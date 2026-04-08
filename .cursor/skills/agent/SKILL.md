@@ -1,0 +1,174 @@
+---
+name: "agent-harness-engineering"
+description: "用于规范 TRAI 项目中 Agent 智能体系统的工程实现。强制执行 Harness 五层架构：上下文装配、工具治理、安全规则、反馈状态、熵管理。"
+---
+
+# TRAI Agent Harness Engineering
+
+作为 TRAI 平台 Agent 工程规范的主入口，请严格按照 Harness Engineering 五层模型进行审查和实现。
+
+---
+
+## 1. 快速索引
+
+| 子规范 | 路径 | 触发场景 |
+|--------|------|----------|
+| **Harness 五层架构** | | |
+| 上下文工程 | `context/engineering.md` | 设计 Agent 上下文时 |
+| 工具治理 | `tools/governance.md` | 注册/调用工具时 |
+| 工具抽象层 | `tools/abstraction.md` | 工具解耦/可扩展设计 |
+| 安全与规则 | `security/rules.md` | 定义 Agent 行为边界时 |
+| 反馈与状态 | `state/feedback.md` | 设计 Agent 循环时 |
+| 熵管理 | `entropy/management.md` | Agent 长周期运行时 |
+| **核心能力** | | |
+| 思考链 | `reasoning/chain_of_thought.md` | 复杂任务推理 (复杂度>=5) |
+| 纠错机制 | `reasoning/correction.md` | Agent 自我检测修正错误 |
+| 用户反馈 | `feedback_user/user_feedback.md` | Bug报告/功能建议/联系我们 |
+| 设计模式 | `patterns/design.md` | 新 Agent 设计 |
+| **基础设施** | | |
+| 监控指标 | `monitoring/metrics.md` | 性能监控和告警阈值 |
+| 部署规范 | `deployment/pipeline.md` | 灰度发布和回滚策略 |
+| 通知告警 | `notification/alert.md` | critical/warning/info 三级通知 |
+| 月度配额 | `quota/management.md` | User AI 任务配额 |
+| 速率限制 | `rate_limit/management.md` | API 端点限流 |
+| 审计日志 | `audit/logging.md` | 安全操作审计 (PG+S3) |
+| **媒体处理** | `media/*.md` | 音频/视频/图片/对话工具 |
+
+---
+
+## 2. 核心概念：Harness Engineering
+
+> **Harness = Agent 运行时的工程环境总和**
+
+### 2.1 五层架构
+
+| 层级 | 核心问题 | TRAI 落地场景 |
+|------|---------|--------------|
+| **上下文装配** | 给模型什么信息？ | 会议/对话/音频/视频/图片上下文分层注入 |
+| **工具治理** | 工具如何被暴露/拦截？ | 转录/翻译/生成/审核/录制 |
+| **工具抽象层** | 工具如何解耦/可扩展？ | 三端 Adapter / Registry / 权限代理 |
+| **安全与规则** | Agent 能做什么？ | RBAC / VIP 特权 / 水印跳过规则 |
+| **反馈与状态** | Agent 如何持续做事？ | 工具执行结果回流，状态持久化 |
+| **熵管理** | 如何防止系统腐烂？ | Rules/Skills 定期清理，上下文裁剪 |
+
+### 2.2 三大核心能力
+
+| 能力 | 说明 |
+|------|------|
+| 思考链 | 复杂任务必须启用推理过程记录，复杂度 >= 5 触发 |
+| 纠错机制 | 错误分类 + 针对性策略，权限/配额错误不可自我纠错 |
+| 用户反馈 | Bug 报告/功能建议/联系我们，安全漏洞 P0 优先处理 |
+
+---
+
+## 3. RBAC 角色体系
+
+| 角色 | 权限 |
+|------|------|
+| **Guest** | 仅基础只读功能 |
+| **User** | 基础功能 + 月度配额限制 + 必须水印 |
+| **VIP** | 去除水印 + 无限配额 + 跳过审核 (图片审核除外) |
+| **Admin** | 全部功能开放 |
+
+---
+
+## 4. 禁止事项
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 严禁事项</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li>禁止把安全边界寄托在提示词上 (必须落在运行时)</li>
+    <li>禁止工具没有治理 (裸 call 而无校验/分级/拦截)</li>
+    <li>禁止 AI 生成内容不经过审核和水印直接展示</li>
+    <li>禁止 VIP 水印跳过逻辑硬编码 (必须在 RBAC 层统一管理)</li>
+    <li>禁止 Agent 输出不透明 (所有决策必须可追溯)</li>
+    <li>禁止长任务无 checkpoint (会话恢复依赖状态持久化)</li>
+    <li>禁止 Rules/Skills 无限膨胀 (必须有熵管理机制)</li>
+    <li>禁止 AI 生成任务无月度配额 (User 必须有配额限制)</li>
+    <li>禁止 API 端点无速率限制 (必须 global/user/endpoint 三层限流)</li>
+  </ul>
+</div>
+
+---
+
+## 5. 目录结构
+
+```
+agent/
+├── SKILL.md                    # 主入口
+├── context/
+│   └── engineering.md           # 上下文工程
+├── tools/
+│   ├── governance.md           # 工具治理
+│   └── abstraction.md          # 工具抽象层
+├── security/
+│   └── rules.md                # 安全与规则
+├── state/
+│   └── feedback.md             # 反馈与状态
+├── entropy/
+│   └── management.md           # 熵管理
+├── reasoning/
+│   ├── chain_of_thought.md     # 思考链
+│   └── correction.md           # 纠错机制
+├── feedback_user/
+│   └── user_feedback.md        # 用户反馈
+├── patterns/
+│   └── design.md               # 设计模式
+├── monitoring/
+│   └── metrics.md              # 监控指标
+├── deployment/
+│   └── pipeline.md             # 部署规范
+├── notification/
+│   └── alert.md                # 通知告警
+├── quota/
+│   └── management.md           # 月度配额
+├── rate_limit/
+│   └── management.md           # 速率限制
+├── audit/
+│   └── logging.md              # 审计日志
+└── media/
+    ├── index.md                # 媒体处理索引
+    ├── image.md                # 图片处理
+    ├── audio/
+    │   ├── index.md
+    │   ├── overview.md
+    │   ├── synthesis.md
+    │   ├── transcribe.md
+    │   ├── recording.md
+    │   ├── stream.md
+    │   ├── rules.md
+    │   └── context.md
+    ├── video/
+    │   ├── index.md
+    │   ├── overview.md
+    │   ├── generate.md
+    │   ├── stream.md
+    │   ├── recording.md
+    │   ├── screenshot.md
+    │   ├── rules.md
+    │   └── context.md
+    └── chat/
+        ├── index.md
+        ├── overview.md
+        ├── message.md
+        ├── translate.md
+        ├── summarize.md
+        ├── reply.md
+        ├── group.md
+        ├── moderate.md
+        ├── rules.md
+        └── context.md
+```
+
+---
+
+## 6. 版本管理
+
+| 版本 | 日期 | 更新内容 |
+|------|------|---------|
+| v2.1 | 2026-04-08 | 重构所有子模块，统一使用 HTML 卡片展示禁止/允许规则 |
+| v2.0 | 2026-04-08 | 重构所有文档，删除代码示例，统一使用表格和 HTML 卡片 |
+| v1.3 | 2026-04-07 | 新增监控/部署/通知规范，精简所有文档 |
+| v1.2 | 2026-04-07 | 新增用户反馈规范 |
+| v1.1 | 2026-04-07 | 新增思考链和纠错机制规范 |
+| v1.0 | 2026-04-01 | 初版发布 |

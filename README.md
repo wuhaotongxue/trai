@@ -13,6 +13,11 @@ cd trai
 
 欢迎提交 Issue / PR。
 
+## 📝 更新日志 (Changelog)
+
+### 🛠️ 项目_2026_04_08_1500
+- 更新项目结构和配置
+
 ## 作者
 
 wuhaotongxue <wuhaotongxue@gmail.com>
