@@ -1,4 +1,4 @@
-# Desktop Client - Win11 Fluent UI 设计规范
+# Desktop_Client_Win11_Fluent_UI_设计规范
 
 ---
 
@@ -67,7 +67,7 @@
 | 弹窗 (Modal) | 16px |
 
 ```python
-# QSS 示例
+# QSS_示例
 button_style = """
 QPushButton {
     background-color: #0078D4;
@@ -99,7 +99,7 @@ QPushButton:disabled {
 ## 5. 阴影规范
 
 ```python
-# 使用 QGraphicsDropShadowEffect
+# 使用_QGraphicsDropShadowEffect
 from PyQt6.QtWidgets import QGraphicsDropShadowEffect
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QPointF
@@ -115,7 +115,7 @@ shadow.setColor(QColor(0, 0, 0, 40))  # 40% 透明度黑色
 ## 6. 动效规范
 
 ```python
-# 过渡动画使用 QPropertyAnimation
+# 过渡动画使用_QPropertyAnimation
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect
 
 # 按钮悬停动画

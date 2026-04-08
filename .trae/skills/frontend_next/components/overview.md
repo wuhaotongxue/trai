@@ -1,4 +1,4 @@
-# Frontend Next.js - UI 组件规范
+# Frontend_Next_js_UI_组件规范
 
 ---
 
@@ -146,50 +146,43 @@ components/feature/ai-generate/
 
 ### 5.2 组件模板
 
+**文件路径**：`components/business/xxx-card.tsx`
+
+**Props 定义**
+
+| 属性 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `data` | `XxxData` | 是 | 数据源 |
+| `onEdit` | `(id: string) => void` | 否 | 编辑回调 |
+| `onDelete` | `(id: string) => void` | 否 | 删除回调 |
+
+**XxxData 类型**
+
 ```tsx
-// components/business/xxx-card.tsx
-"use client";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-interface XxxCardProps {
-  data: XxxData;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
-
-export function XxxCard({ data, onEdit, onDelete }: XxxCardProps) {
-  return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{data.title}</CardTitle>
-          <Badge variant={data.status === "active" ? "default" : "secondary"}>
-            {data.status}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{data.description}</p>
-        <div className="flex gap-2">
-          {onEdit && (
-            <Button size="sm" variant="outline" onClick={() => onEdit(data.id)}>
-              编辑
-            </Button>
-          )}
-          {onDelete && (
-            <Button size="sm" variant="destructive" onClick={() => onDelete(data.id)}>
-              删除
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+interface XxxData {
+  id: string;
+  title: string;
+  description: string;
+  status: "active" | "inactive";
 }
 ```
+
+**组件结构**
+
+```
+Card
+├── CardHeader (pb-3)
+│   └── flex (items-center, justify-between)
+│       ├── CardTitle (text-base)
+│       └── Badge (variant: status 决定)
+└── CardContent
+    ├── p (text-sm, text-muted-foreground, mb-4)
+    └── div (flex, gap-2)
+        ├── Button (编辑, variant=outline, size=sm)
+        └── Button (删除, variant=destructive, size=sm)
+```
+
+**实现参考**：`frontend_next/src/components/business/`
 
 ---
 

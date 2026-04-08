@@ -1,4 +1,4 @@
-# Desktop Client - PyQt6 规范
+# Desktop_Client_PyQt6_规范
 
 ---
 

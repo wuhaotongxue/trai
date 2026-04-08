@@ -1,4 +1,4 @@
-# Frontend Next - Tailwind CSS 规范
+# Frontend_Next_Tailwind_CSS_规范
 
 ---
 
@@ -111,10 +111,6 @@
 | 副标题 | `text-sm text-muted-foreground` |
 
 ### 卡片
-
-<div style="background:white;border:1px solid #E1E1E1;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-  <strong>Normal</strong> — hover 时边框变蓝
-</div>
 
 **约束**：
 - 边框: `border border-border/60`

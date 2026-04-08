@@ -1,4 +1,4 @@
-# Electron - IPC 通道规范
+# Electron_IPC_通道规范
 
 ## 1. 通道命名规范
 

@@ -1,8 +1,8 @@
-# 命名规范 - snake_case 强制
+# 命名规范_snake_case_强制
 
 ## 核心规则
 
-**所有标识符（变量/函数/文件名/路由/API路径）必须使用 snake_case（纯小写+下划线），禁止 kebab-case（中间横杠如 `add-num`、`meeting-analytics`）。**
+**所有标识符（变量/函数/文件名/路由/API路径）必须使用 snake_case（纯小写+下划线），禁止 kebab_case（中间横杠如 `add_num`、`meeting_analytics`）。**
 
 ## Python 后端
 

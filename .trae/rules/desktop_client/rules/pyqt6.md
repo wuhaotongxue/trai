@@ -1,4 +1,4 @@
-# Desktop Client - PyQt6 规范
+# Desktop_Client_PyQt6_规范
 
 ## 1. 信号槽规范
 
@@ -7,12 +7,12 @@
 - 禁止在方法内部动态创建信号
 
 ```python
-# ✅ 正确
+# ✅_正确
 class LoginWorker(QRunnable):
     sig_success = pyqtSignal(dict)
     sig_failed = pyqtSignal(str, int)
 
-# ❌ 禁止
+# ❌_禁止
 class LoginWorker(QRunnable):
     def run(self):
         sig = pyqtSignal(dict)  # ❌ 动态创建
@@ -20,18 +20,18 @@ class LoginWorker(QRunnable):
 
 ### 连接方式
 ```python
-# ✅ 正确
+# ✅_正确
 worker.sig_success.connect(lambda data: self._on_success(data))
 worker.sig_failed.connect(self._on_failed)
 
-# ❌ 禁止
+# ❌_禁止
 worker.sig_success.connect(lambda: self._on_success(data))  # ❌ 闭包陷阱
 ```
 
 ## 2. QThreadPool 使用规范
 
 ```python
-# ✅ 正确: 使用全局线程池
+# ✅_正确:_使用全局线程池
 from PyQt6.QtCore import QThreadPool
 
 pool = QThreadPool.globalInstance()
@@ -40,14 +40,14 @@ pool.setMaxThreadCount(4)
 worker = LoginWorker(username, password)
 pool.start(worker)
 
-# ✅ 正确: 等待完成
+# ✅_正确:_等待完成
 pool.waitForDone(5000)  # 5秒超时
 ```
 
 ## 3. QTimer 使用规范
 
 ```python
-# ✅ 正确: 创建和销毁
+# ✅_正确:_创建和销毁
 class MyWidget:
     def __init__(self):
         self._timer = QTimer()
@@ -58,7 +58,7 @@ class MyWidget:
         self._timer.stop()  # 必须停止
         event.accept()
 
-# ❌ 禁止: 不停止定时器
+# ❌_禁止:_不停止定时器
 def closeEvent(self, event):
     event.accept()  # ❌ 定时器仍在运行
 ```
@@ -80,11 +80,11 @@ def closeEvent(self, event):
 ## 5. 异常规范
 
 ```python
-# ❌ 禁止: 裸 except
+# ❌_禁止:_裸_except
 except:
     pass
 
-# ✅ 正确: 指明异常 + 记录日志
+# ✅_正确:_指明异常_+_记录日志
 except ValueError as e:
     logger.warning(f"Invalid input: {e}")
 except Exception as e:
@@ -94,10 +94,10 @@ except Exception as e:
 ## 6. 路径规范
 
 ```python
-# ❌ 禁止: 硬编码路径
+# ❌_禁止:_硬编码路径
 path = "C:\\Users\\test\\file.txt"
 
-# ✅ 正确: 使用 pathlib
+# ✅_正确:_使用_pathlib
 from pathlib import Path
 base_dir = Path(__file__).parent
 config_path = base_dir / "config.json"

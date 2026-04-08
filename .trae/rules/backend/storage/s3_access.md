@@ -1,6 +1,6 @@
-# Backend - S3 存储与访问控制规范
+# Backend_S3_存储与访问控制规范
 
-> 所有私有资源（音视频、文档、头像等）必须通过 Presigned URL 访问，严禁 Public Read
+> 所有私有资源（音视频、文档、头像等）必须通过 Presigned_URL 访问，严禁 Public_Read
 
 ---
 
@@ -326,7 +326,7 @@ S3 Bucket: trai-media
 > AI 生成文件直接由 AI 服务上传到 S3，不经过 Backend 中转
 
 ```python
-# AI 服务直传安全要求
+# AI_服务直传安全要求
 1. Presigned PUT URL 有效期 = 300 秒 (5 分钟)
 2. 必须设置 x-amz-expected-bucket-owner 为当前 AWS Account ID
 3. S3 事件触发 SQS → Backend 回调处理

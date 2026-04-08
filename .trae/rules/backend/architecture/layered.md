@@ -1,4 +1,4 @@
-# Backend - DDD 五层架构规范
+# Backend_DDD_五层架构规范
 
 ---
 
@@ -98,15 +98,15 @@ Domain 层 (interfaces) + Infrastructure 层 (repositories / llm / storage)
 ## 5. 类封装规则
 
 ```python
-# ❌ 禁止: 文件无类
+# ❌_禁止:_文件无类
 def helper_function():
     return True
 
-# ❌ 禁止: 文件顶层孤立函数
+# ❌_禁止:_文件顶层孤立函数
 def validate_token(token: str) -> bool:
     return len(token) > 0
 
-# ✅ 正确: 必须有类
+# ✅_正确:_必须有类
 class TokenValidator:
     @staticmethod
     def validate(token: str) -> bool:
@@ -118,12 +118,12 @@ class TokenValidator:
 ## 6. Domain 层禁止事项
 
 ```python
-# ❌ Domain 层禁止
+# ❌_Domain_层禁止
 from sqlalchemy import Column   # ❌ 引入 ORM
 from fastapi import Depends    # ❌ 引入 Web 框架
 import redis                   # ❌ 引入基础设施
 
-# ✅ Domain 层正确
+# ✅_Domain_层正确
 from dataclasses import dataclass
 from typing import Protocol, Any
 ```
@@ -133,13 +133,13 @@ from typing import Protocol, Any
 ## 7. Repository 模式
 
 ```python
-# Domain interfaces (纯 Python，无任何第三方依赖)
+# Domain_interfaces_(纯_Python，无任何第三方依赖)
 class IMeetingRepository(Protocol):
     async def save(self, meeting) -> Meeting: ...
     async def find_by_id(self, meeting_id) -> Meeting | None: ...
     async def find_by_host(self, host_id) -> list[Meeting]: ...
 
-# Infrastructure 实现
+# Infrastructure_实现
 class MeetingRecordRepositoryImpl(IMeetingRepository):
     def __init__(self, db: AsyncSession) -> None:
         self._db = db

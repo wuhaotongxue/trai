@@ -1,4 +1,4 @@
-# Frontend Next.js - API 调用规范
+# Frontend_Next_js_API_设计规范
 
 ---
 
@@ -6,116 +6,41 @@
 
 ### 1.1 基础封装
 
-```tsx
-// lib/api-client.ts
-import { useAuthStore } from "@/stores/auth-store";
-import { logger } from "@/lib/logging";
+**ApiClient 类职责**
 
-interface ApiOptions extends RequestInit {
-  params?: Record<string, string | number | boolean>;
-}
+| 方法 | 说明 |
+|------|------|
+| `get<T>(endpoint, options?)` | GET 请求 |
+| `post<T>(endpoint, data, options?)` | POST 请求 |
+| `put<T>(endpoint, data, options?)` | PUT 请求 |
+| `delete<T>(endpoint, options?)` | DELETE 请求 |
+| `upload<T>(endpoint, formData, options?)` | 文件上传 |
 
-interface ApiError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-}
+**请求选项 (ApiOptions)**
 
-class ApiClient {
-  private baseUrl: string;
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `params` | `Record<string, string \| number \| boolean>` | URL 查询参数 |
+| `headers` | `HeadersInit` | 请求头 |
 
-  constructor(baseUrl: string = "/api") {
-    this.baseUrl = baseUrl;
-  }
+**错误类型 (ApiError)**
 
-  private async request<T>(
-    method: string,
-    endpoint: string,
-    options: ApiOptions = {}
-  ): Promise<T> {
-    const { params, ...fetchOptions } = options;
-    const token = useAuthStore.getState().token;
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `code` | `string` | 错误码 |
+| `message` | `string` | 错误信息 |
+| `details` | `Record<string, unknown>` | 详细信息 |
 
-    // 构建 URL
-    let url = `${this.baseUrl}${endpoint}`;
-    if (params) {
-      const searchParams = new URLSearchParams(
-        Object.entries(params).map(([k, v]) => [k, String(v)])
-      );
-      url += `?${searchParams}`;
-    }
+**封装要求**
 
-    // 构建 Headers
-    const headers = new Headers(fetchOptions.headers);
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    headers.set("Content-Type", "application/json");
+| 要求 | 说明 |
+|------|------|
+| Token 自动注入 | 自动从 AuthStore 获取并设置 Authorization |
+| 日志记录 | 记录请求方法、路径、状态码、耗时 |
+| 错误转换 | HTTP 错误转换为 ApiError 抛出 |
+| 网络错误 | 捕获并抛出 NETWORK_ERROR |
 
-    const startTime = Date.now();
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers,
-        ...fetchOptions,
-      });
-
-      const elapsed = Date.now() - startTime;
-      logger.debug(`API ${method} ${endpoint}`, { status: response.status, elapsed });
-
-      if (!response.ok) {
-        const error: ApiError = await response.json();
-        throw new ApiError(error.code, error.message, error.details);
-      }
-
-      return response.json();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        logger.error(`API Error: ${endpoint}`, {
-          code: error.code,
-          message: error.message,
-        });
-        throw error;
-      }
-      logger.error(`Network Error: ${endpoint}`, { error });
-      throw new ApiError("NETWORK_ERROR", "网络请求失败");
-    }
-  }
-
-  get<T>(endpoint: string, options?: ApiOptions) {
-    return this.request<T>("GET", endpoint, options);
-  }
-
-  post<T>(endpoint: string, data?: unknown, options?: ApiOptions) {
-    return this.request<T>("POST", endpoint, {
-      ...options,
-      body: JSON.stringify(data),
-    });
-  }
-
-  put<T>(endpoint: string, data?: unknown, options?: ApiOptions) {
-    return this.request<T>("PUT", endpoint, {
-      ...options,
-      body: JSON.stringify(data),
-    });
-  }
-
-  delete<T>(endpoint: string, options?: ApiOptions) {
-    return this.request<T>("DELETE", endpoint, options);
-  }
-
-  upload<T>(endpoint: string, formData: FormData, options?: ApiOptions) {
-    return this.request<T>("POST", endpoint, {
-      ...options,
-      body: formData,
-      headers: { /* 不设置 Content-Type 让浏览器自动设置 */ },
-    });
-  }
-}
-
-export const api = new ApiClient();
-```
+**实现参考**：`frontend_next/src/lib/api_client.ts`
 
 ---
 
@@ -123,78 +48,32 @@ export const api = new ApiClient();
 
 ### 2.1 查询 Hook
 
-```tsx
-// hooks/use-api.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api-client";
-import { logger } from "@/lib/logging";
+**useApiQuery 参数**
 
-// 查询
-export function useApiQuery<T>(
-  key: string[],
-  endpoint: string,
-  options?: { enabled?: boolean }
-) {
-  return useQuery<T>({
-    queryKey: key,
-    queryFn: async () => {
-      try {
-        return await api.get<T>(endpoint);
-      } catch (error) {
-        logger.error(`Query Error: ${key.join(".")}`, { error });
-        throw error;
-      }
-    },
-    enabled: options?.enabled ?? true,
-    retry: 1,
-  });
-}
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `key` | `string[]` | 是 | 查询缓存键 |
+| `endpoint` | `string` | 是 | API 端点 |
+| `options.enabled` | `boolean` | 否 | 是否启用查询 |
 
-// 变更
-export function useApiMutation<T, V>(
-  endpoint: string,
-  method: "post" | "put" | "delete" = "post"
-) {
-  const queryClient = useQueryClient();
+**useApiMutation 参数**
 
-  return useMutation<T, Error, V>({
-    mutationFn: async (data) => {
-      return await api[method]<T>(endpoint, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [] });
-      logger.info(`Mutation Success: ${endpoint}`);
-    },
-    onError: (error) => {
-      logger.error(`Mutation Error: ${endpoint}`, { error });
-    },
-  });
-}
-```
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `endpoint` | `string` | 是 | API 端点 |
+| `method` | `"post" \| "put" \| "delete"` | 否 | HTTP 方法，默认 post |
 
-### 2.2 使用示例
+**实现参考**：`frontend_next/src/hooks/use_api.ts`
 
-```tsx
-// 获取用户列表
-function useUsers() {
-  return useApiQuery<User[]>(["users"], "/users");
-}
+### 2.2 Hook 命名规范
 
-// 创建用户
-function useCreateUser() {
-  return useApiMutation<User, CreateUserInput>("/users", "post");
-}
-
-// 更新用户
-function useUpdateUser() {
-  return useApiMutation<User, UpdateUserInput>("/users", "put");
-}
-
-// 删除用户
-function useDeleteUser() {
-  return useApiMutation<void, string>("/users", "delete");
-}
-```
+| 用途 | 命名 | 示例 |
+|------|------|------|
+| 查询列表 | `useXxxs` | `useUsers`, `useMeetings` |
+| 查询详情 | `useXxx` | `useUser`, `useMeeting` |
+| 创建 | `useCreateXxx` | `useCreateUser` |
+| 更新 | `useUpdateXxx` | `useUpdateUser` |
+| 删除 | `useDeleteXxx` | `useDeleteUser` |
 
 ---
 
@@ -235,7 +114,7 @@ function useDeleteUser() {
 |------|------|------|------|
 | GET | /reports | 获取报告列表 | User+ |
 | POST | /reports | 创建报告 | User+ |
-| POST | /reports/git-analyze | Git 分析 | User+ |
+| POST | /reports/git_analyze | Git 分析 | User+ |
 | POST | /reports/export | 导出报告 | User+ |
 
 ### 3.5 Admin 相关
@@ -255,104 +134,50 @@ function useDeleteUser() {
 
 ### 4.1 错误类型
 
-```tsx
-// lib/errors.ts
-export class ApiError extends Error {
-  code: string;
-  status: number;
-  details?: Record<string, unknown>;
+| 错误类 | 错误码 | HTTP 状态 | 用途 |
+|--------|--------|-----------|------|
+| `ApiError` | 自定义 | 5xx | 基础错误类 |
+| `ValidationError` | VALIDATION_ERROR | 400 | 参数验证失败 |
+| `UnauthorizedError` | UNAUTHORIZED | 401 | 未登录 |
+| `ForbiddenError` | FORBIDDEN | 403 | 无权限 |
+| `NotFoundError` | NOT_FOUND | 404 | 资源不存在 |
 
-  constructor(code: string, message: string, status = 500, details?: Record<string, unknown>) {
-    super(message);
-    this.code = code;
-    this.status = status;
-    this.details = details;
-  }
-}
+**ApiError 属性**
 
-export class ValidationError extends ApiError {
-  constructor(message: string, details?: Record<string, unknown>) {
-    super("VALIDATION_ERROR", message, 400, details);
-  }
-}
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `code` | `string` | 错误码 |
+| `status` | `number` | HTTP 状态码 |
+| `message` | `string` | 错误信息 |
+| `details` | `Record<string, unknown>` | 详细信息 |
 
-export class UnauthorizedError extends ApiError {
-  constructor(message = "未登录或登录已过期") {
-    super("UNAUTHORIZED", message, 401);
-  }
-}
-
-export class ForbiddenError extends ApiError {
-  constructor(message = "无权限访问") {
-    super("FORBIDDEN", message, 403);
-  }
-}
-
-export class NotFoundError extends ApiError {
-  constructor(resource = "资源") {
-    super("NOT_FOUND", `${resource}不存在`, 404);
-  }
-}
-```
+**实现参考**：`frontend_next/src/lib/errors.ts`
 
 ### 4.2 全局错误处理
 
-```tsx
-// components/error-toast.tsx
-import { toast } from "@/components/ui/use-toast";
-import { ApiError, UnauthorizedError, ForbiddenError } from "@/lib/errors";
+**错误处理策略**
 
-export function handleApiError(error: unknown) {
-  if (error instanceof UnauthorizedError) {
-    window.location.href = "/login";
-    return;
-  }
+| 错误类型 | 处理方式 |
+|---------|---------|
+| UnauthorizedError | 跳转登录页 |
+| ForbiddenError | 显示 toast 提示 |
+| ApiError | 显示 toast 提示 |
+| 其他 | 显示网络错误 toast |
 
-  if (error instanceof ForbiddenError) {
-    toast({ title: "无权限", description: error.message, variant: "destructive" });
-    return;
-  }
-
-  if (error instanceof ApiError) {
-    toast({ title: "操作失败", description: error.message, variant: "destructive" });
-    return;
-  }
-
-  toast({ title: "网络错误", description: "请检查网络连接", variant: "destructive" });
-}
-```
+**实现参考**：`frontend_next/src/components/error_toast.tsx`
 
 ---
 
 ## 5. 请求取消
 
-```tsx
-// hooks/use-cancellable-query.ts
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+**useCancellableQuery 用法**
 
-export function useCancellableQuery<T>(key: string[], endpoint: string) {
-  const abortRef = useRef<AbortController | null>(null);
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `key` | `string[]` | 查询缓存键 |
+| `endpoint` | `string` | API 端点 |
 
-  const query = useQuery<T>({
-    queryKey: key,
-    queryFn: async () => {
-      abortRef.current = new AbortController();
-      return await api.get<T>(endpoint, {
-        signal: abortRef.current.signal,
-      });
-    },
-  });
-
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  return query;
-}
-```
+**实现参考**：`frontend_next/src/hooks/use_cancellable_query.ts`
 
 ---
 

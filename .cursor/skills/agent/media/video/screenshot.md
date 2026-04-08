@@ -1,4 +1,4 @@
-# Video - 视频截图
+# Video_视频截图
 
 ---
 
@@ -6,64 +6,64 @@
 
 ### 1.1 截图
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | string | video.screenshot |
-| name | string | Take Video Screenshot |
-| description | string | Capture a screenshot from video stream |
-| category | string | video |
-| sub_category | string | processing |
-| risk_level | string | safe |
-| audit_log | boolean | true |
+|| 字段 | 类型 | 说明 |
+||------|------|------|
+|| id | string | video_screenshot |
+|| name | string | Take Video Screenshot |
+|| description | string | Capture a screenshot from video stream |
+|| category | string | video |
+|| sub_category | string | processing |
+|| risk_level | string | safe |
+|| audit_log | boolean | true |
 
 **参数定义**：
 
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| video_id | string | 是 | - | 视频 ID |
-| timestamp | number | 是 | - | 时间戳 (秒) |
-| format | string | 否 | png | 格式: png/jpg |
+|| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+||--------|------|------|--------|------|
+|| video_id | string | 是 | - | 视频 ID |
+|| timestamp | number | 是 | - | 时间戳 (秒) |
+|| format | string | 否 | png | 格式: png/jpg |
 
 ### 1.2 水印工具
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | string | video.watermark.apply |
-| name | string | Apply Video Watermark |
-| description | string | Add watermark to video (AI generated required) |
-| category | string | video |
-| sub_category | string | processing |
-| risk_level | string | safe |
-| requires_watermark | boolean | true |
-| watermark_skip_allowed | boolean | false |
-| audit_log | boolean | true |
+|| 字段 | 类型 | 说明 |
+||------|------|------|
+|| id | string | video_watermark_apply |
+|| name | string | Apply Video Watermark |
+|| description | string | Add watermark to video (AI generated required) |
+|| category | string | video |
+|| sub_category | string | processing |
+|| risk_level | string | safe |
+|| requires_watermark | boolean | true |
+|| watermark_skip_allowed | boolean | false |
+|| audit_log | boolean | true |
 
 **参数定义**：
 
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| video_id | string | 是 | - | 视频 ID |
-| watermark_type | string | 是 | - | 水印类型: ai_generated/trai_logo |
-| position | string | 否 | bottom_right | 位置 |
+|| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+||--------|------|------|--------|------|
+|| video_id | string | 是 | - | 视频 ID |
+|| watermark_type | string | 是 | - | 水印类型: ai_generated/trai_logo |
+|| position | string | 否 | bottom_right | 位置 |
 
 ### 1.3 内容审核
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | string | video.moderate |
-| name | string | Moderate Video Content |
-| description | string | Check video for unsafe or inappropriate content |
-| category | string | video |
-| sub_category | string | moderation |
-| risk_level | string | monitored |
-| audit_log | boolean | true |
+|| 字段 | 类型 | 说明 |
+||------|------|------|
+|| id | string | video_moderate |
+|| name | string | Moderate Video Content |
+|| description | string | Check video for unsafe or inappropriate content |
+|| category | string | video |
+|| sub_category | string | moderation |
+|| risk_level | string | monitored |
+|| audit_log | boolean | true |
 
 **参数定义**：
 
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| video_id | string | 是 | - | 视频 ID |
-| check_categories | array | 否 | all | 检查类别 |
+|| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+||--------|------|------|--------|------|
+|| video_id | string | 是 | - | 视频 ID |
+|| check_categories | array | 否 | all | 检查类别 |
 
 ---
 

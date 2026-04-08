@@ -1,4 +1,4 @@
-# Chat - AI 翻译
+# Chat_AI_翻译
 
 ---
 

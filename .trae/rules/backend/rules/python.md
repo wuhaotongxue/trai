@@ -1,4 +1,4 @@
-# Backend - Python 代码规范
+# Backend_Python_代码规范
 
 ---
 
@@ -28,10 +28,10 @@
 ## 3. 路径规范
 
 ```python
-# ❌ 禁止硬编码
+# ❌_禁止硬编码
 path = "C:\\Users\\test\\file.txt"
 
-# ✅ 正确: pathlib
+# ✅_正确:_pathlib
 from pathlib import Path
 path = Path(__file__).parent / "file.txt"
 ```
@@ -54,10 +54,10 @@ path = Path(__file__).parent / "file.txt"
 ## 5. 日志规范
 
 ```python
-# ❌ 禁止 print
+# ❌_禁止_print
 print(f"User login: {username}")
 
-# ✅ 正确: logger
+# ✅_正确:_logger
 logger.info(f"User login: username={username}")
 logger.error(f"Login failed: {e}", exc_info=True)
 ```
@@ -67,15 +67,15 @@ logger.error(f"Login failed: {e}", exc_info=True)
 ## 6. 异常规范
 
 ```python
-# ❌ 禁止裸 except
+# ❌_禁止裸_except
 except:
     pass
 
-# ❌ 禁止静默 pass
+# ❌_禁止静默_pass
 except Exception:
     pass
 
-# ✅ 正确: 指明异常 + 记录
+# ✅_正确:_指明异常_+_记录
 except ValueError as e:
     logger.warning(f"Invalid value: {e}")
 except Exception as e:
@@ -138,11 +138,11 @@ class MeetingService:
 
 ```python
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# 文件名: {实际文件名}
-# 作者: wuhao
-# 日期: {YYYY-MM-DD HH:MM:SS}
-# 描述: {该文件的用途/功能简述，一句话概括}
+# _*_coding:_utf_8_*_
+# 文件名:_{实际文件名}
+# 作者:_wuhao
+# 日期:_{YYYY_MM_DD_HH:MM:SS}
+# 描述:_{该文件的用途/功能简述，一句话概括}
 ```
 
 ---

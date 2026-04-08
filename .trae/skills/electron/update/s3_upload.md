@@ -1,4 +1,4 @@
-# Electron - 自动更新规范
+# Electron_自动更新规范
 
 ## 1. latest.yml 格式
 

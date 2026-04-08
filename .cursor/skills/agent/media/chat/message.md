@@ -1,4 +1,4 @@
-# Chat - 消息发送
+# Chat_消息发送
 
 ---
 
@@ -8,7 +8,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | string | chat.message.send |
+| id | string | chat_message_send |
 | name | string | Send Chat Message |
 | description | string | Send a message to chat |
 | category | string | chat |
@@ -28,7 +28,7 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | string | chat.message.search |
+| id | string | chat_message_search |
 | name | string | Search Messages |
 | description | string | Search messages in chat history |
 | category | string | chat |

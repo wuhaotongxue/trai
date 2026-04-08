@@ -1,4 +1,4 @@
-# Desktop Client - 五层架构规范
+# Desktop_Client_五层架构规范
 
 ## 1. 五层目录结构
 

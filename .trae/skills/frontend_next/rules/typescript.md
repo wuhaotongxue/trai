@@ -1,4 +1,4 @@
-# Frontend Next - TypeScript 规范
+# Frontend_Next_TypeScript_规范
 
 ---
 

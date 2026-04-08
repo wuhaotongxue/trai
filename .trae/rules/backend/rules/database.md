@@ -1,4 +1,4 @@
-# Backend - 数据库规范
+# Backend_数据库规范
 
 ---
 
@@ -28,15 +28,15 @@
 ## 3. 主键规范
 
 ```python
-# ✅ 正确: UUID
+# ✅_正确:_UUID
 id: Mapped[uuid.UUID] = mapped_column(
     UUID(as_uuid=True), primary_key=True, default=uuid.uuid4,
 )
 
-# ✅ 正确: BigInt Identity
+# ✅_正确:_BigInt_Identity
 id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
-# ❌ 禁止: Serial (PostgreSQL 自增)
+# ❌_禁止:_Serial_(PostgreSQL_自增)
 id = Column(Integer, primary_key=True, autoincrement=True)  # Serial
 ```
 
@@ -66,7 +66,7 @@ is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False,
 ## 5. 强制注释
 
 ```python
-# ✅ 正确: 所有字段带 comment
+# ✅_正确:_所有字段带_comment
 class MeetingModel(Base):
     __tablename__ = "meeting_records"
     __table_args__ = {"comment": "会议记录表"}
@@ -75,7 +75,7 @@ class MeetingModel(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False, comment="会议标题")
     start_time: Mapped[datetime] = mapped_column(DateTime(0), nullable=False, comment="开始时间")
 
-# ❌ 禁止: 无注释
+# ❌_禁止:_无注释
 class MeetingModel(Base):
     __tablename__ = "meeting_records"
     id = Column(UUID, primary_key=True)
@@ -86,23 +86,23 @@ class MeetingModel(Base):
 ## 6. 查询红线
 
 ```python
-# ❌ 禁止: SELECT *
+# ❌_禁止:_SELECT_*
 query = select(MeetingModel)
 
-# ✅ 正确: 指定列
+# ✅_正确:_指定列
 query = select(MeetingModel.id, MeetingModel.title, MeetingModel.start_time)
 
-# ❌ 禁止: N+1 查询
+# ❌_禁止:_N+1_查询
 for meeting in meetings:
     user = await db.execute(select(User).where(User.id == meeting.user_id))
 
-# ✅ 正确: joinedload 预加载
+# ✅_正确:_joinedload_预加载
 query = select(MeetingModel).options(joinedload(MeetingModel.user))
 
-# ❌ 禁止: 裸 SQL 拼接
+# ❌_禁止:_裸_SQL_拼接
 query = f"SELECT * FROM users WHERE id = {user_id}"
 
-# ✅ 正确: SQLAlchemy 表达式
+# ✅_正确:_SQLAlchemy_表达式
 query = select(User).where(User.id == user_id)
 ```
 
@@ -111,12 +111,12 @@ query = select(User).where(User.id == user_id)
 ## 7. 事务规范
 
 ```python
-# ✅ 正确: 显式事务
+# ✅_正确:_显式事务
 async with db.begin():
     db.add(model1)
     db.add(model2)
 
-# ✅ 正确: 自动提交
+# ✅_正确:_自动提交
 async with db.begin_nested():
     db.add(detail)
 ```

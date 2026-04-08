@@ -3,7 +3,7 @@ name: "project-rules"
 description: "TRAI 项目全局研发与提交规范。所有开发人员必须遵守。"
 ---
 
-# TRAI 项目全局研发与提交规范
+# TRAI_项目全局研发与提交规范
 
 ## 1. 强制使用 git-submit 技能进行代码提交
 - 任何代码提交与推送**绝对禁止**使用原生终端命令（如 `git commit` 或 `git push`）。

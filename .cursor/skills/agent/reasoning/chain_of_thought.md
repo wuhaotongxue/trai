@@ -1,4 +1,4 @@
-# Agent - 思考链 (Chain of Thought) 规范
+# Agent_思考链__Chain_of_Thought_规范
 
 ---
 

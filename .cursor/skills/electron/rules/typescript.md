@@ -1,4 +1,4 @@
-# Electron - TypeScript 规范
+# Electron_TypeScript_规范
 
 ## 1. 编译配置要求
 

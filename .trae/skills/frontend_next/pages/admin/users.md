@@ -1,4 +1,4 @@
-# Frontend - Admin 用户管理规范
+# Frontend_Admin_用户管理规范
 
 ---
 

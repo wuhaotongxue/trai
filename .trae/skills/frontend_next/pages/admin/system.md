@@ -1,4 +1,4 @@
-# Frontend - Admin 系统设置规范
+# Frontend_Admin_系统设置规范
 
 ---
 

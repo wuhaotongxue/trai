@@ -1,42 +1,15 @@
-# Frontend Next.js - Feature-Sliced Design (FSD)
+# Frontend_Next_js_Feature_Sliced_Design__FSD_
 
 ---
 
 ## 1. FSD 核心理念
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Feature-Sliced Design                            │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  "将代码按业务功能（Feature）组织，而非按技术类型（components/）"    │
-│                                                                     │
-│  传统:                                                              │
-│  src/                                                               │
-│  ├── components/                                                    │
-│  │   ├── button.tsx                                                │
-│  │   ├── card.tsx                                                  │
-│  │   └── dialog.tsx                                                │
-│  ├── hooks/                                                         │
-│  │   └── use-chat.ts                                               │
-│  └── pages/                                                         │
-│      └── chat.tsx                                                  │
-│                                                                     │
-│  FSD:                                                               │
-│  src/                                                               │
-│  ├── features/                                                      │
-│  │   └── chat/                                                     │
-│  │       ├── ui/                                                   │
-│  │       │   └── chat-container.tsx                                │
-│  │       ├── hooks/                                                │
-│  │       │   └── use-chat.ts                                       │
-│  │       └── api/                                                  │
-│  │           └── chat-api.ts                                       │
-│  └── pages/                                                         │
-│      └── chat.tsx                                                  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+**核心思想**：将代码按业务功能（Feature）组织，而非按技术类型（components/）
+
+| 组织方式 | 说明 |
+|---------|------|
+| 传统 | 按 components/、hooks/、pages/ 技术分类 |
+| FSD | 按 chat/、meeting/、report/ 功能分类 |
 
 ---
 
@@ -49,72 +22,33 @@ src/
 │   └── [locale]/dashboard/
 │       └── chat/page.tsx
 │
-├── pages/                         # Pages Router (如有)
-│
 ├── widgets/                       # Widgets (可组合的 UI 块)
-│   ├── header-widget/
-│   │   └── header-widget.tsx
-│   └── sidebar-widget/
-│       └── sidebar-widget.tsx
+│   ├── header_widget/
+│   └── sidebar_widget/
 │
 ├── features/                      # Features (业务功能)
 │   ├── chat/
-│   │   ├── ui/
-│   │   ├── api/
-│   │   ├── hooks/
-│   │   ├── lib/
-│   │   └── index.ts
-│   │
-│   ├── image-generate/
-│   ├── video-generate/
+│   ├── image_generate/
+│   ├── video_generate/
 │   ├── meeting/
 │   └── report/
 │
 ├── entities/                      # Entities (业务实体)
 │   ├── user/
-│   │   ├── model.ts              # 用户模型
-│   │   ├── api/                  # 用户 API
-│   │   └── ui/                   # 用户相关 UI
-│   │
 │   ├── meeting/
-│   │   ├── model.ts
-│   │   ├── api/
-│   │   └── ui/
-│   │
 │   └── report/
 │
 ├── shared/                        # Shared (跨 Feature 共享)
 │   ├── ui/                       # 通用 UI 组件
-│   │   ├── button/
-│   │   ├── card/
-│   │   └── dialog/
-│   │
 │   ├── api/                      # 通用 API
-│   │   ├── api-client.ts
-│   │   └── endpoints/
-│   │
 │   ├── lib/                      # 通用工具
-│   │   ├── utils/
-│   │   ├── validators/
-│   │   └── formatters/
-│   │
 │   ├── hooks/                    # 通用 Hooks
-│   │   ├── use-local-storage.ts
-│   │   └── use-media-query.ts
-│   │
-│   ├── types/                   # 通用类型
-│   │   ├── api.ts
-│   │   └── common.ts
-│   │
-│   └── config/                  # 通用配置
-│       ├── constants.ts
-│       └── i18n/
+│   ├── types/                    # 通用类型
+│   └── config/                   # 通用配置
 │
-└── processes/                   # Processes (跨 Feature 流程)
+└── processes/                     # Processes (跨 Feature 流程)
     ├── auth/
-    │   └── auth-flow.ts
     └── onboarding/
-        └── onboarding-flow.ts
 ```
 
 ---
@@ -145,8 +79,8 @@ src/
 | 目录 | 职责 |
 |------|------|
 | `features/chat/` | AI 对话功能 |
-| `features/image-generate/` | 图片生成功能 |
-| `features/video-generate/` | 视频生成功能 |
+| `features/image_generate/` | 图片生成功能 |
+| `features/video_generate/` | 视频生成功能 |
 | `features/meeting/` | 会议功能 |
 | `features/report/` | 报告功能 |
 
@@ -154,8 +88,8 @@ src/
 
 | 目录 | 职责 |
 |------|------|
-| `widgets/header-widget/` | 顶部导航部件 |
-| `widgets/sidebar-widget/` | 侧边栏部件 |
+| `widgets/header_widget/` | 顶部导航部件 |
+| `widgets/sidebar_widget/` | 侧边栏部件 |
 
 ### 3.5 Processes (流程层)
 
@@ -173,26 +107,26 @@ features/
 └── chat/                           # AI 对话功能
     │
     ├── ui/                        # Feature 私有 UI
-    │   ├── chat-container.tsx
-    │   ├── chat-message.tsx
-    │   ├── chat-input.tsx
-    │   ├── chat-sidebar.tsx
-    │   └── chat-header.tsx
+    │   ├── chat_container.tsx
+    │   ├── chat_message.tsx
+    │   ├── chat_input.tsx
+    │   ├── chat_sidebar.tsx
+    │   └── chat_header.tsx
     │
     ├── api/                       # Feature API
     │   ├── chat.api.ts
     │   └── types.ts
     │
     ├── hooks/                     # Feature Hooks
-    │   ├── use-chat-messages.ts
-    │   ├── use-chat-session.ts
-    │   ├── use-stream-chat.ts
+    │   ├── use_chat_messages.ts
+    │   ├── use_chat_session.ts
+    │   ├── use_stream_chat.ts
     │   └── index.ts
     │
     ├── lib/                       # Feature 私有逻辑
-    │   ├── chat-utils.ts
-    │   ├── message-parser.ts
-    │   └── prompt-builder.ts
+    │   ├── chat_utils.ts
+    │   ├── message_parser.ts
+    │   └── prompt_builder.ts
     │
     ├── types/                     # Feature 类型
     │   ├── chat.types.ts
@@ -223,12 +157,12 @@ entities/
     │   └── types.ts
     │
     ├── ui/                       # 用户相关 UI
-    │   ├── user-avatar.tsx
-    │   ├── user-card.tsx
-    │   ├── user-badge.tsx
-    │   └── user-list/
-    │       ├── user-list.tsx
-    │       └── user-list-item.tsx
+    │   ├── user_avatar.tsx
+    │   ├── user_card.tsx
+    │   ├── user_badge.tsx
+    │   └── user_list/
+    │       ├── user_list.tsx
+    │       └── user_list_item.tsx
     │
     └── index.ts                  # Barrel Export
 ```
@@ -241,48 +175,28 @@ entities/
 shared/
 ├── ui/                           # UI 组件库
 │   ├── button/
-│   │   ├── button.tsx
-│   │   ├── button.test.tsx
-│   │   └── index.ts
-│   │
 │   ├── card/
-│   │   ├── card.tsx
-│   │   ├── card-header.tsx
-│   │   ├── card-content.tsx
-│   │   └── index.ts
-│   │
 │   └── ... (其他基础组件)
 │
 ├── api/                          # API 客户端
-│   ├── api-client.ts             # 基础封装
-│   ├── api-error.ts              # 错误处理
-│   ├── endpoints/
-│   │   ├── user.endpoints.ts
-│   │   └── meeting.endpoints.ts
-│   └── index.ts
+│   ├── api_client.ts             # 基础封装
+│   ├── api_error.ts              # 错误处理
+│   └── endpoints/
+│       ├── user.endpoints.ts
+│       └── meeting.endpoints.ts
 │
 ├── lib/                          # 工具库
-│   ├── utils/
-│   │   ├── cn.ts                 # classnames
-│   │   ├── format-date.ts
-│   │   └── format-number.ts
-│   │
-│   ├── validators/
-│   │   ├── is-email.ts
-│   │   └── is-url.ts
-│   │
-│   └── index.ts
+│   ├── utils/                   # cn.ts, format_date.ts
+│   └── validators/               # is_email.ts, is_url.ts
 │
 ├── hooks/                        # 通用 Hooks
-│   ├── use-local-storage.ts
-│   ├── use-media-query.ts
-│   ├── use-debounce.ts
-│   └── index.ts
+│   ├── use_local_storage.ts
+│   ├── use_media_query.ts
+│   └── use_debounce.ts
 │
 ├── types/                        # 通用类型
 │   ├── api.ts                   # API 类型
-│   ├── common.ts                # 通用类型
-│   └── index.ts
+│   └── common.ts                # 通用类型
 │
 └── config/                      # 配置文件
     ├── constants.ts
@@ -328,112 +242,36 @@ shared/
 
 ---
 
-## 8. 使用示例
+## 8. 创建新 Feature
 
-### 8.1 创建新 Feature
+### 8.1 目录结构
 
-```bash
-# 创建目录结构
-mkdir -p src/features/todo
-mkdir -p src/features/todo/ui
-mkdir -p src/features/todo/api
-mkdir -p src/features/todo/hooks
-mkdir -p src/features/todo/types
-mkdir -p src/features/todo/lib
-```
+| 目录 | 说明 |
+|------|------|
+| `features/xxx/ui/` | Feature 私有 UI |
+| `features/xxx/api/` | Feature API |
+| `features/xxx/hooks/` | Feature Hooks |
+| `features/xxx/types/` | Feature 类型 |
+| `features/xxx/lib/` | Feature 私有逻辑 |
+| `features/xxx/index.ts` | Barrel Export |
 
-### 8.2 编写 Feature 代码
-
-```tsx
-// features/todo/types/todo.types.ts
-export interface Todo {
-  id: string;
-  title: string;
-  completed: boolean;
-  createdAt: Date;
-}
-
-export interface CreateTodoInput {
-  title: string;
-}
-```
-
-```tsx
-// features/todo/api/todo.api.ts
-import { api } from "@/shared/api/api-client";
-import type { Todo, CreateTodoInput } from "../types/todo.types";
-
-export const todoApi = {
-  list: () => api.get<Todo[]>("/todos"),
-  create: (data: CreateTodoInput) => api.post<Todo>("/todos", data),
-  toggle: (id: string) => api.patch<Todo>(`/todos/${id}`),
-  delete: (id: string) => api.delete(`/todos/${id}`),
-};
-```
-
-```tsx
-// features/todo/hooks/use-todos.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { todoApi } from "../api/todo.api";
-
-export function useTodos() {
-  return useQuery({
-    queryKey: ["todos"],
-    queryFn: todoApi.list,
-  });
-}
-
-export function useCreateTodo() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: todoApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
-  });
-}
-```
-
-```tsx
-// features/todo/ui/todo-list.tsx
-import { useTodos, useCreateTodo } from "../hooks/use-todos";
-import type { CreateTodoInput } from "../types/todo.types";
-
-export function TodoList() {
-  const { data: todos, isLoading } = useTodos();
-  const createTodo = useCreateTodo();
-
-  const handleCreate = (input: CreateTodoInput) => {
-    createTodo.mutate(input);
-  };
-
-  if (isLoading) return <div>Loading...</div>;
-
-  return (
-    <div>
-      {todos?.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} />
-      ))}
-    </div>
-  );
-}
-```
-
-### 8.3 Barrel Export
+### 8.2 Barrel Export 规范
 
 ```typescript
-// features/todo/index.ts
+// features/xxx/index.ts
 // UI
-export { TodoList } from "./ui/todo-list";
-export { TodoItem } from "./ui/todo-item";
-export { TodoForm } from "./ui/todo-form";
+export { XxxList } from "./ui/xxx_list";
+export { XxxItem } from "./ui/xxx_item";
+export { XxxForm } from "./ui/xxx_form";
 
 // Hooks
-export { useTodos, useCreateTodo, useDeleteTodo } from "./hooks";
+export { useXxxs, useCreateXxx, useDeleteXxx } from "./hooks";
 
 // Types
-export type { Todo, CreateTodoInput, UpdateTodoInput } from "./types/todo.types";
+export type { Xxx, CreateXxxInput, UpdateXxxInput } from "./types/xxx.types";
 ```
+
+**实现参考**：`frontend_next/src/features/`
 
 ---
 

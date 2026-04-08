@@ -1,4 +1,4 @@
-# Frontend Next.js - 权限与认证规范
+# Frontend_Next_js_权限与认证规范
 
 ---
 
@@ -23,11 +23,18 @@
 
 ### 2.2 Token 存储
 
-```tsx
-// lib/auth.ts
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+**Store 结构**
 
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `user` | `User \| null` | 当前用户信息 |
+| `token` | `string \| null` | 认证 Token |
+| `setAuth(user, token)` | `() => void` | 设置认证信息 |
+| `logout()` | `() => void` | 清除认证信息 |
+
+**User 类型**
+
+```tsx
 interface User {
   id: string;
   name: string;
@@ -35,26 +42,11 @@ interface User {
   role: "guest" | "user" | "vip" | "admin";
   avatar?: string;
 }
-
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  setAuth: (user: User, token: string) => void;
-  logout: () => void;
-}
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      setAuth: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
-    }),
-    { name: "auth-storage" }
-  )
-);
 ```
+
+**存储方案**：使用 Zustand + persist，中间件名称为 `auth-storage`
+
+**实现参考**：`frontend_next/src/stores/auth-store.ts`
 
 ---
 
@@ -62,41 +54,30 @@ export const useAuthStore = create<AuthState>()(
 
 ### 3.1 角色检查 Hook
 
-```tsx
-// hooks/use-permission.ts
-import { useAuthStore } from "@/stores/auth-store";
+**角色层级**
 
-export function usePermission(requiredRole: User["role"]) {
-  const user = useAuthStore((state) => state.user);
+| 层级 | 角色 | 数值 |
+|------|------|------|
+| 0 | guest | 访客 |
+| 1 | user | 普通用户 |
+| 2 | vip | VIP 用户 |
+| 3 | admin | 管理员 |
 
-  const roleHierarchy = { guest: 0, user: 1, vip: 2, admin: 3 };
-  const userLevel = roleHierarchy[user?.role || "guest"];
-  const requiredLevel = roleHierarchy[requiredRole];
+**检查逻辑**：用户角色数值 >= 要求角色数值
 
-  return userLevel >= requiredLevel;
-}
-```
+**实现参考**：`frontend_next/src/hooks/use-permission.ts`
 
 ### 3.2 权限组件
 
-```tsx
-// components/permission-guard.tsx
-"use client";
+**PermissionGuard Props**
 
-import { usePermission } from "@/hooks/use-permission";
-import { ReactNode } from "react";
+| 属性 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `requiredRole` | `User["role"]` | 是 | 最低要求角色 |
+| `children` | `ReactNode` | 是 | 有权限时显示 |
+| `fallback` | `ReactNode` | 否 | 无权限时显示，默认 null |
 
-interface PermissionGuardProps {
-  requiredRole: User["role"];
-  children: ReactNode;
-  fallback?: ReactNode;
-}
-
-export function PermissionGuard({ requiredRole, children, fallback = null }) {
-  const hasPermission = usePermission(requiredRole);
-  return hasPermission ? <>{children}</> : <>{fallback}</>;
-}
-```
+**实现参考**：`frontend_next/src/components/permission-guard.tsx`
 
 ---
 
@@ -104,31 +85,15 @@ export function PermissionGuard({ requiredRole, children, fallback = null }) {
 
 ### 4.1 请求拦截器
 
-```tsx
-// lib/api-client.ts
-import { useAuthStore } from "@/stores/auth-store";
+**拦截器职责**
 
-async function apiRequest(url: string, options: RequestInit = {}) {
-  const token = useAuthStore.getState().token;
+| 职责 | 说明 |
+|------|------|
+| Token 注入 | 自动在请求头添加 `Authorization: Bearer {token}` |
+| 401 处理 | 收到 401 时自动登出并跳转登录页 |
+| 响应解析 | 返回 JSON 格式数据 |
 
-  const headers = new Headers(options.headers);
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  if (response.status === 401) {
-    useAuthStore.getState().logout();
-    window.location.href = "/login";
-  }
-
-  return response.json();
-}
-```
+**实现参考**：`frontend_next/src/lib/api-client.ts`
 
 ### 4.2 API 权限矩阵
 
@@ -145,24 +110,14 @@ async function apiRequest(url: string, options: RequestInit = {}) {
 
 ### 5.1 导航项权限过滤
 
-```tsx
-// components/layout/sidebar.tsx
-const user = useAuthStore((state) => state.user);
+**过滤逻辑**
 
-const filteredNav = DASHBOARD_NAV.filter((group) => {
-  if (group.key === "admin") {
-    return user?.role === "admin";
-  }
-  return true;
-}).map((group) => ({
-  ...group,
-  items: group.items.filter((item) => {
-    // 根据 item.roles 过滤
-    if (!item.roles) return true;
-    return item.roles.includes(user?.role || "guest");
-  }),
-}));
-```
+| 条件 | 处理方式 |
+|------|---------|
+| admin 组 | 仅 admin 角色可见 |
+| 其他组 | 根据 `item.roles` 过滤 |
+
+**实现参考**：`frontend_next/src/components/layout/sidebar.tsx`
 
 ### 5.2 按钮级权限
 
@@ -177,20 +132,15 @@ const filteredNav = DASHBOARD_NAV.filter((group) => {
 
 ## 6. 敏感操作二次确认
 
-```tsx
-// 危险操作确认对话框
-async function handleDelete(userId: string) {
-  const confirmed = window.confirm("确定要删除此用户吗？此操作不可撤销。");
-  if (!confirmed) return;
+**规范要求**
 
-  try {
-    await apiDelete(`/users/${userId}`);
-    toast({ title: "删除成功" });
-  } catch (error) {
-    toast({ title: "删除失败", variant: "destructive" });
-  }
-}
-```
+| 要求 | 说明 |
+|------|------|
+| 确认对话框 | 删除、批量操作等必须弹窗确认 |
+| 不可逆提示 | 必须明确告知操作不可撤销 |
+| 错误处理 | 失败时必须显示 toast 提示 |
+
+**实现参考**：`frontend_next/src/hooks/use-confirm-dialog.ts`
 
 ---
 

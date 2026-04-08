@@ -1,4 +1,4 @@
-# Frontend Next.js - 页面路由规范
+# Frontend_Next_js_页面路由规范
 
 ---
 
@@ -22,7 +22,6 @@ src/app/[locale]/
 │   ├── speech/                 # 语音处理
 │   │
 │   ├── meeting/                # 会议管理
-│   │   ├── page.tsx            # 会议列表
 │   │   └── analytics/          # 会议分析
 │   │
 │   ├── report/                 # 周报/月报
@@ -48,168 +47,68 @@ src/app/[locale]/
 
 ## 2. 路由分组
 
-### 2.1 公开路由 (无需登录)
+### 2.1 动态路由
 
-| 路由 | 说明 |
-|------|------|
-| `/` | 官网首页 |
-| `/login` | 登录页 |
-| `/login/wecom/callback` | 企业微信回调 |
+| 模式 | 说明 | 示例 |
+|------|------|------|
+| `[locale]/` | 多语言前缀 | `/zh/dashboard` |
+| `[id]/` | 动态 ID | `/meetings/123` |
+| `[[...slug]]/` | 可选通配 | `/docs/a/b/c` |
 
-### 2.2 受保护路由 (需要登录)
+### 2.2 布局嵌套
 
-| 路由 | 说明 | 所需角色 |
-|------|------|---------|
-| `/dashboard/*` | 用户工作台 | user+ |
-| `/admin/*` | 后台管理 | admin |
-
----
-
-## 3. 路由守卫
-
-### 3.1 Middleware
-
-```tsx
-// middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-const PUBLIC_PATHS = ["/", "/login", "/zh/login", "/en/login"];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const token = request.cookies.get("token")?.value;
-
-  // 公开路径直接放行
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
-
-  // 需要登录的路径
-  if (!token) {
-    const locale = pathname.split("/")[1] || "zh";
-    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-  }
-
-  return NextResponse.next();
-}
-
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-};
-```
-
-### 3.2 布局内权限检查
-
-```tsx
-// admin/layout.tsx
-useEffect(() => {
-  const user = getUser();
-  if (!user) {
-    router.push(`/${locale}/login`);
-    return;
-  }
-  if (user.role !== "admin") {
-    toast({ title: "无权限访问", variant: "destructive" });
-    router.push(`/${locale}/dashboard`);
-    return;
-  }
-}, [router, locale]);
-```
+| 布局 | 覆盖范围 |
+|------|---------|
+| `app/layout.tsx` | 全局布局 |
+| `app/[locale]/layout.tsx` | 语言布局 |
+| `app/[locale]/dashboard/layout.tsx` | Dashboard 布局 |
+| `app/[locale]/admin/layout.tsx` | Admin 布局 |
 
 ---
 
-## 4. 路由元数据
+## 3. 导航菜单
 
-### 4.1 页面元数据
+### 3.1 Dashboard 菜单结构
 
-```tsx
-// dashboard/page.tsx
-import type { Metadata } from "next";
+| 菜单组 | 菜单项 |
+|--------|--------|
+| AI 工具 | chat, image, video, music, speech |
+| 协作 | meeting, report |
+| 效率 | excel, doc, docs, json, subtitle |
+| 设置 | users, settings, monitor |
 
-export const metadata: Metadata = {
-  title: "Dashboard - TRAI",
-  description: "用户工作台",
-};
-```
+### 3.2 Admin 菜单结构
 
-### 4.2 布局元数据
-
-```tsx
-// [locale]/layout.tsx
-export async function generateMetadata({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  return {
-    title: {
-      default: "TRAI - AI 工作台",
-      template: "%s | TRAI",
-    },
-    description: "智能 AI 工作台",
-  };
-}
-```
+| 菜单组 | 菜单项 |
+|--------|--------|
+| 管理 | users, system |
 
 ---
 
-## 5. 导航结构
+## 4. 路由守卫
 
-### 5.1 Dashboard 侧边栏
+### 4.1 权限检查
 
-```tsx
-const DASHBOARD_NAV = [
-  { key: "tools", items: [
-    { label: "AI 对话", href: "/dashboard/chat", icon: Bot },
-    { label: "图片生成", href: "/dashboard/image", icon: Image },
-    { label: "视频生成", href: "/dashboard/video", icon: Video },
-    { label: "音乐生成", href: "/dashboard/music", icon: Music },
-    { label: "语音处理", href: "/dashboard/speech", icon: Mic },
-  ]},
-  { key: "workspace", items: [
-    { label: "会议管理", href: "/dashboard/meeting", icon: FileText },
-    { label: "周报/月报", href: "/dashboard/report", icon: BarChart3 },
-  ]},
-  { key: "settings", items: [
-    { label: "设置", href: "/dashboard/settings", icon: Settings },
-  ]},
-];
-```
+| 路由 | 权限要求 |
+|------|---------|
+| `/login` | 无需登录 |
+| `/dashboard/*` | User+ |
+| `/admin/*` | Admin |
 
-### 5.2 Admin 侧边栏
+### 4.2 重定向规则
 
-```tsx
-const ADMIN_NAV = [
-  { key: "overview", items: [
-    { label: "总览", href: "/admin", icon: LayoutDashboard },
-  ]},
-  { key: "management", items: [
-    { label: "用户管理", href: "/admin/users", icon: Users },
-    { label: "系统设置", href: "/admin/system", icon: Activity },
-  ]},
-];
-```
+| 场景 | 跳转目标 |
+|------|---------|
+| 已登录访问 login | `/dashboard` |
+| 未登录访问 dashboard | `/login` |
+| 非 admin 访问 admin | `/dashboard` |
 
 ---
 
-## 6. 面包屑导航
+## 5. 禁止事项
 
-```tsx
-// components/breadcrumb.tsx
-const breadcrumbItems = [
-  { label: "首页", href: "/" },
-  { label: "工作台", href: "/dashboard" },
-  { label: "AI 对话", href: "/dashboard/chat" },
-];
-```
-
----
-
-## 7. 禁止事项
-
-- 路由硬编码不带 locale
-- 嵌套路由超过 3 层
-- 动态路由无参数校验
-- 页面组件超过 300 行
-- 路由跳转无 loading 状态
+- 使用硬编码路径（使用路径常量）
+- 路由层级过深（超过 4 层）
+- 缺少 loading.tsx
+- 缺少 error.tsx
+- 缺少 not-found.tsx

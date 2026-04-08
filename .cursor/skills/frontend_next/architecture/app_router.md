@@ -1,4 +1,4 @@
-# Frontend Next - App Router 规范
+# Frontend_Next_App_Router_规范
 
 ---
 
@@ -89,7 +89,7 @@ src/app/
   <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:12px;">
     <strong style="color:#1565C0;">&#x1F4CB; Client Components 中获取</strong>
     <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>通过 Props 接收 Server 数���</li>
+      <li>通过 Props 接收 Server 数据</li>
       <li>适合客户端行为 (轮询、WebSocket)</li>
       <li>配合 <code>useState</code> / <code>useEffect</code></li>
     </ul>

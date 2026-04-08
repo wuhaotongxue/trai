@@ -1,4 +1,4 @@
-# Frontend Next.js - 日志与监控规范
+# Frontend_Next_js_日志与监控规范
 
 ---
 
@@ -16,64 +16,37 @@
 
 ## 2. 日志工具
 
-### 2.1 日志封装
+### 2.1 Logger 类
 
-```tsx
-// lib/logging.ts
-type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";
+**日志方法**
 
-interface LogEntry {
-  timestamp: string;
-  level: LogLevel;
-  message: string;
-  context?: Record<string, unknown>;
-  userId?: string;
-  url?: string;
-}
+| 方法 | 级别 | 用途 |
+|------|------|------|
+| `logger.debug(msg, ctx?)` | debug | 开发调试 |
+| `logger.info(msg, ctx?)` | info | 一般信息 |
+| `logger.warn(msg, ctx?)` | warn | 警告信息 |
+| `logger.error(msg, ctx?)` | error | 错误信息 |
+| `logger.fatal(msg, ctx?)` | fatal | 致命错误 |
 
-class Logger {
-  private minLevel: LogLevel;
-  private levels = { debug: 0, info: 1, warn: 2, error: 3, fatal: 4 };
+**LogEntry 结构**
 
-  constructor(minLevel: LogLevel = "info") {
-    this.minLevel = minLevel;
-  }
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `timestamp` | `string` | ISO 时间戳 |
+| `level` | `LogLevel` | 日志级别 |
+| `message` | `string` | 日志消息 |
+| `context` | `Record<string, unknown>` | 上下文 |
+| `userId` | `string` | 用户 ID |
+| `url` | `string` | 请求 URL |
 
-  private log(level: LogLevel, message: string, context?: Record<string, unknown>) {
-    if (this.levels[level] < this.levels[this.minLevel]) return;
+**环境配置**
 
-    const entry: LogEntry = {
-      timestamp: new Date().toISOString(),
-      level,
-      message,
-      context,
-      userId: getCurrentUserId(),
-      url: typeof window !== "undefined" ? window.location.href : undefined,
-    };
+| 环境 | 最低级别 | 说明 |
+|------|---------|------|
+| development | debug | 显示所有日志 |
+| production | info | 仅 info 及以上 |
 
-    // 生产环境发送到日志服务
-    if (process.env.NODE_ENV === "production") {
-      this.sendToServer(entry);
-    }
-
-    console.log(JSON.stringify(entry));
-  }
-
-  debug = (msg: string, ctx?: Record<string, unknown>) => this.log("debug", msg, ctx);
-  info = (msg: string, ctx?: Record<string, unknown>) => this.log("info", msg, ctx);
-  warn = (msg: string, ctx?: Record<string, unknown>) => this.log("warn", msg, ctx);
-  error = (msg: string, ctx?: Record<string, unknown>) => this.log("error", msg, ctx);
-  fatal = (msg: string, ctx?: Record<string, unknown>) => this.log("fatal", msg, ctx);
-
-  private sendToServer(entry: LogEntry) {
-    navigator.sendBeacon("/api/logs", JSON.stringify(entry));
-  }
-}
-
-export const logger = new Logger(
-  process.env.NODE_ENV === "development" ? "debug" : "info"
-);
-```
+**实现参考**：`frontend_next/src/lib/logging.ts`
 
 ---
 
@@ -81,34 +54,19 @@ export const logger = new Logger(
 
 ### 3.1 行为埋点
 
-```tsx
-// lib/analytics.ts
-interface AnalyticsEvent {
-  event: string;
-  category: string;
-  label?: string;
-  value?: number;
-  metadata?: Record<string, unknown>;
-}
+**AnalyticsEvent 类型**
 
-function trackEvent(event: AnalyticsEvent) {
-  logger.info(`[Analytics] ${event.event}`, {
-    category: event.category,
-    label: event.label,
-    value: event.value,
-    ...event.metadata,
-  });
+| 属性 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `event` | `string` | 是 | 事件名称 |
+| `category` | `string` | 是 | 事件分类 |
+| `label` | `string` | 否 | 事件标签 |
+| `value` | `number` | 否 | 数值 |
+| `metadata` | `Record<string, unknown>` | 否 | 元数据 |
 
-  // 发送到分析服务
-  if (window.gtag) {
-    window.gtag("event", event.event, {
-      event_category: event.category,
-      event_label: event.label,
-      value: event.value,
-    });
-  }
-}
-```
+**trackEvent 函数**：记录用户行为事件
+
+**实现参考**：`frontend_next/src/lib/analytics.ts`
 
 ### 3.2 常用埋点
 
@@ -124,194 +82,68 @@ function trackEvent(event: AnalyticsEvent) {
 
 ### 3.3 自动埋点
 
-```tsx
-// hooks/use-page-view.ts
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+**自动埋点事件**
 
-export function usePageView() {
-  const pathname = usePathname();
+| 事件 | 触发时机 |
+|------|---------|
+| page_view | 页面加载 |
+| scroll_depth | 滚动深度变化 |
+| time_on_page | 页面停留时间 |
 
-  useEffect(() => {
-    trackEvent({
-      event: "page_view",
-      category: "navigation",
-      metadata: { path: pathname },
-    });
-  }, [pathname]);
-}
-```
+**实现参考**：`frontend_next/src/hooks/use-page-view.ts`
 
 ---
 
-## 4. 错误监控
+## 4. 性能监控
 
-### 4.1 全局错误处理
+### 4.1 Core Web Vitals
 
-```tsx
-// components/error-boundary.tsx
-"use client";
+| 指标 | 达标值 | 说明 |
+|------|--------|------|
+| LCP | < 2.5s | 最大内容绘制 |
+| FID | < 100ms | 首次输入延迟 |
+| CLS | < 0.1 | 累积布局偏移 |
 
-import { Component, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import { logger } from "@/lib/logging";
+### 4.2 自定义指标
 
-interface Props { children: ReactNode; fallback?: ReactNode; }
-interface State { hasError: boolean; error?: Error; }
-
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error("React Error Boundary caught error", {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-    });
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-4">出错了</h2>
-          <p className="text-muted-foreground mb-4">{this.state.error?.message}</p>
-          <Button onClick={() => this.setState({ hasError: false })}>
-            重试
-          </Button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-```
-
-### 4.2 Promise 错误处理
-
-```tsx
-// hooks/use-api.ts
-export function useApi<T>(url: string, options?: RequestInit) {
-  return useQuery<T>({
-    queryKey: [url],
-    queryFn: async () => {
-      try {
-        const res = await fetch(url, options);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      } catch (error) {
-        logger.error(`API Error: ${url}`, {
-          status: (error as Response)?.status,
-          message: (error as Error)?.message,
-        });
-        throw error;
-      }
-    },
-  });
-}
-```
+| 指标 | 说明 |
+|------|------|
+| API 响应时间 | 后端接口耗时 |
+| 组件渲染时间 | React 组件性能 |
+| 资源加载时间 | 图片/字体加载 |
 
 ---
 
-## 5. 性能监控
+## 5. 错误监控
 
-### 5.1 Core Web Vitals
+### 5.1 错误类型
 
-```tsx
-// lib/web-vitals.ts
-import { getCLS, getFID, getLCP, getFCP, getTTFB } from "web-vitals";
+| 类型 | 捕获方式 |
+|------|---------|
+| JavaScript Error | window.onerror |
+| Promise Rejection | window.onunhandledrejection |
+| React 渲染错误 | ErrorBoundary |
 
-function sendToAnalytics({ name, delta, id }: Metric) {
-  logger.info(`[WebVitals] ${name}`, {
-    metric: name,
-    value: delta,
-    id,
-  });
-}
+### 5.2 错误上报
 
-export function reportWebVitals() {
-  getCLS(sendToAnalytics);
-  getFID(sendToAnalytics);
-  getLCP(sendToAnalytics);
-  getFCP(sendToAnalytics);
-  getTTFB(sendToAnalytics);
-}
-```
+**上报内容**
 
-### 5.2 性能指标
+| 字段 | 说明 |
+|------|------|
+| stack | 错误堆栈 |
+| message | 错误信息 |
+| userId | 用户 ID |
+| url | 发生错误的页面 |
+| timestamp | 发生时间 |
 
-| 指标 | 名称 | 目标 |
-|------|------|------|
-| LCP | 最大内容绘制 | < 2.5s |
-| FID | 首次输入延迟 | < 100ms |
-| CLS | 累积布局偏移 | < 0.1 |
-| FCP | 首次内容绘制 | < 1.8s |
-| TTFB | 首字节时间 | < 800ms |
+**实现参考**：`frontend_next/src/lib/error-reporter.ts`
 
 ---
 
-## 6. 实时监控
+## 6. 禁止事项
 
-### 6.1 心跳检测
-
-```tsx
-// hooks/use-health-check.ts
-import { useEffect, useState } from "react";
-
-export function useHealthCheck() {
-  const [healthy, setHealthy] = useState(true);
-
-  useEffect(() => {
-    const check = async () => {
-      try {
-        const res = await fetch("/api/health");
-        setHealthy(res.ok);
-      } catch {
-        setHealthy(false);
-      }
-    };
-
-    check();
-    const interval = setInterval(check, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return healthy;
-}
-```
-
-### 6.2 WebSocket 监控
-
-```tsx
-// hooks/use-websocket.ts
-export function useWebSocket(url: string, onMessage: (data: unknown) => void) {
-  useEffect(() => {
-    const ws = new WebSocket(url);
-
-    ws.onopen = () => logger.info(`WebSocket connected: ${url}`);
-    ws.onclose = () => logger.warn(`WebSocket closed: ${url}`);
-    ws.onerror = (e) => logger.error(`WebSocket error: ${url}`, { error: e });
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      onMessage(data);
-    };
-
-    return () => ws.close();
-  }, [url]);
-}
-```
-
----
-
-## 7. 禁止事项
-
-- console.log 留在生产代码中
-- 敏感信息写入日志 (密码、Token)
-- 错误不记录上下文
-- 性能问题不监控
-- 日志不分类分级
+- 生产环境使用 console.log
+- 记录敏感信息（密码、Token）
+- 日志级别使用混乱
+- 大量日志影响性能
+- 错误不上报

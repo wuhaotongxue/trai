@@ -3,7 +3,7 @@ name: "trai-skills-index"
 description: "TRAI 项目所有 Skills 索引。包含 backend、desktop_client、frontend_next、electron、agent、project 六大领域的代码审查和规范文档。"
 ---
 
-# TRAI Skills 索引
+# TRAI_Skills_索引
 
 TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 
@@ -13,10 +13,10 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 |------|------|--------|----------|
 | **Backend** | `backend/` | `backend/SKILL.md` | 修改 Python 后端代码时 |
 | **Desktop Client** | `desktop_client/` | `desktop_client/SKILL.md` | 修改 PyQt6 桌面客户端时 |
-| **Frontend Next** | `frontend_next/` | `frontend_next/code_review/SKILL.md` | 修改 Next.js 前端代码时 |
+| **Frontend Next** | `frontend_next/` | `frontend_next/SKILL.md` | 修改 Next.js 前端代码时 |
 | **Electron** | `electron/` | `electron/SKILL.md` | 开发 Electron 桌面客户端时 |
 | **Agent** | `agent/` | `agent/SKILL.md` | 开发 Agent 智能体系统时 |
-| **Project** | `project/` | `project/*.SKILL.md` | 项目管理、Git 提交时 |
+| **Project** | `project/` | `project/SKILL.md` | 项目管理、Git 提交时 |
 
 ---
 
@@ -50,13 +50,49 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 │       └── fluent.md                # Win11 Fluent UI 规范
 │
 ├── frontend_next/                   # Next.js 前端
-│   ├── code_review/SKILL.md         # 代码审查主入口
+│   ├── SKILL.md                   # 代码审查主入口
 │   ├── rules/
 │   │   ├── typescript.md           # TypeScript 规范
 │   │   ├── tailwind.md             # Tailwind CSS 规范
 │   │   └── i18n.md                 # i18n 翻译规范
-│   └── architecture/
-│       └── app_router.md           # App Router 规范
+│   ├── architecture/
+│   │   ├── overview.md             # 架构总览
+│   │   └── app_router.md           # App Router 规范
+│   ├── components/
+│   │   └── overview.md             # 组件规范
+│   ├── auth/
+│   │   └── overview.md             # 认证规范
+│   ├── design/
+│   │   └── layered.md              # 五层架构
+│   ├── api/
+│   │   └── overview.md             # API 规范
+│   ├── fsd/
+│   │   └── overview.md             # FSD 规范
+│   ├── i18n/
+│   │   └── overview.md             # 国际化规范
+│   ├── logging/
+│   │   └── overview.md             # 日志规范
+│   ├── patterns/
+│   │   └── overview.md             # 设计模式
+│   ├── routing/
+│   │   └── overview.md             # 路由规范
+│   ├── structure/
+│   │   ├── tree.md                 # 目录结构
+│   │   └── monorepo.md             # Monorepo 配置
+│   └── pages/
+│       ├── dashboard/
+│       │   ├── overview.md
+│       │   ├── components.md
+│       │   └── tools.md
+│       ├── admin/
+│       │   ├── overview.md
+│       │   ├── users.md
+│       │   └── system.md
+│       ├── landing/
+│       │   ├── overview.md
+│       │   └── components.md
+│       └── monitor/
+│           └── overview.md
 │
 ├── electron/                        # Electron 桌面客户端
 │   ├── SKILL.md                     # 代码审查主入口
@@ -72,6 +108,18 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 │
 ├── agent/                           # Agent 智能体 (Harness Engineering)
 │   ├── SKILL.md                    # Agent 工程主入口
+│   ├── orchestrator/               # 多 Agent 编排
+│   │   ├── overview.md            # 编排器总览
+│   │   └── router.md              # 任务分解和路由
+│   ├── interface/                   # Agent 接口标准
+│   │   └── definition.md          # 输入输出定义
+│   ├── protocol/                    # 通信协议
+│   │   ├── message.md            # 消息格式
+│   │   └── routing.md            # 消息路由
+│   ├── collaboration/              # 多 Agent 协作
+│   │   └── patterns.md           # 协作模式详解
+│   ├── lifecycle/                   # 生命周期管理
+│   │   └── management.md         # 注册/健康/热更新
 │   ├── context/
 │   │   └── engineering.md         # 上下文装配规范
 │   ├── tools/
@@ -92,10 +140,11 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 │       └── chat/                  # 对话处理规范
 │
 └── project/                         # 项目管理
+    ├── SKILL.md                   # 项目管理入口
     ├── naming_convention/SKILL.md  # 命名规范
     ├── git_submit/SKILL.md         # Git 提交
-    ├── readme_update/SKILL.md     # README 更新
-    └── report_generation/SKILL.md   # 周报生成
+    ├── readme_update/SKILL.md      # README 更新
+    └── report_generation/SKILL.md  # 周报生成
 ```
 
 ---
@@ -108,7 +157,7 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 |----------|----------|
 | `backend/` | `backend/SKILL.md` |
 | `desktop_client/` | `desktop_client/SKILL.md` |
-| `frontend_next/` | `frontend_next/code_review/SKILL.md` |
+| `frontend_next/` | `frontend_next/SKILL.md` |
 | `electron/` | `electron/SKILL.md` |
 | `agent/` | `agent/SKILL.md` |
 
@@ -141,11 +190,11 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 
 ```python
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# 文件名: {实际文件名}
-# 作者: wuhao
-# 日期: {YYYY-MM-DD HH:MM:SS}
-# 描述: {该文件的用途/功能简述，一句话概括}
+# _*_coding:_utf_8_*_
+# 文件名:_{实际文件名}
+# 作者:_wuhao
+# 日期:_{YYYY_MM_DD_HH:MM:SS}
+# 描述:_{该文件的用途/功能简述，一句话概括}
 ```
 
 **TypeScript (frontend_next/electron)**
@@ -183,6 +232,7 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
-| v3.0 | 2026-04-08 | 统一目录结构，新增 Electron 模块，整合两套 skills |
+| v3.2 | 2026-04-08 | 新增 Frontend Next 主入口，重构 project 主入口，更新索引路径 |
+| v3.1 | 2026-04-08 | 扩展 Agent 模块，新增编排器、协作模式、生命周期管理文档 |
 | v2.0 | 2026-04-08 | 重构所有文档，删除代码示例，统一使用表格和 HTML 卡片 |
 | v1.0 | 2026-04-01 | 初版发布 |

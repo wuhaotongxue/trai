@@ -1,4 +1,4 @@
-# Agent - 视频处理规范索引
+# Agent_视频处理规范索引
 
 ---
 
@@ -20,11 +20,11 @@
 
 | 工具 ID | 能力 | 风险等级 | 水印 | VIP 跳过 | 审核 | 月配额 |
 |---------|------|---------|------|---------|------|-------|
-| video.stream.push | 视频流推送 | approval | required | yes | required | video_stream |
-| video.generate | 视频生成 | approval | required | yes | required | video_stream |
-| video.recording.start | 视频录制 | approval | - | - | - | - |
-| video.recording.stop | 停止录制 | monitored | - | - | - | - |
-| video.screenshot | 截图 | safe | - | - | - | - |
+| video_stream_push | 视频流推送 | approval | required | yes | required | video_stream |
+| video_generate | 视频生成 | approval | required | yes | required | video_stream |
+| video_recording_start | 视频录制 | approval | - | - | - | - |
+| video_recording_stop | 停止录制 | monitored | - | - | - | - |
+| video_screenshot | 截图 | safe | - | - | - | - |
 
 ---
 

@@ -1,134 +1,126 @@
-# Desktop Client - Worker 线程规范
+# Desktop_Client_Worker_线程规范
 
-## 1. 标准 Worker 写法
+---
+
+## 1. Worker 信号定义
+
+### 1.1 标准信号
+
+| 信号 | 类型 | 说明 |
+|------|------|------|
+| `sig_success` | `pyqtSignal(dict)` | 成功回调，传递数据 |
+| `sig_failed` | `pyqtSignal(str, int)` | 失败回调，消息+错误码 |
+| `sig_progress` | `pyqtSignal(str)` | 进度回调，进度消息 |
+
+---
+
+## 2. 标准 Worker 结构
+
+### 2.1 Worker 类定义
 
 ```python
-from PyQt6.QtCore import QRunnable, pyqtSignal, pyqtSlot
-from src.infra.logging import get_logger
-
-logger = get_logger()
-
-
-class LoginWorker(QRunnable):
-    """
-    登录业务 Worker，封装登录请求的异步执行.
-
-    参数:
-        无.
-
-    异常:
-        无可预期业务异常.
-    """
-
+class XxxWorker(QRunnable):
     sig_success = pyqtSignal(dict)
     sig_failed = pyqtSignal(str, int)
     sig_progress = pyqtSignal(str)
 
-    def __init__(self, username: str, password: str) -> None:
+    def __init__(self, param1: str, param2: str) -> None:
         super().__init__()
-        self._username = username
-        self._password = password
+        self._param1 = param1
+        self._param2 = param2
 
     @pyqtSlot()
     def run(self) -> None:
         try:
-            self.sig_progress.emit("Connecting to server...")
-            self.sig_success.emit({"token": "mock_token", "user_id": "123"})
+            self.sig_progress.emit("Processing...")
+            # 业务逻辑
+            self.sig_success.emit({"key": "value"})
         except Exception as e:
-            logger.error(f"Login failed: {e}")
-            self.sig_failed.emit(str(e), 401)
+            logger.error(f"XxxWorker failed: {e}")
+            self.sig_failed.emit(str(e), error_code)
 ```
 
-## 2. 标准 Controller 写法
+### 2.2 Worker 类型
+
+| Worker | 用途 |
+|---------|------|
+| `LoginWorker` | 登录请求 |
+| `HttpWorker` | HTTP 请求封装 |
+| `FileWorker` | 文件 IO 操作 |
+| `MeetingWorker` | 会议相关操作 |
+
+**实现参考**：`desktop_client/src/controller/workers/`
+
+---
+
+## 3. 标准 Controller 结构
+
+### 3.1 Controller 类定义
 
 ```python
-from PyQt6.QtCore import QObject, pyqtSlot
-from src.controller.workers.login_worker import LoginWorker
-
-class LoginController(QObject):
-    sig_login_success = pyqtSignal(dict)
-    sig_login_failed = pyqtSignal(str)
+class XxxController(QObject):
+    sig_xxx_success = pyqtSignal(dict)
+    sig_xxx_failed = pyqtSignal(str)
 
     def __init__(self) -> None:
         super().__init__()
-        self._dialog = LoginDialog()
+        self._dialog = XxxDialog()
         self._connect_signals()
 
     def _connect_signals(self) -> None:
-        self._dialog.sig_login_clicked.connect(self._on_login_clicked)
+        self._dialog.sig_action_clicked.connect(self._on_action)
+        self._worker.sig_success.connect(self._on_success)
+        self._worker.sig_failed.connect(self._on_failed)
 
     @pyqtSlot(str, str)
-    def _on_login_clicked(self, username: str, password: str) -> None:
-        worker = LoginWorker(username, password)
-        worker.sig_success.connect(self._on_login_success)
-        worker.sig_failed.connect(self._on_login_failed)
-        from PyQt6.QtCore import QThreadPool
+    def _on_action(self, param1: str, param2: str) -> None:
+        worker = XxxWorker(param1, param2)
+        worker.sig_success.connect(self._on_success)
+        worker.sig_failed.connect(self._on_failed)
         QThreadPool.globalInstance().start(worker)
-
-    @pyqtSlot(dict)
-    def _on_login_success(self, data: dict) -> None:
-        self._dialog.close()
-        self.sig_login_success.emit(data)
-
-    @pyqtSlot(str, int)
-    def _on_login_failed(self, message: str, code: int) -> None:
-        self._dialog.show_error(f"Login failed: {message}")
 ```
 
-## 3. HTTP Worker 标准写法
+### 3.2 Controller 类型
 
-```python
-class HttpWorker(QRunnable):
-    """
-    HTTP 请求 Worker，封装异步 HTTP 请求执行.
+| Controller | 用途 |
+|------------|------|
+| `LoginController` | 登录控制器 |
+| `MeetingController` | 会议控制器 |
+| `SettingsController` | 设置控制器 |
 
-    参数:
-        method: HTTP 方法 (GET/POST).
-        url: 请求 URL.
-        data: 请求数据 (POST 时使用).
+**实现参考**：`desktop_client/src/controller/`
 
-    异常:
-        无可预期业务异常.
-    """
+---
 
-    sig_success = pyqtSignal(dict)
-    sig_failed = pyqtSignal(str, int)
-    sig_progress = pyqtSignal(str)
+## 4. HTTP Worker
 
-    def __init__(self, method: str, url: str, data: dict | None = None) -> None:
-        super().__init__()
-        self._method = method.upper()
-        self._url = url
-        self._data = data
+### 4.1 HTTP 请求配置
 
-    @pyqtSlot()
-    def run(self) -> None:
-        try:
-            self.sig_progress.emit("Sending request...")
-            import httpx
-            with httpx.Client(timeout=30.0) as client:
-                if self._method == "GET":
-                    response = client.get(self._url)
-                else:
-                    response = client.post(self._url, json=self._data)
-                response.raise_for_status()
-                self.sig_success.emit(response.json())
-        except httpx.TimeoutException:
-            logger.error(f"Request timeout: {self._url}")
-            self.sig_failed.emit("Request timeout", 408)
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error: {e.response.status_code}")
-            self.sig_failed.emit(str(e), e.response.status_code)
-        except Exception as e:
-            logger.error(f"Request failed: {e}")
-            self.sig_failed.emit(str(e), 500)
-```
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| method | GET/POST | HTTP 方法 |
+| timeout | 30.0 | 超时秒数 |
+| retry | 1 | 重试次数 |
 
-## 4. 资源释放检查清单
+### 4.2 HTTP 错误处理
+
+| 错误类型 | 错误码 | 处理 |
+|---------|--------|------|
+| TimeoutException | 408 | 超时提示 |
+| HTTPStatusError | 4xx/5xx | 状态码错误 |
+| 其他异常 | 500 | 服务器错误 |
+
+---
+
+## 5. 资源释放
+
+### 5.1 关闭检查
 
 ```python
 def closeEvent(self, event) -> None:
-    self._heartbeat_timer.stop()
+    # 停止定时器
+    self._timer.stop()
+    # 停止 Worker 线程
     if self._worker_thread.isRunning():
         self._worker_thread.quit()
         self._worker_thread.wait(3000)
@@ -136,10 +128,22 @@ def closeEvent(self, event) -> None:
     event.accept()
 ```
 
-## 5. 禁止事项汇总
+### 5.2 释放检查清单
+
+| 检查项 | 操作 |
+|--------|------|
+| 定时器 | stop() |
+| Worker 线程 | quit() + wait() |
+| 资源对象 | deleteLater() |
+
+---
+
+## 6. 禁止事项
 
 | 禁止 | 正确做法 |
-|------|----------|
+|------|---------|
 | 在 slot 中直接写网络请求 | 使用 QRunnable + QThreadPool |
 | 跨线程直接操作 UI | 通过 pyqtSignal |
 | 模块顶层导入重型依赖 | 懒加载 |
+| Worker 不处理异常 | 捕获并发送 sig_failed |
+| 不等待 Worker 完成就关闭 | closeEvent 中 wait() |

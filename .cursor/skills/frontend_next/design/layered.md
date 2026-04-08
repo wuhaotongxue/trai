@@ -1,4 +1,4 @@
-# Frontend Next.js - 现代化分层架构设计
+# Frontend_Next_js_现代化分层架构设计
 
 ---
 
@@ -28,7 +28,7 @@
 │  │                    Data Layer                          │           │
 │  └──────────────────────────────────────────────────────┘           │
 │                                                                     │
-│  Feature-Sliced Design (2020+)  ◄──── 现代主流                     │
+│  Feature_Sliced Design (2020+)  ◄──── 现代主流                     │
 │  ┌──────────────────────────────────────────────────────┐           │
 │  │                      App                             │           │
 │  ├──────────┬──────────┬──────────┬──────────┬─────────┤           │
@@ -62,7 +62,7 @@
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  Business Features / Use Cases                              │   │
 │  │  ├── features/chat/           # AI 对话功能                 │   │
-│  │  ├── features/image-generate/ # 图片生成功能                │   │
+│  │  ├── features/image_generate/ # 图片生成功能                │   │
 │  │  ├── features/meeting/       # 会议管理功能                │   │
 │  │  └── features/report/         # 报告生成功能                │   │
 │  └─────────────────────────────────────────────────────────────┘   │
@@ -85,7 +85,7 @@
 │  L4: Data Access Layer (数据层)                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │  API Clients / Repositories / State Management              │   │
-│  │  ├── lib/api-client.ts      # API 客户端                    │   │
+│  │  ├── lib/api_client.ts      # API 客户端                    │   │
 │  │  ├── lib/repositories/      # 数据仓库                      │   │
 │  │  ├── stores/                # Zustand Store                │   │
 │  │  └── hooks/                 # React Query Hooks            │   │
@@ -182,15 +182,11 @@
 
 ### 依赖方向
 
-```typescript
-// ✅ 正确: 依赖下层
-// L1 → L2 → L3 → L4 → L5
-// Presentation → Feature → Domain → Data → Infrastructure
-
-// ❌ 错误: 依赖上层
-// Feature 不应直接导入 Page
-// Domain 不应直接导入 UI 组件
-```
+| 方向 | 说明 |
+|------|------|
+| 正确 | L1 → L2 → L3 → L4 → L5 (依赖下层) |
+| 错误 | Feature 直接导入 Page |
+| 错误 | Domain 直接导入 UI 组件 |
 
 ---
 
@@ -202,18 +198,18 @@
 features/
 └── chat/                    # AI 对话 Feature
     ├── ui/                  # Feature 私有 UI (仅本 Feature 使用)
-    │   ├── chat-input.tsx
-    │   ├── chat-message.tsx
-    │   └── chat-sidebar.tsx
+    │   ├── chat_input.tsx
+    │   ├── chat_message.tsx
+    │   └── chat_sidebar.tsx
     ├── api/                 # Feature API
-    │   └── chat-api.ts
+    │   └── chat_api.ts
     ├── hooks/               # Feature Hooks
-    │   ├── use-chat-messages.ts
-    │   └── use-chat-session.ts
+    │   ├── use_chat_messages.ts
+    │   └── use_chat_session.ts
     ├── types/               # Feature Types
-    │   └── chat-types.ts
+    │   └── chat_types.ts
     ├── lib/                 # Feature 私有逻辑
-    │   └── chat-utils.ts
+    │   └── chat_utils.ts
     └── index.ts            # 公开接口
 ```
 
@@ -224,10 +220,10 @@ domains/
 └── user/
     ├── entities/           # 实体
     │   └── user.entity.ts
-    ├── value-objects/     # 值对象
+    ├── value_objects/     # 值对象
     │   └── email.vo.ts
     ├── interfaces/        # 接口
-    │   └── i-user.repository.ts
+    │   └── i_user.repository.ts
     └── types/             # 领域类型
         └── user.types.ts
 ```
@@ -238,29 +234,23 @@ domains/
 
 ### 6.1 Context 注入
 
-```tsx
-// contexts/api-context.tsx
-interface ApiContextValue {
-  userRepository: IUserRepository;
-  meetingRepository: IMeetingRepository;
-}
+**ApiContextValue 类型**
 
-const ApiContext = createContext<ApiContextValue | null>(null);
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `userRepository` | `IUserRepository` | 用户仓库 |
+| `meetingRepository` | `IMeetingRepository` | 会议仓库 |
 
-// 使用
-const { userRepository } = useContext(ApiContext);
-```
+**实现参考**：`frontend_next/src/contexts/api_context.tsx`
 
 ### 6.2 Hook 注入
 
-```tsx
-// hooks/use-repositories.ts
-export function useUserRepository(): IUserRepository {
-  const context = useContext(ApiContext);
-  if (!context) throw new Error("Context not found");
-  return context.userRepository;
-}
-```
+| Hook | 返回类型 | 说明 |
+|------|---------|------|
+| `useUserRepository()` | `IUserRepository` | 用户仓库 |
+| `useMeetingRepository()` | `IMeetingRepository` | 会议仓库 |
+
+**实现参考**：`frontend_next/src/hooks/use_repositories.ts`
 
 ---
 

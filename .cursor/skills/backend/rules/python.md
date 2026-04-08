@@ -1,4 +1,4 @@
-# Backend - Python 代码规范
+# Backend_Python_代码规范
 
 ---
 
@@ -81,11 +81,11 @@
 
 ```python
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# 文件名: {实际文件名}
-# 作者: wuhao
-# 日期: {YYYY-MM-DD HH:MM:SS}
-# 描述: {该文件的用途/功能简述，一句话概括}
+# _*_coding:_utf_8_*_
+# 文件名:_{实际文件名}
+# 作者:_wuhao
+# 日期:_{YYYY_MM_DD_HH:MM:SS}
+# 描述:_{该文件的用途/功能简述，一句话概括}
 ```
 
 ---

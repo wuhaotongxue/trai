@@ -1,9 +1,10 @@
 ---
 name: "readme-update"
-description: "自动更新 README 的 Changelog 条目。用户要求"更新日志/写 README/更新README/修改日志/添加更新日志"或提交前需要补齐 README 时调用。"
+description: >-
+  自动更新 README 的 Changelog 条目。用户要求更新日志/写 README 或提交前需要补齐 README 时调用。
 ---
 
-# 自动更新 README 的 Changelog（readme-update）
+# 自动更新_README_的_Changelog（readme_update）
 
 当调用此技能时，请严格按照以下步骤执行：
 

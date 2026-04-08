@@ -1,9 +1,9 @@
 ---
 name: "electron"
-description: "Electron 桌面客户端代码审查主入口。当修改完Electron代码或用户要求审查Electron代码时调用此技能，强制执行 TypeScript 规范、五层架构、IPC 通道、窗口管理、自动更新与 S3 上传。"
+description: "Electron 桌面客户端代码审查主入口。强制执行 TypeScript 规范、五层架构、IPC 通道、窗口管理、自动更新与 S3 上传。"
 ---
 
-# Electron Code Review
+# Electron_Code_Review
 
 作为 TRAI 平台 Electron 桌面客户端开发人员的专属代码审查警察，请严格遵守以下规范进行审查。
 

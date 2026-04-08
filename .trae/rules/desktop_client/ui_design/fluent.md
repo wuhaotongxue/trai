@@ -1,4 +1,4 @@
-# Desktop Client - Win11 Fluent UI 设计规范
+# Desktop_Client_Win11_Fluent_UI_设计规范
 
 > 面向 Windows 11 的原生视觉体验，遵循微软 Fluent Design System 设计语言
 
@@ -189,7 +189,7 @@ from PyQt6.QtWidgets import QGraphicsDropShadowEffect
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QPointF
 
-# 中等阴影 (推荐)
+# 中等阴影_(推荐)
 shadow = QGraphicsDropShadowEffect()
 shadow.setBlurRadius(16)
 shadow.setOffset(QPointF(0, 4))

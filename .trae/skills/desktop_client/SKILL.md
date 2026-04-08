@@ -1,9 +1,9 @@
 ---
-name: "desktop-client-code-review"
-description: "Desktop Client 代码审查主入口。当修改完桌面客户端代码或用户要求审查桌面客户端代码时调用此技能，强制执行 PyQt6 五层架构、防卡死规范、信号槽规范、Win11 Fluent UI 规范与中文标点禁令。"
+name: "desktop_client"
+description: "Desktop Client 规范与审查入口。修改 desktop_client 或涉及线程/Worker/UI 时调用，按 PyQt6 五层架构、防卡死等规范检查。"
 ---
 
-# Desktop Client 代码审查
+# Desktop_Client_代码审查
 
 作为 TRAI 平台桌面端开发人员的专属代码审查警察，请严格遵守以下 PyQt6 + Win11 Fluent 客户端开发规范进行审查。
 
@@ -126,11 +126,11 @@ description: "Desktop Client 代码审查主入口。当修改完桌面客户端
 
 ```python
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# 文件名: {实际相对路径文件名}
-# 作者: {作者姓名}
-# 日期: {YYYY-MM-DD HH:MM:SS}
-# 描述: {该文件的用途/功能简述，一句话概括}
+# _*_coding:_utf_8_*_
+# 文件名:_{实际相对路径文件名}
+# 作者:_{作者姓名}
+# 日期:_{YYYY_MM_DD_HH:MM:SS}
+# 描述:_{该文件的用途/功能简述，一句话概括}
 ```
 
 ### 9. Docstring 全覆盖 (MANDATORY)

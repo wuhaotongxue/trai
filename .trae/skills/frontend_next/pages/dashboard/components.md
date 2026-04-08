@@ -1,4 +1,4 @@
-# Frontend - Dashboard 组件规范
+# Frontend_Dashboard_组件规范
 
 ---
 

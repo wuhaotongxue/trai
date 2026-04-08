@@ -1,4 +1,4 @@
-# Audio - 语音转写 (STT)
+# Audio_语音转写_(STT)
 
 ---
 
@@ -7,7 +7,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | string | audio.transcribe |
-| name | string | Speech-to-Text Transcription |
+| name | string | Speech_to_Text Transcription |
 | description | string | Convert speech to text using ASR |
 | category | string | audio |
 | sub_category | string | transcription |

@@ -1,4 +1,4 @@
-# Backend - API 设计规范
+# Backend_API_设计规范
 
 ---
 
@@ -86,7 +86,7 @@ api/routers/
 │   ├── music.py
 │   ├── video.py
 │   └── speech.py
-├── media/        # 媒体存储 (Presigned URL)
+├── media/        # 媒体存储 (Presigned_URL)
 │   └── access.py
 ├── system/        # 系统
 │   ├── health.py
@@ -100,34 +100,34 @@ api/routers/
 
 ## 7. 媒体存储路由 (CRITICAL)
 
-> 所有私有文件必须通过 Presigned URL，**严禁 Public Read**
+> 所有私有文件必须通过 Presigned_URL，**严禁 Public_Read**
 
 | 路由 | 方法 | 用途 |
 |------|------|------|
-| `/media/access` | POST | 生成文件访问 Presigned GET URL |
-| `/media/upload` | POST | 生成文件上传 Presigned PUT URL |
-| `/media/batch-access` | POST | 批量生成访问 URL |
+| `/media/access` | POST | 生成文件访问 Presigned_GET_URL |
+| `/media/upload` | POST | 生成文件上传 Presigned_PUT_URL |
+| `/media/batch_access` | POST | 批量生成访问 URL |
 
 ---
 
 ## 8. 禁止事项
 
 ```python
-# ❌ 禁止: API 层直接写 SQL
+# ❌_禁止:_API_层直接写_SQL
 @router.post("/meeting/list")
 async def list_meetings(req):
     result = await db.execute("SELECT * FROM meetings")  # ❌
 
-# ✅ 正确: 调用 Application 层
+# ✅_正确:_调用_Application_层
 @router.post("/meeting/list")
 async def list_meetings(req, usecase: ListMeetingsUseCase = Depends()):
     return await usecase.execute(req)
 
-# ❌ 禁止: 不验证输入
+# ❌_禁止:_不验证输入
 @router.post("/meeting/create")
 async def create_meeting(meeting_id: str):  # ❌
 
-# ✅ 正确: 使用 Pydantic
+# ✅_正确:_使用_Pydantic
 @router.post("/meeting/create")
 async def create_meeting(req: CreateMeetingRequest):
     ...

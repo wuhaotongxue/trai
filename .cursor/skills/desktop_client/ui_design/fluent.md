@@ -1,6 +1,21 @@
-# Desktop Client - Win11 Fluent UI 设计规范
+# Desktop_Client_Win11_Fluent_UI_设计规范
 
-## 1. 字体规范
+---
+
+## 1. 中文标点禁令
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止</strong> — 代码、注释、UI 文案中严禁出现中文全角标点
+  <div style="margin-top:8px;font-size:13px;">
+    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">，。！？：</code>
+    &nbsp;&nbsp;
+    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">, . ! ? :</code>
+  </div>
+</div>
+
+---
+
+## 2. 字体规范
 
 | 层级 | 字体 | 字号 | 字重 |
 |------|------|------|------|
@@ -10,17 +25,21 @@
 | 辅助文字 | Segoe UI | 12px | Regular (400) |
 | 按钮文字 | Segoe UI | 14px | SemiBold (600) |
 
-## 2. 色彩规范
+---
+
+## 3. 色彩规范
 
 ### 主色调
+
 | 名称 | 色值 | 用途 |
 |------|------|------|
 | Primary | `#0078D4` | 主按钮、链接 |
-| Primary Hover | `#106EBE` | 悬停状态 |
+| Primary Hover | `#106EBE` | 悬停状�� |
 | Primary Pressed | `#005A9E` | 按下状态 |
 | Primary Disabled | `#A0CFFF` | 禁用状态 |
 
 ### 中性色
+
 | 名称 | 色值 | 用途 |
 |------|------|------|
 | Background | `#FFFFFF` | 页面背景 |
@@ -31,11 +50,14 @@
 | Text Disabled | `#A3A3A3` | 禁用文字 |
 
 ### 禁止使用的颜色
+
 - 紫色系 (`purple`/`indigo`) 作为主色
 - 绿色/红色渐变作为主色
 - 过于饱和的颜色（饱和度 > 100%）
 
-## 3. 圆角规范
+---
+
+## 4. 圆角规范
 
 | 元素 | 圆角 |
 |------|------|
@@ -45,7 +67,7 @@
 | 弹窗 (Modal) | 16px |
 
 ```python
-# QSS 示例
+# QSS_示例
 button_style = """
 QPushButton {
     background-color: #0078D4;
@@ -72,10 +94,12 @@ QPushButton:disabled {
 """
 ```
 
-## 4. 阴影规范
+---
+
+## 5. 阴影规范
 
 ```python
-# 使用 QGraphicsDropShadowEffect
+# 使用_QGraphicsDropShadowEffect
 from PyQt6.QtWidgets import QGraphicsDropShadowEffect
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import QPointF
@@ -86,10 +110,12 @@ shadow.setOffset(QPointF(0, 4))  # 偏移 (0, 4)
 shadow.setColor(QColor(0, 0, 0, 40))  # 40% 透明度黑色
 ```
 
-## 5. 动效规范
+---
+
+## 6. 动效规范
 
 ```python
-# 过渡动画使用 QPropertyAnimation
+# 过渡动画使用_QPropertyAnimation
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QRect
 
 # 按钮悬停动画
@@ -102,6 +128,7 @@ self._hover_anim.start()
 ```
 
 **动画时长**:
+
 | 场景 | 时长 |
 |------|------|
 | 微交互 (悬停、点击) | 100~200ms |
@@ -111,7 +138,9 @@ self._hover_anim.start()
 
 **缓动曲线**: `QEasingCurve.InOutQuad`
 
-## 6. 间距规范
+---
+
+## 7. 间距规范
 
 | 元素 | 间距 |
 |------|------|
@@ -120,9 +149,12 @@ self._hover_anim.start()
 | 组件间距 | 8px |
 | 内边距 | 12px |
 
-## 7. 按钮规范
+---
+
+## 8. 按钮规范
 
 ### 主按钮
+
 ```python
 primary_button_style = """
 QPushButton {
@@ -142,6 +174,7 @@ QPushButton:disabled { background-color: #A0CFFF; color: white; }
 ```
 
 ### 次要按钮
+
 ```python
 secondary_button_style = """
 QPushButton {
@@ -159,7 +192,9 @@ QPushButton:pressed { background-color: #E1E1E1; }
 """
 ```
 
-## 8. 输入框规范
+---
+
+## 9. 输入框规范
 
 ```python
 input_style = """
@@ -178,7 +213,9 @@ QLineEdit:disabled { background-color: #F3F3F3; color: #A3A3A3; }
 """
 ```
 
-## 9. 卡片规范
+---
+
+## 10. 卡片��范
 
 ```python
 card_style = """
@@ -191,7 +228,9 @@ QFrame#card {
 """
 ```
 
-## 10. 状态栏规范
+---
+
+## 11. 状态栏规范
 
 ```python
 statusbar_style = """
@@ -208,7 +247,7 @@ QStatusBar {
 
 ---
 
-## 11. 快速参考
+## 12. 快速参考
 
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;background:#F9F9F9;border-radius:12px;margin:12px 0;">
 
@@ -228,18 +267,18 @@ QStatusBar {
   </div>
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#D32F2F;">禁止紫色</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">purple / indigo</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#D32F2F;">禁止中文标点</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">全角逗号句号感叹号</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
     <strong style="font-size:13px;color:#1565C0;">动效时长</strong>
     <div style="font-size:12px;color:#666;margin-top:4px;">100-400ms</div>
+  </div>
+
+  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
+    <strong style="font-size:13px;color:#1565C0;">阴影</strong>
+    <div style="font-size:12px;color:#666;margin-top:4px;">模糊16px, 偏移(0,4)</div>
+  </div>
+
+  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
+    <strong style="font-size:13px;color:#1565C0;">页面边距</strong>
+    <div style="font-size:12px;color:#666;margin-top:4px;">24px</div>
   </div>
 
 </div>

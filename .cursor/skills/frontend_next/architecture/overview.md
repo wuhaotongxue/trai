@@ -1,4 +1,4 @@
-# Frontend Next.js - 技术架构总览
+# Frontend_Next_技术架构总览
 
 ---
 
@@ -45,44 +45,14 @@ frontend_next/
 │   │
 │   ├── components/
 │   │   ├── layout/                    # 布局组件
-│   │   │   ├── sidebar.tsx
-│   │   │   ├── navbar.tsx
-│   │   │   ├── quick-chat.tsx
-│   │   │   ├── theme-switcher.tsx
-│   │   │   └── language-switcher.tsx
 │   │   ├── ui/                        # shadcn/ui 基础组件
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   └── ...
 │   │   ├── business/                  # 业务组件
-│   │   │   ├── meeting/
-│   │   │   └── report/
 │   │   └── feature/                   # 功能组件
-│   │       └── ai-generate/
 │   │
 │   ├── lib/                           # 工具库
-│   │   ├── api-client.ts              # API 调用封装
-│   │   ├── auth.ts                    # 认证工具
-│   │   ├── utils.ts                   # 通用工具
-│   │   └── logging.ts                 # 日志工具
-│   │
 │   ├── hooks/                         # 自定义 Hooks
-│   │   ├── use-auth.ts
-│   │   ├── use-api.ts
-│   │   └── use-logging.ts
-│   │
 │   ├── stores/                        # Zustand 状态
-│   │   ├── auth-store.ts
-│   │   ├── app-store.ts
-│   │   └── chat-store.ts
-│   │
 │   ├── i18n/                          # 国际化
-│   │   ├── messages/
-│   │   │   ├── zh.json
-│   │   │   └── en.json
-│   │   └── request.ts
-│   │
 │   └── middleware.ts                  # 中间件
 │
 ├── public/                            # 静态资源
@@ -96,17 +66,11 @@ frontend_next/
 
 ### 3.1 App Router 规范
 
-```tsx
-// ✅ 正确: 使用 App Router
-export default function Page() {
-  return <div>Page Content</div>;
-}
-
-// ❌ 错误: 使用 Pages Router
-export default function Page() {
-  return <div>Deprecated</div>;
-}
-```
+| 规范 | 说明 |
+|------|------|
+| 默认 Server Component | 提升首屏加载速度和 SEO |
+| 显式 "use client" | 仅在需要交互、Hooks、浏览器 API 时使用 |
+| 禁止父布局滥用 | 严禁在 Layout 或根节点盲目使用 "use client" |
 
 ### 3.2 布局层级
 
@@ -119,55 +83,16 @@ export default function Page() {
 
 ### 3.3 Server vs Client Components
 
-```tsx
-// ✅ Server Component (默认)
-export default async function Page() {
-  const data = await fetchData();
-  return <div>{data}</div>;
-}
-
-// ✅ Client Component (需要交互)
-"use client";
-export default function ClientPage() {
-  const [state, setState] = useState();
-  return <div>{state}</div>;
-}
-```
+| 场景 | 组件类型 | 说明 |
+|------|---------|------|
+| 数据获取、SEO 优先 | Server Component | 默认 |
+| 用户交互、Hooks、浏览器 API | Client Component | 需要 "use client" |
 
 ---
 
 ## 4. 状态管理
 
-### 4.1 Zustand Store
-
-```tsx
-// stores/auth-store.ts
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  setUser: (user: User) => void;
-  setToken: (token: string) => void;
-  logout: () => void;
-}
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      setUser: (user) => set({ user }),
-      setToken: (token) => set({ token }),
-      logout: () => set({ user: null, token: null }),
-    }),
-    { name: "auth-storage" }
-  )
-);
-```
-
-### 4.2 状态分类
+### 4.1 状态分类
 
 | 状态类型 | 存储方案 | 说明 |
 |---------|---------|------|
@@ -180,47 +105,34 @@ export const useAuthStore = create<AuthState>()(
 
 ## 5. 样式方案
 
-### 5.1 Tailwind CSS 变量
+### 5.1 Tailwind CSS
 
-```tsx
-// tailwind.config.ts
-export default {
-  theme: {
-    extend: {
-      colors: {
-        border: "hsl(var(--border))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-      },
-    },
-  },
-};
-```
+| 规范 | 说明 |
+|------|------|
+| 禁止内联样式 | 动态高宽除外 |
+| 禁止传统 .css | 复杂全局动画或强行覆写第三方组件库除外 |
+| 硬编码颜色 | 必须使用 CSS 变量 |
+| 响应式设计 | 必须考虑 sm:、md:、lg: 断点 |
 
-### 5.2 暗色模式
+### 5.2 禁止颜色
 
-```tsx
-// components/theme-provider.tsx
-"use client";
+| 禁止 | 说明 |
+|------|------|
+| purple | 严禁使用紫色系 |
+| indigo | 严禁使用靛蓝色系 |
+| from-purple-* | 渐变中禁止紫色 |
+| to-indigo-* | 渐变中禁止靛蓝 |
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+### 5.3 允许的色系
 
-export function ThemeProvider({ children }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-    >
-      {children}
-    </NextThemesProvider>
-  );
-}
-```
+| 用途 | 颜色 |
+|------|------|
+| 主色 | blue-500 ~ blue-700，渐变 from-blue-600 to-cyan-600 |
+| 成功 | green |
+| 警告 | orange |
+| 危险 | red |
+| 中性 | slate、gray、zinc |
+| 深色背景 | #0a0f1e、slate-900 |
 
 ---
 
@@ -231,3 +143,4 @@ export function ThemeProvider({ children }) {
 - 直接操作 DOM
 - 硬编码颜色值 (必须使用 CSS 变量)
 - 大量组件写在 page.tsx 中 (必须拆分)
+- 代码和注释中出现中文全角标点 (，。！？：)

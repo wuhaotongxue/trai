@@ -1,4 +1,4 @@
-# Frontend Next.js - 国际化 (i18n) 规范
+# Frontend_Next_js_国际化__i18n_规范
 
 ---
 
@@ -45,73 +45,24 @@ src/
 
 ## 4. 翻译文件格式
 
-### 4.1 中文
+### 4.1 JSON 结构
 
 ```json
-// messages/zh.json
 {
-  "common": {
-    "save": "保存",
-    "cancel": "取消",
-    "delete": "删除",
-    "edit": "编辑",
-    "confirm": "确认",
-    "loading": "加载中...",
-    "noData": "暂无数据"
-  },
-  "auth": {
-    "login": "登录",
-    "logout": "退出登录",
-    "loginSuccess": "登录成功",
-    "loginFailed": "登录失败"
-  },
-  "dashboard": {
-    "welcome": "欢迎回来",
-    "aiTools": "AI 工具",
-    "recentTasks": "最近任务",
-    "announcements": "系统公告"
-  },
-  "errors": {
-    "networkError": "网络错误，请检查网络连接",
-    "serverError": "服务器错误，请稍后重试",
-    "unauthorized": "未登录或登录已过期"
-  }
+  "common": { "save", "cancel", "delete", "edit", "confirm", "loading", "noData" },
+  "auth": { "login", "logout", "loginSuccess", "loginFailed" },
+  "dashboard": { "welcome", "aiTools", "recentTasks", "announcements" },
+  "errors": { "networkError", "serverError", "unauthorized" }
 }
 ```
 
-### 4.2 英文
+### 4.2 命名规范
 
-```json
-// messages/en.json
-{
-  "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "confirm": "Confirm",
-    "loading": "Loading...",
-    "noData": "No data"
-  },
-  "auth": {
-    "login": "Login",
-    "logout": "Logout",
-    "loginSuccess": "Login successful",
-    "loginFailed": "Login failed"
-  },
-  "dashboard": {
-    "welcome": "Welcome back",
-    "aiTools": "AI Tools",
-    "recentTasks": "Recent Tasks",
-    "announcements": "Announcements"
-  },
-  "errors": {
-    "networkError": "Network error, please check your connection",
-    "serverError": "Server error, please try again later",
-    "unauthorized": "Please login or your session has expired"
-  }
-}
-```
+| 规范 | 说明 |
+|------|------|
+| 小写 + 驼峰 | `loginSuccess` |
+| 按模块分组 | `auth.login` |
+| 错误信息单独命名空间 | `errors.networkError` |
 
 ---
 
@@ -119,151 +70,27 @@ src/
 
 ### 5.1 Client Component
 
-```tsx
-"use client";
+| Hook | 返回 | 说明 |
+|------|------|------|
+| `useTranslations(ns)` | `t(key)` | 获取翻译函数 |
+| `useLocale()` | `string` | 获取当前语言 |
+| `useTranslations()` | `t(key)` | 默认 common 命名空间 |
 
-import { useTranslations } from "next-intl";
+### 5.2 ICU MessageFormat
 
-export function Header() {
-  const t = useTranslations("common");
-  return <button>{t("save")}</button>;
-}
-```
+| 格式 | 示例 |
+|------|------|
+| 变量 | `{name} 登录成功` |
+| 复数 | `{count, plural, =0 {无文件} =1 {1个文件} other {#个文件}}` |
+| 选择 | `{gender, select, male {他} female {她} other {它}}` |
 
-### 5.2 Server Component
-
-```tsx
-import { getTranslations } from "next-intl/server";
-
-export default async function Page() {
-  const t = await getTranslations("dashboard");
-  return <h1>{t("welcome")}</h1>;
-}
-```
-
-### 5.3 表单验证消息
-
-```tsx
-// 使用 zod + next-intl
-import { z } from "zod";
-import { createTranslator } from "next-intl";
-
-const schema = (t: ReturnType<typeof createTranslator>) =>
-  z.object({
-    email: z.string().email(t("errors.invalidEmail")),
-    password: z.string().min(6, t("errors.passwordTooShort")),
-  });
-```
+**实现参考**：`frontend_next/src/i18n/messages/zh.json`
 
 ---
 
-## 6. 复数和变量
+## 6. 禁止事项
 
-### 6.1 复数
-
-```json
-{
-  "itemCount": "{count, plural, =0 {No items} =1 {1 item} other {# items}}"
-}
-```
-
-### 6.2 变量
-
-```json
-{
-  "welcome": "欢迎 {name}",
-  "taskProgress": "{done}/{total} 已完成",
-  "timeRemaining": "剩余 {minutes} 分钟"
-}
-```
-
-### 6.3 使用
-
-```tsx
-const t = useTranslations("dashboard");
-
-// 变量
-<p>{t("welcome", { name: user.name })}</p>
-
-// 复数
-<p>{t("itemCount", { count: items.length })}</p>
-```
-
----
-
-## 7. 语言切换
-
-### 7.1 语言选择器
-
-```tsx
-// components/language-switcher.tsx
-"use client";
-
-import { useRouter, usePathname } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-
-const LANGUAGES = [
-  { code: "zh", name: "中文" },
-  { code: "en", name: "English" },
-];
-
-export function LanguageSwitcher() {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const handleChange = (newLocale: string) => {
-    router.push(pathname.replace(`/${locale}`, `/${newLocale}`));
-  };
-
-  return (
-    <select value={locale} onChange={(e) => handleChange(e.target.value)}>
-      {LANGUAGES.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.name}
-        </option>
-      ))}
-    </select>
-  );
-}
-```
-
-### 7.2 URL 结构
-
-| 语言 | URL |
-|------|-----|
-| 中文 | /zh/dashboard |
-| 英文 | /en/dashboard |
-
----
-
-## 8. 日期和时间
-
-```tsx
-import { useFormatter, useTranslations } from "next-intl";
-
-export function DateDisplay({ date }: { date: Date }) {
-  const formatter = useFormatter();
-  const t = useTranslations("common");
-
-  return (
-    <time dateTime={date.toISOString()}>
-      {formatter.dateTime(date, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })}
-    </time>
-  );
-}
-```
-
----
-
-## 9. 禁止事项
-
-- 翻译 key 硬编码字符串
-- 不同命名空间使用相同 key
-- 翻译文件直接修改源语言
-- 缺少翻译不回退到默认语言
-- 动态内容不使用翻译
+- 硬编码中文字符串
+- 使用拼音作为 key
+- 命名空间混乱
+- 缺少错误信息翻译
