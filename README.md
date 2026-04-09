@@ -20,6 +20,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 项目_2026_04_09_1620
+- **新增(规范)**: .gitignore 新增前端依赖目录 frontend_next/node_modules/ 忽略规则
+
 ### 🛠️ 项目_2026_04_09_1230
 - **新增(规划)**: 创建 TODO.md 项目待办清单，梳理 backend/frontend/客户端的整体规划与进度追踪
 
