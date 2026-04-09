@@ -20,6 +20,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_09_2105
+- **新增(auth)**: 新增认证路由模块（登录/注册/登出/刷新令牌/当前用户）
+- **新增(api)**: 认证接口支持 Token 验证、角色权限控制与依赖注入
+- **新增(deps)**: 补充 FastAPI HTTPBearer 安全依赖
+
 ### 🛠️ 后端_2026_04_09_2042
 - **新增(domain)**: 新增领域仓储接口定义（IUserRepository/ISessionRepository/IMessageRepository）
 - **新增(security)**: 新增安全模块（PasswordService 密码哈希/JWTService 令牌认证）
