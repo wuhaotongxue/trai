@@ -64,11 +64,21 @@ description: >-
 
 **Angular 规范前缀**：`feat:`、`fix:`、`chore:`、`refactor:`、`docs:` 等。
 
+**Windows PowerShell 兼容性注意**：
+- ⚠️ PowerShell **不支持** heredoc 语法（`cat <<'EOF'`）
+- ✅ Linux/Mac 可使用 heredoc 多行提交信息
+- ❌ Windows 必须使用单行 `-m "提交信息"` 格式
+
 ### 6. 拉取与推送
 
 **目标推送分支**：
 - 根据用户输入中的关键词（如"推送到 wuhao"）提取目标分支
 - 如果用户未指定，则推送到当前所在的活动分支
+
+**网络问题重试策略**：
+- ⚠️ 推送时如遇网络错误（Connection reset / Timeout / Failed to connect）
+- 🔄 **最少重试 3 次**，每次间隔 2-3 秒
+- 如果 3 次都失败，告知用户网络问题，手动稍后重试
 
 ---
 
