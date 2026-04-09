@@ -20,6 +20,14 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_09_2021
+- **重构(backend)**: 重构代码目录结构，从 `backend/src/trai/` 迁移到 `backend/src/`，优化 DDD 五层架构路径
+- **新增(core)**: 新增统一异常定义模块（exceptions.py）与日志模块（logger.py）
+- **新增(domain)**: 新增用户（User）、会话（ChatSession）、消息（Message）等领域实体
+- **新增(api)**: 新增 FastAPI 主应用配置、路由注册与中间件（请求ID/日志/错误处理）
+- **新增(ai)**: 新增 AI 对话与绘图接口路由
+- **新增(infrastructure)**: 新增 AI 客户端（S3 存储/消息通知）基础设施实现
+
 ### 🛠️ 项目_2026_04_09_1620
 - **新增(规范)**: .gitignore 新增前端依赖目录 frontend_next/node_modules/ 忽略规则
 
