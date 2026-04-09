@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# 文件名: register.py
+# 作者: wuhao
+# 日期: 2026_04_09_21:00:00
+# 描述: 用户注册接口
+
+from __future__ import annotations
+
+import re
+import uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+
+from infrastructure.security.jwt import JWTService, get_jwt_service
+from infrastructure.security.password import PasswordService, get_password_service
+
+router = APIRouter()
+
+# 用户名正则：字母、数字、下划线，3-32字符
+USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
+# 邮箱正则
+EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+
+class RegisterRequest(BaseModel):
+    """注册请求"""
+    username: Annotated[str, Field(min_length=3, max_length=64, description="用户名")]
+    password: Annotated[str, Field(min_length=6, max_length=128, description="密码")]
+    email: Annotated[str, Field(description="邮箱地址")]
+    display_name: Annotated[str | None, Field(default=None, max_length=128, description="显示名称")]
+
+
+class RegisterResponse(BaseModel):
+    """注册响应"""
+    user_id: str = Field(description="用户唯一标识")
+    username: str = Field(description="用户名")
+    email: str = Field(description="邮箱地址")
+    message: str = Field(default="注册成功", description="提示信息")
+
+
+@router.post("/register", response_model=RegisterResponse, tags=["认证"])
+async def register(
+    request: RegisterRequest,
+    password_service: Annotated[PasswordService, Depends(get_password_service)],
+    jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+) -> RegisterResponse:
+    """用户注册
+
+    Args:
+        request: 注册请求参数
+        password_service: 密码服务实例
+        jwt_service: JWT 服务实例
+
+    Returns:
+        RegisterResponse: 注册成功返回用户信息
+
+    Raises:
+        HTTPException: 注册失败（400/409）
+
+    Note:
+        实际的用户创建需要配合 UserRepository 持久化到数据库
+        此接口为框架实现，数据库集成后续完善
+    """
+    # 验证用户名格式
+    if not USERNAME_PATTERN.match(request.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": 400, "message": "用户名格式不正确，需为字母、数字、下划线，3-32字符"},
+        )
+
+    # 验证邮箱格式
+    if not EMAIL_PATTERN.match(request.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": 400, "message": "邮箱格式不正确"},
+        )
+
+    # 验证密码强度
+    password = request.password
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"code": 400, "message": "密码长度至少8个字符"},
+        )
+
+    # TODO: 检查用户名/邮箱是否已存在（需要 UserRepository）
+    # 示例：existing_user = user_repo.get_by_username(request.username)
+    # if existing_user:
+    #     raise HTTPException(status_code=409, detail="用户名已存在")
+
+    # 生成用户 ID
+    user_id = str(uuid.uuid4())
+
+    # 哈希密码
+    password_hash = password_service.hash(password)
+
+    # TODO: 保存用户到数据库
+    # 示例：user_repo.create(user_id=user_id, username=request.username, ...)
+
+    return RegisterResponse(
+        user_id=user_id,
+        username=request.username,
+        email=request.email,
+        message="注册成功",
+    )
+
+
+__all__ = ["router"]

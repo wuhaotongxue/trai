@@ -61,9 +61,15 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.ai import chat, image
     from api.routers.media import upload
     from api.routers.session import session
+    from api.routers.auth import login, register, logout, refresh, me
 
     app.include_router(health.router, prefix="/api/system", tags=["系统"])
     app.include_router(monitor.router, prefix="/api/system", tags=["系统"])
+    app.include_router(login.router, prefix="/api/auth", tags=["认证"])
+    app.include_router(register.router, prefix="/api/auth", tags=["认证"])
+    app.include_router(logout.router, prefix="/api/auth", tags=["认证"])
+    app.include_router(refresh.router, prefix="/api/auth", tags=["认证"])
+    app.include_router(me.router, prefix="/api/auth", tags=["认证"])
     app.include_router(chat.router, prefix="/api/ai", tags=["AI"])
     app.include_router(image.router, prefix="/api/ai", tags=["AI"])
     app.include_router(upload.router, prefix="/api/media", tags=["媒体"])
