@@ -9,9 +9,32 @@ git clone https://github.com/wuhaotongxue/trai.git
 cd trai
 ```
 
+## 镜像仓库
+
+- GitHub：https://github.com/wuhaotongxue/trai
+- Gitee（码云）：https://gitee.com/no5689/trai
+
 ## 贡献
 
 欢迎提交 Issue / PR。
+
+## 📝 更新日志 (Changelog)
+
+### 🛠️ 后端_2026_04_09_1135
+- **新增(release)**: 补充 API 版本管理、密钥轮换、防爬虫、数据导出导入、CDN、连接池监控、国际化、Celery 死信队列等 8 大配置模块
+
+### 🛠️ 项目_2026_04_09_0911
+- **补充(公众号)**: 完善第2期文章，补充 Trae + git_submit 一键提交推送说明与截图
+
+### 🛠️ 项目_2026_04_09_0855
+- **补充(仓库)**: README 增加 Gitee（码云）镜像仓库地址
+
+### 🛠️ 项目_2026_04_08_1952
+- **重构(skills)**: 统一 .trae/.cursor 下 Skills 与 Rules 的目录结构与索引
+- **补齐(agent)**: 完善 agent 能力域文档（媒体/安全/审计/反馈/熵管理等）
+
+### 🛠️ 项目_2026_04_08_1500
+- 更新项目结构和配置
 
 ## 作者
 
