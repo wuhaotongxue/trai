@@ -20,6 +20,18 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 项目_2026_04_09_1620
+- **新增(规范)**: .gitignore 新增前端依赖目录 frontend_next/node_modules/ 忽略规则
+
+### 🛠️ 项目_2026_04_09_1230
+- **新增(规划)**: 创建 TODO.md 项目待办清单，梳理 backend/frontend/客户端的整体规划与进度追踪
+
+### 🛠️ 项目_2026_04_09_1215
+- **优化(规范)**: git_submit 技能补充 Windows PowerShell heredoc 兼容性说明，Linux/Mac 可用 heredoc，Windows 必须用单行 -m 格式
+
+### 🛠️ 项目_2026_04_09_1155
+- **新增(规范)**: 创建 .gitignore 忽略敏感配置与环境文件，仅保留 .env.example 作为模板
+
 ### 🛠️ 后端_2026_04_09_1135
 - **新增(release)**: 补充 API 版本管理、密钥轮换、防爬虫、数据导出导入、CDN、连接池监控、国际化、Celery 死信队列等 8 大配置模块
 
