@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# 文件名: main.py
+# 作者: wuhao
+# 日期: 2026_04_09
+# 描述: FastAPI 应用配置和路由注册
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from trai.api.middleware.request_id import RequestIdMiddleware
+from trai.api.middleware.logging import LoggingMiddleware
+from trai.api.middleware.error_handler import ErrorHandlerMiddleware
+from trai.core.logger import get_logger
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+
+logger = get_logger()
+
+
+def create_app() -> FastAPI:
+    """创建 FastAPI 应用实例"""
+    app = FastAPI(
+        title="TRAI API",
+        description="TRAI 项目后端 API 服务",
+        version="0.1.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+    )
+
+    register_middlewares(app)
+    register_routers(app)
+
+    return app
+
+
+def register_middlewares(app: FastAPI) -> None:
+    """注册中间件"""
+    app.add_middleware(ErrorHandlerMiddleware)
+    app.add_middleware(RequestIdMiddleware)
+    app.add_middleware(LoggingMiddleware)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+
+def register_routers(app: FastAPI) -> None:
+    """注册路由"""
+    from trai.api.routers.system import health, monitor
+    from trai.api.routers.ai import chat, image
+    from trai.api.routers.media import upload
+    from trai.api.routers.session import session
+
+    app.include_router(health.router, prefix="/api/system", tags=["系统"])
+    app.include_router(monitor.router, prefix="/api/system", tags=["系统"])
+    app.include_router(chat.router, prefix="/api/ai", tags=["AI"])
+    app.include_router(image.router, prefix="/api/ai", tags=["AI"])
+    app.include_router(upload.router, prefix="/api/media", tags=["媒体"])
+    app.include_router(session.router, prefix="/api", tags=["会话"])
+
+    @app.get("/", tags=["首页"])
+    async def root() -> dict:
+        """根路径，返回服务信息"""
+        return {
+            "service": "TRAI API",
+            "version": "0.1.0",
+            "docs": "/docs",
+            "health": "/api/system/health",
+            "monitor": "/api/system/monitor",
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    @app.on_event("startup")
+    async def startup_event() -> None:
+        logger.info("TRAI API 服务启动")
+
+    @app.on_event("shutdown")
+    async def shutdown_event() -> None:
+        logger.info("TRAI API 服务关闭")
+
+
+__all__ = ["create_app"]
