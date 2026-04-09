@@ -20,6 +20,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_09_2059
+- **新增(database)**: 新增 UserModel 数据库模型（users 表）
+- **新增(repository)**: 实现 UserRepository 数据库仓储（CRUD 操作）
+- **集成(auth)**: Login/Register 接口集成数据库验证
+
 ### 🛠️ 后端_2026_04_09_2105
 - **新增(auth)**: 新增认证路由模块（登录/注册/登出/刷新令牌/当前用户）
 - **新增(api)**: 认证接口支持 Token 验证、角色权限控制与依赖注入

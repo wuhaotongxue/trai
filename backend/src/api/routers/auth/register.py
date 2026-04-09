@@ -13,9 +13,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.database import get_session
 
 router = APIRouter()
 
@@ -46,6 +49,7 @@ async def register(
     request: RegisterRequest,
     password_service: Annotated[PasswordService, Depends(get_password_service)],
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    session: Annotated[Session, Depends(get_session)],
 ) -> RegisterResponse:
     """用户注册
 
@@ -53,16 +57,13 @@ async def register(
         request: 注册请求参数
         password_service: 密码服务实例
         jwt_service: JWT 服务实例
+        session: 数据库会话
 
     Returns:
         RegisterResponse: 注册成功返回用户信息
 
     Raises:
         HTTPException: 注册失败（400/409）
-
-    Note:
-        实际的用户创建需要配合 UserRepository 持久化到数据库
-        此接口为框架实现，数据库集成后续完善
     """
     # 验证用户名格式
     if not USERNAME_PATTERN.match(request.username):
@@ -86,10 +87,22 @@ async def register(
             detail={"code": 400, "message": "密码长度至少8个字符"},
         )
 
-    # TODO: 检查用户名/邮箱是否已存在（需要 UserRepository）
-    # 示例：existing_user = user_repo.get_by_username(request.username)
-    # if existing_user:
-    #     raise HTTPException(status_code=409, detail="用户名已存在")
+    # 检查用户名/邮箱是否已存在
+    user_repo = UserRepository(session)
+
+    existing_user = user_repo.get_by_username(request.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": 409, "message": "用户名已存在"},
+        )
+
+    existing_email = user_repo.get_by_email(request.email)
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": 409, "message": "邮箱已被注册"},
+        )
 
     # 生成用户 ID
     user_id = str(uuid.uuid4())
@@ -97,13 +110,24 @@ async def register(
     # 哈希密码
     password_hash = password_service.hash(password)
 
-    # TODO: 保存用户到数据库
-    # 示例：user_repo.create(user_id=user_id, username=request.username, ...)
+    # 设置显示名称
+    display_name = request.display_name or request.username
 
-    return RegisterResponse(
+    # 创建用户
+    user = user_repo.create(
         user_id=user_id,
         username=request.username,
+        display_name=display_name,
         email=request.email,
+        password_hash=password_hash,
+        role="normal",
+        status="active",
+    )
+
+    return RegisterResponse(
+        user_id=user.user_id,
+        username=user.username,
+        email=user.email,
         message="注册成功",
     )
 

@@ -11,9 +11,12 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.database import get_session
 
 router = APIRouter()
 
@@ -37,36 +40,63 @@ class LoginResponse(BaseModel):
 async def login(
     request: LoginRequest,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    password_service: Annotated[PasswordService, Depends(get_password_service)],
+    session: Annotated[Session, Depends(get_session)],
 ) -> LoginResponse:
     """用户登录
 
     Args:
         request: 登录请求参数（用户名、密码）
         jwt_service: JWT 服务实例
+        password_service: 密码服务实例
+        session: 数据库会话
 
     Returns:
         LoginResponse: 登录成功返回令牌和用户信息
 
     Raises:
         HTTPException: 认证失败（401）
-
-    Note:
-        实际的用户验证需要配合 UserRepository 从数据库查询用户信息
-        此接口为框架实现，数据库集成后续完善
     """
-    # TODO: 集成 UserRepository 进行真实用户验证
-    # 目前返回示例数据，实际使用时替换为数据库查询
+    # 从数据库查询用户
+    user_repo = UserRepository(session)
+    user = user_repo.get_by_username(request.username)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": 401, "message": "用户名或密码错误"},
+        )
+
+    # 获取密码哈希并验证
+    password_hash = user_repo.get_password_hash(user.user_id)
+    if not password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": 401, "message": "用户名或密码错误"},
+        )
+
+    # 验证密码
+    if not password_service.verify(request.password, password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": 401, "message": "用户名或密码错误"},
+        )
+
+    # 检查用户状态
+    if not user.is_active():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "账户已被禁用，请联系管理员"},
+        )
 
     # 生成令牌
     access_token = jwt_service.create_access_token(
-        user_id="demo_user_id",
-        username=request.username,
-        role="normal",
-        tenant_id=None,
+        user_id=user.user_id,
+        username=user.username,
+        role=user.role.value,
+        tenant_id=user.tenant_id,
     )
-    refresh_token = jwt_service.create_refresh_token(
-        user_id="demo_user_id",
-    )
+    refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
 
     return LoginResponse(
         access_token=access_token,
@@ -74,9 +104,11 @@ async def login(
         token_type="Bearer",
         expires_in=30 * 60,
         user={
-            "user_id": "demo_user_id",
-            "username": request.username,
-            "role": "normal",
+            "user_id": user.user_id,
+            "username": user.username,
+            "display_name": user.display_name,
+            "email": user.email,
+            "role": user.role.value,
         },
     )
 
