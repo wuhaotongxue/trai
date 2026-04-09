@@ -15,7 +15,72 @@
 
 ---
 
-## 2. 表命名规范
+## 2. SQLAlchemy 模型字段注释规范
+
+**所有字段必须有中文注释，格式如下：**
+
+```python
+from sqlalchemy import JSON, DateTime, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
+class ChatSessionModel(Base):
+    """对话会话模型"""
+    __tablename__ = "chat_sessions"
+    __comment__ = "AI 对话会话表，存储会话元数据和消息历史"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    """自增主键 ID"""
+    session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """会话唯一标识 UUID"""
+    user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """用户 ID，用于多用户场景"""
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """会话标题，可由用户自定义"""
+    model: Mapped[str] = mapped_column(String(64), nullable=False)
+    """使用的 AI 模型名称"""
+    messages: Mapped[dict[str, Any]] = mapped_column(JSON, default=list)
+    """消息历史 JSON 数组"""
+    extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展数据字段，用于存储自定义元数据"""
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    """创建时间"""
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """最后更新时间"""
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """软删除时间，为空表示未删除"""
+```
+
+**约束**：
+- 每个字段后必须紧跟 `"""中文注释"""` docstring
+- 表类必须有 `__tablename__` 和 `__comment__`
+- 字段注释禁止留空或写英文
+
+---
+
+## 3. SQLAlchemy 保留字警告
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 禁止使用的保留字段名</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><code>metadata</code> — SQLAlchemy Declarative 保留字，必须改为 <code>extra_data</code> 或 <code>msg_metadata</code></li>
+    <li><code>query</code> — ORM 查询属性保留字</li>
+    <li><code>items</code> — 字典式访问保留字</li>
+  </ul>
+</div>
+
+**正确示例**：
+```python
+# ❌ 错误 - metadata 是保留字
+metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+
+# ✅ 正确 - 使用替代名称
+extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+msg_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+```
+
+---
+
+## 4. 表命名规范
 
 | 规则 | 说明 |
 |------|------|
@@ -25,35 +90,35 @@
 
 ---
 
-## 3. 主键规范
+## 5. 主键规范
 
-**约束**：
+**��束**：
 - ✅ UUID
 - ✅ BigInt Identity
 - ❌ 禁止 Serial (PostgreSQL 自增)
 
 ---
 
-## 4. 必备字段
+## 6. 必备字段
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `created_at` | TIMESTAMP(0) | 创建时间 |
 | `updated_at` | TIMESTAMP(0) | 更新时间 |
-| `is_deleted` | Boolean | 软删除标记 |
+| `deleted_at` | TIMESTAMP(0) | 软删除时间（用时间戳代替 is_deleted） |
 
 ---
 
-## 5. 强制注释
+## 7. 强制注释
 
 **约束**：
-- 必须为表本身添加 `comment`
-- 必须为所有字段添加 `comment`
+- 必须为表本身添加 `__comment__`
+- 必须为所有字段添加 docstring 注释
 - 无注释拒绝创建表
 
 ---
 
-## 6. 查询红线
+## 8. 查询红线
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 查询禁止</strong>
@@ -66,7 +131,7 @@
 
 ---
 
-## 7. 数据库迁移
+## 9. 数据库迁移
 
 <div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#F57F17;">&#x26A0; 严禁在生产环境执行 DDL</strong>
@@ -77,7 +142,7 @@
 
 ---
 
-## 8. 快速参考
+## 10. 快速参考
 
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;background:#F9F9F9;border-radius:12px;margin:12px 0;">
 
@@ -97,13 +162,13 @@
   </div>
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#1565C0;">必备三字段</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">created_at/updated_at/is_deleted</div>
+    <strong style="font-size:13px;color:#D32F2F;">禁止 metadata</strong>
+    <div style="font-size:12px;color:#666;margin-top:4px;">SQLAlchemy 保留字</div>
   </div>
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#1565C0;">复数表名</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">users / meetings</div>
+    <strong style="font-size:13px;color:#1565C0;">字段必须有注释</strong>
+    <div style="font-size:12px;color:#666;margin-top:4px;">每个字段后加 docstring</div>
   </div>
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
