@@ -12,8 +12,8 @@ from typing import Any
 
 import uvicorn
 
-from trai.api.main import create_app
-from trai.core.logger import init_logger
+from api.main import create_app
+from core.logger import init_logger
 
 
 def get_config() -> dict[str, Any]:
