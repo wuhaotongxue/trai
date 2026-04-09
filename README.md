@@ -20,6 +20,12 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_09_2042
+- **新增(domain)**: 新增领域仓储接口定义（IUserRepository/ISessionRepository/IMessageRepository）
+- **新增(security)**: 新增安全模块（PasswordService 密码哈希/JWTService 令牌认证）
+- **新增(api)**: 新增 API 依赖注入模块（deps.py），支持 Token 验证与角色权限控制
+- **补充(deps)**: 补充 pyproject.toml 依赖（jose/argon2）
+
 ### 🛠️ 后端_2026_04_09_2021
 - **重构(backend)**: 重构代码目录结构，从 `backend/src/trai/` 迁移到 `backend/src/`，优化 DDD 五层架构路径
 - **新增(core)**: 新增统一异常定义模块（exceptions.py）与日志模块（logger.py）
