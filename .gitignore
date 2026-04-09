@@ -29,3 +29,6 @@ __pycache__/
 
 # 临时上传目录
 uploads/
+
+# 前端依赖
+frontend_next/node_modules/
