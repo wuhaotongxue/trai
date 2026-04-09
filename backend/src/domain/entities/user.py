@@ -35,6 +35,7 @@ class User:
     display_name: str
     email: str
     user_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    password_hash: str = ""  # 不持久化到实体，仅用于验证
     avatar_url: str | None = None
     role: UserRole = UserRole.NORMAL
     status: UserStatus = UserStatus.ACTIVE
