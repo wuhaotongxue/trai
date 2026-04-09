@@ -20,6 +20,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 项目_2026_04_09_1215
+- **优化(规范)**: git_submit 技能补充 Windows PowerShell heredoc 兼容性说明，Linux/Mac 可用 heredoc，Windows 必须用单行 -m 格式
+
 ### 🛠️ 项目_2026_04_09_1155
 - **新增(规范)**: 创建 .gitignore 忽略敏感配置与环境文件，仅保留 .env.example 作为模板
 

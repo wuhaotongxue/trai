@@ -64,6 +64,11 @@ description: >-
 
 **Angular 规范前缀**：`feat:`、`fix:`、`chore:`、`refactor:`、`docs:` 等。
 
+**Windows PowerShell 兼容性注意**：
+- ⚠️ PowerShell **不支持** heredoc 语法（`cat <<'EOF'`）
+- ✅ Linux/Mac 可使用 heredoc 多行提交信息
+- ❌ Windows 必须使用单行 `-m "提交信息"` 格式
+
 ### 6. 拉取与推送
 
 **目标推送分支**：
