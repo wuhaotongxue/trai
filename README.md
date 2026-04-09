@@ -20,6 +20,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 项目_2026_04_09_1230
+- **新增(规划)**: 创建 TODO.md 项目待办清单，梳理 backend/frontend/客户端的整体规划与进度追踪
+
 ### 🛠️ 项目_2026_04_09_1215
 - **优化(规范)**: git_submit 技能补充 Windows PowerShell heredoc 兼容性说明，Linux/Mac 可用 heredoc，Windows 必须用单行 -m 格式
 
