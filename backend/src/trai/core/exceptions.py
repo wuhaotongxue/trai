@@ -15,11 +15,13 @@ class TraiException(Exception):
         self,
         message: str,
         code: int = 500,
+        status_code: int = 500,
         details: dict | None = None,
     ) -> None:
         super().__init__(message)
         self.message: str = message
         self.code: int = code
+        self.status_code: int = status_code
         self.details: dict = details or {}
 
     def __str__(self) -> str:
