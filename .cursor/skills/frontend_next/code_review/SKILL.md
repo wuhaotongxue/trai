@@ -1,161 +1,110 @@
 ---
 name: "frontend-next-code-review"
-description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代码。编写前端代码时调用，强制执行 App Router 规范、文件头规范与全局标点禁令。"
+description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代码。编写前端代码时调用，强制执行全中文规范、App Router 规范与文件头规范。"
 ---
 
 # Frontend Next 代码审查
 
-作为 TRAI 平台新版前端 (frontend_next) 开发人员的专属代码审查警察，请严格遵守以下 Next.js (App Router) 与 React 开发规范。
+作为 TRAI 平台前端代码审查员，请严格遵守以下规范。
 
-## 快速索引
-
-| 子规范 | 路径 | 触发场景 |
-|--------|------|----------|
-| TypeScript 规范 | `rules/typescript.md` | 必读 |
-| Tailwind CSS 规范 | `rules/tailwind.md` | 必读 |
-| i18n 翻译规范 | `rules/i18n.md` | 新增文案时 |
-| App Router 规范 | `architecture/app_router.md` | 必读 |
-
----
-
-## 核心审查规则
-
-### 1. 中文标点禁令 (CRITICAL)
+## 全局颜色禁令 (CRITICAL)
 
 <div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#D32F2F;">&#x274C; 绝对禁止</strong> — 代码、注释中严禁出现中文全角标点
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止使用紫色及相关色系</strong> — 前端所有代码、UI 设计、组件中严禁出现任何紫色或紫色相近颜色
   <div style="margin-top:8px;font-size:13px;">
-    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">，。！？：</code>
+    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">purple, violet, indigo, #9333EA, #7C3AED, rgb(147, 51, 234)</code>
     &nbsp;&nbsp;
-    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">, . ! ? :</code>
+    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">推荐: blue/cyan/teal/emerald/amber 等中性或冷暖对撞色系</code>
+  </div>
+  <div style="margin-top:8px;font-size:13px;">
+    背景色推荐使用 <code>#080818</code> 深蓝黑 或 <code>#0F172A</code> 深灰蓝，渐变使用 <code>blue -> cyan</code> 而非 <code>purple -> pink</code>
   </div>
 </div>
 
-### 2. 环境与包管理
+## 强制语言规范（CRITICAL）
+
+**TRAI 项目前端所有代码、注释、UI 文案必须使用简体中文。**
+
+| 类别 | 强制要求 |
+|------|----------|
+| UI 文案 | 所有显示给用户的文字必须是简体中文 |
+| 代码注释 | 所有注释必须是中文 |
+| 文件头注释 | 每个 .tsx/.ts 必须包含中文文件头 |
+| 中文标点禁令 | **禁止** `，，！？：` 全角标点，必须用 `, . ! ? :` |
+
+### 中文标点禁令示例
+
+```
+❌ // 发送消息请求。
+✅ // 发送消息请求.
+
+❌ <Button>登录</Button>
+✅ <Button>登录</Button>
+
+❌ "用户名不能为空。"
+✅ "用户名不能为空."
+```
+
+## 技术栈规范
 
 | 设置项 | 值 |
-|--------|------|
+|--------|-----|
 | 环境 | Node.js 18.17.0+ |
-| 包管理器 | pnpm 8.0+ |
-| ❌ 禁止 | npm / yarn |
+| 包管理器 | pnpm 9 |
+| 禁止 | npm / yarn |
+| React 框架 | Next.js 16 App Router |
 
-### 3. App Router (RSC) 规范
+## App Router 规范
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
-  <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px;">
-    <strong style="color:#2E7D32;">&#x2714; 默认 Server Components</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>更快的首屏加载</li>
-      <li>更好的 SEO</li>
-      <li>更小的客户端 JS Bundle</li>
-    </ul>
-  </div>
-  <div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px;">
-    <strong style="color:#F57F17;">&#x26A0; 必须 use client</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li><code>useState</code> / <code>useEffect</code></li>
-      <li><code>onClick</code> / <code>onChange</code></li>
-      <li>浏览器 API</li>
-    </ul>
-  </div>
-</div>
+- **默认** Server Components（更快的首屏、更小 Bundle）
+- **必须** `"use client"` 时机：useState / useEffect / onClick / 浏览器 API
+- 组件放在 `src/components/` 按功能模块分组
+- 状态管理统一使用 Zustand（`src/stores/`）
 
-### 4. TypeScript 严格类型
+## TypeScript 严格类型
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
-  <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px;">
-    <strong style="color:#2E7D32;">&#x2714; 必须显式声明</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>所有数据结构</li>
-      <li>组件 Props</li>
-      <li>API 响应</li>
-    </ul>
-  </div>
-  <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px;">
-    <strong style="color:#C62828;">&#x274C; 严禁 any</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>禁止 <code>: any</code></li>
-      <li>禁止 <code>as any</code></li>
-      <li>禁止 <code>const data: any = ...</code></li>
-    </ul>
-  </div>
-</div>
+- 所有数据结构、组件 Props、API 响应必须显式声明类型
+- **严禁** `: any` / `as any`
 
-### 5. 样式规范 (Tailwind CSS)
+## 样式规范
 
-| 规则 | 说明 |
-|------|------|
-| ✅ 强制 | Tailwind CSS className |
-| ❌ 禁止 | 内联 <code>style={{...}}</code> |
-| ❌ 禁止 | 传统 <code>.css</code> 文件 |
-| ❌ 禁止 | 紫色系 (purple / indigo) |
-| ✅ 必须 | 响应式设计 (sm: / md: / lg:) |
+- 使用 Tailwind CSS 4，通过 `.dark` class 切换 dark mode
+- shadcn/ui 组件位于 `src/components/ui/`，按需导入
+- **禁止** 内联 `style={{...}}`，使用 Tailwind className
+- 响应式设计必须使用 `sm:` / `md:` / `lg:`
+- **禁止使用紫色及相关色系** (purple/violet/indigo)
 
-### 6. 翻译文件 (i18n) 规范 (CRITICAL)
+## 文件头模板（强制）
 
-<div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#F57F17;">&#x26A0; 核心铁律</strong>
-  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
-    <li><strong>所有用户可见文案必须通过 <code>useTranslations</code> 获取</strong></li>
-    <li><strong>严禁在 JSX/TSX 文件中直接写中文字符串</strong></li>
-    <li><strong>新增翻译 key 时，必须同时在四种语言中添加</strong></li>
-  </ul>
-</div>
-
-### 7. 命名规范
-
-| 类型 | 规则 | 示例 |
-|------|------|------|
-| 组件文件 | snake_case | `meeting_analytics.tsx` |
-| 组件名 | PascalCase | `MeetingAnalytics` |
-| 变量名 | snake_case | `total_records` |
-| Import | 绝对路径 | `@/components/...` |
-
-### 8. 文件头模板 (MANDATORY)
+每个 `.tsx/.ts` 文件必须包含：
 
 ```typescript
 /**
- * 文件名: {相对路径}
+ * 文件名: component-name.tsx
  * 作者: wuhao
- * 日期: {YYYY-MM-DD HH:MM:SS}
- * 描述: {该文件的功能简述，一句话概括}
+ * 日期: YYYY_MM_DD_HHmm
+ * 描述: 本组件功能说明
  */
 ```
 
----
+## 命名规范
 
-## 快速参考
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| 组件文件 | kebab-case | `chat-panel.tsx` |
+| 组件名 | PascalCase | `ChatPanel` |
+| 变量名 | camelCase | `isLoading` |
+| Import | 绝对路径 | `@/components/...` |
 
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;background:#F9F9F9;border-radius:12px;margin:12px 0;">
+## 审查清单
 
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#D32F2F;">禁止中文标点</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">全角逗号句号感叹号</div>
-  </div>
+编辑/创建 `frontend_next` 文件时，检查：
 
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#D32F2F;">禁止 any 类型</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">必须显式声明类型</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#D32F2F;">禁止内联样式</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">style={{...}}</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#2E7D32;">默认 Server</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">无需"use client"</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#2E7D32;">四种语言同步</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">zh/en/ja/ko</div>
-  </div>
-
-  <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
-    <strong style="font-size:13px;color:#1565C0;">绝对路径</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">@/components/...</div>
-  </div>
-
-</div>
+1. ✅ UI 文案是否全中文
+2. ✅ 注释是否全中文（无全角标点）
+3. ✅ 文件头是否包含中文
+4. ✅ 是否使用 `"use client"`（仅必要时）
+5. ✅ Props 和返回值是否有显式类型
+6. ✅ 是否有 `any` 类型
+7. ✅ 响应式设计是否完整
+8. ✅ **是否使用紫色及相关色系**（严格禁止）

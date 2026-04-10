@@ -5,6 +5,7 @@
 # 日期: 2026_04_09_14:20:00
 # 描述: TRAI 核心层 - 基础设施代码
 
+from core.context_manager import ContextManager, ContextStats, get_context_manager
 from core.exceptions import (
     AIContentViolationError,
     AIQuotaExceededError,
@@ -24,6 +25,15 @@ from core.exceptions import (
     ValidationError,
 )
 from core.logger import LoggerConfig, LoggerManager, get_logger, init_logger, logger
+from core.policy_engine import (
+    PolicyContext,
+    PolicyDecision,
+    PolicyEngine,
+    PolicyResult,
+    get_policy_engine,
+    require_policy,
+)
+from core.token_counter import TokenCounter, get_token_counter
 
 __all__ = [
     "logger",
@@ -47,4 +57,15 @@ __all__ = [
     "AIQuotaExceededError",
     "AIContentViolationError",
     "AIServiceUnavailableError",
+    "PolicyEngine",
+    "PolicyDecision",
+    "PolicyContext",
+    "PolicyResult",
+    "get_policy_engine",
+    "require_policy",
+    "TokenCounter",
+    "get_token_counter",
+    "ContextManager",
+    "ContextStats",
+    "get_context_manager",
 ]
