@@ -64,14 +64,23 @@ async def generate_image(
     Raises:
         HTTPException: AI 服务错误（502）
     """
+    from application.usecases.image_generation import ImageGenerationInput
+    from domain.entities.image_generation import ImageSize, ImageStyle
+    from infrastructure.repositories.image_generation_repository import (
+        ImageGenerationRepository,
+    )
+
     user_id = current_user.get("user_id", "")
 
     try:
+        db = get_session()
+        repo = ImageGenerationRepository(db)
         client = ModelScopeClient()
-        use_case = ImageGenerationUseCase(client=client)
+        use_case = ImageGenerationUseCase(client=client, repository=repo)
 
         input_data = ImageGenerationInput(
             prompt=request.prompt,
+            user_id=user_id,
             model=request.model,
             width=request.width,
             height=request.height,

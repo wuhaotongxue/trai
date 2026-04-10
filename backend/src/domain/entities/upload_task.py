@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 文件名: upload_task.py
 # 作者: wuhao
-# 日期: 2026_04_09
+# 日期: 2026_04_10_09:22:00
 # 描述: 上传任务实体
 
 from __future__ import annotations
@@ -44,40 +44,41 @@ class UploadTask:
     content_type: str
     file_type: FileType = FileType.OTHER
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
     status: UploadStatus = UploadStatus.PENDING
-    file_path: str | None = None
     file_url: str | None = None
-    thumbnail_url: str | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
+    error_message: str | None = None
+    session_id: str | None = None
+    trace_id: str | None = None
     created_at: datetime = field(default_factory=datetime.now)
     completed_at: datetime | None = None
 
     def mark_completed(self, file_path: str, file_url: str) -> None:
         """标记完成"""
         self.status = UploadStatus.COMPLETED
-        self.file_path = file_path
         self.file_url = file_url
         self.completed_at = datetime.now()
 
     def mark_failed(self, error: str) -> None:
         """标记失败"""
         self.status = UploadStatus.FAILED
-        self.metadata["error"] = error
+        self.error_message = error
         self.completed_at = datetime.now()
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "task_id": self.task_id,
+            "user_id": self.user_id,
             "filename": self.filename,
             "file_size": self.file_size,
             "content_type": self.content_type,
             "file_type": self.file_type.value,
             "status": self.status.value,
-            "file_path": self.file_path,
             "file_url": self.file_url,
-            "thumbnail_url": self.thumbnail_url,
-            "metadata": self.metadata,
+            "error_message": self.error_message,
+            "session_id": self.session_id,
+            "trace_id": self.trace_id,
             "created_at": self.created_at.isoformat(),
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
         }
