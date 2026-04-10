@@ -81,6 +81,93 @@ class ActionResponse(BaseModel):
     message: str = Field(description="提示信息")
 
 
+@router.post("/sessions/{session_id}/messages", response_model=SendMessageResponse, tags=["会话"])
+async def send_message(
+    session_id: str,
+    request: SendMessageRequest,
+    current_user: CurrentUser,
+    session: Annotated[Session, Depends(get_session)],
+) -> SendMessageResponse:
+    """发送消息（联动 AI 对话）
+
+    Args:
+        session_id: 会话 ID
+        request: 消息内容
+        current_user: 当前登录用户
+        session: 数据库会话
+
+    Returns:
+        SendMessageResponse: 发送结果
+
+    Raises:
+        HTTPException: 会话不存在（404）或无权访问（403）
+    """
+    user_id = current_user.get("user_id")
+    role = current_user.get("role", "normal")
+
+    session_repo = SessionRepository(session)
+    message_repo = MessageRepository(session)
+
+    # 检查会话是否存在
+    chat_session = session_repo.get_session(session_id)
+    if not chat_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": 404, "message": "会话不存在"},
+        )
+
+    # 权限校验：非管理员只能访问自己的会话
+    if role != "admin" and chat_session.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "无权访问此会话"},
+        )
+
+    # 保存用户消息
+    user_msg = message_repo.add_message(
+        session_id=session_id,
+        role=request.role or "user",
+        content=request.content,
+    )
+
+    # 获取历史消息
+    messages = message_repo.get_messages(session_id)
+    messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+
+    # 调用 AI
+    try:
+        from infrastructure.ai.openai_client import OpenAIClient
+        ai_client = OpenAIClient()
+        ai_response = await ai_client.chat(
+            messages=messages_dict,
+            model=chat_session.model or "gpt-4o",
+        )
+
+        # 保存 AI 响应
+        assistant_msg = message_repo.add_message(
+            session_id=session_id,
+            role="assistant",
+            content=ai_response["content"],
+        )
+
+        # 更新会话摘要（标题）
+        if len(messages) == 1:
+            title = request.content[:30] + ("..." if len(request.content) > 30 else "")
+            session_repo.update_session(session_id=session_id, title=title)
+
+        return SendMessageResponse(
+            session_id=session_id,
+            user_message={"role": user_msg.role, "content": user_msg.content},
+            assistant_message={"role": "assistant", "content": ai_response["content"]},
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"code": 502, "message": f"AI 服务调用失败: {str(e)}"},
+        )
+
+
 @router.post("/sessions", response_model=CreateSessionResponse, tags=["会话"])
 async def create_session(
     request: CreateSessionRequest,
@@ -265,6 +352,92 @@ async def delete_session(
     session_repo.delete_session(session_id)
 
     return ActionResponse(message="会话已删除")
+
+
+@router.post("/sessions/{session_id}/messages/stream", tags=["会话"])
+async def send_message_stream(
+    session_id: str,
+    request: SendMessageRequest,
+    current_user: CurrentUser,
+    session: Annotated[Session, Depends(get_session)],
+):
+    """发送消息（流式响应）
+
+    Args:
+        session_id: 会话 ID
+        request: 消息内容
+        current_user: 当前登录用户
+        session: 数据库会话
+
+    Returns:
+        StreamingResponse: SSE 流式响应
+    """
+    user_id = current_user.get("user_id")
+    role = current_user.get("role", "normal")
+
+    session_repo = SessionRepository(session)
+    message_repo = MessageRepository(session)
+
+    chat_session = session_repo.get_session(session_id)
+    if not chat_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": 404, "message": "会话不存在"},
+        )
+
+    if role != "admin" and chat_session.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "无权访问此会话"},
+        )
+
+    user_msg = message_repo.add_message(
+        session_id=session_id,
+        role=request.role or "user",
+        content=request.content,
+    )
+
+    messages = message_repo.get_messages(session_id)
+    messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+
+    from fastapi.responses import StreamingResponse
+    from infrastructure.ai.openai_client import OpenAIClient
+
+    async def generate():
+        try:
+            client = OpenAIClient()
+            full_content = ""
+
+            async for chunk in client.chat_stream(
+                messages=messages_dict,
+                model=chat_session.model or "gpt-4o",
+            ):
+                full_content += chunk
+                data = f"data: {chunk}\n\n"
+                yield data.encode("utf-8")
+
+            # 保存 AI 完整响应
+            message_repo.add_message(
+                session_id=session_id,
+                role="assistant",
+                content=full_content,
+            )
+
+            yield b"data: [DONE]\n\n"
+
+        except Exception as e:
+            error_data = f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+            yield error_data.encode("utf-8")
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 __all__ = ["router"]
