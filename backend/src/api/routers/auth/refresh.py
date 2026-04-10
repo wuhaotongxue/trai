@@ -11,9 +11,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from core.exceptions import AuthenticationError
 from infrastructure.security.jwt import JWTService, get_jwt_service
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.database import get_session
 
 router = APIRouter()
 
@@ -35,12 +38,14 @@ class RefreshResponse(BaseModel):
 async def refresh_token(
     request: RefreshRequest,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    session: Annotated[Session, Depends(get_session)],
 ) -> RefreshResponse:
     """刷新访问令牌
 
     Args:
         request: 刷新令牌请求
         jwt_service: JWT 服务实例
+        session: 数据库会话
 
     Returns:
         RefreshResponse: 新的令牌对
@@ -59,17 +64,31 @@ async def refresh_token(
                 detail={"code": 401, "message": "刷新令牌无效"},
             )
 
-        # TODO: 从数据库获取最新的用户信息
-        # user = await user_repo.get_by_user_id(user_id)
+        # 从数据库获取最新的用户信息
+        user_repo = UserRepository(session)
+        user = user_repo.get_by_user_id(user_id)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"code": 401, "message": "用户不存在"},
+            )
+
+        # 检查用户状态
+        if not user.is_active():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": 403, "message": "账户已被禁用"},
+            )
 
         # 生成新的令牌对
         new_access_token = jwt_service.create_access_token(
-            user_id=user_id,
-            username=payload.get("username", ""),
-            role=payload.get("role", "normal"),
-            tenant_id=payload.get("tenant_id"),
+            user_id=user.user_id,
+            username=user.username,
+            role=user.role.value,
+            tenant_id=user.tenant_id,
         )
-        new_refresh_token = jwt_service.create_refresh_token(user_id=user_id)
+        new_refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
 
         return RefreshResponse(
             access_token=new_access_token,

@@ -12,6 +12,7 @@ from api.routers.auth.register import router as register_router
 from api.routers.auth.logout import router as logout_router
 from api.routers.auth.refresh import router as refresh_router
 from api.routers.auth.me import router as me_router
+from api.routers.auth.password import router as password_router
 
 __all__ = [
     "login_router",
@@ -19,4 +20,5 @@ __all__ = [
     "logout_router",
     "refresh_router",
     "me_router",
+    "password_router",
 ]
