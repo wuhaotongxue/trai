@@ -2,64 +2,120 @@
 # -*- coding: utf-8 -*-
 # 文件名: image.py
 # 作者: wuhao
-# 日期: 2026_04_09
+# 日期: 2026_04_10
 # 描述: AI 图片生成接口
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from api.deps import CurrentUser
 from application.usecases.image_generation import (
     ImageGenerationInput,
     ImageGenerationUseCase,
 )
 from infrastructure.ai.modelscope_client import ModelScopeClient
+from infrastructure.database import get_session
 
 router = APIRouter()
 
 
-@router.post("/image")
+class ImageGenerationRequest(BaseModel):
+    """图片生成请求"""
+    prompt: Annotated[str, Field(min_length=1, max_length=2000, description="图片描述")]
+    model: Annotated[str, Field(default="AI-ModelScope/FLUX.1-dev", description="模型名称")] = "AI-ModelScope/FLUX.1-dev"
+    width: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片宽度")] = 1024
+    height: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片高度")] = 1024
+    steps: Annotated[int, Field(ge=1, le=100, default=30, description="采样步数")] = 30
+    seed: Annotated[int, Field(ge=-1, default=-1, description="随机种子，-1 表示随机")] = -1
+
+
+class ImageGenerationResponse(BaseModel):
+    """图片生成响应"""
+    task_id: str = Field(description="任务 ID")
+    status: str = Field(description="任务状态")
+    image_url: str | None = Field(default=None, description="生成的图片 URL")
+    error: str | None = Field(default=None, description="错误信息")
+
+
+class ImageStatusRequest(BaseModel):
+    """图片生成状态查询请求"""
+    task_id: Annotated[str, Field(description="任务 ID")]
+
+
+@router.post("/image", response_model=ImageGenerationResponse, tags=["AI"])
 async def generate_image(
-    prompt: str = Body(..., description="图片描述"),
-    model: str = Body("AI-ModelScope/FLUX.1-dev", description="模型名称"),
-    width: int = Body(1024, ge=256, le=4096, description="图片宽度"),
-    height: int = Body(1024, ge=256, le=4096, description="图片高度"),
-    steps: int = Body(30, ge=1, le=100, description="采样步数"),
-    seed: int = Body(-1, ge=-1, description="随机种子，-1 表示随机"),
-) -> dict[str, Any]:
-    """AI 图片生成接口
+    request: ImageGenerationRequest,
+    current_user: CurrentUser,
+) -> ImageGenerationResponse:
+    """AI 图片生成接口（文生图）
 
     Args:
-        prompt: 图片描述
-        model: 模型名称
-        width: 图片宽度 (256-4096)
-        height: 图片高度 (256-4096)
-        steps: 采样步数 (1-100)
-        seed: 随机种子，-1 表示随机
+        request: 图片生成参数
+        current_user: 当前登录用户
 
     Returns:
-        dict: 生成结果
-    """
-    client = ModelScopeClient()
-    use_case = ImageGenerationUseCase(client=client)
+        ImageGenerationResponse: 生成结果
 
-    input_data = ImageGenerationInput(
-        prompt=prompt,
-        model=model,
-        width=width,
-        height=height,
-        steps=steps,
-        seed=seed,
-    )
-    result = await use_case.execute(input_data)
+    Raises:
+        HTTPException: AI 服务错误（502）
+    """
+    user_id = current_user.get("user_id", "")
+
+    try:
+        client = ModelScopeClient()
+        use_case = ImageGenerationUseCase(client=client)
+
+        input_data = ImageGenerationInput(
+            prompt=request.prompt,
+            model=request.model,
+            width=request.width,
+            height=request.height,
+            steps=request.steps,
+            seed=request.seed if request.seed >= 0 else -1,
+        )
+        result = await use_case.execute(input_data)
+
+        return ImageGenerationResponse(
+            task_id=result.task_id,
+            status=result.status,
+            image_url=result.image_url,
+            error=result.error,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"code": 502, "message": f"AI 图片生成服务错误: {str(e)}"},
+        )
+
+
+@router.get("/image/models", tags=["AI"])
+async def list_image_models(
+    current_user: CurrentUser,
+) -> dict[str, Any]:
+    """获取支持的图片生成模型列表
+
+    Args:
+        current_user: 当前登录用户
+
+    Returns:
+        dict: 模型列表
+    """
+    models = [
+        {"id": "AI-ModelScope/FLUX.1-dev", "name": "FLUX.1 Dev", "description": "高质量图片生成"},
+        {"id": "AI-ModelScope/FLUX.1-schnell", "name": "FLUX.1 Schnell", "description": "快速图片生成"},
+        {"id": "AI-ModelScope/SD3-Medium", "name": "SD3 Medium", "description": "Stable Diffusion 3"},
+        {"id": "AI-ModelScope/Wanx", "name": "Wanx", "description": "阿里图片生成模型"},
+    ]
 
     return {
-        "task_id": result.task_id,
-        "status": result.status,
-        "image_url": result.image_url,
-        "error": result.error,
+        "models": models,
+        "default": "AI-ModelScope/FLUX.1-dev",
     }
 
 
