@@ -20,6 +20,37 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_10_0847
+- **增强(session)**: 新增发送消息联动 AI（普通/流式）
+- **新增(core)**: OpenTelemetry 可观测性模块
+- **新增(middleware)**: 速率限制中间件
+- **新增(middleware)**: 审计日志中间件
+- **增强(main)**: 中间件注册顺序优化
+
+### 🛠️ 后端_2026_04_10_0831
+- **增强(system)**: 健康检查接口（存活探针/就绪探针/依赖检查）
+- **增强(system)**: 监控接口（数据库统计/服务状态/Prometheus 格式指标）
+- **新增(system)**: 通知管理接口（发送通知/测试通知/配置列表）
+
+### 🛠️ 后端_2026_04_10_0820
+- **新增(auth)**: 新增认证路由模块（登录/注册/登出/刷新令牌/当前用户）
+- **新增(api)**: 认证接口支持 Token 验证、角色权限控制与依赖注入
+- **新增(deps)**: 补充 FastAPI HTTPBearer 安全依赖
+
+### 🛠️ 后端_2026_04_09_2042
+- **新增(domain)**: 新增领域仓储接口定义（IUserRepository/ISessionRepository/IMessageRepository）
+- **新增(security)**: 新增安全模块（PasswordService 密码哈希/JWTService 令牌认证）
+- **新增(api)**: 新增 API 依赖注入模块（deps.py），支持 Token 验证与角色权限控制
+- **补充(deps)**: 补充 pyproject.toml 依赖（jose/argon2）
+
+### 🛠️ 后端_2026_04_09_2021
+- **重构(backend)**: 重构代码目录结构，从 `backend/src/trai/` 迁移到 `backend/src/`，优化 DDD 五层架构路径
+- **新增(core)**: 新增统一异常定义模块（exceptions.py）与日志模块（logger.py）
+- **新增(domain)**: 新增用户（User）、会话（ChatSession）、消息（Message）等领域实体
+- **新增(api)**: 新增 FastAPI 主应用配置、路由注册与中间件（请求ID/日志/错误处理）
+- **新增(ai)**: 新增 AI 对话与绘图接口路由
+- **新增(infrastructure)**: 新增 AI 客户端（S3 存储/消息通知）基础设施实现
+
 ### 🛠️ 项目_2026_04_09_1620
 - **新增(规范)**: .gitignore 新增前端依赖目录 frontend_next/node_modules/ 忽略规则
 
