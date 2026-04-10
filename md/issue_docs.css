@@ -1,0 +1,183 @@
+/**
+ * TRAI 期数文档 Markdown 增强样式（可选）
+ * 在 Cursor / VS Code: 设置 markdown.styles 添加 md/issue_docs.css（相对工作区根）。
+ * 注意: 若用 class 而非内联 style，<div class="..."> 与内部内容之间请勿插入空行，
+ * 否则 CommonMark 预览常把 </div> 当普通文本且样式不生效。
+ * 与 .cursor/skills/project/SKILL.md 一致、最稳的做法是内联 style。
+ * GitHub 网页不加载本文件。
+ */
+
+/* ---------- 开篇高亮 ---------- */
+.doc-lead {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 1em 0;
+  color: #1e3a5f;
+  font-size: 0.98em;
+  line-height: 1.65;
+}
+
+/* ---------- 提示块（蓝） ---------- */
+.doc-tip {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #1e40af;
+}
+.doc-tip strong {
+  color: #1d4ed8;
+}
+
+/* ---------- 信息块（青） ---------- */
+.doc-info {
+  background: #ecfeff;
+  border: 1px solid #67e8f9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #0e7490;
+}
+.doc-info strong {
+  color: #0e7490;
+}
+
+/* ---------- 警告 / 禁止（红，对齐后端 SKILL 示意） ---------- */
+.doc-warn {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-left: 4px solid #e11d48;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #881337;
+}
+.doc-warn .doc-warn-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #be123c;
+  margin-bottom: 8px;
+}
+
+/* ---------- 成功 / 要点（绿） ---------- */
+.doc-ok {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #065f46;
+}
+.doc-ok strong {
+  color: #047857;
+}
+
+/* ---------- 时间锚点条 ---------- */
+.doc-anchor {
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.88em;
+  color: #475569;
+}
+.doc-anchor code {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #0f172a;
+}
+
+/* ---------- 卡片栅格（快速参考） ---------- */
+.doc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.doc-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.doc-card-title {
+  font-weight: 700;
+  font-size: 0.9em;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.doc-card--red .doc-card-title {
+  color: #be123c;
+  border-bottom-color: #fecdd3;
+}
+.doc-card--blue .doc-card-title {
+  color: #1d4ed8;
+  border-bottom-color: #bfdbfe;
+}
+.doc-card--teal .doc-card-title {
+  color: #0d9488;
+  border-bottom-color: #99f6e4;
+}
+.doc-card p,
+.doc-card ul {
+  margin: 0;
+  font-size: 0.88em;
+  line-height: 1.55;
+  color: #334155;
+}
+.doc-card ul {
+  padding-left: 1.1em;
+}
+
+/* ---------- 表格包装 ---------- */
+.doc-table-wrap {
+  overflow-x: auto;
+  margin: 14px 0;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.doc-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.doc-table-wrap th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid #cbd5e1;
+}
+.doc-table-wrap td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+.doc-table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- 小节标签 ---------- */
+.doc-tag {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
