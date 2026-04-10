@@ -57,7 +57,7 @@ def register_middlewares(app: FastAPI) -> None:
 
 def register_routers(app: FastAPI) -> None:
     """注册路由"""
-    from api.routers.system import health, monitor
+    from api.routers.system import health, monitor, notify
     from api.routers.ai import chat, image
     from api.routers.media import upload
     from api.routers.session import session
@@ -66,6 +66,7 @@ def register_routers(app: FastAPI) -> None:
 
     app.include_router(health.router, prefix="/api/system", tags=["系统"])
     app.include_router(monitor.router, prefix="/api/system", tags=["系统"])
+    app.include_router(notify.router, prefix="/api/system", tags=["通知"])
     app.include_router(login.router, prefix="/api/auth", tags=["认证"])
     app.include_router(register.router, prefix="/api/auth", tags=["认证"])
     app.include_router(logout.router, prefix="/api/auth", tags=["认证"])
