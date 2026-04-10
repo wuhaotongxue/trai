@@ -20,6 +20,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 📚 docs(project)_2026_04_10_1613
+- **新增(skills)**: 新增期数文档技能 `issue_index/SKILL.md`，规范 `md/issue_NN/index.md` 写作（锚点/git log/分段/内联色块）
+- **新增(docs)**: 新增第 3 期文档 `md/issue_03/index.md`（Agent 工具与工作流落地），配样式 `md/issue_docs.css`
+- **增强(project)**: `project/SKILL.md` 索引表补充期数文档入口
+
 ### 🛠️ 后端_2026_04_10_0847
 - **增强(session)**: 新增发送消息联动 AI（普通/流式）
 - **新增(core)**: OpenTelemetry 可观测性模块
