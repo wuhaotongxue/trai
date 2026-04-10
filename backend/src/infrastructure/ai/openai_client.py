@@ -8,7 +8,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, AsyncIterator
 
 import httpx
 from loguru import logger
@@ -85,6 +85,81 @@ class OpenAIClient:
             logger.error(f"OpenAI 请求异常 | 错误: {str(e)}")
             raise ExternalServiceError(
                 message=f"OpenAI API 请求异常: {str(e)}",
+                details={"error": str(e)},
+            )
+
+    async def chat_stream(
+        self,
+        messages: list[dict[str, str]],
+        model: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+    ) -> AsyncIterator[str]:
+        """发送流式对话请求
+
+        Args:
+            messages: 消息列表
+            model: 模型名称
+            temperature: 温度参数
+            max_tokens: 最大 token 数
+
+        Yields:
+            str: 响应内容片段
+        """
+        if not self._api_key:
+            raise ExternalServiceError(
+                message="OpenAI API 密钥未配置",
+                details={"service": "openai"},
+            )
+
+        url = f"{self._base_url}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self._api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": model or self._model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+
+        logger.info(f"OpenAI 流式请求 | 模型: {payload['model']}")
+
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                async with client.stream("POST", url, headers=headers, json=payload) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if not line or not line.startswith("data: "):
+                            continue
+
+                        data_str = line[6:]
+                        if data_str == "[DONE]":
+                            break
+
+                        import json
+                        try:
+                            chunk = json.loads(data_str)
+                            if "choices" in chunk and len(chunk["choices"]) > 0:
+                                delta = chunk["choices"][0].get("delta", {})
+                                content = delta.get("content", "")
+                                if content:
+                                    yield content
+                        except json.JSONDecodeError:
+                            continue
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code}")
+            raise ExternalServiceError(
+                message=f"OpenAI API 流式请求失败: {e.response.status_code}",
+                details={"status_code": e.response.status_code},
+            )
+        except Exception as e:
+            logger.error(f"OpenAI 流式请求异常 | 错误: {str(e)}")
+            raise ExternalServiceError(
+                message=f"OpenAI API 流式请求异常: {str(e)}",
                 details={"error": str(e)},
             )
 
