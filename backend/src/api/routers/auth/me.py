@@ -7,12 +7,15 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.database import get_session
 
 router = APIRouter()
 
@@ -25,8 +28,10 @@ class UserInfo(BaseModel):
     display_name: str | None = Field(default=None, description="显示名称")
     avatar_url: str | None = Field(default=None, description="头像 URL")
     role: str = Field(default="normal", description="用户角色")
+    status: str = Field(default="active", description="用户状态")
     tenant_id: str | None = Field(default=None, description="租户 ID")
     created_at: str | None = Field(default=None, description="创建时间")
+    updated_at: str | None = Field(default=None, description="更新时间")
 
 
 class MeResponse(BaseModel):
@@ -38,40 +43,52 @@ class MeResponse(BaseModel):
 @router.get("/me", response_model=MeResponse, tags=["认证"])
 async def get_current_user_info(
     current_user: CurrentUser,
+    session: Annotated[Session, Depends(get_session)],
 ) -> MeResponse:
     """获取当前登录用户信息
 
     Args:
         current_user: 当前登录用户（从 Token 中解析）
+        session: 数据库会话
 
     Returns:
         MeResponse: 当前用户信息
 
-    Note:
-        实际的用户详情需要从数据库查询补充
-        此接口基于 Token 信息返回基本数据
+    Raises:
+        HTTPException: 用户不存在（404）
     """
     user_id = current_user.get("user_id", "")
-    username = current_user.get("username", "")
-    role = current_user.get("role", "normal")
-    tenant_id = current_user.get("tenant_id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": 401, "message": "无效的认证信息"},
+        )
 
-    # TODO: 从数据库获取完整的用户信息
-    # user = await user_repo.get_by_user_id(user_id)
+    # 从数据库获取完整的用户信息
+    user_repo = UserRepository(session)
+    user = user_repo.get_by_user_id(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": 404, "message": "用户不存在"},
+        )
 
     # 基于角色生成权限列表
-    permissions = _get_permissions_by_role(role)
+    permissions = _get_permissions_by_role(user.role.value)
 
     return MeResponse(
         user=UserInfo(
-            user_id=user_id,
-            username=username,
-            role=role,
-            tenant_id=tenant_id,
-            email=None,
-            display_name=None,
-            avatar_url=None,
-            created_at=None,
+            user_id=user.user_id,
+            username=user.username,
+            email=user.email,
+            display_name=user.display_name,
+            avatar_url=user.avatar_url,
+            role=user.role.value,
+            status=user.status.value,
+            tenant_id=user.tenant_id,
+            created_at=user.created_at.isoformat() if user.created_at else None,
+            updated_at=user.updated_at.isoformat() if user.updated_at else None,
         ),
         permissions=permissions,
     )
