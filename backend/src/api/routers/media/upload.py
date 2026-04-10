@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 文件名: upload.py
 # 作者: wuhao
-# 日期: 2026_04_10
+# 日期: 2026_04_10_09:22:00
 # 描述: 媒体上传接口
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
 from application.usecases.upload import FileUploadUseCase, UploadInput
+from infrastructure.repositories.upload_task_repository import UploadTaskRepository
 from infrastructure.storage.s3_storage import S3StorageService
 
 router = APIRouter()
@@ -60,14 +61,31 @@ async def upload_file(
     Raises:
         HTTPException: 上传失败（500）
     """
+    from infrastructure.database import get_session
+
     user_id = current_user.get("user_id", "anonymous") if current_user else "anonymous"
 
     try:
+        db = get_session()
+        repo = UploadTaskRepository(db)
         storage = S3StorageService()
         use_case = FileUploadUseCase(storage_service=storage)
 
         input_data = UploadInput(file=file, folder=folder)
         result = await use_case.execute(input_data)
+
+        if repo:
+            from domain.entities.upload_task import UploadTask, UploadStatus
+            task = UploadTask(
+                filename=result.filename,
+                file_size=result.file_size,
+                content_type=result.content_type,
+                file_type=result.file_type,
+                user_id=user_id,
+                status=UploadStatus.COMPLETED,
+                file_url=result.file_url,
+            )
+            repo.create(task)
 
         return UploadResponse(
             task_id=result.task_id,
@@ -75,7 +93,7 @@ async def upload_file(
             file_url=result.file_url,
             file_type=result.file_type,
             file_size=result.file_size,
-            content_type=result.status,  # 返回 content_type
+            content_type=result.content_type,
         )
 
     except Exception as e:

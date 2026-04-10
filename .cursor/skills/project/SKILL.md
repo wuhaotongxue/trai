@@ -15,6 +15,7 @@ TRAI 项目管理相关规范的统一入口。
 | Git 提交 | `git_submit/SKILL.md` | 提交代码时 |
 | README 更新 | `readme_update/SKILL.md` | 更新文档时 |
 | 周报生成 | `report_generation/SKILL.md` | 生成工作周报/月报时 |
+| 期数文档 | `issue_index/SKILL.md` | 撰写 `md/issue_NN/index.md`，按上期锚点与 git log 归纳 |
 
 ---
 

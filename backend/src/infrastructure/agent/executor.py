@@ -1,0 +1,351 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# 文件名: executor.py
+# 作者: wuhao
+# 日期: 2026_04_10_09:21:00
+# 描述: Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制
+
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass
+from typing import Any
+
+from core.logger import logger
+from core.token_counter import TokenCounter, get_token_counter
+from infrastructure.agent.error_classifier import ClassifiedError
+from infrastructure.agent.self_corrector import (
+    CorrectionResult,
+    CorrectionState,
+    SelfCorrector,
+    get_self_corrector,
+)
+from infrastructure.agent.tools.base import (
+    ExecutionContext,
+    ToolCallResult,
+)
+from infrastructure.agent.tools.governor import get_tool_governor
+from infrastructure.agent.tools.loader import (
+    get_openai_tools_format,
+    load_all_tools,
+)
+from infrastructure.agent.tools.registry import get_tool_registry
+from infrastructure.ai.openai_client import OpenAIClient
+
+
+@dataclass
+class AgentStep:
+    """Agent 单轮执行结果"""
+
+    turn: int
+    assistant_message: str
+    tool_calls: list[dict[str, Any]]
+    tool_results: list[ToolCallResult]
+    total_tokens: int
+    duration_ms: int
+    correction_info: dict[str, Any] | None = None
+
+
+class AgentExecutor:
+    """Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制"""
+
+    MAX_TURNS = 10
+
+    def __init__(self) -> None:
+        self._ai_client = OpenAIClient()
+        self._governor = get_tool_governor()
+        self._token_counter: TokenCounter = get_token_counter()
+        self._self_corrector: SelfCorrector = get_self_corrector()
+        self._quota_repository: Any = None
+        self._quota_service: Any = None
+        self._tools: list[dict[str, Any]] = []
+        self._initialized = False
+
+    def _ensure_quota(self) -> None:
+        """延迟初始化配额服务"""
+        if self._quota_repository is not None:
+            return
+
+        try:
+            from infrastructure.database import get_session as _get_db_session
+            from infrastructure.repositories.quota_repository import QuotaRepository
+
+            db_session = _get_db_session()
+            self._quota_repository = QuotaRepository(db_session)
+
+            from infrastructure.quota.quota_service import QuotaService
+
+            self._quota_service = QuotaService(self._quota_repository)
+            logger.info("AgentExecutor 配额服务初始化完成")
+        except Exception as e:
+            logger.warning(f"配额服务初始化失败: {e}")
+
+    def _ensure_initialized(self) -> None:
+        """延迟初始化：加载工具"""
+        if self._initialized:
+            return
+
+        definitions = load_all_tools()
+        self._tools = get_openai_tools_format(definitions)
+        logger.info(f"AgentExecutor 初始化 | 工具数: {len(self._tools)}")
+        self._initialized = True
+
+    async def execute(
+        self,
+        messages: list[dict[str, str]],
+        context: ExecutionContext,
+    ) -> dict[str, Any]:
+        """执行 Agent 对话（支持多轮工具调用 + 自我纠错）
+
+        Args:
+            messages: 消息历史（含 system/user/assistant/tool 消息）
+            context: 执行上下文
+
+        Returns:
+            dict: 最终结果
+        """
+        self._ensure_initialized()
+        self._ensure_quota()
+
+        steps: list[AgentStep] = []
+        turn = 0
+        total_tokens = 0
+        start_ms = int(time.time() * 1000)
+        current_messages = list(messages)
+
+        while turn < self.MAX_TURNS:
+            turn += 1
+            turn_start = int(time.time() * 1000)
+
+            logger.info(
+                f"Agent Turn {turn} | user_id={context.user_id} | "
+                f"消息数={len(current_messages)}"
+            )
+
+            ai_response = await self._call_ai(current_messages)
+
+            assistant_content = ai_response.get("content", "")
+            tool_calls = ai_response.get("tool_calls", [])
+            usage = ai_response.get("usage", {})
+            total_tokens += usage.get("total_tokens", 0)
+
+            assistant_msg: dict[str, Any] = {
+                "role": "assistant",
+                "content": assistant_content,
+            }
+            if tool_calls:
+                assistant_msg["tool_calls"] = tool_calls
+
+            current_messages.append(assistant_msg)
+
+            if not tool_calls:
+                steps.append(AgentStep(
+                    turn=turn,
+                    assistant_message=assistant_content,
+                    tool_calls=[],
+                    tool_results=[],
+                    total_tokens=total_tokens,
+                    duration_ms=int(time.time() * 1000) - turn_start,
+                ))
+                break
+
+            tool_results: list[ToolCallResult] = []
+            for tc in tool_calls:
+                tool_call_id = tc.get("id", "")
+                func = tc.get("function", {})
+                tool_id = func.get("name", "")
+                raw_args = func.get("arguments", "{}")
+
+                import json
+                try:
+                    args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+                except Exception:
+                    args = {}
+
+                logger.info(
+                    f"工具调用 | turn={turn} | tool_id={tool_id} | args={args}"
+                )
+
+                tool_result = await self._execute_tool_with_correction(
+                    tool_id, tool_call_id, args, context
+                )
+                tool_results.append(tool_result)
+
+                tool_content: str
+                if not tool_result.success:
+                    tool_content = (
+                        f"[工具执行失败] {tool_result.error or '未知错误'}"
+                    )
+                else:
+                    tool_content = tool_result.output or ""
+
+                current_messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call_id,
+                    "content": tool_content,
+                })
+
+            steps.append(AgentStep(
+                turn=turn,
+                assistant_message=assistant_content,
+                tool_calls=tool_calls,
+                tool_results=tool_results,
+                total_tokens=total_tokens,
+                duration_ms=int(time.time() * 1000) - turn_start,
+            ))
+
+        return {
+            "final_content": current_messages[-1].get("content", ""),
+            "steps": [
+                {
+                    "turn": s.turn,
+                    "assistant_message": s.assistant_message,
+                    "tool_calls": [
+                        {
+                            "id": tc.get("id"),
+                            "function": tc.get("function", {}).get("name"),
+                        }
+                        for tc in s.tool_calls
+                    ],
+                    "tool_results": [
+                        {
+                            "tool_id": tr.tool_id,
+                            "success": tr.success,
+                            "output": tr.output,
+                            "error": tr.error,
+                            "duration_ms": tr.duration_ms,
+                        }
+                        for tr in s.tool_results
+                    ],
+                    "duration_ms": s.duration_ms,
+                }
+                for s in steps
+            ],
+            "total_turns": turn,
+            "total_tokens": total_tokens,
+            "total_duration_ms": int(time.time() * 1000) - start_ms,
+        }
+
+    async def _execute_tool_with_correction(
+        self,
+        tool_id: str,
+        tool_call_id: str,
+        args: dict[str, Any],
+        context: ExecutionContext,
+    ) -> ToolCallResult:
+        """执行工具（含自我纠错）
+
+        Args:
+            tool_id: 工具 ID
+            tool_call_id: 工具调用 ID
+            args: 工具参数
+            context: 执行上下文
+
+        Returns:
+            ToolCallResult: 执行结果
+        """
+        registry = get_tool_registry()
+        tool = registry.get_tool(tool_id)
+
+        if tool is None:
+            return ToolCallResult(
+                tool_call_id=tool_call_id,
+                tool_id=tool_id,
+                success=False,
+                error=f"工具不存在: {tool_id}",
+            )
+
+        self._check_quota_before_call(context, tool_id)
+
+        async def raw_execute() -> ToolCallResult:
+            return await self._governor.execute(tool, args, context)
+
+        try:
+            result = await raw_execute()
+            result.tool_call_id = tool_call_id
+            return result
+        except Exception as e:
+            logger.warning(f"工具执行异常，进入纠错流程 | tool_id={tool_id} | error={e}")
+            result, correction_result = await self._self_corrector.handle(
+                e, raw_execute
+            )
+
+            if result is not None:
+                result.tool_call_id = tool_call_id
+                return result
+
+            return ToolCallResult(
+                tool_call_id=tool_call_id,
+                tool_id=tool_id,
+                success=False,
+                error=correction_result.message if correction_result else str(e),
+            )
+
+    def _check_quota_before_call(
+        self, context: ExecutionContext, tool_id: str
+    ) -> None:
+        """工具调用前检查配额
+
+        Args:
+            context: 执行上下文
+            tool_id: 工具 ID
+
+        Raises:
+            AIQuotaExceededError: 配额不足
+        """
+        if self._quota_service is None:
+            return
+
+        if context.user_role in ("vip", "admin"):
+            return
+
+        try:
+            self._quota_service.check_quota(
+                user_id=context.user_id,
+                role=context.user_role,
+                tool_id=tool_id,
+            )
+            self._quota_service.deduct_quota(
+                user_id=context.user_id,
+                role=context.user_role,
+                tool_id=tool_id,
+                session_id=context.session_id,
+                trace_id=context.trace_id,
+            )
+        except Exception as e:
+            logger.warning(f"配额检查/扣减失败: {e}")
+
+    async def _call_ai(
+        self, messages: list[dict[str, str]]
+    ) -> dict[str, Any]:
+        """调用 AI
+
+        Args:
+            messages: 消息列表
+
+        Returns:
+            dict: AI 响应
+        """
+        return await self._ai_client.chat(
+            messages=messages,
+            tools=self._tools if self._tools else None,
+            tool_choice="auto",
+        )
+
+
+_agent_executor_instance: AgentExecutor | None = None
+
+
+def get_agent_executor() -> AgentExecutor:
+    """获取 Agent 执行器单例
+
+    Returns:
+        AgentExecutor: Agent 执行器实例
+    """
+    global _agent_executor_instance
+    if _agent_executor_instance is None:
+        _agent_executor_instance = AgentExecutor()
+    return _agent_executor_instance
+
+
+__all__ = ["AgentExecutor", "AgentStep", "get_agent_executor"]
