@@ -29,11 +29,11 @@ description: >-
 </div>
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#C62828;">&#x274C; 严禁使用综合标签</strong>
+  <strong style="color:#C62828;">&#x274C; 严禁使用综合、项目等模糊标签</strong>
   <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;color:#555;">
-    <li>当一次提交包含多个模块修改时，<strong>必须按模块拆分标题</strong>。</li>
-    <li>禁止写 <code>综合_2026_04...</code>。</li>
-    <li>正确做法是分块编写：<code>### 前端_时间</code>、<code>### 后端_时间</code>、<code>### 客户端_时间</code> 等。</li>
+    <li>当一次提交包含多个模块修改时，<strong>必须按受影响的业务模块单独拆分标题</strong>。</li>
+    <li>禁止使用 <code>综合_2026_04...</code>、<code>项目_2026_04...</code>、<code>project_...</code> 等无法区分具体业务影响面的模块名。</li>
+    <li>哪怕是项目级的结构调整（如改 gitignore 或重命名），也要归类到实际受影响的业务线：<code>### 🎨 前端_时间</code>、<code>### 🛠️ 后端_时间</code>、<code>### 💻 客户端_时间</code>、<code>### 📚 规范(skills)_时间</code>。</li>
   </ul>
 </div>
 
