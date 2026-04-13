@@ -63,5 +63,8 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_13_1955
+- **新增(frontend_next)**: 补充 Next.js 前端模块的 README.md 说明文档
+
 ### 🎨 前端_2026_04_13_1521
 - **修复(frontend)**: 修复前端组件（navbar, pricing, settings）中出现的乱码及中文全角标点问题
