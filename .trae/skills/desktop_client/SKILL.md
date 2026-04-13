@@ -1,102 +1,18 @@
 ---
 name: "desktop_client_code_review"
-description: "Desktop Client 代码审查主入口。强制执行 PyQt6 五层架构、防卡死规范、信号槽规范、Win11 Fluent UI 规范与中文标点禁令。"
+description: "⚠️ 桌面端已统一迁移到 Electron 架构。当用户提及 PyQt6 客户端时调用，用于提示重定向。"
 ---
 
-# Desktop_Client_代码审查
+# ⚠️ 桌面端架构迁移通知
 
-作为 TRAI 平台桌面端开发人员的专属代码审查警察，请严格遵守以下 PyQt6 + Win11 Fluent 客户端开发规范进行审查。
-
-## 快速索引
-
-| 子规范 | 路径 | 触发场景 |
-|--------|------|----------|
-| 五层架构 | `architecture/layered.md` | 必读 |
-| 线程安全 | `threading/workers.md` | 使用 Worker 时 |
-| PyQt6 规范 | `rules/pyqt6.md` | 必读 |
-| UI 设计 | `ui_design/fluent.md` | UI 开发时 |
-
----
-
-## 核心审查规则
-
-### 1. 全局颜色禁令 (CRITICAL)
-
-<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#D32F2F;">&#x274C; 绝对禁止使用紫色及相关色系</strong> — 桌面客户端所有代码、UI 设计、主题中严禁出现任何紫色或紫色相近颜色
-  <div style="margin-top:8px;font-size:13px;">
-    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">purple, violet, indigo, #9333EA, #7C3AED, rgb(147, 51, 234)</code>
-    &nbsp;&nbsp;
-    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">推荐: blue/cyan/teal/emerald/amber 等中性或冷暖对撞色系</code>
-  </div>
-  <div style="margin-top:8px;font-size:13px;">
-    深色主题推荐背景色 <code>QColor(8, 8, 24)</code> 或 <code>QColor(15, 23, 42)</code>，高亮色使用 <code>blue</code> / <code>cyan</code> 而非 <code>purple</code> / <code>violet</code>
+<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#E65100;">&#x26A0; 架构迁移提醒</strong>
+  <div style="margin-top:8px;font-size:13px;color:#555;">
+    TRAI 项目的桌面客户端原 <code>desktop_client</code>（基于 PyQt6）已被废弃，现在已全面统一迁移至基于 React + Vite + Electron-Builder 的 <code>client_electron</code> 模块。
+    <br><br>
+    请立即停止在此目录编写任何代码，并将相关审查规则指向 <code>electron/SKILL.md</code>。
   </div>
 </div>
-
-### 2. 中文标点禁令 (CRITICAL)
-
-<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#D32F2F;">&#x274C; 绝对禁止</strong> — 代码、注释、日志、异常文案、UI 界面文案中严禁出现中文全角标点
-  <div style="margin-top:8px;font-size:13px;">
-    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">，，！？：</code>
-    &nbsp;&nbsp;
-    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">, . ! ? :</code>
-  </div>
-</div>
-
-### 3. Python 3.11 环境
-
-| 设置项 | 值 |
-|--------|------|
-| 标准环境 | `pyqt6_3_11_15_whf_20260320` (Conda) |
-| 类型提示 | `|` 替代 `Union`，`list[int]` 替代 `typing.List` |
-| 跨平台路径 | 禁止硬编码 `\`，必须使用 `pathlib.Path` |
-
-### 4. 五层架构强制分层
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
-  <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px;">
-    <strong style="color:#C62828;">&#x274C; 下层不得越权调用上层</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>Infrastructure 禁止调用 Service</li>
-      <li>Communication 禁止调用 Controller</li>
-      <li>禁止循环依赖</li>
-    </ul>
-  </div>
-  <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px;">
-    <strong style="color:#2E7D32;">&#x2714; 单向依赖</strong>
-    <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>UI - Controller - Service</li>
-      <li>Service - Repository (Interface)</li>
-      <li>Infrastructure 实现 Repository</li>
-    </ul>
-  </div>
-</div>
-
-| 层级 | 目录 | 职责 | 禁止行为 |
-|------|------|------|----------|
-| **表示层** | `src/ui/` | PyQt6 控件渲染，用户手势响应 | 禁止写任何业务逻辑，禁止 `requests.get/post` |
-| **控制层** | `src/controller/` | UI 事件监听，命令分发，数据校验，Worker 调度 | 禁止直接操作数据库 |
-| **服务层** | `src/service/` | 业务流程编排，领域对象状态管理 | 禁止直接发起 HTTP 请求 |
-| **通信层** | `src/comm/` | HTTP/WebSocket 封装，协议编解码 | 禁止写 UI 控件代码 |
-| **基础设施层** | `src/infra/` | 日志、SQLite、配置、加密、硬件指纹 | 禁止写业务判断逻辑 |
-
-### 5. 绝对禁止阻塞主线程 (CRITICAL)
-
-<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#C62828;">&#x274C; 所有耗时操作严禁在主线程执行，违者直接打回</strong>
-  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;color:#555;">
-    <li>网络请求 (HTTP/WebSocket/流媒体传输)</li>
-    <li>大文件读写 (>1MB)</li>
-    <li>密集 CPU 计算 (图像处理、音视频编解码)</li>
-    <li>任何带 <code>time.sleep()</code> 的阻塞代码</li>
-  </ul>
-</div>
-
-**正确做法**: 必须封装到 `QThread` 子类、`QRunnable` + `QThreadPool`。
-
-### 6. 信号槽跨线程通信 (CRITICAL)
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 严禁后台线程直接调用 UI 控件</strong>
