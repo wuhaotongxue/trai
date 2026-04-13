@@ -38,6 +38,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_1945
+- **新增(client_electron)**: 在主进程 `main/index.ts` 中集成系统托盘 (Tray) 并在窗口配置中启用无边框样式 (`titleBarStyle: 'hidden'`)
+- **重构(client_electron)**: 按照 Win11 Fluent Design 风格全面重构 UI，使用暗色 Mica 背景 (`#202020`) 与蓝色主题色，并增加自定义可拖拽顶栏 (`TitleBar`)
+
 ### 💻 客户端_2026_04_13_1932
 - **修复(client_electron)**: 修复打包后应用出现白屏的问题，修正 Vite 生产环境相对路径 (`base: './'`) 及 Main 进程 HTML 加载路径
 

@@ -26,18 +26,20 @@ const Sidebar: React.FC = () => {
   ]
 
   return (
-    <div style={{ width: '240px', backgroundColor: '#1e293b', height: '100vh', display: 'flex', flexDirection: 'column', borderRight: '1px solid #334155' }}>
-      <div style={{ padding: '24px', borderBottom: '1px solid #334155' }}>
-        <h2 style={{ color: '#38bdf8', margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <User size={24} />
+    <div className="no-drag-region" style={{ width: '260px', backgroundColor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+        <h2 style={{ color: '#ffffff', margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+            <User size={20} color="#ffffff" />
+          </div>
           {user?.username || '未登录'}
         </h2>
-        <div style={{ color: '#64748b', fontSize: '12px', marginTop: '8px', paddingLeft: '32px' }}>
+        <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', marginTop: '8px', paddingLeft: '44px' }}>
           {user?.email || ''}
         </div>
       </div>
       
-      <div style={{ flex: 1, padding: '16px 0' }}>
+      <div style={{ flex: 1, padding: '16px 12px' }}>
         {nav_items.map(item => {
           const is_active = location.pathname === item.path
           return (
@@ -45,30 +47,45 @@ const Sidebar: React.FC = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               style={{
-                padding: '12px 24px',
+                padding: '10px 16px',
+                marginBottom: '4px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
-                color: is_active ? '#38bdf8' : '#94a3b8',
-                backgroundColor: is_active ? '#0f172a' : 'transparent',
-                borderRight: is_active ? '3px solid #38bdf8' : '3px solid transparent'
+                borderRadius: '6px',
+                color: is_active ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+                backgroundColor: is_active ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
+                transition: 'background-color 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'
+              }}
+              onMouseLeave={(e) => {
+                if (!is_active) e.currentTarget.style.backgroundColor = 'transparent'
               }}
             >
               {item.icon}
-              <span style={{ fontWeight: is_active ? 'bold' : 'normal' }}>{item.label}</span>
+              <span style={{ fontSize: '14px', fontWeight: is_active ? '600' : 'normal' }}>{item.label}</span>
             </div>
           )
         })}
       </div>
 
-      <div style={{ padding: '24px', borderTop: '1px solid #334155' }}>
+      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
         <div
           onClick={handle_logout}
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ef4444', cursor: 'pointer', padding: '12px' }}
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '12px', 
+            color: 'rgba(255, 255, 255, 0.7)', cursor: 'pointer', 
+            padding: '10px 16px', borderRadius: '6px',
+            transition: 'background-color 0.15s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <LogOut size={20} />
-          <span>退出登录</span>
+          <span style={{ fontSize: '14px' }}>退出登录</span>
         </div>
       </div>
     </div>

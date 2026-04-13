@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from './sidebar'
+import TitleBar from './title_bar'
 import { use_auth_store } from '@/store/auth'
 
 const MainLayout: React.FC = () => {
@@ -24,10 +25,13 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f172a', overflow: 'hidden' }}>
-      <Sidebar />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-        <Outlet />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#202020', overflow: 'hidden' }}>
+      <TitleBar />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar />
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: '#202020' }}>
+          <Outlet />
+        </div>
       </div>
     </div>
   )

@@ -9,9 +9,17 @@
     <style>
       body {
         margin: 0;
-        background-color: #0f172a;
-        color: #e2e8f0;
-        font-family: sans-serif;
+        background-color: #202020; /* Win11 Fluent Dark 基础色 */
+        color: #ffffff;
+        font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        overflow: hidden; /* 防止出现外层滚动条 */
+      }
+      /* 可拖拽区域通用类 */
+      .drag-region {
+        -webkit-app-region: drag;
+      }
+      .no-drag-region {
+        -webkit-app-region: no-drag;
       }
     </style>
   </head>
