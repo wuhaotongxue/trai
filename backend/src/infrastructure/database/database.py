@@ -12,6 +12,7 @@ from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.engine.url import URL
 
 
 class Base(DeclarativeBase):
@@ -30,11 +31,15 @@ class DatabaseConfig:
         self._database: str = os.getenv("POSTGRES_DB", "trai")
 
     @property
-    def url(self) -> str:
-        """获取数据库连接 URL"""
-        return (
-            f"postgresql://{self._user}:{self._password}"
-            f"@{self._server}:{self._port}/{self._database}"
+    def url(self) -> URL:
+        """获取数据库连接 URL（密码自动 URL 编码）"""
+        return URL.create(
+            drivername="postgresql",
+            username=self._user,
+            password=self._password,
+            host=self._server,
+            port=int(self._port),
+            database=self._database,
         )
 
     def create_engine(self, **kwargs: Any) -> Any:
