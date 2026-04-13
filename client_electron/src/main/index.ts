@@ -41,10 +41,11 @@ if (!got_the_lock) {
   })
 
   const create_window = () => {
-  // 使用 256x256 的 ICO 作为窗口图标
-  const window_icon = process.env.VITE_DEV_SERVER_URL
+  // 使用 256x256 的 ICO 作为窗口和任务栏图标
+  const icon_path = process.env.VITE_DEV_SERVER_URL
     ? join(__dirname, '../../public/kity_256.ico')
     : join(__dirname, '../kity_256.ico')
+  const window_icon = nativeImage.createFromPath(icon_path)
 
   main_window = new BrowserWindow({
     width: 1200,
@@ -112,6 +113,11 @@ const create_tray = () => {
 
 // 解决 Windows 下开发环境热重载时 GPU 缓存锁定的报错 (cache_util_win.cc(20) 拒绝访问)
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
+
+// 设置 Windows 任务栏应用 ID，防止显示默认的 Electron 图标 (非常关键)
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.wuhao.trai')
+}
 
 app.whenReady().then(() => {
   register_ipc_handlers()
