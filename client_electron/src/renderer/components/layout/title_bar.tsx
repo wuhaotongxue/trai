@@ -18,13 +18,13 @@ const TitleBar: React.FC = () => {
         alignItems: 'center',
         paddingLeft: '16px',
         fontSize: '12px',
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: 'rgba(0, 0, 0, 0.7)',
         boxSizing: 'border-box',
         // 因为原生 titleBarOverlay 占据了右侧，我们只负责左侧和中间的拖拽区域
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '14px', height: '14px', backgroundColor: '#0078d4', borderRadius: '4px' }} />
+        <img src="/kity.svg" alt="logo" style={{ width: '16px', height: '16px' }} />
         <span>TRAI Desktop</span>
       </div>
     </div>

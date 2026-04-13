@@ -63,6 +63,9 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_13_2015
+- **新增(frontend_next)**: 使用 `kity.svg` 作为默认图标配置
+
 ### 🎨 前端_2026_04_13_1955
 - **新增(frontend_next)**: 补充 Next.js 前端模块的 README.md 说明文档
 

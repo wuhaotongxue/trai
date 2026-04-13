@@ -30,37 +30,37 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#202020', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f3f3f3', overflow: 'hidden' }}>
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: '40px', borderRadius: '8px', width: '320px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <h2 style={{ color: '#ffffff', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI 客户端</h2>
+        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '320px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
+          <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI 客户端</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ color: 'rgba(255, 255, 255, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
+              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => set_username(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.1)', backgroundColor: 'rgba(0, 0, 0, 0.2)', color: '#ffffff', boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                 placeholder="请输入用户名"
                 onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(255, 255, 255, 0.1)'}
+                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
               />
             </div>
             <div>
-              <label style={{ color: 'rgba(255, 255, 255, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
+              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => set_password(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(255, 255, 255, 0.1)', backgroundColor: 'rgba(0, 0, 0, 0.2)', color: '#ffffff', boxSizing: 'border-box', outline: 'none' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                 placeholder="请输入密码"
                 onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(255, 255, 255, 0.1)'}
+                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
               />
             </div>
-            {error_msg && <div style={{ color: '#ff99a4', fontSize: '12px' }}>{error_msg}</div>}
+            {error_msg && <div style={{ color: '#e51400', fontSize: '12px' }}>{error_msg}</div>}
             <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
               登录
             </button>

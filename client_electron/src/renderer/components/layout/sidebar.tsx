@@ -26,15 +26,15 @@ const Sidebar: React.FC = () => {
   ]
 
   return (
-    <div className="no-drag-region" style={{ width: '260px', backgroundColor: 'transparent', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
-      <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-        <h2 style={{ color: '#ffffff', margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="no-drag-region" style={{ width: '260px', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}>
+      <div style={{ padding: '24px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)' }}>
+        <h2 style={{ color: '#202020', margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex' }}>
             <User size={20} color="#ffffff" />
           </div>
           {user?.username || '未登录'}
         </h2>
-        <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', marginTop: '8px', paddingLeft: '44px' }}>
+        <div style={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px', marginTop: '8px', paddingLeft: '44px' }}>
           {user?.email || ''}
         </div>
       </div>
@@ -54,12 +54,12 @@ const Sidebar: React.FC = () => {
                 alignItems: 'center',
                 gap: '12px',
                 borderRadius: '6px',
-                color: is_active ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
-                backgroundColor: is_active ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
+                color: is_active ? '#0078d4' : '#202020',
+                backgroundColor: is_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
                 transition: 'background-color 0.15s ease'
               }}
               onMouseEnter={(e) => {
-                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'
+                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
               }}
               onMouseLeave={(e) => {
                 if (!is_active) e.currentTarget.style.backgroundColor = 'transparent'
@@ -72,16 +72,16 @@ const Sidebar: React.FC = () => {
         })}
       </div>
 
-      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(0, 0, 0, 0.05)' }}>
         <div
           onClick={handle_logout}
           style={{ 
             display: 'flex', alignItems: 'center', gap: '12px', 
-            color: 'rgba(255, 255, 255, 0.7)', cursor: 'pointer', 
+            color: '#202020', cursor: 'pointer', 
             padding: '10px 16px', borderRadius: '6px',
             transition: 'background-color 0.15s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <LogOut size={20} />
