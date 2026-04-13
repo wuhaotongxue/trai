@@ -181,7 +181,27 @@ COMMENT ON COLUMN table_name.column_name IS '字段用途说明';
 [ ] 数据库中 COMMENT 已写入（验证脚本确认）
 ```
 
-**验证脚本**：
+**自动化验证脚本**（必须通过）：
+
+```bash
+# 在 backend/ 目录下运行
+python verify_schema.py
+
+# 预期输出：8 张表全部 [OK]
+[OK] chat_sessions: 10 个字段完全匹配
+[OK] image_generations: 19 个字段完全匹配
+[OK] messages: 6 个字段完全匹配
+[OK] quota_plans: 12 个字段完全匹配
+[OK] quota_transaction_log: 12 个字段完全匹配
+[OK] upload_tasks: 14 个字段完全匹配
+[OK] user_quota_usage: 12 个字段完全匹配
+[OK] users: 14 个字段完全匹配
+全部检查通过，Schema 与 Model 完全一致
+```
+
+**禁止跳过验证**：每次提交 backend 变更前必须运行 `verify_schema.py`，输出不是"全部检查通过"则拒绝提交。
+
+**验证脚本**（检查数据库 COMMENT）：
 
 ```python
 import psycopg2
@@ -229,7 +249,91 @@ for row in cur.fetchall():
 
 ---
 
-## 10. 快速参考
+## 10. 主表文档强制维护
+
+<div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#1565C0;">&#x1F4D8; 必须维护的主表文档</strong>
+  <div style="margin-top:8px;font-size:13px;color:#555;">
+    每次新增/修改表结构后，必须同步更新 <code>.cursor/skills/backend/database_schema.md</code>，包括表级别注释和字段级别注释。
+  </div>
+</div>
+
+**强制规则**：
+
+1. **新增表**：在 `database_schema.md` 中追加完整表定义，包含表注释 + 所有字段的详细说明
+2. **修改字段**：同步更新 `database_schema.md` 中对应表的字段列表和注释
+3. **禁止空注释**：表或字段没有注释说明则拒绝提交
+4. **字段数量校验**：`database_schema.md` 中字段数量必须与 Model 源代码严格一致
+
+**主表文档结构**（每张表必须包含）：
+
+```markdown
+### table_name（表中文名）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | BIGINT | 自增主键 ID |
+| ... | ... | ... |
+
+**说明**：表的业务用途简述（1-2 句话）
+```
+
+**表分区组��**（按业务域分组）：
+
+```
+## 用户与认证
+## 对话与消息
+## 配额管理
+## AI 任务
+## 文件上传
+## 系统日志
+```
+
+**主表文档验证脚本**：
+
+```python
+# backend/verify_schema.py
+# 运行方式: python verify_schema.py
+# 检查 database_schema.md 与 Model 源码的一致性
+
+import re, os
+
+model_dir = "src/infrastructure/database"
+schema_file = ".cursor/skills/backend/database_schema.md"
+
+# 1. 从 Model 提取表名和字段列表
+def extract_from_model(model_path):
+    with open(model_path, encoding="utf-8") as f:
+        content = f.read()
+    tables = {}
+    table_name = None
+    fields = []
+    # 解析 Model 结构...
+    return tables
+
+# 2. 从 database_schema.md 提取表定义
+def extract_from_schema(schema_path):
+    with open(schema_path, encoding="utf-8") as f:
+        content = f.read()
+    # 解析 markdown 表格结构...
+    return schema_tables
+
+# 3. 比对差异
+def verify():
+    model_tables = extract_from_model(model_dir)
+    schema_tables = extract_from_schema(schema_file)
+    for table, fields in model_tables.items():
+        if table not in schema_tables:
+            print(f"[ERROR] {table} not in schema!")
+        elif schema_tables[table] != fields:
+            print(f"[WARN] {table} fields mismatch!")
+        else:
+            print(f"[OK] {table}")
+```
+
+---
+
+## 11. 快速参考
 
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;background:#F9F9F9;border-radius:12px;margin:12px 0;">
 
