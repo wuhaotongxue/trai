@@ -26,7 +26,7 @@ const create_window = () => {
     main_window.loadURL(process.env.VITE_DEV_SERVER_URL)
     main_window.webContents.openDevTools()
   } else {
-    main_window.loadFile(join(__dirname, '../renderer/index.html'))
+    main_window.loadFile(join(__dirname, '../index.html'))
   }
 }
 
