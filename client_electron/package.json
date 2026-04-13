@@ -1,0 +1,44 @@
+{
+  "name": "trai-desktop",
+  "version": "0.1.0",
+  "description": "TRAI 桌面客户端 (Electron)",
+  "main": "dist/main/index.js",
+  "author": "wuhao",
+  "license": "ISC",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "electron ."
+  },
+  "dependencies": {
+    "electron-log": "^5.0.0",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0"
+  },
+  "build": {
+    "appId": "com.wuhao.trai",
+    "productName": "TRAI",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
