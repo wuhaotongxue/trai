@@ -59,6 +59,7 @@ TRAI 项目管理相关规范的统一入口。
     <li>子模块的忽略规则必须统一提升并合并到根目录的 <code>.gitignore</code> 中，并使用对应的前缀进行约束（如 <code>frontend_next/node_modules/</code>）</li>
     <li><strong>绝对禁止上传任何依赖包或构建产物</strong>：无论是前端（node_modules）、后端（.venv, __pycache__）还是客户端（dist, release），在提交代码前必须确认这些目录已被 <code>.gitignore</code> 正确忽略。</li>
     <li><strong>绝对禁止上传测试文件和临时脚本</strong>：如 <code>check_comments.py</code> 等验证脚本必须在 <code>.gitignore</code> 中排除。</li>
+    <li><strong>临时测试代码规范</strong>：测试文件应统一写在 <code>tests/</code> 或各自的测试文件夹下，临时验证用途的代码脚本（如一次性运行验证某逻辑的脚本）<strong>使用后必须立即删除</strong>，禁止留存在业务代码目录中。</li>
     <li><strong>绝对禁止上传超过 500MB 的文件</strong>：避免污染 Git 仓库历史记录。</li>
   </ul>
 </div>
@@ -69,6 +70,7 @@ TRAI 项目管理相关规范的统一入口。
 
 | 版本 | 日期 | 更新内容 |
 |------|------|---------|
+| v1.3 | 2026-04-13 20:15:00 | 增加测试文件必须写在测试文件夹下且临时代码用后必须删除的规范 |
 | v1.2 | 2026-04-13 20:05:00 | 增加禁止上传测试/临时脚本和大于 500MB 文件的强制约束 |
 | v1.1 | 2026-04-13 17:31:12 | 新增全局配置文件与依赖管理（.gitignore 与禁止上传依赖/产物）规范 |
 | v1.0 | 2026-04-08 | 初版发布 |
