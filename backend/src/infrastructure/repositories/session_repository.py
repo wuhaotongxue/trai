@@ -32,11 +32,11 @@ class SessionRepository:
     ) -> ChatSessionModel:
         """创建会话"""
         session = ChatSessionModel(
-            session_id=session_id,
-            user_id=user_id,
-            title=title,
-            model=model,
-            extra_data=extra_data or {},
+            t_session_id=session_id,
+            t_user_id=user_id,
+            t_title=title,
+            t_model=model,
+            t_extra_data=extra_data or {},
         )
         self._session.add(session)
         self._session.commit()
@@ -46,8 +46,8 @@ class SessionRepository:
     def get_session(self, session_id: str) -> ChatSessionModel | None:
         """获取会话"""
         stmt = select(ChatSessionModel).where(
-            ChatSessionModel.session_id == session_id,
-            ChatSessionModel.deleted_at.is_(None),
+            ChatSessionModel.t_session_id == session_id,
+            ChatSessionModel.t_deleted_at.is_(None),
         )
         return self._session.scalar(stmt)
 
@@ -59,11 +59,11 @@ class SessionRepository:
     ) -> list[ChatSessionModel]:
         """获取会话列表"""
         stmt = select(ChatSessionModel).where(
-            ChatSessionModel.deleted_at.is_(None)
+            ChatSessionModel.t_deleted_at.is_(None)
         )
         if user_id:
-            stmt = stmt.where(ChatSessionModel.user_id == user_id)
-        stmt = stmt.order_by(ChatSessionModel.updated_at.desc()).limit(limit).offset(offset)
+            stmt = stmt.where(ChatSessionModel.t_user_id == user_id)
+        stmt = stmt.order_by(ChatSessionModel.t_updated_at.desc()).limit(limit).offset(offset)
         return list(self._session.scalars(stmt))
 
     def update_session(
@@ -79,13 +79,13 @@ class SessionRepository:
             return None
 
         if title is not None:
-            session.title = title
+            session.t_title = title
         if messages is not None:
-            session.messages = messages
+            session.t_messages = messages
         if extra_data is not None:
-            session.extra_data = extra_data
+            session.t_extra_data = extra_data
 
-        session.updated_at = datetime.now()
+        session.t_updated_at = datetime.now()
         self._session.commit()
         self._session.refresh(session)
         return session
@@ -96,7 +96,7 @@ class SessionRepository:
         if not session:
             return False
 
-        session.deleted_at = datetime.now()
+        session.t_deleted_at = datetime.now()
         self._session.commit()
         return True
 
@@ -116,10 +116,10 @@ class MessageRepository:
     ) -> MessageModel:
         """添加消息"""
         message = MessageModel(
-            session_id=session_id,
-            role=role,
-            content=content,
-            msg_metadata=msg_metadata or {},
+            t_session_id=session_id,
+            t_role=role,
+            t_content=content,
+            t_msg_metadata=msg_metadata or {},
         )
         self._session.add(message)
         self._session.commit()
@@ -129,13 +129,13 @@ class MessageRepository:
     def get_messages(self, session_id: str) -> list[MessageModel]:
         """获取会话消息"""
         stmt = select(MessageModel).where(
-            MessageModel.session_id == session_id
-        ).order_by(MessageModel.created_at)
+            MessageModel.t_session_id == session_id
+        ).order_by(MessageModel.t_created_at)
         return list(self._session.scalars(stmt))
 
     def delete_messages(self, session_id: str) -> int:
         """删除会话消息"""
-        stmt = select(MessageModel).where(MessageModel.session_id == session_id)
+        stmt = select(MessageModel).where(MessageModel.t_session_id == session_id)
         messages = list(self._session.scalars(stmt))
         count = len(messages)
         for msg in messages:

@@ -26,22 +26,22 @@ class ImageGenerationRepository(IImageGenerationRepository):
 
     def create(self, entity: ImageGeneration) -> ImageGeneration:
         model = ImageGenerationModel(
-            task_id=entity.task_id,
-            user_id=entity.user_id,
-            prompt=entity.prompt,
-            negative_prompt=entity.negative_prompt,
-            style=entity.style.value if hasattr(entity.style, "value") else entity.style,
-            size=entity.size.value if hasattr(entity.size, "value") else entity.size,
-            status=entity.status.value,
-            result_url=entity.result_url,
-            error_message=entity.error_message,
-            model=entity.model,
-            width=entity.width,
-            height=entity.height,
-            steps=entity.steps,
-            seed=entity.seed,
-            session_id=entity.session_id,
-            trace_id=entity.trace_id,
+            t_task_id=entity.task_id,
+            t_user_id=entity.user_id,
+            t_prompt=entity.prompt,
+            t_negative_prompt=entity.negative_prompt,
+            t_style=entity.style.value if hasattr(entity.style, "value") else entity.style,
+            t_size=entity.size.value if hasattr(entity.size, "value") else entity.size,
+            t_status=entity.status.value,
+            t_result_url=entity.result_url,
+            t_error_message=entity.error_message,
+            t_model=entity.model,
+            t_width=entity.width,
+            t_height=entity.height,
+            t_steps=entity.steps,
+            t_seed=entity.seed,
+            t_session_id=entity.session_id,
+            t_trace_id=entity.trace_id,
         )
         self._session.add(model)
         self._session.flush()
@@ -50,7 +50,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
 
     def get_by_id(self, task_id: str) -> ImageGeneration | None:
         stmt = select(ImageGenerationModel).where(
-            ImageGenerationModel.task_id == task_id
+            ImageGenerationModel.t_task_id == task_id
         )
         result = self._session.execute(stmt)
         model = result.scalar_one_or_none()
@@ -65,8 +65,8 @@ class ImageGenerationRepository(IImageGenerationRepository):
     ) -> list[ImageGeneration]:
         stmt = (
             select(ImageGenerationModel)
-            .where(ImageGenerationModel.user_id == user_id)
-            .order_by(ImageGenerationModel.created_at.desc())
+            .where(ImageGenerationModel.t_user_id == user_id)
+            .order_by(ImageGenerationModel.t_created_at.desc())
             .limit(limit)
             .offset(offset)
         )
@@ -83,7 +83,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
         error_message: str | None = None,
     ) -> ImageGeneration | None:
         stmt = select(ImageGenerationModel).where(
-            ImageGenerationModel.task_id == task_id
+            ImageGenerationModel.t_task_id == task_id
         )
         result = self._session.execute(stmt)
         model = result.scalar_one_or_none()
@@ -91,11 +91,11 @@ class ImageGenerationRepository(IImageGenerationRepository):
         if model is None:
             return None
 
-        model.status = status
+        model.t_status = status
         if result_url is not None:
-            model.result_url = result_url
+            model.t_result_url = result_url
         if error_message is not None:
-            model.error_message = error_message
+            model.t_error_message = error_message
 
         self._session.flush()
         logger.info(
@@ -105,7 +105,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
 
     def count_by_user(self, user_id: str) -> int:
         stmt = select(func.count()).where(
-            ImageGenerationModel.user_id == user_id
+            ImageGenerationModel.t_user_id == user_id
         )
         result = self._session.execute(stmt)
         return result.scalar() or 0
@@ -119,22 +119,22 @@ class ImageGenerationRepository(IImageGenerationRepository):
         )
 
         return ImageGeneration(
-            task_id=model.task_id,
-            user_id=model.user_id,
-            prompt=model.prompt,
-            negative_prompt=model.negative_prompt,
-            style=ImageStyle(model.style),
-            size=ImageSize(model.size),
-            status=ImageStatus(model.status),
-            result_url=model.result_url,
-            error_message=model.error_message,
-            model=model.model,
-            width=model.width,
-            height=model.height,
-            steps=model.steps,
-            seed=model.seed,
-            session_id=model.session_id,
-            trace_id=model.trace_id,
+            task_id=model.t_task_id,
+            user_id=model.t_user_id,
+            prompt=model.t_prompt,
+            negative_prompt=model.t_negative_prompt,
+            style=ImageStyle(model.t_style),
+            size=ImageSize(model.t_size),
+            status=ImageStatus(model.t_status),
+            result_url=model.t_result_url,
+            error_message=model.t_error_message,
+            model=model.t_model,
+            width=model.t_width,
+            height=model.t_height,
+            steps=model.t_steps,
+            seed=model.t_seed,
+            session_id=model.t_session_id,
+            trace_id=model.t_trace_id,
         )
 
 

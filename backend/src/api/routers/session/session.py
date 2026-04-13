@@ -119,7 +119,7 @@ async def send_message(
         )
 
     # 权限校验：非管理员只能访问自己的会话
-    if role != "admin" and chat_session.user_id != user_id:
+    if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
@@ -134,7 +134,7 @@ async def send_message(
 
     # 获取历史消息
     messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
     # 上下文管理：检查并压缩超限上下文
     context_manager: ContextManager = get_context_manager()
@@ -165,7 +165,7 @@ async def send_message(
 
         return SendMessageResponse(
             session_id=session_id,
-            user_message={"role": user_msg.role, "content": user_msg.content},
+            user_message={"role": user_msg.t_role, "content": user_msg.t_content},
             assistant_message={"role": "assistant", "content": ai_response["content"]},
         )
 
@@ -210,9 +210,9 @@ async def create_session(
     )
 
     return CreateSessionResponse(
-        session_id=db_session.session_id,
-        title=db_session.title,
-        model=db_session.model,
+        session_id=db_session.t_session_id,
+        title=db_session.t_title,
+        model=db_session.t_model,
         message="会话创建成功",
     )
 
@@ -248,14 +248,14 @@ async def list_sessions(
 
     items = []
     for s in sessions:
-        messages = message_repo.get_messages(s.session_id)
+        messages = message_repo.get_messages(s.t_session_id)
         items.append(SessionItem(
-            session_id=s.session_id,
-            title=s.title,
-            model=s.model,
+            session_id=s.t_session_id,
+            title=s.t_title,
+            model=s.t_model,
             message_count=len(messages),
-            created_at=s.created_at.isoformat() if s.created_at else None,
-            updated_at=s.updated_at.isoformat() if s.updated_at else None,
+            created_at=s.t_created_at.isoformat() if s.t_created_at else None,
+            updated_at=s.t_updated_at.isoformat() if s.t_updated_at else None,
         ))
 
     return SessionListResponse(
@@ -297,22 +297,22 @@ async def get_session_detail(
 
     # 非管理员只能查看自己的会话
     role = current_user.get("role", "normal")
-    if role != "admin" and chat_session.user_id != user_id:
+    if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
         )
 
     messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
     return SessionDetailResponse(
-        session_id=chat_session.session_id,
-        title=chat_session.title,
-        model=chat_session.model,
+        session_id=chat_session.t_session_id,
+        title=chat_session.t_title,
+        model=chat_session.t_model,
         messages=messages_dict,
-        created_at=chat_session.created_at.isoformat() if chat_session.created_at else None,
-        updated_at=chat_session.updated_at.isoformat() if chat_session.updated_at else None,
+        created_at=chat_session.t_created_at.isoformat() if chat_session.t_created_at else None,
+        updated_at=chat_session.t_updated_at.isoformat() if chat_session.t_updated_at else None,
     )
 
 
@@ -432,7 +432,7 @@ async def send_message_stream(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.user_id != user_id:
+    if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
@@ -445,7 +445,7 @@ async def send_message_stream(
     )
 
     messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
     context_manager: ContextManager = get_context_manager()
     managed_messages, context_stats = context_manager.check_and_manage(
