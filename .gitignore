@@ -42,6 +42,15 @@ frontend_next/coverage/
 frontend_next/.pnp
 frontend_next/.pnp.*
 
+# 桌面客户端依赖与构建产物
+client_electron/node_modules/
+client_electron/dist/
+client_electron/release/
+client_electron/out/
+client_electron/.vite/
+client_electron/*.tsbuildinfo
+client_electron/coverage/
+
 # 包管理器日志
 npm-debug.log*
 yarn-debug.log*
