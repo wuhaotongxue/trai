@@ -12,9 +12,11 @@
 
 ## 快速开始
 
+推荐使用 pnpm 并配置淘宝镜像源加速:
+
 ```bash
 # 安装依赖
-pnpm install
+pnpm install --registry=https://registry.npmmirror.com
 
 # 启动开发服务器
 pnpm dev
