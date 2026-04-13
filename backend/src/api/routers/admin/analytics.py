@@ -18,9 +18,9 @@ from sqlalchemy import func, select
 from api.deps import AdminUser
 from infrastructure.database.models import (
     QuotaTransactionLogModel,
-    UserModel,
     UserQuotaUsageModel,
 )
+from infrastructure.database.user_model import UserModel
 from infrastructure.database import get_session
 from infrastructure.repositories.quota_repository import QuotaRepository
 
@@ -87,17 +87,17 @@ async def get_analytics(admin: AdminUser) -> AnalyticsResponse:
 
     usage_by_type: list[UsageByTypeItem] = []
     for qt in quota_types:
-        used_field = f"{qt}_used"
-        if hasattr(QuotaTransactionLogModel, "quota_type"):
+        used_field = f"t_{qt}_used"
+        if hasattr(QuotaTransactionLogModel, "t_quota_type"):
             total = db.execute(
-                select(func.sum(QuotaTransactionLogModel.delta)).where(
-                    QuotaTransactionLogModel.quota_type == qt,
-                    QuotaTransactionLogModel.transaction_type == "deduct",
+                select(func.sum(QuotaTransactionLogModel.t_delta)).where(
+                    QuotaTransactionLogModel.t_quota_type == qt,
+                    QuotaTransactionLogModel.t_transaction_type == "deduct",
                 )
             ).scalar() or 0
             user_count = db.execute(
-                select(func.count(func.distinct(QuotaTransactionLogModel.user_id))).where(
-                    QuotaTransactionLogModel.quota_type == qt,
+                select(func.count(func.distinct(QuotaTransactionLogModel.t_user_id))).where(
+                    QuotaTransactionLogModel.t_quota_type == qt,
                 )
             ).scalar() or 0
             usage_by_type.append(UsageByTypeItem(
@@ -109,12 +109,12 @@ async def get_analytics(admin: AdminUser) -> AnalyticsResponse:
     top_users: list[TopUserItem] = []
     user_totals = db.execute(
         select(
-            QuotaTransactionLogModel.user_id,
+            QuotaTransactionLogModel.t_user_id,
             func.count().label("total_calls"),
         ).where(
-            QuotaTransactionLogModel.transaction_type == "deduct",
+            QuotaTransactionLogModel.t_transaction_type == "deduct",
         ).group_by(
-            QuotaTransactionLogModel.user_id
+            QuotaTransactionLogModel.t_user_id
         ).order_by(
             func.count().desc()
         ).limit(10)
@@ -122,12 +122,12 @@ async def get_analytics(admin: AdminUser) -> AnalyticsResponse:
 
     for row in user_totals:
         user = db.execute(
-            select(UserModel).where(UserModel.user_id == row.user_id)
+            select(UserModel).where(UserModel.t_user_id == row.t_user_id)
         ).scalar_one_or_none()
         top_users.append(TopUserItem(
-            user_id=row.user_id,
-            username=user.username if user else row.user_id,
-            role=user.role if user else "unknown",
+            user_id=row.t_user_id,
+            username=user.t_username if user else row.t_user_id,
+            role=user.t_role if user else "unknown",
             total_calls=row.total_calls,
             total_tokens=0,
         ))

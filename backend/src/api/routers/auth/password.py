@@ -140,7 +140,7 @@ async def reset_password(
     new_hash = password_service.hash(request.new_password)
     user_repo.update(request.user_id, password_hash=new_hash)
 
-    return PasswordResponse(message=f"用户 {target_user.username} 的密码已重置")
+    return PasswordResponse(message=f"用户 {target_user.t_username} 的密码已重置")
 
 
 __all__ = ["router"]

@@ -2,7 +2,6 @@
 name = "trai-backend"
 version = "0.1.0"
 description = "TRAI 后端服务"
-readme = "README.md"
 requires-python = ">=3.13"
 authors = [
     {name = "wuhao", email = "wuhaotongxue@gmail.com"},

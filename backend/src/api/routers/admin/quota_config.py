@@ -76,16 +76,16 @@ async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
 
     return [
         QuotaPlanResponse(
-            id=p.id,
-            plan_name=p.plan_name,
-            user_role=p.user_role,
-            image_generation_limit=p.image_generation_limit,
-            audio_synthesis_limit=p.audio_synthesis_limit,
-            transcription_minutes_limit=p.transcription_minutes_limit,
-            meeting_summary_limit=p.meeting_summary_limit,
-            ai_translation_limit=p.ai_translation_limit,
-            ai_summarization_limit=p.ai_summarization_limit,
-            agent_tool_call_limit=p.agent_tool_call_limit,
+            id=p.t_id,
+            plan_name=p.t_plan_name,
+            user_role=p.t_user_role,
+            image_generation_limit=p.t_image_generation_limit,
+            audio_synthesis_limit=p.t_audio_synthesis_limit,
+            transcription_minutes_limit=p.t_transcription_minutes_limit,
+            meeting_summary_limit=p.t_meeting_summary_limit,
+            ai_translation_limit=p.t_ai_translation_limit,
+            ai_summarization_limit=p.t_ai_summarization_limit,
+            agent_tool_call_limit=p.t_agent_tool_call_limit,
         )
         for p in plans
     ]
@@ -117,28 +117,28 @@ async def update_quota_plan(
             detail={"code": 404, "message": f"角色 {role} 的配额套餐不存在"},
         )
 
-    plan.image_generation_limit = request.image_generation_limit
-    plan.audio_synthesis_limit = request.audio_synthesis_limit
-    plan.transcription_minutes_limit = request.transcription_minutes_limit
-    plan.meeting_summary_limit = request.meeting_summary_limit
-    plan.ai_translation_limit = request.ai_translation_limit
-    plan.ai_summarization_limit = request.ai_summarization_limit
-    plan.agent_tool_call_limit = request.agent_tool_call_limit
+    plan.t_image_generation_limit = request.image_generation_limit
+    plan.t_audio_synthesis_limit = request.audio_synthesis_limit
+    plan.t_transcription_minutes_limit = request.transcription_minutes_limit
+    plan.t_meeting_summary_limit = request.meeting_summary_limit
+    plan.t_ai_translation_limit = request.ai_translation_limit
+    plan.t_ai_summarization_limit = request.ai_summarization_limit
+    plan.t_agent_tool_call_limit = request.agent_tool_call_limit
     db.flush()
 
     logger.info(f"管理员 {admin.get('user_id')} 更新配额套餐 | role={role}")
 
     return QuotaPlanResponse(
-        id=plan.id,
-        plan_name=plan.plan_name,
-        user_role=plan.user_role,
-        image_generation_limit=plan.image_generation_limit,
-        audio_synthesis_limit=plan.audio_synthesis_limit,
-        transcription_minutes_limit=plan.transcription_minutes_limit,
-        meeting_summary_limit=plan.meeting_summary_limit,
-        ai_translation_limit=plan.ai_translation_limit,
-        ai_summarization_limit=plan.ai_summarization_limit,
-        agent_tool_call_limit=plan.agent_tool_call_limit,
+        id=plan.t_id,
+        plan_name=plan.t_plan_name,
+        user_role=plan.t_user_role,
+        image_generation_limit=plan.t_image_generation_limit,
+        audio_synthesis_limit=plan.t_audio_synthesis_limit,
+        transcription_minutes_limit=plan.t_transcription_minutes_limit,
+        meeting_summary_limit=plan.t_meeting_summary_limit,
+        ai_translation_limit=plan.t_ai_translation_limit,
+        ai_summarization_limit=plan.t_ai_summarization_limit,
+        agent_tool_call_limit=plan.t_agent_tool_call_limit,
     )
 
 
@@ -169,15 +169,15 @@ async def create_quota_plan(
         )
 
     plan = QuotaPlanModel(
-        plan_name=request.plan_name,
-        user_role=request.user_role,
-        image_generation_limit=request.image_generation_limit,
-        audio_synthesis_limit=request.audio_synthesis_limit,
-        transcription_minutes_limit=request.transcription_minutes_limit,
-        meeting_summary_limit=request.meeting_summary_limit,
-        ai_translation_limit=request.ai_translation_limit,
-        ai_summarization_limit=request.ai_summarization_limit,
-        agent_tool_call_limit=request.agent_tool_call_limit,
+        t_plan_name=request.plan_name,
+        t_user_role=request.user_role,
+        t_image_generation_limit=request.image_generation_limit,
+        t_audio_synthesis_limit=request.audio_synthesis_limit,
+        t_transcription_minutes_limit=request.transcription_minutes_limit,
+        t_meeting_summary_limit=request.meeting_summary_limit,
+        t_ai_translation_limit=request.ai_translation_limit,
+        t_ai_summarization_limit=request.ai_summarization_limit,
+        t_agent_tool_call_limit=request.agent_tool_call_limit,
     )
     db.add(plan)
     db.flush()
@@ -185,16 +185,16 @@ async def create_quota_plan(
     logger.info(f"管理员 {admin.get('user_id')} 创建配额套餐 | role={request.user_role}")
 
     return QuotaPlanResponse(
-        id=plan.id,
-        plan_name=plan.plan_name,
-        user_role=plan.user_role,
-        image_generation_limit=plan.image_generation_limit,
-        audio_synthesis_limit=plan.audio_synthesis_limit,
-        transcription_minutes_limit=plan.transcription_minutes_limit,
-        meeting_summary_limit=plan.meeting_summary_limit,
-        ai_translation_limit=plan.ai_translation_limit,
-        ai_summarization_limit=plan.ai_summarization_limit,
-        agent_tool_call_limit=plan.agent_tool_call_limit,
+        id=plan.t_id,
+        plan_name=plan.t_plan_name,
+        user_role=plan.t_user_role,
+        image_generation_limit=plan.t_image_generation_limit,
+        audio_synthesis_limit=plan.t_audio_synthesis_limit,
+        transcription_minutes_limit=plan.t_transcription_minutes_limit,
+        meeting_summary_limit=plan.t_meeting_summary_limit,
+        ai_translation_limit=plan.t_ai_translation_limit,
+        ai_summarization_limit=plan.t_ai_summarization_limit,
+        agent_tool_call_limit=plan.t_agent_tool_call_limit,
     )
 
 

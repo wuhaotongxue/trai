@@ -22,9 +22,9 @@ from infrastructure.database.models import (
     MessageModel,
     QuotaTransactionLogModel,
     UploadTaskModel,
-    UserModel,
     UserQuotaUsageModel,
 )
+from infrastructure.database.user_model import UserModel
 from infrastructure.database import get_session
 
 router = APIRouter()
@@ -85,7 +85,7 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
 
     total_users = db.execute(select(func.count()).select_from(UserModel)).scalar() or 0
     vip_users = db.execute(
-        select(func.count()).where(UserModel.role == "vip")
+        select(func.count()).where(UserModel.t_role == "vip")
     ).scalar() or 0
     total_sessions = db.execute(
         select(func.count()).select_from(ChatSessionModel)
@@ -96,20 +96,20 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
 
     new_this_month = db.execute(
         select(func.count()).where(
-            UserModel.created_at >= datetime.strptime(month_start, "%Y-%m-%d")
+            UserModel.t_created_at >= datetime.strptime(month_start, "%Y-%m-%d")
         )
     ).scalar() or 0
 
     active_today = db.execute(
-        select(func.count(func.distinct(ChatSessionModel.user_id))).where(
-            ChatSessionModel.updated_at >= datetime.combine(today, datetime.min.time())
+        select(func.count(func.distinct(ChatSessionModel.t_user_id))).where(
+            ChatSessionModel.t_updated_at >= datetime.combine(today, datetime.min.time())
         )
     ).scalar() or 0
 
     agent_calls = db.execute(
         select(func.count()).where(
-            QuotaTransactionLogModel.transaction_type == "deduct",
-            QuotaTransactionLogModel.quota_type == "agent_tool_call",
+            QuotaTransactionLogModel.t_transaction_type == "deduct",
+            QuotaTransactionLogModel.t_quota_type == "agent_tool_call",
         )
     ).scalar() or 0
 
@@ -136,26 +136,26 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
 
         day_users = db.execute(
             select(func.count()).where(
-                UserModel.created_at >= day_start,
-                UserModel.created_at <= day_end,
+                UserModel.t_created_at >= day_start,
+                UserModel.t_created_at <= day_end,
             )
         ).scalar() or 0
         day_sessions = db.execute(
             select(func.count()).where(
-                ChatSessionModel.created_at >= day_start,
-                ChatSessionModel.created_at <= day_end,
+                ChatSessionModel.t_created_at >= day_start,
+                ChatSessionModel.t_created_at <= day_end,
             )
         ).scalar() or 0
         day_messages = db.execute(
             select(func.count()).where(
-                MessageModel.created_at >= day_start,
-                MessageModel.created_at <= day_end,
+                MessageModel.t_created_at >= day_start,
+                MessageModel.t_created_at <= day_end,
             )
         ).scalar() or 0
         day_agent = db.execute(
             select(func.count()).where(
-                QuotaTransactionLogModel.created_at >= day_start,
-                QuotaTransactionLogModel.created_at <= day_end,
+                QuotaTransactionLogModel.t_created_at >= day_start,
+                QuotaTransactionLogModel.t_created_at <= day_end,
             )
         ).scalar() or 0
 

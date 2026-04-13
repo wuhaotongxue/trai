@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 文件名: user_model.py
 # 作者: wuhao
-# 日期: 2026_04_09_21:20:00
+# 日期: 2026_04_13
 # 描述: 用户数据库模型
 
 from __future__ import annotations
@@ -16,54 +16,60 @@ from infrastructure.database.database import Base
 
 
 class UserModel(Base):
-    """用户模型
-
-    对应数据库中的 users 表，存储用户基本信息
-    """
-    __tablename__ = "users"
+    """用户模型"""
+    __tablename__ = "t_users"
     __comment__ = "用户表，存储用户账户信息"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
 
-    user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    t_user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """用户唯一标识 UUID"""
 
-    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    t_username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """用户名，唯一"""
 
-    display_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    t_display_name: Mapped[str] = mapped_column(String(128), nullable=False)
     """显示名称"""
 
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    t_email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     """邮箱地址，唯一"""
 
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    """密码哈希（argon2/ bcrypt）"""
+    t_password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    """密码哈希（argon2）"""
 
-    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     """头像 URL"""
 
-    role: Mapped[str] = mapped_column(String(32), default="normal", nullable=False)
+    t_role: Mapped[str] = mapped_column(String(32), default="normal", nullable=False)
     """用户角色：admin/vip/normal"""
 
-    status: Mapped[str] = mapped_column(String(32), default="active", nullable=False)
+    t_status: Mapped[str] = mapped_column(String(32), default="active", nullable=False)
     """用户状态：active/disabled/pending"""
 
-    tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     """租户 ID（多租户场景）"""
 
-    wecom_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+    t_wecom_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
     """企业微信用户 ID（用于 SSO）"""
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     """创建时间"""
 
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
+
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
     """最后更新时间"""
 
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """最后修改人 user_id"""
+
+    t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     """软删除时间，为空表示未删除"""
+
+    t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """删除操作人 user_id"""
 
 
 __all__ = ["UserModel"]

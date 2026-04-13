@@ -63,17 +63,17 @@ e:\code\trai_dev\trai\
 
 | Skill ID | 名称 | 路径 | 说明 |
 |----------|------|------|------|
-| `trai-skills-index` | 总索引 | `.trae/skills/SKILL.md` | 所有 Skills 的导航入口 |
-| `backend` | 后端规范 | `.trae/skills/backend/SKILL.md` | Python DDD 五层架构规范 |
-| `desktop_client` | 桌面客户端规范 | `.trae/skills/desktop_client/SKILL.md` | PyQt6 防卡死、信号槽、Fluent UI |
-| `frontend_next` | 前端规范 | `.trae/skills/frontend_next/SKILL.md` | Next.js App Router、i18n 规范 |
+| `trai-skills-index` | 总索引 | `*/SKILL.md` | 所有 Skills 的导航入口 |
+| `backend_code_check_wuhao` | 后端代码审查 | `backend/SKILL.md` | Python DDD 五层架构规范 |
+| `desktop_client_code_review` | 桌面客户端审查 | `desktop_client/SKILL.md` | PyQt6 防卡死、信号槽、Fluent UI |
+| `frontend_next_code_review` | 前端代码审查 | `frontend_next/SKILL.md` | Next.js App Router、i18n 规范 |
 | `electron` | Electron 桌面 | `electron/SKILL.md` | TypeScript、IPC、窗口管理 |
-| `agent` | Agent 智能体规范 | `.trae/skills/agent/SKILL.md` | Harness 五层架构 |
-| `project` | 项目管理规范 | `.trae/skills/project/SKILL.md` | 全局研发规范 |
-| `git_submit` | Git 提交 | `.trae/skills/git_submit/SKILL.md` | 自动提交并推送 |
-| `report-generation` | 周报生成 | `.trae/skills/report-generation/SKILL.md` | Git 分析、Excel 导入 |
-| `readme-update` | README 更新 | `.trae/skills/readme-update/SKILL.md` | Changelog 自动维护 |
-| `naming-convention` | 命名规范 | `.trae/skills/naming-convention/SKILL.md` | snake_case 强制规范 |
+| `agent_harness_engineering` | Agent 智能体 | `agent/SKILL.md` | Harness 五层架构 |
+| `project_management` | 项目管理 | `project/SKILL.md` | 全局研发规范 |
+| `git_submit` | Git 提交 | `project/git_submit/SKILL.md` | 中文 Angular 规范提交 |
+| `report-generation` | 周报生成 | `project/report_generation/SKILL.md` | Git 分析、Excel 导入 |
+| `readme-update` | README 更新 | `project/readme_update/SKILL.md` | Changelog 自动维护 |
+| `naming-convention` | 命名规范 | `project/naming_convention/SKILL.md` | snake_case 强制规范 |
 
 ## 6. 最佳实践
 

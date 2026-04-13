@@ -62,12 +62,12 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
         )
 
         return SessionOutput(
-            session_id=session.session_id,
-            title=session.title,
-            model=session.model,
-            messages=session.messages,
-            created_at=session.created_at.isoformat(),
-            updated_at=session.updated_at.isoformat(),
+            session_id=session.t_session_id,
+            title=session.t_title,
+            model=session.t_model,
+            messages=session.t_messages,
+            created_at=session.t_created_at.isoformat(),
+            updated_at=session.t_updated_at.isoformat(),
         )
 
 
@@ -110,7 +110,7 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
         )
 
         messages = message_repo.get_messages(input_data.session_id)
-        messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+        messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
         ai_response = await self._ai_client.chat(messages=messages_dict)
 
@@ -164,12 +164,12 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, ListSessionsOutput]):
         return ListSessionsOutput(
             sessions=[
                 SessionOutput(
-                    session_id=s.session_id,
-                    title=s.title,
-                    model=s.model,
-                    messages=s.messages,
-                    created_at=s.created_at.isoformat(),
-                    updated_at=s.updated_at.isoformat(),
+                    session_id=s.t_session_id,
+                    title=s.t_title,
+                    model=s.t_model,
+                    messages=s.t_messages,
+                    created_at=s.t_created_at.isoformat(),
+                    updated_at=s.t_updated_at.isoformat(),
                 )
                 for s in sessions
             ],
@@ -208,15 +208,15 @@ class GetSessionUseCase(UseCase[GetSessionInput, GetSessionOutput]):
             raise ValueError(f"会话不存在: {input_data.session_id}")
 
         messages = message_repo.get_messages(input_data.session_id)
-        messages_dict = [{"role": m.role, "content": m.content} for m in messages]
+        messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
         return GetSessionOutput(
-            session_id=session.session_id,
-            title=session.title,
-            model=session.model,
+            session_id=session.t_session_id,
+            title=session.t_title,
+            model=session.t_model,
             messages=messages_dict,
-            created_at=session.created_at.isoformat(),
-            updated_at=session.updated_at.isoformat(),
+            created_at=session.t_created_at.isoformat(),
+            updated_at=session.t_updated_at.isoformat(),
         )
 
 
