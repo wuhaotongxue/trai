@@ -20,6 +20,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 📚 规范(skills)_2026_04_13_1730
+- **新增(skills)**: 全局项目配置规范中追加“绝对禁止上传任何依赖包或构建产物（如 node_modules, .venv 等）”的强约束
+
 ### 💻 客户端_2026_04_13_1723
 - **修复(client_electron)**: 使用 `git rm -r --cached` 移除了被错误提交到远程仓库的 `client_electron/node_modules`
 
