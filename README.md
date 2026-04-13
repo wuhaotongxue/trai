@@ -20,9 +20,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 综合_2026_04_13_1521
+### 🎨 前端_2026_04_13_1521
 - **修复(frontend)**: 修复前端组件（navbar, pricing, settings）中出现的乱码及中文全角标点问题
+
+### 🛠️ 后端_2026_04_13_1521
 - **修复(backend)**: 补齐后端缺失依赖（redis, opentelemetry），修正 `UserModel` 导入路径，确保后端服务成功启动
+
+### 📚 docs(skills)_2026_04_13_1521
 - **新增(skills)**: 将 `.cursor/skills` 下的所有规范配置文件平滑迁移至 `.trae/skills`，完成 Trae Agent 的技能装配
 
 ### 📚 docs(project)_2026_04_13_1155
