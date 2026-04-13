@@ -20,6 +20,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 📚 docs(project)_2026_04_13_1556
+- **重构(project)**: 将 `frontend_next` 的忽略规则合并至根目录 `.gitignore`，并新增全局规范禁止子模块单独维护 `.gitignore`
+- **重构(project)**: 依据防关键字冲突规范，将 `electron` 目录重命名为 `client_electron`
+- **新增(skills)**: 全局命名规范新增“禁止使用语言或框架关键字作为顶层目录或模块名称”的强制约束
+
 ### 🎨 前端_2026_04_13_1521
 - **修复(frontend)**: 修复前端组件（navbar, pricing, settings）中出现的乱码及中文全角标点问题
 
