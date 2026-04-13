@@ -38,10 +38,15 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### � docs(project)_2026_04_13_1803
+### 💻 客户端_2026_04_13_1814
+- **新增(client_electron)**: 引入 `react-router-dom`、`zustand` 和 `lucide-react`，完成前端模块化路由与全局状态配置
+- **新增(client_electron)**: 封装 `MainLayout` 与 `Sidebar`（包含仪表盘、设置与登出菜单）
+- **新增(client_electron)**: 完成注册与登录页面的搭建，并实现状态保持与路由拦截
+
+### 📚 docs(project)_2026_04_13_1803
 - **新增(project)**: README 补充 Conda 后端环境创建指南，新增 `pip install -i https://pypi.tuna.tsinghua.edu.cn/simple` 清华源加速说明
 
-### �💻 客户端_2026_04_13_1754
+### � 客户端_2026_04_13_1754
 - **重构(client_electron)**: 删除冗余的 `desktop_client` 目录，统一桌面端架构为基于 Electron 的 `client_electron` 模块
 - **重构(skills)**: 修改 `desktop_client` 审查规范为重定向通知，引导使用者使用 `electron` 的开发规范
 
