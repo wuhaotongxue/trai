@@ -38,6 +38,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_2055
+- **新增(client_electron)**: 配置 nsis 打包规则，补充开始菜单快捷方式生成以及完善的 Windows 卸载程序配置
+- **修复(client_electron)**: 修复打包后自定义 TitleBar 上的图片图标由于绝对路径 `/kity.svg` 导致的加载失败碎图问题
+
 ### 💻 客户端_2026_04_13_2045
 - **修复(client_electron)**: 配置 `kity_16.ico` 专门用于系统托盘图标，配置 `kity_256.ico` 用于应用主窗口图标及 electron-builder 打包图标
 
