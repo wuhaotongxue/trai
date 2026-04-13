@@ -20,6 +20,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 📚 docs(project)_2026_04_13_1115
+- **新增(tools)**: 新增 `backend/verify_schema.py` 自动化脚本，验证 `database_schema.md` 与 Model 源码字段一致性（8 张表全部通过）
+- **增强(rules)**: `rules/database.md` 新增主表文档强制维护规范，规定每次提交前必须运行验证脚本
+- **增强(schema)**: `database_schema.md` 重写表定义，与 Model 源码字段严格对齐，通过自动化验证
+
 ### 📚 docs(project)_2026_04_10_1613
 - **新增(skills)**: 新增期数文档技能 `issue_index/SKILL.md`，规范 `md/issue_NN/index.md` 写作（锚点/git log/分段/内联色块）
 - **新增(docs)**: 新增第 3 期文档 `md/issue_03/index.md`（Agent 工具与工作流落地），配样式 `md/issue_docs.css`
