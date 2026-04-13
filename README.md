@@ -2,6 +2,24 @@
 
 一个用于实验与沉淀代码片段的小仓库。
 
+## 环境要求
+
+- **后端 Python 环境**: `trai_31313_20260413` (Conda) / Python 3.13.13
+
+### 使用 Conda 创建后端环境（推荐使用清华源）
+
+```bash
+# 1. 创建 conda 虚拟环境
+conda create -n trai_31313_20260413 python=3.13.13 -y
+
+# 2. 激活环境
+conda activate trai_31313_20260413
+
+# 3. 安装依赖（使用清华源加速）
+cd backend
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -e .
+```
+
 ## 快速开始
 
 ```bash
@@ -20,7 +38,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### 💻 客户端_2026_04_13_1754
+### � docs(project)_2026_04_13_1803
+- **新增(project)**: README 补充 Conda 后端环境创建指南，新增 `pip install -i https://pypi.tuna.tsinghua.edu.cn/simple` 清华源加速说明
+
+### �💻 客户端_2026_04_13_1754
 - **重构(client_electron)**: 删除冗余的 `desktop_client` 目录，统一桌面端架构为基于 Electron 的 `client_electron` 模块
 - **重构(skills)**: 修改 `desktop_client` 审查规范为重定向通知，引导使用者使用 `electron` 的开发规范
 
