@@ -211,13 +211,37 @@ class AIServiceUnavailableError(TraiException):
         super().__init__(message, code=503, details=details)
 
 
+class NotFoundError(ResourceNotFoundError):
+    """资源不存在异常（别名）"""
+
+    def __init__(
+        self,
+        message: str = "资源不存在",
+        details: dict | None = None,
+    ) -> None:
+        super().__init__(message, details=details)
+
+
+class ConflictError(DuplicateResourceError):
+    """资源重复异常（别名）"""
+
+    def __init__(
+        self,
+        message: str = "资源已存在",
+        details: dict | None = None,
+    ) -> None:
+        super().__init__(message, details=details)
+
+
 __all__ = [
     "TraiException",
     "ValidationError",
     "AuthenticationError",
     "AuthorizationError",
     "ResourceNotFoundError",
+    "NotFoundError",
     "DuplicateResourceError",
+    "ConflictError",
     "RateLimitError",
     "ExternalServiceError",
     "ThirdPartyServiceError",

@@ -20,7 +20,7 @@
 **所有字段必须有中文注释，格式如下：**
 
 ```python
-from sqlalchemy import JSON, DateTime, Integer, String, Text
+from sqlalchemy import JSON, BigInteger, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 class ChatSessionModel(Base):
@@ -28,7 +28,7 @@ class ChatSessionModel(Base):
     __tablename__ = "chat_sessions"
     __comment__ = "AI 对话会话表，存储会话元数据和消息历史"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """会话唯一标识 UUID"""
@@ -92,10 +92,40 @@ msg_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 ## 5. 主键规范
 
-**��束**：
+**约束**：
+- ✅ BigInt Identity（推荐）
 - ✅ UUID
-- ✅ BigInt Identity
-- ❌ 禁止 Serial (PostgreSQL 自增)
+- ❌ 禁止 Serial（PostgreSQL 自增旧式写法）
+
+**为什么禁止 Serial**：
+
+| 特性 | Serial | BigInt Identity |
+|------|--------|-----------------|
+| 字段类型 | INTEGER（32 位，最大 21 亿） | BIGINT（64 位，最大 9.2 京） |
+| SQL 标准 | PostgreSQL 特有 | SQL:2003 标准 |
+| 适用场景 | 快速原型 | 生产环境必选 |
+
+详细原理见 `md/postgresql_identity.md`。
+
+**SQLAlchemy 正确写法**：
+
+```python
+from sqlalchemy import BigInteger
+
+id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+```
+
+❌ **错误（会生成 Serial，32 位上限）**：
+```python
+id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+```
+
+✅ **正确（生成 BigInt Identity，64 位）**：
+```python
+from sqlalchemy import BigInteger
+
+id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+```
 
 ---
 
@@ -115,6 +145,63 @@ msg_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 - 必须为表本身添加 `__comment__`
 - 必须为所有字段添加 docstring 注释
 - 无注释拒绝创建表
+
+**数据库 COMMENT 强制检查流程（新增 Model 时必须执行）**：
+
+新增 Model 后，除了在 Python 代码中写注释，还必须同步到数据库。两种方式：
+
+**方式一：手动执行 SQL（开发阶段）**
+
+```sql
+-- 表注释
+COMMENT ON TABLE table_name IS '表用途说明';
+
+-- 字段注释
+COMMENT ON COLUMN table_name.column_name IS '字段用途说明';
+```
+
+**方式二：运行注释脚本（生产环境推荐）**
+
+```python
+# 在 backend/ 下创建 add_comments.py，执行：
+# 1. 读取所有 Model 的 __comment__ 和字段 docstring
+# 2. 生成 COMMENT ON TABLE / COLUMN SQL
+# 3. 连接到数据库执行
+```
+
+**禁止直接用 Navicat 等工具创建表**，必须通过 SQLAlchemy + Alembic 迁移。迁移文件中同样要包含 `comment=` 参数。
+
+**开发检查清单**：
+
+```
+[ ] Model 类有 __comment__（表注释）
+[ ] 每个字段有 docstring（字段注释）
+[ ] 主键使用 BigInteger（不是 Integer + autoincrement=True）
+[ ] 迁移文件包含 comment= 参数
+[ ] 数据库中 COMMENT 已写入（验证脚本确认）
+```
+
+**验证脚本**：
+
+```python
+import psycopg2
+
+conn = psycopg2.connect(host='...', port=..., user='...', password='...', database='...')
+cur = conn.cursor()
+
+cur.execute("""
+    SELECT c.relname, pgd.description
+    FROM pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+    LEFT JOIN pg_catalog.pg_description pgd ON pgd.objoid = c.oid AND pgd.objsubid = 0
+    WHERE c.relkind = 'r' AND n.nspname = 'public'
+""")
+for row in cur.fetchall():
+    if row[1] is None:
+        print(f"[WARN] Table {row[0]} has no COMMENT!")
+    else:
+        print(f"[OK] Table {row[0]}: {row[1]}")
+```
 
 ---
 
