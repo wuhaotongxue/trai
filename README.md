@@ -38,6 +38,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_2105
+- **新增(client_electron)**: 实现系统托盘双击呼出主窗口的功能
+- **新增(client_electron)**: 新增 `Platform` 层的 `ConfigStore` 配置服务，用于基于本地 JSON 文件持久化存储应用设置
+- **新增(client_electron)**: 完善 `Settings` 系统设置页面，接入 `config:get` 与 `config:set` IPC 接口，实现后端 API 服务器地址的本地存储
+
 ### 💻 客户端_2026_04_13_2055
 - **新增(client_electron)**: 配置 nsis 打包规则，补充开始菜单快捷方式生成以及完善的 Windows 卸载程序配置
 - **修复(client_electron)**: 修复打包后自定义 TitleBar 上的图片图标由于绝对路径 `/kity.svg` 导致的加载失败碎图问题
