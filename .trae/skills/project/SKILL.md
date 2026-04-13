@@ -49,6 +49,17 @@ TRAI 项目管理相关规范的统一入口。
 | 函数名 | `get_meeting_detail()` | `getMeetingDetail()` |
 | 类名 | `MeetingExport` (PascalCase) | `meetingExport` |
 
+### 3. 全局配置文件管理 (CRITICAL)
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 强制要求</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>只允许在项目根目录存在一个 <code>.gitignore</code> 文件</strong></li>
+    <li>禁止在各子模块（如 <code>frontend_next</code>、<code>backend</code>、<code>client_electron</code> 等）中单独创建 <code>.gitignore</code></li>
+    <li>子模块的忽略规则必须统一提升并合并到根目录的 <code>.gitignore</code> 中，并使用对应的前缀进行约束（如 <code>frontend_next/node_modules/</code>）</li>
+  </ul>
+</div>
+
 ---
 
 ## 版本历史
