@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, Integer, String, Text
+from sqlalchemy import JSON, DateTime, Integer, String, BigInteger, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -22,7 +22,7 @@ class ChatSessionModel(Base):
     __tablename__ = "chat_sessions"
     __comment__ = "AI 对话会话表，存储会话元数据和消息历史"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """会话唯一标识 UUID"""
@@ -49,7 +49,7 @@ class MessageModel(Base):
     __tablename__ = "messages"
     __comment__ = "AI 对话消息表，存储单条消息内容"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     session_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """关联的会话 ID"""
@@ -68,7 +68,7 @@ class QuotaPlanModel(Base):
     __tablename__ = "quota_plans"
     __comment__ = "配额套餐表，定义各角色的月度配额上限"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     plan_name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     """套餐名称"""
@@ -99,7 +99,7 @@ class UserQuotaUsageModel(Base):
     __tablename__ = "user_quota_usage"
     __comment__ = "用户配额使用表，按自然月记录各类型配额消耗"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -134,7 +134,7 @@ class QuotaTransactionLogModel(Base):
     __tablename__ = "quota_transaction_log"
     __comment__ = "配额变动流水表，记录每次配额增减及原因"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -165,7 +165,7 @@ class ImageGenerationModel(Base):
     __tablename__ = "image_generations"
     __comment__ = "AI 图片生成任务表，存储图片生成请求和结果"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
@@ -210,7 +210,7 @@ class UploadTaskModel(Base):
     __tablename__ = "upload_tasks"
     __comment__ = "文件上传任务表，存储上传请求和结果"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
     """自增主键 ID"""
     task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
