@@ -36,7 +36,7 @@ class QuotaRepository:
         Returns:
             QuotaPlanModel | None: 配额套餐
         """
-        stmt = select(QuotaPlanModel).where(QuotaPlanModel.user_role == role)
+        stmt = select(QuotaPlanModel).where(QuotaPlanModel.t_user_role == role)
         result = self._session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -53,16 +53,16 @@ class QuotaRepository:
             UserQuotaUsageModel: 配额使用记录
         """
         stmt = select(UserQuotaUsageModel).where(
-            UserQuotaUsageModel.user_id == user_id,
-            UserQuotaUsageModel.billing_month == billing_month,
+            UserQuotaUsageModel.t_user_id == user_id,
+            UserQuotaUsageModel.t_billing_month == billing_month,
         )
         result = self._session.execute(stmt)
         record = result.scalar_one_or_none()
 
         if record is None:
             record = UserQuotaUsageModel(
-                user_id=user_id,
-                billing_month=billing_month,
+                t_user_id=user_id,
+                t_billing_month=billing_month,
             )
             self._session.add(record)
             self._session.flush()
@@ -83,8 +83,8 @@ class QuotaRepository:
             UserQuotaUsageModel | None: 配额使用记录
         """
         stmt = select(UserQuotaUsageModel).where(
-            UserQuotaUsageModel.user_id == user_id,
-            UserQuotaUsageModel.billing_month == billing_month,
+            UserQuotaUsageModel.t_user_id == user_id,
+            UserQuotaUsageModel.t_billing_month == billing_month,
         )
         result = self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -102,13 +102,13 @@ class QuotaRepository:
             int: 已用数量
         """
         field_map: dict[str, str] = {
-            "image_generation": "image_generation_used",
-            "audio_synthesis": "audio_synthesis_used",
-            "transcription_minutes": "transcription_minutes_used",
-            "meeting_summary": "meeting_summary_used",
-            "ai_translation": "ai_translation_used",
-            "ai_summarization": "ai_summarization_used",
-            "agent_tool_call": "agent_tool_call_used",
+            "image_generation": "t_image_generation_used",
+            "audio_synthesis": "t_audio_synthesis_used",
+            "transcription_minutes": "t_transcription_minutes_used",
+            "meeting_summary": "t_meeting_summary_used",
+            "ai_translation": "t_ai_translation_used",
+            "ai_summarization": "t_ai_summarization_used",
+            "agent_tool_call": "t_agent_tool_call_used",
         }
         field = field_map.get(quota_type)
         if field:
@@ -128,13 +128,13 @@ class QuotaRepository:
             int: 配额上限（0 表示无限制）
         """
         field_map: dict[str, str] = {
-            "image_generation": "image_generation_limit",
-            "audio_synthesis": "audio_synthesis_limit",
-            "transcription_minutes": "transcription_minutes_limit",
-            "meeting_summary": "meeting_summary_limit",
-            "ai_translation": "ai_translation_limit",
-            "ai_summarization": "ai_summarization_limit",
-            "agent_tool_call": "agent_tool_call_limit",
+            "image_generation": "t_image_generation_limit",
+            "audio_synthesis": "t_audio_synthesis_limit",
+            "transcription_minutes": "t_transcription_minutes_limit",
+            "meeting_summary": "t_meeting_summary_limit",
+            "ai_translation": "t_ai_translation_limit",
+            "ai_summarization": "t_ai_summarization_limit",
+            "agent_tool_call": "t_agent_tool_call_limit",
         }
         field = field_map.get(quota_type)
         if field:
@@ -158,19 +158,19 @@ class QuotaRepository:
             int: 扣减后的新余额
         """
         field_map: dict[str, str] = {
-            "image_generation": "image_generation_used",
-            "audio_synthesis": "audio_synthesis_used",
-            "transcription_minutes": "transcription_minutes_used",
-            "meeting_summary": "meeting_summary_used",
-            "ai_translation": "ai_translation_used",
-            "ai_summarization": "ai_summarization_used",
-            "agent_tool_call": "agent_tool_call_used",
+            "image_generation": "t_image_generation_used",
+            "audio_synthesis": "t_audio_synthesis_used",
+            "transcription_minutes": "t_transcription_minutes_used",
+            "meeting_summary": "t_meeting_summary_used",
+            "ai_translation": "t_ai_translation_used",
+            "ai_summarization": "t_ai_summarization_used",
+            "agent_tool_call": "t_agent_tool_call_used",
         }
         field = field_map.get(quota_type)
         if field:
             current = getattr(record, field, 0)
             setattr(record, field, current + delta)
-            record.updated_at = datetime.now()
+            record.t_updated_at = datetime.now()
             self._session.flush()
             return current + delta
         return 0
@@ -203,16 +203,16 @@ class QuotaRepository:
             trace_id: 链路追踪 ID
         """
         log = QuotaTransactionLogModel(
-            user_id=user_id,
-            billing_month=billing_month,
-            transaction_type=transaction_type,
-            quota_type=quota_type,
-            delta=delta,
-            balance_before=balance_before,
-            balance_after=balance_after,
-            tool_id=tool_id,
-            session_id=session_id,
-            trace_id=trace_id,
+            t_user_id=user_id,
+            t_billing_month=billing_month,
+            t_transaction_type=transaction_type,
+            t_quota_type=quota_type,
+            t_delta=delta,
+            t_balance_before=balance_before,
+            t_balance_after=balance_after,
+            t_tool_id=tool_id,
+            t_session_id=session_id,
+            t_trace_id=trace_id,
         )
         self._session.add(log)
         self._session.flush()
@@ -232,15 +232,15 @@ class QuotaRepository:
                 continue
 
             plan = QuotaPlanModel(
-                plan_name=name,
-                user_role=role,
-                image_generation_limit=limits[0],
-                audio_synthesis_limit=limits[1],
-                transcription_minutes_limit=limits[2],
-                meeting_summary_limit=limits[3],
-                ai_translation_limit=limits[4],
-                ai_summarization_limit=limits[5],
-                agent_tool_call_limit=limits[6],
+                t_plan_name=name,
+                t_user_role=role,
+                t_image_generation_limit=limits[0],
+                t_audio_synthesis_limit=limits[1],
+                t_transcription_minutes_limit=limits[2],
+                t_meeting_summary_limit=limits[3],
+                t_ai_translation_limit=limits[4],
+                t_ai_summarization_limit=limits[5],
+                t_agent_tool_call_limit=limits[6],
             )
             self._session.add(plan)
 

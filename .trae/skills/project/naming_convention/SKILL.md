@@ -1,5 +1,5 @@
 ---
-name: "naming-convention-spec"
+name: "naming-convention"
 description: "TRAI 项目命名规范。强制所有代码（前端/后端/客户端）使用 snake_case 命名法，禁止 kebab-case（中间横杠）。创建或修改任何代码文件时立即应用此规范。"
 ---
 

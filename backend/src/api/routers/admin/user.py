@@ -91,15 +91,15 @@ async def list_users(
         total=total,
         users=[
             UserListItem(
-                user_id=u.user_id,
-                username=u.username,
-                display_name=u.display_name,
-                email=u.email,
-                avatar_url=u.avatar_url,
-                role=u.role.value,
-                status=u.status.value,
-                tenant_id=u.tenant_id,
-                created_at=u.created_at.isoformat() if u.created_at else None,
+                user_id=u.t_user_id,
+                username=u.t_username,
+                display_name=u.t_display_name,
+                email=u.t_email,
+                avatar_url=u.t_avatar_url,
+                role=u.t_role.value,
+                status=u.t_status.value,
+                tenant_id=u.t_tenant_id,
+                created_at=u.t_created_at.isoformat() if u.t_created_at else None,
             )
             for u in users
         ],
@@ -135,15 +135,15 @@ async def get_user(
         )
 
     return UserListItem(
-        user_id=user.user_id,
-        username=user.username,
-        display_name=user.display_name,
-        email=user.email,
-        avatar_url=user.avatar_url,
-        role=user.role.value,
-        status=user.status.value,
-        tenant_id=user.tenant_id,
-        created_at=user.created_at.isoformat() if user.created_at else None,
+        user_id=user.t_user_id,
+        username=user.t_username,
+        display_name=user.t_display_name,
+        email=user.t_email,
+        avatar_url=user.t_avatar_url,
+        role=user.t_role.value,
+        status=user.t_status.value,
+        tenant_id=user.t_tenant_id,
+        created_at=user.t_created_at.isoformat() if user.t_created_at else None,
     )
 
 
@@ -242,7 +242,7 @@ async def delete_user(
     user_repo.soft_delete(user_id)
 
     return ActionResponse(
-        message=f"用户 {existing.username} 已删除",
+        message=f"用户 {existing.t_username} 已删除",
         user_id=user_id,
     )
 

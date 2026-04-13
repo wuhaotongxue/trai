@@ -75,20 +75,20 @@ async def get_current_user_info(
         )
 
     # 基于角色生成权限列表
-    permissions = _get_permissions_by_role(user.role.value)
+    permissions = _get_permissions_by_role(user.t_role.value)
 
     return MeResponse(
         user=UserInfo(
-            user_id=user.user_id,
-            username=user.username,
-            email=user.email,
-            display_name=user.display_name,
-            avatar_url=user.avatar_url,
-            role=user.role.value,
-            status=user.status.value,
-            tenant_id=user.tenant_id,
-            created_at=user.created_at.isoformat() if user.created_at else None,
-            updated_at=user.updated_at.isoformat() if user.updated_at else None,
+            user_id=user.t_user_id,
+            username=user.t_username,
+            email=user.t_email,
+            display_name=user.t_display_name,
+            avatar_url=user.t_avatar_url,
+            role=user.t_role.value,
+            status=user.t_status.value,
+            tenant_id=user.t_tenant_id,
+            created_at=user.t_created_at.isoformat() if user.t_created_at else None,
+            updated_at=user.t_updated_at.isoformat() if user.t_updated_at else None,
         ),
         permissions=permissions,
     )

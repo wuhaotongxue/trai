@@ -1,6 +1,6 @@
 ---
-name: "project"
-description: "项目管理规范入口。涉及 Git 提交、命名规范、README 更新、周报生成等项目管理流程时调用。"
+name: "project_management"
+description: "项目管理规范索引。包含 Git 提交、命名规范、README 更新、周报生成等项目管理相关的规范文档。"
 ---
 
 # Project_项目管理规范
@@ -15,6 +15,7 @@ TRAI 项目管理相关规范的统一入口。
 | Git 提交 | `git_submit/SKILL.md` | 提交代码时 |
 | README 更新 | `readme_update/SKILL.md` | 更新文档时 |
 | 周报生成 | `report_generation/SKILL.md` | 生成工作周报/月报时 |
+| 期数文档 | `issue_index/SKILL.md` | 撰写 `md/issue_NN/index.md`，按上期锚点与 git log 归纳 |
 
 ---
 
