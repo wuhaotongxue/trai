@@ -20,15 +20,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### 📚 docs(project)_2026_04_13_1041
-- **新增(docs)**: 新增 `md/postgresql_identity.md`，详解 Serial / BigInt Identity / autoincrement 三种方案区别与选型建议
-- **新增(docs)**: 新增 `md/client_architecture.md`（PyQt6 客户端架构文档）与 `md/electron_architecture.md`（Electron 客户端架构文档）
-- **新增(docs)**: 新增 `md/issue_03/index.md` 第 3 期文档（Agent 工具与工作流落地）
-- **增强(database)**: `rules/database.md` 补充主键 BigInteger 规范、SQLAlchemy 正确写法与数据库 COMMENT 强制检查流程
-- **增强(skills)**: `backend/SKILL.md` 索引新增数据库表总览入口，`rules/database.md` 修正 `is_deleted` 为 `deleted_at`
-- **增强(database)**: 修复 `database.py` 中 `URL.create()` 密码含 `@` 导致解析失败的问题
-- **增强(database)**: 将所有 Model 主键从 `Integer` 改为 `BigInteger`（与 BigInt Identity 规范对齐）
-- **增强(database)**: 补充数据库所有表和字段的中文 COMMENT（8 张表 + 全部字段）
+### 📚 docs(project)_2026_04_13_1115
+- **新增(tools)**: 新增 `backend/verify_schema.py` 自动化脚本，验证 `database_schema.md` 与 Model 源码字段一致性（8 张表全部通过）
+- **增强(rules)**: `rules/database.md` 新增主表文档强制维护规范，规定每次提交前必须运行验证脚本
+- **增强(schema)**: `database_schema.md` 重写表定义，与 Model 源码字段严格对齐，通过自动化验证
 
 ### 📚 docs(project)_2026_04_10_1613
 - **新增(skills)**: 新增期数文档技能 `issue_index/SKILL.md`，规范 `md/issue_NN/index.md` 写作（锚点/git log/分段/内联色块）
