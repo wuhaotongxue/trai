@@ -11,6 +11,12 @@ import { register_ipc_handlers } from './ipc/index'
 
 log.info('app starting...')
 
+// 提升 tray 变量到外层作用域，防止被 V8 垃圾回收导致托盘消失
+let tray: Tray | null = null
+let main_window: BrowserWindow | null = null
+// 是否真正退出应用的标记
+let is_quitting = false
+
 // 保证应用单例运行 (软件唯一性)
 const got_the_lock = app.requestSingleInstanceLock()
 
@@ -18,11 +24,6 @@ if (!got_the_lock) {
   log.warn('检测到另一个实例正在运行，即将退出并提示用户...')
   app.quit()
 } else {
-  let tray: Tray | null = null
-  let main_window: BrowserWindow | null = null
-  // 是否真正退出应用的标记
-  let is_quitting = false
-
   app.on('second-instance', () => {
     // 当运行第二个实例时，如果主窗口存在，则使其获得焦点
     if (main_window) {
@@ -76,10 +77,12 @@ if (!got_the_lock) {
 }
 
 const create_tray = () => {
-  // 生成一个简单的蓝色方块作为托盘默认图标
-  const icon = nativeImage.createFromDataURL(
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAADFJREFUOE9jZKAQMFKon2EQjP7//x+bAQSsIC4OwhkGTYMRHhgNRkMzEBoQ/P8PRkMzjBvAAHWTEkL/I1U0AwA3oQ8g3HjK8AAAAABJRU5ErkJggg=='
-  )
+  // 使用 kity.png 作为托盘图标
+  const icon_path = process.env.VITE_DEV_SERVER_URL
+    ? join(__dirname, '../../public/kity.png')
+    : join(__dirname, '../kity.png')
+    
+  const icon = nativeImage.createFromPath(icon_path).resize({ width: 16, height: 16 })
   tray = new Tray(icon)
   const context_menu = Menu.buildFromTemplate([
     { label: '显示主界面', click: () => main_window?.show() },
