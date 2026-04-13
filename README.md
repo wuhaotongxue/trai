@@ -20,7 +20,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### � 客户端_2026_04_13_1556
+### 💻 客户端_2026_04_13_1607
+- **配置(client_electron)**: 在项目根目录的 `.gitignore` 中补充了 `client_electron` 的相关构建产物和依赖忽略规则
+
+### 💻 客户端_2026_04_13_1556
 - **重构(client_electron)**: 依据防关键字冲突规范，将 `electron` 目录重命名为 `client_electron`
 
 ### 🎨 前端_2026_04_13_1556
