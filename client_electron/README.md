@@ -49,6 +49,11 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_2113
+- **重构(client_electron)**: 完善 `Login` 与 `Register` 页面组件，接入真实的 IPC 接口 `auth_login` 与 `auth_register`，并处理后端 API 错误提示
+- **新增(client_electron)**: 注册表单新增 `email` 字段以适配后端接口要求，并更新 `use_auth_store` 状态保存逻辑
+- **修复(client_electron)**: 更新 `auth.ts` 服务层与 `Settings` 页面的默认后端 API 端口为真实的 `5666`
+
 ### 💻 客户端_2026_04_13_2105
 - **新增(client_electron)**: 实现系统托盘双击呼出主窗口的功能
 - **新增(client_electron)**: 新增 `Platform` 层的 `ConfigStore` 配置服务，用于基于本地 JSON 文件持久化存储应用设置

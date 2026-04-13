@@ -10,5 +10,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 contextBridge.exposeInMainWorld('electron_api', {
   get_system_info: () => ipcRenderer.invoke('system:get_info'),
   config_get: (key: string, default_value?: any) => ipcRenderer.invoke('config:get', key, default_value),
-  config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value)
+  config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value),
+  auth_login: (params: any) => ipcRenderer.invoke('auth:login', params),
+  auth_register: (params: any) => ipcRenderer.invoke('auth:register', params)
 })

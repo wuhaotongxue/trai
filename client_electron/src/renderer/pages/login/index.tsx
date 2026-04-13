@@ -16,7 +16,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
 
-  const handle_submit = (e: React.FormEvent) => {
+  const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!username || !password) {
@@ -24,9 +24,23 @@ const Login: React.FC = () => {
       return
     }
 
-    // 模拟登录请求成功
-    login({ username, email: `${username}@trai.local`, role: 'admin' })
-    navigate('/')
+    try {
+      const res = await window.electron_api.auth_login({ username, password })
+      if (res.success && res.data) {
+        // 登录成功
+        const user_info = res.data.user
+        login({ 
+          username: user_info.username || username, 
+          email: user_info.email || `${username}@trai.local`, 
+          role: user_info.role || 'user' 
+        })
+        navigate('/')
+      } else {
+        set_error_msg(res.error || '登录失败，请检查用户名和密码')
+      }
+    } catch (err: any) {
+      set_error_msg(err.message || '登录异常')
+    }
   }
 
   return (
