@@ -49,7 +49,7 @@ TRAI 项目管理相关规范的统一入口。
 | 函数名 | `get_meeting_detail()` | `getMeetingDetail()` |
 | 类名 | `MeetingExport` (PascalCase) | `meetingExport` |
 
-### 3. 全局配置文件管理 (CRITICAL)
+### 3. 全局配置文件与依赖管理 (CRITICAL)
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 强制要求</strong>
@@ -57,6 +57,7 @@ TRAI 项目管理相关规范的统一入口。
     <li><strong>只允许在项目根目录存在一个 <code>.gitignore</code> 文件</strong></li>
     <li>禁止在各子模块（如 <code>frontend_next</code>、<code>backend</code>、<code>client_electron</code> 等）中单独创建 <code>.gitignore</code></li>
     <li>子模块的忽略规则必须统一提升并合并到根目录的 <code>.gitignore</code> 中，并使用对应的前缀进行约束（如 <code>frontend_next/node_modules/</code>）</li>
+    <li><strong>绝对禁止上传任何依赖包或构建产物</strong>：无论是前端（node_modules）、后端（.venv, __pycache__）还是客户端（dist, release），在提交代码前必须确认这些目录已被 <code>.gitignore</code> 正确忽略。</li>
   </ul>
 </div>
 
@@ -64,6 +65,7 @@ TRAI 项目管理相关规范的统一入口。
 
 ## 版本历史
 
-|| 版本 | 日期 | 更新内容 |
+| 版本 | 日期 | 更新内容 |
 |------|------|---------|
+| v1.1 | 2026-04-13 17:31:12 | 新增全局配置文件与依赖管理（.gitignore 与禁止上传依赖/产物）规范 |
 | v1.0 | 2026-04-08 | 初版发布 |
