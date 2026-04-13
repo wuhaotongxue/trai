@@ -51,5 +51,11 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
   }
 }
