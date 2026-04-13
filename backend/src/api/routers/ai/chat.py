@@ -133,8 +133,8 @@ async def chat_stream(
 async def chat_with_session(
     session_id: Annotated[str, Body(description="会话 ID")],
     content: Annotated[str, Body(description="用户消息内容")],
-    model: Annotated[str, Body(default="gpt-4o", description="模型名称")] = "gpt-4o",
-    temperature: Annotated[float, Body(ge=0, le=2, default=0.7)] = 0.7,
+    model: Annotated[str, Body(description="模型名称")] = "gpt-4o",
+    temperature: Annotated[float, Body(ge=0, le=2)] = 0.7,
     current_user: CurrentUser = None,
 ) -> ChatResponse:
     """在新会话中发送消息并自动创建会话

@@ -11,7 +11,7 @@ import os
 from typing import Any
 
 from passlib.context import CryptContext
-from passlib.exceptions import UnknownHashError
+from passlib.exc import UnknownHashError
 
 from core.exceptions import ConfigurationError
 
