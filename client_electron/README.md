@@ -47,5 +47,9 @@ npm run build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_2015
+- **重构(client_electron)**: 将桌面客户端默认主题从深色模式修改为 Win11 亮色主题，应用全白背景与微边框设计
+- **新增(client_electron)**: 使用 `kity.svg` 替换默认应用图标与顶栏图标
+
 ### 💻 客户端_2026_04_13_1955
 - **新增(client_electron)**: 初始化 Electron 客户端的 README.md 说明文档

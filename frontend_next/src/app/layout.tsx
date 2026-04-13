@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "TRAI 是一个强大的 AI 智能助手平台，支持多工具调用、Agent 自动化、VLM 视觉理解与流式交互",
   keywords: ["AI", "Agent", "智能助手", "工具调用", "大模型", "GPT"],
   icons: {
-    icon: "/favicon.svg",
+    icon: "/kity.svg",
   },
 };
 

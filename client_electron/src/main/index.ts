@@ -25,8 +25,8 @@ const create_window = () => {
     // 隐藏原生边框，保留系统控制按钮 (Win11 风格)
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#202020',
-      symbolColor: '#ffffff',
+      color: '#f3f3f3',
+      symbolColor: '#202020',
       height: 36
     },
     webPreferences: {

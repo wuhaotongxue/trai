@@ -25,11 +25,11 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#202020', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f3f3f3', overflow: 'hidden' }}>
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: '#202020' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: '#f3f3f3' }}>
           <Outlet />
         </div>
       </div>
