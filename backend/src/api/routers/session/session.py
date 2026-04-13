@@ -265,7 +265,7 @@ async def list_sessions(
 
 
 @router.get("/sessions/{session_id}", response_model=SessionDetailResponse, tags=["会话"])
-async def get_session(
+async def get_session_detail(
     session_id: str,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
