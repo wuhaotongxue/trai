@@ -62,7 +62,7 @@ def create_admin_user(
     try:
         # 检查是否已存在管理员
         result = session.execute(
-            text("SELECT id FROM users WHERE username = :username AND deleted_at IS NULL"),
+            text("SELECT t_id FROM t_users WHERE t_username = :username AND t_deleted_at IS NULL"),
             {"username": username},
         )
         existing = result.fetchone()
@@ -80,15 +80,15 @@ def create_admin_user(
         now = datetime.now()
 
         admin = UserModel(
-            user_id=user_id,
-            username=username,
-            display_name=display_name,
-            email=email,
-            password_hash=password_hash,
-            role="admin",
-            status="active",
-            created_at=now,
-            updated_at=now,
+            t_user_id=user_id,
+            t_username=username,
+            t_display_name=display_name,
+            t_email=email,
+            t_password_hash=password_hash,
+            t_role="admin",
+            t_status="active",
+            t_created_at=now,
+            t_updated_at=now,
         )
 
         session.add(admin)
@@ -155,10 +155,10 @@ def show_users() -> None:
 
     try:
         result = session.execute(text("""
-            SELECT user_id, username, email, role, status, created_at
-            FROM users
-            WHERE deleted_at IS NULL
-            ORDER BY created_at DESC
+            SELECT t_user_id, t_username, t_email, t_role, t_status, t_created_at
+            FROM t_users
+            WHERE t_deleted_at IS NULL
+            ORDER BY t_created_at DESC
         """))
         users = result.fetchall()
 

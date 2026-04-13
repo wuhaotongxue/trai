@@ -20,6 +20,20 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_13_1521
+- **修复(frontend)**: 修复前端组件（navbar, pricing, settings）中出现的乱码及中文全角标点问题
+
+### 🛠️ 后端_2026_04_13_1521
+- **修复(backend)**: 补齐后端缺失依赖（redis, opentelemetry），修正 `UserModel` 导入路径，确保后端服务成功启动
+
+### 📚 docs(skills)_2026_04_13_1521
+- **新增(skills)**: 将 `.cursor/skills` 下的所有规范配置文件平滑迁移至 `.trae/skills`，完成 Trae Agent 的技能装配
+
+### 📚 docs(project)_2026_04_13_1155
+- **重构(database)**: 所有表改用 `t_` 前缀（t_users/t_chat_sessions/t_messages 等），防止与 SQL 关键字冲突
+- **新增(database)**: 所有表新增 `created_by`/`updated_by`/`deleted_by` 审计字段，完善数据血缘追踪
+- **新增(rules)**: `rules/database.md` 补充表命名 `t_` 前缀规范，替代旧的复数命名规则
+
 ### 📚 docs(project)_2026_04_13_1115
 - **新增(tools)**: 新增 `backend/verify_schema.py` 自动化脚本，验证 `database_schema.md` 与 Model 源码字段一致性（8 张表全部通过）
 - **增强(rules)**: `rules/database.md` 新增主表文档强制维护规范，规定每次提交前必须运行验证脚本

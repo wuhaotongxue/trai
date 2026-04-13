@@ -8,11 +8,25 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.engine.url import URL
+
+# 加载 backend/.env 配置
+# __file__ = e:\code\zzgit\trai\backend\src\infrastructure\database\database.py
+# parent.parent.parent = e:\code\zzgit\trai\backend\src
+# parent.parent.parent.parent = e:\code\zzgit\trai\backend
+_env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
+if _env_path.exists():
+    with open(_env_path, "r", encoding="utf-8") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _key, _val = _line.split("=", 1)
+                os.environ[_key.strip()] = _val.strip()
 
 
 class Base(DeclarativeBase):

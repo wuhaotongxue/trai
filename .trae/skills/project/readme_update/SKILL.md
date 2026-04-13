@@ -1,5 +1,5 @@
 ---
-name: "readme-update-spec"
+name: "readme-update"
 description: >-
   自动更新 README 的 Changelog 条目。用户要求更新日志/写 README 或提交前需要补齐 README 时调用。
 ---
@@ -24,8 +24,17 @@ description: >-
 <div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#F57F17;">&#x26A0; 必须使用系统当前时间</strong>
   <div style="margin-top:8px;font-size:13px;color:#555;">
-    标题格式：<code>模块_YYYY_MM_DD_HHmm</code>，例如：<code>后端_2026_04_08_1430</code>
+    标题格式：<code>模块_YYYY_MM_DD_HHmm</code>，例如：<code>后端_2026_04_08_1430</code> 或 <code>前端_2026_04_08_1430</code>
   </div>
+</div>
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 严禁使用综合标签</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;color:#555;">
+    <li>当一次提交包含多个模块修改时，<strong>必须按模块拆分标题</strong>。</li>
+    <li>禁止写 <code>综合_2026_04...</code>。</li>
+    <li>正确做法是分块编写：<code>### 前端_时间</code>、<code>### 后端_时间</code>、<code>### 客户端_时间</code> 等。</li>
+  </ul>
 </div>
 
 ### 3. 归纳本次变更的要点

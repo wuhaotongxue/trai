@@ -16,9 +16,9 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-tables = ["users", "chat_sessions", "messages", "quota_plans",
-          "user_quota_usage", "quota_transaction_log",
-          "image_generations", "upload_tasks"]
+tables = ["t_users", "t_chat_sessions", "t_messages", "t_quota_plans",
+          "t_user_quota_usage", "t_quota_transaction_log",
+          "t_image_generations", "t_upload_tasks"]
 
 for tname in tables:
     cur.execute("""
