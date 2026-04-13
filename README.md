@@ -38,6 +38,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 📚 规范(skills)_2026_04_13_2005
+- **新增(skills)**: 增加绝对禁止上传测试脚本 (如 `check_comments.py`) 及大于 500MB 文件的强制约束, 更新全局 `.gitignore`
+
+### 📚 docs(project)_2026_04_13_1955
+- **新增(docs)**: 补充 backend, frontend_next, client_electron 各子模块的 README 文档, 并更新根目录 README
+- **修复(frontend_next)**: 修复 frontend_next 被错误识别为子模块的问题, 并将其代码提交推送至 wuhao 分支
+
 ### 💻 客户端_2026_04_13_1945
 - **新增(client_electron)**: 在主进程 `main/index.ts` 中集成系统托盘 (Tray) 并在窗口配置中启用无边框样式 (`titleBarStyle: 'hidden'`)
 - **重构(client_electron)**: 按照 Win11 Fluent Design 风格全面重构 UI，使用暗色 Mica 背景 (`#202020`) 与蓝色主题色，并增加自定义可拖拽顶栏 (`TitleBar`)
