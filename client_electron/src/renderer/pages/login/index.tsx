@@ -10,8 +10,8 @@ import { use_auth_store } from '@/store/auth'
 import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
-  const [username, set_username] = useState('')
-  const [password, set_password] = useState('')
+  const [username, set_username] = useState('admin')
+  const [password, set_password] = useState('admin123')
   const [error_msg, set_error_msg] = useState('')
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
