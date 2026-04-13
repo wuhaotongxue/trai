@@ -9,13 +9,7 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 
 // 拓展 window 对象类型
-declare global {
-  interface Window {
-    electron_api: {
-      get_system_info: () => Promise<{ success: boolean; data?: any; error?: string }>
-    }
-  }
-}
+
 
 const App: React.FC = () => {
   return <RouterProvider router={router} />

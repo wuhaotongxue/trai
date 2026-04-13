@@ -37,5 +37,8 @@ python src/run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_13_2135
+- **修复(auth)**: 修复 `login.py` 中由于数据库模型更新导致 `user` 实体错误调用 `t_` 前缀属性而引起的 `AttributeError` 异常
+
 ### 🛠️ 后端_2026_04_13_1955
 - **新增(backend)**: 初始化后端模块的 README.md 说明文档
