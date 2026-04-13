@@ -68,7 +68,7 @@ async def login(
         )
 
     # 获取密码哈希并验证
-    password_hash = user_repo.get_password_hash(user.user_id)
+    password_hash = user_repo.get_password_hash(user.t_user_id)
     if not password_hash:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,12 +91,12 @@ async def login(
 
     # 生成令牌
     access_token = jwt_service.create_access_token(
-        user_id=user.user_id,
-        username=user.username,
-        role=user.role.value,
-        tenant_id=user.tenant_id,
+        user_id=user.t_user_id,
+        username=user.t_username,
+        role=user.t_role.value,
+        tenant_id=user.t_tenant_id,
     )
-    refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
+    refresh_token = jwt_service.create_refresh_token(user_id=user.t_user_id)
 
     return LoginResponse(
         access_token=access_token,
@@ -104,11 +104,11 @@ async def login(
         token_type="Bearer",
         expires_in=30 * 60,
         user={
-            "user_id": user.user_id,
-            "username": user.username,
-            "display_name": user.display_name,
-            "email": user.email,
-            "role": user.role.value,
+            "user_id": user.t_user_id,
+            "username": user.t_username,
+            "display_name": user.t_display_name,
+            "email": user.t_email,
+            "role": user.t_role.value,
         },
     )
 

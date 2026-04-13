@@ -41,17 +41,17 @@ class UserRepository(IUserRepository):
             User: 用户领域实体
         """
         return User(
-            user_id=model.user_id,
-            username=model.username,
-            display_name=model.display_name,
-            email=model.email,
-            avatar_url=model.avatar_url,
-            role=UserRole(model.role),
-            status=UserStatus(model.status),
-            tenant_id=model.tenant_id,
-            wecom_user_id=model.wecom_user_id,
-            created_at=model.created_at,
-            updated_at=model.updated_at,
+            user_id=model.t_user_id,
+            username=model.t_username,
+            display_name=model.t_display_name,
+            email=model.t_email,
+            avatar_url=model.t_avatar_url,
+            role=UserRole(model.t_role),
+            status=UserStatus(model.t_status),
+            tenant_id=model.t_tenant_id,
+            wecom_user_id=model.t_wecom_user_id,
+            created_at=model.t_created_at,
+            updated_at=model.t_updated_at,
         )
 
     def _to_model(self, user: User, password_hash: str) -> UserModel:
@@ -65,18 +65,18 @@ class UserRepository(IUserRepository):
             UserModel: 用户数据库模型
         """
         return UserModel(
-            user_id=user.user_id,
-            username=user.username,
-            display_name=user.display_name,
-            email=user.email,
-            password_hash=password_hash,
-            avatar_url=user.avatar_url,
-            role=user.role.value,
-            status=user.status.value,
-            tenant_id=user.tenant_id,
-            wecom_user_id=user.wecom_user_id,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
+            t_user_id=user.user_id,
+            t_username=user.username,
+            t_display_name=user.display_name,
+            t_email=user.email,
+            t_password_hash=password_hash,
+            t_avatar_url=user.avatar_url,
+            t_role=user.role.value,
+            t_status=user.status.value,
+            t_tenant_id=user.tenant_id,
+            t_wecom_user_id=user.wecom_user_id,
+            t_created_at=user.created_at,
+            t_updated_at=user.updated_at,
         )
 
     def create(self, **kwargs: Any) -> User:
@@ -123,8 +123,8 @@ class UserRepository(IUserRepository):
             User | None: 用户实体，不存在或已删除返回 None
         """
         stmt = select(UserModel).where(
-            UserModel.user_id == user_id,
-            UserModel.deleted_at.is_(None),
+            UserModel.t_user_id == user_id,
+            UserModel.t_deleted_at.is_(None),
         )
         model = self._session.scalar(stmt)
         return self._to_entity(model) if model else None
@@ -140,8 +140,8 @@ class UserRepository(IUserRepository):
             User | None: 用户实体
         """
         stmt = select(UserModel).where(
-            UserModel.username == username,
-            UserModel.deleted_at.is_(None),
+            UserModel.t_username == username,
+            UserModel.t_deleted_at.is_(None),
         )
         model = self._session.scalar(stmt)
         return self._to_entity(model) if model else None
@@ -157,8 +157,8 @@ class UserRepository(IUserRepository):
             User | None: 用户实体
         """
         stmt = select(UserModel).where(
-            UserModel.email == email,
-            UserModel.deleted_at.is_(None),
+            UserModel.t_email == email,
+            UserModel.t_deleted_at.is_(None),
         )
         model = self._session.scalar(stmt)
         return self._to_entity(model) if model else None
@@ -173,8 +173,8 @@ class UserRepository(IUserRepository):
             User | None: 用户实体
         """
         stmt = select(UserModel).where(
-            UserModel.wecom_user_id == wecom_user_id,
-            UserModel.deleted_at.is_(None),
+            UserModel.t_wecom_user_id == wecom_user_id,
+            UserModel.t_deleted_at.is_(None),
         )
         model = self._session.scalar(stmt)
         return self._to_entity(model) if model else None
@@ -188,11 +188,11 @@ class UserRepository(IUserRepository):
         Returns:
             str | None: 密码哈希
         """
-        stmt = select(UserModel.password_hash).where(UserModel.user_id == user_id)
+        stmt = select(UserModel.t_password_hash).where(UserModel.t_user_id == user_id)
         return self._session.scalar(stmt)
 
     def update(self, user_id: str, **kwargs: Any) -> User | None:
-        """更新用户信息
+        """更��用户信息
 
         Args:
             user_id: 用户唯一标识
@@ -203,8 +203,8 @@ class UserRepository(IUserRepository):
         """
         stmt = (
             update(UserModel)
-            .where(UserModel.user_id == user_id, UserModel.deleted_at.is_(None))
-            .values(**kwargs, updated_at=datetime.now())
+            .where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
+            .values(**kwargs, t_updated_at=datetime.now())
             .returning(UserModel)
         )
         model = self._session.scalar(stmt)
@@ -229,8 +229,8 @@ class UserRepository(IUserRepository):
         """
         stmt = (
             update(UserModel)
-            .where(UserModel.user_id == user_id, UserModel.deleted_at.is_(None))
-            .values(deleted_at=datetime.now())
+            .where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
+            .values(t_deleted_at=datetime.now())
         )
         result = self._session.execute(stmt)
         self._session.commit()
@@ -260,14 +260,14 @@ class UserRepository(IUserRepository):
         Returns:
             list[User]: 用户实体列表
         """
-        stmt = select(UserModel).where(UserModel.deleted_at.is_(None))
+        stmt = select(UserModel).where(UserModel.t_deleted_at.is_(None))
 
         if tenant_id:
-            stmt = stmt.where(UserModel.tenant_id == tenant_id)
+            stmt = stmt.where(UserModel.t_tenant_id == tenant_id)
         if role:
-            stmt = stmt.where(UserModel.role == role)
+            stmt = stmt.where(UserModel.t_role == role)
         if status:
-            stmt = stmt.where(UserModel.status == status)
+            stmt = stmt.where(UserModel.t_status == status)
 
         stmt = stmt.offset(offset).limit(limit)
         models = self._session.scalars(stmt).all()
@@ -284,14 +284,14 @@ class UserRepository(IUserRepository):
         Returns:
             int: 用户总数
         """
-        stmt = select(UserModel).where(UserModel.deleted_at.is_(None))
+        stmt = select(UserModel).where(UserModel.t_deleted_at.is_(None))
 
         if tenant_id:
-            stmt = stmt.where(UserModel.tenant_id == tenant_id)
+            stmt = stmt.where(UserModel.t_tenant_id == tenant_id)
         if role:
-            stmt = stmt.where(UserModel.role == role)
+            stmt = stmt.where(UserModel.t_role == role)
         if status:
-            stmt = stmt.where(UserModel.status == status)
+            stmt = stmt.where(UserModel.t_status == status)
 
         return len(self._session.scalars(stmt).all())
 

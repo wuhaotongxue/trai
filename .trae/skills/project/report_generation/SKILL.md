@@ -1,5 +1,5 @@
 ---
-name: "report-generation-spec"
+name: "report-generation"
 description: "周报/月报生成模块规范。用于生成结构化工作周报/月报，支持 Git 分析、Excel 导入、AI 生成与导出。"
 ---
 

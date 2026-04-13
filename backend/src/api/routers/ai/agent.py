@@ -235,12 +235,12 @@ async def get_user_quota(
         role=role,
         quotas=[
             QuotaStatusResponse(
-                quota_type=s.quota_type,
-                used=s.used,
-                limit=s.limit,
-                remaining=s.remaining,
-                unlimited=s.unlimited,
-                billing_month=s.billing_month,
+                quota_type=s.t_quota_type,
+                used=s.t_used,
+                limit=s.t_limit,
+                remaining=s.t_remaining,
+                unlimited=s.t_unlimited,
+                billing_month=s.t_billing_month,
             )
             for s in statuses
         ],

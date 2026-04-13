@@ -1,6 +1,6 @@
 ---
-name: "backend"
-description: "Backend 规范与审查入口。修改 backend 目录下的 Python 代码时调用，用于按 DDD 五层、Python/数据库/API/S3 等规范进行检查。"
+name: "backend_code_check_wuhao"
+description: "用于自动格式化和检查 backend 目录下的 Python 代码。当修改完后台代码或用户要求格式化后台代码时调用此技能，强制执行 DDD 5层架构、类封装规范（每个 .py 必须有类，所有函数必须封装在类中）、文件头规范与标点符号规范。"
 ---
 
 # Backend_Code_Review_(Wuhao)
@@ -13,6 +13,7 @@ description: "Backend 规范与审查入口。修改 backend 目录下的 Python
 |--------|------|----------|
 | Python 规范 | `rules/python.md` | 必读 |
 | 数据库规范 | `rules/database.md` | 新增 Model 时 |
+| 数据库表总览 | `database_schema.md` | 查看表结构时 |
 | API 设计规范 | `api_design/routes.md` | 新增 API 时 |
 | S3 存储与访问控制 | `storage/s3_access.md` | 涉及文件上传/下载时 |
 | DDD 五层架构 | `architecture/layered.md` | 必读 |
@@ -74,7 +75,7 @@ description: "Backend 规范与审查入口。修改 backend 目录下的 Python
 |------|------|
 | 表名 | 复数 snake_case (`users`, `meeting_records`) |
 | 主键 | UUID 或 BigInt Identity (**禁止 Serial**) |
-| 必备字段 | `created_at`, `updated_at`, `is_deleted` |
+| 必备字段 | `created_at`, `updated_at`, `deleted_at` |
 | 强制注释 | 表和每个字段必须有中文 `comment` |
 | 查询红线 | 禁止 `SELECT *`、禁止 N+1 (必须 joinedload)、禁止裸 SQL 拼接 |
 | 迁移规范 | **禁止在生产环境执行 DDL**，必须使用 Alembic |
@@ -92,13 +93,53 @@ description: "Backend 规范与审查入口。修改 backend 目录下的 Python
 
 ### 7. 文件头模板 (MANDATORY)
 
+#### Python 文件模板
+
 ```python
 #!/usr/bin/env python
-# _*_coding:_utf_8_*_
-# 文件名:_{实际文件名}
-# 作者:_wuhao
-# 日期:_{YYYY_MM_DD_HH:MM:SS}
-# 描述:_{该文件的用途/功能简述，一句话概括}
+# -*- coding: utf-8 -*-
+# 文件名: {实际文件名}
+# 作者: wuhao
+# 日期: 2026_04_09_10:47:12  ← 当前时间（每次修改配置时刷新）
+# 描述: {该文件的用途/功能简述，一句话概括}
+```
+
+#### .env.example 文件模板
+
+```bash
+# ============================================================
+# TRAI Backend Environment Configuration
+# 文件名: .env
+# 作者: wuhao
+# 日期: 2026_04_09_10:47:12  ← 当前时间（每次修改配置时刷新）
+# 描述: {配置文件用途简述}
+# 说明: {补充说明}
+# ============================================================
+```
+
+<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#E65100;">&#x26A0; 时间获取强制流程</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>第一步：获取当前时间</strong> — 任何涉及日期的操作前，必须先调用 Shell 执行 <code>date +%Y_%m_%d_%H:%M:%S</code> 或 <code>Get-Date -Format "yyyy_MM_dd_HH:mm:ss"</code></li>
+    <li><strong>第二步：使用获取到的时间</strong> — 将第一步获取的时间填入日期字段</li>
+    <li><strong>禁止使用预估值或固定值</strong> — 严禁用记忆中的时间、估算时间或历史时间</li>
+    <li><strong>禁止使用 AI 内部时间</strong> — AI 训练数据中的时间不是真实时间</li>
+  </ul>
+</div>
+
+#### 错误示例（禁止）
+
+```bash
+# 日期: 2026_04_09_17:30:00    # ❌ 估算/记忆的时间
+# 日期: 2026_01_01_00:00:00    # ❌ 固定历史时间
+# 日期: {current_time}          # ❌ 未获取真实时间
+```
+
+#### 正确示例
+
+```bash
+# 假设当前时间是 2026_04_09_10:45:00
+# 日期: 2026_04_09_10:45:00    # ✅ 使用真实获取的时间
 ```
 
 ### 8. Docstring 全覆盖 (MANDATORY)
