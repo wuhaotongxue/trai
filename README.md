@@ -38,6 +38,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_1932
+- **修复(client_electron)**: 修复打包后应用出现白屏的问题，修正 Vite 生产环境相对路径 (`base: './'`) 及 Main 进程 HTML 加载路径
+
 ### 💻 客户端_2026_04_13_1814
 - **新增(client_electron)**: 引入 `react-router-dom`、`zustand` 和 `lucide-react`，完成前端模块化路由与全局状态配置
 - **新增(client_electron)**: 封装 `MainLayout` 与 `Sidebar`（包含仪表盘、设置与登出菜单）
