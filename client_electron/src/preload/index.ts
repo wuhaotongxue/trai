@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld('electron_api', {
   config_get: (key: string, default_value?: any) => ipcRenderer.invoke('config:get', key, default_value),
   config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value),
   auth_login: (params: any) => ipcRenderer.invoke('auth:login', params),
-  auth_register: (params: any) => ipcRenderer.invoke('auth:register', params)
+  auth_register: (params: any) => ipcRenderer.invoke('auth:register', params),
+  auth_logout: () => ipcRenderer.invoke('auth:logout')
 })

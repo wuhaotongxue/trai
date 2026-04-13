@@ -5,5 +5,6 @@ interface Window {
     config_set: (key: string, value: any) => Promise<{ success: boolean; error?: string }>;
     auth_login: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_register: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+    auth_logout: () => Promise<{ success: boolean; error?: string }>;
   }
 }
