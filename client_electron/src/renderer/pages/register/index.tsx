@@ -10,16 +10,17 @@ import TitleBar from '@/components/layout/title_bar'
 
 const Register: React.FC = () => {
   const [username, set_username] = useState('')
+  const [email, set_email] = useState('')
   const [password, set_password] = useState('')
   const [confirm_password, set_confirm_password] = useState('')
   const [error_msg, set_error_msg] = useState('')
   const navigate = useNavigate()
 
-  const handle_submit = (e: React.FormEvent) => {
+  const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!username || !password) {
-      set_error_msg('用户名和密码不能为空')
+    if (!username || !email || !password) {
+      set_error_msg('用户名、邮箱和密码不能为空')
       return
     }
 
@@ -28,9 +29,17 @@ const Register: React.FC = () => {
       return
     }
 
-    // 模拟注册成功并返回登录页
-    alert('注册成功, 请登录')
-    navigate('/login')
+    try {
+      const res = await window.electron_api.auth_register({ username, email, password })
+      if (res.success) {
+        alert('注册成功，请登录')
+        navigate('/login')
+      } else {
+        set_error_msg(res.error || '注册失败')
+      }
+    } catch (err: any) {
+      set_error_msg(err.message || '注册异常')
+    }
   }
 
   return (
@@ -48,6 +57,18 @@ const Register: React.FC = () => {
                 onChange={(e) => set_username(e.target.value)}
                 style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                 placeholder="请输入用户名"
+                onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
+                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+              />
+            </div>
+            <div>
+              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>邮箱</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => set_email(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                placeholder="请输入邮箱"
                 onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
                 onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
               />

@@ -8,10 +8,12 @@ import { ipcMain } from 'electron'
 import log from 'electron-log'
 import { get_system_info } from '../platform/index'
 import { config_store } from '../platform/config_store'
+import { auth_service } from '../services/auth'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
 
+  // ===================== 系统和配置 =====================
   ipcMain.handle('system:get_info', async () => {
     try {
       const info = get_system_info()
@@ -41,5 +43,14 @@ export const register_ipc_handlers = (): void => {
       log.error('failed to set config', error)
       return { success: false, error: 'failed to set config' }
     }
+  })
+
+  // ===================== 用户认证 =====================
+  ipcMain.handle('auth:login', async (_, params: any) => {
+    return await auth_service.login(params)
+  })
+
+  ipcMain.handle('auth:register', async (_, params: any) => {
+    return await auth_service.register(params)
   })
 }

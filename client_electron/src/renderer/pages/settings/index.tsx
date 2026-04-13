@@ -13,7 +13,7 @@ const Settings: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       if (window.electron_api?.config_get) {
-        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:8000')
+        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
         if (res.success) {
           set_api_url(res.data)
         }
