@@ -1,0 +1,23 @@
+{
+  "builtinSkillIds": [
+    "create-rule",
+    "create-skill",
+    "create-subagent",
+    "migrate-to-skills",
+    "shell",
+    "update-cursor-settings"
+  ],
+  "managedSkillIds": [
+    "trai-skills-index",
+    "backend_code_check_wuhao",
+    "desktop_client_code_review",
+    "frontend_next_code_review",
+    "electron",
+    "agent_harness_engineering",
+    "project_management",
+    "git_submit",
+    "report-generation",
+    "readme-update",
+    "naming-convention"
+  ]
+}

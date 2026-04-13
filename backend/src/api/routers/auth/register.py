@@ -125,9 +125,9 @@ async def register(
     )
 
     return RegisterResponse(
-        user_id=user.user_id,
-        username=user.username,
-        email=user.email,
+        user_id=user.t_user_id,
+        username=user.t_username,
+        email=user.t_email,
         message="注册成功",
     )
 

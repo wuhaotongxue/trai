@@ -1,5 +1,5 @@
 ---
-name: "readme-update-spec"
+name: "readme-update"
 description: >-
   自动更新 README 的 Changelog 条目。用户要求更新日志/写 README 或提交前需要补齐 README 时调用。
 ---
