@@ -37,6 +37,7 @@
     "directories": {
       "output": "release"
     },
+    "icon": "public/kity_256.ico",
     "files": [
       "dist/**/*",
       "package.json"

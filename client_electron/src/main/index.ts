@@ -41,11 +41,17 @@ if (!got_the_lock) {
   })
 
   const create_window = () => {
+  // 使用 256x256 的 ICO 作为窗口图标
+  const window_icon = process.env.VITE_DEV_SERVER_URL
+    ? join(__dirname, '../../public/kity_256.ico')
+    : join(__dirname, '../kity_256.ico')
+
   main_window = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    icon: window_icon,
     // 隐藏原生边框，保留系统控制按钮 (Win11 风格)
     titleBarStyle: 'hidden',
     titleBarOverlay: {
@@ -77,12 +83,12 @@ if (!got_the_lock) {
 }
 
 const create_tray = () => {
-  // 使用 kity.png 作为托盘图标
+  // 使用 16x16 的 ICO 作为系统托盘图标
   const icon_path = process.env.VITE_DEV_SERVER_URL
-    ? join(__dirname, '../../public/kity.png')
-    : join(__dirname, '../kity.png')
+    ? join(__dirname, '../../public/kity_16.ico')
+    : join(__dirname, '../kity_16.ico')
     
-  const icon = nativeImage.createFromPath(icon_path).resize({ width: 16, height: 16 })
+  const icon = nativeImage.createFromPath(icon_path)
   tray = new Tray(icon)
   const context_menu = Menu.buildFromTemplate([
     { label: '显示主界面', click: () => main_window?.show() },
