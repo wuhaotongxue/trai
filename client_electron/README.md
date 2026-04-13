@@ -49,6 +49,10 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_2140
+- **增强(client_electron)**: `auth.ts` 服务层增加 Token 持久化与 Axios 请求拦截器，实现自动携带 `Authorization` 头，方便后续受保护接口调用
+- **新增(client_electron)**: `auth.ts` 增加 `logout` 方法并在 IPC 暴露 `auth:logout` 通道，在侧边栏实现完整的登出功能（清理服务端状态与本地 Token）
+
 ### 💻 客户端_2026_04_13_2125
 - **修复(client_electron)**: 修复由于未创建默认管理员导致登录出现 401 `用户名或密码错误` 的问题，并在后端执行 `init_db.py --create-admin` 初始化数据
 - **优化(client_electron)**: 解决 `env.d.ts` 与 `app.tsx` 的类型冲突问题，使 `pnpm build` 能够顺利通过编译并完成打包

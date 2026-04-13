@@ -53,4 +53,8 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('auth:register', async (_, params: any) => {
     return await auth_service.register(params)
   })
+
+  ipcMain.handle('auth:logout', async () => {
+    return await auth_service.logout()
+  })
 }

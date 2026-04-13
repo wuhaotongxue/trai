@@ -16,9 +16,17 @@ const Sidebar: React.FC = () => {
   const user = use_auth_store((state) => state.user)
   const [collapsed, set_collapsed] = useState(false)
 
-  const handle_logout = () => {
-    logout()
-    navigate('/login')
+  const handle_logout = async () => {
+    try {
+      if (window.electron_api?.auth_logout) {
+        await window.electron_api.auth_logout()
+      }
+    } catch (error) {
+      console.error('logout error:', error)
+    } finally {
+      logout()
+      navigate('/login')
+    }
   }
 
   const nav_items = [
