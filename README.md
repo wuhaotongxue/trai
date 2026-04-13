@@ -20,6 +20,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_13_1754
+- **重构(client_electron)**: 删除冗余的 `desktop_client` 目录，统一桌面端架构为基于 Electron 的 `client_electron` 模块
+- **重构(skills)**: 修改 `desktop_client` 审查规范为重定向通知，引导使用者使用 `electron` 的开发规范
+
 ### 📚 规范(skills)_2026_04_13_1730
 - **新增(skills)**: 全局项目配置规范中追加“绝对禁止上传任何依赖包或构建产物（如 node_modules, .venv 等）”的强约束
 
