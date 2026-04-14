@@ -38,6 +38,12 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_0855
+- **修复(client_electron)**: 移除了第三方 `form-data` 依赖，改用 Node.js 20 内部原生支持的 `FormData` 与 `Blob` 接口，解决 Vite/Rollup 打包时产生的 `[vite]: Rollup failed to resolve import "form-data"` 报错问题
+
+### 🛠️ 后端_2026_04_14_0855
+- **修复(backend)**: 修正了 `.env` 中 `MODELSCOPE_API_BASE` 的默认值为 `https://dashscope.aliyuncs.com/compatible-mode/v1`（阿里云百炼兼容端），解决由于旧版域名引发的大模型请求 `[Errno 11001] getaddrinfo failed` DNS 解析错误
+
 ### 💻 客户端_2026_04_14_0840
 - **新增(client_electron)**: 新增 `AI 对话` 界面，支持与后端 Agent 交互并解析展示思维链（CoT）推理过程
 - **新增(client_electron)**: 在主进程服务层实现 `agent_service.ts` 及对应的 `agent:chat` IPC 调用

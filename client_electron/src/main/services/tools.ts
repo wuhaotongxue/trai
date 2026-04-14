@@ -8,7 +8,6 @@ import axios from 'axios'
 import log from 'electron-log'
 import fs from 'fs'
 import path from 'path'
-import FormData from 'form-data'
 import { config_store } from '../platform/config_store'
 
 const get_api_base_url = () => {
@@ -35,15 +34,11 @@ export const tools_service = {
       const url = `${get_api_base_url()}/api/tools/md_to_pdf`
       const form_data = new FormData()
       
-      const file_stream = fs.createReadStream(file_path)
+      const file_buffer = await fs.promises.readFile(file_path)
       const filename = path.basename(file_path)
-      form_data.append('file', file_stream, filename)
+      form_data.append('file', new Blob([file_buffer]), filename)
       
-      const res = await api_client.post(url, form_data, {
-        headers: {
-          ...form_data.getHeaders()
-        }
-      })
+      const res = await api_client.post(url, form_data)
       
       return { success: true, data: res.data }
     } catch (error: any) {
@@ -63,15 +58,11 @@ export const tools_service = {
       const url = `${get_api_base_url()}/api/tools/compress_image?quality=${quality}`
       const form_data = new FormData()
       
-      const file_stream = fs.createReadStream(file_path)
+      const file_buffer = await fs.promises.readFile(file_path)
       const filename = path.basename(file_path)
-      form_data.append('file', file_stream, filename)
+      form_data.append('file', new Blob([file_buffer]), filename)
       
-      const res = await api_client.post(url, form_data, {
-        headers: {
-          ...form_data.getHeaders()
-        }
-      })
+      const res = await api_client.post(url, form_data)
       
       return { success: true, data: res.data }
     } catch (error: any) {
@@ -92,16 +83,12 @@ export const tools_service = {
       const form_data = new FormData()
       
       for (const file_path of file_paths) {
-        const file_stream = fs.createReadStream(file_path)
+        const file_buffer = await fs.promises.readFile(file_path)
         const filename = path.basename(file_path)
-        form_data.append('files', file_stream, filename)
+        form_data.append('files', new Blob([file_buffer]), filename)
       }
       
-      const res = await api_client.post(url, form_data, {
-        headers: {
-          ...form_data.getHeaders()
-        }
-      })
+      const res = await api_client.post(url, form_data)
       
       return { success: true, data: res.data }
     } catch (error: any) {
