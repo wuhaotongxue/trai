@@ -268,6 +268,30 @@ class UploadTaskModel(Base):
     """最后修改人 user_id"""
 
 
+class ClientReleaseModel(Base):
+    """客户端版本发布模型"""
+
+    __tablename__ = "t_client_releases"
+    __comment__ = "客户端版本发布表,记录 Electron 客户端的各个版本信息及 S3 路径"
+
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    """自增主键 ID"""
+    t_version: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
+    """版本号,例如 0.1.0"""
+    t_release_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """更新日志"""
+    t_latest_yml_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    """S3 中 latest.yml 文件的 Key"""
+    t_installer_exe_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    """S3 中安装包 .exe 文件的 Key"""
+    t_is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    """是否激活(可用于下线有 bug 的版本)"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    """创建时间"""
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """发布人 user_id"""
+
+
 __all__ = [
     "Base",
     "ChatSessionModel",
@@ -278,4 +302,5 @@ __all__ = [
     "QuotaTransactionLogModel",
     "ImageGenerationModel",
     "UploadTaskModel",
+    "ClientReleaseModel",
 ]

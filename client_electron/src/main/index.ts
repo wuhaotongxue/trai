@@ -9,6 +9,7 @@ import { join } from 'path'
 import log from 'electron-log'
 import { register_ipc_handlers } from './ipc/index'
 import { config_store } from './platform/config_store'
+import { UpdateService } from './services/update_service'
 
 log.info('app starting...')
 
