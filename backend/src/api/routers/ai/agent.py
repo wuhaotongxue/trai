@@ -44,11 +44,11 @@ class AgentChatResponse(BaseModel):
     trace_id: str = Field(description="链路追踪 ID")
 
 
-@router.post("/agent/chat", response_model=AgentChatResponse, tags=["Agent"])
+@router.post("/agent/chat", tags=["Agent"])
 async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
-) -> AgentChatResponse:
+) -> Any:
     """Agent 对话（支持多轮工具调用）
 
     支持 AI 自动调用工具（天气/搜索/翻译/计算等），
@@ -79,7 +79,20 @@ async def agent_chat(
         {"role": "user", "content": request.message},
     ]
 
-    result = await executor.execute(messages, context)
+    result = await executor.execute(messages, context, stream=request.stream)
+    
+    if request.stream:
+        # 如果是流式响应，executor.execute 会返回一个 AsyncGenerator
+        from fastapi.responses import StreamingResponse
+        
+        async def event_generator():
+            import json
+            async for event in result:
+                # event is a dict containing type, content, etc.
+                yield f"data: {json.dumps(event)}\n\n"
+            yield "data: [DONE]\n\n"
+            
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
     
     # 提取所有步骤中的思维链并拼接
     reasoning_parts = []

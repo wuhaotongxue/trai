@@ -45,7 +45,7 @@ class SearchTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="utility.search",
+                id="utility_search",
                 name="联网搜索",
                 description="搜索互联网上的相关信息，返回标题、摘要和链接",
                 category=ToolCategory.UTILITY,

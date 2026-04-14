@@ -38,7 +38,7 @@ class WeatherTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="weather.current",
+                id="weather_current",
                 name="天气查询",
                 description="查询指定城市的当前天气情况，包括温度、湿度、风力、空气质量等",
                 category=ToolCategory.UTILITY,

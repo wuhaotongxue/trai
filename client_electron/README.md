@@ -49,6 +49,10 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_0940
+- **新增(client_electron)**: 实现 AI 助手对话的打字机（流式响应）效果，逐字渲染思维链与最终结果
+- **优化(client_electron)**: 修复流式数据中 `JSON.parse` 截断导致的粘包报错问题
+
 ### 💻 客户端_2026_04_14_0855
 - **修复(client_electron)**: 移除了第三方 `form-data` 依赖，改用 Node.js 20 内部原生支持的 `FormData` 与 `Blob` 接口，解决 Vite/Rollup 打包时产生的 `[vite]: Rollup failed to resolve import "form-data"` 报错问题
 

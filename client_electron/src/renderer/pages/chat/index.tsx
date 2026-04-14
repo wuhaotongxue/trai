@@ -14,7 +14,7 @@ interface ChatMessage {
 
 const AgentChat: React.FC = () => {
   const [messages, set_messages] = useState<ChatMessage[]>([])
-  const [input, set_input] = useState('')
+  const [input, set_input] = useState('今天北京天气怎么样？')
   const [loading, set_loading] = useState(false)
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
@@ -29,33 +29,61 @@ const AgentChat: React.FC = () => {
     scroll_to_bottom()
   }, [messages])
 
+  useEffect(() => {
+    if (window.electron_api?.on_agent_chat_chunk) {
+      const cleanup = window.electron_api.on_agent_chat_chunk((_event: any, chunk: any) => {
+        set_messages(prev => {
+          const new_msgs = [...prev]
+          if (new_msgs.length > 0) {
+            const last_msg = { ...new_msgs[new_msgs.length - 1] }
+            if (last_msg.role === 'assistant') {
+              if (chunk.type === 'token' && chunk.content) {
+                last_msg.content += chunk.content
+              } else if (chunk.type === 'reasoning' && chunk.content) {
+                last_msg.reasoning_content = (last_msg.reasoning_content || '') + chunk.content
+              }
+              new_msgs[new_msgs.length - 1] = last_msg
+            }
+          }
+          return new_msgs
+        })
+      })
+      return cleanup
+    }
+  }, [])
+
   const handle_send = async () => {
     if (!input.trim()) return
     
     const user_msg = input.trim()
     set_input('')
     set_messages(prev => [...prev, { role: 'user', content: user_msg }])
+    
+    // Add empty assistant message for streaming
+    set_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '' }])
     set_loading(true)
     
     try {
       const res = await window.electron_api.agent_chat(session_id, user_msg)
-      if (res.success && res.data) {
-        set_messages(prev => [...prev, { 
-          role: 'assistant', 
-          content: res.data.content,
-          reasoning_content: res.data.reasoning_content
-        }])
-      } else {
-        set_messages(prev => [...prev, { 
-          role: 'assistant', 
-          content: `[错误]: ${res.error || '请求失败'}` 
-        }])
+      if (!res.success) {
+        set_messages(prev => {
+          const new_msgs = [...prev]
+          new_msgs[new_msgs.length - 1] = { 
+            role: 'assistant', 
+            content: `[错误]: ${res.error || '请求失败'}` 
+          }
+          return new_msgs
+        })
       }
     } catch (err: any) {
-      set_messages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `[异常]: ${err.message}` 
-      }])
+      set_messages(prev => {
+        const new_msgs = [...prev]
+        new_msgs[new_msgs.length - 1] = { 
+          role: 'assistant', 
+          content: `[异常]: ${err.message}` 
+        }
+        return new_msgs
+      })
     } finally {
       set_loading(false)
     }
