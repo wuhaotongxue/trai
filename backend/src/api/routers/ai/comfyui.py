@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: comfyui.py
 # 作者: wuhao
 # 日期: 2026_04_14_15:27:00
@@ -29,9 +28,7 @@ class ComfyUIAPI:
 
     @staticmethod
     @router.post("/generate", summary="提交 ComfyUI 生成任务")
-    async def generate_image(
-        request: ComfyUIGenerateRequest, user: dict[str, Any] = Depends(get_current_user)
-    ) -> Any:
+    async def generate_image(request: ComfyUIGenerateRequest, user: dict[str, Any] = Depends(get_current_user)) -> Any:
         """向 ComfyUI 提交工作流生成图像
 
         Args:
@@ -42,7 +39,7 @@ class ComfyUIAPI:
             提交结果统一响应
         """
         logger.info(f"User {user.get('user_id')} submitted comfyui task: {request.prompt}")
-        
+
         # 模拟后端直接返回一张 Mock 图片（实际应通过 requests 调用本地或远端 ComfyUI /prompt 接口）
         return {
             "code": 200,
@@ -51,7 +48,7 @@ class ComfyUIAPI:
                 "task_id": "comfy-task-001",
                 "status": "completed",
                 # 此处用一张占位图模拟生成的图片
-                "image_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+                "image_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
             },
         }
 
