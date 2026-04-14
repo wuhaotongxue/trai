@@ -36,6 +36,12 @@ class ToolResultResponse(BaseModel):
     expires_in: int = Field(description="链接过期时间 (秒)")
     file_name: str = Field(description="文件名")
     message: str = Field(default="处理成功", description="提示信息")
+    original_size: int | None = Field(default=None, description="原始文件大小(字节)")
+    converted_size: int | None = Field(default=None, description="转换后文件大小(字节)")
+    original_width: int | None = Field(default=None, description="原图宽度")
+    original_height: int | None = Field(default=None, description="原图高度")
+    converted_width: int | None = Field(default=None, description="转换后宽度")
+    converted_height: int | None = Field(default=None, description="转换后高度")
 
 
 class ToolsAPI:
@@ -162,6 +168,8 @@ class ToolsAPI:
         current_user: CurrentUser,
         s3_service: S3StorageService,
         sizes: list[int] | None = None,
+        width: int | None = None,
+        height: int | None = None,
     ) -> ToolResultResponse:
         """图片格式转换接口
 
@@ -186,7 +194,9 @@ class ToolsAPI:
 
         try:
             content = await file.read()
+            original_size = len(content)
             image = Image.open(BytesIO(content))
+            original_width, original_height = image.size
             
             # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式，且原图带 Alpha
             if fmt in ("JPEG", "BMP") and image.mode in ("RGBA", "LA", "P"):
@@ -199,18 +209,30 @@ class ToolsAPI:
                 image = background
                 
             output_buffer = BytesIO()
+            converted_width, converted_height = original_width, original_height
             
             # 保存转换后的图片
             if fmt == "ICO":
                 ico_sizes = [(s, s) for s in sizes] if sizes else [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
                 # Pillow 保存 ICO 时支持 sizes 参数来打包多尺寸
                 image.save(output_buffer, format=fmt, sizes=ico_sizes)
+                if ico_sizes:
+                    converted_width, converted_height = ico_sizes[-1] # use largest for display
             else:
-                if sizes and len(sizes) > 0:
+                if width or height:
+                    target_w = width if width else int(original_width * (height / original_height))
+                    target_h = height if height else int(original_height * (width / original_width))
+                    image = image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                    converted_width, converted_height = target_w, target_h
+                elif sizes and len(sizes) > 0:
+                    # Fallback for older param if still passed for non-ico
                     image = image.resize((sizes[0], sizes[0]), Image.Resampling.LANCZOS)
+                    converted_width, converted_height = sizes[0], sizes[0]
+                    
                 image.save(output_buffer, format=fmt)
                 
             converted_bytes = output_buffer.getvalue()
+            converted_size = len(converted_bytes)
             
             ext = fmt.lower()
             content_type = f"image/{ext}" if ext != "ico" else "image/x-icon"
@@ -226,6 +248,12 @@ class ToolsAPI:
                 url=presigned_url,
                 expires_in=300,
                 file_name=f"{original_name}.{ext}",
+                original_size=original_size,
+                converted_size=converted_size,
+                original_width=original_width,
+                original_height=original_height,
+                converted_width=converted_width,
+                converted_height=converted_height
             )
         except Exception as e:
             logger.error(f"图片格式转换失败: {str(e)}")
@@ -326,10 +354,12 @@ async def convert_image_endpoint(
     file: UploadFile = File(...),
     target_format: str = Form(..., description="目标格式，如 png, jpeg, ico, webp"),
     sizes: str | None = Form(None, description="尺寸列表，逗号分隔，如 16,32,256"),
+    width: int | None = Form(None, description="指定转换宽度(像素)"),
+    height: int | None = Form(None, description="指定转换高度(像素)"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """转换图片格式并上传到 S3 返回限时下载链接"""
     parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
-    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes)
+    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes, width, height)
 
 __all__ = ["router", "ToolsAPI"]

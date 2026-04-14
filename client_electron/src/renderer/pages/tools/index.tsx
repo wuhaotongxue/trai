@@ -10,10 +10,12 @@ import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, Al
 const Tools: React.FC = () => {
   const [loading_task, set_loading_task] = useState<string | null>(null)
   const [result_url, set_result_url] = useState('')
+  const [result_info, set_result_info] = useState<any>(null)
   const [error_msg, set_error_msg] = useState('')
   const [target_image_format, set_target_image_format] = useState('png')
   const [ico_sizes, set_ico_sizes] = useState<number[]>([16, 32, 48, 64, 128, 256])
-  const [other_size, set_other_size] = useState<string>('')
+  const [target_width, set_target_width] = useState<string>('')
+  const [target_height, set_target_height] = useState<string>('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -112,18 +114,24 @@ const Tools: React.FC = () => {
       set_loading_task('convert_image')
       set_error_msg('')
       set_result_url('')
+      set_result_info(null)
       
       let sizes_param: number[] | undefined = undefined
+      let w: number | undefined = undefined
+      let h: number | undefined = undefined
+      
       if (target_image_format === 'ico') {
         sizes_param = ico_sizes.length > 0 ? ico_sizes : undefined
-      } else if (other_size && !isNaN(Number(other_size))) {
-        sizes_param = [Number(other_size)]
+      } else {
+        if (target_width && !isNaN(Number(target_width))) w = Number(target_width)
+        if (target_height && !isNaN(Number(target_height))) h = Number(target_height)
       }
       
       try {
-        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param)
+        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param, w, h)
         if (res.success && res.data) {
           set_result_url(res.data.url)
+          set_result_info(res.data)
         } else {
           set_error_msg(res.error || '格式转换失败')
         }
@@ -228,16 +236,32 @@ const Tools: React.FC = () => {
           )}
           
           {target_image_format !== 'ico' && (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px', minWidth: '60px' }}>目标尺寸:</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '13px', color: '#475569', minWidth: '60px' }}>尺寸(宽x高):</label>
               <input 
                 type="number" 
-                placeholder="如 512，留空保持原图"
-                value={other_size}
-                onChange={(e) => set_other_size(e.target.value)}
+                placeholder="宽"
+                value={target_width}
+                onChange={(e) => set_target_width(e.target.value)}
                 style={{ 
                   flex: 1,
-                  padding: '6px 12px', 
+                  padding: '6px', 
+                  borderRadius: '6px', 
+                  border: '1px solid #cbd5e1', 
+                  fontSize: '13px', 
+                  outline: 'none',
+                  backgroundColor: '#ffffff'
+                }}
+              />
+              <span style={{ color: '#94a3b8' }}>×</span>
+              <input 
+                type="number" 
+                placeholder="高"
+                value={target_height}
+                onChange={(e) => set_target_height(e.target.value)}
+                style={{ 
+                  flex: 1,
+                  padding: '6px', 
                   borderRadius: '6px', 
                   border: '1px solid #cbd5e1', 
                   fontSize: '13px', 
@@ -360,6 +384,18 @@ const Tools: React.FC = () => {
             ) : (
               <div>
                 <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>文件已成功生成，请点击下方按钮下载（链接有效期 5 分钟）。</p>
+                
+                {result_info && result_info.original_size !== undefined && (
+                  <div style={{ marginBottom: '12px', fontSize: '13px', color: '#047857', display: 'flex', gap: '16px', backgroundColor: '#d1fae5', padding: '8px 12px', borderRadius: '6px' }}>
+                    <div>
+                      <strong>处理前:</strong> {result_info.original_width && result_info.original_height ? `${result_info.original_width}x${result_info.original_height}, ` : ''}{(result_info.original_size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                    <div>
+                      <strong>处理后:</strong> {result_info.converted_width && result_info.converted_height ? `${result_info.converted_width}x${result_info.converted_height}, ` : ''}{(result_info.converted_size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                  </div>
+                )}
+                
                 <a 
                   href={result_url} 
                   target="_blank" 

@@ -74,8 +74,8 @@ export const register_ipc_handlers = (): void => {
     return await tools_service.compress_files_to_zip(file_paths)
   })
 
-  ipcMain.handle('tools:convert_image', async (_, file_path: string, target_format: string, sizes?: number[]) => {
-    return await tools_service.convert_image(file_path, target_format, sizes)
+  ipcMain.handle('tools:convert_image', async (_, file_path: string, target_format: string, sizes?: number[], width?: number, height?: number) => {
+    return await tools_service.convert_image(file_path, target_format, sizes, width, height)
   })
 
   // ===================== Agent =====================
