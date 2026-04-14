@@ -138,7 +138,7 @@
 ## 下一步方向
 
 <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px 16px;margin:14px 0;color:#1e40af;">
-  <strong style="color:#1d4ed8;">TRAI 第 5 期剧透</strong>：完善第三方身份认证与基础业务场景落地。
+  <strong style="color:#1d4ed8;">TRAI 第 5 期</strong>：完善第三方身份认证与基础业务场景落地。
 </div>
 
 - **企业微信登录接入**：前端与官网将支持**企业微信（WeCom）扫码与网页登录**，打通第三方账号认证闭环。
