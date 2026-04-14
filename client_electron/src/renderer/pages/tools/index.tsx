@@ -181,9 +181,9 @@ const Tools: React.FC = () => {
       bg_color: '#f0f9ff',
       border_color: '#bae6fd',
       extra_ui: (
-        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px', minWidth: '60px' }}>目标格式:</label>
+        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '13px', color: '#475569' }}>目标格式:</label>
             <select 
               value={target_image_format} 
               onChange={(e) => {
@@ -192,14 +192,14 @@ const Tools: React.FC = () => {
                 set_result_url('')
               }}
               style={{ 
-                padding: '6px 12px', 
+                padding: '8px 12px', 
                 borderRadius: '6px', 
                 border: '1px solid #cbd5e1', 
                 fontSize: '13px',
                 outline: 'none',
                 backgroundColor: '#f8fafc',
                 cursor: 'pointer',
-                flex: 1
+                width: '100%'
               }}
             >
               <option value="png">PNG</option>
@@ -211,8 +211,8 @@ const Tools: React.FC = () => {
           </div>
           
           {target_image_format === 'ico' && (
-            <div>
-              <label style={{ fontSize: '13px', color: '#475569', display: 'block', marginBottom: '6px' }}>打包尺寸 (多选):</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '13px', color: '#475569' }}>打包尺寸 (多选):</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {[16, 32, 48, 64, 128, 256].map(size => (
                   <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
@@ -236,39 +236,45 @@ const Tools: React.FC = () => {
           )}
           
           {target_image_format !== 'ico' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '13px', color: '#475569', minWidth: '60px' }}>尺寸(宽x高):</label>
-              <input 
-                type="number" 
-                placeholder="宽"
-                value={target_width}
-                onChange={(e) => set_target_width(e.target.value)}
-                style={{ 
-                  flex: 1,
-                  padding: '6px', 
-                  borderRadius: '6px', 
-                  border: '1px solid #cbd5e1', 
-                  fontSize: '13px', 
-                  outline: 'none',
-                  backgroundColor: '#ffffff'
-                }}
-              />
-              <span style={{ color: '#94a3b8' }}>×</span>
-              <input 
-                type="number" 
-                placeholder="高"
-                value={target_height}
-                onChange={(e) => set_target_height(e.target.value)}
-                style={{ 
-                  flex: 1,
-                  padding: '6px', 
-                  borderRadius: '6px', 
-                  border: '1px solid #cbd5e1', 
-                  fontSize: '13px', 
-                  outline: 'none',
-                  backgroundColor: '#ffffff'
-                }}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '13px', color: '#475569' }}>尺寸 (宽 x 高):</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="number" 
+                  placeholder="宽 (留空保持原图)"
+                  value={target_width}
+                  onChange={(e) => set_target_width(e.target.value)}
+                  style={{ 
+                    flex: 1,
+                    padding: '8px 12px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #cbd5e1', 
+                    fontSize: '13px', 
+                    outline: 'none',
+                    backgroundColor: '#ffffff',
+                    width: '100%',
+                    minWidth: '0'
+                  }}
+                />
+                <span style={{ color: '#94a3b8' }}>×</span>
+                <input 
+                  type="number" 
+                  placeholder="高 (留空保持原图)"
+                  value={target_height}
+                  onChange={(e) => set_target_height(e.target.value)}
+                  style={{ 
+                    flex: 1,
+                    padding: '8px 12px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #cbd5e1', 
+                    fontSize: '13px', 
+                    outline: 'none',
+                    backgroundColor: '#ffffff',
+                    width: '100%',
+                    minWidth: '0'
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
