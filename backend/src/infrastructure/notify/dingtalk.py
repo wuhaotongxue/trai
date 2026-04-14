@@ -2,7 +2,7 @@
 # 文件名: dingtalk.py
 # 作者: wuhao
 # 日期: 2026_04_09_14:15:00
-# 描述: 钉钉（DingTalk）通知服务实现
+# 描述: 钉钉(DingTalk)通知服务实现
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ class DingTalkNotifyService(BaseNotifyService):
         """生成加签签名
 
         Returns:
-            str | None: 签名字符串，secret 为空时返回 None
+            str | None: 签名字符串,secret 为空时返回 None
         """
         if not self._secret:
             return None
@@ -182,7 +182,7 @@ class DingTalkNotifyService(BaseNotifyService):
 
         Args:
             title: 标题
-            content: 内容（支持 Markdown）
+            content: 内容(支持 Markdown)
             action_title: 按钮文字
             action_url: 点击按钮跳转的 URL
             btn_orientation: 按钮排列方式: 0-按钮竖直排列, 1-按钮横向排列

@@ -23,14 +23,14 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     """对话请求"""
 
-    messages: Annotated[list[dict[str, str]], Field(description="消息列表，每条消息包含 role 和 content")]
+    messages: Annotated[list[dict[str, str]], Field(description="消息列表,每条消息包含 role 和 content")]
     model: Annotated[str, Field(default="gpt-4o", description="模型名称")] = "gpt-4o"
     temperature: Annotated[float, Field(ge=0, le=2, default=0.7, description="温度参数")] = 0.7
     max_tokens: Annotated[int, Field(ge=1, le=128000, default=4096, description="最大 token 数")] = 4096
 
 
 class ChatResponse(BaseModel):
-    """对话响应（非流式）"""
+    """对话响应(非流式)"""
 
     content: str = Field(description="AI 响应内容")
     model: str = Field(description="实际使用的模型")
@@ -43,7 +43,7 @@ async def chat(
     request: ChatRequest,
     current_user: CurrentUser,
 ) -> ChatResponse:
-    """AI 对话接口（非流式）
+    """AI 对话接口(非流式)
 
     Args:
         request: 对话请求参数
@@ -53,7 +53,7 @@ async def chat(
         ChatResponse: AI 响应结果
 
     Raises:
-        HTTPException: AI 服务错误（502）
+        HTTPException: AI 服务错误(502)
     """
     current_user.get("user_id", "")
 
@@ -88,7 +88,7 @@ async def chat_stream(
     request: ChatRequest,
     current_user: CurrentUser,
 ) -> StreamingResponse:
-    """AI 对话接口（流式响应）
+    """AI 对话接口(流式响应)
 
     Args:
         request: 对话请求参数
@@ -153,7 +153,7 @@ async def chat_with_session(
     # 暂时返回占位响应
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail={"code": 501, "message": "此接口正在开发中，请使用 /chat 接口配合 /api/sessions/{id}/messages"},
+        detail={"code": 501, "message": "此接口正在开发中,请使用 /chat 接口配合 /api/sessions/{id}/messages"},
     )
 
 

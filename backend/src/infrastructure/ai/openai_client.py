@@ -2,7 +2,7 @@
 # 文件名: openai_client.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
-# 描述: OpenAI 客户端适配器（支持 Vision 多模态、abort 中断、流式 token 统计）
+# 描述: OpenAI 客户端适配器(支持 Vision 多模态、abort 中断、流式 token 统计)
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ class OpenAIClient:
         """发送对话请求
 
         Args:
-            messages: 消息列表（支持多模态 Vision 内容）
+            messages: 消息列表(支持多模态 Vision 内容)
                 文本消息: {"role": "user", "content": "text"}
                 图片消息: {"role": "user", "content": [
                     {"type": "text", "text": "..."},
@@ -142,22 +142,22 @@ class OpenAIClient:
         tools: list[dict[str, Any]] | None = None,
         abort_event: asyncio.Event | None = None,
     ) -> AsyncIterator[StreamEvent]:
-        """发送流式对话请求（支持 Vision / abort / token 统计）
+        """发送流式对话请求(支持 Vision / abort / token 统计)
 
         事件流格式:
         - token: 普通文本片段
         - tool_call_start: 工具调用开始
         - tool_call_arg: 工具参数增量
         - tool_call_end: 工具调用结束
-        - done: 流结束，包含 usage 统计
+        - done: 流结束,包含 usage 统计
 
         Args:
-            messages: 消息列表（支持多模态 Vision 内容）
+            messages: 消息列表(支持多模态 Vision 内容)
             model: 模型名称
             temperature: 温度参数
             max_tokens: 最大 token 数
             tools: OpenAI tool_calls 格式的工具定义列表
-            abort_event: 中断信号，为 None 则忽略
+            abort_event: 中断信号,为 None 则忽略
 
         Yields:
             StreamEvent: 流式事件
@@ -234,7 +234,7 @@ class OpenAIClient:
 
                             # 新的一个工具调用开始
                             if tc.get("id"):
-                                # 如果上一个工具还在处理中，则先发送结束事件
+                                # 如果上一个工具还在处理中,则先发送结束事件
                                 if in_tool_call and tool_call_id:
                                     yield StreamEvent(
                                         type="tool_call_end",

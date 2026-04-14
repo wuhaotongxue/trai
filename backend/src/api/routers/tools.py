@@ -160,7 +160,7 @@ class ToolsAPI:
                 if best_bytes:
                     output_buffer.write(best_bytes)
                 else:
-                    # 如果连最低质量(1)都无法满足，只能保存最低质量
+                    # 如果连最低质量(1)都无法满足,只能保存最低质量
                     image.save(output_buffer, format="JPEG", quality=1)
             else:
                 image.save(output_buffer, format="JPEG", quality=quality)
@@ -231,7 +231,7 @@ class ToolsAPI:
             image = Image.open(BytesIO(content))
             original_width, original_height = image.size
 
-            # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式，且原图带 Alpha
+            # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式,且原图带 Alpha
             if fmt in ("JPEG", "BMP") and image.mode in ("RGBA", "LA", "P"):
                 # 处理透明背景为白色
                 background = Image.new("RGB", image.size, (255, 255, 255))
@@ -288,7 +288,7 @@ class ToolsAPI:
                     else:
                         image.save(output_buffer, format=fmt, quality=1)
                 else:
-                    # PNG, BMP 等不支持 quality 动态调整，或者未指定大小
+                    # PNG, BMP 等不支持 quality 动态调整,或者未指定大小
                     if fmt in ("JPEG", "WEBP"):
                         image.save(output_buffer, format=fmt, quality=90)
                     else:
@@ -322,7 +322,7 @@ class ToolsAPI:
             logger.error(f"图片格式转换失败: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={"code": 500, "message": "图片格式转换失败，可能是不支持的格式"},
+                detail={"code": 500, "message": "图片格式转换失败,可能是不支持的格式"},
             )
 
     @staticmethod
@@ -395,7 +395,7 @@ async def compress_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
     quality: int = Form(60, description="压缩质量 (1-100)"),
-    target_size_kb: int | None = Form(None, description="目标文件大小(KB)，若指定则动态调整 quality 尝试逼近该大小"),
+    target_size_kb: int | None = Form(None, description="目标文件大小(KB),若指定则动态调整 quality 尝试逼近该大小"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """压缩图片并上传到 S3 返回限时下载链接"""
@@ -416,11 +416,11 @@ async def compress_zip_endpoint(
 async def convert_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
-    target_format: str = Form(..., description="目标格式，如 png, jpeg, ico, webp"),
-    sizes: str | None = Form(None, description="尺寸列表，逗号分隔，如 16,32,256"),
+    target_format: str = Form(..., description="目标格式,如 png, jpeg, ico, webp"),
+    sizes: str | None = Form(None, description="尺寸列表,逗号分隔,如 16,32,256"),
     width: int | None = Form(None, description="指定转换宽度(像素)"),
     height: int | None = Form(None, description="指定转换高度(像素)"),
-    target_size_kb: int | None = Form(None, description="目标大小(KB)，仅对支持压缩的格式如 JPEG/WEBP 有效"),
+    target_size_kb: int | None = Form(None, description="目标大小(KB),仅对支持压缩的格式如 JPEG/WEBP 有效"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """转换图片格式并上传到 S3 返回限时下载链接"""

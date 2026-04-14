@@ -2,7 +2,7 @@
 # 文件名: policy_engine.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:12:17
-# 描述: 策略引擎 - 高危操作三态决策（allow/deny/ask）
+# 描述: 策略引擎 - 高危操作三态决策(allow/deny/ask)
 
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ class PolicyEngine:
             self._redis_client.ping()
             logger.info("PolicyEngine Redis 连接成功")
         except Exception as e:
-            logger.warning(f"PolicyEngine Redis 连接失败，降级为内存模式: {e}")
+            logger.warning(f"PolicyEngine Redis 连接失败,降级为内存模式: {e}")
             self._redis_client = None
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
@@ -122,14 +122,14 @@ class PolicyEngine:
             if cached:
                 return PolicyResult(
                     decision=PolicyDecision.ALLOW,
-                    reason="已确认，跳过二次确认",
+                    reason="已确认,跳过二次确认",
                     require_confirmation=False,
                     policy_name="cached_confirmation",
                 )
 
             return PolicyResult(
                 decision=PolicyDecision.ASK,
-                reason="该操作具有破坏性，需要二次确认",
+                reason="该操作具有破坏性,需要二次确认",
                 require_confirmation=True,
                 policy_name="destructive_action_ask",
             )
@@ -197,7 +197,7 @@ class PolicyEngine:
 
         return PolicyResult(
             decision=PolicyDecision.DENY,
-            reason="权限不足，无法访问敏感数据",
+            reason="权限不足,无法访问敏感数据",
             policy_name="sensitive_denied",
         )
 
@@ -247,13 +247,13 @@ class PolicyEngine:
 
         Args:
             context: 策略评估上下文
-            ttl: 缓存过期时间（秒），默认使用配置值
+            ttl: 缓存过期时间(秒),默认使用配置值
 
         Returns:
             bool: 是否记录成功
         """
         if not self._redis_client:
-            logger.warning("Redis 未连接，无法记录确认状态")
+            logger.warning("Redis 未连接,无法记录确认状态")
             return False
 
         cache_key = self._build_confirmation_key(context)
@@ -299,7 +299,7 @@ class PolicyEngine:
         return f"policy:confirm:{context.user_id}:{context.action}:{context.resource_type}:{context.resource_id}"
 
     def enforce(self, context: PolicyContext) -> None:
-        """强制执行策略检查，未通过则抛出异常
+        """强制执行策略检查,未通过则抛出异常
 
         Args:
             context: 策略评估上下文

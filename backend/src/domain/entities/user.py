@@ -37,7 +37,7 @@ class User:
     display_name: str
     email: str
     user_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    password_hash: str = ""  # 不持久化到实体，仅用于验证
+    password_hash: str = ""  # 不持久化到实体,仅用于验证
     avatar_url: str | None = None
     role: UserRole = UserRole.NORMAL
     status: UserStatus = UserStatus.ACTIVE
@@ -69,7 +69,7 @@ class User:
         Args:
             display_name: 新的显示名称
             email: 新的邮箱地址
-            avatar_url: 新的头像 URL（可选）
+            avatar_url: 新的头像 URL(可选)
         """
         self.display_name = display_name
         self.email = email

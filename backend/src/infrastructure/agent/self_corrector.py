@@ -50,12 +50,12 @@ class SelfCorrector:
     """自我纠错器 - 根据规范执行对应纠错策略
 
     错误分类 → 对应策略:
-    - quota / permission / validation     → reject（直接拒绝，禁止纠错）
-    - rate_limit                          → retry_with_backoff（退避重试）
+    - quota / permission / validation     → reject(直接拒绝,禁止纠错)
+    - rate_limit                          → retry_with_backoff(退避重试)
     - tool_execution                      → retry → alternative → rollback
     - business_logic                      → rollback
     - external                            → retry
-    - system                              → escalate（升级通知）
+    - system                              → escalate(升级通知)
     """
 
     MAX_RETRIES = 3
@@ -237,7 +237,7 @@ class SelfCorrector:
         if rollback_fn:
             try:
                 await rollback_fn()
-                logger.info("回退操作成功，通知用户")
+                logger.info("回退操作成功,通知用户")
             except Exception as rollback_err:
                 logger.error(f"回退失败: {rollback_err}")
                 self._state = CorrectionState.ROLLBACK_FAILED
@@ -247,7 +247,7 @@ class SelfCorrector:
         return None, self._escalate(classified)
 
     def _escalate(self, classified: ClassifiedError) -> CorrectionResult:
-        """升级策略 - 通知用户，记录审计
+        """升级策略 - 通知用户,记录审计
 
         Args:
             classified: 分类后的错误
@@ -258,14 +258,14 @@ class SelfCorrector:
         self._state = CorrectionState.ESCALATING
 
         escalation_messages: dict[ErrorCategory, str] = {
-            ErrorCategory.QUOTA: "月度配额已用完，请下个月重试或升级为 VIP",
-            ErrorCategory.PERMISSION: "权限不足，无法执行此操作",
-            ErrorCategory.VALIDATION: "参数校验失败，请检查输入",
-            ErrorCategory.RATE_LIMIT: "请求过于频繁，请稍后重试",
-            ErrorCategory.TOOL_EXECUTION: "工具执行失败，请联系管理员",
-            ErrorCategory.BUSINESS_LOGIC: "业务逻辑异常，请联系管理员",
-            ErrorCategory.EXTERNAL: "外部服务异常，请稍后重试",
-            ErrorCategory.SYSTEM: "系统异常，请联系管理员",
+            ErrorCategory.QUOTA: "月度配额已用完,请下个月重试或升级为 VIP",
+            ErrorCategory.PERMISSION: "权限不足,无法执行此操作",
+            ErrorCategory.VALIDATION: "参数校验失败,请检查输入",
+            ErrorCategory.RATE_LIMIT: "请求过于频繁,请稍后重试",
+            ErrorCategory.TOOL_EXECUTION: "工具执行失败,请联系管理员",
+            ErrorCategory.BUSINESS_LOGIC: "业务逻辑异常,请联系管理员",
+            ErrorCategory.EXTERNAL: "外部服务异常,请稍后重试",
+            ErrorCategory.SYSTEM: "系统异常,请联系管理员",
         }
 
         message = escalation_messages.get(classified.category, classified.message)

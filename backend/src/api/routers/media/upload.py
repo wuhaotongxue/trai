@@ -26,7 +26,7 @@ class UploadResponse(BaseModel):
     filename: str = Field(description="文件名")
     file_url: str = Field(description="文件 URL")
     file_type: str = Field(description="文件类型")
-    file_size: int = Field(description="文件大小（字节）")
+    file_size: int = Field(description="文件大小(字节)")
     content_type: str = Field(description="MIME 类型")
 
 
@@ -36,7 +36,7 @@ class FileInfo(BaseModel):
     filename: str = Field(description="文件名")
     file_url: str = Field(description="文件 URL")
     file_type: str = Field(description="文件类型")
-    file_size: int = Field(description="文件大小（字节）")
+    file_size: int = Field(description="文件大小(字节)")
     content_type: str = Field(description="MIME 类型")
     created_at: str = Field(description="上传时间")
 
@@ -51,14 +51,14 @@ async def upload_file(
 
     Args:
         file: 上传的文件
-        folder: 存储文件夹（默认 general）
+        folder: 存储文件夹(默认 general)
         current_user: 当前登录用户
 
     Returns:
         UploadResponse: 上传结果
 
     Raises:
-        HTTPException: 上传失败（500）
+        HTTPException: 上传失败(500)
     """
     from infrastructure.database import get_session
 
@@ -105,7 +105,7 @@ async def upload_file(
 
 @router.post("/upload/batch", tags=["媒体"])
 async def upload_batch(
-    files: list[UploadFile] = File(..., description="上传的文件列表（最多 10 个）"),
+    files: list[UploadFile] = File(..., description="上传的文件列表(最多 10 个)"),
     folder: Annotated[str, Form(description="存储文件夹")] = "general",
     current_user: CurrentUser = None,
 ) -> dict[str, Any]:
@@ -120,7 +120,7 @@ async def upload_batch(
         dict: 上传结果列表
 
     Raises:
-        HTTPException: 文件数量超限（400）
+        HTTPException: 文件数量超限(400)
     """
     if len(files) > 10:
         raise HTTPException(
@@ -170,14 +170,14 @@ async def upload_batch(
 @router.get("/upload/presign", tags=["媒体"])
 async def get_presigned_url(
     object_key: Annotated[str, Query(description="S3 对象键")],
-    expires_in: Annotated[int, Query(ge=60, le=3600, description="过期时间（秒）")] = 300,
+    expires_in: Annotated[int, Query(ge=60, le=3600, description="过期时间(秒)")] = 300,
     current_user: CurrentUser = None,
 ) -> dict[str, Any]:
-    """获取预签名 URL（用于直接上传或下载）
+    """获取预签名 URL(用于直接上传或下载)
 
     Args:
         object_key: S3 对象键
-        expires_in: 过期时间（秒）
+        expires_in: 过期时间(秒)
         current_user: 当前登录用户
 
     Returns:
@@ -220,7 +220,7 @@ async def delete_file(
     if role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": 403, "message": "权限不足，仅管理员可删除文件"},
+            detail={"code": 403, "message": "权限不足,仅管理员可删除文件"},
         )
 
     try:

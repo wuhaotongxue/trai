@@ -6,7 +6,7 @@
 # 用法:
 #   python -m scripts.init_db                    # 初始化数据库和表结构
 #   python -m scripts.init_db --create-admin    # 创建管理员账户
-#   python -m scripts.init_db --reset          # 重置数据库（危险！）
+#   python -m scripts.init_db --reset          # 重置数据库(危险!)
 #   python -m scripts.init_db --help           # 查看帮助
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from infrastructure.security.password import PasswordService
 
 
 def init_database() -> None:
-    """初始化数据库（创建表结构）"""
+    """初始化数据库(创建表结构)"""
     logger.info("开始初始化数据库...")
 
     db = get_database()
@@ -66,7 +66,7 @@ def create_admin_user(
         existing = result.fetchone()
 
         if existing:
-            logger.warning(f"管理员账户 {username} 已存在，跳过创建")
+            logger.warning(f"管理员账户 {username} 已存在,跳过创建")
             return
 
         # 生成密码哈希
@@ -107,7 +107,7 @@ def create_admin_user(
 
 
 def reset_database() -> None:
-    """重置数据库（删除所有表并重新创建）"""
+    """重置数据库(删除所有表并重新创建)"""
     logger.warning("开始重置数据库...")
 
     db = get_database()
@@ -187,7 +187,7 @@ def main() -> None:
   python -m scripts.init_db --create-admin    # 创建管理员账户
   python -m scripts.init_db --show-tables    # 显示所有表
   python -m scripts.init_db --show-users     # 显示所有用户
-  python -m scripts.init_db --reset          # 重置数据库（危险！）
+  python -m scripts.init_db --reset          # 重置数据库(危险!)
         """,
     )
 
@@ -209,22 +209,22 @@ def main() -> None:
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="重置数据库（删除所有数据）",
+        help="重置数据库(删除所有数据)",
     )
     parser.add_argument(
         "--admin-username",
         default="admin",
-        help="管理员用户名（默认: admin）",
+        help="管理员用户名(默认: admin)",
     )
     parser.add_argument(
         "--admin-password",
         default="admin123",
-        help="管理员密码（默认: admin123）",
+        help="管理员密码(默认: admin123)",
     )
     parser.add_argument(
         "--admin-email",
         default="admin@example.com",
-        help="管理员邮箱（默认: admin@example.com）",
+        help="管理员邮箱(默认: admin@example.com)",
     )
 
     args = parser.parse_args()
@@ -257,7 +257,7 @@ def main() -> None:
         )
         return
 
-    # 默认行为：初始化数据库
+    # 默认行为:初始化数据库
     init_database()
 
 

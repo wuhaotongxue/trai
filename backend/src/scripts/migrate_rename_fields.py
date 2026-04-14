@@ -2,8 +2,8 @@
 # 文件名: migrate_rename_fields.py
 # 作者: wuhao
 # 日期: 2026_04_13
-# 描述: 数据库字段重命名迁移脚本（将表名和字段名改为 t_ 前缀）
-# 危险！执行前请先备份数据库！
+# 描述: 数据库字段重命名迁移脚本(将表名和字段名改为 t_ 前缀)
+# 危险!执行前请先备份数据库!
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def get_db_connection():
     return psycopg2.connect(**get_db_config())
 
 
-# 表名映射（旧名 -> 新名）
+# 表名映射(旧名 -> 新名)
 TABLE_RENAMES = {
     "users": "t_users",
     "chat_sessions": "t_chat_sessions",
@@ -46,7 +46,7 @@ TABLE_RENAMES = {
     "upload_tasks": "t_upload_tasks",
 }
 
-# 每个表需要重命名的字段映射（旧名 -> 新名）
+# 每个表需要重命名的字段映射(旧名 -> 新名)
 FIELD_RENAMES = {
     "t_users": {
         "id": "t_id",
@@ -229,8 +229,8 @@ def migrate_rename_all():
         conn = get_db_connection()
         print("数据库连接成功")
 
-        # 第一步：重命名表名
-        print("\n=== 第一步：重命名表名 ===")
+        # 第一步:重命名表名
+        print("\n=== 第一步:重命名表名 ===")
         existing_tables = get_table_names(conn)
         for old_name, new_name in TABLE_RENAMES.items():
             if old_name not in existing_tables:
@@ -241,8 +241,8 @@ def migrate_rename_all():
                 continue
             rename_table(conn, old_name, new_name)
 
-        # 第二步：重命名字段名
-        print("\n=== 第二步：重命名字段名 ===")
+        # 第二步:重命名字段名
+        print("\n=== 第二步:重命名字段名 ===")
         for table_name, renames in FIELD_RENAMES.items():
             print(f"\n处理表: {table_name}")
             columns = get_table_columns(conn, table_name)
@@ -264,7 +264,7 @@ def migrate_rename_all():
         conn.close()
 
         print("\n" + "=" * 60)
-        print("迁移完成！")
+        print("迁移完成!")
         print("请重启应用以使更改生效")
         print("=" * 60)
 
@@ -274,7 +274,7 @@ def migrate_rename_all():
 
 
 def rollback_rename_all():
-    """回滚重命名（将 t_ 前缀改回原名）"""
+    """回滚重命名(将 t_ 前缀改回原名)"""
     print("=" * 60)
     print("数据库重命名回滚")
     print("将 t_ 前缀改回原名")
@@ -284,8 +284,8 @@ def rollback_rename_all():
         conn = get_db_connection()
         print("数据库连接成功")
 
-        # 第一步：先回滚字段名
-        print("\n=== 第一步：回滚字段名 ===")
+        # 第一步:先回滚字段名
+        print("\n=== 第一步:回滚字段名 ===")
         for table_name, renames in FIELD_RENAMES.items():
             print(f"\n处理表: {table_name}")
             columns = get_table_columns(conn, table_name)
@@ -303,8 +303,8 @@ def rollback_rename_all():
 
             print(f"  完成: {table_name}")
 
-        # 第二步：回滚表名
-        print("\n=== 第二步：回滚表名 ===")
+        # 第二步:回滚表名
+        print("\n=== 第二步:回滚表名 ===")
         existing_tables = get_table_names(conn)
         for old_name, new_name in TABLE_RENAMES.items():
             if new_name not in existing_tables:
@@ -318,7 +318,7 @@ def rollback_rename_all():
         conn.close()
 
         print("\n" + "=" * 60)
-        print("回滚完成！")
+        print("回滚完成!")
         print("=" * 60)
 
     except Exception as e:
@@ -334,7 +334,7 @@ def main():
     parser.add_argument(
         "--rollback",
         action="store_true",
-        help="回滚迁移（将 t_ 前缀改回原名）",
+        help="回滚迁移(将 t_ 前缀改回原名)",
     )
     args = parser.parse_args()
 

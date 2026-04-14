@@ -38,7 +38,7 @@ class RateLimitCounter:
 
 
 class InMemoryRateLimiter:
-    """内存版速率限制器（单机使用）"""
+    """内存版速率限制器(单机使用)"""
 
     def __init__(self) -> None:
         self._counters: dict[str, RateLimitCounter] = {}
@@ -124,7 +124,7 @@ def get_client_key(request: Request, user_id: str | None = None) -> str:
 
     Args:
         request: HTTP 请求
-        user_id: 用户 ID（已登录时使用）
+        user_id: 用户 ID(已登录时使用)
 
     Returns:
         str: 限流键
@@ -176,7 +176,7 @@ def rate_limit(
                     status_code=429,
                     content={
                         "code": 429,
-                        "message": "请求过于频繁，请稍后再试",
+                        "message": "请求过于频繁,请稍后再试",
                         "error": "rate_limit_exceeded",
                         "retry_after": info["retry_after"],
                     },
@@ -248,7 +248,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=429,
                 content={
                     "code": 429,
-                    "message": "请求过于频繁，请稍后再试",
+                    "message": "请求过于频繁,请稍后再试",
                     "error": "rate_limit_exceeded",
                     "retry_after": info["retry_after"],
                 },
@@ -270,7 +270,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 def reset_rate_limiter() -> None:
-    """重置速率限制器（用于测试）"""
+    """重置速率限制器(用于测试)"""
     global _rate_limiter
     _rate_limiter = InMemoryRateLimiter()
 

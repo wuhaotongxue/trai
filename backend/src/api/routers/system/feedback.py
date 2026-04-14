@@ -56,7 +56,7 @@ async def submit_feedback(request: FeedbackRequest, user: dict[str, Any] = Depen
     _MOCK_FEEDBACKS.append(new_feedback)
 
     logger.info(f"User {user.get('user_id')} submitted feedback: {new_feedback['id']} ({request.type})")
-    return {"code": 200, "msg": "反馈提交成功，感谢您的支持！", "data": {"feedback_id": new_feedback["id"]}}
+    return {"code": 200, "msg": "反馈提交成功,感谢您的支持!", "data": {"feedback_id": new_feedback["id"]}}
 
 
 @router.get("/list", summary="获取当前用户的反馈列表")

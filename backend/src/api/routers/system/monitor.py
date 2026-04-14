@@ -30,17 +30,17 @@ class PlatformInfo(BaseModel):
 class MemoryInfo(BaseModel):
     """内存信息"""
 
-    total: float = Field(description="总内存（GB）")
-    available: float = Field(description="可用内存（GB）")
-    used: float = Field(description="已用内存（GB）")
-    percent: float = Field(description="使用率（%）")
+    total: float = Field(description="总内存(GB)")
+    available: float = Field(description="可用内存(GB)")
+    used: float = Field(description="已用内存(GB)")
+    percent: float = Field(description="使用率(%)")
 
 
 class CpuInfo(BaseModel):
     """CPU 信息"""
 
     count: int = Field(description="CPU 核心数")
-    usage: float = Field(description="使用率（%）")
+    usage: float = Field(description="使用率(%)")
 
 
 class DatabaseStats(BaseModel):
@@ -48,7 +48,7 @@ class DatabaseStats(BaseModel):
 
     status: str = Field(description="状态")
     session_count: int = Field(default=0, description="当前会话数")
-    query_time_ms: float = Field(default=0, description="查询时间（毫秒）")
+    query_time_ms: float = Field(default=0, description="查询时间(毫秒)")
 
 
 class ServiceStatus(BaseModel):
@@ -56,7 +56,7 @@ class ServiceStatus(BaseModel):
 
     name: str = Field(description="服务名称")
     status: str = Field(description="状态")
-    latency_ms: float | None = Field(default=None, description="延迟（毫秒）")
+    latency_ms: float | None = Field(default=None, description="延迟(毫秒)")
     error: str | None = Field(default=None, description="错误")
 
 
@@ -65,7 +65,7 @@ class MonitorResponse(BaseModel):
 
     status: str = Field(description="整体状态")
     timestamp: str = Field(description="时间戳")
-    uptime_seconds: float = Field(description="运行时长（秒）")
+    uptime_seconds: float = Field(description="运行时长(秒)")
     platform: PlatformInfo = Field(description="平台信息")
     memory: MemoryInfo = Field(description="内存信息")
     cpu: CpuInfo = Field(description="CPU 信息")
@@ -141,7 +141,7 @@ def get_service_status() -> dict[str, ServiceStatus]:
     # AI 服务
     services["ai_service"] = _check_ai()
 
-    # 通知服务（检查是否配置了任何一个）
+    # 通知服务(检查是否配置了任何一个)
     services["notify_service"] = _check_notify()
 
     return services
@@ -282,11 +282,11 @@ trai_cpu_usage_percent {cpu_usage:.2f}
 # TYPE trai_memory_usage_percent gauge
 trai_memory_usage_percent {mem.percent:.2f}
 
-# HELP trai_memory_total_bytes 总内存（字节）
+# HELP trai_memory_total_bytes 总内存(字节)
 # TYPE trai_memory_total_bytes gauge
 trai_memory_total_bytes {mem.total}
 
-# HELP trai_memory_available_bytes 可用内存（字节）
+# HELP trai_memory_available_bytes 可用内存(字节)
 # TYPE trai_memory_available_bytes gauge
 trai_memory_available_bytes {mem.available}
 """

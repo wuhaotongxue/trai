@@ -2,7 +2,7 @@
 # 文件名: user.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:10:00
-# 描述: 用户管理接口（管理员用）
+# 描述: 用户管理接口(管理员用)
 
 from __future__ import annotations
 
@@ -66,7 +66,7 @@ async def list_users(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> UserListResponse:
-    """获取用户列表（仅管理员）
+    """获取用户列表(仅管理员)
 
     Args:
         current_user: 当前登录管理员
@@ -114,7 +114,7 @@ async def get_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> UserListItem:
-    """获取指定用户信息（仅管理员）
+    """获取指定用户信息(仅管理员)
 
     Args:
         user_id: 用户 ID
@@ -125,7 +125,7 @@ async def get_user(
         UserListItem: 用户信息
 
     Raises:
-        HTTPException: 用户不存在（404）
+        HTTPException: 用户不存在(404)
     """
     user_repo = UserRepository(session)
     user = user_repo.get_by_user_id(user_id)
@@ -156,7 +156,7 @@ async def update_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> ActionResponse:
-    """更新用户信息（仅管理员）
+    """更新用户信息(仅管理员)
 
     Args:
         user_id: 用户 ID
@@ -168,7 +168,7 @@ async def update_user(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 用户不存在（404）
+        HTTPException: 用户不存在(404)
     """
     user_repo = UserRepository(session)
 
@@ -208,7 +208,7 @@ async def delete_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> ActionResponse:
-    """删除用户（仅管理员，物理删除）
+    """删除用户(仅管理员,物理删除)
 
     Args:
         user_id: 用户 ID
@@ -219,7 +219,7 @@ async def delete_user(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 用户不存在（404）/ 禁止删除自己（400）
+        HTTPException: 用户不存在(404)/ 禁止删除自己(400)
     """
     admin_user_id = current_user.get("user_id", "")
 

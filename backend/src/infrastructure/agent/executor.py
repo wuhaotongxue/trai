@@ -2,7 +2,7 @@
 # 文件名: executor.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
-# 描述: Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制
+# 描述: Agent 执行器 - 管理多轮工具调用循环,含自我纠错和配额控制
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ class AgentStep:
 
 
 class AgentExecutor:
-    """Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制"""
+    """Agent 执行器 - 管理多轮工具调用循环,含自我纠错和配额控制"""
 
     MAX_TURNS = 10
     _instance: AgentExecutor | None = None
@@ -82,7 +82,7 @@ class AgentExecutor:
             logger.warning(f"配额服务初始化失败: {e}")
 
     def _ensure_initialized(self) -> None:
-        """延迟初始化：加载工具"""
+        """延迟初始化:加载工具"""
         if self._initialized:
             return
 
@@ -97,10 +97,10 @@ class AgentExecutor:
         context: ExecutionContext,
         stream: bool = False,
     ) -> Any:
-        """执行 Agent 对话（支持多轮工具调用 + 自我纠错）
+        """执行 Agent 对话(支持多轮工具调用 + 自我纠错)
 
         Args:
-            messages: 消息历史（含 system/user/assistant/tool 消息）
+            messages: 消息历史(含 system/user/assistant/tool 消息)
             context: 执行上下文
             stream: 是否流式响应
 
@@ -338,7 +338,7 @@ class AgentExecutor:
         args: dict[str, Any],
         context: ExecutionContext,
     ) -> ToolCallResult:
-        """执行工具（含自我纠错）
+        """执行工具(含自我纠错)
 
         Args:
             tool_id: 工具 ID
@@ -370,7 +370,7 @@ class AgentExecutor:
             result.tool_call_id = tool_call_id
             return result
         except Exception as e:
-            logger.warning(f"工具执行异常，进入纠错流程 | tool_id={tool_id} | error={e}")
+            logger.warning(f"工具执行异常,进入纠错流程 | tool_id={tool_id} | error={e}")
             result, correction_result = await self._self_corrector.handle(e, raw_execute)
 
             if result is not None:

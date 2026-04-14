@@ -32,7 +32,7 @@ class ImageGenerationRequest(BaseModel):
     width: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片宽度")] = 1024
     height: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片高度")] = 1024
     steps: Annotated[int, Field(ge=1, le=100, default=30, description="采样步数")] = 30
-    seed: Annotated[int, Field(ge=-1, default=-1, description="随机种子，-1 表示随机")] = -1
+    seed: Annotated[int, Field(ge=-1, default=-1, description="随机种子,-1 表示随机")] = -1
 
 
 class ImageGenerationResponse(BaseModel):
@@ -55,7 +55,7 @@ async def generate_image(
     request: ImageGenerationRequest,
     current_user: CurrentUser,
 ) -> ImageGenerationResponse:
-    """AI 图片生成接口（文生图）
+    """AI 图片生成接口(文生图)
 
     Args:
         request: 图片生成参数
@@ -65,7 +65,7 @@ async def generate_image(
         ImageGenerationResponse: 生成结果
 
     Raises:
-        HTTPException: AI 服务错误（502）
+        HTTPException: AI 服务错误(502)
     """
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,

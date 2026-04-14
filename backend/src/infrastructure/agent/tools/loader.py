@@ -19,7 +19,7 @@ def _import_tool_module(tool_name: str) -> Any | None:
     """动态导入工具模块
 
     Args:
-        tool_name: 工具模块名（不含路径）
+        tool_name: 工具模块名(不含路径)
 
     Returns:
         工具类或 None
@@ -53,8 +53,8 @@ def _import_tool_module(tool_name: str) -> Any | None:
 def load_all_tools() -> list[ToolDefinition]:
     """加载所有可用工具
 
-    从环境变量 TOOL_ENABLED_LIST 读取需要加载的工具列表，
-    默认为全部工具。
+    从环境变量 TOOL_ENABLED_LIST 读取需要加载的工具列表,
+    默认为全部工具.
 
     Returns:
         list[ToolDefinition]: 已注册的工具定义列表

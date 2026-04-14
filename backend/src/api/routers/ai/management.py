@@ -2,7 +2,7 @@
 # 文件名: management.py
 # 作者: wuhao
 # 日期: 2026_04_14_12:45:00
-# 描述: 多 Agent 管理接口，负责智能体的注册、启动、停止和列表查询
+# 描述: 多 Agent 管理接口,负责智能体的注册、启动、停止和列表查询
 
 from typing import Any
 
@@ -116,7 +116,7 @@ class AgentManagementAPI:
             return {"code": 404, "msg": f"Agent {request.agent_id} 不存在"}
 
         if request.action not in ["start", "stop"]:
-            return {"code": 400, "msg": "无效的操作指令，仅支持 start 或 stop"}
+            return {"code": 400, "msg": "无效的操作指令,仅支持 start 或 stop"}
 
         target_agent["status"] = "running" if request.action == "start" else "stopped"
 

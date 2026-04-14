@@ -2,7 +2,7 @@
 # 文件名: exceptions.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:50:00
-# 描述: 统一异常定义，包含业务异常和系统异常
+# 描述: 统一异常定义,包含业务异常和系统异常
 
 from __future__ import annotations
 
@@ -211,7 +211,7 @@ class AIServiceUnavailableError(TraiException):
 
 
 class NotFoundError(ResourceNotFoundError):
-    """资源不存在异常（别名）"""
+    """资源不存在异常(别名)"""
 
     def __init__(
         self,
@@ -222,7 +222,7 @@ class NotFoundError(ResourceNotFoundError):
 
 
 class ConflictError(DuplicateResourceError):
-    """资源重复异常（别名）"""
+    """资源重复异常(别名)"""
 
     def __init__(
         self,

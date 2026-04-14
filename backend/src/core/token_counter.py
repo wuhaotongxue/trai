@@ -24,7 +24,7 @@ class TokenCounter:
         """初始化 Token 计数器
 
         Args:
-            model: 模型名称，默认从环境变量读取
+            model: 模型名称,默认从环境变量读取
         """
         self._model = model or os.getenv("OPENAI_MODEL", "gpt-4o")
         self._encoder: Any = None
@@ -33,7 +33,7 @@ class TokenCounter:
     def _init_encoder(self) -> None:
         """初始化 tiktoken 编码器"""
         if tiktoken is None:
-            logger.warning("tiktoken 未安装，降级为粗略估算")
+            logger.warning("tiktoken 未安装,降级为粗略估算")
             self._encoder = None
             return
 
@@ -52,7 +52,7 @@ class TokenCounter:
             self._encoder = tiktoken.get_encoding(encoding_name)
             logger.info(f"TokenCounter 初始化完成 | 模型={self._model} | 编码={encoding_name}")
         except Exception as e:
-            logger.warning(f"编码器初始化失败，降级为粗略估算: {e}")
+            logger.warning(f"编码器初始化失败,降级为粗略估算: {e}")
             self._encoder = None
 
     def count(self, text: str) -> int:
@@ -73,14 +73,14 @@ class TokenCounter:
         try:
             return len(self._encoder.encode(text))
         except Exception as e:
-            logger.warning(f"Token 计数异常，降级为估算: {e}")
+            logger.warning(f"Token 计数异常,降级为估算: {e}")
             return self._rough_estimate(text)
 
     def count_messages(self, messages: list[dict[str, str]]) -> int:
         """统计消息列表的总 Token 数
 
         消息格式: [{"role": "user", "content": "xxx"}, ...]
-        包含每条消息的开销（role + content 结构）
+        包含每条消息的开销(role + content 结构)
 
         Args:
             messages: 消息列表
@@ -105,7 +105,7 @@ class TokenCounter:
     def truncate_to_limit(self, messages: list[dict[str, str]], max_tokens: int) -> list[dict[str, str]]:
         """将消息列表截断到指定 Token 上限
 
-        从最旧的消息开始丢弃，保留最新的消息
+        从最旧的消息开始丢弃,保留最新的消息
 
         Args:
             messages: 消息列表
@@ -131,7 +131,7 @@ class TokenCounter:
         return list(reversed(truncated))
 
     def _rough_estimate(self, text: str) -> int:
-        """粗略估算 Token 数（中文按字符计，英文按单词计）
+        """粗略估算 Token 数(中文按字符计,英文按单词计)
 
         Args:
             text: 待估算文本

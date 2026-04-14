@@ -69,7 +69,7 @@ def require_role(*allowed_roles: str):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
                     "code": 403,
-                    "message": f"权限不足，需要角色: {', '.join(allowed_roles)}",
+                    "message": f"权限不足,需要角色: {', '.join(allowed_roles)}",
                 },
             )
         return current_user
