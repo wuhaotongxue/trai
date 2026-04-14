@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: policy_engine.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:12:17
-# 描述: 策略引擎 - 高危操作三态决策（allow/deny/ask）
+# 描述: 策略引擎 - 高危操作三态决策(allow/deny/ask)
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import redis
@@ -18,7 +17,7 @@ from core.exceptions import AuthorizationError
 from core.logger import logger
 
 
-class PolicyDecision(str, Enum):
+class PolicyDecision(StrEnum):
     """策略决策枚举"""
 
     ALLOW = "allow"
@@ -54,9 +53,7 @@ class PolicyEngine:
     def __init__(self) -> None:
         self._redis_client: redis.Redis | None = None
         self._policy_cache_ttl: int = int(os.getenv("POLICY_CACHE_TTL", "300"))
-        self._ask_confirmation_timeout: int = int(
-            os.getenv("POLICY_ASK_TIMEOUT", "600")
-        )
+        self._ask_confirmation_timeout: int = int(os.getenv("POLICY_ASK_TIMEOUT", "600"))
         self._init_redis()
 
     def _init_redis(self) -> None:
@@ -77,7 +74,7 @@ class PolicyEngine:
             self._redis_client.ping()
             logger.info("PolicyEngine Redis 连接成功")
         except Exception as e:
-            logger.warning(f"PolicyEngine Redis 连接失败，降级为内存模式: {e}")
+            logger.warning(f"PolicyEngine Redis 连接失败,降级为内存模式: {e}")
             self._redis_client = None
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
@@ -90,7 +87,6 @@ class PolicyEngine:
             PolicyResult: 策略评估结果
         """
         action = context.action
-        role = context.role
 
         if action in ("delete_session", "bulk_delete", "force_logout"):
             return self._evaluate_destructive_action(context)
@@ -126,14 +122,14 @@ class PolicyEngine:
             if cached:
                 return PolicyResult(
                     decision=PolicyDecision.ALLOW,
-                    reason="已确认，跳过二次确认",
+                    reason="已确认,跳过二次确认",
                     require_confirmation=False,
                     policy_name="cached_confirmation",
                 )
 
             return PolicyResult(
                 decision=PolicyDecision.ASK,
-                reason="该操作具有破坏性，需要二次确认",
+                reason="该操作具有破坏性,需要二次确认",
                 require_confirmation=True,
                 policy_name="destructive_action_ask",
             )
@@ -201,7 +197,7 @@ class PolicyEngine:
 
         return PolicyResult(
             decision=PolicyDecision.DENY,
-            reason="权限不足，无法访问敏感数据",
+            reason="权限不足,无法访问敏感数据",
             policy_name="sensitive_denied",
         )
 
@@ -251,13 +247,13 @@ class PolicyEngine:
 
         Args:
             context: 策略评估上下文
-            ttl: 缓存过期时间（秒），默认使用配置值
+            ttl: 缓存过期时间(秒),默认使用配置值
 
         Returns:
             bool: 是否记录成功
         """
         if not self._redis_client:
-            logger.warning("Redis 未连接，无法记录确认状态")
+            logger.warning("Redis 未连接,无法记录确认状态")
             return False
 
         cache_key = self._build_confirmation_key(context)
@@ -303,7 +299,7 @@ class PolicyEngine:
         return f"policy:confirm:{context.user_id}:{context.action}:{context.resource_type}:{context.resource_id}"
 
     def enforce(self, context: PolicyContext) -> None:
-        """强制执行策略检查，未通过则抛出异常
+        """强制执行策略检查,未通过则抛出异常
 
         Args:
             context: 策略评估上下文
@@ -314,9 +310,7 @@ class PolicyEngine:
         result = self.evaluate(context)
 
         if result.decision == PolicyDecision.DENY:
-            logger.warning(
-                f"策略拒绝 | user_id={context.user_id} | action={context.action} | reason={result.reason}"
-            )
+            logger.warning(f"策略拒绝 | user_id={context.user_id} | action={context.action} | reason={result.reason}")
             raise AuthorizationError(
                 message=result.reason,
                 details={
@@ -327,9 +321,7 @@ class PolicyEngine:
             )
 
         if result.decision == PolicyDecision.ASK:
-            logger.info(
-                f"策略需要确认 | user_id={context.user_id} | action={context.action}"
-            )
+            logger.info(f"策略需要确认 | user_id={context.user_id} | action={context.action}")
             raise AuthorizationError(
                 message=result.reason,
                 details={
@@ -366,6 +358,7 @@ def require_policy(action: str, resource_type: str) -> Any:
     Returns:
         依赖函数
     """
+
     def policy_checker(
         current_user: dict[str, Any],
         session_id: str | None = None,

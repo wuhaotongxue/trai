@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: session.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -12,18 +11,18 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from application.usecases.base import UseCase
-from domain.entities.chat_session import ChatSession, SessionStatus
 from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
     SessionRepository,
 )
-from infrastructure.database.database import get_session
 
 
 @dataclass
 class CreateSessionInput:
     """创建会话输入"""
+
     user_id: str | None = None
     title: str | None = None
     model: str = "gpt-4o"
@@ -33,6 +32,7 @@ class CreateSessionInput:
 @dataclass
 class SessionOutput:
     """会话输出"""
+
     session_id: str
     title: str | None
     model: str
@@ -74,6 +74,7 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
 @dataclass
 class SendMessageInput:
     """发送消息输入"""
+
     session_id: str
     content: str
     role: str = "user"
@@ -82,6 +83,7 @@ class SendMessageInput:
 @dataclass
 class SendMessageOutput:
     """发送消息输出"""
+
     session_id: str
     user_message: dict[str, Any]
     assistant_message: dict[str, Any]
@@ -114,7 +116,7 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
 
         ai_response = await self._ai_client.chat(messages=messages_dict)
 
-        assistant_msg = message_repo.add_message(
+        message_repo.add_message(
             session_id=input_data.session_id,
             role="assistant",
             content=ai_response["content"],
@@ -135,6 +137,7 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
 @dataclass
 class ListSessionsInput:
     """获取会话列表输入"""
+
     user_id: str | None = None
     limit: int = 50
     offset: int = 0
@@ -143,6 +146,7 @@ class ListSessionsInput:
 @dataclass
 class ListSessionsOutput:
     """获取会话列表输出"""
+
     sessions: list[SessionOutput]
     total: int
 
@@ -180,12 +184,14 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, ListSessionsOutput]):
 @dataclass
 class GetSessionInput:
     """获取会话输入"""
+
     session_id: str
 
 
 @dataclass
 class GetSessionOutput:
     """获取会话输出"""
+
     session_id: str
     title: str | None
     model: str
@@ -223,6 +229,7 @@ class GetSessionUseCase(UseCase[GetSessionInput, GetSessionOutput]):
 @dataclass
 class DeleteSessionInput:
     """删除会话输入"""
+
     session_id: str
 
 

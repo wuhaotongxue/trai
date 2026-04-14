@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_generation.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,15 +6,16 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
-import uuid
 
 
-class ImageStyle(str, Enum):
+class ImageStyle(StrEnum):
     """图片风格"""
+
     REALISTIC = "realistic"
     ARTISTIC = "artistic"
     CARTOON = "cartoon"
@@ -24,15 +24,17 @@ class ImageStyle(str, Enum):
     AUTO = "auto"
 
 
-class ImageSize(str, Enum):
+class ImageSize(StrEnum):
     """图片尺寸"""
+
     SQUARE_1K = "1024x1024"
     PORTRAIT_1K = "1024x1792"
     LANDSCAPE_1K = "1792x1024"
 
 
-class ImageStatus(str, Enum):
+class ImageStatus(StrEnum):
     """图片生成状态"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -42,6 +44,7 @@ class ImageStatus(str, Enum):
 @dataclass
 class ImageGeneration:
     """图片生成实体"""
+
     prompt: str
     model: str = "AI-ModelScope/FLUX.1-dev"
     width: int = 1024

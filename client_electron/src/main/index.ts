@@ -8,6 +8,7 @@ import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron'
 import { join } from 'path'
 import log from 'electron-log'
 import { register_ipc_handlers } from './ipc/index'
+import { config_store } from './platform/config_store'
 
 log.info('app starting...')
 
@@ -67,11 +68,53 @@ if (!got_the_lock) {
     },
   })
 
-  // 拦截关闭事件，转为隐藏窗口
+  // 拦截关闭事件，转为隐藏窗口或退出程序
   main_window.on('close', (event) => {
-    if (!is_quitting) {
-      event.preventDefault()
+    if (is_quitting) return
+
+    event.preventDefault()
+    
+    const close_action = config_store.get('close_action') // 'tray' | 'quit' | undefined
+
+    if (close_action === 'tray') {
       main_window?.hide()
+    } else if (close_action === 'quit') {
+      is_quitting = true
+      app.quit()
+    } else {
+      // 提示用户选择
+      if (!main_window) return
+      
+      dialog.showMessageBox(main_window, {
+        type: 'question',
+        title: '退出提示',
+        message: '您点击了关闭按钮，请问是要最小化到系统托盘，还是直接退出程序？',
+        buttons: ['最小化到托盘', '直接退出程序', '取消'],
+        defaultId: 0,
+        cancelId: 2,
+        checkboxLabel: '记住我的选择，下次不再提示',
+        checkboxChecked: false
+      }).then((result) => {
+        if (result.response === 2) {
+          // 用户取消关闭
+          return
+        }
+        
+        const action = result.response === 0 ? 'tray' : 'quit'
+        
+        if (result.checkboxChecked) {
+          config_store.set('close_action', action)
+        }
+
+        if (action === 'tray') {
+          main_window?.hide()
+        } else {
+          is_quitting = true
+          app.quit()
+        }
+      }).catch((err) => {
+        log.error('关闭提示框出错:', err)
+      })
     }
   })
 

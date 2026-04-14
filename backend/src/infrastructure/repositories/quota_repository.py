@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: quota_repository.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -8,9 +7,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.logger import logger
@@ -40,9 +38,7 @@ class QuotaRepository:
         result = self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    def get_or_create_usage(
-        self, user_id: str, billing_month: str
-    ) -> UserQuotaUsageModel:
+    def get_or_create_usage(self, user_id: str, billing_month: str) -> UserQuotaUsageModel:
         """获取或创建当月配额使用记录
 
         Args:
@@ -70,9 +66,7 @@ class QuotaRepository:
 
         return record
 
-    def get_usage(
-        self, user_id: str, billing_month: str
-    ) -> UserQuotaUsageModel | None:
+    def get_usage(self, user_id: str, billing_month: str) -> UserQuotaUsageModel | None:
         """获取当月配额使用记录
 
         Args:
@@ -89,9 +83,7 @@ class QuotaRepository:
         result = self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    def get_usage_field(
-        self, record: UserQuotaUsageModel, quota_type: str
-    ) -> int:
+    def get_usage_field(self, record: UserQuotaUsageModel, quota_type: str) -> int:
         """从使用记录中读取指定配额字段
 
         Args:
@@ -115,9 +107,7 @@ class QuotaRepository:
             return getattr(record, field, 0)
         return 0
 
-    def get_limit_field(
-        self, plan: QuotaPlanModel, quota_type: str
-    ) -> int:
+    def get_limit_field(self, plan: QuotaPlanModel, quota_type: str) -> int:
         """从套餐中读取指定配额上限
 
         Args:
@@ -125,7 +115,7 @@ class QuotaRepository:
             quota_type: 配额类型
 
         Returns:
-            int: 配额上限（0 表示无限制）
+            int: 配额上限(0 表示无限制)
         """
         field_map: dict[str, str] = {
             "image_generation": "t_image_generation_limit",
@@ -152,7 +142,7 @@ class QuotaRepository:
         Args:
             record: 配额使用记录
             quota_type: 配额类型
-            delta: 增量（默认 1）
+            delta: 增量(默认 1)
 
         Returns:
             int: 扣减后的新余额

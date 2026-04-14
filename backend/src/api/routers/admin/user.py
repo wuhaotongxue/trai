@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:10:00
-# 描述: 用户管理接口（管理员用）
+# 描述: 用户管理接口(管理员用)
 
 from __future__ import annotations
 
@@ -13,16 +12,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser, require_admin
-from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
+from api.deps import require_admin
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
 
 class UserListItem(BaseModel):
     """用户列表项"""
+
     user_id: str = Field(description="用户唯一标识")
     username: str = Field(description="用户名")
     display_name: str = Field(description="显示名称")
@@ -36,12 +35,14 @@ class UserListItem(BaseModel):
 
 class UserListResponse(BaseModel):
     """用户列表响应"""
+
     total: int = Field(description="用户总数")
     users: list[UserListItem] = Field(description="用户列表")
 
 
 class UpdateUserRequest(BaseModel):
     """更新用户请求"""
+
     display_name: str | None = Field(default=None, description="显示名称")
     email: str | None = Field(default=None, description="邮箱地址")
     avatar_url: str | None = Field(default=None, description="头像 URL")
@@ -51,6 +52,7 @@ class UpdateUserRequest(BaseModel):
 
 class ActionResponse(BaseModel):
     """操作响应"""
+
     message: str = Field(description="提示信息")
     user_id: str = Field(description="用户 ID")
 
@@ -64,7 +66,7 @@ async def list_users(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> UserListResponse:
-    """获取用户列表（仅管理员）
+    """获取用户列表(仅管理员)
 
     Args:
         current_user: 当前登录管理员
@@ -112,7 +114,7 @@ async def get_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> UserListItem:
-    """获取指定用户信息（仅管理员）
+    """获取指定用户信息(仅管理员)
 
     Args:
         user_id: 用户 ID
@@ -123,7 +125,7 @@ async def get_user(
         UserListItem: 用户信息
 
     Raises:
-        HTTPException: 用户不存在（404）
+        HTTPException: 用户不存在(404)
     """
     user_repo = UserRepository(session)
     user = user_repo.get_by_user_id(user_id)
@@ -154,7 +156,7 @@ async def update_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> ActionResponse:
-    """更新用户信息（仅管理员）
+    """更新用户信息(仅管理员)
 
     Args:
         user_id: 用户 ID
@@ -166,7 +168,7 @@ async def update_user(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 用户不存在（404）
+        HTTPException: 用户不存在(404)
     """
     user_repo = UserRepository(session)
 
@@ -206,7 +208,7 @@ async def delete_user(
     current_user: Annotated[dict, Depends(require_admin)],
     session: Annotated[Session, Depends(get_session)],
 ) -> ActionResponse:
-    """删除用户（仅管理员，物理删除）
+    """删除用户(仅管理员,物理删除)
 
     Args:
         user_id: 用户 ID
@@ -217,7 +219,7 @@ async def delete_user(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 用户不存在（404）/ 禁止删除自己（400）
+        HTTPException: 用户不存在(404)/ 禁止删除自己(400)
     """
     admin_user_id = current_user.get("user_id", "")
 

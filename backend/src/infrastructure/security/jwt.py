@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: jwt.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:30:00
@@ -8,33 +7,29 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
 from loguru import logger
 
-from core.exceptions import AuthenticationError, AuthorizationError
+from core.exceptions import AuthenticationError
 
 
 class JWTService:
     """JWT 认证服务
 
-    负责 Token 生成与验证，支持 Access Token 和 Refresh Token
+    负责 Token 生成与验证,支持 Access Token 和 Refresh Token
     """
 
     def __init__(self) -> None:
         self._secret_key: str = os.getenv("JWT_SECRET_KEY", "")
         if not self._secret_key:
-            logger.warning("JWT_SECRET_KEY 未配置，将使用不安全的默认密钥")
+            logger.warning("JWT_SECRET_KEY 未配置,将使用不安全的默认密钥")
 
         self._algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
-        self._access_token_expire_minutes: int = int(
-            os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-        )
-        self._refresh_token_expire_days: int = int(
-            os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7")
-        )
+        self._access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+        self._refresh_token_expire_days: int = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
     def create_access_token(
         self,
@@ -50,13 +45,13 @@ class JWTService:
             user_id: 用户 ID
             username: 用户名
             role: 用户角色
-            tenant_id: 租户 ID（可选）
-            extra_claims: 额外声明（可选）
+            tenant_id: 租户 ID(可选)
+            extra_claims: 额外声明(可选)
 
         Returns:
             str: JWT 访问令牌
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expire = now + timedelta(minutes=self._access_token_expire_minutes)
 
         payload = {
@@ -86,7 +81,7 @@ class JWTService:
         Returns:
             str: JWT 刷新令牌
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expire = now + timedelta(days=self._refresh_token_expire_days)
 
         payload = {
@@ -104,7 +99,7 @@ class JWTService:
 
         Args:
             token: JWT 令牌
-            expected_type: 期望的令牌类型（access/refresh）
+            expected_type: 期望的令牌类型(access/refresh)
 
         Returns:
             dict: 解码后的 payload
@@ -122,7 +117,7 @@ class JWTService:
             token_type = payload.get("type")
             if token_type != expected_type:
                 raise AuthenticationError(
-                    message=f"令牌类型不匹配，期望 {expected_type}",
+                    message=f"令牌类型不匹配,期望 {expected_type}",
                     details={"actual_type": token_type},
                 )
 
@@ -168,13 +163,13 @@ class JWTService:
             )
             exp = payload.get("exp")
             if exp:
-                return datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(timezone.utc)
+                return datetime.fromtimestamp(exp, tz=UTC) < datetime.now(UTC)
             return False
         except JWTError:
             return True
 
     def get_token_payload(self, token: str) -> dict[str, Any]:
-        """获取令牌载荷（不验证过期时间）
+        """获取令牌载荷(不验证过期时间)
 
         Args:
             token: JWT 令牌
@@ -200,7 +195,7 @@ _jwt_service: JWTService | None = None
 
 
 def get_jwt_service() -> JWTService:
-    """获取 JWT 服务实例（单例）
+    """获取 JWT 服务实例(单例)
 
     Returns:
         JWTService: JWT 服务实例

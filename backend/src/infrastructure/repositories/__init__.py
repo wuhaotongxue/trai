@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: __init__.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,18 +6,18 @@
 
 from __future__ import annotations
 
-from infrastructure.repositories.user_repository import UserRepository
-from infrastructure.repositories.session_repository import (
-    SessionRepository,
-    MessageRepository,
-)
-from infrastructure.repositories.quota_repository import QuotaRepository
 from infrastructure.repositories.image_generation_repository import (
     ImageGenerationRepository,
+)
+from infrastructure.repositories.quota_repository import QuotaRepository
+from infrastructure.repositories.session_repository import (
+    MessageRepository,
+    SessionRepository,
 )
 from infrastructure.repositories.upload_task_repository import (
     UploadTaskRepository,
 )
+from infrastructure.repositories.user_repository import UserRepository
 
 __all__ = [
     "UserRepository",

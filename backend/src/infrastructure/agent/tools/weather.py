@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: weather.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -18,9 +17,9 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 
 
@@ -30,29 +29,27 @@ class WeatherTool(BaseTool):
     def __init__(self) -> None:
         super().__init__()
         self._api_key = os.getenv("WEATHER_API_KEY", "")
-        self._base_url = os.getenv(
-            "WEATHER_API_URL", "https://api.seniverse.com/v3/weather"
-        )
+        self._base_url = os.getenv("WEATHER_API_URL", "https://api.seniverse.com/v3/weather")
 
     @property
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="weather.current",
+                id="weather_current",
                 name="天气查询",
-                description="查询指定城市的当前天气情况，包括温度、湿度、风力、空气质量等",
+                description="查询指定城市的当前天气情况,包括温度、湿度、风力、空气质量等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[
                     ToolParameter(
                         name="city",
-                        description="城市名称，如：北京、上海、Shanghai",
+                        description="城市名称,如:北京、上海、Shanghai",
                         type="string",
                         required=True,
                     ),
                     ToolParameter(
                         name="lang",
-                        description="返回语言，zh-Hans（简体中文）或 en（英文）",
+                        description="返回语言,zh-Hans(简体中文)或 en(英文)",
                         type="string",
                         required=False,
                         default="zh-Hans",
@@ -64,11 +61,9 @@ class WeatherTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         city = params.get("city", "")
-        lang = params.get("lang", "zh-Hans")
+        params.get("lang", "zh-Hans")
 
         if not city:
             return ToolCallResult(
@@ -78,33 +73,25 @@ class WeatherTool(BaseTool):
                 error="城市名称不能为空",
             )
 
-        if not self._api_key:
-            return await self._mock_weather(city)
+        # 移除强制检查 API key,直接使用 wttr.in 免费接口
+        # if not self._api_key:
+        #     return await self._mock_weather(city)
 
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(
-                    self._base_url,
-                    params={
-                        "key": self._api_key,
-                        "location": city,
-                        "language": lang,
-                        "unit": "c",
-                    },
-                )
+                response = await client.get(f"https://wttr.in/{city}?format=j1")
                 response.raise_for_status()
                 data = response.json()
 
-                weather_data = data.get("results", [{}])[0]
-                now = weather_data.get("now", {})
+                current_condition = data.get("current_condition", [{}])[0]
 
                 output = (
-                    f"{city}当前天气:\\n"
-                    f"- 温度: {now.get('temperature', 'N/A')}°C\\n"
-                    f"- 天气: {now.get('text', 'N/A')}\\n"
-                    f"- 湿度: {now.get('humidity', 'N/A')}%\\n"
-                    f"- 风力: {now.get('wind_direction', '')}{now.get('wind_speed', '')}级\\n"
-                    f"- 更新时间: {weather_data.get('last_update', 'N/A')}"
+                    f"{city}当前天气 (实时数据):\n"
+                    f"- 温度: {current_condition.get('temp_C', 'N/A')}°C\n"
+                    f"- 天气: {current_condition.get('lang_zh', [{'value': current_condition.get('weatherDesc', [{'value': 'N/A'}])[0]['value']}])[0]['value']}\n"
+                    f"- 湿度: {current_condition.get('humidity', 'N/A')}%\n"
+                    f"- 风向/风速: {current_condition.get('winddir16Point', '')} {current_condition.get('windspeedKmph', '')}km/h\n"
+                    f"- 观测时间: {current_condition.get('observation_time', 'N/A')}"
                 )
 
                 return ToolCallResult(
@@ -127,9 +114,9 @@ class WeatherTool(BaseTool):
             return await self._mock_weather(city)
 
     async def _mock_weather(self, city: str) -> ToolCallResult:
-        """Mock 数据，用于未配置 API Key 时"""
+        """Mock 数据,用于未配置 API Key 时"""
         output = (
-            f"{city}当前天气（Mock数据）:\\n"
+            f"{city}当前天气(Mock数据):\\n"
             f"- 温度: 22°C\\n"
             f"- 天气: 多云\\n"
             f"- 湿度: 65%\\n"
