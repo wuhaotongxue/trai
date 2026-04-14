@@ -13,6 +13,10 @@ import Dashboard from '@/pages/dashboard'
 import Settings from '@/pages/settings'
 import Tools from '@/pages/tools'
 import AgentChat from '@/pages/chat'
+import TextToImage from '@/pages/ai/text-to-image'
+import ImageToImage from '@/pages/ai/image-to-image'
+import AiMusic from '@/pages/ai/music'
+import AiVideo from '@/pages/ai/video'
 import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
@@ -45,6 +49,22 @@ export const router = createHashRouter([
       {
         path: '/chat',
         element: <AgentChat />
+      },
+      {
+        path: '/ai/text-to-image',
+        element: <TextToImage />
+      },
+      {
+        path: '/ai/image-to-image',
+        element: <ImageToImage />
+      },
+      {
+        path: '/ai/music',
+        element: <AiMusic />
+      },
+      {
+        path: '/ai/video',
+        element: <AiVideo />
       },
       {
         path: '/tools',

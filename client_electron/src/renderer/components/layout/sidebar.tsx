@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 const Sidebar: React.FC = () => {
@@ -32,6 +32,10 @@ const Sidebar: React.FC = () => {
   const nav_items = [
     { path: '/', label: '仪表盘', icon: <Home size={20} /> },
     { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={20} /> },
+    { path: '/ai/text-to-image', label: '文生图', icon: <Image size={20} /> },
+    { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={20} /> },
+    { path: '/ai/music', label: 'AI 音乐', icon: <Music size={20} /> },
+    { path: '/ai/video', label: 'AI 视频', icon: <Video size={20} /> },
     { path: '/tools', label: '工具箱', icon: <Wrench size={20} /> },
     { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }
   ]
