@@ -38,6 +38,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1345
+- **新增(client_electron)**: 侧边栏新增“用户反馈”菜单与界面，提供产品建议与 Bug 报告的入口
+- **新增(client_electron)**: 实现反馈提交相关的 IPC 通道与 Service 桥接逻辑
+
+### 🛠️ 后端_2026_04_14_1345
+- **新增(backend)**: 增加系统反馈 API 路由 (`/api/system/feedback`) 并完善相关模型定义与数据落地模拟
+
 ### 💻 客户端_2026_04_14_1310
 - **新增(client_electron)**: 聊天界面新增 Agent 选择器，允许用户在当前会话中主动切换并指定进行对话的 Agent
 - **优化(client_electron)**: 完善 `management.py` 等后端接口依赖，修复模块导入错误并移除 `ResponseModel` 统一直接返回字典
