@@ -241,7 +241,7 @@ const Tools: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="number" 
-                  placeholder="宽 (留空保持原图)"
+                  placeholder="宽"
                   value={target_width}
                   onChange={(e) => set_target_width(e.target.value)}
                   style={{ 
@@ -259,7 +259,7 @@ const Tools: React.FC = () => {
                 <span style={{ color: '#94a3b8' }}>×</span>
                 <input 
                   type="number" 
-                  placeholder="高 (留空保持原图)"
+                  placeholder="高"
                   value={target_height}
                   onChange={(e) => set_target_height(e.target.value)}
                   style={{ 
@@ -275,6 +275,7 @@ const Tools: React.FC = () => {
                   }}
                 />
               </div>
+              <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>* 留空则保持原图尺寸</span>
             </div>
           )}
         </div>
