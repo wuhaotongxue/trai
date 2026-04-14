@@ -49,6 +49,10 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_0831
+- **修复(client_electron)**: `tools.ts` 中请求路由变更为 `snake_case` 下划线命名风格，与后端一致
+- **修复(client_electron)**: `router/index.tsx` 补充缺少的 `Navigate` 导入，修复 `pnpm dev` 时的构建错误
+
 ### 💻 客户端_2026_04_14_0812
 - **新增(client_electron)**: `tools.ts` 服务层增加文件转换和压缩等相关接口请求，在 IPC 和 `preload` 层注册对应事件
 - **新增(client_electron)**: `Sidebar` 增加 `工具箱` 入口页面，前端实现与后端的交互：Markdown 转 PDF、多文件 ZIP 压缩、图片压缩的上传测试入口

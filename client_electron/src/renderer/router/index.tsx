@@ -5,13 +5,14 @@
  * 描述: 前端路由配置文件
  */
 import React from 'react'
-import { createHashRouter } from 'react-router-dom'
+import { createHashRouter, Navigate } from 'react-router-dom'
 import MainLayout from '@/components/layout/main_layout'
 import Login from '@/pages/login'
 import Register from '@/pages/register'
 import Dashboard from '@/pages/dashboard'
 import Settings from '@/pages/settings'
 import Tools from '@/pages/tools'
+import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {

@@ -26,7 +26,7 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -e .
 ### 2. 运行服务
 
 ```bash
-python src/run.py
+python run.py
 ```
 
 服务默认在 `http://127.0.0.1:8000` 启动. 可以访问 `http://127.0.0.1:8000/docs` 查看 Swagger API 文档.
@@ -36,6 +36,11 @@ python src/run.py
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
 ## 📝 更新日志 (Changelog)
+
+### 🛠️ 后端_2026_04_14_0831
+- **修复(backend)**: 修复 `tools.py` 等文件中不符合项目 `snake_case` 命名规范的 API 路由，将 `-`（中划线）彻底替换为 `_`（下划线）
+- **修复(backend)**: 修复了 `tools.py` 路由依赖注入导致 `Depends in Annotated` 的 AssertionError
+- **修复(backend)**: 更新了 `README.md` 中对于服务运行 `python run.py` 的脚本路径说明
 
 ### 🛠️ 后端_2026_04_14_0812
 - **新增(tools)**: 增加 `ToolsAPI` 类，实现 `md-to-pdf`、`compress-image` 和 `compress-zip` 的逻辑，并注册到 `/api/tools/` 路由

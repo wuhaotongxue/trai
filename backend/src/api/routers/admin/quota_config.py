@@ -60,7 +60,7 @@ class CreateQuotaPlanRequest(BaseModel):
     agent_tool_call_limit: int = Field(ge=0)
 
 
-@router.get("/admin/quota-plans", response_model=list[QuotaPlanResponse], tags=["管理后台"])
+@router.get("/admin/quota_plans", response_model=list[QuotaPlanResponse], tags=["管理后台"])
 async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
     """获取所有配额套餐
 
@@ -91,7 +91,7 @@ async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
     ]
 
 
-@router.put("/admin/quota-plans/{role}", response_model=QuotaPlanResponse, tags=["管理后台"])
+@router.put("/admin/quota_plans/{role}", response_model=QuotaPlanResponse, tags=["管理后台"])
 async def update_quota_plan(
     role: str,
     request: QuotaPlanUpdateRequest,
@@ -142,7 +142,7 @@ async def update_quota_plan(
     )
 
 
-@router.post("/admin/quota-plans", response_model=QuotaPlanResponse, tags=["管理后台"])
+@router.post("/admin/quota_plans", response_model=QuotaPlanResponse, tags=["管理后台"])
 async def create_quota_plan(
     request: CreateQuotaPlanRequest,
     admin: AdminUser,

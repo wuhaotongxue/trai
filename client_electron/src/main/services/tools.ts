@@ -32,7 +32,7 @@ export const tools_service = {
    */
   async convert_md_to_pdf(file_path: string) {
     try {
-      const url = `${get_api_base_url()}/api/tools/md-to-pdf`
+      const url = `${get_api_base_url()}/api/tools/md_to_pdf`
       const form_data = new FormData()
       
       const file_stream = fs.createReadStream(file_path)
@@ -60,7 +60,7 @@ export const tools_service = {
    */
   async compress_image(file_path: string, quality: number = 70) {
     try {
-      const url = `${get_api_base_url()}/api/tools/compress-image?quality=${quality}`
+      const url = `${get_api_base_url()}/api/tools/compress_image?quality=${quality}`
       const form_data = new FormData()
       
       const file_stream = fs.createReadStream(file_path)
@@ -88,7 +88,7 @@ export const tools_service = {
    */
   async compress_files_to_zip(file_paths: string[]) {
     try {
-      const url = `${get_api_base_url()}/api/tools/compress-zip`
+      const url = `${get_api_base_url()}/api/tools/compress_zip`
       const form_data = new FormData()
       
       for (const file_path of file_paths) {
