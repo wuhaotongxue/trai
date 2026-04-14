@@ -5,14 +5,14 @@
  * 描述: 客户端工具箱页面，提供文件处理功能
  */
 import React, { useState } from 'react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 const Tools: React.FC = () => {
-  const [loading, set_loading] = useState(false)
+  const [loading_task, set_loading_task] = useState<string | null>(null)
   const [result_url, set_result_url] = useState('')
   const [error_msg, set_error_msg] = useState('')
 
   const handle_md_to_pdf = async () => {
-    // 创建一个隐藏的 input 用于选择文件
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.md'
@@ -20,12 +20,11 @@ const Tools: React.FC = () => {
       const file = e.target.files[0]
       if (!file) return
       
-      set_loading(true)
+      set_loading_task('md2pdf')
       set_error_msg('')
       set_result_url('')
       
       try {
-        // file.path 是 Electron 特有的属性，包含文件的绝对路径
         const res = await window.electron_api.tools_convert_md_to_pdf(file.path)
         if (res.success && res.data) {
           set_result_url(res.data.url)
@@ -35,7 +34,7 @@ const Tools: React.FC = () => {
       } catch (err: any) {
         set_error_msg(err.message || '转换异常')
       } finally {
-        set_loading(false)
+        set_loading_task(null)
       }
     }
     input.click()
@@ -49,7 +48,7 @@ const Tools: React.FC = () => {
       const file = e.target.files[0]
       if (!file) return
       
-      set_loading(true)
+      set_loading_task('image')
       set_error_msg('')
       set_result_url('')
       
@@ -63,7 +62,7 @@ const Tools: React.FC = () => {
       } catch (err: any) {
         set_error_msg(err.message || '压缩异常')
       } finally {
-        set_loading(false)
+        set_loading_task(null)
       }
     }
     input.click()
@@ -77,7 +76,7 @@ const Tools: React.FC = () => {
       const files = Array.from(e.target.files)
       if (files.length === 0) return
       
-      set_loading(true)
+      set_loading_task('zip')
       set_error_msg('')
       set_result_url('')
       
@@ -93,65 +92,176 @@ const Tools: React.FC = () => {
       } catch (err: any) {
         set_error_msg(err.message || '打包异常')
       } finally {
-        set_loading(false)
+        set_loading_task(null)
       }
     }
     input.click()
   }
 
+  const tool_cards = [
+    {
+      id: 'md2pdf',
+      title: 'Markdown 转 PDF',
+      description: '将 Markdown 文件渲染并导出为 PDF 文档',
+      icon: <FileText size={32} color="#0ea5e9" />,
+      action: handle_md_to_pdf,
+      bg_color: '#f0f9ff',
+      border_color: '#bae6fd'
+    },
+    {
+      id: 'image',
+      title: '图片压缩',
+      description: '智能压缩图片体积，支持主流格式',
+      icon: <ImageIcon size={32} color="#10b981" />,
+      action: handle_compress_image,
+      bg_color: '#ecfdf5',
+      border_color: '#a7f3d0'
+    },
+    {
+      id: 'zip',
+      title: 'ZIP 打包压缩',
+      description: '将多个文件打包压缩成一个 ZIP 文件',
+      icon: <FileArchive size={32} color="#f59e0b" />,
+      action: handle_compress_zip,
+      bg_color: '#fffbeb',
+      border_color: '#fde68a'
+    }
+  ]
+
   return (
-    <div>
-      <h1 style={{ color: '#202020', marginTop: 0 }}>工具箱</h1>
-      <p style={{ color: 'rgba(0, 0, 0, 0.6)' }}>常用文件处理与转换</p>
+    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '24px', fontWeight: 600 }}>工具箱</h1>
+      </div>
+      <p style={{ color: '#64748b', marginBottom: '32px', fontSize: '15px' }}>常用文件处理与格式转换工具，操作将在本地或云端安全处理。</p>
       
       <div style={{
-        marginTop: '24px',
-        padding: '24px',
-        backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        border: '1px solid rgba(0, 0, 0, 0.05)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
       }}>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <button 
-            onClick={handle_md_to_pdf} 
-            disabled={loading}
-            style={{ padding: '10px 16px', backgroundColor: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: loading ? 'not-allowed' : 'pointer' }}
+        {tool_cards.map(card => (
+          <div 
+            key={card.id}
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: `1px solid #e2e8f0`,
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)'
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)'
+              e.currentTarget.style.borderColor = card.border_color
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'none'
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)'
+              e.currentTarget.style.borderColor = '#e2e8f0'
+            }}
           >
-            Markdown 转 PDF
-          </button>
-          
-          <button 
-            onClick={handle_compress_image} 
-            disabled={loading}
-            style={{ padding: '10px 16px', backgroundColor: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: loading ? 'not-allowed' : 'pointer' }}
-          >
-            图片压缩
-          </button>
-          
-          <button 
-            onClick={handle_compress_zip} 
-            disabled={loading}
-            style={{ padding: '10px 16px', backgroundColor: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: loading ? 'not-allowed' : 'pointer' }}
-          >
-            多文件 ZIP 打包
-          </button>
-        </div>
-
-        {loading && <div style={{ color: '#0078d4' }}>处理中，请稍候...</div>}
-        {error_msg && <div style={{ color: '#e51400' }}>{error_msg}</div>}
-        {result_url && (
-          <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#f3f9fd', border: '1px solid #cce5ff', borderRadius: '4px' }}>
-            <div style={{ color: '#0078d4', fontWeight: 'bold', marginBottom: '8px' }}>处理成功！</div>
-            <a href={result_url} target="_blank" rel="noreferrer" style={{ color: '#0078d4', wordBreak: 'break-all' }}>
-              点击此处下载处理后的文件 (链接 5 分钟内有效)
-            </a>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '12px',
+              backgroundColor: card.bg_color,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              {card.icon}
+            </div>
+            
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b', fontWeight: 600 }}>{card.title}</h3>
+            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: '1.5', flex: 1 }}>{card.description}</p>
+            
+            <button 
+              onClick={card.action} 
+              disabled={loading_task !== null}
+              style={{ 
+                padding: '10px 16px', 
+                backgroundColor: loading_task === card.id ? '#f1f5f9' : '#0078d4', 
+                color: loading_task === card.id ? '#64748b' : '#ffffff', 
+                border: 'none', 
+                borderRadius: '8px', 
+                cursor: loading_task !== null ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              {loading_task === card.id ? (
+                <><Loader2 size={16} className="animate-spin" /> 处理中...</>
+              ) : (
+                '选择文件'
+              )}
+            </button>
           </div>
-        )}
+        ))}
       </div>
+
+      {(error_msg || result_url) && (
+        <div style={{
+          padding: '20px',
+          borderRadius: '12px',
+          backgroundColor: error_msg ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${error_msg ? '#fecaca' : '#bbf7d0'}`,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '12px'
+        }}>
+          {error_msg ? <AlertCircle size={24} color="#ef4444" /> : <CheckCircle2 size={24} color="#10b981" />}
+          
+          <div style={{ flex: 1 }}>
+            <h4 style={{ margin: '0 0 8px 0', color: error_msg ? '#991b1b' : '#166534', fontSize: '16px', fontWeight: 600 }}>
+              {error_msg ? '处理失败' : '处理成功'}
+            </h4>
+            
+            {error_msg ? (
+              <p style={{ margin: 0, color: '#b91c1c', fontSize: '14px' }}>{error_msg}</p>
+            ) : (
+              <div>
+                <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>文件已成功生成，请点击下方按钮下载（链接有效期 5 分钟）。</p>
+                <a 
+                  href={result_url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  style={{ 
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                >
+                  <ArrowDownToLine size={16} />
+                  下载文件
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

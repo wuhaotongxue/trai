@@ -49,6 +49,9 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1350
+- **重构(client_electron)**: 重构工具箱 (`Tools`) 页面，使用卡片式网格布局 (`Grid`) 和 Lucide 图标替换原有的简单按钮列表，提升页面美观度与交互体验
+
 ### 💻 客户端_2026_04_14_1345
 - **新增(client_electron)**: 侧边栏新增“用户反馈”菜单与界面，提供产品建议与 Bug 报告的入口
 - **新增(client_electron)**: 实现反馈提交相关的 IPC 通道与 Service 桥接逻辑
