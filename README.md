@@ -56,6 +56,9 @@ cd trai
 - **优化(skills)**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
 - **清理(docs)**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
 
+### 📚 项目(docs)_2026_04_14_1634
+- **新增(md)**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
+
 ### 💻 客户端_2026_04_14_1630
 - **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
 
