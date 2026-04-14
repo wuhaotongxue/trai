@@ -58,8 +58,7 @@ const Sidebar: React.FC = () => {
         { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
         { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
         { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
-        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> },
-        { path: '/ai/comfyui', label: 'ComfyUI', icon: <Bot size={18} /> }
+        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
       ]
     },
     {
@@ -67,10 +66,10 @@ const Sidebar: React.FC = () => {
       label: '实用工具',
       icon: <Wrench size={20} />,
       children: [
-        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> },
-        { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={18} /> }
+        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
       ]
     },
+    { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={20} /> },
     { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }
   ]
 
