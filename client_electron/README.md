@@ -49,6 +49,10 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1310
+- **新增(client_electron)**: 聊天界面新增 Agent 选择器，允许用户在当前会话中主动切换并指定进行对话的 Agent
+- **优化(client_electron)**: 完善 `management.py` 等后端接口依赖，修复模块导入错误并移除 `ResponseModel` 统一直接返回字典
+
 ### 💻 客户端_2026_04_14_1200
 - **新增(client_electron)**: 补充文生图、图生图、AI音乐、AI视频的具体UI页面与IPC通信通道
 - **重构(client_electron)**: 优化左侧菜单结构，将AI功能与工具分离为折叠组，默认展开AI

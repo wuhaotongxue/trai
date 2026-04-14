@@ -27,6 +27,7 @@ class AgentChatRequest(BaseModel):
 
     session_id: Annotated[str, Field(description="会话 ID")]
     message: Annotated[str, Field(description="用户消息")]
+    agent_id: Annotated[str | None, Field(default=None, description="指定 Agent ID")]
     stream: Annotated[bool, Field(default=False, description="是否流式响应")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
 
@@ -70,6 +71,7 @@ async def agent_chat(
         user_id=user_id,
         user_role=role,
         session_id=request.session_id,
+        agent_id=request.agent_id,
         trace_id=trace_id,
     )
 

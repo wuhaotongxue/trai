@@ -17,7 +17,7 @@ contextBridge.exposeInMainWorld('electron_api', {
   tools_convert_md_to_pdf: (file_path: string) => ipcRenderer.invoke('tools:convert_md_to_pdf', file_path),
   tools_compress_image: (file_path: string, quality?: number) => ipcRenderer.invoke('tools:compress_image', file_path, quality),
   tools_compress_files_to_zip: (file_paths: string[]) => ipcRenderer.invoke('tools:compress_files_to_zip', file_paths),
-  agent_chat: (session_id: string, message: string) => ipcRenderer.invoke('agent:chat', session_id, message),
+  agent_chat: (session_id: string, message: string, agent_id?: string) => ipcRenderer.invoke('agent:chat', session_id, message, agent_id),
   agent_stop: (session_id: string) => ipcRenderer.invoke('agent:stop', session_id),
   ai_generate_image: (prompt: string) => ipcRenderer.invoke('ai:generate_image', prompt),
   ai_generate_image_to_image: (prompt: string, image_url: string) => ipcRenderer.invoke('ai:generate_image_to_image', prompt, image_url),
