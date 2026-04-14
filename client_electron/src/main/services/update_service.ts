@@ -83,6 +83,11 @@ export class UpdateService {
       autoUpdater.quitAndInstall()
     })
 
+    // 注册 IPC,允许渲染进程获取当前版本号
+    ipcMain.handle('app:get_version', () => {
+      return require('electron').app.getVersion()
+    })
+
     // 启动时自动检查一次
     this.check_update()
   }
