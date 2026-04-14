@@ -38,6 +38,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1716
+- **新增(client_electron)**: `Settings` 系统设置页面新增“个人账号设置”标签页，与原有的系统常规设置拆分，集成显示用户信息、头像上传预览以及修改密码的基础 UI 组件交互
+
 ### 💻 客户端_2026_04_14_1653
 - **新增(client_electron)**: `Settings` 系统设置页面新增“检查更新”与“立即重启并安装”按钮，用户可直观地查看当前应用版本并手动触发 OTA 自动更新流程
 - **优化(client_electron)**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
