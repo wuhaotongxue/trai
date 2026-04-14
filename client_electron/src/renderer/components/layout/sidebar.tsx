@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 const Sidebar: React.FC = () => {
@@ -15,6 +15,7 @@ const Sidebar: React.FC = () => {
   const logout = use_auth_store((state) => state.logout)
   const user = use_auth_store((state) => state.user)
   const [collapsed, set_collapsed] = useState(false)
+  const [expanded_groups, set_expanded_groups] = useState<Record<string, boolean>>({ ai: true, tools: true })
 
   const handle_logout = async () => {
     try {
@@ -29,14 +30,37 @@ const Sidebar: React.FC = () => {
     }
   }
 
+  const toggle_group = (id: string) => {
+    if (collapsed) {
+      set_collapsed(false)
+      set_expanded_groups(prev => ({ ...prev, [id]: true }))
+    } else {
+      set_expanded_groups(prev => ({ ...prev, [id]: !prev[id] }))
+    }
+  }
+
   const nav_items = [
     { path: '/', label: '仪表盘', icon: <Home size={20} /> },
-    { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={20} /> },
-    { path: '/ai/text-to-image', label: '文生图', icon: <Image size={20} /> },
-    { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={20} /> },
-    { path: '/ai/music', label: 'AI 音乐', icon: <Music size={20} /> },
-    { path: '/ai/video', label: 'AI 视频', icon: <Video size={20} /> },
-    { path: '/tools', label: '工具箱', icon: <Wrench size={20} /> },
+    {
+      id: 'ai',
+      label: 'AI 创作',
+      icon: <Bot size={20} />,
+      children: [
+        { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={18} /> },
+        { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
+        { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
+        { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
+        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
+      ]
+    },
+    {
+      id: 'tools',
+      label: '实用工具',
+      icon: <Wrench size={20} />,
+      children: [
+        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
+      ]
+    },
     { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }
   ]
 
@@ -63,8 +87,82 @@ const Sidebar: React.FC = () => {
         )}
       </div>
       
-      <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
         {nav_items.map(item => {
+          if (item.children) {
+            const is_group_active = item.children.some(child => location.pathname === child.path)
+            const is_expanded = expanded_groups[item.id]
+
+            return (
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div
+                  onClick={() => toggle_group(item.id)}
+                  title={collapsed ? item.label : undefined}
+                  style={{
+                    padding: collapsed ? '12px 0' : '10px 16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: collapsed ? 'center' : 'space-between',
+                    borderRadius: '6px',
+                    color: is_group_active && collapsed ? '#0078d4' : '#64748b',
+                    backgroundColor: is_group_active && collapsed ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+                    transition: 'background-color 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? '0' : '12px' }}>
+                    {item.icon}
+                    {!collapsed && <span style={{ fontSize: '13px', fontWeight: '600' }}>{item.label}</span>}
+                  </div>
+                  {!collapsed && (
+                    is_expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                  )}
+                </div>
+
+                {!collapsed && is_expanded && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
+                    {item.children.map(child => {
+                      const is_child_active = location.pathname === child.path
+                      return (
+                        <div
+                          key={child.path}
+                          onClick={() => navigate(child.path)}
+                          style={{
+                            padding: '8px 16px 8px 48px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            borderRadius: '6px',
+                            color: is_child_active ? '#0078d4' : '#475569',
+                            backgroundColor: is_child_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'transparent'
+                          }}
+                        >
+                          {child.icon}
+                          <span style={{ fontSize: '13px', fontWeight: is_child_active ? '600' : 'normal' }}>{child.label}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // Single item
           const is_active = location.pathname === item.path
           return (
             <div
