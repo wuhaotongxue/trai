@@ -11,10 +11,14 @@
     "preview": "electron ."
   },
   "dependencies": {
+    "axios": "^1.15.0",
     "electron-log": "^5.0.0",
     "electron-updater": "^6.1.7",
+    "lucide-react": "^1.8.0",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.0",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -34,6 +38,7 @@
     "directories": {
       "output": "release"
     },
+    "icon": "public/kity_256.ico",
     "files": [
       "dist/**/*",
       "package.json"
@@ -45,7 +50,18 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TRAI",
+      "uninstallDisplayName": "卸载 TRAI",
+      "deleteAppDataOnUninstall": true
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
   }
 }
