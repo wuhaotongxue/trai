@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: wecom_contact_tool.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,7 +6,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from loguru import logger
@@ -17,14 +15,13 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 from infrastructure.agent.tools.wecom_contact import (
     WeComContactClient,
     WeComUser,
-    WeComDepartment,
 )
 
 
@@ -84,9 +81,7 @@ class WeComContactTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         import time
 
         start = time.monotonic()
@@ -123,9 +118,7 @@ class WeComContactTool(BaseTool):
 
             elif action == "list_departments":
                 dept_id = params.get("department_id")
-                depts = await self._client.list_departments(
-                    dept_id if dept_id is not None else None
-                )
+                depts = await self._client.list_departments(dept_id if dept_id is not None else None)
                 lines = [f"部门列表（共 {len(depts)} 个）："]
                 for d in depts:
                     prefix = "  " if d.parent_id != 0 else ""
@@ -148,8 +141,7 @@ class WeComContactTool(BaseTool):
                     lines = [f"找到 {len(matched)} 条匹配结果："]
                     for u in matched:
                         lines.append(
-                            f"  · {u.name} | 工号：{u.user_id} | "
-                            f"部门：{u.department} | 职位：{u.position or '未设置'}"
+                            f"  · {u.name} | 工号：{u.user_id} | 部门：{u.department} | 职位：{u.position or '未设置'}"
                         )
                     output = "\n".join(lines)
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload_task_interfaces.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00

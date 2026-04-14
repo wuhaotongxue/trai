@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: register.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -15,10 +14,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
-from infrastructure.database import get_session
 
 router = APIRouter()
 
@@ -30,6 +29,7 @@ EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 class RegisterRequest(BaseModel):
     """注册请求"""
+
     username: Annotated[str, Field(min_length=3, max_length=64, description="用户名")]
     password: Annotated[str, Field(min_length=6, max_length=128, description="密码")]
     email: Annotated[str, Field(description="邮箱地址")]
@@ -38,6 +38,7 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
     """注册响应"""
+
     user_id: str = Field(description="用户唯一标识")
     username: str = Field(description="用户名")
     email: str = Field(description="邮箱地址")

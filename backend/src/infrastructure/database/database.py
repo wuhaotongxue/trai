@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: database.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -12,8 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.engine.url import URL
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 # 加载 backend/.env 配置
 # __file__ = e:\code\zzgit\trai\backend\src\infrastructure\database\database.py
@@ -21,7 +20,7 @@ from sqlalchemy.engine.url import URL
 # parent.parent.parent.parent = e:\code\zzgit\trai\backend
 _env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
 if _env_path.exists():
-    with open(_env_path, "r", encoding="utf-8") as _f:
+    with open(_env_path, encoding="utf-8") as _f:
         for _line in _f:
             _line = _line.strip()
             if _line and not _line.startswith("#") and "=" in _line:
@@ -31,6 +30,7 @@ if _env_path.exists():
 
 class Base(DeclarativeBase):
     """SQLAlchemy 声明式基类"""
+
     pass
 
 

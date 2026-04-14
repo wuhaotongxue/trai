@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: quota_service.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -10,10 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from core.logger import logger
 from core.exceptions import AIQuotaExceededError
+from core.logger import logger
 from infrastructure.repositories.quota_repository import QuotaRepository
-
 
 TOOL_TO_QUOTA_TYPE: dict[str, str] = {
     "image.generate": "image_generation",
@@ -177,9 +175,7 @@ class QuotaService:
 
         return limit - new_balance
 
-    def get_user_quota_status(
-        self, user_id: str, role: str
-    ) -> list[QuotaStatus]:
+    def get_user_quota_status(self, user_id: str, role: str) -> list[QuotaStatus]:
         """获取用户所有配额状态
 
         Args:
@@ -212,14 +208,16 @@ class QuotaService:
             unlimited = limit == 0
             remaining = 0 if unlimited else max(0, limit - used)
 
-            statuses.append(QuotaStatus(
-                quota_type=qt,
-                used=used,
-                limit=limit,
-                remaining=remaining,
-                unlimited=unlimited,
-                billing_month=self._billing_month,
-            ))
+            statuses.append(
+                QuotaStatus(
+                    quota_type=qt,
+                    used=used,
+                    limit=limit,
+                    remaining=remaining,
+                    unlimited=unlimited,
+                    billing_month=self._billing_month,
+                )
+            )
 
         return statuses
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,8 +6,6 @@
 
 from __future__ import annotations
 
-import os
-import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
@@ -24,6 +21,7 @@ router = APIRouter()
 
 class UploadResponse(BaseModel):
     """上传响应"""
+
     task_id: str = Field(description="任务 ID")
     filename: str = Field(description="文件名")
     file_url: str = Field(description="文件 URL")
@@ -34,6 +32,7 @@ class UploadResponse(BaseModel):
 
 class FileInfo(BaseModel):
     """文件信息"""
+
     filename: str = Field(description="文件名")
     file_url: str = Field(description="文件 URL")
     file_type: str = Field(description="文件类型")
@@ -75,7 +74,8 @@ async def upload_file(
         result = await use_case.execute(input_data)
 
         if repo:
-            from domain.entities.upload_task import UploadTask, UploadStatus
+            from domain.entities.upload_task import UploadStatus, UploadTask
+
             task = UploadTask(
                 filename=result.filename,
                 file_size=result.file_size,
@@ -139,21 +139,25 @@ async def upload_batch(
             input_data = UploadInput(file=file, folder=folder)
             result = await use_case.execute(input_data)
 
-            results.append(UploadResponse(
-                task_id=result.task_id,
-                filename=result.filename,
-                file_url=result.file_url,
-                file_type=result.file_type,
-                file_size=result.file_size,
-                content_type=result.status,
-            ))
+            results.append(
+                UploadResponse(
+                    task_id=result.task_id,
+                    filename=result.filename,
+                    file_url=result.file_url,
+                    file_type=result.file_type,
+                    file_size=result.file_size,
+                    content_type=result.status,
+                )
+            )
 
         except Exception as e:
-            errors.append({
-                "index": idx,
-                "filename": file.filename,
-                "error": str(e),
-            })
+            errors.append(
+                {
+                    "index": idx,
+                    "filename": file.filename,
+                    "error": str(e),
+                }
+            )
 
     return {
         "success": len(results),

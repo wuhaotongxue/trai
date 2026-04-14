@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: quota_config.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,16 +6,14 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from api.deps import AdminUser
 from core.logger import logger
-from infrastructure.database.models import QuotaPlanModel
 from infrastructure.database import get_session
+from infrastructure.database.models import QuotaPlanModel
 from infrastructure.repositories.quota_repository import QuotaRepository
 
 router = APIRouter()
@@ -24,6 +21,7 @@ router = APIRouter()
 
 class QuotaPlanResponse(BaseModel):
     """配额套餐响应"""
+
     id: int
     plan_name: str
     user_role: str
@@ -38,6 +36,7 @@ class QuotaPlanResponse(BaseModel):
 
 class QuotaPlanUpdateRequest(BaseModel):
     """配额套餐更新请求"""
+
     image_generation_limit: int = Field(ge=0, description="图片生成配额（0=无限制）")
     audio_synthesis_limit: int = Field(ge=0, description="语音合成配额（0=无限制）")
     transcription_minutes_limit: int = Field(ge=0, description="转录配额（0=无限制）")
@@ -49,6 +48,7 @@ class QuotaPlanUpdateRequest(BaseModel):
 
 class CreateQuotaPlanRequest(BaseModel):
     """创建配额套餐请求"""
+
     plan_name: str = Field(min_length=1, max_length=50)
     user_role: str = Field(min_length=1, max_length=20)
     image_generation_limit: int = Field(ge=0)
@@ -71,7 +71,7 @@ async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
         list[QuotaPlanResponse]: 套餐列表
     """
     db = get_session()
-    repo = QuotaRepository(db)
+    QuotaRepository(db)
     plans = db.execute(select(QuotaPlanModel)).scalars().all()
 
     return [

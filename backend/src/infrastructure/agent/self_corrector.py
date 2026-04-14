@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: self_corrector.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -8,10 +7,10 @@
 from __future__ import annotations
 
 import asyncio
-import os
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from enum import Enum
-from typing import Any, Callable, Coroutine
+from enum import StrEnum
+from typing import Any
 
 from loguru import logger
 
@@ -23,7 +22,7 @@ from infrastructure.agent.error_classifier import (
 )
 
 
-class CorrectionState(str, Enum):
+class CorrectionState(StrEnum):
     """纠错状态"""
 
     DETECTED = "detected"
@@ -101,14 +100,10 @@ class SelfCorrector:
         self._state = CorrectionState.ATTEMPTING
 
         if classified.action == ErrorAction.RETRY_WITH_BACKOFF:
-            return await self._retry_with_backoff(
-                classified, retry_fn, *args, **kwargs
-            )
+            return await self._retry_with_backoff(classified, retry_fn, *args, **kwargs)
 
         if classified.action in (ErrorAction.RETRY, ErrorAction.TOOL_EXECUTION):
-            return await self._retry_and_alternative(
-                classified, retry_fn, *args, **kwargs
-            )
+            return await self._retry_and_alternative(classified, retry_fn, *args, **kwargs)
 
         if classified.action == ErrorAction.ROLLBACK:
             return await self._rollback(classified, retry_fn, *args, **kwargs)
@@ -140,10 +135,7 @@ class SelfCorrector:
                 self.BACKOFF_MAX_MS,
             )
 
-            logger.info(
-                f"退避重试 | attempt={attempt}/{self.MAX_RETRIES} | "
-                f"backoff={backoff_ms}ms"
-            )
+            logger.info(f"退避重试 | attempt={attempt}/{self.MAX_RETRIES} | backoff={backoff_ms}ms")
 
             await asyncio.sleep(backoff_ms / 1000.0)
 
@@ -279,8 +271,7 @@ class SelfCorrector:
         message = escalation_messages.get(classified.category, classified.message)
 
         logger.warning(
-            f"错误升级 | category={classified.category.value} | "
-            f"attempts={self._attempts} | message={message}"
+            f"错误升级 | category={classified.category.value} | attempts={self._attempts} | message={message}"
         )
 
         self._state = CorrectionState.ESCALATED

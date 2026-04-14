@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: me.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -14,14 +13,15 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
 
 class UserInfo(BaseModel):
     """用户信息"""
+
     user_id: str = Field(description="用户唯一标识")
     username: str = Field(description="用户名")
     email: str | None = Field(default=None, description="邮箱地址")
@@ -36,6 +36,7 @@ class UserInfo(BaseModel):
 
 class MeResponse(BaseModel):
     """当前用户响应"""
+
     user: UserInfo = Field(description="用户信息")
     permissions: list[str] = Field(default_factory=list, description="用户权限列表")
 
@@ -107,19 +108,29 @@ def _get_permissions_by_role(role: str) -> list[str]:
 
     role_permissions = {
         "admin": [
-            "user:create", "user:delete", "user:list",
-            "session:create", "session:delete", "session:list",
-            "file:upload", "file:download", "file:delete",
+            "user:create",
+            "user:delete",
+            "user:list",
+            "session:create",
+            "session:delete",
+            "session:list",
+            "file:upload",
+            "file:download",
+            "file:delete",
             "admin:access",
         ],
         "manager": [
             "user:list",
-            "session:create", "session:list",
-            "file:upload", "file:download",
+            "session:create",
+            "session:list",
+            "file:upload",
+            "file:download",
         ],
         "vip": [
-            "session:create", "session:list",
-            "file:upload", "file:download",
+            "session:create",
+            "session:list",
+            "file:upload",
+            "file:download",
         ],
         "normal": base_permissions,
         "guest": ["user:read"],

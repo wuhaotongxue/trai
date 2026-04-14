@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user_model.py
 # 作者: wuhao
 # 日期: 2026_04_13
@@ -9,7 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, BigInteger, Text
+from sqlalchemy import BigInteger, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -17,6 +16,7 @@ from infrastructure.database.database import Base
 
 class UserModel(Base):
     """用户模型"""
+
     __tablename__ = "t_users"
     __comment__ = "用户表，存储用户账户信息"
 

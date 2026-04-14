@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: factory.py
 # 作者: wuhao
 # 日期: 2026_04_09_14:25:00
@@ -45,6 +44,7 @@ class NotifyServiceFactory:
         """
         if cls._logger is None:
             from core.logger import get_logger
+
             cls._logger = get_logger()
         return cls._logger
 

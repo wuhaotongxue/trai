@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: token_counter.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:12:17
@@ -103,9 +102,7 @@ class TokenCounter:
         total += 3
         return total
 
-    def truncate_to_limit(
-        self, messages: list[dict[str, str]], max_tokens: int
-    ) -> list[dict[str, str]]:
+    def truncate_to_limit(self, messages: list[dict[str, str]], max_tokens: int) -> list[dict[str, str]]:
         """将消息列表截断到指定 Token 上限
 
         从最旧的消息开始丢弃，保留最新的消息

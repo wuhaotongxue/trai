@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: openai_client.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -9,8 +8,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator
+from typing import Any
 
 import httpx
 from loguru import logger
@@ -208,6 +208,7 @@ class OpenAIClient:
                             break
 
                         import json
+
                         try:
                             chunk = json.loads(data_str)
                         except json.JSONDecodeError:
@@ -230,7 +231,7 @@ class OpenAIClient:
                         # 处理 tool_calls
                         if "tool_calls" in delta and delta["tool_calls"]:
                             tc = delta["tool_calls"][0]
-                            
+
                             # 新的一个工具调用开始
                             if tc.get("id"):
                                 # 如果上一个工具还在处理中，则先发送结束事件
@@ -242,7 +243,7 @@ class OpenAIClient:
                                         content="".join(tool_args_parts),
                                         finish_reason="",
                                     )
-                                
+
                                 in_tool_call = True
                                 tool_call_id = tc["id"]
                                 tool_name = tc.get("function", {}).get("name", "")

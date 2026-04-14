@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: audit.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -12,7 +11,7 @@ import time
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request, Response
@@ -23,8 +22,9 @@ from core.logger import get_logger
 logger = get_logger()
 
 
-class AuditAction(str, Enum):
+class AuditAction(StrEnum):
     """审计动作类型"""
+
     LOGIN = "login"
     LOGOUT = "logout"
     REGISTER = "register"
@@ -42,8 +42,9 @@ class AuditAction(str, Enum):
     CONFIG_UPDATE = "config_update"
 
 
-class AuditLevel(str, Enum):
+class AuditLevel(StrEnum):
     """审计级别"""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -53,6 +54,7 @@ class AuditLevel(str, Enum):
 @dataclass
 class AuditLog:
     """审计日志"""
+
     log_id: str
     timestamp: str
     trace_id: str
@@ -285,6 +287,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                     content_type = request.headers.get("Content-Type", "")
                     if "application/json" in content_type:
                         import json
+
                         try:
                             request_body = json.loads(body)
                         except json.JSONDecodeError:
@@ -305,6 +308,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             try:
                 if hasattr(response, "body"):
                     import json
+
                     response_body = json.loads(response.body)
             except Exception:
                 pass

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload_task_repository.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -51,9 +50,7 @@ class UploadTaskRepository(IUploadTaskRepository):
 
         return self._model_to_entity(model)
 
-    def get_by_user(
-        self, user_id: str, limit: int = 20, offset: int = 0
-    ) -> list[UploadTask]:
+    def get_by_user(self, user_id: str, limit: int = 20, offset: int = 0) -> list[UploadTask]:
         stmt = (
             select(UploadTaskModel)
             .where(UploadTaskModel.t_user_id == user_id)

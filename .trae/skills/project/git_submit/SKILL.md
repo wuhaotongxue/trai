@@ -19,7 +19,7 @@ description: >-
   <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:12px;">
     <strong style="color:#1565C0;">&#x1F6E1; 强制检查</strong>
     <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>修改 <code>backend</code> → 必须调用 <code>backend/SKILL.md</code> 检查 DDD 架构</li>
+      <li>修改 <code>backend</code> → 必须调用 <code>backend/SKILL.md</code> 检查 DDD 架构，**并调用 <code>ruff_check</code> 技能进行格式化和 Lint 检查**</li>
       <li>修改 <code>desktop_client</code> → 必须调用 <code>desktop_client/SKILL.md</code> 检查防卡死规范</li>
       <li>修改 <code>electron</code> → 必须调用 <code>electron/SKILL.md</code> 检查 Electron 规范</li>
       <li>修改 <code>frontend_next</code> → 必须调用 <code>frontend_next/SKILL.md</code> 检查 App Router 规范</li>

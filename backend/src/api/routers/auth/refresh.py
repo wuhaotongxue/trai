@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: refresh.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -14,20 +13,22 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from core.exceptions import AuthenticationError
-from infrastructure.security.jwt import JWTService, get_jwt_service
-from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.jwt import JWTService, get_jwt_service
 
 router = APIRouter()
 
 
 class RefreshRequest(BaseModel):
     """刷新令牌请求"""
+
     refresh_token: str = Field(description="刷新令牌")
 
 
 class RefreshResponse(BaseModel):
     """刷新令牌响应"""
+
     access_token: str = Field(description="新的访问令牌")
     refresh_token: str = Field(description="新的刷新令牌（可选）")
     token_type: str = Field(default="Bearer", description="令牌类型")

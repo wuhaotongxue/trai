@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: error_classifier.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -8,11 +7,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """错误分类枚举（对应 correction.md 规范）"""
 
     VALIDATION = "validation"
@@ -25,7 +24,7 @@ class ErrorCategory(str, Enum):
     SYSTEM = "system"
 
 
-class ErrorAction(str, Enum):
+class ErrorAction(StrEnum):
     """错误处理动作"""
 
     ESCALATE = "escalate"
@@ -51,9 +50,7 @@ class ClassifiedError:
 class ErrorClassifier:
     """错误分类器 - 将异常映射为规范中的错误分类"""
 
-    def classify(
-        self, error: Exception, context: dict[str, Any] | None = None
-    ) -> ClassifiedError:
+    def classify(self, error: Exception, context: dict[str, Any] | None = None) -> ClassifiedError:
         """将异常分类
 
         Args:

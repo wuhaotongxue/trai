@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: rate_limiter.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,9 +6,8 @@
 
 from __future__ import annotations
 
-import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from fastapi import Request, Response
@@ -24,6 +22,7 @@ logger = get_logger()
 @dataclass
 class RateLimitRule:
     """速率限制规则"""
+
     max_requests: int = 60
     window_seconds: int = 60
     key_prefix: str = "rate_limit"
@@ -32,6 +31,7 @@ class RateLimitRule:
 @dataclass
 class RateLimitCounter:
     """计数器"""
+
     count: int = 0
     reset_at: float = 0
     blocked: bool = False
@@ -51,10 +51,7 @@ class InMemoryRateLimiter:
         if now - self._last_cleanup < self._cleanup_interval:
             return
 
-        expired_keys = [
-            key for key, counter in self._counters.items()
-            if counter.reset_at < now
-        ]
+        expired_keys = [key for key, counter in self._counters.items() if counter.reset_at < now]
         for key in expired_keys:
             del self._counters[key]
 

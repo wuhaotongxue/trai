@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: init_db.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -24,8 +23,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from loguru import logger
 from sqlalchemy import text
 
-from infrastructure.database.database import Base, get_database
-from infrastructure.database.models import ChatSessionModel, MessageModel
+from infrastructure.database.database import get_database
 from infrastructure.database.user_model import UserModel
 from infrastructure.security.password import PasswordService
 
@@ -94,7 +92,7 @@ def create_admin_user(
         session.add(admin)
         session.commit()
 
-        logger.info(f"管理员账户创建成功!")
+        logger.info("管理员账户创建成功!")
         logger.info(f"  用户名: {username}")
         logger.info(f"  密码: {password}")
         logger.info(f"  邮箱: {email}")
@@ -125,12 +123,14 @@ def show_tables() -> None:
     session = db.get_session()
 
     try:
-        result = session.execute(text("""
+        result = session.execute(
+            text("""
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
             ORDER BY table_name
-        """))
+        """)
+        )
         tables = result.fetchall()
 
         if not tables:
@@ -154,12 +154,14 @@ def show_users() -> None:
     session = db.get_session()
 
     try:
-        result = session.execute(text("""
+        result = session.execute(
+            text("""
             SELECT t_user_id, t_username, t_email, t_role, t_status, t_created_at
             FROM t_users
             WHERE t_deleted_at IS NULL
             ORDER BY t_created_at DESC
-        """))
+        """)
+        )
         users = result.fetchall()
 
         if not users:

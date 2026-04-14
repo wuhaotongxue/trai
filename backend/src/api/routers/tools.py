@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: tools.py
 # 作者: wuhao
 # 日期: 2026_04_14_08:12:51
@@ -7,23 +6,19 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Annotated, Any
 
 import markdown
 import pdfkit
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from PIL import Image
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
 from core.logger import get_logger
-from infrastructure.database import get_session
 from infrastructure.storage.s3_storage import S3StorageService
 
 logger = get_logger()
@@ -32,6 +27,7 @@ router = APIRouter()
 
 class ToolResultResponse(BaseModel):
     """工具处理结果响应"""
+
     url: str = Field(description="处理后的文件下载链接 (预签名 URL)")
     expires_in: int = Field(description="链接过期时间 (秒)")
     file_name: str = Field(description="文件名")
@@ -76,21 +72,21 @@ class ToolsAPI:
             content = await file.read()
             md_text = content.decode("utf-8")
             html_text = markdown.markdown(md_text, extensions=["tables", "fenced_code"])
-            
+
             # 使用 pdfkit 将 HTML 转换为 PDF
             # 注意: 需要系统安装 wkhtmltopdf
             pdf_bytes = pdfkit.from_string(html_text, False)
-            
+
             if not pdf_bytes:
                 raise ValueError("PDF 生成为空")
 
             # 上传到 S3
             object_key = f"tools/pdf/{current_user.user_id}/{uuid.uuid4().hex}.pdf"
             s3_service.upload_bytes(pdf_bytes, object_key, content_type="application/pdf")
-            
+
             # 获取预签名 URL (5分钟有效)
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            
+
             return ToolResultResponse(
                 url=presigned_url,
                 expires_in=300,
@@ -136,33 +132,31 @@ class ToolsAPI:
             original_size = len(content)
             image = Image.open(BytesIO(content))
             original_width, original_height = image.size
-            
+
             # 转换为 RGB 以支持 JPEG 保存
             if image.mode in ("RGBA", "P"):
                 image = image.convert("RGB")
-                
+
             output_buffer = BytesIO()
-            
+
             if target_size_kb and target_size_kb > 0:
                 target_bytes = target_size_kb * 1024
                 low, high = 1, 100
-                best_quality = 60
                 best_bytes = None
-                
+
                 # 二分查找合适的压缩质量
                 while low <= high:
                     mid = (low + high) // 2
                     temp_buffer = BytesIO()
                     image.save(temp_buffer, format="JPEG", quality=mid)
                     size = len(temp_buffer.getvalue())
-                    
+
                     if size <= target_bytes:
-                        best_quality = mid
                         best_bytes = temp_buffer.getvalue()
                         low = mid + 1  # 尝试提高质量
                     else:
-                        high = mid - 1 # 降低质量
-                        
+                        high = mid - 1  # 降低质量
+
                 if best_bytes:
                     output_buffer.write(best_bytes)
                 else:
@@ -170,16 +164,16 @@ class ToolsAPI:
                     image.save(output_buffer, format="JPEG", quality=1)
             else:
                 image.save(output_buffer, format="JPEG", quality=quality)
-                
+
             compressed_bytes = output_buffer.getvalue()
             converted_size = len(compressed_bytes)
-            
+
             # 上传到 S3
             object_key = f"tools/images/{current_user.user_id}/{uuid.uuid4().hex}.jpg"
             s3_service.upload_bytes(compressed_bytes, object_key, content_type="image/jpeg")
-            
+
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            
+
             original_name = Path(file.filename or "image.jpg").stem
             return ToolResultResponse(
                 url=presigned_url,
@@ -190,7 +184,7 @@ class ToolsAPI:
                 original_width=original_width,
                 original_height=original_height,
                 converted_width=original_width,
-                converted_height=original_height
+                converted_height=original_height,
             )
         except Exception as e:
             logger.error(f"图片压缩失败: {str(e)}")
@@ -236,7 +230,7 @@ class ToolsAPI:
             original_size = len(content)
             image = Image.open(BytesIO(content))
             original_width, original_height = image.size
-            
+
             # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式，且原图带 Alpha
             if fmt in ("JPEG", "BMP") and image.mode in ("RGBA", "LA", "P"):
                 # 处理透明背景为白色
@@ -246,17 +240,21 @@ class ToolsAPI:
                 else:
                     background.paste(image)
                 image = background
-                
+
             output_buffer = BytesIO()
             converted_width, converted_height = original_width, original_height
-            
+
             # 保存转换后的图片
             if fmt == "ICO":
-                ico_sizes = [(s, s) for s in sizes] if sizes else [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+                ico_sizes = (
+                    [(s, s) for s in sizes]
+                    if sizes
+                    else [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+                )
                 # Pillow 保存 ICO 时支持 sizes 参数来打包多尺寸
                 image.save(output_buffer, format=fmt, sizes=ico_sizes)
                 if ico_sizes:
-                    converted_width, converted_height = ico_sizes[-1] # use largest for display
+                    converted_width, converted_height = ico_sizes[-1]  # use largest for display
             else:
                 if width or height:
                     target_w = width if width else int(original_width * (height / original_height))
@@ -267,26 +265,24 @@ class ToolsAPI:
                     # Fallback for older param if still passed for non-ico
                     image = image.resize((sizes[0], sizes[0]), Image.Resampling.LANCZOS)
                     converted_width, converted_height = sizes[0], sizes[0]
-                    
+
                 if target_size_kb and target_size_kb > 0 and fmt in ("JPEG", "WEBP"):
                     target_bytes = target_size_kb * 1024
                     low, high = 1, 100
-                    best_quality = 80
                     best_bytes = None
-                    
+
                     while low <= high:
                         mid = (low + high) // 2
                         temp_buffer = BytesIO()
                         image.save(temp_buffer, format=fmt, quality=mid)
                         size = len(temp_buffer.getvalue())
-                        
+
                         if size <= target_bytes:
-                            best_quality = mid
                             best_bytes = temp_buffer.getvalue()
                             low = mid + 1
                         else:
                             high = mid - 1
-                            
+
                     if best_bytes:
                         output_buffer.write(best_bytes)
                     else:
@@ -297,19 +293,19 @@ class ToolsAPI:
                         image.save(output_buffer, format=fmt, quality=90)
                     else:
                         image.save(output_buffer, format=fmt)
-                
+
             converted_bytes = output_buffer.getvalue()
             converted_size = len(converted_bytes)
-            
+
             ext = fmt.lower()
             content_type = f"image/{ext}" if ext != "ico" else "image/x-icon"
-            
+
             # 上传到 S3
             object_key = f"tools/images_converted/{current_user.user_id}/{uuid.uuid4().hex}.{ext}"
             s3_service.upload_bytes(converted_bytes, object_key, content_type=content_type)
-            
+
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            
+
             original_name = Path(file.filename or "image.jpg").stem
             return ToolResultResponse(
                 url=presigned_url,
@@ -320,7 +316,7 @@ class ToolsAPI:
                 original_width=original_width,
                 original_height=original_height,
                 converted_width=converted_width,
-                converted_height=converted_height
+                converted_height=converted_height,
             )
         except Exception as e:
             logger.error(f"图片格式转换失败: {str(e)}")
@@ -361,15 +357,15 @@ class ToolsAPI:
                     content = await file.read()
                     file_name = file.filename or f"file_{uuid.uuid4().hex[:8]}"
                     zip_file.writestr(file_name, content)
-            
+
             zip_bytes = zip_buffer.getvalue()
-            
+
             # 上传到 S3
             object_key = f"tools/zip/{current_user.user_id}/{uuid.uuid4().hex}.zip"
             s3_service.upload_bytes(zip_bytes, object_key, content_type="application/zip")
-            
+
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            
+
             return ToolResultResponse(
                 url=presigned_url,
                 expires_in=300,
@@ -429,6 +425,9 @@ async def convert_image_endpoint(
 ) -> ToolResultResponse:
     """转换图片格式并上传到 S3 返回限时下载链接"""
     parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
-    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes, width, height, target_size_kb)
+    return await ToolsAPI.convert_image(
+        file, target_format, current_user, s3_service, parsed_sizes, width, height, target_size_kb
+    )
+
 
 __all__ = ["router", "ToolsAPI"]

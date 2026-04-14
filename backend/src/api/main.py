@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: main.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -13,13 +12,14 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .middleware.request_id import RequestIdMiddleware
-from .middleware.logging import LoggingMiddleware
-from .middleware.error_handler import ErrorHandlerMiddleware
-from .middleware.rate_limiter import RateLimitMiddleware
-from .middleware.audit import AuditMiddleware
 from core.logger import get_logger
 from core.telemetry import init_telemetry
+
+from .middleware.audit import AuditMiddleware
+from .middleware.error_handler import ErrorHandlerMiddleware
+from .middleware.logging import LoggingMiddleware
+from .middleware.rate_limiter import RateLimitMiddleware
+from .middleware.request_id import RequestIdMiddleware
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -72,13 +72,13 @@ def register_middlewares(app: FastAPI) -> None:
 
 def register_routers(app: FastAPI) -> None:
     """注册路由"""
-    from api.routers.system import health, monitor, notify, feedback
-    from api.routers.ai import chat, image, agent
+    from api.routers import tools
+    from api.routers.admin import analytics_router, dashboard_router, quota_config_router, user_router
+    from api.routers.ai import agent, chat, image
+    from api.routers.auth import login, logout, me, password, refresh, register
     from api.routers.media import upload
     from api.routers.session import session
-    from api.routers.auth import login, register, logout, refresh, me, password
-    from api.routers.admin import dashboard_router, analytics_router, quota_config_router, user_router
-    from api.routers import tools
+    from api.routers.system import feedback, health, monitor, notify
 
     app.include_router(health.router, prefix="/api/system", tags=["系统"])
     app.include_router(monitor.router, prefix="/api/system", tags=["系统"])

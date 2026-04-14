@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: context_manager.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:12:17
@@ -9,7 +8,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Any
 
 from core.logger import logger
 from core.token_counter import TokenCounter, get_token_counter
@@ -30,18 +28,10 @@ class ContextManager:
 
     def __init__(self) -> None:
         """初始化上下文管理器"""
-        self._max_context_tokens: int = int(
-            os.getenv("CONTEXT_MAX_TOKENS", "128000")
-        )
-        self._compression_threshold: int = int(
-            os.getenv("CONTEXT_COMPRESSION_THRESHOLD", "80000")
-        )
-        self._summary_prompt_tokens: int = int(
-            os.getenv("CONTEXT_SUMMARY_PROMPT_TOKENS", "2000")
-        )
-        self._keep_recent_messages: int = int(
-            os.getenv("CONTEXT_KEEP_RECENT_MESSAGES", "10")
-        )
+        self._max_context_tokens: int = int(os.getenv("CONTEXT_MAX_TOKENS", "128000"))
+        self._compression_threshold: int = int(os.getenv("CONTEXT_COMPRESSION_THRESHOLD", "80000"))
+        self._summary_prompt_tokens: int = int(os.getenv("CONTEXT_SUMMARY_PROMPT_TOKENS", "2000"))
+        self._keep_recent_messages: int = int(os.getenv("CONTEXT_KEEP_RECENT_MESSAGES", "10"))
         self._token_counter: TokenCounter = get_token_counter()
 
     def check_and_manage(
@@ -94,9 +84,7 @@ class ContextManager:
             was_compressed=True,
         )
 
-    def _truncate_messages(
-        self, messages: list[dict[str, str]]
-    ) -> list[dict[str, str]]:
+    def _truncate_messages(self, messages: list[dict[str, str]]) -> list[dict[str, str]]:
         """截断消息到阈值以内
 
         Args:
@@ -109,15 +97,11 @@ class ContextManager:
 
         truncated = self._token_counter.truncate_to_limit(messages, target_tokens)
 
-        logger.info(
-            f"上下文截断 | 原始消息数={len(messages)} | 截断后消息数={len(truncated)}"
-        )
+        logger.info(f"上下文截断 | 原始消息数={len(messages)} | 截断后消息数={len(truncated)}")
 
         return truncated
 
-    async def _compress_with_ai(
-        self, messages: list[dict[str, str]], session_id: str
-    ) -> list[dict[str, str]]:
+    async def _compress_with_ai(self, messages: list[dict[str, str]], session_id: str) -> list[dict[str, str]]:
         """使用 AI 压缩历史消息
 
         Args:
@@ -134,8 +118,7 @@ class ContextManager:
         summary_message: dict[str, str] = {
             "role": "system",
             "content": (
-                f"[历史消息摘要] 之前的对话摘要如下:\n{summary}\n\n"
-                "基于以上摘要继续对话，如需了解详情可参考原始记录。"
+                f"[历史消息摘要] 之前的对话摘要如下:\n{summary}\n\n基于以上摘要继续对话，如需了解详情可参考原始记录。"
             ),
         }
 
@@ -152,9 +135,7 @@ class ContextManager:
 
         return compressed
 
-    async def _generate_summary(
-        self, messages: list[dict[str, str]]
-    ) -> str:
+    async def _generate_summary(self, messages: list[dict[str, str]]) -> str:
         """调用 AI 生成摘要
 
         Args:
@@ -175,9 +156,7 @@ class ContextManager:
         )
 
         history_text = "\n".join(
-            f"[{msg.get('role', 'unknown')}]: {msg.get('content', '')}"
-            for msg in messages
-            if msg.get("content")
+            f"[{msg.get('role', 'unknown')}]: {msg.get('content', '')}" for msg in messages if msg.get("content")
         )
 
         prompt = summary_instruction + history_text
@@ -197,9 +176,7 @@ class ContextManager:
             logger.error(f"AI 摘要生成失败: {e}")
             return self._fallback_summary(messages)
 
-    def _fallback_summary(
-        self, messages: list[dict[str, str]]
-    ) -> str:
+    def _fallback_summary(self, messages: list[dict[str, str]]) -> str:
         """降级摘要策略
 
         Args:
@@ -227,9 +204,7 @@ class ContextManager:
 
         return summary
 
-    def get_context_stats(
-        self, messages: list[dict[str, str]]
-    ) -> ContextStats:
+    def get_context_stats(self, messages: list[dict[str, str]]) -> ContextStats:
         """获取上下文统计信息
 
         Args:

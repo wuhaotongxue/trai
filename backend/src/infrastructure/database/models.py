@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: models.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -10,7 +9,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, Integer, String, BigInteger, Text
+from infrastructure.database.user import UserModel
+from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -18,6 +18,7 @@ from infrastructure.database.database import Base
 
 class ChatSessionModel(Base):
     """AI 对话会话模型"""
+
     __tablename__ = "t_chat_sessions"
     __comment__ = "AI 对话会话表，存储会话元数据和消息历史"
 
@@ -51,6 +52,7 @@ class ChatSessionModel(Base):
 
 class MessageModel(Base):
     """AI 对话消息模型"""
+
     __tablename__ = "t_messages"
     __comment__ = "AI 对话消息表，存储单条消息内容"
 
@@ -72,6 +74,7 @@ class MessageModel(Base):
 
 class QuotaPlanModel(Base):
     """配额套餐模型"""
+
     __tablename__ = "t_quota_plans"
     __comment__ = "配额套餐表，定义各角色的月度配额上限"
 
@@ -107,6 +110,7 @@ class QuotaPlanModel(Base):
 
 class UserQuotaUsageModel(Base):
     """用户配额使用模型"""
+
     __tablename__ = "t_user_quota_usage"
     __comment__ = "用户配额使用表，按自然月记录各类型配额消耗"
 
@@ -142,6 +146,7 @@ class UserQuotaUsageModel(Base):
 
 class QuotaTransactionLogModel(Base):
     """配额变动流水模型"""
+
     __tablename__ = "t_quota_transaction_log"
     __comment__ = "配额变动流水表，记录每次配额增减及原因"
 
@@ -175,6 +180,7 @@ class QuotaTransactionLogModel(Base):
 
 class ImageGenerationModel(Base):
     """AI 图片生成模型"""
+
     __tablename__ = "t_image_generations"
     __comment__ = "AI 图片生成任务表，存储图片生成请求和结果"
 
@@ -224,6 +230,7 @@ class ImageGenerationModel(Base):
 
 class UploadTaskModel(Base):
     """文件上传任务模型"""
+
     __tablename__ = "t_upload_tasks"
     __comment__ = "文件上传任务表，存储上传请求和结果"
 

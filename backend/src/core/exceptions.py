@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exceptions.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:50:00
