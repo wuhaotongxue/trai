@@ -303,12 +303,29 @@ class AgentExecutor:
                 except Exception:
                     args = {}
                     
+                # 通知客户端工具开始执行
+                yield {
+                    "type": "tool_execution_start",
+                    "tool_call_id": tool_call_id,
+                    "tool_name": tool_id,
+                    "content": json.dumps(args, ensure_ascii=False)
+                }
+
                 tool_result = await self._execute_tool_with_correction(
                     tool_id, tool_call_id, args, context
                 )
                 
                 tool_content = tool_result.output if tool_result.success else f"[工具执行失败] {tool_result.error or '未知错误'}"
                 
+                # 通知客户端工具执行结果
+                yield {
+                    "type": "tool_execution_result",
+                    "tool_call_id": tool_call_id,
+                    "tool_name": tool_id,
+                    "content": tool_content,
+                    "success": tool_result.success
+                }
+
                 current_messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call_id,
