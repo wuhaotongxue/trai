@@ -31,6 +31,12 @@ class AgentToggleRequest(BaseModel):
     action: str = Field(..., description="操作: start / stop")
 
 
+class AgentCheckRequest(BaseModel):
+    """检测 Agent 状态请求模型"""
+
+    agent_id: str = Field(..., description="Agent ID")
+
+
 # 模拟内存中的 Agent 列表库
 _MOCK_AGENTS = [
     {
@@ -125,4 +131,42 @@ class AgentManagementAPI:
             "code": 200,
             "msg": f"Agent 已{'启动' if request.action == 'start' else '停止'}",
             "data": {"agent": target_agent},
+        }
+
+    @staticmethod
+    @router.post("/check", summary="检测 Agent 状态")
+    async def check_agent(request: AgentCheckRequest, user: dict[str, Any] = Depends(get_current_user)) -> Any:
+        """检测一个已注册的 Agent 状态是否正常
+
+        Args:
+            request: 检测参数
+            user: 当前登录用户
+
+        Returns:
+            检测结果的统一响应
+        """
+        import asyncio
+        import random
+
+        target_agent = next((a for a in _MOCK_AGENTS if a["id"] == request.agent_id), None)
+        if not target_agent:
+            return {"code": 404, "msg": f"Agent {request.agent_id} 不存在"}
+
+        # 模拟网络延迟
+        await asyncio.sleep(0.5)
+
+        # 模拟检测逻辑：如果 agent 是 stopped 状态，那必定是正常（因为它没在运行）
+        # 如果是 running 状态，有 20% 的概率检测为异常
+        is_normal = True
+        if target_agent["status"] == "running":
+            is_normal = random.random() > 0.2
+            if not is_normal:
+                target_agent["status"] = "error"
+
+        logger.info(f"User {user.get('user_id')} checked agent {request.agent_id}, normal: {is_normal}")
+
+        return {
+            "code": 200,
+            "msg": "检测完成" if is_normal else "检测到 Agent 运行异常",
+            "data": {"agent": target_agent, "is_normal": is_normal},
         }

@@ -19,6 +19,7 @@ interface Window {
     agent_management_list: () => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_register: (name: string, description: string, model: string, system_prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     feedback_submit: (data: { type: string, title: string, content: string, contact?: string }) => Promise<{ success: boolean; data?: any; error?: string }>;
     on_agent_chat_chunk?: (callback: (event: any, chunk: any) => void) => (() => void);
   }

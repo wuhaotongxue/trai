@@ -38,6 +38,12 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1501
+- **新增(client_electron)**: Agent 管理页面新增“状态检测”按钮，支持调用后端检测接口验证 Agent 当前的运行状态是否正常，并在 UI 上展示异常 (Error) 状态标签
+
+### 🛠️ 后端_2026_04_14_1501
+- **新增(backend)**: `management.py` 中新增 `/api/agent/management/check` 接口，支持检测指定 Agent 的运行状态是否正常（模拟了网络延迟和运行中 20% 概率抛出异常的情况）
+
 ### 🛠️ 后端_2026_04_14_1446
 - **修复(backend)**: 修复 `main.py` 中遗漏注册 `management`、`music`、`video` 路由，导致 `/api/agent/management/list` 接口报 404 的问题
 

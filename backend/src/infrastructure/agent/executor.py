@@ -13,7 +13,6 @@ from typing import Any
 
 from core.logger import logger
 from core.token_counter import TokenCounter, get_token_counter
-from infrastructure.ai.openai_client import StreamEvent
 from infrastructure.agent.self_corrector import (
     SelfCorrector,
     get_self_corrector,
@@ -28,7 +27,7 @@ from infrastructure.agent.tools.loader import (
     load_all_tools,
 )
 from infrastructure.agent.tools.registry import get_tool_registry
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.openai_client import OpenAIClient, StreamEvent
 
 
 @dataclass
