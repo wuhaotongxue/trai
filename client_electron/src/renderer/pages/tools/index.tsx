@@ -390,22 +390,28 @@ const Tools: React.FC = () => {
               e.currentTarget.style.borderColor = '#e2e8f0'
             }}
           >
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '12px',
-              backgroundColor: card.bg_color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              {card.icon}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '12px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                backgroundColor: card.bg_color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                {React.cloneElement(card.icon as React.ReactElement, { size: 24 })}
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#1e293b', fontWeight: 600 }}>{card.title}</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{card.description}</p>
+              </div>
             </div>
             
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b', fontWeight: 600 }}>{card.title}</h3>
-            <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: '1.5', flex: 1 }}>{card.description}</p>
-            
+            <div style={{ flex: 1 }}></div>
+
             {card.extra_ui && card.extra_ui}
 
             <button 
