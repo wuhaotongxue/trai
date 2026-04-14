@@ -11,6 +11,13 @@ import Login from '@/pages/login'
 import Register from '@/pages/register'
 import Dashboard from '@/pages/dashboard'
 import Settings from '@/pages/settings'
+import Tools from '@/pages/tools'
+
+// 需要认证的路由守卫
+const AuthRoute = ({ children }: { children: React.ReactNode }) => {
+  const is_authenticated = use_auth_store((state) => state.is_authenticated)
+  return is_authenticated ? <>{children}</> : <Navigate to="/login" replace />
+}
 
 export const router = createHashRouter([
   {
@@ -23,14 +30,22 @@ export const router = createHashRouter([
   },
   {
     path: '/',
-    element: <MainLayout />,
+    element: (
+      <AuthRoute>
+        <MainLayout />
+      </AuthRoute>
+    ),
     children: [
       {
-        index: true,
+        path: '/',
         element: <Dashboard />
       },
       {
-        path: 'settings',
+        path: '/tools',
+        element: <Tools />
+      },
+      {
+        path: '/settings',
         element: <Settings />
       }
     ]

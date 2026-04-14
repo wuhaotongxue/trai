@@ -78,6 +78,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.session import session
     from api.routers.auth import login, register, logout, refresh, me, password
     from api.routers.admin import dashboard_router, analytics_router, quota_config_router, user_router
+    from api.routers import tools
 
     app.include_router(health.router, prefix="/api/system", tags=["系统"])
     app.include_router(monitor.router, prefix="/api/system", tags=["系统"])
@@ -97,6 +98,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(agent.router, prefix="/api", tags=["Agent"])
     app.include_router(upload.router, prefix="/api/media", tags=["媒体"])
     app.include_router(session.router, prefix="/api", tags=["会话"])
+    app.include_router(tools.router, prefix="/api/tools", tags=["工具"])
 
     @app.get("/", tags=["首页"])
     async def root() -> dict:

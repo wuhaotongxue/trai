@@ -13,5 +13,8 @@ contextBridge.exposeInMainWorld('electron_api', {
   config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value),
   auth_login: (params: any) => ipcRenderer.invoke('auth:login', params),
   auth_register: (params: any) => ipcRenderer.invoke('auth:register', params),
-  auth_logout: () => ipcRenderer.invoke('auth:logout')
+  auth_logout: () => ipcRenderer.invoke('auth:logout'),
+  tools_convert_md_to_pdf: (file_path: string) => ipcRenderer.invoke('tools:convert_md_to_pdf', file_path),
+  tools_compress_image: (file_path: string, quality?: number) => ipcRenderer.invoke('tools:compress_image', file_path, quality),
+  tools_compress_files_to_zip: (file_paths: string[]) => ipcRenderer.invoke('tools:compress_files_to_zip', file_paths)
 })

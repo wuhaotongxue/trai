@@ -37,6 +37,10 @@ python src/run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_14_0812
+- **新增(tools)**: 增加 `ToolsAPI` 类，实现 `md-to-pdf`、`compress-image` 和 `compress-zip` 的逻辑，并注册到 `/api/tools/` 路由
+- **增强(tools)**: 工具接口实现处理结果自动上传至 S3 服务，并利用 S3 预签名机制，生成仅 5 分钟有效的访问链接返回给前端
+
 ### 🛠️ 后端_2026_04_13_2135
 - **修复(auth)**: 修复 `login.py` 中由于数据库模型更新导致 `user` 实体错误调用 `t_` 前缀属性而引起的 `AttributeError` 异常
 
