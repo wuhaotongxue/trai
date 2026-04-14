@@ -38,6 +38,14 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1200
+- **新增(client_electron)**: 补充文生图、图生图、AI音乐、AI视频的具体UI页面与IPC通信通道
+- **重构(client_electron)**: 优化左侧菜单结构，将AI功能与工具分离为折叠组，默认展开AI
+- **新增(client_electron)**: 增加助手长回复的折叠/展开功能
+- **新增(client_electron)**: 增加用户长文本消息的折叠/展开功能
+- **优化(client_electron)**: 增加思考过程中的加载动画状态，优化体验
+- **新增(client_electron)**: 增加 react-markdown 渲染，正确显示聊天消息中的 Markdown 格式
+
 ### 💻 客户端_2026_04_14_0940
 - **新增(client_electron)**: 实现 AI 助手对话的打字机（流式响应）效果，逐字渲染思维链与最终结果
 - **优化(client_electron)**: 修复流式数据中 `JSON.parse` 截断导致的粘包报错问题
