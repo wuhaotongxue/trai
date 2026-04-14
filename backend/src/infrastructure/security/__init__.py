@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: __init__.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:30:00

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: init_db.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,7 +6,7 @@
 # 用法:
 #   python -m scripts.init_db                    # 初始化数据库和表结构
 #   python -m scripts.init_db --create-admin    # 创建管理员账户
-#   python -m scripts.init_db --reset          # 重置数据库（危险！）
+#   python -m scripts.init_db --reset          # 重置数据库(危险!)
 #   python -m scripts.init_db --help           # 查看帮助
 
 from __future__ import annotations
@@ -24,14 +23,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from loguru import logger
 from sqlalchemy import text
 
-from infrastructure.database.database import Base, get_database
-from infrastructure.database.models import ChatSessionModel, MessageModel
+from infrastructure.database.database import get_database
 from infrastructure.database.user_model import UserModel
 from infrastructure.security.password import PasswordService
 
 
 def init_database() -> None:
-    """初始化数据库（创建表结构）"""
+    """初始化数据库(创建表结构)"""
     logger.info("开始初始化数据库...")
 
     db = get_database()
@@ -68,7 +66,7 @@ def create_admin_user(
         existing = result.fetchone()
 
         if existing:
-            logger.warning(f"管理员账户 {username} 已存在，跳过创建")
+            logger.warning(f"管理员账户 {username} 已存在,跳过创建")
             return
 
         # 生成密码哈希
@@ -94,7 +92,7 @@ def create_admin_user(
         session.add(admin)
         session.commit()
 
-        logger.info(f"管理员账户创建成功!")
+        logger.info("管理员账户创建成功!")
         logger.info(f"  用户名: {username}")
         logger.info(f"  密码: {password}")
         logger.info(f"  邮箱: {email}")
@@ -109,7 +107,7 @@ def create_admin_user(
 
 
 def reset_database() -> None:
-    """重置数据库（删除所有表并重新创建）"""
+    """重置数据库(删除所有表并重新创建)"""
     logger.warning("开始重置数据库...")
 
     db = get_database()
@@ -125,12 +123,14 @@ def show_tables() -> None:
     session = db.get_session()
 
     try:
-        result = session.execute(text("""
+        result = session.execute(
+            text("""
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
             ORDER BY table_name
-        """))
+        """)
+        )
         tables = result.fetchall()
 
         if not tables:
@@ -154,12 +154,14 @@ def show_users() -> None:
     session = db.get_session()
 
     try:
-        result = session.execute(text("""
+        result = session.execute(
+            text("""
             SELECT t_user_id, t_username, t_email, t_role, t_status, t_created_at
             FROM t_users
             WHERE t_deleted_at IS NULL
             ORDER BY t_created_at DESC
-        """))
+        """)
+        )
         users = result.fetchall()
 
         if not users:
@@ -185,7 +187,7 @@ def main() -> None:
   python -m scripts.init_db --create-admin    # 创建管理员账户
   python -m scripts.init_db --show-tables    # 显示所有表
   python -m scripts.init_db --show-users     # 显示所有用户
-  python -m scripts.init_db --reset          # 重置数据库（危险！）
+  python -m scripts.init_db --reset          # 重置数据库(危险!)
         """,
     )
 
@@ -207,22 +209,22 @@ def main() -> None:
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="重置数据库（删除所有数据）",
+        help="重置数据库(删除所有数据)",
     )
     parser.add_argument(
         "--admin-username",
         default="admin",
-        help="管理员用户名（默认: admin）",
+        help="管理员用户名(默认: admin)",
     )
     parser.add_argument(
         "--admin-password",
         default="admin123",
-        help="管理员密码（默认: admin123）",
+        help="管理员密码(默认: admin123)",
     )
     parser.add_argument(
         "--admin-email",
         default="admin@example.com",
-        help="管理员邮箱（默认: admin@example.com）",
+        help="管理员邮箱(默认: admin@example.com)",
     )
 
     args = parser.parse_args()
@@ -255,7 +257,7 @@ def main() -> None:
         )
         return
 
-    # 默认行为：初始化数据库
+    # 默认行为:初始化数据库
     init_database()
 
 

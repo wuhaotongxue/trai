@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: calculator.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -16,9 +15,9 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 
 
@@ -26,8 +25,20 @@ class CalculatorTool(BaseTool):
     """计算器工具 - 支持基础数学运算"""
 
     _ALLOWED_FUNCTIONS: set[str] = {
-        "abs", "round", "min", "max", "sum", "pow", "sqrt",
-        "sin", "cos", "tan", "log", "log10", "pi", "e",
+        "abs",
+        "round",
+        "min",
+        "max",
+        "sum",
+        "pow",
+        "sqrt",
+        "sin",
+        "cos",
+        "tan",
+        "log",
+        "log10",
+        "pi",
+        "e",
     }
 
     def __init__(self) -> None:
@@ -37,15 +48,15 @@ class CalculatorTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="utility.calculator",
+                id="utility_calculator",
                 name="计算器",
-                description="执行基础数学计算，支持加减乘除、幂运算、开方、三角函数、对数等",
+                description="执行基础数学计算,支持加减乘除、幂运算、开方、三角函数、对数等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[
                     ToolParameter(
                         name="expression",
-                        description="数学表达式，如: 2+3*4, sqrt(16), pow(2, 10), sin(pi/2)",
+                        description="数学表达式,如: 2+3*4, sqrt(16), pow(2, 10), sin(pi/2)",
                         type="string",
                         required=True,
                     ),
@@ -56,9 +67,7 @@ class CalculatorTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         expression = params.get("expression", "")
 
         if not expression:
@@ -97,7 +106,7 @@ class CalculatorTool(BaseTool):
         """
         expression = expression.strip().lower()
 
-        if not re.match(r'^[\d\s\+\-\*\/\.\(\)\,\%]+$', expression):
+        if not re.match(r"^[\d\s\+\-\*\/\.\(\)\,\%]+$", expression):
             return None, "表达式包含非法字符"
 
         math_ctx = {

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: password.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:05:00
-# 描述: 密码管理接口（修改密码/忘记密码/重置密码）
+# 描述: 密码管理接口(修改密码/忘记密码/重置密码)
 
 from __future__ import annotations
 
@@ -14,27 +13,30 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.password import PasswordService, get_password_service
 
 router = APIRouter()
 
 
 class ChangePasswordRequest(BaseModel):
     """修改密码请求"""
+
     old_password: Annotated[str, Field(min_length=6, max_length=128, description="旧密码")]
     new_password: Annotated[str, Field(min_length=6, max_length=128, description="新密码")]
 
 
 class ResetPasswordRequest(BaseModel):
-    """重置密码请求（管理员用）"""
+    """重置密码请求(管理员用)"""
+
     user_id: Annotated[str, Field(description="用户 ID")]
     new_password: Annotated[str, Field(min_length=6, max_length=128, description="新密码")]
 
 
 class PasswordResponse(BaseModel):
     """密码操作响应"""
+
     message: str = Field(description="提示信息")
 
 
@@ -48,7 +50,7 @@ async def change_password(
     """修改当前用户密码
 
     Args:
-        request: 修改密码请求（旧密码、新密码）
+        request: 修改密码请求(旧密码、新密码)
         current_user: 当前登录用户
         password_service: 密码服务实例
         session: 数据库会话
@@ -57,7 +59,7 @@ async def change_password(
         PasswordResponse: 操作成功信息
 
     Raises:
-        HTTPException: 验证失败（400/401）
+        HTTPException: 验证失败(400/401)
     """
     user_id = current_user.get("user_id", "")
     if not user_id:
@@ -104,7 +106,7 @@ async def reset_password(
     password_service: Annotated[PasswordService, Depends(get_password_service)],
     session: Annotated[Session, Depends(get_session)],
 ) -> PasswordResponse:
-    """重置用户密码（仅管理员）
+    """重置用户密码(仅管理员)
 
     Args:
         request: 重置密码请求
@@ -116,14 +118,14 @@ async def reset_password(
         PasswordResponse: 操作成功信息
 
     Raises:
-        HTTPException: 权限不足（403）
+        HTTPException: 权限不足(403)
     """
     # 检查是否为管理员
     role = current_user.get("role", "")
     if role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": 403, "message": "权限不足，仅管理员可执行此操作"},
+            detail={"code": 403, "message": "权限不足,仅管理员可执行此操作"},
         )
 
     user_repo = UserRepository(session)

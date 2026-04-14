@@ -13,13 +13,17 @@ description: >-
 ### 1. 状态检查
 运行 `git status` 了解当前修改了哪些文件。
 
+**⚠️ 根目录整洁度检查 (强制)**：
+- 观察 `git status` 中是否有项目总根目录或 `backend/` 根目录下的新增临时/工具脚本（如 `check_*.py`, `verify_*.py`, `fix_*.py` 等）。
+- 必须保持项目总根目录和 `backend` 根目录干净，严禁提交多余的测试或临时脚本，除非用户明确说明需要保留。发现多余脚本应立即删除。
+
 ### 2. 规范检查与 AI 警察拦截 (强制)
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
   <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:12px;">
     <strong style="color:#1565C0;">&#x1F6E1; 强制检查</strong>
     <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;color:#555;">
-      <li>修改 <code>backend</code> → 必须调用 <code>backend/SKILL.md</code> 检查 DDD 架构</li>
+      <li>修改 <code>backend</code> → 必须调用 <code>backend/SKILL.md</code> 检查 DDD 架构，**并调用 <code>ruff_check</code> 技能进行格式化和 Lint 检查**</li>
       <li>修改 <code>desktop_client</code> → 必须调用 <code>desktop_client/SKILL.md</code> 检查防卡死规范</li>
       <li>修改 <code>electron</code> → 必须调用 <code>electron/SKILL.md</code> 检查 Electron 规范</li>
       <li>修改 <code>frontend_next</code> → 必须调用 <code>frontend_next/SKILL.md</code> 检查 App Router 规范</li>

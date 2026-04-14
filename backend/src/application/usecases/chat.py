@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: chat.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -16,6 +15,7 @@ from application.usecases.base import UseCase
 @dataclass
 class ChatInput:
     """对话输入"""
+
     messages: list[dict[str, str]]
     model: str = "gpt-4o"
     temperature: float = 0.7
@@ -26,6 +26,7 @@ class ChatInput:
 @dataclass
 class ChatOutput:
     """对话输出"""
+
     content: str
     model: str
     usage: dict[str, Any] = field(default_factory=dict)

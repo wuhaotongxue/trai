@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload_task_interfaces.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -23,7 +22,7 @@ class IUploadTaskRepository(ABC):
             entity: 上传任务实体
 
         Returns:
-            UploadTask: 创建后的实体（含 ID）
+            UploadTask: 创建后的实体(含 ID)
         """
         pass
 

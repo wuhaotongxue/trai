@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_generation_repository.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -49,9 +48,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
         return entity
 
     def get_by_id(self, task_id: str) -> ImageGeneration | None:
-        stmt = select(ImageGenerationModel).where(
-            ImageGenerationModel.t_task_id == task_id
-        )
+        stmt = select(ImageGenerationModel).where(ImageGenerationModel.t_task_id == task_id)
         result = self._session.execute(stmt)
         model = result.scalar_one_or_none()
 
@@ -60,9 +57,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
 
         return self._model_to_entity(model)
 
-    def get_by_user(
-        self, user_id: str, limit: int = 20, offset: int = 0
-    ) -> list[ImageGeneration]:
+    def get_by_user(self, user_id: str, limit: int = 20, offset: int = 0) -> list[ImageGeneration]:
         stmt = (
             select(ImageGenerationModel)
             .where(ImageGenerationModel.t_user_id == user_id)
@@ -82,9 +77,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
         result_url: str | None = None,
         error_message: str | None = None,
     ) -> ImageGeneration | None:
-        stmt = select(ImageGenerationModel).where(
-            ImageGenerationModel.t_task_id == task_id
-        )
+        stmt = select(ImageGenerationModel).where(ImageGenerationModel.t_task_id == task_id)
         result = self._session.execute(stmt)
         model = result.scalar_one_or_none()
 
@@ -98,15 +91,11 @@ class ImageGenerationRepository(IImageGenerationRepository):
             model.t_error_message = error_message
 
         self._session.flush()
-        logger.info(
-            f"图片生成任务状态已更新 | task_id={task_id} | status={status}"
-        )
+        logger.info(f"图片生成任务状态已更新 | task_id={task_id} | status={status}")
         return self._model_to_entity(model)
 
     def count_by_user(self, user_id: str) -> int:
-        stmt = select(func.count()).where(
-            ImageGenerationModel.t_user_id == user_id
-        )
+        stmt = select(func.count()).where(ImageGenerationModel.t_user_id == user_id)
         result = self._session.execute(stmt)
         return result.scalar() or 0
 

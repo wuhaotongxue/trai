@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: session.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,32 +6,37 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
 from core.context_manager import ContextManager, get_context_manager
 from core.policy_engine import PolicyContext, PolicyDecision, get_policy_engine
+from infrastructure.database import get_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
     SessionRepository,
 )
-from infrastructure.database import get_session
 
 router = APIRouter()
 
 
 class CreateSessionRequest(BaseModel):
     """创建会话请求"""
+
     title: Annotated[str | None, Field(default=None, max_length=255, description="会话标题")] = None
     model: Annotated[str, Field(default="gpt-4o", description="模型名称")] = "gpt-4o"
 
 
 class SessionItem(BaseModel):
     """会话项"""
+
     session_id: str = Field(description="会话唯一标识")
     title: str | None = Field(description="会话标题")
     model: str = Field(description="模型名称")
@@ -43,6 +47,7 @@ class SessionItem(BaseModel):
 
 class CreateSessionResponse(BaseModel):
     """创建会话响应"""
+
     session_id: str = Field(description="会话唯一标识")
     title: str | None = Field(description="会话标题")
     model: str = Field(description="模型名称")
@@ -51,12 +56,14 @@ class CreateSessionResponse(BaseModel):
 
 class SessionListResponse(BaseModel):
     """会话列表响应"""
+
     total: int = Field(description="会话总数")
     sessions: list[SessionItem] = Field(description="会话列表")
 
 
 class SessionDetailResponse(BaseModel):
     """会话详情响应"""
+
     session_id: str = Field(description="会话唯一标识")
     title: str | None = Field(description="会话标题")
     model: str = Field(description="模型名称")
@@ -67,12 +74,14 @@ class SessionDetailResponse(BaseModel):
 
 class SendMessageRequest(BaseModel):
     """发送消息请求"""
+
     content: Annotated[str, Field(min_length=1, max_length=32000, description="消息���容")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
 
 
 class SendMessageResponse(BaseModel):
     """发送消息响应"""
+
     session_id: str = Field(description="会话 ID")
     user_message: dict[str, Any] = Field(description="用户消息")
     assistant_message: dict[str, Any] = Field(description="助手回复")
@@ -80,6 +89,7 @@ class SendMessageResponse(BaseModel):
 
 class ActionResponse(BaseModel):
     """操作响应"""
+
     message: str = Field(description="提示信息")
 
 
@@ -90,7 +100,7 @@ async def send_message(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ) -> SendMessageResponse:
-    """发送消息（联动 AI 对话）
+    """发送消息(联动 AI 对话)
 
     Args:
         session_id: 会话 ID
@@ -102,7 +112,7 @@ async def send_message(
         SendMessageResponse: 发送结果
 
     Raises:
-        HTTPException: 会话不存在（404）或无权访问（403）
+        HTTPException: 会话不存在(404)或无权访问(403)
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
@@ -118,7 +128,7 @@ async def send_message(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # 权限校验：非管理员只能访问自己的会话
+    # 权限校验:非管理员只能访问自己的会话
     if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -136,15 +146,14 @@ async def send_message(
     messages = message_repo.get_messages(session_id)
     messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
-    # 上下文管理：检查并压缩超限上下文
+    # 上下文管理:检查并压缩超限上下文
     context_manager: ContextManager = get_context_manager()
-    managed_messages, context_stats = context_manager.check_and_manage(
-        messages_dict, session_id
-    )
+    managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
     # 调用 AI
     try:
         from infrastructure.ai.openai_client import OpenAIClient
+
         ai_client = OpenAIClient()
         ai_response = await ai_client.chat(
             messages=managed_messages,
@@ -152,13 +161,13 @@ async def send_message(
         )
 
         # 保存 AI 响应
-        assistant_msg = message_repo.add_message(
+        message_repo.add_message(
             session_id=session_id,
             role="assistant",
             content=ai_response["content"],
         )
 
-        # 更新会话摘要（标题）
+        # 更新会话摘要(标题)
         if len(messages) == 1:
             title = request.content[:30] + ("..." if len(request.content) > 30 else "")
             session_repo.update_session(session_id=session_id, title=title)
@@ -196,7 +205,6 @@ async def create_session(
 
     session_repo = SessionRepository(session)
     import uuid
-    from datetime import datetime
 
     session_id = str(uuid.uuid4())
     title = request.title or "新对话"
@@ -249,14 +257,16 @@ async def list_sessions(
     items = []
     for s in sessions:
         messages = message_repo.get_messages(s.t_session_id)
-        items.append(SessionItem(
-            session_id=s.t_session_id,
-            title=s.t_title,
-            model=s.t_model,
-            message_count=len(messages),
-            created_at=s.t_created_at.isoformat() if s.t_created_at else None,
-            updated_at=s.t_updated_at.isoformat() if s.t_updated_at else None,
-        ))
+        items.append(
+            SessionItem(
+                session_id=s.t_session_id,
+                title=s.t_title,
+                model=s.t_model,
+                message_count=len(messages),
+                created_at=s.t_created_at.isoformat() if s.t_created_at else None,
+                updated_at=s.t_updated_at.isoformat() if s.t_updated_at else None,
+            )
+        )
 
     return SessionListResponse(
         total=len(items),
@@ -281,7 +291,7 @@ async def get_session_detail(
         SessionDetailResponse: 会话详情
 
     Raises:
-        HTTPException: 会话不存在（404）
+        HTTPException: 会话不存在(404)
     """
     user_id = current_user.get("user_id")
 
@@ -333,7 +343,7 @@ async def delete_session(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 会话不存在（404）
+        HTTPException: 会话不存在(404)
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
@@ -395,7 +405,7 @@ async def send_message_stream(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ):
-    """发送消息（流式响应，支持 abort 中断）
+    """发送消息(流式响应,支持 abort 中断)
 
     SSE 事件格式:
     - token: 文本片段 {"event": "token", "data": "..."}
@@ -416,8 +426,6 @@ async def send_message_stream(
         StreamingResponse: SSE 流式响应
     """
     import asyncio
-    import json
-    import threading
 
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
@@ -448,15 +456,14 @@ async def send_message_stream(
     messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
     context_manager: ContextManager = get_context_manager()
-    managed_messages, context_stats = context_manager.check_and_manage(
-        messages_dict, session_id
-    )
+    managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
     abort_event = asyncio.Event()
 
     _active_abort_events[session_id] = abort_event
 
     from fastapi.responses import StreamingResponse
+
     from infrastructure.ai.openai_client import OpenAIClient
 
     async def generate():
@@ -472,36 +479,40 @@ async def send_message_stream(
                 if event.type == "token":
                     full_content += event.content
                     data = json.dumps({"event": "token", "data": event.content})
-                    yield f"data: {data}\n\n".encode("utf-8")
+                    yield f"data: {data}\n\n".encode()
 
                 elif event.type == "tool_call_end":
-                    data = json.dumps({
-                        "event": "tool_call_end",
-                        "data": {
-                            "tool_call_id": event.tool_call_id,
-                            "tool_name": event.tool_name,
-                            "arguments": event.content,
-                        },
-                    })
-                    yield f"data: {data}\n\n".encode("utf-8")
+                    data = json.dumps(
+                        {
+                            "event": "tool_call_end",
+                            "data": {
+                                "tool_call_id": event.tool_call_id,
+                                "tool_name": event.tool_name,
+                                "arguments": event.content,
+                            },
+                        }
+                    )
+                    yield f"data: {data}\n\n".encode()
 
                 elif event.type == "done":
-                    data = json.dumps({
-                        "event": "usage",
-                        "data": event.usage,
-                    })
-                    yield f"data: {data}\n\n".encode("utf-8")
+                    data = json.dumps(
+                        {
+                            "event": "usage",
+                            "data": event.usage,
+                        }
+                    )
+                    yield f"data: {data}\n\n".encode()
                     data = json.dumps({"event": "done", "data": ""})
-                    yield f"data: {data}\n\n".encode("utf-8")
+                    yield f"data: {data}\n\n".encode()
 
                 elif event.type == "abort":
                     data = json.dumps({"event": "error", "data": "请求已取消"})
-                    yield f"data: {data}\n\n".encode("utf-8")
+                    yield f"data: {data}\n\n".encode()
 
         except Exception as e:
             logger.error(f"流式请求异常: {e}")
             error_data = json.dumps({"event": "error", "data": str(e)})
-            yield f"data: {error_data}\n\n".encode("utf-8")
+            yield f"data: {error_data}\n\n".encode()
 
         finally:
             _active_abort_events.pop(session_id, None)
@@ -551,6 +562,7 @@ async def abort_stream(
 
 class PolicyConfirmRequest(BaseModel):
     """策略确认请求"""
+
     action: Annotated[str, Field(description="操作名称")]
     resource_type: Annotated[str, Field(description="资源类型")]
     resource_id: Annotated[str | None, Field(default=None, description="资源 ID")] = None
@@ -558,6 +570,7 @@ class PolicyConfirmRequest(BaseModel):
 
 class PolicyConfirmResponse(BaseModel):
     """策略确认响应"""
+
     confirmed: bool = Field(description="是否确认成功")
     message: str = Field(description="提示信息")
 
@@ -569,8 +582,8 @@ async def policy_confirm(
 ) -> PolicyConfirmResponse:
     """确认危险操作
 
-    当高危操作返回 ASK 状态时，前端调用此接口完成二次确认。
-    确认成功后，操作可直接执行。
+    当高危操作返回 ASK 状态时,前端调用此接口完成二次确认.
+    确认成功后,操作可直接执行.
 
     Args:
         request: 确认请求参数
@@ -596,7 +609,7 @@ async def policy_confirm(
 
     return PolicyConfirmResponse(
         confirmed=success,
-        message="操作已确认" if success else "确认失败，请重试",
+        message="操作已确认" if success else "确认失败,请重试",
     )
 
 
