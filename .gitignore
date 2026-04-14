@@ -57,6 +57,30 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# 测试与临时脚本文件
+check_comments.py
+test_*.py
+*test*.py
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+tmp/
+temp/
+*.tmp
+*.bak
+
+# 大文件拦截 (建议配合 git-hooks 使用)
+# 虽然 gitignore 不能按大小过滤, 但可以拦截常见的大型模型/视频/压缩包
+*.mp4
+*.zip
+*.tar.gz
+*.iso
+*.pth
+*.bin
+*.pt
+*.onnx
+
 # misc
 .DS_Store
 *.pem

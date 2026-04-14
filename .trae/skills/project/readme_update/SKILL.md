@@ -22,9 +22,10 @@ description: >-
 ### 2. 生成真实时间戳标题
 
 <div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#F57F17;">&#x26A0; 必须使用系统当前时间</strong>
+  <strong style="color:#F57F17;">&#x26A0; 必须严格使用系统当前真实时间</strong>
   <div style="margin-top:8px;font-size:13px;color:#555;">
-    标题格式：<code>模块_YYYY_MM_DD_HHmm</code>，例如：<code>后端_2026_04_08_1430</code> 或 <code>前端_2026_04_08_1430</code>
+    标题格式：<code>模块_YYYY_MM_DD_HHmm</code>，例如：<code>后端_2026_04_08_1430</code> 或 <code>前端_2026_04_08_1430</code>。<br/>
+    <strong>严禁主观猜测或预判未来的时间！(如现在没到 20:00 绝对不能写 2000)</strong>
   </div>
 </div>
 
@@ -118,5 +119,6 @@ description: >-
 
 | 版本 | 日期 | 更新内容 |
 |------|------|---------|
+| v1.2 | 2026-04-13 19:55:00 | 强化约束：必须严格使用当前真实系统时间，严禁主观猜测或预判未来时间 |
 | v1.1 | 2026-04-13 17:31:12 | 增加严禁使用综合标签、模糊标签的红线约束 |
 | v1.0 | 2026-04-08 | 初版发布 |
