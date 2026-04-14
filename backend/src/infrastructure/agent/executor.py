@@ -11,10 +11,9 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from infrastructure.agent.models import StreamEvent
-
 from core.logger import logger
 from core.token_counter import TokenCounter, get_token_counter
+from infrastructure.agent.models import StreamEvent
 from infrastructure.agent.self_corrector import (
     SelfCorrector,
     get_self_corrector,
