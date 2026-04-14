@@ -18,6 +18,7 @@ import ImageToImage from '@/pages/ai/image-to-image'
 import AiMusic from '@/pages/ai/music'
 import AiVideo from '@/pages/ai/video'
 import AgentManagement from '@/pages/agent/management'
+import Feedback from '@/pages/feedback'
 import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
@@ -74,6 +75,10 @@ export const router = createHashRouter([
       {
         path: '/tools',
         element: <Tools />
+      },
+      {
+        path: '/feedback',
+        element: <Feedback />
       },
       {
         path: '/settings',

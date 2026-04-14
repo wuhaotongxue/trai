@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 const Sidebar: React.FC = () => {
@@ -59,7 +59,8 @@ const Sidebar: React.FC = () => {
       label: '实用工具',
       icon: <Wrench size={20} />,
       children: [
-        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
+        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> },
+        { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={18} /> }
       ]
     },
     { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }

@@ -11,6 +11,7 @@ import { config_store } from '../platform/config_store'
 import { auth_service } from '../services/auth'
 import { tools_service } from '../services/tools'
 import { agent_service } from '../services/agent'
+import { feedback_service } from '../services/feedback'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
@@ -112,5 +113,10 @@ export const register_ipc_handlers = (): void => {
 
   ipcMain.handle('agent:management:toggle', async (_, agent_id: string, action: 'start' | 'stop') => {
     return agent_service.toggle_agent(agent_id, action)
+  })
+
+  // ===================== 系统反馈 =====================
+  ipcMain.handle('feedback:submit', async (_, data: { type: string, title: string, content: string, contact?: string }) => {
+    return await feedback_service.submit(data)
   })
 }
