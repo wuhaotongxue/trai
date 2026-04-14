@@ -281,23 +281,25 @@ const Tools: React.FC = () => {
           {['jpeg', 'webp'].includes(target_image_format) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
-              <input 
-                type="number" 
-                placeholder="如 500 (留空使用默认质量)"
-                value={target_convert_size_kb}
-                onChange={(e) => set_target_convert_size_kb(e.target.value)}
-                style={{ 
-                  flex: 1,
-                  padding: '8px 12px', 
-                  borderRadius: '6px', 
-                  border: '1px solid #cbd5e1', 
-                  fontSize: '13px', 
-                  outline: 'none',
-                  backgroundColor: '#ffffff',
-                  width: '100%',
-                  minWidth: '0'
-                }}
-              />
+              <div style={{ display: 'flex' }}>
+                <input 
+                  type="number" 
+                  placeholder="如 500 (留空使用默认质量)"
+                  value={target_convert_size_kb}
+                  onChange={(e) => set_target_convert_size_kb(e.target.value)}
+                  style={{ 
+                    flex: 1,
+                    padding: '8px 12px', 
+                    borderRadius: '6px', 
+                    border: '1px solid #cbd5e1', 
+                    fontSize: '13px', 
+                    outline: 'none',
+                    backgroundColor: '#ffffff',
+                    width: '100%',
+                    minWidth: '0'
+                  }}
+                />
+              </div>
             </div>
           )}
 
