@@ -114,6 +114,16 @@
 
 ![客户端系统设置](issue_04_04.jpg)
 
+## 实战示意：客户端实用工具箱
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin:14px 0;">
+  <p style="margin:0;font-size:0.92em;color:#334155;line-height:1.8;">
+    全新的卡片式工具箱界面，集成了高频的本地/云端实用小工具。目前已接入 <strong>图片智能压缩</strong>（支持指定目标 KB 大小）、<strong>图片格式互转</strong>（带尺寸裁剪）、<strong>Markdown 转 PDF</strong> 以及 <strong>ZIP 打包压缩</strong> 等便捷功能。
+  </p>
+</div>
+
+![客户端实用工具箱](issue_04_05.jpg)
+
 ## 本期 Git 摘要（按主题）
 
 | 主题 | 内容要点 |
