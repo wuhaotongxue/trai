@@ -29,7 +29,7 @@ contextBridge.exposeInMainWorld('electron_api', {
   agent_management_register: (name: string, description: string, model: string, system_prompt: string) => ipcRenderer.invoke('agent:management:register', name, description, model, system_prompt),
   agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => ipcRenderer.invoke('agent:management:toggle', agent_id, action),
   agent_management_check: (agent_id: string) => ipcRenderer.invoke('agent:management:check', agent_id),
-  feedback_submit: (data: { type: string, title: string, content: string, contact?: string }) => ipcRenderer.invoke('feedback:submit', data),
+  feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: { name: string, data: string }[] }) => ipcRenderer.invoke('feedback:submit', data),
   app_check_update: () => ipcRenderer.invoke('app:check_update'),
   app_install_update: () => ipcRenderer.invoke('app:install_update'),
   app_get_version: () => ipcRenderer.invoke('app:get_version'),
