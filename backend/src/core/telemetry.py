@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: telemetry.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -38,16 +37,18 @@ def get_tracer(name: str = "trai") -> trace.Tracer:
         return _tracer
 
     # 构建 Resource
-    resource = Resource.create({
-        "service.name": "trai-api",
-        "service.version": os.getenv("APP_VERSION", "0.1.0"),
-        "deployment.environment": os.getenv("DEPLOY_ENV", "development"),
-    })
+    resource = Resource.create(
+        {
+            "service.name": "trai-api",
+            "service.version": os.getenv("APP_VERSION", "0.1.0"),
+            "deployment.environment": os.getenv("DEPLOY_ENV", "development"),
+        }
+    )
 
     # 创建 TracerProvider
     provider = TracerProvider(resource=resource)
 
-    # 添加 Console 导出器（开发环境）
+    # 添加 Console 导出器(开发环境)
     if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
         try:
             otlp_exporter = OTLPSpanExporter()
@@ -75,17 +76,17 @@ class SpanBuilder:
         self._span: Span | None = None
         self._attributes: dict[str, Any] = {}
 
-    def with_attribute(self, key: str, value: Any) -> "SpanBuilder":
+    def with_attribute(self, key: str, value: Any) -> SpanBuilder:
         """添加属性"""
         self._attributes[key] = value
         return self
 
-    def with_attributes(self, **kwargs: Any) -> "SpanBuilder":
+    def with_attributes(self, **kwargs: Any) -> SpanBuilder:
         """批量添加属性"""
         self._attributes.update(kwargs)
         return self
 
-    def start(self) -> "SpanBuilder":
+    def start(self) -> SpanBuilder:
         """启动 Span"""
         self._span = self._tracer.start_span(self._name)
         for key, value in self._attributes.items():
@@ -114,7 +115,7 @@ class SpanBuilder:
         if self._span:
             self._span.add_event(name, attributes or {})
 
-    def __enter__(self) -> "SpanBuilder":
+    def __enter__(self) -> SpanBuilder:
         return self.start()
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -164,12 +165,14 @@ def trace_ai_call(
         SpanBuilder: span 构建器
     """
     tracer = get_tracer()
-    return (create_span(tracer, "ai.chat")
+    return (
+        create_span(tracer, "ai.chat")
         .with_attribute("gen_ai.system", "openai")
         .with_attribute("gen_ai.request.model", model)
         .with_attribute("gen_ai.request.message_count", len(messages))
         .with_attribute("trai.user_id", user_id or "")
-        .with_attribute("trai.session_id", session_id or ""))
+        .with_attribute("trai.session_id", session_id or "")
+    )
 
 
 def trace_tool_call(
@@ -188,10 +191,12 @@ def trace_tool_call(
         SpanBuilder: span 构建器
     """
     tracer = get_tracer()
-    return (create_span(tracer, f"tool.{tool_name}")
+    return (
+        create_span(tracer, f"tool.{tool_name}")
         .with_attribute("trai.tool.name", tool_name)
         .with_attribute("trai.tool.risk_level", risk_level)
-        .with_attribute("trai.user_id", user_id or ""))
+        .with_attribute("trai.user_id", user_id or "")
+    )
 
 
 def trace_db_call(
@@ -205,19 +210,21 @@ def trace_db_call(
     Args:
         operation: 操作类型
         table: 表名
-        latency_ms: 延迟（毫秒）
+        latency_ms: 延迟(毫秒)
         status: 状态
 
     Returns:
         SpanBuilder: span 构建器
     """
     tracer = get_tracer()
-    return (create_span(tracer, f"db.{operation}")
+    return (
+        create_span(tracer, f"db.{operation}")
         .with_attribute("db.system", "postgresql")
         .with_attribute("db.operation", operation)
         .with_attribute("db.table", table)
         .with_attribute("db.latency_ms", latency_ms)
-        .with_attribute("db.status", status))
+        .with_attribute("db.status", status)
+    )
 
 
 def init_telemetry() -> None:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: translate.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -18,15 +17,25 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 
-
 SUPPORTED_LANGUAGES = [
-    "zh", "en", "ja", "ko", "fr", "de", "es",
-    "ru", "ar", "pt", "it", "vi", "th",
+    "zh",
+    "en",
+    "ja",
+    "ko",
+    "fr",
+    "de",
+    "es",
+    "ru",
+    "ar",
+    "pt",
+    "it",
+    "vi",
+    "th",
 ]
 
 
@@ -36,15 +45,13 @@ class TranslateTool(BaseTool):
     def __init__(self) -> None:
         super().__init__()
         self._api_key = os.getenv("TRANSLATE_API_KEY", "")
-        self._base_url = os.getenv(
-            "TRANSLATE_API_URL", "https://api.translate.unknown/v1/translate"
-        )
+        self._base_url = os.getenv("TRANSLATE_API_URL", "https://api.translate.unknown/v1/translate")
 
     @property
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="utility.translate",
+                id="utility_translate",
                 name="翻译",
                 description="将文本从一种语言翻译成另一种语言",
                 category=ToolCategory.UTILITY,
@@ -58,13 +65,13 @@ class TranslateTool(BaseTool):
                     ),
                     ToolParameter(
                         name="source_lang",
-                        description=f"源语言代码，如: zh, en, ja. 设为 auto 则自动检测 ({', '.join(SUPPORTED_LANGUAGES)})",
+                        description=f"源语言代码,如: zh, en, ja. 设为 auto 则自动检测 ({', '.join(SUPPORTED_LANGUAGES)})",
                         type="string",
                         required=True,
                     ),
                     ToolParameter(
                         name="target_lang",
-                        description=f"目标语言代码，如: zh, en, ja ({', '.join(SUPPORTED_LANGUAGES)})",
+                        description=f"目标语言代码,如: zh, en, ja ({', '.join(SUPPORTED_LANGUAGES)})",
                         type="string",
                         required=True,
                     ),
@@ -75,9 +82,7 @@ class TranslateTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         text = params.get("text", "")
         source_lang = params.get("source_lang", "auto")
         target_lang = params.get("target_lang", "zh")
@@ -133,9 +138,7 @@ class TranslateTool(BaseTool):
             logger.error(f"翻译异常: {e}")
             return self._mock_translate(text, source_lang, target_lang)
 
-    def _mock_translate(
-        self, text: str, source_lang: str, target_lang: str
-    ) -> ToolCallResult:
+    def _mock_translate(self, text: str, source_lang: str, target_lang: str) -> ToolCallResult:
         if target_lang == "en":
             mock_result = f"[Translation to English] {text[:100]}..."
         elif target_lang == "ja":

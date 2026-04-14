@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: error_handler.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -14,12 +13,11 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from core.logger import get_logger
 from core.exceptions import TraiException
+from core.logger import get_logger
 
 if TYPE_CHECKING:
     from starlette.middleware.base import RequestResponseEndpoint
-    from fastapi import FastAPI
 
 logger = get_logger()
 
@@ -27,18 +25,13 @@ logger = get_logger()
 class ErrorHandlerMiddleware(BaseHTTPMiddleware):
     """全局异常处理中间件"""
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> JSONResponse:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> JSONResponse:
         try:
             response = await call_next(request)
             return response
 
         except TraiException as e:
-            logger.warning(
-                f"业务异常 | {request.method} {request.url.path} | "
-                f"错误码: {e.code} | 消息: {e.message}"
-            )
+            logger.warning(f"业务异常 | {request.method} {request.url.path} | 错误码: {e.code} | 消息: {e.message}")
             return JSONResponse(
                 status_code=e.status_code,
                 content={

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: request_id.py
 # 作者: wuhao
 # 日期: 2026_04_09
-# 描述: 请求 ID 中间件，为每个请求生成唯一 ID
+# 描述: 请求 ID 中间件,为每个请求生成唯一 ID
 
 from __future__ import annotations
 
@@ -23,9 +22,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
 
     HEADER_NAME: str = "X-Request-ID"
 
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         request_id = request.headers.get(self.HEADER_NAME) or str(uuid.uuid4())
         request.state.request_id = request_id
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: wecom.py
 # 作者: wuhao
 # 日期: 2026_04_09_14:10:00
-# 描述: 企业微信（WeCom）通知服务实现
+# 描述: 企业微信(WeCom)通知服务实现
 
 from __future__ import annotations
 

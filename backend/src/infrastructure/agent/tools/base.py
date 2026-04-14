@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: base.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -9,11 +8,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class ToolCategory(str, Enum):
+class ToolCategory(StrEnum):
     """工具分类枚举"""
 
     MEETING = "meeting"
@@ -27,7 +26,7 @@ class ToolCategory(str, Enum):
     UTILITY = "utility"
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     """风险等级枚举"""
 
     SAFE = "safe"
@@ -79,14 +78,14 @@ class ToolCallResult:
 
 @dataclass
 class ExecutionContext:
-    """工具执行上下文"""
+    """执行上下文"""
 
     user_id: str
-    user_role: str
+    user_role: str = "normal"
     session_id: str | None = None
-    meeting_id: str | None = None
+    agent_id: str | None = None
     trace_id: str | None = None
-    extra: dict[str, Any] = field(default_factory=dict)
+    tenant_id: str | None = None
 
 
 class BaseTool(ABC):
@@ -102,9 +101,7 @@ class BaseTool(ABC):
         pass
 
     @abstractmethod
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         """执行工具
 
         Args:

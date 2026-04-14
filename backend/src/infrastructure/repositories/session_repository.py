@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: session_repository.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -58,9 +57,7 @@ class SessionRepository:
         offset: int = 0,
     ) -> list[ChatSessionModel]:
         """获取会话列表"""
-        stmt = select(ChatSessionModel).where(
-            ChatSessionModel.t_deleted_at.is_(None)
-        )
+        stmt = select(ChatSessionModel).where(ChatSessionModel.t_deleted_at.is_(None))
         if user_id:
             stmt = stmt.where(ChatSessionModel.t_user_id == user_id)
         stmt = stmt.order_by(ChatSessionModel.t_updated_at.desc()).limit(limit).offset(offset)
@@ -128,9 +125,7 @@ class MessageRepository:
 
     def get_messages(self, session_id: str) -> list[MessageModel]:
         """获取会话消息"""
-        stmt = select(MessageModel).where(
-            MessageModel.t_session_id == session_id
-        ).order_by(MessageModel.t_created_at)
+        stmt = select(MessageModel).where(MessageModel.t_session_id == session_id).order_by(MessageModel.t_created_at)
         return list(self._session.scalars(stmt))
 
     def delete_messages(self, session_id: str) -> int:

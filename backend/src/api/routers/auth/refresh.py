@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: refresh.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -14,24 +13,26 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from core.exceptions import AuthenticationError
-from infrastructure.security.jwt import JWTService, get_jwt_service
-from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.jwt import JWTService, get_jwt_service
 
 router = APIRouter()
 
 
 class RefreshRequest(BaseModel):
     """刷新令牌请求"""
+
     refresh_token: str = Field(description="刷新令牌")
 
 
 class RefreshResponse(BaseModel):
     """刷新令牌响应"""
+
     access_token: str = Field(description="新的访问令牌")
-    refresh_token: str = Field(description="新的刷新令牌（可选）")
+    refresh_token: str = Field(description="新的刷新令牌(可选)")
     token_type: str = Field(default="Bearer", description="令牌类型")
-    expires_in: int = Field(description="访问令牌过期时间（秒）")
+    expires_in: int = Field(description="访问令牌过期时间(秒)")
 
 
 @router.post("/refresh", response_model=RefreshResponse, tags=["认证"])
@@ -51,7 +52,7 @@ async def refresh_token(
         RefreshResponse: 新的令牌对
 
     Raises:
-        HTTPException: 刷新令牌无效或已过期（401）
+        HTTPException: 刷新令牌无效或已过期(401)
     """
     try:
         # 验证刷新令牌

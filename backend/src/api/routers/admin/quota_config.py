@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: quota_config.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,16 +6,14 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from api.deps import AdminUser
 from core.logger import logger
-from infrastructure.database.models import QuotaPlanModel
 from infrastructure.database import get_session
+from infrastructure.database.models import QuotaPlanModel
 from infrastructure.repositories.quota_repository import QuotaRepository
 
 router = APIRouter()
@@ -24,6 +21,7 @@ router = APIRouter()
 
 class QuotaPlanResponse(BaseModel):
     """配额套餐响应"""
+
     id: int
     plan_name: str
     user_role: str
@@ -38,17 +36,19 @@ class QuotaPlanResponse(BaseModel):
 
 class QuotaPlanUpdateRequest(BaseModel):
     """配额套餐更新请求"""
-    image_generation_limit: int = Field(ge=0, description="图片生成配额（0=无限制）")
-    audio_synthesis_limit: int = Field(ge=0, description="语音合成配额（0=无限制）")
-    transcription_minutes_limit: int = Field(ge=0, description="转录配额（0=无限制）")
-    meeting_summary_limit: int = Field(ge=0, description="会议摘要配额（0=无限制）")
-    ai_translation_limit: int = Field(ge=0, description="AI 翻译配额（0=无限制）")
-    ai_summarization_limit: int = Field(ge=0, description="AI 摘要配额（0=无限制）")
-    agent_tool_call_limit: int = Field(ge=0, description="Agent 工具调用配额（0=无限制）")
+
+    image_generation_limit: int = Field(ge=0, description="图片生成配额(0=无限制)")
+    audio_synthesis_limit: int = Field(ge=0, description="语音合成配额(0=无限制)")
+    transcription_minutes_limit: int = Field(ge=0, description="转录配额(0=无限制)")
+    meeting_summary_limit: int = Field(ge=0, description="会议摘要配额(0=无限制)")
+    ai_translation_limit: int = Field(ge=0, description="AI 翻译配额(0=无限制)")
+    ai_summarization_limit: int = Field(ge=0, description="AI 摘要配额(0=无限制)")
+    agent_tool_call_limit: int = Field(ge=0, description="Agent 工具调用配额(0=无限制)")
 
 
 class CreateQuotaPlanRequest(BaseModel):
     """创建配额套餐请求"""
+
     plan_name: str = Field(min_length=1, max_length=50)
     user_role: str = Field(min_length=1, max_length=20)
     image_generation_limit: int = Field(ge=0)
@@ -60,7 +60,7 @@ class CreateQuotaPlanRequest(BaseModel):
     agent_tool_call_limit: int = Field(ge=0)
 
 
-@router.get("/admin/quota-plans", response_model=list[QuotaPlanResponse], tags=["管理后台"])
+@router.get("/admin/quota_plans", response_model=list[QuotaPlanResponse], tags=["管理后台"])
 async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
     """获取所有配额套餐
 
@@ -71,7 +71,7 @@ async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
         list[QuotaPlanResponse]: 套餐列表
     """
     db = get_session()
-    repo = QuotaRepository(db)
+    QuotaRepository(db)
     plans = db.execute(select(QuotaPlanModel)).scalars().all()
 
     return [
@@ -91,7 +91,7 @@ async def list_quota_plans(admin: AdminUser) -> list[QuotaPlanResponse]:
     ]
 
 
-@router.put("/admin/quota-plans/{role}", response_model=QuotaPlanResponse, tags=["管理后台"])
+@router.put("/admin/quota_plans/{role}", response_model=QuotaPlanResponse, tags=["管理后台"])
 async def update_quota_plan(
     role: str,
     request: QuotaPlanUpdateRequest,
@@ -142,7 +142,7 @@ async def update_quota_plan(
     )
 
 
-@router.post("/admin/quota-plans", response_model=QuotaPlanResponse, tags=["管理后台"])
+@router.post("/admin/quota_plans", response_model=QuotaPlanResponse, tags=["管理后台"])
 async def create_quota_plan(
     request: CreateQuotaPlanRequest,
     admin: AdminUser,

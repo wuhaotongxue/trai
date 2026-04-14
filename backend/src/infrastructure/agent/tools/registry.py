@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: registry.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -17,7 +16,7 @@ from infrastructure.agent.tools.base import (
 
 
 class ToolRegistry:
-    """工具注册表 - 全局单例，管理所有工具"""
+    """工具注册表 - 全局单例,管理所有工具"""
 
     def __init__(self) -> None:
         self._tools: dict[str, BaseTool] = {}
@@ -34,9 +33,7 @@ class ToolRegistry:
         self._tools[tool_id] = tool
         self._definitions[tool_id] = tool.definition
 
-    def register_adapter(
-        self, tool_id: str, platform: str, adapter: Any
-    ) -> None:
+    def register_adapter(self, tool_id: str, platform: str, adapter: Any) -> None:
         """注册平台适配器
 
         Args:
@@ -78,9 +75,7 @@ class ToolRegistry:
         """
         return list(self._definitions.values())
 
-    def get_tools_by_category(
-        self, category: ToolCategory
-    ) -> list[ToolDefinition]:
+    def get_tools_by_category(self, category: ToolCategory) -> list[ToolDefinition]:
         """按分类获取工具定义
 
         Args:
@@ -89,16 +84,14 @@ class ToolRegistry:
         Returns:
             list[ToolDefinition]: 工具定义列表
         """
-        return [
-            d for d in self._definitions.values() if d.category == category
-        ]
+        return [d for d in self._definitions.values() if d.category == category]
 
     def get_tools_for_user(self, role: str) -> list[ToolDefinition]:
         """获取用户可用的工具定义
 
-        根据角色过滤，返回该角色可使用的工具定义列表。
-        目前所有已注册工具都对所有角色可见，
-        实际权限控制在 ToolGovernor 中处理。
+        根据角色过滤,返回该角色可使用的工具定义列表.
+        目前所有已注册工具都对所有角色可见,
+        实际权限控制在 ToolGovernor 中处理.
 
         Args:
             role: 用户角色
@@ -108,9 +101,7 @@ class ToolRegistry:
         """
         return list(self._definitions.values())
 
-    def get_adapter(
-        self, tool_id: str, platform: str
-    ) -> Any | None:
+    def get_adapter(self, tool_id: str, platform: str) -> Any | None:
         """获取平台适配器
 
         Args:

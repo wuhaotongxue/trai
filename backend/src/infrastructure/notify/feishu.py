@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: feishu.py
 # 作者: wuhao
 # 日期: 2026_04_09_14:00:00
-# 描述: 飞书（Lark）通知服务实现
+# 描述: 飞书(Lark)通知服务实现
 
 from __future__ import annotations
 
@@ -128,7 +127,7 @@ class FeishuNotifyService(BaseNotifyService):
 
         Args:
             title: 卡片标题
-            content: 卡片内容（支持 Markdown）
+            content: 卡片内容(支持 Markdown)
             extra: 额外配置
 
         Returns:

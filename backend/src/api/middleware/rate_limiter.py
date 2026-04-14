@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: rate_limiter.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,9 +6,8 @@
 
 from __future__ import annotations
 
-import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from fastapi import Request, Response
@@ -24,6 +22,7 @@ logger = get_logger()
 @dataclass
 class RateLimitRule:
     """速率限制规则"""
+
     max_requests: int = 60
     window_seconds: int = 60
     key_prefix: str = "rate_limit"
@@ -32,13 +31,14 @@ class RateLimitRule:
 @dataclass
 class RateLimitCounter:
     """计数器"""
+
     count: int = 0
     reset_at: float = 0
     blocked: bool = False
 
 
 class InMemoryRateLimiter:
-    """内存版速率限制器（单机使用）"""
+    """内存版速率限制器(单机使用)"""
 
     def __init__(self) -> None:
         self._counters: dict[str, RateLimitCounter] = {}
@@ -51,10 +51,7 @@ class InMemoryRateLimiter:
         if now - self._last_cleanup < self._cleanup_interval:
             return
 
-        expired_keys = [
-            key for key, counter in self._counters.items()
-            if counter.reset_at < now
-        ]
+        expired_keys = [key for key, counter in self._counters.items() if counter.reset_at < now]
         for key in expired_keys:
             del self._counters[key]
 
@@ -127,7 +124,7 @@ def get_client_key(request: Request, user_id: str | None = None) -> str:
 
     Args:
         request: HTTP 请求
-        user_id: 用户 ID（已登录时使用）
+        user_id: 用户 ID(已登录时使用)
 
     Returns:
         str: 限流键
@@ -179,7 +176,7 @@ def rate_limit(
                     status_code=429,
                     content={
                         "code": 429,
-                        "message": "请求过于频繁，请稍后再试",
+                        "message": "请求过于频繁,请稍后再试",
                         "error": "rate_limit_exceeded",
                         "retry_after": info["retry_after"],
                     },
@@ -251,7 +248,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 status_code=429,
                 content={
                     "code": 429,
-                    "message": "请求过于频繁，请稍后再试",
+                    "message": "请求过于频繁,请稍后再试",
                     "error": "rate_limit_exceeded",
                     "retry_after": info["retry_after"],
                 },
@@ -273,7 +270,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 def reset_rate_limiter() -> None:
-    """重置速率限制器（用于测试）"""
+    """重置速率限制器(用于测试)"""
     global _rate_limiter
     _rate_limiter = InMemoryRateLimiter()
 

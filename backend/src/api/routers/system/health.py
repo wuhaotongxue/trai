@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: health.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -18,6 +17,7 @@ router = APIRouter()
 
 class HealthResponse(BaseModel):
     """健康检查响应"""
+
     status: str = Field(description="健康状态")
     service: str = Field(description="服务名称")
     version: str = Field(description="版本号")
@@ -26,14 +26,16 @@ class HealthResponse(BaseModel):
 
 class DependencyStatus(BaseModel):
     """依赖服务状态"""
+
     name: str = Field(description="服务名称")
     status: str = Field(description="状态")
-    latency_ms: float | None = Field(default=None, description="响应延迟（毫秒）")
+    latency_ms: float | None = Field(default=None, description="响应延迟(毫秒)")
     error: str | None = Field(default=None, description="错误信息")
 
 
 class DetailedHealthResponse(BaseModel):
     """详细健康检查响应"""
+
     status: str = Field(description="整体健康状态")
     service: str = Field(description="服务名称")
     version: str = Field(description="版本号")
@@ -91,7 +93,7 @@ async def detailed_health_check() -> DetailedHealthResponse:
 async def liveness_check() -> dict[str, str]:
     """存活探针
 
-    用于 Kubernetes livenessProbe，判断服务是否存活
+    用于 Kubernetes livenessProbe,判断服务是否存活
 
     Returns:
         dict: 存活状态
@@ -103,7 +105,7 @@ async def liveness_check() -> dict[str, str]:
 async def readiness_check() -> dict[str, Any]:
     """就绪探针
 
-    用于 Kubernetes readinessProbe，判断服务是否可以接收流量
+    用于 Kubernetes readinessProbe,判断服务是否可以接收流量
 
     Returns:
         dict: 就绪状态
@@ -127,8 +129,9 @@ async def _check_database() -> DependencyStatus:
     import time
 
     try:
-        from infrastructure.database.database import get_database
         from sqlalchemy import text
+
+        from infrastructure.database.database import get_database
 
         db = get_database()
         session = db.get_session()
@@ -160,7 +163,6 @@ async def _check_ai_service() -> DependencyStatus:
         DependencyStatus: AI 服务状态
     """
     import os
-    import time
 
     try:
         api_key = os.getenv("OPENAI_API_KEY", "")

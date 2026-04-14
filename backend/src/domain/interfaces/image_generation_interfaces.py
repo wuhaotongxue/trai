@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_generation_interfaces.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -23,7 +22,7 @@ class IImageGenerationRepository(ABC):
             entity: 图片生成实体
 
         Returns:
-            ImageGeneration: 创建后的实体（含 ID）
+            ImageGeneration: 创建后的实体(含 ID)
         """
         pass
 

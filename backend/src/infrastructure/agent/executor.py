@@ -1,22 +1,19 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: executor.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
-# 描述: Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制
+# 描述: Agent 执行器 - 管理多轮工具调用循环,含自我纠错和配额控制
 
 from __future__ import annotations
 
 import time
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
 from core.logger import logger
 from core.token_counter import TokenCounter, get_token_counter
-from infrastructure.agent.error_classifier import ClassifiedError
 from infrastructure.agent.self_corrector import (
-    CorrectionResult,
-    CorrectionState,
     SelfCorrector,
     get_self_corrector,
 )
@@ -30,7 +27,7 @@ from infrastructure.agent.tools.loader import (
     load_all_tools,
 )
 from infrastructure.agent.tools.registry import get_tool_registry
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.openai_client import OpenAIClient, StreamEvent
 
 
 @dataclass
@@ -39,6 +36,7 @@ class AgentStep:
 
     turn: int
     assistant_message: str
+    reasoning_content: str
     tool_calls: list[dict[str, Any]]
     tool_results: list[ToolCallResult]
     total_tokens: int
@@ -47,9 +45,10 @@ class AgentStep:
 
 
 class AgentExecutor:
-    """Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制"""
+    """Agent 执行器 - 管理多轮工具调用循环,含自我纠错和配额控制"""
 
     MAX_TURNS = 10
+    _instance: AgentExecutor | None = None
 
     def __init__(self) -> None:
         self._ai_client = OpenAIClient()
@@ -81,7 +80,7 @@ class AgentExecutor:
             logger.warning(f"配额服务初始化失败: {e}")
 
     def _ensure_initialized(self) -> None:
-        """延迟初始化：加载工具"""
+        """延迟初始化:加载工具"""
         if self._initialized:
             return
 
@@ -94,18 +93,23 @@ class AgentExecutor:
         self,
         messages: list[dict[str, str]],
         context: ExecutionContext,
-    ) -> dict[str, Any]:
-        """执行 Agent 对话（支持多轮工具调用 + 自我纠错）
+        stream: bool = False,
+    ) -> Any:
+        """执行 Agent 对话(支持多轮工具调用 + 自我纠错)
 
         Args:
-            messages: 消息历史（含 system/user/assistant/tool 消息）
+            messages: 消息历史(含 system/user/assistant/tool 消息)
             context: 执行上下文
+            stream: 是否流式响应
 
         Returns:
-            dict: 最终结果
+            dict | AsyncGenerator: 最终结果或流式生成器
         """
         self._ensure_initialized()
         self._ensure_quota()
+
+        if stream:
+            return self._execute_stream(messages, context)
 
         steps: list[AgentStep] = []
         turn = 0
@@ -117,14 +121,12 @@ class AgentExecutor:
             turn += 1
             turn_start = int(time.time() * 1000)
 
-            logger.info(
-                f"Agent Turn {turn} | user_id={context.user_id} | "
-                f"消息数={len(current_messages)}"
-            )
+            logger.info(f"Agent Turn {turn} | user_id={context.user_id} | 消息数={len(current_messages)}")
 
             ai_response = await self._call_ai(current_messages)
 
             assistant_content = ai_response.get("content", "")
+            reasoning_content = ai_response.get("reasoning_content", "")
             tool_calls = ai_response.get("tool_calls", [])
             usage = ai_response.get("usage", {})
             total_tokens += usage.get("total_tokens", 0)
@@ -139,14 +141,17 @@ class AgentExecutor:
             current_messages.append(assistant_msg)
 
             if not tool_calls:
-                steps.append(AgentStep(
-                    turn=turn,
-                    assistant_message=assistant_content,
-                    tool_calls=[],
-                    tool_results=[],
-                    total_tokens=total_tokens,
-                    duration_ms=int(time.time() * 1000) - turn_start,
-                ))
+                steps.append(
+                    AgentStep(
+                        turn=turn,
+                        assistant_message=assistant_content,
+                        reasoning_content=reasoning_content,
+                        tool_calls=[],
+                        tool_results=[],
+                        total_tokens=total_tokens,
+                        duration_ms=int(time.time() * 1000) - turn_start,
+                    )
+                )
                 break
 
             tool_results: list[ToolCallResult] = []
@@ -157,42 +162,42 @@ class AgentExecutor:
                 raw_args = func.get("arguments", "{}")
 
                 import json
+
                 try:
                     args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
                 except Exception:
                     args = {}
 
-                logger.info(
-                    f"工具调用 | turn={turn} | tool_id={tool_id} | args={args}"
-                )
+                logger.info(f"工具调用 | turn={turn} | tool_id={tool_id} | args={args}")
 
-                tool_result = await self._execute_tool_with_correction(
-                    tool_id, tool_call_id, args, context
-                )
+                tool_result = await self._execute_tool_with_correction(tool_id, tool_call_id, args, context)
                 tool_results.append(tool_result)
 
                 tool_content: str
                 if not tool_result.success:
-                    tool_content = (
-                        f"[工具执行失败] {tool_result.error or '未知错误'}"
-                    )
+                    tool_content = f"[工具执行失败] {tool_result.error or '未知错误'}"
                 else:
                     tool_content = tool_result.output or ""
 
-                current_messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call_id,
-                    "content": tool_content,
-                })
+                current_messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call_id,
+                        "content": tool_content,
+                    }
+                )
 
-            steps.append(AgentStep(
-                turn=turn,
-                assistant_message=assistant_content,
-                tool_calls=tool_calls,
-                tool_results=tool_results,
-                total_tokens=total_tokens,
-                duration_ms=int(time.time() * 1000) - turn_start,
-            ))
+            steps.append(
+                AgentStep(
+                    turn=turn,
+                    assistant_message=assistant_content,
+                    reasoning_content=reasoning_content,
+                    tool_calls=tool_calls,
+                    tool_results=tool_results,
+                    total_tokens=total_tokens,
+                    duration_ms=int(time.time() * 1000) - turn_start,
+                )
+            )
 
         return {
             "final_content": current_messages[-1].get("content", ""),
@@ -200,6 +205,7 @@ class AgentExecutor:
                 {
                     "turn": s.turn,
                     "assistant_message": s.assistant_message,
+                    "reasoning_content": s.reasoning_content,
                     "tool_calls": [
                         {
                             "id": tc.get("id"),
@@ -226,6 +232,103 @@ class AgentExecutor:
             "total_duration_ms": int(time.time() * 1000) - start_ms,
         }
 
+    async def _execute_stream(
+        self,
+        messages: list[dict[str, str]],
+        context: ExecutionContext,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """执行流式 Agent 对话"""
+        turn = 0
+        current_messages = list(messages)
+
+        while turn < self.MAX_TURNS:
+            turn += 1
+            logger.info(f"Agent Turn (Stream) {turn} | user_id={context.user_id}")
+
+            stream_gen = await self._call_ai(current_messages, stream=True)
+
+            assistant_content = ""
+            reasoning_content = ""
+            tool_calls: list[dict[str, Any]] = []
+
+            import json
+
+            async for event in stream_gen:
+                # pass event to client
+                yield {
+                    "type": event.type,
+                    "content": event.content,
+                    "tool_call_id": event.tool_call_id,
+                    "tool_name": event.tool_name,
+                }
+
+                if event.type == "token":
+                    assistant_content += event.content
+                elif event.type == "reasoning":
+                    reasoning_content += event.content
+                elif event.type == "tool_call_end":
+                    tool_calls.append(
+                        {
+                            "id": event.tool_call_id,
+                            "type": "function",
+                            "function": {"name": event.tool_name, "arguments": event.content},
+                        }
+                    )
+
+            assistant_msg: dict[str, Any] = {
+                "role": "assistant",
+                "content": assistant_content,
+            }
+            if tool_calls:
+                assistant_msg["tool_calls"] = tool_calls
+
+            current_messages.append(assistant_msg)
+
+            if not tool_calls:
+                break
+
+            for tc in tool_calls:
+                tool_call_id = tc.get("id", "")
+                func = tc.get("function", {})
+                tool_id = func.get("name", "")
+                raw_args = func.get("arguments", "{}")
+
+                try:
+                    args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+                except Exception:
+                    args = {}
+
+                # 通知客户端工具开始执行
+                yield {
+                    "type": "tool_execution_start",
+                    "tool_call_id": tool_call_id,
+                    "tool_name": tool_id,
+                    "content": json.dumps(args, ensure_ascii=False),
+                }
+
+                tool_result = await self._execute_tool_with_correction(tool_id, tool_call_id, args, context)
+
+                tool_content = (
+                    tool_result.output if tool_result.success else f"[工具执行失败] {tool_result.error or '未知错误'}"
+                )
+
+                # 通知客户端工具执行结果
+                yield {
+                    "type": "tool_execution_result",
+                    "tool_call_id": tool_call_id,
+                    "tool_name": tool_id,
+                    "content": tool_content,
+                    "success": tool_result.success,
+                }
+
+                current_messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call_id,
+                        "content": tool_content,
+                    }
+                )
+
     async def _execute_tool_with_correction(
         self,
         tool_id: str,
@@ -233,7 +336,7 @@ class AgentExecutor:
         args: dict[str, Any],
         context: ExecutionContext,
     ) -> ToolCallResult:
-        """执行工具（含自我纠错）
+        """执行工具(含自我纠错)
 
         Args:
             tool_id: 工具 ID
@@ -265,10 +368,8 @@ class AgentExecutor:
             result.tool_call_id = tool_call_id
             return result
         except Exception as e:
-            logger.warning(f"工具执行异常，进入纠错流程 | tool_id={tool_id} | error={e}")
-            result, correction_result = await self._self_corrector.handle(
-                e, raw_execute
-            )
+            logger.warning(f"工具执行异常,进入纠错流程 | tool_id={tool_id} | error={e}")
+            result, correction_result = await self._self_corrector.handle(e, raw_execute)
 
             if result is not None:
                 result.tool_call_id = tool_call_id
@@ -281,9 +382,7 @@ class AgentExecutor:
                 error=correction_result.message if correction_result else str(e),
             )
 
-    def _check_quota_before_call(
-        self, context: ExecutionContext, tool_id: str
-    ) -> None:
+    def _check_quota_before_call(self, context: ExecutionContext, tool_id: str) -> None:
         """工具调用前检查配额
 
         Args:
@@ -316,36 +415,39 @@ class AgentExecutor:
             logger.warning(f"配额检查/扣减失败: {e}")
 
     async def _call_ai(
-        self, messages: list[dict[str, str]]
-    ) -> dict[str, Any]:
+        self, messages: list[dict[str, str]], stream: bool = False
+    ) -> dict[str, Any] | AsyncIterator[StreamEvent]:
         """调用 AI
 
         Args:
             messages: 消息列表
+            stream: 是否使用流式返回
 
         Returns:
-            dict: AI 响应
+            dict | AsyncIterator[StreamEvent]: AI 响应或流
         """
+        if stream:
+            return self._ai_client.chat_stream(
+                messages=messages,
+                tools=self._tools if self._tools else None,
+            )
+
         return await self._ai_client.chat(
             messages=messages,
             tools=self._tools if self._tools else None,
             tool_choice="auto",
         )
 
+    @classmethod
+    def get_instance(cls) -> AgentExecutor:
+        """获取 Agent 执行器单例
 
-_agent_executor_instance: AgentExecutor | None = None
-
-
-def get_agent_executor() -> AgentExecutor:
-    """获取 Agent 执行器单例
-
-    Returns:
-        AgentExecutor: Agent 执行器实例
-    """
-    global _agent_executor_instance
-    if _agent_executor_instance is None:
-        _agent_executor_instance = AgentExecutor()
-    return _agent_executor_instance
+        Returns:
+            AgentExecutor: Agent 执行器实例
+        """
+        if cls._instance is None:
+            cls._instance = AgentExecutor()
+        return cls._instance
 
 
-__all__ = ["AgentExecutor", "AgentStep", "get_agent_executor"]
+__all__ = ["AgentExecutor", "AgentStep"]
