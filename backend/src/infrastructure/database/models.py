@@ -13,7 +13,7 @@ from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
-from infrastructure.database.user import UserModel
+from infrastructure.database.user_model import UserModel
 
 
 class ChatSessionModel(Base):
