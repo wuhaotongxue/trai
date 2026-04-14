@@ -73,7 +73,7 @@ async def agent_chat(
         trace_id=trace_id,
     )
 
-    executor = get_agent_executor.get_instance()
+    executor = AgentExecutor.get_instance()
 
     messages = [
         {"role": "user", "content": request.message},
