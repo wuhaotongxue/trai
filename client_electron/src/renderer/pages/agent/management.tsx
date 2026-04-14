@@ -5,14 +5,14 @@
  * 描述: Agent 管理页面，支持列表、注册、启停
  */
 import React, { useState, useEffect } from 'react'
-import { Bot, Plus, Play, Square, Loader2, RefreshCw } from 'lucide-react'
+import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity } from 'lucide-react'
 
 interface Agent {
   id: string
   name: string
   description: string
   model: string
-  status: 'running' | 'stopped'
+  status: 'running' | 'stopped' | 'error'
   created_at: string
 }
 
@@ -20,6 +20,7 @@ const AgentManagement: React.FC = () => {
   const [agents, set_agents] = useState<Agent[]>([])
   const [loading, set_loading] = useState(false)
   const [error, set_error] = useState('')
+  const [checking_id, set_checking_id] = useState<string | null>(null)
   
   // 注册模态框状态
   const [show_modal, set_show_modal] = useState(false)
@@ -57,6 +58,26 @@ const AgentManagement: React.FC = () => {
       }
     } catch (err: any) {
       alert(err.message)
+    }
+  }
+
+  const handle_check = async (id: string) => {
+    set_checking_id(id)
+    try {
+      const res = await window.electron_api.agent_management_check(id)
+      if (res.success) {
+        // 刷新列表以获取最新状态
+        fetch_agents()
+        if (!res.data.is_normal) {
+          alert('检测到 Agent 运行异常！请检查日志。')
+        }
+      } else {
+        alert(res.error || '检测失败')
+      }
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      set_checking_id(null)
     }
   }
 
@@ -130,10 +151,10 @@ const AgentManagement: React.FC = () => {
                 </div>
                 <div style={{ 
                   padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 500,
-                  backgroundColor: agent.status === 'running' ? '#dcfce7' : '#f1f5f9',
-                  color: agent.status === 'running' ? '#16a34a' : '#64748b'
+                  backgroundColor: agent.status === 'running' ? '#dcfce7' : agent.status === 'error' ? '#fee2e2' : '#f1f5f9',
+                  color: agent.status === 'running' ? '#16a34a' : agent.status === 'error' ? '#ef4444' : '#64748b'
                 }}>
-                  {agent.status === 'running' ? '运行中' : '已停止'}
+                  {agent.status === 'running' ? '运行中' : agent.status === 'error' ? '异常' : '已停止'}
                 </div>
               </div>
               
@@ -146,17 +167,28 @@ const AgentManagement: React.FC = () => {
                 <span>创建于 {new Date(agent.created_at).toLocaleDateString()}</span>
               </div>
               
-              <div style={{ display: 'flex', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+              <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                <button
+                  onClick={() => handle_check(agent.id)}
+                  disabled={checking_id === agent.id}
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', cursor: checking_id === agent.id ? 'not-allowed' : 'pointer', fontWeight: 500, fontSize: '13px',
+                    backgroundColor: '#f8fafc', color: '#475569'
+                  }}
+                >
+                  {checking_id === agent.id ? <Loader2 size={14} className="animate-spin" /> : <Activity size={14} />} 状态检测
+                </button>
                 <button
                   onClick={() => handle_toggle(agent.id, agent.status)}
                   style={{
-                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 500, fontSize: '14px',
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 500, fontSize: '13px',
                     backgroundColor: agent.status === 'running' ? '#fef2f2' : '#f0fdf4',
                     color: agent.status === 'running' ? '#dc2626' : '#16a34a'
                   }}
                 >
-                  {agent.status === 'running' ? <><Square size={16} /> 停止</> : <><Play size={16} /> 启动</>}
+                  {agent.status === 'running' ? <><Square size={14} /> 停止</> : <><Play size={14} /> 启动</>}
                 </button>
               </div>
             </div>

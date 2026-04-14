@@ -119,6 +119,10 @@ export const register_ipc_handlers = (): void => {
     return agent_service.toggle_agent(agent_id, action)
   })
 
+  ipcMain.handle('agent:management:check', async (_, agent_id: string) => {
+    return agent_service.check_agent(agent_id)
+  })
+
   // ===================== 系统反馈 =====================
   ipcMain.handle('feedback:submit', async (_, data: { type: string, title: string, content: string, contact?: string }) => {
     return await feedback_service.submit(data)

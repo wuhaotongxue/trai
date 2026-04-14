@@ -231,5 +231,20 @@ export const agent_service = {
       log.error('toggle_agent failed:', error.message)
       return { success: false, error: error.message || '启停 Agent 失败' }
     }
+  },
+
+  /**
+   * 检测 Agent 状态
+   */
+  async check_agent(agent_id: string) {
+    try {
+      const url = `${get_api_base_url()}/api/agent/management/check`
+      const payload = { agent_id }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('check_agent failed:', error.message)
+      return { success: false, error: error.message || '检测 Agent 状态失败' }
+    }
   }
 }
