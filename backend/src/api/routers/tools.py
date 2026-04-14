@@ -16,7 +16,7 @@ from typing import Annotated, Any
 
 import markdown
 import pdfkit
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -156,6 +156,79 @@ class ToolsAPI:
             )
 
     @staticmethod
+    async def convert_image(
+        file: UploadFile,
+        target_format: str,
+        current_user: CurrentUser,
+        s3_service: S3StorageService,
+    ) -> ToolResultResponse:
+        """图片格式转换接口
+
+        Args:
+            file: 上传的图片文件
+            target_format: 目标格式 (如 png, jpeg, ico, webp)
+            current_user: 当前用户
+            s3_service: S3 存储服务
+
+        Returns:
+            转换后的图片信息和预签名 URL
+        """
+        if not file.content_type or not file.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": 400, "message": "只支持图片格式文件"},
+            )
+
+        fmt = target_format.upper()
+        if fmt == "JPG":
+            fmt = "JPEG"
+
+        try:
+            content = await file.read()
+            image = Image.open(BytesIO(content))
+            
+            # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式，且原图带 Alpha
+            if fmt in ("JPEG", "BMP") and image.mode in ("RGBA", "LA", "P"):
+                # 处理透明背景为白色
+                background = Image.new("RGB", image.size, (255, 255, 255))
+                if image.mode == "RGBA":
+                    background.paste(image, mask=image.split()[3])
+                else:
+                    background.paste(image)
+                image = background
+            elif fmt == "ICO":
+                # ICO 推荐尺寸
+                image = image.resize((256, 256), Image.Resampling.LANCZOS)
+                
+            output_buffer = BytesIO()
+            
+            # 保存转换后的图片
+            image.save(output_buffer, format=fmt)
+            converted_bytes = output_buffer.getvalue()
+            
+            ext = fmt.lower()
+            content_type = f"image/{ext}" if ext != "ico" else "image/x-icon"
+            
+            # 上传到 S3
+            object_key = f"tools/images_converted/{current_user.user_id}/{uuid.uuid4().hex}.{ext}"
+            s3_service.upload_bytes(converted_bytes, object_key, content_type=content_type)
+            
+            presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
+            
+            original_name = Path(file.filename or "image.jpg").stem
+            return ToolResultResponse(
+                url=presigned_url,
+                expires_in=300,
+                file_name=f"{original_name}.{ext}",
+            )
+        except Exception as e:
+            logger.error(f"图片格式转换失败: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"code": 500, "message": "图片格式转换失败，可能是不支持的格式"},
+            )
+
+    @staticmethod
     async def compress_files_to_zip(
         files: list[UploadFile],
         current_user: CurrentUser,
@@ -240,5 +313,15 @@ async def compress_zip_endpoint(
     """将多个文件压缩为 ZIP 并上传到 S3 返回限时下载链接"""
     return await ToolsAPI.compress_files_to_zip(files, current_user, s3_service)
 
+
+@router.post("/convert_image", response_model=ToolResultResponse, tags=["工具"])
+async def convert_image_endpoint(
+    current_user: CurrentUser,
+    file: UploadFile = File(...),
+    target_format: str = Form(..., description="目标格式，如 png, jpeg, ico, webp"),
+    s3_service: S3StorageService = Depends(S3StorageService),
+) -> ToolResultResponse:
+    """转换图片格式并上传到 S3 返回限时下载链接"""
+    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service)
 
 __all__ = ["router", "ToolsAPI"]

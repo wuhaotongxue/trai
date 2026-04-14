@@ -98,5 +98,30 @@ export const tools_service = {
         error: error.response?.data?.detail?.message || 'ZIP 压缩失败' 
       }
     }
+  },
+
+  /**
+   * 转换本地图片格式
+   */
+  async convert_image(file_path: string, target_format: string) {
+    try {
+      const url = `${get_api_base_url()}/api/tools/convert_image`
+      const form_data = new FormData()
+      
+      const file_buffer = await fs.promises.readFile(file_path)
+      const filename = path.basename(file_path)
+      form_data.append('file', new Blob([file_buffer]), filename)
+      form_data.append('target_format', target_format)
+      
+      const res = await api_client.post(url, form_data)
+      
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('convert_image failed:', error.response?.data || error.message)
+      return { 
+        success: false, 
+        error: error.response?.data?.detail?.message || '图片转换失败' 
+      }
+    }
   }
 }
