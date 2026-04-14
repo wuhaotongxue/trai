@@ -51,6 +51,7 @@ class AgentExecutor:
     """Agent 执行器 - 管理多轮工具调用循环，含自我纠错和配额控制"""
 
     MAX_TURNS = 10
+    _instance: "AgentExecutor | None" = None
 
     def __init__(self) -> None:
         self._ai_client = OpenAIClient()
@@ -445,20 +446,16 @@ class AgentExecutor:
             tool_choice="auto",
         )
 
+    @classmethod
+    def get_instance(cls) -> "AgentExecutor":
+        """获取 Agent 执行器单例
 
-_agent_executor_instance: AgentExecutor | None = None
-
-
-def get_agent_executor() -> AgentExecutor:
-    """获取 Agent 执行器单例
-
-    Returns:
-        AgentExecutor: Agent 执行器实例
-    """
-    global _agent_executor_instance
-    if _agent_executor_instance is None:
-        _agent_executor_instance = AgentExecutor()
-    return _agent_executor_instance
+        Returns:
+            AgentExecutor: Agent 执行器实例
+        """
+        if cls._instance is None:
+            cls._instance = AgentExecutor()
+        return cls._instance
 
 
-__all__ = ["AgentExecutor", "AgentStep", "get_agent_executor"]
+__all__ = ["AgentExecutor", "AgentStep"]

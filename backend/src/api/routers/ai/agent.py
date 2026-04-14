@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
-from infrastructure.agent.executor import get_agent_executor
+from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.registry import get_tool_registry
 from infrastructure.agent.tools.loader import get_openai_tools_format
@@ -73,7 +73,7 @@ async def agent_chat(
         trace_id=trace_id,
     )
 
-    executor = get_agent_executor()
+    executor = get_agent_executor.get_instance()
 
     messages = [
         {"role": "user", "content": request.message},
