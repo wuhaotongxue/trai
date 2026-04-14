@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: message.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -9,12 +8,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class MessageRole(str, Enum):
+class MessageRole(StrEnum):
     """消息角色"""
+
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -23,6 +23,7 @@ class MessageRole(str, Enum):
 @dataclass
 class Message:
     """消息实体"""
+
     role: MessageRole
     content: str
     created_at: datetime = field(default_factory=datetime.now)

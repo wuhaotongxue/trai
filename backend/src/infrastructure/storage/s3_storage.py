@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: storage.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -18,7 +17,7 @@ from core.exceptions import ExternalServiceError
 
 
 class S3StorageService:
-    """S3 存储服务（支持 MinIO）"""
+    """S3 存储服务(支持 MinIO)"""
 
     def __init__(self) -> None:
         self._endpoint: str = os.getenv("S3_ENDPOINT", "http://localhost:9000")
@@ -114,7 +113,7 @@ class S3StorageService:
 
         Args:
             object_key: S3 对象键
-            expires_in: 过期时间（秒）
+            expires_in: 过期时间(秒)
 
         Returns:
             str: 预签名 URL

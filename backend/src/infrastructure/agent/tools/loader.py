@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: loader.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -20,7 +19,7 @@ def _import_tool_module(tool_name: str) -> Any | None:
     """动态导入工具模块
 
     Args:
-        tool_name: 工具模块名（不含路径）
+        tool_name: 工具模块名(不含路径)
 
     Returns:
         工具类或 None
@@ -28,18 +27,23 @@ def _import_tool_module(tool_name: str) -> Any | None:
     try:
         if tool_name == "weather":
             from infrastructure.agent.tools.weather import WeatherTool
+
             return WeatherTool
         if tool_name == "calculator":
             from infrastructure.agent.tools.calculator import CalculatorTool
+
             return CalculatorTool
         if tool_name == "search":
             from infrastructure.agent.tools.search import SearchTool
+
             return SearchTool
         if tool_name == "translate":
             from infrastructure.agent.tools.translate import TranslateTool
+
             return TranslateTool
         if tool_name == "wecom_contact":
             from infrastructure.agent.tools.wecom_contact_tool import WeComContactTool
+
             return WeComContactTool
     except ImportError as e:
         logger.warning(f"工具模块导入失败 | tool={tool_name} | error={e}")
@@ -49,18 +53,15 @@ def _import_tool_module(tool_name: str) -> Any | None:
 def load_all_tools() -> list[ToolDefinition]:
     """加载所有可用工具
 
-    从环境变量 TOOL_ENABLED_LIST 读取需要加载的工具列表，
-    默认为全部工具。
+    从环境变量 TOOL_ENABLED_LIST 读取需要加载的工具列表,
+    默认为全部工具.
 
     Returns:
         list[ToolDefinition]: 已注册的工具定义列表
     """
-    registry = get_tool_registry()
+    get_tool_registry()
 
-    enabled_str = os.getenv(
-        "TOOL_ENABLED_LIST",
-        "weather,calculator,search,translate,wecom_contact"
-    )
+    enabled_str = os.getenv("TOOL_ENABLED_LIST", "weather,calculator,search,translate,wecom_contact")
     tool_names = [t.strip() for t in enabled_str.split(",") if t.strip()]
 
     registered: list[ToolDefinition] = []
@@ -111,18 +112,20 @@ def get_openai_tools_format(
             if p.required:
                 required.append(p.name)
 
-        tools.append({
-            "type": "function",
-            "function": {
-                "name": d.id,
-                "description": d.description,
-                "parameters": {
-                    "type": "object",
-                    "properties": params_props,
-                    "required": required,
+        tools.append(
+            {
+                "type": "function",
+                "function": {
+                    "name": d.id,
+                    "description": d.description,
+                    "parameters": {
+                        "type": "object",
+                        "properties": params_props,
+                        "required": required,
+                    },
                 },
-            },
-        })
+            }
+        )
 
     return tools
 

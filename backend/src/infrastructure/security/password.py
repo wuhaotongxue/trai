@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: password.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:30:00
@@ -8,7 +7,6 @@
 from __future__ import annotations
 
 import os
-from typing import Any
 
 from passlib.context import CryptContext
 from passlib.exc import UnknownHashError
@@ -19,8 +17,8 @@ from core.exceptions import ConfigurationError
 class PasswordService:
     """密码服务
 
-    封装密码哈希与验证逻辑，使用 passlib + bcrypt/argon2
-    遵循安全规范：禁止明文存储、使用强哈希算法
+    封装密码哈希与验证逻辑,使用 passlib + bcrypt/argon2
+    遵循安全规范:禁止明文存储、使用强哈希算法
     """
 
     _ALGORITHM_ARGON2 = "argon2"
@@ -101,7 +99,7 @@ _password_service: PasswordService | None = None
 
 
 def get_password_service() -> PasswordService:
-    """获取密码服务实例（单例）
+    """获取密码服务实例(单例)
 
     Returns:
         PasswordService: 密码服务实例

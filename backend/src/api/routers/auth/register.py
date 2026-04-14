@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: register.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -15,14 +14,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
-from infrastructure.database import get_session
 
 router = APIRouter()
 
-# 用户名正则：字母、数字、下划线，3-32字符
+# 用户名正则:字母、数字、下划线,3-32字符
 USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
 # 邮箱正则
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
@@ -30,6 +29,7 @@ EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 class RegisterRequest(BaseModel):
     """注册请求"""
+
     username: Annotated[str, Field(min_length=3, max_length=64, description="用户名")]
     password: Annotated[str, Field(min_length=6, max_length=128, description="密码")]
     email: Annotated[str, Field(description="邮箱地址")]
@@ -38,6 +38,7 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
     """注册响应"""
+
     user_id: str = Field(description="用户唯一标识")
     username: str = Field(description="用户名")
     email: str = Field(description="邮箱地址")
@@ -63,13 +64,13 @@ async def register(
         RegisterResponse: 注册成功返回用户信息
 
     Raises:
-        HTTPException: 注册失败（400/409）
+        HTTPException: 注册失败(400/409)
     """
     # 验证用户名格式
     if not USERNAME_PATTERN.match(request.username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": 400, "message": "用户名格式不正确，需为字母、数字、下划线，3-32字符"},
+            detail={"code": 400, "message": "用户名格式不正确,需为字母、数字、下划线,3-32字符"},
         )
 
     # 验证邮箱格式

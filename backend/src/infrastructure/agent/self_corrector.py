@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: self_corrector.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -8,10 +7,10 @@
 from __future__ import annotations
 
 import asyncio
-import os
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from enum import Enum
-from typing import Any, Callable, Coroutine
+from enum import StrEnum
+from typing import Any
 
 from loguru import logger
 
@@ -23,7 +22,7 @@ from infrastructure.agent.error_classifier import (
 )
 
 
-class CorrectionState(str, Enum):
+class CorrectionState(StrEnum):
     """纠错状态"""
 
     DETECTED = "detected"
@@ -51,12 +50,12 @@ class SelfCorrector:
     """自我纠错器 - 根据规范执行对应纠错策略
 
     错误分类 → 对应策略:
-    - quota / permission / validation     → reject（直接拒绝，禁止纠错）
-    - rate_limit                          → retry_with_backoff（退避重试）
+    - quota / permission / validation     → reject(直接拒绝,禁止纠错)
+    - rate_limit                          → retry_with_backoff(退避重试)
     - tool_execution                      → retry → alternative → rollback
     - business_logic                      → rollback
     - external                            → retry
-    - system                              → escalate（升级通知）
+    - system                              → escalate(升级通知)
     """
 
     MAX_RETRIES = 3
@@ -101,14 +100,10 @@ class SelfCorrector:
         self._state = CorrectionState.ATTEMPTING
 
         if classified.action == ErrorAction.RETRY_WITH_BACKOFF:
-            return await self._retry_with_backoff(
-                classified, retry_fn, *args, **kwargs
-            )
+            return await self._retry_with_backoff(classified, retry_fn, *args, **kwargs)
 
         if classified.action in (ErrorAction.RETRY, ErrorAction.TOOL_EXECUTION):
-            return await self._retry_and_alternative(
-                classified, retry_fn, *args, **kwargs
-            )
+            return await self._retry_and_alternative(classified, retry_fn, *args, **kwargs)
 
         if classified.action == ErrorAction.ROLLBACK:
             return await self._rollback(classified, retry_fn, *args, **kwargs)
@@ -140,10 +135,7 @@ class SelfCorrector:
                 self.BACKOFF_MAX_MS,
             )
 
-            logger.info(
-                f"退避重试 | attempt={attempt}/{self.MAX_RETRIES} | "
-                f"backoff={backoff_ms}ms"
-            )
+            logger.info(f"退避重试 | attempt={attempt}/{self.MAX_RETRIES} | backoff={backoff_ms}ms")
 
             await asyncio.sleep(backoff_ms / 1000.0)
 
@@ -245,7 +237,7 @@ class SelfCorrector:
         if rollback_fn:
             try:
                 await rollback_fn()
-                logger.info("回退操作成功，通知用户")
+                logger.info("回退操作成功,通知用户")
             except Exception as rollback_err:
                 logger.error(f"回退失败: {rollback_err}")
                 self._state = CorrectionState.ROLLBACK_FAILED
@@ -255,7 +247,7 @@ class SelfCorrector:
         return None, self._escalate(classified)
 
     def _escalate(self, classified: ClassifiedError) -> CorrectionResult:
-        """升级策略 - 通知用户，记录审计
+        """升级策略 - 通知用户,记录审计
 
         Args:
             classified: 分类后的错误
@@ -266,21 +258,20 @@ class SelfCorrector:
         self._state = CorrectionState.ESCALATING
 
         escalation_messages: dict[ErrorCategory, str] = {
-            ErrorCategory.QUOTA: "月度配额已用完，请下个月重试或升级为 VIP",
-            ErrorCategory.PERMISSION: "权限不足，无法执行此操作",
-            ErrorCategory.VALIDATION: "参数校验失败，请检查输入",
-            ErrorCategory.RATE_LIMIT: "请求过于频繁，请稍后重试",
-            ErrorCategory.TOOL_EXECUTION: "工具执行失败，请联系管理员",
-            ErrorCategory.BUSINESS_LOGIC: "业务逻辑异常，请联系管理员",
-            ErrorCategory.EXTERNAL: "外部服务异常，请稍后重试",
-            ErrorCategory.SYSTEM: "系统异常，请联系管理员",
+            ErrorCategory.QUOTA: "月度配额已用完,请下个月重试或升级为 VIP",
+            ErrorCategory.PERMISSION: "权限不足,无法执行此操作",
+            ErrorCategory.VALIDATION: "参数校验失败,请检查输入",
+            ErrorCategory.RATE_LIMIT: "请求过于频繁,请稍后重试",
+            ErrorCategory.TOOL_EXECUTION: "工具执行失败,请联系管理员",
+            ErrorCategory.BUSINESS_LOGIC: "业务逻辑异常,请联系管理员",
+            ErrorCategory.EXTERNAL: "外部服务异常,请稍后重试",
+            ErrorCategory.SYSTEM: "系统异常,请联系管理员",
         }
 
         message = escalation_messages.get(classified.category, classified.message)
 
         logger.warning(
-            f"错误升级 | category={classified.category.value} | "
-            f"attempts={self._attempts} | message={message}"
+            f"错误升级 | category={classified.category.value} | attempts={self._attempts} | message={message}"
         )
 
         self._state = CorrectionState.ESCALATED

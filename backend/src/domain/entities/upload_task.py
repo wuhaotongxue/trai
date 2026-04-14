@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload_task.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -7,15 +6,16 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
-import uuid
 
 
-class FileType(str, Enum):
+class FileType(StrEnum):
     """文件类型"""
+
     IMAGE = "image"
     VIDEO = "video"
     AUDIO = "audio"
@@ -27,8 +27,9 @@ class FileType(str, Enum):
     OTHER = "other"
 
 
-class UploadStatus(str, Enum):
+class UploadStatus(StrEnum):
     """上传状态"""
+
     PENDING = "pending"
     UPLOADING = "uploading"
     PROCESSING = "processing"
@@ -39,6 +40,7 @@ class UploadStatus(str, Enum):
 @dataclass
 class UploadTask:
     """上传任务实体"""
+
     filename: str
     file_size: int
     content_type: str

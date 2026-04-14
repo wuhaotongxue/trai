@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: agent.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -10,14 +9,14 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
-from infrastructure.agent.executor import get_agent_executor
+from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
-from infrastructure.agent.tools.registry import get_tool_registry
 from infrastructure.agent.tools.loader import get_openai_tools_format
+from infrastructure.agent.tools.registry import get_tool_registry
 
 router = APIRouter()
 
@@ -27,6 +26,7 @@ class AgentChatRequest(BaseModel):
 
     session_id: Annotated[str, Field(description="会话 ID")]
     message: Annotated[str, Field(description="用户消息")]
+    agent_id: Annotated[str | None, Field(default=None, description="指定 Agent ID")]
     stream: Annotated[bool, Field(default=False, description="是否流式响应")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
 
@@ -36,22 +36,23 @@ class AgentChatResponse(BaseModel):
 
     session_id: str = Field(description="会话 ID")
     content: str = Field(description="AI 最终回复")
+    reasoning_content: str | None = Field(default=None, description="AI 思维链/推理过程")
     steps: list[dict[str, Any]] = Field(description="执行步骤明细")
     total_turns: int = Field(description="总轮次")
     total_tokens: int = Field(description="总消耗 Token 数")
-    total_duration_ms: int = Field(description="总耗时（毫秒）")
+    total_duration_ms: int = Field(description="总耗时(毫秒)")
     trace_id: str = Field(description="链路追踪 ID")
 
 
-@router.post("/agent/chat", response_model=AgentChatResponse, tags=["Agent"])
+@router.post("/agent/chat", tags=["Agent"])
 async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
-) -> AgentChatResponse:
-    """Agent 对话（支持多轮工具调用）
+) -> Any:
+    """Agent 对话(支持多轮工具调用)
 
-    支持 AI 自动调用工具（天气/搜索/翻译/计算等），
-    多轮对话直到 AI 完成回答或达到最大轮数。
+    支持 AI 自动调用工具(天气/搜索/翻译/计算等),
+    多轮对话直到 AI 完成回答或达到最大轮数.
 
     Args:
         request: Agent 对话请求
@@ -69,20 +70,45 @@ async def agent_chat(
         user_id=user_id,
         user_role=role,
         session_id=request.session_id,
+        agent_id=request.agent_id,
         trace_id=trace_id,
     )
 
-    executor = get_agent_executor()
+    executor = AgentExecutor.get_instance()
 
     messages = [
         {"role": "user", "content": request.message},
     ]
 
-    result = await executor.execute(messages, context)
+    result = await executor.execute(messages, context, stream=request.stream)
+
+    if request.stream:
+        # 如果是流式响应,executor.execute 会返回一个 AsyncGenerator
+        from fastapi.responses import StreamingResponse
+
+        async def event_generator():
+            import json
+
+            async for event in result:
+                # event is a dict containing type, content, etc.
+                yield f"data: {json.dumps(event)}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+    # 提取所有步骤中的思维链并拼接
+    reasoning_parts = []
+    for step in result.get("steps", []):
+        rc = step.get("reasoning_content")
+        if rc:
+            reasoning_parts.append(rc)
+
+    full_reasoning = "\n\n".join(reasoning_parts) if reasoning_parts else None
 
     return AgentChatResponse(
         session_id=request.session_id,
         content=result["final_content"],
+        reasoning_content=full_reasoning,
         steps=result["steps"],
         total_turns=result["total_turns"],
         total_tokens=result["total_tokens"],
@@ -103,8 +129,8 @@ async def list_tools(
 ) -> ToolListResponse:
     """获取可用工具列表
 
-    返回所有已注册的工具定义，
-    前端据此构建 AI 的工具选择界面。
+    返回所有已注册的工具定义,
+    前端据此构建 AI 的工具选择界面.
 
     Args:
         current_user: 当前登录用户
@@ -144,8 +170,8 @@ async def call_tool(
 ) -> ToolCallResponse:
     """手动调用指定工具
 
-    不经过 AI，直接执行工具。
-    用于前端手动触发特定工具。
+    不经过 AI,直接执行工具.
+    用于前端手动触发特定工具.
 
     Args:
         request: 工具调用请求
@@ -172,6 +198,7 @@ async def call_tool(
     )
 
     from infrastructure.agent.tools.governor import get_tool_governor
+
     governor = get_tool_governor()
     result = await governor.execute(tool, request.params, context)
 
@@ -189,8 +216,8 @@ class QuotaStatusResponse(BaseModel):
 
     quota_type: str = Field(description="配额类型")
     used: int = Field(description="已使用数量")
-    limit: int = Field(description="月度上限（0 表示无限制）")
-    remaining: int = Field(description="剩余数量（无限制时为 0）")
+    limit: int = Field(description="月度上限(0 表示无限制)")
+    remaining: int = Field(description="剩余数量(无限制时为 0)")
     unlimited: bool = Field(description="是否无限制")
     billing_month: str = Field(description="账单月份")
 
@@ -209,7 +236,7 @@ async def get_user_quota(
 ) -> UserQuotaResponse:
     """获取当前用户配额状态
 
-    返回用户所有类型的月度配额使用情况。
+    返回用户所有类型的月度配额使用情况.
 
     Args:
         current_user: 当前登录用户
@@ -218,8 +245,8 @@ async def get_user_quota(
         UserQuotaResponse: 配额状态列表
     """
     from infrastructure.database import get_session
-    from infrastructure.repositories.quota_repository import QuotaRepository
     from infrastructure.quota.quota_service import QuotaService
+    from infrastructure.repositories.quota_repository import QuotaRepository
 
     user_id = current_user.get("user_id", "")
     role = current_user.get("role", "normal")

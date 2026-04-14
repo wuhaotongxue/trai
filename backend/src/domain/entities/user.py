@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:55:00
@@ -7,22 +6,24 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
-import uuid
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     """用户角色"""
+
     ADMIN = "admin"
     VIP = "vip"
     NORMAL = "normal"
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     """用户状态"""
+
     ACTIVE = "active"
     DISABLED = "disabled"
     PENDING = "pending"
@@ -31,11 +32,12 @@ class UserStatus(str, Enum):
 @dataclass
 class User:
     """用户领域实体"""
+
     username: str
     display_name: str
     email: str
     user_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    password_hash: str = ""  # 不持久化到实体，仅用于验证
+    password_hash: str = ""  # 不持久化到实体,仅用于验证
     avatar_url: str | None = None
     role: UserRole = UserRole.NORMAL
     status: UserStatus = UserStatus.ACTIVE
@@ -67,7 +69,7 @@ class User:
         Args:
             display_name: 新的显示名称
             email: 新的邮箱地址
-            avatar_url: 新的头像 URL（可选）
+            avatar_url: 新的头像 URL(可选)
         """
         self.display_name = display_name
         self.email = email
