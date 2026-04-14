@@ -1,3 +1,9 @@
+/**
+ * 文件名: label.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: label.tsx 的页面或组件实现
+ */
 "use client"
 
 import * as React from "react"

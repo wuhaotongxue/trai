@@ -8,9 +8,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { Bot } from "lucide-react";
 import { useAgentStore } from "@/stores/agent.store";
-import { ChatPanel } from "@/components/agent/chat-panel";
-import { QuotaBar } from "@/components/agent/quota-bar";
+import { ChatPanel } from "@/components/agent/chat_panel";
+import { QuotaBar } from "@/components/agent/quota_bar";
 
 export default function AgentPage() {
   const { startSession, loadQuotas, sessionId } = useAgentStore();
@@ -20,7 +21,7 @@ export default function AgentPage() {
       startSession();
     }
     loadQuotas();
-  }, []);
+  }, [loadQuotas, sessionId, startSession]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -31,7 +32,7 @@ export default function AgentPage() {
           </div>
           <div>
             <h1 className="text-base font-bold text-slate-800 dark:text-white">TRAI Agent</h1>
-            <p className="text-xs text-muted-foreground">AI 助手，支持工具调用</p>
+            <p className="text-xs text-muted-foreground">AI 助手, 支持工具调用</p>
           </div>
         </div>
         <QuotaBar />

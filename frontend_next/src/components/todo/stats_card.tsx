@@ -1,7 +1,13 @@
+/**
+ * 文件名: stats_card.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: stats_card.tsx 的页面或组件实现
+ */
 'use client';
 
 /**
- * stats-card.tsx
+ * stats_card.tsx
  * 作者: wuhao
  * 日期: 2026-04-09
  * 描述: 统计卡片组件
@@ -58,3 +64,4 @@ export function StatsCard({ title, value, total, icon: Icon, gradient, textColor
     </Card>
   );
 }
+

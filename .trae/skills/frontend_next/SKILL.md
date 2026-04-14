@@ -33,14 +33,14 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 ### 1. 全局颜色禁令 (CRITICAL)
 
 <div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
-  <strong style="color:#D32F2F;">&#x274C; 绝对禁止使用紫色及相关色系</strong> — 前端所有代码、UI 设计、组件中严禁出现任何紫色或紫色相近颜色
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止使用紫色及相关色系</strong> — 前端所有代码、UI 设计、组件中严禁出现任何紫色或紫色相近颜色（但 Indigo 为主色调，允许使用）
   <div style="margin-top:8px;font-size:13px;">
-    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">purple, violet, indigo, #9333EA, #7C3AED, rgb(147, 51, 234)</code>
+    <span style="color:#D32F2F;">&#x2718;</span> <code style="color:#D32F2F;">purple, violet, #9333EA, #7C3AED, rgb(147, 51, 234)</code>
     &nbsp;&nbsp;
-    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">推荐: blue/cyan/teal/emerald/amber 等中性或冷暖对撞色系</code>
+    <span style="color:#2E7D32;">&#x2714;</span> <code style="color:#2E7D32;">推荐: indigo (主色), blue/cyan/teal/emerald/amber 等中性或冷暖对撞色系</code>
   </div>
   <div style="margin-top:8px;font-size:13px;">
-    背景色推荐使用 <code>#080818</code> 深蓝黑 或 <code>#0F172A</code> 深灰蓝，渐变使用 <code>blue → cyan</code> 而非 <code>purple → pink</code>
+    背景色推荐使用 <code>#080818</code> 深蓝黑 或 <code>#0F172A</code> 深灰蓝，渐变使用 <code>indigo → cyan</code> 或 <code>blue → cyan</code> 而非 <code>purple → pink</code>
   </div>
 </div>
 
@@ -80,13 +80,25 @@ frontend_next/src/
 │   ├── business/              # 业务组件
 │   └── feature/               # 功能组件
 ├── lib/                        # 工具库
-│   ├── api-client.ts          # API 客户端
+│   ├── api_client.ts          # API 客户端
 │   └── utils.ts               # 工具函数
 ├── stores/                     # 状态管理
-│   └── auth-store.ts          # 认证状态
+│   └── auth_store.ts          # 认证状态
 └── hooks/                      # 自定义 Hooks
-    └── use-permission.ts      # 权限检查
+    └── use_permission.ts      # 权限检查
 ```
+
+### 页面布局规范
+
+- 页面默认应使用全宽布局, 避免内容区过窄导致观感"非全屏"
+- 推荐: `container mx-auto px-4 max-w-7xl`
+- 避免: `max-w-2xl`, `max-w-3xl`, `max-w-4xl` 等过窄限制
+
+### 更新日志规范
+
+- 修改 `frontend_next/` 代码后, 必须同步更新两处 Changelog
+- 位置: 根目录 `README.md` 与 `frontend_next/README.md`
+- 提交前优先使用 `readme-update` 技能生成并追加时间戳条目, 保持倒序
 
 ### 5. 组件开发规范
 
@@ -94,8 +106,16 @@ frontend_next/src/
 ||------|------|
 || 组件名 | PascalCase (`MeetingCard`) |
 || Props 接口 | PascalCase + Props (`MeetingCardProps`) |
-|| 文件名 | kebab-case (`meeting-card.tsx`) |
+|| 文件名 | snake_case (`meeting_card.tsx`) |
 || 组件行数 | 建议 <= 200 行，超限拆分 |
+
+### Import 排版规范
+
+- Import 列表不要一行一个标识符, 优先使用单行或分组换行, 让每行包含多个标识符.
+
+```ts
+import { Activity, AlertCircle, ArrowUp, Bot, CheckCircle2 } from "lucide-react";
+```
 
 ### 6. API 客户端规范
 
@@ -135,7 +155,7 @@ frontend_next/src/
     <li>直接使用 any 类型</li>
     <li>不使用 shadcn/ui 直接写 HTML</li>
     <li>Token 存储在 localStorage</li>
-    <li><strong>使用紫色及相关色系 (purple/violet/indigo)</strong></li>
+    <li><strong>使用紫色及相关色系 (purple/violet)</strong></li>
   </ul>
 </div>
 
@@ -147,7 +167,7 @@ frontend_next/src/
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">
     <strong style="font-size:13px;color:#D32F2F;">禁止紫色</strong>
-    <div style="font-size:12px;color:#666;margin-top:4px;">purple/violet/indigo</div>
+    <div style="font-size:12px;color:#666;margin-top:4px;">purple/violet</div>
   </div>
 
   <div style="background:white;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;">

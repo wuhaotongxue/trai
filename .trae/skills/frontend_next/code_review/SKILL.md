@@ -80,7 +80,7 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 
 ```typescript
 /**
- * 文件名: component-name.tsx
+ * 文件名: component_name.tsx
  * 作者: wuhao
  * 日期: YYYY_MM_DD_HHmm
  * 描述: 本组件功能说明
@@ -91,10 +91,23 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 
 | 类型 | 规则 | 示例 |
 |------|------|------|
-| 组件文件 | kebab-case | `chat-panel.tsx` |
+| 组件文件 | snake_case | `chat_panel.tsx` |
 | 组件名 | PascalCase | `ChatPanel` |
 | 变量名 | camelCase | `isLoading` |
 | Import | 绝对路径 | `@/components/...` |
+
+## 横杠禁令
+
+- 前端所有命名禁止使用 `-` 作为自定义命名的一部分, 包括文件名, 自定义对象 key, 自定义 query key.
+- Next.js 保留文件名不在此限制内: `not-found.tsx`, `error.tsx`, `loading.tsx`, `layout.tsx`, `page.tsx`.
+
+## Import 排版规范
+
+- Import 列表不要一行一个标识符, 优先使用单行或分组换行, 让每行包含多个标识符, 保证可读性.
+
+```ts
+import { Activity, AlertCircle, ArrowDown, ArrowUp, Bot, CheckCircle2 } from "lucide-react";
+```
 
 ## 审查清单
 

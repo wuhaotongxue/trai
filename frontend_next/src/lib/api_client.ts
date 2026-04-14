@@ -1,11 +1,11 @@
 /**
- * api-client.ts
+ * api_client.ts
  * 作者: wuhao
  * 日期: 2026-04-10
  * 描述: TRAI API 客户端 - 与后端所有接口通信
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api";
 
 interface ApiOptions {
   headers?: Record<string, string>;
@@ -45,6 +45,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
   expires_in: number;
   user: UserInfo;
@@ -244,8 +245,6 @@ export function createStreamClient(
     onDone?: () => void;
   }
 ) {
-  const token = localStorage.getItem("token");
-
   const es = new EventSource(
     `${API_BASE}/sessions/${sessionId}/messages/stream` +
       `?${new URLSearchParams({
@@ -271,7 +270,6 @@ export function createStreamClient(
         es.close();
       }
     } catch {
-      // ignore parse errors
     }
   };
 

@@ -1,30 +1,14 @@
 /**
  * page.tsx
  * TRAI 官网首页 (根路由)
- * 默认浅色主题，支持深色模式切换
+ * 默认浅色主题, 支持深色模式切换
  * 参考: Google Material Motion 设计体系
  */
 
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bot,
-  Zap,
-  Shield,
-  BarChart3,
-  MessageSquare,
-  Image,
-  Star,
-  ChevronRight,
-  Sparkles,
-  Cpu,
-  Globe,
-  Database,
-  Workflow,
-  CheckCircle,
-} from "lucide-react";
+import { ArrowRight, BarChart3, Bot, CheckCircle, ChevronRight, Cpu, Database, Globe, Image, MessageSquare, Shield, Sparkles, Star, Workflow, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/website/navbar";
@@ -32,8 +16,8 @@ import { useEffect, useRef, useState } from "react";
 
 // ---- 信任背书 ----
 const trustedBy = [
-  "字节跳动", "腾讯云", "阿里云", "美团", "小米", "华为",
-  "字节", "腾讯", "阿里", "美团",
+  "字X跳动", "腾X云", "阿X云", "美X", "小X", "华X",
+  "字X", "腾X", "阿X", "美X",
 ];
 
 // ---- 核心功能 ----
@@ -42,37 +26,37 @@ const features = [
     icon: Bot,
     color: "from-blue-600 to-blue-500",
     title: "多工具 Agent",
-    desc: "内置天气、搜索、翻译、计算器等工具，支持用户自定义扩展，AI 自动编排任务流程",
+    desc: "内置天气、搜索、翻译、计算器等工具, 支持用户自定义扩展, AI 自动编排任务流程",
   },
   {
     icon: Zap,
     color: "from-amber-500 to-orange-500",
     title: "智能自我纠错",
-    desc: "五层错误分类器，rate_limit 自动退避重试，工具失败自动回退，保证任务可靠性",
+    desc: "五层错误分类器, rate_limit 自动退避重试, 工具失败自动回退, 保证任务可靠性",
   },
   {
     icon: Image,
     color: "from-emerald-500 to-teal-500",
     title: "Vision 视觉理解",
-    desc: "基于 GPT-4o Vision 的图片问答，支持 URL 和 Base64 图片输入，多模态交互更自然",
+    desc: "基于 GPT-4o Vision 的图片问答, 支持 URL 和 Base64 图片输入, 多模态交互更自然",
   },
   {
     icon: MessageSquare,
     color: "from-blue-500 to-cyan-500",
     title: "流式 SSE 响应",
-    desc: "打字机效果实时显示，支持随时中断，流式 Token 统计透明可见",
+    desc: "打字机效果实时显示, 支持随时中断, 流式 Token 统计透明可见",
   },
   {
     icon: Shield,
     color: "from-rose-500 to-red-500",
     title: "配额 & 权限体系",
-    desc: "基于角色的月度配额（Guest/User/VIP），DB 层强制约束，管理员可动态配置",
+    desc: "基于角色的月度配额（Guest/User/VIP）, DB 层强制约束, 管理员可动态配置",
   },
   {
     icon: BarChart3,
     color: "from-teal-500 to-cyan-500",
     title: "数据分析后台",
-    desc: "30 天趋势图、用户排行、配额报表、完整审计日志，为运营决策提供依据",
+    desc: "30 天趋势图、用户排行、配额报表、完整审计日志, 为运营决策提供依据",
   },
 ];
 
@@ -86,33 +70,33 @@ const stats = [
 
 // ---- 应用场景 ----
 const scenarios = [
-  { icon: Workflow, title: "智能客服", desc: "7x24 自动问答，降低 80% 人工成本" },
-  { icon: Database, title: "数据分析", desc: "自然语言查询数据库，生成可视化报表" },
-  { icon: Globe, title: "内容生成", desc: "批量生成营销文案，支持多语言翻译" },
-  { icon: Cpu, title: "流程自动化", desc: "复杂任务自动编排，减少人工干预" },
+  { icon: Workflow, title: "智能客服", desc: "7x24 自动问答, 降低 80% 人工成本" },
+  { icon: Database, title: "数据分析", desc: "自然语言查询数据库, 生成可视化报表" },
+  { icon: Globe, title: "内容生成", desc: "批量生成营销文案, 支持多语言翻译" },
+  { icon: Cpu, title: "流程自动化", desc: "复杂任务自动编排, 减少人工干预" },
 ];
 
 // ---- 使用步骤 ----
 const steps = [
-  { num: "01", title: "注册账号", desc: "输入邮箱和密码即可注册，无需信用卡，即刻体验完整功能" },
-  { num: "02", title: "开始对话", desc: "打开 Agent 界面，输入问题或上传图片，AI 即时响应，支持流式交互" },
-  { num: "03", title: "调用工具", desc: "Agent 自动识别问题类型，调用搜索、翻译等工具，完成复杂任务" },
+  { num: "01", title: "注册账号", desc: "输入邮箱和密码即可注册, 无需信用卡, 即刻体验完整功能" },
+  { num: "02", title: "开始对话", desc: "打开 Agent 界面, 输入问题或上传图片, AI 即时响应, 支持流式交互" },
+  { num: "03", title: "调用工具", desc: "Agent 自动识别问题类型, 调用搜索、翻译等工具, 完成复杂任务" },
 ];
 
 // ---- 用户评价 ----
 const testimonials = [
   {
-    quote: "TRAI 的工具调用能力远超预期，我们用它替代了内部 80% 的重复查询工作，效率提升显著。",
+    quote: "TRAI 的工具调用能力远超预期, 我们用它替代了内部 80% 的重复查询工作, 效率提升显著。",
     name: "张明", role: "CTO", company: "某科技公司", avatar: "ZM",
     color: "from-blue-600 to-blue-500",
   },
   {
-    quote: "流式响应加上随时中断的设计非常贴心，配额体系也清晰透明，用户体验做得很好。",
+    quote: "流式响应加上随时中断的设计非常贴心, 配额体系也清晰透明, 用户体验做得很好。",
     name: "李华", role: "产品经理", company: "某 SaaS 创业公司", avatar: "LH",
     color: "from-amber-500 to-orange-500",
   },
   {
-    quote: "从注册到接入 API 不到 10 分钟，文档清晰，SDK 友好，集成成本极低。",
+    quote: "从注册到接入 API 不到 10 分钟, 文档清晰, SDK 友好, 集成成本极低。",
     name: "王芳", role: "全栈工程师", company: "某数字化企业", avatar: "WF",
     color: "from-emerald-500 to-teal-500",
   },
@@ -120,9 +104,9 @@ const testimonials = [
 
 // ---- 常见问题 ----
 const faqs = [
-  { q: "如何申请 VIP 账号?", a: "登录后在个人中心点击「升级 VIP」，支持支付宝和微信支付，支付成功后即时生效。" },
-  { q: "配额用完了怎么办?", a: "配额按自然月重置，或升级为 VIP 获得无限配额。配额超限后 API 直接返回错误，禁止降级。" },
-  { q: "支持私有化部署吗?", a: "支持，企业版提供完整的私有化部署方案，可接入内网环境，支持定制模型接入。" },
+  { q: "如何申请 VIP 账号?", a: "登录后在个人中心点击「升级 VIP」, 支持支付宝和微信支付, 支付成功后即时生效。" },
+  { q: "配额用完了怎么办?", a: "配额按自然月重置, 或升级为 VIP 获得无限配额。配额超限后 API 直接返回错误, 禁止降级。" },
+  { q: "支持私有化部署吗?", a: "支持, 企业版提供完整的私有化部署方案, 可接入内网环境, 支持定制模型接入。" },
 ];
 
 // ---- Intersection Observer Hook ----
@@ -154,15 +138,30 @@ function Reveal({ children, delay = 0, className = "" }: {
   className?: string;
 }) {
   const { ref, inView } = useInView();
+  const delayClass =
+    delay === 0 ? "delay-0" :
+    delay === 100 ? "delay-100" :
+    delay === 200 ? "delay-200" :
+    delay === 300 ? "delay-300" :
+    delay === 350 ? "delay-[350ms]" :
+    delay === 400 ? "delay-400" :
+    delay === 500 ? "delay-500" :
+    delay === 600 ? "delay-600" :
+    delay === 650 ? "delay-[650ms]" :
+    delay === 700 ? "delay-700" :
+    delay === 800 ? "delay-800" :
+    delay === 900 ? "delay-900" :
+    delay === 1000 ? "delay-1000" :
+    "";
   return (
     <div
       ref={ref}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.7s cubic-bezier(0.4,0,0.2,1) ${delay}ms, transform 0.7s cubic-bezier(0.4,0,0.2,1) ${delay}ms`,
-      }}
-      className={className}
+      className={[
+        className,
+        "transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        delayClass,
+        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-7",
+      ].filter(Boolean).join(" ")}
     >
       {children}
     </div>
@@ -179,22 +178,16 @@ export default function HomePage() {
       {/* ===== Hero: 浅色干净背景 ===== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden text-center pt-16">
         {/* 浅色背景 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-[#080c1a] dark:via-[#0d1220] dark:to-[#080c1a]" />
         <div className="absolute inset-0 hero-glow" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] hero-glow-warm opacity-60" />
         {/* 微妙网格 */}
-        <div className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(59,130,246,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.6) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
+        <div className="absolute inset-0 opacity-[0.04] hero_grid" />
 
         <div className="container mx-auto px-4 pb-20 relative z-10">
           {/* Badge */}
           <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-300 text-sm font-medium mb-8"
-            style={{ animation: "fadeIn 0.5s cubic-bezier(0,0,0.2,1) 0.1s both" }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-300 text-sm font-medium mb-8 animate-[fadeIn_0.5s_cubic-bezier(0,0,0.2,1)_0.1s_both]"
           >
             <Sparkles className="h-3.5 w-3.5" />
             AI Agent Platform &middot; v2.0 发布
@@ -202,8 +195,7 @@ export default function HomePage() {
 
           {/* 大标题: Google 风格居中 */}
           <h1
-            className="text-5xl md:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-slate-900 dark:text-white"
-            style={{ animation: "slideUpFade 0.6s cubic-bezier(0,0,0.2,1) 0.2s both" }}
+            className="text-5xl md:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-slate-900 dark:text-white animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.2s_both]"
           >
             AI Agent
             <br />
@@ -213,17 +205,15 @@ export default function HomePage() {
           </h1>
 
           <p
-            className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10"
-            style={{ animation: "slideUpFade 0.6s cubic-bezier(0,0,0.2,1) 0.35s both" }}
+            className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.35s_both]"
           >
-            企业级 AI 助手平台，支持多工具调用、自动纠错、VLM 视觉理解与流式交互。
-            开箱即用，配额清晰，企业级安全。
+            企业级 AI 助手平台, 支持多工具调用、自动纠错、VLM 视觉理解与流式交互。
+            开箱即用, 配额清晰, 企业级安全。
           </p>
 
           {/* CTA 按钮 */}
           <div
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-            style={{ animation: "slideUpFade 0.6s cubic-bezier(0,0,0.2,1) 0.5s both" }}
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.5s_both]"
           >
             <Link href="/register">
               <Button size="lg" className="h-12 px-8 gap-2 shadow-lg shadow-blue-500/20 text-base font-semibold rounded-full btn-press transition-all duration-300">
@@ -241,8 +231,7 @@ export default function HomePage() {
 
           {/* Social Proof */}
           <div
-            className="flex items-center justify-center gap-6 text-sm text-slate-400 dark:text-slate-500"
-            style={{ animation: "slideUpFade 0.6s cubic-bezier(0,0,0.2,1) 0.65s both" }}
+            className="flex items-center justify-center gap-6 text-sm text-slate-400 dark:text-slate-500 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.65s_both]"
           >
             <div className="flex items-center gap-1.5">
               <div className="flex">
@@ -259,8 +248,7 @@ export default function HomePage() {
           </div>
 
           {/* 产品 Mockup */}
-          <div style={{ animation: "slideUpFade 0.7s cubic-bezier(0,0,0.2,1) 0.8s both" }}
-            className="max-w-2xl mx-auto mt-16">
+          <div className="max-w-2xl mx-auto mt-16 animate-[slideUpFade_0.7s_cubic-bezier(0,0,0.2,1)_0.8s_both]">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-3xl blur-2xl" />
               <div className="relative bg-white dark:bg-[#0d1117] rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-2xl shadow-blue-500/10 dark:shadow-2xl overflow-hidden">
@@ -280,12 +268,12 @@ export default function HomePage() {
                       <Bot className="h-4 w-4 text-white" />
                     </div>
                     <div className="bg-slate-100 dark:bg-[#161b22] rounded-2xl rounded-tl-md px-4 py-3 text-sm text-slate-700 dark:text-slate-200 leading-relaxed max-w-sm">
-                      你好！我是 TRAI Agent。今天天气如何？我需要为明天的户外活动做准备。
+                      你好! 我是 TRAI Agent。今天天气如何? 我需要为明天的户外活动做准备。
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
                     <div className="bg-blue-600 rounded-2xl rounded-tr-md px-4 py-3 text-sm text-white max-w-sm shadow-sm">
-                      明天北京多云转晴，26~34&deg;C，适合户外活动。建议上午出行，午后注意防晒补水。
+                      明天北京多云转晴, 26~34&deg;C, 适合户外活动。建议上午出行, 午后注意防晒补水。
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -346,7 +334,7 @@ export default function HomePage() {
                 为企业级 AI 应用打造的完整能力
               </h2>
               <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-                从智能 Agent 到配额管控，从视觉理解到数据分析，TRAI 提供端到端的产品能力
+                从智能 Agent 到配额管控, 从视觉理解到数据分析, TRAI 提供端到端的产品能力
               </p>
             </div>
           </Reveal>
@@ -390,7 +378,7 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">覆盖核心业务场景</h2>
-              <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">TRAI 已深度集成到各行业的关键业务流程中，持续创造价值</p>
+              <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">TRAI 已深度集成到各行业的关键业务流程中, 持续创造价值</p>
             </div>
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
@@ -422,7 +410,7 @@ export default function HomePage() {
                   现代化技术栈<br /><span className="text-blue-600 dark:text-blue-400">稳定可靠</span>
                 </h2>
                 <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
-                  前端基于 Next.js 15 App Router，后端遵循 DDD 五层架构。支持 OpenAI、ModelScope、智谱等多模型接入，Redis 缓存加速，SSE 流式输出。
+                  前端基于 Next.js 15 App Router, 后端遵循 DDD 五层架构。支持 OpenAI、ModelScope、智谱等多模型接入, Redis 缓存加速, SSE 流式输出。
                 </p>
                 <div className="space-y-3">
                   {[
@@ -472,7 +460,7 @@ export default function HomePage() {
                 看 AI 如何<span className="text-blue-600 dark:text-blue-400">替你工作</span>
               </h2>
               <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-                输入自然语言，Agent 自动规划、调用工具、返回结果，全流程可视化展示
+                输入自然语言, Agent 自动规划、调用工具、返回结果, 全流程可视化展示
               </p>
             </div>
           </Reveal>
@@ -508,7 +496,7 @@ export default function HomePage() {
                     <div className="flex-1 bg-slate-50 dark:bg-[#080c1a] rounded-xl p-4 border border-slate-100 dark:border-slate-800/60">
                       <p className="text-xs text-slate-400 mb-1">用户输入</p>
                       <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                        &ldquo;帮我查一下明天北京的天气，然后翻译成日语并发给我&rdquo;
+                        &ldquo;帮我查一下明天北京的天气, 然后翻译成日语并发给我&rdquo;
                       </p>
                     </div>
                   </div>
@@ -587,11 +575,11 @@ export default function HomePage() {
                       <div className="bg-white/60 dark:bg-[#080c1a]/60 rounded-lg p-3 space-y-2">
                         <div>
                           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">北京天气预报（4月10日）</p>
-                          <p className="text-sm text-slate-700 dark:text-slate-200">多云转晴，18~26&deg;C，东南风 3-4 级，适合出行</p>
+                          <p className="text-sm text-slate-700 dark:text-slate-200">多云转晴, 18~26&deg;C, 东南风 3-4 级, 适合出行</p>
                         </div>
                         <div className="border-t border-emerald-100 dark:border-emerald-500/20 pt-2">
                           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">日语翻译</p>
-                          <p className="text-sm text-slate-700 dark:text-slate-200 font-ja">明日の北京の天気予報：晴れ、時々曇り、気温18〜26度、 南東の風3〜4級、外出に適しています。</p>
+                          <p className="text-sm text-slate-700 dark:text-slate-200 font-ja">明日の北京の天気予報: 晴れ、時々曇り、気温18〜26度、 南東の風3〜4級、外出に適しています。</p>
                         </div>
                       </div>
                     </div>
@@ -603,7 +591,7 @@ export default function HomePage() {
               {/* 底部提示 */}
               <div className="flex items-center justify-center gap-2 mt-6">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse-dot" />
-                <p className="text-sm text-slate-400 dark:text-slate-500">以上为交互演示，实际效果因网络环境略有差异</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">以上为交互演示, 实际效果因网络环境略有差异</p>
               </div>
             </div>
           </Reveal>
@@ -616,7 +604,7 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">3 步开始使用</h2>
-              <p className="text-slate-500 dark:text-slate-400">从注册到完成第一个任务，不超过 5 分钟</p>
+              <p className="text-slate-500 dark:text-slate-400">从注册到完成第一个任务, 不超过 5 分钟</p>
             </div>
           </Reveal>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
@@ -709,7 +697,7 @@ export default function HomePage() {
           <Reveal>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">准备好开始了吗?</h2>
             <p className="text-blue-100 text-lg max-w-lg mx-auto mb-10">
-              注册即可获得免费配额，体验完整 Agent 功能。无需信用卡，立即试用。
+              注册即可获得免费配额, 体验完整 Agent 功能。无需信用卡, 立即试用。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
@@ -719,7 +707,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="h-12 px-10 gap-2 border-white/30 text-white hover:bg-white/10 text-base rounded-full btn-press transition-all duration-300">
+                <Button size="lg" variant="outline" className="h-12 px-10 gap-2 bg-transparent border-white/30 text-white hover:bg-white/10 text-base rounded-full btn-press transition-all duration-300">
                   联系我们
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -741,7 +729,7 @@ export default function HomePage() {
                 <span className="text-lg font-bold text-white">TRAI</span>
               </Link>
               <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
-                新一代 AI Agent 平台，为企业提供安全、可靠、可扩展的智能助手解决方案。
+                新一代 AI Agent 平台, 为企业提供安全、可靠、可扩展的智能助手解决方案。
               </p>
             </div>
             {([

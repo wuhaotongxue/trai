@@ -1,3 +1,9 @@
+/**
+ * 文件名: separator.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: separator.tsx 的页面或组件实现
+ */
 "use client"
 
 import { Separator as SeparatorPrimitive } from "@base-ui/react/separator"
