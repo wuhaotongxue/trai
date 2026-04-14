@@ -74,7 +74,7 @@ def register_routers(app: FastAPI) -> None:
     """注册路由"""
     from api.routers import tools
     from api.routers.admin import analytics_router, dashboard_router, quota_config_router, user_router
-    from api.routers.ai import agent, chat, image
+    from api.routers.ai import agent, chat, image, management, music, video
     from api.routers.auth import login, logout, me, password, refresh, register
     from api.routers.media import upload
     from api.routers.session import session
@@ -96,7 +96,10 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(quota_config_router, prefix="/api/admin", tags=["管理"])
     app.include_router(chat.router, prefix="/api/ai", tags=["AI"])
     app.include_router(image.router, prefix="/api/ai", tags=["AI"])
+    app.include_router(music.router, prefix="/api/ai", tags=["AI"])
+    app.include_router(video.router, prefix="/api/ai", tags=["AI"])
     app.include_router(agent.router, prefix="/api", tags=["Agent"])
+    app.include_router(management.router, prefix="/api", tags=["Agent 管理"])
     app.include_router(upload.router, prefix="/api/media", tags=["媒体"])
     app.include_router(session.router, prefix="/api", tags=["会话"])
     app.include_router(tools.router, prefix="/api/tools", tags=["工具"])
