@@ -94,6 +94,12 @@ frontend_next/src/
 - 推荐: `container mx-auto px-4 max-w-7xl`
 - 避免: `max-w-2xl`, `max-w-3xl`, `max-w-4xl` 等过窄限制
 
+### 更新日志规范
+
+- 修改 `frontend_next/` 代码后, 必须同步更新两处 Changelog
+- 位置: 根目录 `README.md` 与 `frontend_next/README.md`
+- 提交前优先使用 `readme-update` 技能生成并追加时间戳条目, 保持倒序
+
 ### 5. 组件开发规范
 
 ||| 规则 | 说明 |
