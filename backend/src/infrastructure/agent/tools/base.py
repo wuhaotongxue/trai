@@ -79,14 +79,14 @@ class ToolCallResult:
 
 @dataclass
 class ExecutionContext:
-    """工具执行上下文"""
+    """执行上下文"""
 
     user_id: str
-    user_role: str
+    user_role: str = "normal"
     session_id: str | None = None
-    meeting_id: str | None = None
+    agent_id: str | None = None
     trace_id: str | None = None
-    extra: dict[str, Any] = field(default_factory=dict)
+    tenant_id: str | None = None
 
 
 class BaseTool(ABC):

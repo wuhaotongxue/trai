@@ -42,7 +42,7 @@ export const agent_service = {
   /**
    * 发送消息给 Agent (流式)
    */
-  async chat(session_id: string, message: string, event_sender?: (event: string, data: any) => void) {
+  async chat(session_id: string, message: string, agent_id?: string, event_sender?: (event: string, data: any) => void) {
     try {
       // 停止上一个同一 session 的请求（如果存在）
       if (active_requests[session_id]) {
@@ -56,6 +56,7 @@ export const agent_service = {
       const payload = {
         session_id,
         message,
+        agent_id,
         stream: true,
         role: 'user'
       }

@@ -10,8 +10,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from loguru import logger
 
-from core.auth.jwt import get_current_user
-from api.schemas.common import ResponseModel
+from api.deps import get_current_user
 
 router = APIRouter(prefix="/agent/management", tags=["AI Agent 管理"])
 
@@ -58,27 +57,27 @@ class AgentManagementAPI:
     @router.get("/list", summary="获取 Agent 列表")
     async def list_agents(
         user: dict[str, Any] = Depends(get_current_user)
-    ) -> ResponseModel:
+    ) -> Any:
         """获取当前系统中注册的全部 Agent 列表
         
         Args:
             user: 当前登录用户
             
         Returns:
-            ResponseModel: 包含 Agent 列表的统一响应
+            包含 Agent 列表的统一响应
             
         Raises:
             Exception: 获取失败时抛出异常由全局异常处理
         """
         logger.info(f"User {user.get('user_id')} requested agent list")
-        return ResponseModel(code=200, msg="OK", data={"agents": _MOCK_AGENTS})
+        return {"code": 200, "msg": "OK", "data": {"agents": _MOCK_AGENTS}}
 
     @staticmethod
     @router.post("/register", summary="注册新 Agent")
     async def register_agent(
         request: AgentRegisterRequest,
         user: dict[str, Any] = Depends(get_current_user)
-    ) -> ResponseModel:
+    ) -> Any:
         """注册一个全新的 Agent
         
         Args:
@@ -86,7 +85,7 @@ class AgentManagementAPI:
             user: 当前登录用户
             
         Returns:
-            ResponseModel: 包含新 Agent 信息的统一响应
+            包含新 Agent 信息的统一响应
         """
         import uuid
         new_agent = {
@@ -98,40 +97,33 @@ class AgentManagementAPI:
             "created_at": "2026-04-14T12:45:00Z"
         }
         _MOCK_AGENTS.append(new_agent)
-        logger.info(f"User {user.get('user_id')} registered a new agent: {request.name}")
-        return ResponseModel(code=200, msg="OK", data=new_agent)
+        
+        logger.info(f"User {user.get('user_id')} registered new agent: {new_agent['id']}")
+        return {"code": 200, "msg": "Agent 注册成功", "data": {"agent": new_agent}}
 
     @staticmethod
     @router.post("/toggle", summary="启停 Agent")
     async def toggle_agent(
         request: AgentToggleRequest,
         user: dict[str, Any] = Depends(get_current_user)
-    ) -> ResponseModel:
-        """启动或停止某个指定的 Agent
+    ) -> Any:
+        """启动或停止一个已注册的 Agent
         
         Args:
             request: 启停参数
             user: 当前登录用户
             
         Returns:
-            ResponseModel: 操作结果
+            操作结果的统一响应
         """
-        target_agent = None
-        for agent in _MOCK_AGENTS:
-            if agent["id"] == request.agent_id:
-                target_agent = agent
-                break
-                
+        target_agent = next((a for a in _MOCK_AGENTS if a["id"] == request.agent_id), None)
         if not target_agent:
-            logger.warning(f"User {user.get('user_id')} tried to toggle non-existent agent: {request.agent_id}")
-            return ResponseModel(code=404, msg="Agent 不存在", data={})
+            return {"code": 404, "msg": f"Agent {request.agent_id} 不存在"}
             
-        if request.action == "start":
-            target_agent["status"] = "running"
-        elif request.action == "stop":
-            target_agent["status"] = "stopped"
-        else:
-            return ResponseModel(code=400, msg="非法操作，仅支持 start/stop", data={})
+        if request.action not in ["start", "stop"]:
+            return {"code": 400, "msg": "无效的操作指令，仅支持 start 或 stop"}
             
-        logger.info(f"User {user.get('user_id')} toggled agent {request.agent_id} to {request.action}")
-        return ResponseModel(code=200, msg="OK", data=target_agent)
+        target_agent["status"] = "running" if request.action == "start" else "stopped"
+        
+        logger.info(f"User {user.get('user_id')} toggled agent {request.agent_id} to {target_agent['status']}")
+        return {"code": 200, "msg": f"Agent 已{'启动' if request.action == 'start' else '停止'}", "data": {"agent": target_agent}}

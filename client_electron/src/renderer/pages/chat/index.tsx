@@ -28,6 +28,13 @@ interface ChatSession {
   title: string
   updated_at: number
   messages: ChatMessage[]
+  agent_id?: string
+}
+
+interface Agent {
+  id: string
+  name: string
+  status: string
 }
 
 const STORAGE_KEY = 'trai_chat_sessions'
@@ -35,6 +42,7 @@ const STORAGE_KEY = 'trai_chat_sessions'
 const AgentChat: React.FC = () => {
   const [sessions, set_sessions] = useState<ChatSession[]>([])
   const [active_session_id, set_active_session_id] = useState<string>('')
+  const [available_agents, set_available_agents] = useState<Agent[]>([])
   const [is_sidebar_open, set_is_sidebar_open] = useState(true)
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
@@ -43,23 +51,36 @@ const AgentChat: React.FC = () => {
   
   const active_session_id_ref = useRef<string>('')
 
-  // 初始化会话
+  // 初始化会话与 Agent 列表
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed.length > 0) {
-          set_sessions(parsed)
-          set_active_session_id(parsed[0].id)
-          active_session_id_ref.current = parsed[0].id
-          return
+    const init_data = async () => {
+      try {
+        const res = await window.electron_api.agent_management_list()
+        if (res.success && res.data) {
+          set_available_agents(res.data.filter((a: Agent) => a.status === 'running'))
         }
+      } catch (err) {
+        console.error('Failed to load agents', err)
       }
-    } catch (e) {
-      console.error('加载历史会话失败', e)
+      
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (parsed.length > 0) {
+            set_sessions(parsed)
+            set_active_session_id(parsed[0].id)
+            active_session_id_ref.current = parsed[0].id
+            return
+          }
+        }
+      } catch (e) {
+        console.error('加载历史会话失败', e)
+      }
+      create_new_session()
     }
-    create_new_session()
+    
+    init_data()
   }, [])
 
   useEffect(() => {
@@ -169,6 +190,14 @@ const AgentChat: React.FC = () => {
     }
   }, [])
 
+  const update_session_agent = (agent_id: string) => {
+    set_sessions(prev => {
+      const updated = prev.map(s => s.id === active_session_id ? { ...s, agent_id } : s)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
   const handle_send = async () => {
     if (!input.trim() || !active_session_id) return
     
@@ -176,13 +205,15 @@ const AgentChat: React.FC = () => {
     set_input('')
     
     const current_sid = active_session_id
+    const current_agent_id = active_session?.agent_id || (available_agents.length > 0 ? available_agents[0].id : undefined)
+
     update_active_session_messages(prev => [...prev, { role: 'user', content: user_msg }], current_sid)
     update_active_session_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '', steps: [] }], current_sid)
     
     set_loading(true)
     
     try {
-      const res = await window.electron_api.agent_chat(current_sid, user_msg)
+      const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id)
       if (!res.success && !res.is_canceled) {
         update_active_session_messages(prev => {
           const new_msgs = [...prev]
@@ -353,6 +384,30 @@ const AgentChat: React.FC = () => {
           </button>
           <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
           <span style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+          
+          {available_agents.length > 0 && (
+            <select 
+              value={active_session?.agent_id || available_agents[0]?.id || ''}
+              onChange={(e) => update_session_agent(e.target.value)}
+              style={{
+                marginLeft: 'auto', // Pushes to the right
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#f8fafc',
+                color: '#475569',
+                fontSize: '13px',
+                outline: 'none',
+                cursor: 'pointer',
+                fontWeight: 500
+              }}
+              title="选择对话 Agent"
+            >
+              {available_agents.map(a => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          )}
         </div>
         
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
