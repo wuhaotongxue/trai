@@ -42,12 +42,19 @@ const Sidebar: React.FC = () => {
   const nav_items = [
     { path: '/', label: '仪表盘', icon: <Home size={20} /> },
     {
+      id: 'agent',
+      label: '智能体生态',
+      icon: <Cpu size={20} />,
+      children: [
+        { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
+      ]
+    },
+    {
       id: 'ai',
       label: 'AI 创作',
       icon: <Bot size={20} />,
       children: [
         { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={18} /> },
-        { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
         { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
         { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
         { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
