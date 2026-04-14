@@ -161,6 +161,7 @@ class ToolsAPI:
         target_format: str,
         current_user: CurrentUser,
         s3_service: S3StorageService,
+        sizes: list[int] | None = None,
     ) -> ToolResultResponse:
         """图片格式转换接口
 
@@ -196,14 +197,19 @@ class ToolsAPI:
                 else:
                     background.paste(image)
                 image = background
-            elif fmt == "ICO":
-                # ICO 推荐尺寸
-                image = image.resize((256, 256), Image.Resampling.LANCZOS)
                 
             output_buffer = BytesIO()
             
             # 保存转换后的图片
-            image.save(output_buffer, format=fmt)
+            if fmt == "ICO":
+                ico_sizes = [(s, s) for s in sizes] if sizes else [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+                # Pillow 保存 ICO 时支持 sizes 参数来打包多尺寸
+                image.save(output_buffer, format=fmt, sizes=ico_sizes)
+            else:
+                if sizes and len(sizes) > 0:
+                    image = image.resize((sizes[0], sizes[0]), Image.Resampling.LANCZOS)
+                image.save(output_buffer, format=fmt)
+                
             converted_bytes = output_buffer.getvalue()
             
             ext = fmt.lower()
@@ -319,9 +325,11 @@ async def convert_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
     target_format: str = Form(..., description="目标格式，如 png, jpeg, ico, webp"),
+    sizes: str | None = Form(None, description="尺寸列表，逗号分隔，如 16,32,256"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """转换图片格式并上传到 S3 返回限时下载链接"""
-    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service)
+    parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
+    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes)
 
 __all__ = ["router", "ToolsAPI"]
