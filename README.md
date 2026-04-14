@@ -38,6 +38,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1630
+- **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
+
 ### 🎨 前端_2026_04_14_1610
 - **新增(roadmap)**: 增加基于 Git 历史的路线图页面, 支持线性时间轴, 关系图谱, 按前端/后端/客户端分组展示当日变更
 - **新增(docs)**: 补齐文档中心与子页面路由, 包含 /docs, /docs/api, /docs/sdk, /docs/quickstart, /docs/faq
