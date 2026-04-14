@@ -83,4 +83,21 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('agent:stop', async (_, session_id: string) => {
     return agent_service.stop_chat(session_id)
   })
+
+  // ===================== AI Generation =====================
+  ipcMain.handle('ai:generate_image', async (_, prompt: string) => {
+    return agent_service.generate_image(prompt)
+  })
+
+  ipcMain.handle('ai:generate_image_to_image', async (_, prompt: string, image_url: string) => {
+    return agent_service.generate_image_to_image(prompt, image_url)
+  })
+
+  ipcMain.handle('ai:generate_music', async (_, prompt: string) => {
+    return agent_service.generate_music(prompt)
+  })
+
+  ipcMain.handle('ai:generate_video', async (_, prompt: string) => {
+    return agent_service.generate_video(prompt)
+  })
 }
