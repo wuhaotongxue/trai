@@ -1,0 +1,354 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ================================================
+   亮色主题（默认）：白色 + 蓝色系
+   ================================================ */
+:root {
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.55 0.22 255);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.25 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.91 0 0);
+  --input: oklch(0.91 0 0);
+  --ring: oklch(0.55 0.22 255);
+  --chart-1: oklch(0.55 0.22 255);
+  --chart-2: oklch(0.65 0.19 165);
+  --chart-3: oklch(0.65 0.19 145);
+  --chart-4: oklch(0.6 0.15 250);
+  --chart-5: oklch(0.63 0.2 25);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.55 0.22 255);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.91 0 0);
+  --sidebar-ring: oklch(0.55 0.22 255);
+
+  /* 官网专属颜色 */
+  --website-bg: #f8fafc;
+  --website-surface: #ffffff;
+  --website-border: #e2e8f0;
+  --website-text: #0f172a;
+  --website-muted: #64748b;
+  --website-accent: oklch(0.55 0.22 255);
+}
+
+/* ================================================
+   深色主题：深蓝黑 + 蓝色系
+   ================================================ */
+.dark {
+  --background: oklch(0.11 0.015 265);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.14 0.015 265);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.14 0.015 265);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.70 0.19 255);
+  --primary-foreground: oklch(0.11 0 0);
+  --secondary: oklch(0.20 0.015 265);
+  --secondary-foreground: oklch(0.90 0 0);
+  --muted: oklch(0.20 0.015 265);
+  --muted-foreground: oklch(0.60 0 0);
+  --accent: oklch(0.20 0.015 265);
+  --accent-foreground: oklch(0.90 0 0);
+  --destructive: oklch(0.60 0.2 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.60 0 0);
+  --chart-1: oklch(0.70 0.19 255);
+  --chart-2: oklch(0.65 0.19 165);
+  --chart-3: oklch(0.65 0.19 145);
+  --chart-4: oklch(0.60 0.15 250);
+  --chart-5: oklch(0.63 0.2 25);
+  --sidebar: oklch(0.14 0.015 265);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.70 0.19 255);
+  --sidebar-primary-foreground: oklch(0.11 0 0);
+  --sidebar-accent: oklch(0.20 0.015 265);
+  --sidebar-accent-foreground: oklch(0.90 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.60 0 0);
+
+  /* 官网专属颜色（深色） */
+  --website-bg: #080c1a;
+  --website-surface: #0d1220;
+  --website-border: rgba(255,255,255,0.08);
+  --website-text: #f1f5f9;
+  --website-muted: #64748b;
+  --website-accent: oklch(0.70 0.19 255);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans scroll-smooth;
+  }
+}
+
+/* ================================================
+   官网：使用 CSS 变量保持主题一致
+   ================================================ */
+.website-section {
+  background-color: var(--website-bg);
+  color: var(--website-text);
+}
+.website-surface {
+  background-color: var(--website-surface);
+  border-color: var(--website-border);
+  color: var(--website-text);
+}
+.website-muted {
+  color: var(--website-muted);
+}
+
+/* ================================================
+   Google Material Motion: 黄金缓动曲线
+   ================================================ */
+:root {
+  --ease-google: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0.0, 1.0, 1.0);
+}
+
+/* ================================================
+   滚动条美化
+   ================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.35);
+}
+
+/* ================================================
+   Material Motion: 关键帧动画
+   ================================================ */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.5s var(--ease-google) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s var(--ease-enter) both;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ================================================
+   卡片: 物理悬浮感 (Hover) - 微交互规范
+   Hover 伴随 Y 轴位移 + 阴影扩散
+   ================================================ */
+.card-hover {
+  transition: transform 0.25s var(--ease-google), box-shadow 0.25s var(--ease-google);
+  cursor: pointer;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+.card-hover:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ================================================
+   按钮点击反馈 + Hover 微交互
+   ================================================ */
+.btn-press:active {
+  transform: scale(0.97);
+}
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+button:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ================================================
+   Hero 渐变光晕（亮/暗双版本）
+   ================================================ */
+.hero-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+}
+.hero-glow-warm {
+  background: radial-gradient(ellipse 60% 40% at 70% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+}
+.dark .hero-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+}
+.dark .hero-glow-warm {
+  background: radial-gradient(ellipse 60% 40% at 70% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 60%);
+}
+
+/* ================================================
+   无障碍键盘焦点高亮 (A11y 规范)
+   品牌蓝色 Ring: 宽 2-3px, 偏移 2px
+   ================================================ */
+*:focus {
+  outline: none;
+}
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  border-radius: calc(var(--radius) * 0.5);
+}
+
+/* ================================================
+   玻璃态效果
+   ================================================ */
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ================================================
+   中文相对时间（i18n 规范）
+   ================================================ */
+.time-relative {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================
+   中文多行文本截断（i18n 规范）
+   ================================================ */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ================================================
+   aria-live 动态播报区域（屏幕阅读器）
+   ================================================ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
