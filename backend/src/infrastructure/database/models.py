@@ -9,11 +9,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from infrastructure.database.user import UserModel
 from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
+from infrastructure.database.user import UserModel
 
 
 class ChatSessionModel(Base):

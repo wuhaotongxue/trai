@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 
-class TraiException(Exception):
+class TraiException(Exception):  # noqa: N818
     """TRAI 项目基础异常类"""
 
     def __init__(
