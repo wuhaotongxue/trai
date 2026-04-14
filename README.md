@@ -38,6 +38,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_14_1717
+- **新增(docs)**: 补充 `/docs/api` (API 接口文档) 页面，采用全宽视觉布局，展示核心 API (如登录、对话、工具调用等) 概览，并嵌入后端 Swagger 交互文档链接与 Shell 调用示例
+
 ### 💻 客户端_2026_04_14_1653
 - **新增(client_electron)**: `Settings` 系统设置页面新增“检查更新”与“立即重启并安装”按钮，用户可直观地查看当前应用版本并手动触发 OTA 自动更新流程
 - **优化(client_electron)**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
