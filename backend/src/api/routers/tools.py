@@ -45,7 +45,7 @@ class ToolsAPI:
     async def convert_md_to_pdf(
         file: UploadFile,
         current_user: CurrentUser,
-        s3_service: S3StorageService = Depends(S3StorageService),
+        s3_service: S3StorageService,
     ) -> ToolResultResponse:
         """Markdown 转 PDF 接口
 
@@ -100,9 +100,9 @@ class ToolsAPI:
     @staticmethod
     async def compress_image(
         file: UploadFile,
-        quality: int = 70,
-        current_user: CurrentUser = Depends(),
-        s3_service: S3StorageService = Depends(S3StorageService),
+        quality: int,
+        current_user: CurrentUser,
+        s3_service: S3StorageService,
     ) -> ToolResultResponse:
         """图片压缩接口
 
@@ -158,8 +158,8 @@ class ToolsAPI:
     @staticmethod
     async def compress_files_to_zip(
         files: list[UploadFile],
-        current_user: CurrentUser = Depends(),
-        s3_service: S3StorageService = Depends(S3StorageService),
+        current_user: CurrentUser,
+        s3_service: S3StorageService,
     ) -> ToolResultResponse:
         """多文件 ZIP 压缩接口
 
@@ -210,31 +210,31 @@ class ToolsAPI:
 
 
 # 注册路由
-@router.post("/md-to-pdf", response_model=ToolResultResponse, tags=["工具"])
+@router.post("/md_to_pdf", response_model=ToolResultResponse, tags=["工具"])
 async def md_to_pdf_endpoint(
+    current_user: CurrentUser,
     file: UploadFile = File(...),
-    current_user: CurrentUser = Depends(),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """将 Markdown 文件转换为 PDF 并上传到 S3 返回限时下载链接"""
     return await ToolsAPI.convert_md_to_pdf(file, current_user, s3_service)
 
 
-@router.post("/compress-image", response_model=ToolResultResponse, tags=["工具"])
+@router.post("/compress_image", response_model=ToolResultResponse, tags=["工具"])
 async def compress_image_endpoint(
+    current_user: CurrentUser,
     file: UploadFile = File(...),
     quality: int = 70,
-    current_user: CurrentUser = Depends(),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """压缩图片并上传到 S3 返回限时下载链接"""
     return await ToolsAPI.compress_image(file, quality, current_user, s3_service)
 
 
-@router.post("/compress-zip", response_model=ToolResultResponse, tags=["工具"])
+@router.post("/compress_zip", response_model=ToolResultResponse, tags=["工具"])
 async def compress_zip_endpoint(
+    current_user: CurrentUser,
     files: list[UploadFile] = File(...),
-    current_user: CurrentUser = Depends(),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """将多个文件压缩为 ZIP 并上传到 S3 返回限时下载链接"""
