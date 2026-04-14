@@ -8,6 +8,8 @@
 import Link from "next/link";
 import { ArrowRight, Check, Zap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/website/navbar";
+import { Footer } from "@/components/website/footer";
 
 const plans = [
   {
@@ -71,19 +73,21 @@ const plans = [
 ];
 
 const faqs = [
-  { q: "免费版用完了会自动升级吗？", a: "不会。免费版额度用完当月会暂停 Agent 调用，下月自动恢复，不会产生额外费用。" },
-  { q: "Agent 调用是什么意思？", a: "每次你让 AI 执行一个工具（如查天气、翻译）就算一次 Agent 调用。普通聊天消息不计入。" },
-  { q: "可以退款吗？", a: "Pro 和 VIP 支持 7 天无理由退款。联系客服即可申请，退款将在 3 个工作日内原路返回。" },
-  { q: "可以开发票吗？", a: "可以。升级后联系 support@trai.ai，提供企业信息，即可开具增值税普通发票或专用发票。" },
-  { q: "有年度套餐吗？", a: "有的。年度套餐享受 8 折优惠，相当于 10 个月费用用 12 个月。联系销售获取折扣码。" },
+  { q: "免费版用完了会自动升级吗? ", a: "不会。免费版额度用完当月会暂停 Agent 调用, 下月自动恢复, 不会产生额外费用。" },
+  { q: "Agent 调用是什么意思? ", a: "每次你让 AI 执行一个工具（如查天气、翻译）就算一次 Agent 调用。普通聊天消息不计入。" },
+  { q: "可以退款吗? ", a: "Pro 和 VIP 支持 7 天无理由退款。联系客服即可申请, 退款将在 3 个工作日内原路返回。" },
+  { q: "可以开发票吗? ", a: "可以。升级后联系 support@trai.ai, 提供企业信息, 即可开具增值税普通发票或专用发票。" },
+  { q: "有年度套餐吗? ", a: "有的。年度套餐享受 8 折优惠, 相当于 10 个月费用用 12 个月。联系销售获取折扣码。" },
 ];
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="pt-32 pb-16 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
+        <div className="container mx-auto px-4 text-center max-w-7xl">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />
             简单透明定价
@@ -92,7 +96,7 @@ export default function PricingPage() {
             选择适合你的<span className="text-blue-600">方案</span>
           </h1>
           <p className="text-lg text-slate-500 leading-relaxed">
-            无隐藏费用，无信用卡要求，随时可取消。所有套餐均含完整功能体验
+            无隐藏费用, 无信用卡要求, 随时可取消。所有套餐均含完整功能体验
           </p>
         </div>
       </section>
@@ -100,7 +104,7 @@ export default function PricingPage() {
       {/* 定价卡片 */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {plans.map((plan) => (
               <div
                 key={plan.name}
@@ -150,7 +154,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <section className="py-20 bg-slate-50">
-        <div className="container mx-auto px-4 max-w-2xl">
+        <div className="container mx-auto px-4 max-w-7xl">
           <h2 className="text-3xl font-bold text-slate-900 text-center mb-10">常见问题</h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
@@ -171,5 +175,7 @@ export default function PricingPage() {
         </div>
       </section>
     </div>
+      <Footer />
+    </>
   );
 }

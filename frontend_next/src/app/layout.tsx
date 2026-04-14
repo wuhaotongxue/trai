@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { FloatingWidget } from "@/components/website/floating_widget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | TRAI",
   },
   description:
-    "TRAI 是一个强大的 AI 智能助手平台，支持多工具调用、Agent 自动化、VLM 视觉理解与流式交互",
+    "TRAI 是一个强大的 AI 智能助手平台, 支持多工具调用、Agent 自动化、VLM 视觉理解与流式交互",
   keywords: ["AI", "Agent", "智能助手", "工具调用", "大模型", "GPT"],
   icons: {
     icon: "/kity.svg",
@@ -40,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased scroll-smooth dark`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased scroll-smooth`}
       suppressHydrationWarning
     >
       <body className="min-h-full">
@@ -57,6 +58,9 @@ export default function RootLayout({
           className="sr-only"
           id="aria-live-region"
         />
+
+        {/* 官网全局悬浮组件 */}
+        <FloatingWidget />
       </body>
     </html>
   );

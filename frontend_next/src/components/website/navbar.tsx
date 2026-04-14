@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bot, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "./theme_toggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -52,7 +52,7 @@ export function Navbar() {
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
         scrolled
           ? "bg-white/90 dark:bg-[#0d1220]/90 glass border-b border-slate-200 dark:border-slate-800/60"
-          : "bg-transparent"
+          : "bg-transparent dark:bg-[#0d1220]/70 dark:backdrop-blur-md"
       )}
     >
       <div className="container mx-auto px-4">
@@ -71,7 +71,7 @@ export function Navbar() {
               <div key={item.href} className="relative">
                 {item.children ? (
                   <button
-                    className="flex items-center gap-1 px-3.5 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                    className="flex items-center gap-1 px-3.5 py-2 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-white/10"
                     onClick={() =>
                       setOpenDropdown(openDropdown === item.label ? null : item.label)
                     }
@@ -83,7 +83,7 @@ export function Navbar() {
                 ) : (
                   <Link
                     href={item.href}
-                    className="px-3.5 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                    className="px-3.5 py-2 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-white/10"
                   >
                     {item.label}
                   </Link>
@@ -95,7 +95,7 @@ export function Navbar() {
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="block px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                        className="block px-4 py-2 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {child.label}
