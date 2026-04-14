@@ -5,12 +5,13 @@
  * 描述: 客户端工具箱页面，提供文件处理功能
  */
 import React, { useState } from 'react'
-import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react'
 
 const Tools: React.FC = () => {
   const [loading_task, set_loading_task] = useState<string | null>(null)
   const [result_url, set_result_url] = useState('')
   const [error_msg, set_error_msg] = useState('')
+  const [target_image_format, set_target_image_format] = useState('png')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -98,6 +99,34 @@ const Tools: React.FC = () => {
     input.click()
   }
 
+  const handle_convert_image = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0]
+      if (!file) return
+      
+      set_loading_task('convert_image')
+      set_error_msg('')
+      set_result_url('')
+      
+      try {
+        const res = await window.electron_api.tools_convert_image(file.path, target_image_format)
+        if (res.success && res.data) {
+          set_result_url(res.data.url)
+        } else {
+          set_error_msg(res.error || '格式转换失败')
+        }
+      } catch (err: any) {
+        set_error_msg(err.message || '格式转换异常')
+      } finally {
+        set_loading_task(null)
+      }
+    }
+    input.click()
+  }
+
   const tool_cards = [
     {
       id: 'md2pdf',
@@ -125,6 +154,39 @@ const Tools: React.FC = () => {
       action: handle_compress_zip,
       bg_color: '#fffbeb',
       border_color: '#fde68a'
+    },
+    {
+      id: 'convert_image',
+      title: '图片格式转换',
+      description: '在常见格式间互转 (如 png, jpeg, ico, webp)',
+      icon: <RefreshCw size={32} color="#0ea5e9" />,
+      action: handle_convert_image,
+      bg_color: '#f0f9ff',
+      border_color: '#bae6fd',
+      extra_ui: (
+        <div style={{ marginTop: '12px', marginBottom: '16px' }}>
+          <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px' }}>目标格式:</label>
+          <select 
+            value={target_image_format} 
+            onChange={(e) => set_target_image_format(e.target.value)}
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '6px', 
+              border: '1px solid #cbd5e1', 
+              fontSize: '13px',
+              outline: 'none',
+              backgroundColor: '#f8fafc',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="ico">ICO (图标)</option>
+            <option value="webp">WEBP</option>
+            <option value="bmp">BMP</option>
+          </select>
+        </div>
+      )
     }
   ]
 
@@ -183,6 +245,8 @@ const Tools: React.FC = () => {
             <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b', fontWeight: 600 }}>{card.title}</h3>
             <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b', lineHeight: '1.5', flex: 1 }}>{card.description}</p>
             
+            {card.extra_ui && card.extra_ui}
+
             <button 
               onClick={card.action} 
               disabled={loading_task !== null}

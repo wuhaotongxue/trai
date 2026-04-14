@@ -38,6 +38,12 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1400
+- **新增(client_electron)**: 工具箱新增“图片格式转换”工具卡片，支持用户自定义目标格式（PNG, JPEG, ICO, WEBP, BMP）
+
+### 🛠️ 后端_2026_04_14_1400
+- **新增(backend)**: 增加图片格式互相转换 API 路由 (`/api/tools/convert_image`)，使用 Pillow 处理 RGBA 通道、ICO 缩放等复杂场景并上传 S3
+
 ### 💻 客户端_2026_04_14_1350
 - **重构(client_electron)**: 重构工具箱 (`Tools`) 页面，使用卡片式网格布局 (`Grid`) 和 Lucide 图标替换原有的简单按钮列表，提升页面美观度与交互体验
 
