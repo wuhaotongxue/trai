@@ -87,9 +87,9 @@
 ### 4. 下一期预告：TRAI 第5期
 
 <div style="background:#fff7ed;border:1px solid #a7f3d0;border-radius:8px;padding:12px 16px;margin:14px 0;color:#064e3b;">
-  <strong style="color:#047857;">剧透</strong>：向企业级身份认证与业务纵深迈进。
+  <strong style="color:#047857;">剧透</strong>：完善第三方身份认证与基础业务场景落地。
 </div>
 
-- **企业微信身份体系接入**：前端与官网将全面支持**企业微信（WeCom）扫码/网页登录**，彻底打通企业内部身份认证与组织架构体系。
+- **企业微信登录接入**：前端与官网将支持**企业微信（WeCom）扫码与网页登录**，打通第三方账号认证闭环。
 - **官网版块深化**：补充和完善 TRAI 官网的更多业务场景展示与文档支持。
 - **Agent 与客户端进阶**：进一步丰富客户端的高级配置项，深化工作流的可视化编排反馈。
