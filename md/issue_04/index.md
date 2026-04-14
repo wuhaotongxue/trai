@@ -1,7 +1,7 @@
 # TRAI 第4期：Electron 客户端重生，思维链 (CoT) 落地与全栈大整合
 
 <div style="background:linear-gradient(135deg,#eff6ff 0%,#f0f9ff 100%);border:1px solid #bfdbfe;border-left:4px solid #2563eb;border-radius:10px;padding:14px 18px;margin:1em 0;color:#1e3a5f;line-height:1.65;font-size:0.98em;">
-  <strong>本期一句话</strong>：桌面端抛弃 PyQt6 彻底拥抱 Electron，带来原生流畅的 Win11 Fluent 体验与深度的 Agent 思维链 (CoT) 交互展示；同时，前端官网完成“全宽重构”，管理后台修复水合报错并打通动态关系图谱；后端进一步扩容了从图片压缩到 ComfyUI 的完整工具与能力链。
+  <strong>本期一句话</strong>：桌面端抛弃 PyQt6 彻底拥抱 Electron，带来原生流畅的 Win11 Fluent 体验与深度的 Agent 思维链 (CoT) 交互展示；同时，前端官网完成“全宽重构”，管理后台修复水合报错并打通动态关系图谱；后端进一步完善了工具生态链与极端代码规范。
 </div>
 
 <div style="background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:10px 14px;margin:12px 0;font-family:ui-monospace,monospace;font-size:0.88em;color:#475569;">
@@ -22,7 +22,7 @@
 
 <div style="border:1px solid #99f6e4;border-radius:10px;padding:12px 14px;margin:0 0 16px 0;background:#fff;">
   <div style="font-weight:700;font-size:0.9em;color:#0d9488;margin:0 0 8px 0;padding-bottom:6px;border-bottom:2px solid #99f6e4;">后端与工具库 · AI 生态扩容与极度代码洁癖</div>
-  <p style="margin:0;font-size:0.88em;line-height:1.55;color:#334155;">后端接入多 Agent 注册模块，打通 ComfyUI 及多模态（音视频）底层路由；新增包含目标体积压缩与尺寸裁剪的图片转换工具；规范层面落地了极其严苛的「中文全角标点禁令」与 <code>ruff_check</code> 自动化拦截。</p>
+  <p style="margin:0;font-size:0.88em;line-height:1.55;color:#334155;">后端接入多 Agent 注册模块，打通多模态（音视频）底层路由；新增包含目标体积压缩与尺寸裁剪的图片转换工具；规范层面落地了极其严苛的「中文全角标点禁令」与 <code>ruff_check</code> 自动化拦截。</p>
 </div>
 
 ### 1. 客户端：重铸桌面交互与思维链 (CoT) 体验
@@ -120,7 +120,7 @@
 |------|----------|
 | 客户端重构 | PyQt6 整体迁移至 Vite + React + Electron，系统托盘与持久化存储 |
 | 对话与 AI | 思维链 (CoT) 展示面板、流式 Markdown 渲染、长回复/长文本折叠 |
-| 工具与生态 | ComfyUI 及多模态接口搭建、图片格式互相转换（支持指定体积压缩与 ICO） |
+| 工具与生态 | 图片格式互相转换（支持指定体积压缩与 ICO）及多模态底层路由搭建 |
 | 前端官网 | 全宽视觉重构、企业名打码合规化、深浅色模式平滑切换 |
 | 前端后台 | React Hydration 渲染修复、动态路线图重构、FE/BE/CL 三域联动关系图谱 |
 | 工程与规范 | `ruff_check` 自动格式化拦截、强制中文标点禁令、数据库 `COMMENT` 校验 |
