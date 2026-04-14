@@ -49,6 +49,9 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1435
+- **修复(client_electron)**: 修复工具箱因旧版后端进程未重载导致的新字段 (`original_size`, `converted_size` 等) 无法显示的问题，同时新增 `format_size` 函数，使得结果能够根据体积智能显示为 KB/MB 等格式
+
 ### 💻 客户端_2026_04_14_1430
 - **修复(client_electron)**: 修复图片转换尺寸输入框在窄屏下 Placeholder 占位符文字被截断溢出的问题，精简了文字并移除了多余的内边距，增加底部提示文字
 

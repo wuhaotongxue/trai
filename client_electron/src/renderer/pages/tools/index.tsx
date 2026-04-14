@@ -7,6 +7,14 @@
 import React, { useState } from 'react'
 import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react'
 
+const format_size = (bytes: number) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
 const Tools: React.FC = () => {
   const [loading_task, set_loading_task] = useState<string | null>(null)
   const [result_url, set_result_url] = useState('')
@@ -395,10 +403,10 @@ const Tools: React.FC = () => {
                 {result_info && result_info.original_size !== undefined && (
                   <div style={{ marginBottom: '12px', fontSize: '13px', color: '#047857', display: 'flex', gap: '16px', backgroundColor: '#d1fae5', padding: '8px 12px', borderRadius: '6px' }}>
                     <div>
-                      <strong>处理前:</strong> {result_info.original_width && result_info.original_height ? `${result_info.original_width}x${result_info.original_height}, ` : ''}{(result_info.original_size / 1024 / 1024).toFixed(2)} MB
+                      <strong>处理前:</strong> {result_info.original_width && result_info.original_height ? `${result_info.original_width}x${result_info.original_height}, ` : ''}{format_size(result_info.original_size)}
                     </div>
                     <div>
-                      <strong>处理后:</strong> {result_info.converted_width && result_info.converted_height ? `${result_info.converted_width}x${result_info.converted_height}, ` : ''}{(result_info.converted_size / 1024 / 1024).toFixed(2)} MB
+                      <strong>处理后:</strong> {result_info.converted_width && result_info.converted_height ? `${result_info.converted_width}x${result_info.converted_height}, ` : ''}{format_size(result_info.converted_size)}
                     </div>
                   </div>
                 )}
