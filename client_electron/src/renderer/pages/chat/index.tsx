@@ -356,9 +356,57 @@ const AgentChat: React.FC = () => {
                         color: '#ffffff',
                         lineHeight: '1.6',
                         fontSize: '14px',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        position: 'relative'
                       }}>
-                        {msg.content}
+                        <div style={{
+                          maxHeight: (!expanded_steps[`user_msg_${idx}`] && msg.content.length > 300) ? '120px' : 'none',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word'
+                        }}>
+                          {msg.content}
+                          {(!expanded_steps[`user_msg_${idx}`] && msg.content.length > 300) && (
+                            <div style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              height: '40px',
+                              background: 'linear-gradient(to bottom, transparent, #0ea5e9)'
+                            }} />
+                          )}
+                        </div>
+                        {msg.content.length > 300 && (
+                          <div 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggle_step(`user_msg_${idx}`)
+                            }}
+                            style={{
+                              marginTop: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              fontSize: '12px',
+                              color: 'rgba(255, 255, 255, 0.8)',
+                              cursor: 'pointer',
+                              borderTop: '1px dashed rgba(255, 255, 255, 0.2)',
+                              paddingTop: '8px',
+                              userSelect: 'none'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'}
+                          >
+                            {expanded_steps[`user_msg_${idx}`] ? (
+                              <><ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} /> 收起</>
+                            ) : (
+                              <><ChevronDown size={14} /> 展开全文</>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <>
