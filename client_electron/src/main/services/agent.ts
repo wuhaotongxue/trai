@@ -186,5 +186,49 @@ export const agent_service = {
       log.error('generate_video failed:', error.message)
       return { success: false, error: error.message || '视频生成失败' }
     }
+  },
+
+  /**
+   * 获取 Agent 列表
+   */
+  async get_agents() {
+    try {
+      const url = `${get_api_base_url()}/api/agent/management/list`
+      const res = await api_client.get(url)
+      return { success: true, data: res.data.data.agents }
+    } catch (error: any) {
+      log.error('get_agents failed:', error.message)
+      return { success: false, error: error.message || '获取 Agent 列表失败' }
+    }
+  },
+
+  /**
+   * 注册新 Agent
+   */
+  async register_agent(name: string, description: string, model: string, system_prompt: string) {
+    try {
+      const url = `${get_api_base_url()}/api/agent/management/register`
+      const payload = { name, description, model, system_prompt }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('register_agent failed:', error.message)
+      return { success: false, error: error.message || '注册 Agent 失败' }
+    }
+  },
+
+  /**
+   * 启停 Agent
+   */
+  async toggle_agent(agent_id: string, action: 'start' | 'stop') {
+    try {
+      const url = `${get_api_base_url()}/api/agent/management/toggle`
+      const payload = { agent_id, action }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('toggle_agent failed:', error.message)
+      return { success: false, error: error.message || '启停 Agent 失败' }
+    }
   }
 }

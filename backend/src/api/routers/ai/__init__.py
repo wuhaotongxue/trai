@@ -5,4 +5,19 @@
 # 日期: 2026_04_10_09:19:27
 # 描述: AI 路由包
 
-__all__ = ["chat", "image", "agent"]
+from fastapi import APIRouter
+from .agent import router as agent_router
+from .image import router as image_router
+from .music import router as music_router
+from .video import router as video_router
+from .management import router as management_router
+
+router = APIRouter()
+
+router.include_router(agent_router)
+router.include_router(image_router)
+router.include_router(music_router)
+router.include_router(video_router)
+router.include_router(management_router)
+
+__all__ = ["router"]

@@ -100,4 +100,17 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('ai:generate_video', async (_, prompt: string) => {
     return agent_service.generate_video(prompt)
   })
+
+  // ===================== Agent Management =====================
+  ipcMain.handle('agent:management:list', async () => {
+    return agent_service.get_agents()
+  })
+
+  ipcMain.handle('agent:management:register', async (_, name: string, description: string, model: string, system_prompt: string) => {
+    return agent_service.register_agent(name, description, model, system_prompt)
+  })
+
+  ipcMain.handle('agent:management:toggle', async (_, agent_id: string, action: 'start' | 'stop') => {
+    return agent_service.toggle_agent(agent_id, action)
+  })
 }
