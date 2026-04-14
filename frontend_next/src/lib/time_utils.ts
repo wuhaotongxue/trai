@@ -1,5 +1,5 @@
 /**
- * time-utils.ts
+ * time_utils.ts
  * i18n 时间工具函数（中文本地化规范）
  * - Intl.DateTimeFormat: 2026年4月10日 下午 3:30
  * - 自然相对时间: 刚刚 / 3 分钟前 / 2 天后
@@ -95,3 +95,4 @@ export function getRelativeTimeLabel(date: Date | string | number): string {
   if (diffDay < 7) return `${diffDay} 天前`;
   return formatDate(d);
 }
+
