@@ -1,7 +1,13 @@
+/**
+ * 文件名: timeline_view.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: timeline_view.tsx 的页面或组件实现
+ */
 'use client';
 
 /**
- * timeline-view.tsx
+ * timeline_view.tsx
  * 作者: wuhao
  * 日期: 2026-04-09
  * 描述: 时间线流程视图组件
@@ -9,7 +15,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll_area';
 import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/todo.types';
 import type { Task } from '@/types/todo.types';
 import { MODULES } from '@/stores/todo.store';
@@ -94,16 +100,16 @@ export function TimelineView({ tasks }: TimelineViewProps) {
   })).filter((m) => m.tasks.length > 0);
 
   const moduleColors: Record<string, string> = {
-    'backend-core': 'from-pink-500 to-purple-500',
-    'backend-application': 'from-red-500 to-pink-500',
-    'backend-domain': 'from-orange-500 to-red-500',
-    'backend-infrastructure': 'from-yellow-500 to-orange-500',
-    'frontend-init': 'from-blue-500 to-cyan-500',
-    'frontend-pages': 'from-cyan-500 to-teal-500',
-    'frontend-components': 'from-teal-500 to-green-500',
-    'frontend-features': 'from-green-500 to-emerald-500',
-    'desktop-client': 'from-emerald-500 to-green-600',
-    electron: 'from-green-600 to-emerald-700',
+    backend_core: 'from-blue-500 to-blue-600',
+    backend_application: 'from-cyan-500 to-cyan-600',
+    backend_domain: 'from-teal-500 to-emerald-600',
+    backend_infrastructure: 'from-amber-500 to-orange-600',
+    frontend_init: 'from-blue-500 to-indigo-600',
+    frontend_pages: 'from-sky-500 to-cyan-600',
+    frontend_components: 'from-emerald-500 to-green-600',
+    frontend_features: 'from-emerald-500 to-teal-600',
+    desktop_client: 'from-emerald-500 to-green-600',
+    electron: 'from-sky-500 to-cyan-600',
   };
 
   return (

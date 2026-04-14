@@ -1,5 +1,5 @@
 /**
- * theme-toggle.tsx
+ * theme_toggle.tsx
  * 主题切换组件（太阳/月亮）
  * - 浅色模式（默认）
  * - 深色模式
@@ -14,14 +14,6 @@ import { Sun, Moon } from "lucide-react";
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
-  useEffect(() => {
-    // 初始化：从 localStorage 读取或默认浅色
-    const saved = localStorage.getItem("trai-theme") as "light" | "dark" | null;
-    const initial = saved ?? "light";
-    setTheme(initial);
-    applyTheme(initial);
-  }, []);
-
   function applyTheme(t: "light" | "dark") {
     const root = document.documentElement;
     if (t === "dark") {
@@ -30,6 +22,19 @@ export function ThemeToggle() {
       root.classList.remove("dark");
     }
   }
+
+  useEffect(() => {
+    const syncTheme = () => {
+      const saved = localStorage.getItem("trai-theme") as "light" | "dark" | null;
+      const initial = saved ?? "light";
+      applyTheme(initial);
+      setTheme(initial);
+    };
+
+    syncTheme();
+    window.addEventListener("storage", syncTheme);
+    return () => window.removeEventListener("storage", syncTheme);
+  }, []);
 
   function toggle() {
     const next = theme === "light" ? "dark" : "light";

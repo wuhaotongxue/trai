@@ -35,8 +35,8 @@ export default function NotFound() {
         {/* 提示文字 */}
         <h1 className="text-2xl font-bold text-slate-900 mb-3">页面不存在</h1>
         <p className="text-slate-500 leading-relaxed mb-8">
-          抱歉，你访问的页面已搬离或不存在了。<br />
-          可能的原因：链接错误、页面已删除或地址输入有误。
+          抱歉, 你访问的页面已搬离或不存在了。<br />
+          可能的原因: 链接错误、页面已删除或地址输入有误。
         </p>
 
         {/* 建议操作 */}
@@ -65,8 +65,8 @@ export default function NotFound() {
               onClick={() => window.history.back()}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
             >
-              <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors">
-                <ArrowLeft className="h-4 w-4 text-violet-600" />
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                <ArrowLeft className="h-4 w-4 text-indigo-600" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-medium text-slate-700">返回上一页</p>

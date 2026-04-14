@@ -1,7 +1,13 @@
+/**
+ * 文件名: task_card.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: task_card.tsx 的页面或组件实现
+ */
 'use client';
 
 /**
- * task-card.tsx
+ * task_card.tsx
  * 作者: wuhao
  * 日期: 2026-04-09
  * 描述: 任务卡片组件
@@ -16,7 +22,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown_menu';
 import { Separator } from '@/components/ui/separator';
 import type { Task } from '@/types/todo.types';
 import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/todo.types';
@@ -95,3 +101,4 @@ export function TaskCard({ task, onStart, onComplete, onDelete }: TaskCardProps)
     </Card>
   );
 }
+

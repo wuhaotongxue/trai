@@ -1,5 +1,5 @@
 /**
- * chat-panel.tsx
+ * chat_panel.tsx
  * 作者: wuhao
  * 日期: 2026-04-10
  * 描述: Agent 对话主面板
@@ -10,8 +10,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Square, Trash2, Image as ImageIcon, X } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll_area";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X } from "lucide-react";
 
 export function ChatPanel() {
   const {
@@ -73,7 +73,6 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* 消息列表 */}
       <ScrollArea className="flex-1 px-4 py-6">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
@@ -82,9 +81,8 @@ export function ChatPanel() {
             </div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">开始对话</h2>
             <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-              输入消息与 AI 助手对话，支持上传图片（Vision 多模态）和调用工具。试试发送「北京天气怎么样？」
+              输入消息与 AI 助手对话, 支持上传图片（Vision 多模态）和调用工具。试试发送「北京天气怎么样? 」
             </p>
-            {/* 快捷示例 */}
             <div className="flex flex-wrap gap-2 mt-6 justify-center">
               {["北京天气怎么样", "帮我翻译 Hello World", "1+1等于多少", "搜索 AI 发展趋势"].map((tip) => (
                 <button
@@ -149,41 +147,39 @@ export function ChatPanel() {
           </div>
         )}
 
-        {/* Token 统计 */}
-      {(totalTokens > 0 || isStreaming) && (
-        <div className="flex items-center gap-3 text-xs px-2 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 mt-2 mx-2">
-          {isStreaming && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-blue-600 dark:text-blue-400 font-medium">流式响应中</span>
-            </span>
-          )}
-          {!isStreaming && totalTokens > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-muted-foreground">Completion:</span>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">{completionTokens}</span>
+        {(totalTokens > 0 || isStreaming) && (
+          <div className="flex items-center gap-3 text-xs px-2 py-1.5 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 mt-2 mx-2">
+            {isStreaming && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-blue-600 dark:text-blue-400 font-medium">流式响应中</span>
               </span>
-              <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
-                <span className="text-muted-foreground">Prompt:</span>
-                <span className="font-medium text-blue-600 dark:text-blue-400">{promptTokens}</span>
-              </span>
-              <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
-                合计: {totalTokens}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+            {!isStreaming && totalTokens > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-muted-foreground">Completion:</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">{completionTokens}</span>
+                </span>
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span className="text-muted-foreground">Prompt:</span>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">{promptTokens}</span>
+                </span>
+                <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  合计: {totalTokens}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div ref={bottomRef} />
       </ScrollArea>
 
-      {/* 工具栏 */}
       <div className="px-4 py-2 border-t border-border">
         {images.length > 0 && (
           <div className="flex gap-2 mb-2 flex-wrap">
@@ -232,7 +228,7 @@ export function ChatPanel() {
                 handleSend();
               }
             }}
-            placeholder="输入消息，Enter 发送，Shift+Enter 换行..."
+            placeholder="输入消息, Enter 发送, Shift+Enter 换行..."
             className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             rows={1}
           />
@@ -270,3 +266,4 @@ export function ChatPanel() {
     </div>
   );
 }
+

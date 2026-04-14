@@ -6,7 +6,7 @@
  */
 
 import { create } from "zustand";
-import { api, type AgentChatResponse, type QuotaStatus, type StreamUsageEvent } from "@/lib/api-client";
+import { api, type AgentChatResponse, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
 
 export interface ImageContent {
   type: "text" | "image_url";
@@ -71,7 +71,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       const res = await api.session.create({ model: "gpt-4o" });
       set({ sessionId: res.session_id, messages: [], isLoading: false });
     } catch (e) {
-      set({ error: "会话创建失败，请检查网络后重试", isLoading: false });
+      set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });
     }
   },
 
@@ -115,7 +115,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     const client = api.agent;
     const streamClient = new EventSource(
-      `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api"}/sessions/${sessionId}/messages/stream`
+      `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/sessions/${sessionId}/messages/stream`
     );
 
     const assistantMsgId = crypto.randomUUID();
@@ -129,7 +129,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       ],
     }));
 
-    // SSE POST 需要用 fetch，EventSource 不支持 POST，改用 fetch + ReadableStream
+    // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
     const token = localStorage.getItem("token");
     let aborted = false;
 
@@ -142,7 +142,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api"}/sessions/${sessionId}/messages/stream`,
+        `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/sessions/${sessionId}/messages/stream`,
         {
           method: "POST",
           headers: {
@@ -215,7 +215,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         });
       }
     } catch (e) {
-      set({ error: "消息发送失败，请检查网络后重试" });
+      set({ error: "消息发送失败, 请检查网络后重试" });
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }

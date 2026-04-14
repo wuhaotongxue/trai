@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 const benefits = [
   "免费 50 次 Agent 调用 / 月",
-  "无信用卡，随时取消",
+  "无信用卡, 随时取消",
   "完整 Vision + 流式功能",
 ];
 
