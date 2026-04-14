@@ -7,14 +7,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
-  X,
-} from "lucide-react";
-import type { ToastVariant } from "./use-toast";
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
+import type { ToastVariant } from "./use_toast";
 
 interface ToastItem {
   id: string;
@@ -36,31 +30,31 @@ const variantConfig: Record<
 > = {
   success: {
     icon: CheckCircle2,
-    bg: "bg-white",
+    bg: "bg-card",
     border: "border-l-4 border-l-emerald-500",
     iconColor: "text-emerald-500",
-    titleColor: "text-emerald-700",
+    titleColor: "text-foreground",
   },
   error: {
     icon: XCircle,
-    bg: "bg-white",
+    bg: "bg-card",
     border: "border-l-4 border-l-red-500",
     iconColor: "text-red-500",
-    titleColor: "text-red-700",
+    titleColor: "text-foreground",
   },
   warning: {
     icon: AlertTriangle,
-    bg: "bg-white",
+    bg: "bg-card",
     border: "border-l-4 border-l-amber-500",
     iconColor: "text-amber-500",
-    titleColor: "text-amber-700",
+    titleColor: "text-foreground",
   },
   info: {
     icon: Info,
-    bg: "bg-white",
+    bg: "bg-card",
     border: "border-l-4 border-l-blue-500",
     iconColor: "text-blue-500",
-    titleColor: "text-blue-700",
+    titleColor: "text-foreground",
   },
 };
 
@@ -68,18 +62,18 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
   const [visible, setVisible] = useState(false);
   const config = variantConfig[toast.variant];
   const Icon = config.icon;
+  const ariaLive = toast.variant === "error" ? "assertive" : "polite";
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
   }, []);
 
-  return (
+  const content = (
     <div
       role="alert"
-      aria-live={toast.variant === "error" ? "assertive" : "polite"}
       className={`
         flex items-start gap-3 p-4 rounded-xl shadow-lg
-        border border-slate-200
+        border border-border
         ${config.bg} ${config.border}
         transition-all duration-300 ease-out
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
@@ -91,16 +85,23 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
         {toast.title && (
           <p className={`text-sm font-semibold ${config.titleColor}`}>{toast.title}</p>
         )}
-        <p className="text-sm text-slate-700 leading-relaxed">{toast.message}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">{toast.message}</p>
       </div>
       <button
+        type="button"
         onClick={onDismiss}
         aria-label="关闭通知"
-        className="flex-shrink-0 p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+        className="flex-shrink-0 p-1 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
       >
         <X className="h-4 w-4" />
       </button>
     </div>
+  );
+
+  return ariaLive === "assertive" ? (
+    <div aria-live="assertive">{content}</div>
+  ) : (
+    <div aria-live="polite">{content}</div>
   );
 }
 
@@ -115,8 +116,7 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   return (
     <div
       aria-label="通知列表"
-      className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"
-      style={{ maxHeight: "calc(100vh - 48px)", overflowY: "auto" }}
+      className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none max-h-[calc(100vh-48px)] overflow-y-auto"
     >
       {toasts.map((t) => (
         <div key={t.id} className="pointer-events-auto animate-slide-up">
@@ -128,7 +128,6 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
 }
 
 // 全局 Toast 状态管理器（跨组件共享）
-let globalToasts: ToastItem[] = [];
 let globalSetToasts: React.Dispatch<React.SetStateAction<ToastItem[]>> | null = null;
 
 export function registerToastState(

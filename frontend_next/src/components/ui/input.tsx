@@ -1,3 +1,9 @@
+/**
+ * 文件名: input.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: input.tsx 的页面或组件实现
+ */
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 

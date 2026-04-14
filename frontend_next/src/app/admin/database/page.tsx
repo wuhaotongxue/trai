@@ -6,18 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Database,
-  RefreshCw,
-  HardDrive,
-  Table2,
-  Activity,
-  CheckCircle2,
-  AlertCircle,
-  Download,
-  Upload,
-  BarChart3,
-} from "lucide-react";
+import { Activity, AlertCircle, BarChart3, CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -54,15 +43,15 @@ export default function DatabasePage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">数据库管理</h1>
-          <p className="text-sm text-slate-500 mt-0.5">PostgreSQL 16.2 · 连接状态正常</p>
+          <h1 className="text-xl font-bold text-foreground">数据库管理</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">PostgreSQL 16.2 · 连接状态正常</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-slate-200" onClick={handleOptimize}>
+          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={handleOptimize}>
             <RefreshCw className={`h-3.5 w-3.5 ${optimizing ? "animate-spin" : ""}`} />
             {optimizing ? "优化中..." : "优化表"}
           </Button>
-          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-slate-200">
+          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
             <Download className="h-3.5 w-3.5" />
             导出备份
           </Button>
@@ -76,10 +65,10 @@ export default function DatabasePage() {
       {/* 数据库概览 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "总表数", value: "6", icon: Table2, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "总记录数", value: "623,128", icon: Database, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "总占用", value: "650 MB", icon: HardDrive, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "健康状态", value: "正常", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "总表数", value: "6", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
+          { label: "总记录数", value: "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { label: "总占用", value: "650 MB", icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { label: "健康状态", value: "正常", icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
         ].map((item) => (
           <Card key={item.label} className="border-0 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
@@ -87,8 +76,8 @@ export default function DatabasePage() {
                 <item.icon className={`h-4.5 w-4.5 ${item.color}`} />
               </div>
               <div>
-                <p className="text-lg font-bold text-slate-900">{item.value}</p>
-                <p className="text-xs text-slate-500">{item.label}</p>
+                <p className="text-lg font-bold text-foreground">{item.value}</p>
+                <p className="text-xs text-muted-foreground">{item.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -98,30 +87,30 @@ export default function DatabasePage() {
       {/* 表列表 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-slate-900">数据表详情</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">数据表详情</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="text-left px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">表名</th>
-                  <th className="text-right px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">记录数</th>
-                  <th className="text-right px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">占用空间</th>
-                  <th className="text-center px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">引擎</th>
-                  <th className="text-center px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">字符集</th>
-                  <th className="text-left px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wide">上次优化</th>
+                <tr className="border-b border-border/60 bg-muted/20">
+                  <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">表名</th>
+                  <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">记录数</th>
+                  <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">占用空间</th>
+                  <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">引擎</th>
+                  <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">字符集</th>
+                  <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">上次优化</th>
                 </tr>
               </thead>
               <tbody>
                 {tables.map((t, i) => (
-                  <tr key={t.name} className={`border-b border-slate-50 hover:bg-blue-50/20 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
-                    <td className="px-4 py-3 font-mono font-medium text-slate-800">{t.name}</td>
-                    <td className="px-4 py-3 text-right text-slate-600">{t.rows.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-medium text-slate-800">{t.size}</td>
-                    <td className="px-4 py-3 text-center text-slate-500">{t.engine}</td>
-                    <td className="px-4 py-3 text-center text-slate-500">{t.charset}</td>
-                    <td className="px-4 py-3 text-slate-400">{t.lastOptimize}</td>
+                  <tr key={t.name} className={`border-b border-border/40 hover:bg-muted/25 transition-colors ${i % 2 === 0 ? "bg-card" : "bg-muted/10"}`}>
+                    <td className="px-4 py-3 font-mono font-medium text-foreground">{t.name}</td>
+                    <td className="px-4 py-3 text-right text-foreground/80">{t.rows.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right font-medium text-foreground">{t.size}</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">{t.engine}</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">{t.charset}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t.lastOptimize}</td>
                   </tr>
                 ))}
               </tbody>
@@ -133,8 +122,8 @@ export default function DatabasePage() {
       {/* 备份记录 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-semibold text-slate-900">备份记录</CardTitle>
-          <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+          <CardTitle className="text-sm font-semibold text-foreground">备份记录</CardTitle>
+          <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" />
             近 7 天已自动备份 7 次
           </span>
@@ -142,15 +131,15 @@ export default function DatabasePage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {backups.map((b) => (
-              <div key={b.name} className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <Database className="h-5 w-5 text-blue-500" />
+              <div key={b.name} className="flex items-center gap-4 p-4 rounded-xl bg-muted/25 hover:bg-muted/40 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                  <Database className="h-5 w-5 text-blue-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800">{b.name}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{b.time} · {b.size}</p>
+                  <p className="text-sm font-medium text-foreground">{b.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{b.time} · {b.size}</p>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-600">
+                <div className="flex items-center gap-1 text-emerald-400">
                   <CheckCircle2 className="h-4 w-4" />
                   <span className="text-xs font-medium">完成</span>
                 </div>
