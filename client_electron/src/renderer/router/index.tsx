@@ -17,6 +17,7 @@ import TextToImage from '@/pages/ai/text-to-image'
 import ImageToImage from '@/pages/ai/image-to-image'
 import AiMusic from '@/pages/ai/music'
 import AiVideo from '@/pages/ai/video'
+import ComfyUI from '@/pages/ai/comfyui'
 import AgentManagement from '@/pages/agent/management'
 import Feedback from '@/pages/feedback'
 import { use_auth_store } from '@/store/auth'
@@ -67,6 +68,10 @@ export const router = createHashRouter([
       {
         path: '/ai/video',
         element: <AiVideo />
+      },
+      {
+        path: '/ai/comfyui',
+        element: <ComfyUI />
       },
       {
         path: '/agent/management',

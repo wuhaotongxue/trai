@@ -16,6 +16,7 @@ interface Window {
     ai_generate_image_to_image: (prompt: string, image_url: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_music: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_video: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    ai_generate_comfyui: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_list: () => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_register: (name: string, description: string, model: string, system_prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;

@@ -246,5 +246,20 @@ export const agent_service = {
       log.error('check_agent failed:', error.message)
       return { success: false, error: error.message || '检测 Agent 状态失败' }
     }
+  },
+
+  /**
+   * 提交 ComfyUI 任务
+   */
+  async generate_comfyui(prompt: string) {
+    try {
+      const url = `${get_api_base_url()}/api/ai/comfyui/generate`
+      const payload = { prompt }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('generate_comfyui failed:', error.message)
+      return { success: false, error: error.message || '提交 ComfyUI 任务失败' }
+    }
   }
 }
