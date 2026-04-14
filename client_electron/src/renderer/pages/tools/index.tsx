@@ -278,15 +278,14 @@ const Tools: React.FC = () => {
             </div>
           )}
           
-          {target_image_format !== 'ico' && (
+          {['jpeg', 'webp'].includes(target_image_format) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB) - 仅限 JPEG/WEBP:</label>
+              <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
               <input 
                 type="number" 
-                placeholder="如 500"
+                placeholder="如 500 (留空使用默认质量)"
                 value={target_convert_size_kb}
                 onChange={(e) => set_target_convert_size_kb(e.target.value)}
-                disabled={!['jpeg', 'webp'].includes(target_image_format)}
                 style={{ 
                   flex: 1,
                   padding: '8px 12px', 
@@ -294,13 +293,17 @@ const Tools: React.FC = () => {
                   border: '1px solid #cbd5e1', 
                   fontSize: '13px', 
                   outline: 'none',
-                  backgroundColor: !['jpeg', 'webp'].includes(target_image_format) ? '#f1f5f9' : '#ffffff',
+                  backgroundColor: '#ffffff',
                   width: '100%',
-                  minWidth: '0',
-                  cursor: !['jpeg', 'webp'].includes(target_image_format) ? 'not-allowed' : 'text'
+                  minWidth: '0'
                 }}
               />
-              <label style={{ fontSize: '13px', color: '#475569', marginTop: '8px' }}>尺寸 (宽 x 高):</label>
+            </div>
+          )}
+
+          {target_image_format !== 'ico' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: ['jpeg', 'webp'].includes(target_image_format) ? '8px' : '0' }}>
+              <label style={{ fontSize: '13px', color: '#475569' }}>尺寸 (宽 x 高):</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="number" 
