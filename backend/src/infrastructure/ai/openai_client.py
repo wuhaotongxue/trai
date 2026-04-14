@@ -35,10 +35,17 @@ class OpenAIClient:
     """OpenAI 客户端"""
 
     def __init__(self) -> None:
-        self._api_key: str = os.getenv("OPENAI_API_KEY", "")
-        self._base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        self._model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
-        self._timeout: int = int(os.getenv("OPENAI_TIMEOUT", "120"))
+        self._provider = os.getenv("LLM_PROVIDER", "openai")
+        if self._provider == "modelscope":
+            self._api_key: str = os.getenv("MODELSCOPE_API_KEY", "")
+            self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://api.modelscope.cn/v1")
+            self._model: str = os.getenv("MODELSCOPE_CHAT_MODEL", "Qwen/Qwen3.5-0.8B")
+            self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
+        else:
+            self._api_key: str = os.getenv("OPENAI_API_KEY", "")
+            self._base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+            self._model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
+            self._timeout: int = int(os.getenv("OPENAI_TIMEOUT", "120"))
 
     async def chat(
         self,
@@ -99,6 +106,7 @@ class OpenAIClient:
 
                 return {
                     "content": data["choices"][0]["message"].get("content", ""),
+                    "reasoning_content": data["choices"][0]["message"].get("reasoning_content", ""),
                     "model": data["model"],
                     "usage": data.get("usage", {}),
                     "tool_calls": data["choices"][0]["message"].get("tool_calls", []),
@@ -204,44 +212,58 @@ class OpenAIClient:
                         choice = chunk["choices"][0]
                         delta = choice.get("delta", {})
 
-                        if "content_block_delta" in delta:
-                            cb_type = delta.get("type", "")
-                            if cb_type == "text_delta":
-                                text = delta.get("text", "")
-                                if text:
-                                    yield StreamEvent(type="token", content=text)
-                            elif cb_type == "tool_use":
-                                in_tool_call = True
-                                tool_call_id = delta.get("id", "")
-                                tool_name = delta.get("name", "")
-                                arg_text = delta.get("input", "")
-                                if arg_text:
-                                    tool_args_parts.append(arg_text)
-                                yield StreamEvent(
-                                    type="tool_call_arg",
-                                    tool_call_id=tool_call_id,
-                                    tool_name=tool_name,
-                                    content=arg_text,
-                                )
+                        # 兼容处理思维链 (reasoning_content)
+                        if "reasoning_content" in delta and delta["reasoning_content"]:
+                            yield StreamEvent(type="reasoning", content=delta["reasoning_content"])
 
-                        elif "tool_call" in delta:
-                            tc = delta["tool_call"]
-                            if tc.get("type") == "function":
+                        # 正常内容文本
+                        if "content" in delta and delta["content"]:
+                            yield StreamEvent(type="token", content=delta["content"])
+
+                        # 处理 tool_calls
+                        if "tool_calls" in delta and delta["tool_calls"]:
+                            tc = delta["tool_calls"][0]
+                            
+                            # 新的一个工具调用开始
+                            if tc.get("id"):
+                                # 如果上一个工具还在处理中，则先发送结束事件
+                                if in_tool_call and tool_call_id:
+                                    yield StreamEvent(
+                                        type="tool_call_end",
+                                        tool_call_id=tool_call_id,
+                                        tool_name=tool_name,
+                                        content="".join(tool_args_parts),
+                                        finish_reason="",
+                                    )
+                                
                                 in_tool_call = True
-                                tool_call_id = tc.get("id", "")
+                                tool_call_id = tc["id"]
                                 tool_name = tc.get("function", {}).get("name", "")
+                                tool_args_parts = []
                                 arg_text = tc.get("function", {}).get("arguments", "")
                                 if arg_text:
                                     tool_args_parts.append(arg_text)
-                                yield StreamEvent(
-                                    type="tool_call_arg",
-                                    tool_call_id=tool_call_id,
-                                    tool_name=tool_name,
-                                    content=arg_text,
-                                )
+                                    yield StreamEvent(
+                                        type="tool_call_arg",
+                                        tool_call_id=tool_call_id,
+                                        tool_name=tool_name,
+                                        content=arg_text,
+                                    )
+                            else:
+                                # 参数追加
+                                arg_text = tc.get("function", {}).get("arguments", "")
+                                if arg_text:
+                                    tool_args_parts.append(arg_text)
+                                    yield StreamEvent(
+                                        type="tool_call_arg",
+                                        tool_call_id=tool_call_id,
+                                        tool_name=tool_name,
+                                        content=arg_text,
+                                    )
 
-                        elif "finish_reason" in choice:
-                            finish_reason = choice.get("finish_reason", "")
+                        # 处理完成和 usage
+                        finish_reason = choice.get("finish_reason")
+                        if finish_reason is not None:
                             if in_tool_call and tool_call_id:
                                 yield StreamEvent(
                                     type="tool_call_end",
@@ -255,6 +277,7 @@ class OpenAIClient:
                                 tool_name = ""
                                 tool_args_parts = []
 
+                            # 如果 API 将 usage 放到了最后的 chunk 且外层包含
                             usage = chunk.get("usage", {})
                             if usage:
                                 yield StreamEvent(
@@ -265,6 +288,11 @@ class OpenAIClient:
                                         "completion_tokens": usage.get("completion_tokens", 0),
                                         "total_tokens": usage.get("total_tokens", 0),
                                     },
+                                )
+                            else:
+                                yield StreamEvent(
+                                    type="done",
+                                    finish_reason=finish_reason,
                                 )
 
         except httpx.HTTPStatusError as e:

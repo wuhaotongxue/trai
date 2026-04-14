@@ -12,6 +12,7 @@ import Register from '@/pages/register'
 import Dashboard from '@/pages/dashboard'
 import Settings from '@/pages/settings'
 import Tools from '@/pages/tools'
+import AgentChat from '@/pages/chat'
 import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
@@ -40,6 +41,10 @@ export const router = createHashRouter([
       {
         path: '/',
         element: <Dashboard />
+      },
+      {
+        path: '/chat',
+        element: <AgentChat />
       },
       {
         path: '/tools',

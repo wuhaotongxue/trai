@@ -39,6 +39,7 @@ class AgentStep:
 
     turn: int
     assistant_message: str
+    reasoning_content: str
     tool_calls: list[dict[str, Any]]
     tool_results: list[ToolCallResult]
     total_tokens: int
@@ -125,6 +126,7 @@ class AgentExecutor:
             ai_response = await self._call_ai(current_messages)
 
             assistant_content = ai_response.get("content", "")
+            reasoning_content = ai_response.get("reasoning_content", "")
             tool_calls = ai_response.get("tool_calls", [])
             usage = ai_response.get("usage", {})
             total_tokens += usage.get("total_tokens", 0)
@@ -142,6 +144,7 @@ class AgentExecutor:
                 steps.append(AgentStep(
                     turn=turn,
                     assistant_message=assistant_content,
+                    reasoning_content=reasoning_content,
                     tool_calls=[],
                     tool_results=[],
                     total_tokens=total_tokens,
@@ -188,6 +191,7 @@ class AgentExecutor:
             steps.append(AgentStep(
                 turn=turn,
                 assistant_message=assistant_content,
+                reasoning_content=reasoning_content,
                 tool_calls=tool_calls,
                 tool_results=tool_results,
                 total_tokens=total_tokens,
@@ -200,6 +204,7 @@ class AgentExecutor:
                 {
                     "turn": s.turn,
                     "assistant_message": s.assistant_message,
+                    "reasoning_content": s.reasoning_content,
                     "tool_calls": [
                         {
                             "id": tc.get("id"),
