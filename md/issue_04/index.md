@@ -62,7 +62,7 @@
 
 **Hydration 痛点与交互**：
 - 在 `/admin` 路由组引入 `mounted` 状态管理，完美解决 Next.js 服务端 HTML 与客户端本地状态（Theme、Token）不一致导致的 React Hydration 崩溃。
-- 左侧菜单现已支持流畅展开折叠，暗色模式无缝继承。
+- 左侧菜单现已支持流畅展开折叠，并且整个前端（包括官网和管理后台）完美支持**深色/浅色（Dark/Light）主题自由切换**，解决了切换时的闪烁与断层现象。
 
 ![动态图谱与后台交互](issue_04_02.png)
 
@@ -73,13 +73,23 @@
 ### 3. 后端生态：工具链扩建与强悍的代码“洁癖”
 
 <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:12px 16px;margin:14px 0;color:#4c1d95;">
-  <strong style="color:#4c1d95;">后端基建与规范</strong>：不仅要接得进更多大模型玩法（ComfyUI），更要用严苛的工具把后端代码管得干干净净。
+  <strong style="color:#4c1d95;">后端基建与规范</strong>：不仅要接得进更多大模型玩法，更要用严苛的工具把后端代码管得干干净净。
 </div>
 
 - **多模态与工具生态**：
-  - 增加 ComfyUI 前端页面与后端基础接口的初步集成（骨架搭建阶段），并补充了 AI 音乐、视频等生成式入口。
+  - 补充了 AI 音乐、视频等生成式入口的前端骨架。
   - 新增图片格式互相转换核心工具（支持 PNG/JPEG/ICO/WEBP），甚至支持用户在前端指定“目标压缩体积(KB)”或“无损打包多尺寸 ICO”。
 - **极端代码规范落地**：
   - 强制执行「全局中文标点符号禁令」，全站排查并清除了所有违规的全角逗号、句号。
   - 在 `git_submit` 技能中嵌入 `ruff_check`，提交代码前自动格式化 Python 导入路径并拦截语法坏味道。
   - 对数据库层新增了强制 `COMMENT` 注释检查脚本，为表字段生成自动化文档兜底。
+
+### 4. 下一期预告：TRAI 第5期
+
+<div style="background:#fff7ed;border:1px solid #a7f3d0;border-radius:8px;padding:12px 16px;margin:14px 0;color:#064e3b;">
+  <strong style="color:#047857;">剧透</strong>：向企业级身份认证与业务纵深迈进。
+</div>
+
+- **企业微信身份体系接入**：前端与官网将全面支持**企业微信（WeCom）扫码/网页登录**，彻底打通企业内部身份认证与组织架构体系。
+- **官网版块深化**：补充和完善 TRAI 官网的更多业务场景展示与文档支持。
+- **Agent 与客户端进阶**：进一步丰富客户端的高级配置项，深化工作流的可视化编排反馈。
