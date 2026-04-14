@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: weather.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -18,9 +17,9 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 
 
@@ -30,9 +29,7 @@ class WeatherTool(BaseTool):
     def __init__(self) -> None:
         super().__init__()
         self._api_key = os.getenv("WEATHER_API_KEY", "")
-        self._base_url = os.getenv(
-            "WEATHER_API_URL", "https://api.seniverse.com/v3/weather"
-        )
+        self._base_url = os.getenv("WEATHER_API_URL", "https://api.seniverse.com/v3/weather")
 
     @property
     def definition(self) -> ToolDefinition:
@@ -64,11 +61,9 @@ class WeatherTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         city = params.get("city", "")
-        lang = params.get("lang", "zh-Hans")
+        params.get("lang", "zh-Hans")
 
         if not city:
             return ToolCallResult(
@@ -89,7 +84,7 @@ class WeatherTool(BaseTool):
                 data = response.json()
 
                 current_condition = data.get("current_condition", [{}])[0]
-                
+
                 output = (
                     f"{city}当前天气 (实时数据):\n"
                     f"- 温度: {current_condition.get('temp_C', 'N/A')}°C\n"

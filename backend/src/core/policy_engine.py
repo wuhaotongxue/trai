@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: policy_engine.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:12:17
@@ -9,7 +8,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import redis
@@ -18,7 +17,7 @@ from core.exceptions import AuthorizationError
 from core.logger import logger
 
 
-class PolicyDecision(str, Enum):
+class PolicyDecision(StrEnum):
     """策略决策枚举"""
 
     ALLOW = "allow"
@@ -54,9 +53,7 @@ class PolicyEngine:
     def __init__(self) -> None:
         self._redis_client: redis.Redis | None = None
         self._policy_cache_ttl: int = int(os.getenv("POLICY_CACHE_TTL", "300"))
-        self._ask_confirmation_timeout: int = int(
-            os.getenv("POLICY_ASK_TIMEOUT", "600")
-        )
+        self._ask_confirmation_timeout: int = int(os.getenv("POLICY_ASK_TIMEOUT", "600"))
         self._init_redis()
 
     def _init_redis(self) -> None:
@@ -90,7 +87,6 @@ class PolicyEngine:
             PolicyResult: 策略评估结果
         """
         action = context.action
-        role = context.role
 
         if action in ("delete_session", "bulk_delete", "force_logout"):
             return self._evaluate_destructive_action(context)
@@ -314,9 +310,7 @@ class PolicyEngine:
         result = self.evaluate(context)
 
         if result.decision == PolicyDecision.DENY:
-            logger.warning(
-                f"策略拒绝 | user_id={context.user_id} | action={context.action} | reason={result.reason}"
-            )
+            logger.warning(f"策略拒绝 | user_id={context.user_id} | action={context.action} | reason={result.reason}")
             raise AuthorizationError(
                 message=result.reason,
                 details={
@@ -327,9 +321,7 @@ class PolicyEngine:
             )
 
         if result.decision == PolicyDecision.ASK:
-            logger.info(
-                f"策略需要确认 | user_id={context.user_id} | action={context.action}"
-            )
+            logger.info(f"策略需要确认 | user_id={context.user_id} | action={context.action}")
             raise AuthorizationError(
                 message=result.reason,
                 details={
@@ -366,6 +358,7 @@ def require_policy(action: str, resource_type: str) -> Any:
     Returns:
         依赖函数
     """
+
     def policy_checker(
         current_user: dict[str, Any],
         session_id: str | None = None,

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: registry.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -34,9 +33,7 @@ class ToolRegistry:
         self._tools[tool_id] = tool
         self._definitions[tool_id] = tool.definition
 
-    def register_adapter(
-        self, tool_id: str, platform: str, adapter: Any
-    ) -> None:
+    def register_adapter(self, tool_id: str, platform: str, adapter: Any) -> None:
         """注册平台适配器
 
         Args:
@@ -78,9 +75,7 @@ class ToolRegistry:
         """
         return list(self._definitions.values())
 
-    def get_tools_by_category(
-        self, category: ToolCategory
-    ) -> list[ToolDefinition]:
+    def get_tools_by_category(self, category: ToolCategory) -> list[ToolDefinition]:
         """按分类获取工具定义
 
         Args:
@@ -89,9 +84,7 @@ class ToolRegistry:
         Returns:
             list[ToolDefinition]: 工具定义列表
         """
-        return [
-            d for d in self._definitions.values() if d.category == category
-        ]
+        return [d for d in self._definitions.values() if d.category == category]
 
     def get_tools_for_user(self, role: str) -> list[ToolDefinition]:
         """获取用户可用的工具定义
@@ -108,9 +101,7 @@ class ToolRegistry:
         """
         return list(self._definitions.values())
 
-    def get_adapter(
-        self, tool_id: str, platform: str
-    ) -> Any | None:
+    def get_adapter(self, tool_id: str, platform: str) -> Any | None:
         """获取平台适配器
 
         Args:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: password.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:05:00
@@ -14,27 +13,30 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.password import PasswordService, get_password_service
 
 router = APIRouter()
 
 
 class ChangePasswordRequest(BaseModel):
     """修改密码请求"""
+
     old_password: Annotated[str, Field(min_length=6, max_length=128, description="旧密码")]
     new_password: Annotated[str, Field(min_length=6, max_length=128, description="新密码")]
 
 
 class ResetPasswordRequest(BaseModel):
     """重置密码请求（管理员用）"""
+
     user_id: Annotated[str, Field(description="用户 ID")]
     new_password: Annotated[str, Field(min_length=6, max_length=128, description="新密码")]
 
 
 class PasswordResponse(BaseModel):
     """密码操作响应"""
+
     message: str = Field(description="提示信息")
 
 

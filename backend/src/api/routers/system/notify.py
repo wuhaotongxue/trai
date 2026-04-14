@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: notify.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -13,15 +12,16 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from api.deps import CurrentUser, require_admin
+from api.deps import require_admin
 from infrastructure.notify.base import NotifyLevel, NotifyMessage, NotifyType
-from infrastructure.notify.factory import NotifyServiceFactory, NotifyPlatform
+from infrastructure.notify.factory import NotifyServiceFactory
 
 router = APIRouter()
 
 
 class SendNotifyRequest(BaseModel):
     """发送通知请求"""
+
     platform: Annotated[str, Field(description="平台类型: feishu/wecom/dingtalk")]
     title: Annotated[str, Field(max_length=200, description="通知标题")]
     content: Annotated[str, Field(min_length=1, max_length=10000, description="通知内容")]
@@ -32,6 +32,7 @@ class SendNotifyRequest(BaseModel):
 
 class SendNotifyResponse(BaseModel):
     """发送通知响应"""
+
     success: bool = Field(description="是否成功")
     platform: str = Field(description="平台类型")
     message: str = Field(description="提示信息")
@@ -40,11 +41,13 @@ class SendNotifyResponse(BaseModel):
 
 class NotifyTestRequest(BaseModel):
     """测试通知请求"""
+
     platform: Annotated[str, Field(description="平台类型: feishu/wecom/dingtalk")]
 
 
 class NotifyConfig(BaseModel):
     """通知配置"""
+
     platform: str = Field(description="平台类型")
     enabled: bool = Field(description="是否已启用")
     webhook_configured: bool = Field(description="Webhook 是否已配置")
@@ -52,6 +55,7 @@ class NotifyConfig(BaseModel):
 
 class NotifyConfigListResponse(BaseModel):
     """通知配置列表响应"""
+
     configs: list[NotifyConfig] = Field(description="配置列表")
 
 
@@ -224,11 +228,13 @@ async def list_notify_configs(
     configs = []
     for p in platforms:
         webhook = _get_webhook_url(p["id"])
-        configs.append(NotifyConfig(
-            platform=p["name"],
-            enabled=bool(webhook),
-            webhook_configured=bool(webhook),
-        ))
+        configs.append(
+            NotifyConfig(
+                platform=p["name"],
+                enabled=bool(webhook),
+                webhook_configured=bool(webhook),
+            )
+        )
 
     return NotifyConfigListResponse(configs=configs)
 

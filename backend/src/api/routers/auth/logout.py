@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: logout.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:00:00
@@ -7,9 +6,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
@@ -19,6 +16,7 @@ router = APIRouter()
 
 class LogoutResponse(BaseModel):
     """登出响应"""
+
     message: str = Field(default="登出成功", description="提示信息")
     user_id: str = Field(description="登出的用户 ID")
 

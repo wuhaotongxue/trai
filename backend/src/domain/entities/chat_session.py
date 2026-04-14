@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: chat_session.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -7,15 +6,16 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
-import uuid
 
 
-class SessionStatus(str, Enum):
+class SessionStatus(StrEnum):
     """会话状态"""
+
     ACTIVE = "active"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -24,6 +24,7 @@ class SessionStatus(str, Enum):
 @dataclass
 class ChatSession:
     """AI 对话会话实体"""
+
     model: str
     messages: list[dict[str, Any]] = field(default_factory=list)
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -34,11 +35,13 @@ class ChatSession:
 
     def add_message(self, role: str, content: str) -> None:
         """添加消息"""
-        self.messages.append({
-            "role": role,
-            "content": content,
-            "created_at": datetime.now().isoformat(),
-        })
+        self.messages.append(
+            {
+                "role": role,
+                "content": content,
+                "created_at": datetime.now().isoformat(),
+            }
+        )
         self.updated_at = datetime.now()
 
     def to_dict(self) -> dict[str, Any]:

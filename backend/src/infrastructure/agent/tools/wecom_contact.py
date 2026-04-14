@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: wecom_contact.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -32,7 +31,7 @@ class WeComUser:
     direct_leader: list[str]
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "WeComUser":
+    def from_dict(cls, data: dict[str, Any]) -> WeComUser:
         return cls(
             user_id=data.get("userid", ""),
             name=data.get("name", ""),
@@ -58,7 +57,7 @@ class WeComDepartment:
     department_leader_userids: list[str]
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "WeComDepartment":
+    def from_dict(cls, data: dict[str, Any]) -> WeComDepartment:
         return cls(
             id=data.get("id", 0),
             name=data.get("name", ""),
@@ -97,9 +96,7 @@ class WeComContactClient:
         self._corp_id = corp_id or os.getenv("WECOM_CORP_ID", "")
         self._agent_id = agent_id or os.getenv("WECOM_AGENT_ID", "")
         self._app_secret = app_secret or os.getenv("WECOM_APP_SECRET", "")
-        self._contact_secret = contact_secret or os.getenv(
-            "WECOM_CONTACT_SECRET", self._app_secret
-        )
+        self._contact_secret = contact_secret or os.getenv("WECOM_CONTACT_SECRET", self._app_secret)
         self._timeout = timeout
 
         self._token: str | None = None
@@ -118,9 +115,7 @@ class WeComContactClient:
 
         secret = self._contact_secret
         if not secret:
-            raise RuntimeError(
-                "WECOM_APP_SECRET 或 WECOM_CONTACT_SECRET 未配置，无法获取 access_token"
-            )
+            raise RuntimeError("WECOM_APP_SECRET 或 WECOM_CONTACT_SECRET 未配置，无法获取 access_token")
 
         params = {
             "grant_type": "client_credential",
@@ -129,22 +124,16 @@ class WeComContactClient:
         }
 
         async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.get(
-                "https://qyapi.weixin.qq.com/cgi-bin/gettoken", params=params
-            )
+            resp = await client.get("https://qyapi.weixin.qq.com/cgi-bin/gettoken", params=params)
             data = resp.json()
             errcode = data.get("errcode", 0)
 
             if errcode != 0:
-                raise RuntimeError(
-                    f"获取 access_token 失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}"
-                )
+                raise RuntimeError(f"获取 access_token 失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
 
             self._token = data["access_token"]
             self._token_expires_at = now + int(data.get("expires_in", 7200))
-            logger.debug(
-                f"access_token 已刷新 | expires_in={data.get('expires_in')}s"
-            )
+            logger.debug(f"access_token 已刷新 | expires_in={data.get('expires_in')}s")
 
         return self._token  # type: ignore[return-value]
 
@@ -176,9 +165,7 @@ class WeComContactClient:
         data = resp.json()
         errcode = data.get("errcode", 0)
         if errcode != 0:
-            raise RuntimeError(
-                f"获取部门列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}"
-            )
+            raise RuntimeError(f"获取部门列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
 
         return [WeComDepartment.from_dict(d) for d in data.get("department", [])]
 
@@ -189,7 +176,7 @@ class WeComContactClient:
             list[dict]: 部门树形结构 [{id, name, parent_id, children: []}]
         """
 
-        root_depts = await self.list_departments()
+        await self.list_departments()
         all_depts = await self.list_departments()
 
         dept_map: dict[int, dict[str, Any]] = {}
@@ -246,9 +233,7 @@ class WeComContactClient:
         data = resp.json()
         errcode = data.get("errcode", 0)
         if errcode != 0:
-            raise RuntimeError(
-                f"获取部门用户列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}"
-            )
+            raise RuntimeError(f"获取部门用户列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
 
         return [WeComUser.from_dict(u) for u in data.get("userlist", [])]
 
@@ -274,9 +259,7 @@ class WeComContactClient:
         data = resp.json()
         errcode = data.get("errcode", 0)
         if errcode != 0:
-            raise RuntimeError(
-                f"获取用户详情失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}"
-            )
+            raise RuntimeError(f"获取用户详情失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
 
         return WeComUser.from_dict(data)
 
@@ -332,12 +315,7 @@ class WeComContactClient:
     def format_department_summary(self, dept: WeComDepartment) -> str:
         """格式化部门信息为可读摘要"""
 
-        return (
-            f"部门ID：{dept.id}\n"
-            f"部门名称：{dept.name}\n"
-            f"上级部门ID：{dept.parent_id}\n"
-            f"排序：{dept.order}"
-        )
+        return f"部门ID：{dept.id}\n部门名称：{dept.name}\n上级部门ID：{dept.parent_id}\n排序：{dept.order}"
 
 
 __all__ = [

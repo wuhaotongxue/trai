@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:10:00
@@ -13,16 +12,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser, require_admin
-from infrastructure.security.password import PasswordService, get_password_service
-from infrastructure.repositories.user_repository import UserRepository
+from api.deps import require_admin
 from infrastructure.database import get_session
+from infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
 
 
 class UserListItem(BaseModel):
     """用户列表项"""
+
     user_id: str = Field(description="用户唯一标识")
     username: str = Field(description="用户名")
     display_name: str = Field(description="显示名称")
@@ -36,12 +35,14 @@ class UserListItem(BaseModel):
 
 class UserListResponse(BaseModel):
     """用户列表响应"""
+
     total: int = Field(description="用户总数")
     users: list[UserListItem] = Field(description="用户列表")
 
 
 class UpdateUserRequest(BaseModel):
     """更新用户请求"""
+
     display_name: str | None = Field(default=None, description="显示名称")
     email: str | None = Field(default=None, description="邮箱地址")
     avatar_url: str | None = Field(default=None, description="头像 URL")
@@ -51,6 +52,7 @@ class UpdateUserRequest(BaseModel):
 
 class ActionResponse(BaseModel):
     """操作响应"""
+
     message: str = Field(description="提示信息")
     user_id: str = Field(description="用户 ID")
 

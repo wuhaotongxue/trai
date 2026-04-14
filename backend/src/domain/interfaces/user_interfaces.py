@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user_interfaces.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:22:00

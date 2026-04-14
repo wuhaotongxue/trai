@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: migrate_rename_fields.py
 # 作者: wuhao
 # 日期: 2026_04_13
@@ -9,11 +8,6 @@
 from __future__ import annotations
 
 import os
-import sys
-import time
-from typing import Any
-
-from loguru import logger
 
 
 def get_db_config():
@@ -36,6 +30,7 @@ def get_db_config():
 def get_db_connection():
     """获取数据库连接"""
     import psycopg2
+
     return psycopg2.connect(**get_db_config())
 
 

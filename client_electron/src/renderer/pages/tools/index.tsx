@@ -186,10 +186,10 @@ const Tools: React.FC = () => {
           <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <input 
-              type="number" 
-              placeholder="如 500 (留空使用默认质量)"
-              value={target_compress_kb}
-              onChange={(e) => set_target_compress_kb(e.target.value)}
+                type="number" 
+                placeholder="如 500 (留空使用默认质量)"
+                value={target_convert_kb}
+                onChange={(e) => set_target_compress_kb(e.target.value)}
               style={{ 
                 flex: 1,
                 padding: '8px 12px', 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: jwt.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:30:00
@@ -8,13 +7,13 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
 from loguru import logger
 
-from core.exceptions import AuthenticationError, AuthorizationError
+from core.exceptions import AuthenticationError
 
 
 class JWTService:
@@ -29,12 +28,8 @@ class JWTService:
             logger.warning("JWT_SECRET_KEY 未配置，将使用不安全的默认密钥")
 
         self._algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
-        self._access_token_expire_minutes: int = int(
-            os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-        )
-        self._refresh_token_expire_days: int = int(
-            os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7")
-        )
+        self._access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+        self._refresh_token_expire_days: int = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
     def create_access_token(
         self,
@@ -56,7 +51,7 @@ class JWTService:
         Returns:
             str: JWT 访问令牌
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expire = now + timedelta(minutes=self._access_token_expire_minutes)
 
         payload = {
@@ -86,7 +81,7 @@ class JWTService:
         Returns:
             str: JWT 刷新令牌
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expire = now + timedelta(days=self._refresh_token_expire_days)
 
         payload = {
@@ -168,7 +163,7 @@ class JWTService:
             )
             exp = payload.get("exp")
             if exp:
-                return datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(timezone.utc)
+                return datetime.fromtimestamp(exp, tz=UTC) < datetime.now(UTC)
             return False
         except JWTError:
             return True

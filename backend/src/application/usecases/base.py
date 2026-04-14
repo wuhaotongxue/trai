@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: base.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -8,13 +7,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import TypeVar
 
 TInput = TypeVar("TInput")
 TOutput = TypeVar("TOutput")
 
 
-class UseCase(ABC, Generic[TInput, TOutput]):
+class UseCase[TInput, TOutput](ABC):
     """用例基类"""
 
     @abstractmethod

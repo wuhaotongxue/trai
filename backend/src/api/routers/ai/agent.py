@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: agent.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
@@ -10,14 +9,14 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
 from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
-from infrastructure.agent.tools.registry import get_tool_registry
 from infrastructure.agent.tools.loader import get_openai_tools_format
+from infrastructure.agent.tools.registry import get_tool_registry
 
 router = APIRouter()
 
@@ -82,27 +81,28 @@ async def agent_chat(
     ]
 
     result = await executor.execute(messages, context, stream=request.stream)
-    
+
     if request.stream:
         # 如果是流式响应，executor.execute 会返回一个 AsyncGenerator
         from fastapi.responses import StreamingResponse
-        
+
         async def event_generator():
             import json
+
             async for event in result:
                 # event is a dict containing type, content, etc.
                 yield f"data: {json.dumps(event)}\n\n"
             yield "data: [DONE]\n\n"
-            
+
         return StreamingResponse(event_generator(), media_type="text/event-stream")
-    
+
     # 提取所有步骤中的思维链并拼接
     reasoning_parts = []
     for step in result.get("steps", []):
         rc = step.get("reasoning_content")
         if rc:
             reasoning_parts.append(rc)
-            
+
     full_reasoning = "\n\n".join(reasoning_parts) if reasoning_parts else None
 
     return AgentChatResponse(
@@ -198,6 +198,7 @@ async def call_tool(
     )
 
     from infrastructure.agent.tools.governor import get_tool_governor
+
     governor = get_tool_governor()
     result = await governor.execute(tool, request.params, context)
 
@@ -244,8 +245,8 @@ async def get_user_quota(
         UserQuotaResponse: 配额状态列表
     """
     from infrastructure.database import get_session
-    from infrastructure.repositories.quota_repository import QuotaRepository
     from infrastructure.quota.quota_service import QuotaService
+    from infrastructure.repositories.quota_repository import QuotaRepository
 
     user_id = current_user.get("user_id", "")
     role = current_user.get("role", "normal")

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: base.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:55:00
@@ -153,9 +152,7 @@ class BaseNotifyService(ABC):
         Returns:
             NotifyResult: 发送结果
         """
-        self._logger.info(
-            f"Sending {self.__class__.__name__} notification: {message.title}"
-        )
+        self._logger.info(f"Sending {self.__class__.__name__} notification: {message.title}")
 
         try:
             payload = self._build_payload(message)
@@ -187,9 +184,7 @@ class BaseNotifyService(ABC):
         Returns:
             NotifyResult: 发送结果
         """
-        self._logger.info(
-            f"Sending async {self.__class__.__name__} notification: {message.title}"
-        )
+        self._logger.info(f"Sending async {self.__class__.__name__} notification: {message.title}")
 
         try:
             payload = self._build_payload(message)

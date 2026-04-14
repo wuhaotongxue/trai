@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: governor.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -13,7 +12,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from core.logger import logger
-from core.policy_engine import PolicyDecision, PolicyEngine, get_policy_engine
 from infrastructure.agent.tools.base import (
     BaseTool,
     ExecutionContext,
@@ -39,12 +37,8 @@ class ToolGovernor:
     """工具治理器 - 统一拦截器，五步校验"""
 
     def __init__(self) -> None:
-        self._rate_limit_enabled: bool = os.getenv(
-            "TOOL_GOVERNOR_RATE_LIMIT", "true"
-        ).lower() == "true"
-        self._audit_enabled: bool = os.getenv(
-            "TOOL_GOVERNOR_AUDIT", "true"
-        ).lower() == "true"
+        self._rate_limit_enabled: bool = os.getenv("TOOL_GOVERNOR_RATE_LIMIT", "true").lower() == "true"
+        self._audit_enabled: bool = os.getenv("TOOL_GOVERNOR_AUDIT", "true").lower() == "true"
 
     async def execute(
         self,
@@ -160,10 +154,7 @@ class ToolGovernor:
             )
 
         if tool_def.risk_level == RiskLevel.MONITORED:
-            logger.info(
-                f"工具监控 | tool_id={tool_def.id} | "
-                f"user_id={context.user_id} | role={context.user_role}"
-            )
+            logger.info(f"工具监控 | tool_id={tool_def.id} | user_id={context.user_id} | role={context.user_role}")
 
         return GovernanceResult(
             allowed=True,

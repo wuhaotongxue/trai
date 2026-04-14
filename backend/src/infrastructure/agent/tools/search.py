@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: search.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
@@ -18,9 +17,9 @@ from infrastructure.agent.tools.base import (
     ExecutionContext,
     RiskLevel,
     ToolCallResult,
+    ToolCategory,
     ToolDefinition,
     ToolParameter,
-    ToolCategory,
 )
 
 
@@ -28,17 +27,23 @@ class SearchTool(BaseTool):
     """搜索工具"""
 
     FORBIDDEN_PATTERNS = [
-        "password", "token", "secret", "key",
-        "eval(", "exec(", "import ", "open(",
-        ".exe", ".dll", ".bat",
+        "password",
+        "token",
+        "secret",
+        "key",
+        "eval(",
+        "exec(",
+        "import ",
+        "open(",
+        ".exe",
+        ".dll",
+        ".bat",
     ]
 
     def __init__(self) -> None:
         super().__init__()
         self._api_key = os.getenv("SEARCH_API_KEY", "")
-        self._base_url = os.getenv(
-            "SEARCH_API_URL", "https://api.search.unknown/v1/search"
-        )
+        self._base_url = os.getenv("SEARCH_API_URL", "https://api.search.unknown/v1/search")
         self._max_results = int(os.getenv("SEARCH_MAX_RESULTS", "5"))
 
     @property
@@ -71,9 +76,7 @@ class SearchTool(BaseTool):
             )
         return self._definition
 
-    async def execute(
-        self, params: dict[str, Any], context: ExecutionContext
-    ) -> ToolCallResult:
+    async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         query = params.get("query", "")
         max_results = params.get("max_results", self._max_results)
 
@@ -111,9 +114,7 @@ class SearchTool(BaseTool):
             logger.error(f"搜索异常: {e}")
             return await self._mock_search(query, max_results)
 
-    def _parse_search_results(
-        self, query: str, data: dict[str, Any]
-    ) -> ToolCallResult:
+    def _parse_search_results(self, query: str, data: dict[str, Any]) -> ToolCallResult:
         results = data.get("results", [])[: self._max_results]
 
         if not results:
@@ -137,9 +138,7 @@ class SearchTool(BaseTool):
             output="\n".join(lines),
         )
 
-    async def _mock_search(
-        self, query: str, max_results: int
-    ) -> ToolCallResult:
+    async def _mock_search(self, query: str, max_results: int) -> ToolCallResult:
         lines = [
             f"搜索「{query}」找到 3 条结果（Mock数据）:\\n",
             f"1. {query} - 相关介绍",

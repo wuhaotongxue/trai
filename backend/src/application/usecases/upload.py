@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: upload.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -9,19 +8,19 @@ from __future__ import annotations
 
 import os
 import uuid
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 from fastapi import UploadFile
 
 from application.usecases.base import UseCase
-from domain.entities.upload_task import FileType, UploadTask, UploadStatus
+from domain.entities.upload_task import FileType, UploadTask
 from infrastructure.storage.s3_storage import S3StorageService
 
 
 @dataclass
 class UploadInput:
     """上传输入"""
+
     file: UploadFile
     folder: str = "general"
 
@@ -29,6 +28,7 @@ class UploadInput:
 @dataclass
 class UploadOutput:
     """上传输出"""
+
     task_id: str
     filename: str
     file_url: str
@@ -51,8 +51,11 @@ class FileUploadUseCase(UseCase[UploadInput, UploadOutput]):
             return FileType.VIDEO
         elif content_type.startswith("audio/"):
             return FileType.AUDIO
-        elif content_type in ["application/pdf", "application/msword",
-                               "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+        elif content_type in [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ]:
             return FileType.DOCUMENT
         elif content_type.startswith("text/"):
             return FileType.CODE

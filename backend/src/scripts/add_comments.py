@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: add_comments.py
 # 作者: wuhao
 # 日期: 2026_04_13
@@ -8,9 +7,9 @@
 
 from __future__ import annotations
 
-import psycopg2
 import sys
 
+import psycopg2
 
 # 表注释
 TABLE_COMMENTS = {
@@ -173,7 +172,7 @@ def add_comments():
             user="itzx",
             password="Tuoren@2026...",
             database="trai",
-            connect_timeout=10
+            connect_timeout=10,
         )
         print("数据库连接成功", flush=True)
         cur = conn.cursor()
@@ -192,7 +191,7 @@ def add_comments():
         # 添加表注释
         print("\n=== 添加表注释 ===", flush=True)
         for table, comment in TABLE_COMMENTS.items():
-            cur.execute(f"COMMENT ON TABLE \"{table}\" IS %s", (comment,))
+            cur.execute(f'COMMENT ON TABLE "{table}" IS %s', (comment,))
             conn.commit()
             print(f"  [OK] {table}: {comment}", flush=True)
 
@@ -201,7 +200,7 @@ def add_comments():
         for table, fields in FIELD_COMMENTS.items():
             for field, comment in fields.items():
                 try:
-                    cur.execute(f"COMMENT ON COLUMN \"{table}\".\"{field}\" IS %s", (comment,))
+                    cur.execute(f'COMMENT ON COLUMN "{table}"."{field}" IS %s', (comment,))
                     conn.commit()
                     print(f"  [OK] {table}.{field}: {comment}", flush=True)
                 except Exception as e:
@@ -218,6 +217,7 @@ def add_comments():
     except Exception as e:
         print(f"添加 COMMENT 失败: {e}", flush=True)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: deps.py
 # 作者: wuhao
 # 日期: 2026_04_09_20:30:00
@@ -9,12 +8,12 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from core.exceptions import AuthenticationError, AuthorizationError
+from core.exceptions import AuthenticationError
 from infrastructure.security.jwt import JWTService, get_jwt_service
-from infrastructure.security.password import PasswordService, get_password_service
+from infrastructure.security.password import get_password_service
 
 security = HTTPBearer()
 
@@ -60,6 +59,7 @@ def require_role(*allowed_roles: str):
     Returns:
         依赖函数
     """
+
     def role_checker(
         current_user: Annotated[dict[str, Any], Depends(get_current_user)],
     ) -> dict[str, Any]:

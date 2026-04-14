@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_generation.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:22:00
@@ -13,7 +12,6 @@ from application.usecases.base import UseCase
 from domain.entities.image_generation import (
     ImageGeneration,
     ImageSize,
-    ImageStatus,
     ImageStyle,
 )
 from domain.interfaces.image_generation_interfaces import (
@@ -25,6 +23,7 @@ from infrastructure.ai.modelscope_client import ModelScopeClient
 @dataclass
 class ImageGenerationInput:
     """图片生成输入"""
+
     prompt: str
     user_id: str = ""
     model: str = "AI-ModelScope/FLUX.1-dev"
@@ -42,6 +41,7 @@ class ImageGenerationInput:
 @dataclass
 class ImageGenerationOutput:
     """图片生成输出"""
+
     task_id: str
     image_url: str | None = None
     status: str = "pending"
@@ -59,9 +59,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
         self._client = client or ModelScopeClient()
         self._repository = repository
 
-    async def execute(
-        self, input_data: ImageGenerationInput
-    ) -> ImageGenerationOutput:
+    async def execute(self, input_data: ImageGenerationInput) -> ImageGenerationOutput:
         """执行图片生成"""
         generation = ImageGeneration(
             prompt=input_data.prompt,

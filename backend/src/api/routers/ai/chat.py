@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: chat.py
 # 作者: wuhao
 # 日期: 2026_04_10
@@ -7,23 +6,23 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from application.usecases.chat import ChatInput, ChatOutput, ChatUseCase
+from application.usecases.chat import ChatInput, ChatUseCase
 from infrastructure.ai.openai_client import OpenAIClient
-from infrastructure.database import get_session
 
 router = APIRouter()
 
 
 class ChatRequest(BaseModel):
     """对话请求"""
+
     messages: Annotated[list[dict[str, str]], Field(description="消息列表，每条消息包含 role 和 content")]
     model: Annotated[str, Field(default="gpt-4o", description="模型名称")] = "gpt-4o"
     temperature: Annotated[float, Field(ge=0, le=2, default=0.7, description="温度参数")] = 0.7
@@ -32,6 +31,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     """对话响应（非流式）"""
+
     content: str = Field(description="AI 响应内容")
     model: str = Field(description="实际使用的模型")
     usage: dict[str, Any] = Field(description="token 使用量")
@@ -55,7 +55,7 @@ async def chat(
     Raises:
         HTTPException: AI 服务错误（502）
     """
-    user_id = current_user.get("user_id", "")
+    current_user.get("user_id", "")
 
     try:
         client = OpenAIClient()
@@ -97,7 +97,7 @@ async def chat_stream(
     Returns:
         StreamingResponse: SSE 流式响应
     """
-    user_id = current_user.get("user_id", "")
+    current_user.get("user_id", "")
 
     async def generate() -> AsyncIterator[bytes]:
         try:
@@ -115,7 +115,7 @@ async def chat_stream(
             yield b"data: [DONE]\n\n"
 
         except Exception as e:
-            error_data = f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+            error_data = f'data: {{"error": "{str(e)}"}}\n\n'
             yield error_data.encode("utf-8")
 
     return StreamingResponse(

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: user_repository.py
 # 作者: wuhao
 # 日期: 2026_04_09_21:20:00
@@ -12,13 +11,12 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from domain.entities.user import User, UserRole, UserStatus
 from domain.interfaces.user_interfaces import IUserRepository
 from infrastructure.database.user_model import UserModel
-from core.exceptions import NotFoundError, ConflictError
 
 
 class UserRepository(IUserRepository):
