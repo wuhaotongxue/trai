@@ -5,7 +5,7 @@
  * 描述: TODO 任务管理页面
  */
 
-import { TodoBoard } from '@/components/todo/todo-board';
+import { TodoBoard } from '@/components/todo/todo_board';
 
 export default function TodoPage() {
   return (

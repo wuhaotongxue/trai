@@ -1,7 +1,13 @@
+/**
+ * 文件名: todo_board.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: todo_board.tsx 的页面或组件实现
+ */
 'use client';
 
 /**
- * todo-board.tsx
+ * todo_board.tsx
  * 作者: wuhao
  * 日期: 2026-04-09
  * 描述: TODO 看板主视图组件
@@ -9,15 +15,15 @@
 
 import { useState } from 'react';
 import { useTodoStore, MODULES } from '@/stores/todo.store';
-import { TaskCard } from './task-card';
-import { ModuleProgressCard } from './module-progress-card';
-import { GanttChart } from './gantt-chart';
-import { TimelineView } from './timeline-view';
+import { TaskCard } from './task_card';
+import { ModuleProgressCard } from './module_progress_card';
+import { GanttChart } from './gantt_chart';
+import { TimelineView } from './timeline_view';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll_area';
 import { Separator } from '@/components/ui/separator';
 import {
   Select,
@@ -109,7 +115,6 @@ export function TodoBoard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">任务管理</h1>
@@ -148,7 +153,6 @@ export function TodoBoard() {
         </div>
       </div>
 
-      {/* Stats Overview */}
       <div className="grid grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -196,7 +200,6 @@ export function TodoBoard() {
         </Card>
       </div>
 
-      {/* Module Progress */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">模块进度</h2>
@@ -225,7 +228,6 @@ export function TodoBoard() {
 
       <Separator />
 
-      {/* Filters */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -297,7 +299,6 @@ export function TodoBoard() {
         </div>
       </div>
 
-      {/* Content based on view mode */}
       {viewMode === 'kanban' && (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {renderKanbanColumn(
@@ -327,3 +328,4 @@ export function TodoBoard() {
     </div>
   );
 }
+

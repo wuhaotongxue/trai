@@ -38,13 +38,13 @@ export default function LoginPage() {
             <CardHeader className="space-y-1 pb-6">
               <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">欢迎回来</CardTitle>
               <CardDescription className="text-slate-500 dark:text-slate-400">
-                输入您的账号信息，继续使用 TRAI
+                输入您的账号信息, 继续使用 TRAI
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">邮箱地址</Label>
-                <Input id="email" type="email" placeholder="your@email.com" className="h-11 rounded-lg" />
+                <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">邮箱地址或用户名</Label>
+                <Input id="email" type="text" placeholder="admin" defaultValue="admin" className="h-11 rounded-lg" />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -52,7 +52,7 @@ export default function LoginPage() {
                   <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">忘记密码?</Link>
                 </div>
                 <div className="relative">
-                  <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" className="h-11 rounded-lg pr-10" />
+                  <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" defaultValue="admin123" className="h-11 rounded-lg pr-10" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -63,7 +63,7 @@ export default function LoginPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="remember" className="rounded border-slate-300" />
+                <input type="checkbox" id="remember" className="rounded border-slate-300" aria-label="记住我" title="记住我" />
                 <Label htmlFor="remember" className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer">记住我</Label>
               </div>
               <Button className="w-full h-11 text-base font-semibold rounded-lg shadow-lg shadow-blue-500/20 mt-2">

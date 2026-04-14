@@ -1,7 +1,13 @@
+/**
+ * 文件名: gantt_chart.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: gantt_chart.tsx 的页面或组件实现
+ */
 'use client';
 
 /**
- * gantt-chart.tsx
+ * gantt_chart.tsx
  * 作者: wuhao
  * 日期: 2026-04-09
  * 描述: 甘特图时间线组件
@@ -9,7 +15,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll_area';
 import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/todo.types';
 import type { Task } from '@/types/todo.types';
 import { Clock, CheckCircle2 } from 'lucide-react';
@@ -98,7 +104,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
       <CardContent className="pt-0">
         <ScrollArea className="w-full">
           <div className="min-w-[800px]">
-            {/* Header - 日期行 */}
             <div className="flex border-b">
               <div className="w-48 shrink-0 p-2 border-r bg-muted/50">
                 <span className="text-xs font-medium text-muted-foreground">
@@ -129,7 +134,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
               </div>
             </div>
 
-            {/* Today line */}
             {todayIndex >= 0 && todayIndex < days.length && (
               <div
                 className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
@@ -137,7 +141,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
               />
             )}
 
-            {/* Task rows */}
             <div className="relative">
               {tasks
                 .filter((t) => t.plannedStart && t.plannedEnd)
@@ -172,7 +175,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
                         </div>
                       </div>
                       <div className="flex-1 relative" style={{ height: 60 }}>
-                        {/* Grid lines */}
                         {days.map((_, i) => (
                           <div
                             key={i}
@@ -181,7 +183,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
                           />
                         ))}
 
-                        {/* Today line */}
                         {todayIndex >= 0 && todayIndex < days.length && (
                           <div
                             className="absolute top-0 bottom-0 w-0.5 bg-red-500/50 z-10"
@@ -189,7 +190,6 @@ export function GanttChart({ tasks }: GanttChartProps) {
                           />
                         )}
 
-                        {/* Task bar */}
                         {position && (
                           <div
                             className={`absolute top-4 bottom-4 rounded-md px-2 py-1 text-xs font-medium text-white cursor-pointer hover:opacity-80 transition-opacity flex items-center ${
@@ -218,7 +218,7 @@ export function GanttChart({ tasks }: GanttChartProps) {
                   <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">暂无带计划时间的任务</p>
                   <p className="text-xs mt-1">
-                    为任务设置计划开始和结束日期后，这里会显示甘特图
+                    为任务设置计划开始和结束日期后, 这里会显示甘特图
                   </p>
                 </div>
               )}
@@ -230,3 +230,4 @@ export function GanttChart({ tasks }: GanttChartProps) {
     </Card>
   );
 }
+

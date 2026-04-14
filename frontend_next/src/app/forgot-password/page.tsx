@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
             </div>
           </Link>
           <h1 className="text-2xl font-bold text-slate-900 mt-4">找回密码</h1>
-          <p className="text-sm text-slate-500 mt-1">输入你的注册邮箱，我们会发送重置链接</p>
+          <p className="text-sm text-slate-500 mt-1">输入你的注册邮箱, 我们会发送重置链接</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xl shadow-blue-500/10 p-6 backdrop-blur-sm">
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
                 </Button>
 
                 <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-500">
-                  <strong className="text-slate-700">提示：</strong>重置链接将在 30 分钟内有效。如果未收到邮件，请检查垃圾邮件文件夹。
+                  <strong className="text-slate-700">提示: </strong>重置链接将在 30 分钟内有效。如果未收到邮件, 请检查垃圾邮件文件夹。
                 </div>
               </div>
             </>
@@ -100,13 +100,13 @@ export default function ForgotPasswordPage() {
                 <CheckCircle2 className="h-8 w-8 text-emerald-500" />
               </div>
               <div>
-                <p className="text-base font-bold text-slate-900 mb-1">重置链接已发送！</p>
+                <p className="text-base font-bold text-slate-900 mb-1">重置链接已发送! </p>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  我们已向 <strong className="text-slate-700">{email}</strong> 发送了一封密码重置邮件，请点击邮件中的链接完成密码重置。
+                  我们已向 <strong className="text-slate-700">{email}</strong> 发送了一封密码重置邮件, 请点击邮件中的链接完成密码重置。
                 </p>
               </div>
               <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-600">
-                没收到？检查垃圾邮件，或联系 <a href="mailto:support@trai.ai" className="underline">support@trai.ai</a>
+                没收到? 检查垃圾邮件, 或联系 <a href="mailto:support@trai.ai" className="underline">support@trai.ai</a>
               </div>
               <Button variant="outline" className="w-full h-10 rounded-xl gap-2" onClick={() => { setSent(false); setEmail(""); }}>
                 <ArrowLeft className="h-4 w-4" />

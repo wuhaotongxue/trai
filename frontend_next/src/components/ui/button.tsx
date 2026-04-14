@@ -1,3 +1,9 @@
+/**
+ * 文件名: button.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-14 09:00:53
+ * 描述: button.tsx 的页面或组件实现
+ */
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 

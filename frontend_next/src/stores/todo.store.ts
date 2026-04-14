@@ -33,67 +33,67 @@ interface TodoStore {
 
 const INITIAL_TASKS: Task[] = [
   // Backend Core
-  { id: '1', name: 'run.py 应用入口', status: 'completed', priority: 'high', module: 'backend-core', description: 'FastAPI 实例、生命周期管理', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-02', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
-  { id: '2', name: 'api/main.py FastAPI 配置', status: 'completed', priority: 'high', module: 'backend-core', description: 'CORS、请求限流、异常处理', startTime: '2026-04-02', completeTime: '2026-04-03', plannedStart: '2026-04-02', plannedEnd: '2026-04-03', actualStart: '2026-04-02', actualEnd: '2026-04-03' },
-  { id: '3', name: 'api/middleware.py 中间件', status: 'in_progress', priority: 'high', module: 'backend-core', description: '请求日志、认证、请求 ID', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
-  { id: '4', name: 'api/routers/system/health.py 健康检查', status: 'pending', priority: 'high', module: 'backend-core', description: '/health 接口', startTime: null, completeTime: null, plannedStart: '2026-04-06', plannedEnd: '2026-04-06', actualStart: null, actualEnd: null },
-  { id: '5', name: 'api/routers/system/monitor.py 监控接口', status: 'pending', priority: 'high', module: 'backend-core', description: '系统状态、内存、CPU', startTime: null, completeTime: null, plannedStart: '2026-04-07', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
-  { id: '6', name: 'api/routers/ai/chat.py AI 对话', status: 'pending', priority: 'medium', module: 'backend-core', description: 'OpenAI/Claude 对接', startTime: null, completeTime: null, plannedStart: '2026-04-09', plannedEnd: '2026-04-11', actualStart: null, actualEnd: null },
-  { id: '7', name: 'api/routers/ai/image.py AI 绘图', status: 'pending', priority: 'medium', module: 'backend-core', description: 'DALL-E/Midjourney', startTime: null, completeTime: null, plannedStart: '2026-04-12', plannedEnd: '2026-04-14', actualStart: null, actualEnd: null },
-  { id: '8', name: 'api/routers/media/access.py 媒体访问', status: 'pending', priority: 'medium', module: 'backend-core', description: 'Presigned URL 生成', startTime: null, completeTime: null, plannedStart: '2026-04-15', plannedEnd: '2026-04-16', actualStart: null, actualEnd: null },
-  { id: '9', name: 'api/routers/media/upload.py 媒体上传', status: 'pending', priority: 'medium', module: 'backend-core', description: 'S3 上传', startTime: null, completeTime: null, plannedStart: '2026-04-17', plannedEnd: '2026-04-18', actualStart: null, actualEnd: null },
-  { id: '10', name: 'api/routers/admin/users.py 用户管理', status: 'pending', priority: 'low', module: 'backend-core', description: '后台用户 CRUD', startTime: null, completeTime: null, plannedStart: '2026-04-19', plannedEnd: '2026-04-21', actualStart: null, actualEnd: null },
-  { id: '11', name: 'api/routers/admin/settings.py 系统设置', status: 'pending', priority: 'low', module: 'backend-core', description: '配置管理', startTime: null, completeTime: null, plannedStart: '2026-04-22', plannedEnd: '2026-04-23', actualStart: null, actualEnd: null },
+  { id: '1', name: 'run.py 应用入口', status: 'completed', priority: 'high', module: 'backend_core', description: 'FastAPI 实例、生命周期管理', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-02', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
+  { id: '2', name: 'api/main.py FastAPI 配置', status: 'completed', priority: 'high', module: 'backend_core', description: 'CORS、请求限流、异常处理', startTime: '2026-04-02', completeTime: '2026-04-03', plannedStart: '2026-04-02', plannedEnd: '2026-04-03', actualStart: '2026-04-02', actualEnd: '2026-04-03' },
+  { id: '3', name: 'api/middleware.py 中间件', status: 'in_progress', priority: 'high', module: 'backend_core', description: '请求日志、认证、请求 ID', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
+  { id: '4', name: 'api/routers/system/health.py 健康检查', status: 'pending', priority: 'high', module: 'backend_core', description: '/health 接口', startTime: null, completeTime: null, plannedStart: '2026-04-06', plannedEnd: '2026-04-06', actualStart: null, actualEnd: null },
+  { id: '5', name: 'api/routers/system/monitor.py 监控接口', status: 'pending', priority: 'high', module: 'backend_core', description: '系统状态、内存、CPU', startTime: null, completeTime: null, plannedStart: '2026-04-07', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
+  { id: '6', name: 'api/routers/ai/chat.py AI 对话', status: 'pending', priority: 'medium', module: 'backend_core', description: 'OpenAI/Claude 对接', startTime: null, completeTime: null, plannedStart: '2026-04-09', plannedEnd: '2026-04-11', actualStart: null, actualEnd: null },
+  { id: '7', name: 'api/routers/ai/image.py AI 绘图', status: 'pending', priority: 'medium', module: 'backend_core', description: 'DALL-E/Midjourney', startTime: null, completeTime: null, plannedStart: '2026-04-12', plannedEnd: '2026-04-14', actualStart: null, actualEnd: null },
+  { id: '8', name: 'api/routers/media/access.py 媒体访问', status: 'pending', priority: 'medium', module: 'backend_core', description: 'Presigned URL 生成', startTime: null, completeTime: null, plannedStart: '2026-04-15', plannedEnd: '2026-04-16', actualStart: null, actualEnd: null },
+  { id: '9', name: 'api/routers/media/upload.py 媒体上传', status: 'pending', priority: 'medium', module: 'backend_core', description: 'S3 上传', startTime: null, completeTime: null, plannedStart: '2026-04-17', plannedEnd: '2026-04-18', actualStart: null, actualEnd: null },
+  { id: '10', name: 'api/routers/admin/users.py 用户管理', status: 'pending', priority: 'low', module: 'backend_core', description: '后台用户 CRUD', startTime: null, completeTime: null, plannedStart: '2026-04-19', plannedEnd: '2026-04-21', actualStart: null, actualEnd: null },
+  { id: '11', name: 'api/routers/admin/settings.py 系统设置', status: 'pending', priority: 'low', module: 'backend_core', description: '配置管理', startTime: null, completeTime: null, plannedStart: '2026-04-22', plannedEnd: '2026-04-23', actualStart: null, actualEnd: null },
 
   // Backend Application
-  { id: '12', name: '用例基类设计', status: 'pending', priority: 'medium', module: 'backend-application', description: '统一用例接口', startTime: null, completeTime: null, plannedStart: '2026-04-24', plannedEnd: '2026-04-25', actualStart: null, actualEnd: null },
-  { id: '13', name: 'AI 对话用例', status: 'pending', priority: 'medium', module: 'backend-application', description: 'ChatUseCase', startTime: null, completeTime: null, plannedStart: '2026-04-26', plannedEnd: '2026-04-28', actualStart: null, actualEnd: null },
-  { id: '14', name: 'AI 绘图用例', status: 'pending', priority: 'medium', module: 'backend-application', description: 'ImageUseCase', startTime: null, completeTime: null, plannedStart: '2026-04-29', plannedEnd: '2026-05-01', actualStart: null, actualEnd: null },
-  { id: '15', name: '媒体上传用例', status: 'pending', priority: 'medium', module: 'backend-application', description: 'MediaUploadUseCase', startTime: null, completeTime: null, plannedStart: '2026-05-02', plannedEnd: '2026-05-03', actualStart: null, actualEnd: null },
+  { id: '12', name: '用例基类设计', status: 'pending', priority: 'medium', module: 'backend_application', description: '统一用例接口', startTime: null, completeTime: null, plannedStart: '2026-04-24', plannedEnd: '2026-04-25', actualStart: null, actualEnd: null },
+  { id: '13', name: 'AI 对话用例', status: 'pending', priority: 'medium', module: 'backend_application', description: 'ChatUseCase', startTime: null, completeTime: null, plannedStart: '2026-04-26', plannedEnd: '2026-04-28', actualStart: null, actualEnd: null },
+  { id: '14', name: 'AI 绘图用例', status: 'pending', priority: 'medium', module: 'backend_application', description: 'ImageUseCase', startTime: null, completeTime: null, plannedStart: '2026-04-29', plannedEnd: '2026-05-01', actualStart: null, actualEnd: null },
+  { id: '15', name: '媒体上传用例', status: 'pending', priority: 'medium', module: 'backend_application', description: 'MediaUploadUseCase', startTime: null, completeTime: null, plannedStart: '2026-05-02', plannedEnd: '2026-05-03', actualStart: null, actualEnd: null },
 
   // Backend Domain
-  { id: '16', name: '用户实体', status: 'pending', priority: 'medium', module: 'backend-domain', description: 'User Entity', startTime: null, completeTime: null, plannedStart: '2026-05-04', plannedEnd: '2026-05-05', actualStart: null, actualEnd: null },
-  { id: '17', name: 'AI 会话实体', status: 'pending', priority: 'medium', module: 'backend-domain', description: 'ChatSession Entity', startTime: null, completeTime: null, plannedStart: '2026-05-06', plannedEnd: '2026-05-07', actualStart: null, actualEnd: null },
-  { id: '18', name: '媒体资源实体', status: 'pending', priority: 'medium', module: 'backend-domain', description: 'MediaResource Entity', startTime: null, completeTime: null, plannedStart: '2026-05-08', plannedEnd: '2026-05-09', actualStart: null, actualEnd: null },
+  { id: '16', name: '用户实体', status: 'pending', priority: 'medium', module: 'backend_domain', description: 'User Entity', startTime: null, completeTime: null, plannedStart: '2026-05-04', plannedEnd: '2026-05-05', actualStart: null, actualEnd: null },
+  { id: '17', name: 'AI 会话实体', status: 'pending', priority: 'medium', module: 'backend_domain', description: 'ChatSession Entity', startTime: null, completeTime: null, plannedStart: '2026-05-06', plannedEnd: '2026-05-07', actualStart: null, actualEnd: null },
+  { id: '18', name: '媒体资源实体', status: 'pending', priority: 'medium', module: 'backend_domain', description: 'MediaResource Entity', startTime: null, completeTime: null, plannedStart: '2026-05-08', plannedEnd: '2026-05-09', actualStart: null, actualEnd: null },
 
   // Backend Infrastructure
-  { id: '19', name: 'S3 存储适配器', status: 'completed', priority: 'low', module: 'backend-infrastructure', description: 'AWS S3 / MinIO', startTime: '2026-04-09', completeTime: '2026-04-09', plannedStart: '2026-04-01', plannedEnd: '2026-04-03', actualStart: '2026-04-01', actualEnd: '2026-04-03' },
-  { id: '20', name: 'Redis 缓存', status: 'pending', priority: 'low', module: 'backend-infrastructure', description: '会话缓存、限流', startTime: null, completeTime: null, plannedStart: '2026-05-10', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
-  { id: '21', name: 'PostgreSQL 连接', status: 'pending', priority: 'low', module: 'backend-infrastructure', description: '数据持久化', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-15', actualStart: null, actualEnd: null },
-  { id: '22', name: 'AI 服务适配器', status: 'pending', priority: 'low', module: 'backend-infrastructure', description: 'OpenAI/Claude 封装', startTime: null, completeTime: null, plannedStart: '2026-05-16', plannedEnd: '2026-05-18', actualStart: null, actualEnd: null },
+  { id: '19', name: 'S3 存储适配器', status: 'completed', priority: 'low', module: 'backend_infrastructure', description: 'AWS S3 / MinIO', startTime: '2026-04-09', completeTime: '2026-04-09', plannedStart: '2026-04-01', plannedEnd: '2026-04-03', actualStart: '2026-04-01', actualEnd: '2026-04-03' },
+  { id: '20', name: 'Redis 缓存', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: '会话缓存、限流', startTime: null, completeTime: null, plannedStart: '2026-05-10', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
+  { id: '21', name: 'PostgreSQL 连接', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: '数据持久化', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-15', actualStart: null, actualEnd: null },
+  { id: '22', name: 'AI 服务适配器', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: 'OpenAI/Claude 封装', startTime: null, completeTime: null, plannedStart: '2026-05-16', plannedEnd: '2026-05-18', actualStart: null, actualEnd: null },
 
   // Frontend Init
-  { id: '23', name: '项目脚手架', status: 'completed', priority: 'high', module: 'frontend-init', description: 'create-next-app 初始化', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-01', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
-  { id: '24', name: 'TypeScript 配置', status: 'completed', priority: 'high', module: 'frontend-init', description: 'tsconfig、严格模式', startTime: '2026-04-02', completeTime: '2026-04-02', plannedStart: '2026-04-02', plannedEnd: '2026-04-02', actualStart: '2026-04-02', actualEnd: '2026-04-02' },
-  { id: '25', name: 'Tailwind CSS 配置', status: 'completed', priority: 'high', module: 'frontend-init', description: '主题定制', startTime: '2026-04-03', completeTime: '2026-04-03', plannedStart: '2026-04-03', plannedEnd: '2026-04-03', actualStart: '2026-04-03', actualEnd: '2026-04-03' },
-  { id: '26', name: '目录结构', status: 'in_progress', priority: 'high', module: 'frontend-init', description: 'FSD 架构', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
+  { id: '23', name: '项目脚手架', status: 'completed', priority: 'high', module: 'frontend_init', description: 'create-next-app 初始化', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-01', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
+  { id: '24', name: 'TypeScript 配置', status: 'completed', priority: 'high', module: 'frontend_init', description: 'tsconfig、严格模式', startTime: '2026-04-02', completeTime: '2026-04-02', plannedStart: '2026-04-02', plannedEnd: '2026-04-02', actualStart: '2026-04-02', actualEnd: '2026-04-02' },
+  { id: '25', name: 'Tailwind CSS 配置', status: 'completed', priority: 'high', module: 'frontend_init', description: '主题定制', startTime: '2026-04-03', completeTime: '2026-04-03', plannedStart: '2026-04-03', plannedEnd: '2026-04-03', actualStart: '2026-04-03', actualEnd: '2026-04-03' },
+  { id: '26', name: '目录结构', status: 'in_progress', priority: 'high', module: 'frontend_init', description: 'FSD 架构', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
 
   // Frontend Pages
-  { id: '27', name: 'Landing 页', status: 'pending', priority: 'high', module: 'frontend-pages', description: '首页/落地页', startTime: null, completeTime: null, plannedStart: '2026-04-06', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
-  { id: '28', name: 'Dashboard 页', status: 'pending', priority: 'high', module: 'frontend-pages', description: '主工作台', startTime: null, completeTime: null, plannedStart: '2026-04-09', plannedEnd: '2026-04-11', actualStart: null, actualEnd: null },
-  { id: '29', name: 'AI 对话页', status: 'pending', priority: 'high', module: 'frontend-pages', description: 'Chat 界面', startTime: null, completeTime: null, plannedStart: '2026-04-12', plannedEnd: '2026-04-15', actualStart: null, actualEnd: null },
-  { id: '30', name: 'AI 绘图页', status: 'pending', priority: 'high', module: 'frontend-pages', description: 'Image 生成', startTime: null, completeTime: null, plannedStart: '2026-04-16', plannedEnd: '2026-04-18', actualStart: null, actualEnd: null },
-  { id: '31', name: 'Admin 管理页', status: 'pending', priority: 'medium', module: 'frontend-pages', description: '用户/系统管理', startTime: null, completeTime: null, plannedStart: '2026-04-19', plannedEnd: '2026-04-21', actualStart: null, actualEnd: null },
-  { id: '32', name: 'Monitor 监控页', status: 'pending', priority: 'medium', module: 'frontend-pages', description: '系统监控', startTime: null, completeTime: null, plannedStart: '2026-04-22', plannedEnd: '2026-04-23', actualStart: null, actualEnd: null },
+  { id: '27', name: 'Landing 页', status: 'pending', priority: 'high', module: 'frontend_pages', description: '首页/落地页', startTime: null, completeTime: null, plannedStart: '2026-04-06', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
+  { id: '28', name: 'Dashboard 页', status: 'pending', priority: 'high', module: 'frontend_pages', description: '主工作台', startTime: null, completeTime: null, plannedStart: '2026-04-09', plannedEnd: '2026-04-11', actualStart: null, actualEnd: null },
+  { id: '29', name: 'AI 对话页', status: 'pending', priority: 'high', module: 'frontend_pages', description: 'Chat 界面', startTime: null, completeTime: null, plannedStart: '2026-04-12', plannedEnd: '2026-04-15', actualStart: null, actualEnd: null },
+  { id: '30', name: 'AI 绘图页', status: 'pending', priority: 'high', module: 'frontend_pages', description: 'Image 生成', startTime: null, completeTime: null, plannedStart: '2026-04-16', plannedEnd: '2026-04-18', actualStart: null, actualEnd: null },
+  { id: '31', name: 'Admin 管理页', status: 'pending', priority: 'medium', module: 'frontend_pages', description: '用户/系统管理', startTime: null, completeTime: null, plannedStart: '2026-04-19', plannedEnd: '2026-04-21', actualStart: null, actualEnd: null },
+  { id: '32', name: 'Monitor 监控页', status: 'pending', priority: 'medium', module: 'frontend_pages', description: '系统监控', startTime: null, completeTime: null, plannedStart: '2026-04-22', plannedEnd: '2026-04-23', actualStart: null, actualEnd: null },
 
   // Frontend Components
-  { id: '33', name: '基础组件', status: 'pending', priority: 'medium', module: 'frontend-components', description: 'Button/Input/Modal', startTime: null, completeTime: null, plannedStart: '2026-04-24', plannedEnd: '2026-04-26', actualStart: null, actualEnd: null },
-  { id: '34', name: 'AI 对话组件', status: 'pending', priority: 'medium', module: 'frontend-components', description: 'ChatBubble/InputArea', startTime: null, completeTime: null, plannedStart: '2026-04-27', plannedEnd: '2026-04-29', actualStart: null, actualEnd: null },
-  { id: '35', name: '媒体上传组件', status: 'pending', priority: 'medium', module: 'frontend-components', description: 'FileUpload/Preview', startTime: null, completeTime: null, plannedStart: '2026-04-30', plannedEnd: '2026-05-02', actualStart: null, actualEnd: null },
+  { id: '33', name: '基础组件', status: 'pending', priority: 'medium', module: 'frontend_components', description: 'Button/Input/Modal', startTime: null, completeTime: null, plannedStart: '2026-04-24', plannedEnd: '2026-04-26', actualStart: null, actualEnd: null },
+  { id: '34', name: 'AI 对话组件', status: 'pending', priority: 'medium', module: 'frontend_components', description: 'ChatBubble/InputArea', startTime: null, completeTime: null, plannedStart: '2026-04-27', plannedEnd: '2026-04-29', actualStart: null, actualEnd: null },
+  { id: '35', name: '媒体上传组件', status: 'pending', priority: 'medium', module: 'frontend_components', description: 'FileUpload/Preview', startTime: null, completeTime: null, plannedStart: '2026-04-30', plannedEnd: '2026-05-02', actualStart: null, actualEnd: null },
 
   // Frontend Features
-  { id: '36', name: '用户认证', status: 'pending', priority: 'medium', module: 'frontend-features', description: '登录/注册/JWT', startTime: null, completeTime: null, plannedStart: '2026-05-03', plannedEnd: '2026-05-06', actualStart: null, actualEnd: null },
-  { id: '37', name: '国际化 i18n', status: 'pending', priority: 'medium', module: 'frontend-features', description: '中英文切换', startTime: null, completeTime: null, plannedStart: '2026-05-07', plannedEnd: '2026-05-08', actualStart: null, actualEnd: null },
-  { id: '38', name: '暗黑模式', status: 'pending', priority: 'medium', module: 'frontend-features', description: '主题切换', startTime: null, completeTime: null, plannedStart: '2026-05-09', plannedEnd: '2026-05-10', actualStart: null, actualEnd: null },
+  { id: '36', name: '用户认证', status: 'pending', priority: 'medium', module: 'frontend_features', description: '登录/注册/JWT', startTime: null, completeTime: null, plannedStart: '2026-05-03', plannedEnd: '2026-05-06', actualStart: null, actualEnd: null },
+  { id: '37', name: '国际化 i18n', status: 'pending', priority: 'medium', module: 'frontend_features', description: '中英文切换', startTime: null, completeTime: null, plannedStart: '2026-05-07', plannedEnd: '2026-05-08', actualStart: null, actualEnd: null },
+  { id: '38', name: '暗黑模式', status: 'pending', priority: 'medium', module: 'frontend_features', description: '主题切换', startTime: null, completeTime: null, plannedStart: '2026-05-09', plannedEnd: '2026-05-10', actualStart: null, actualEnd: null },
 
   // Desktop Client
-  { id: '39', name: '项目脚手架', status: 'pending', priority: 'high', module: 'desktop-client', description: 'PyQt6 安装配置', startTime: null, completeTime: null, plannedStart: '2026-05-11', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
-  { id: '40', name: '主窗口设计', status: 'pending', priority: 'high', module: 'desktop-client', description: 'Win11 Fluent UI 风格', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-15', actualStart: null, actualEnd: null },
-  { id: '41', name: '目录结构', status: 'pending', priority: 'high', module: 'desktop-client', description: 'DDD 5 层架构', startTime: null, completeTime: null, plannedStart: '2026-05-16', plannedEnd: '2026-05-17', actualStart: null, actualEnd: null },
-  { id: '42', name: 'AI 对话界面', status: 'pending', priority: 'high', module: 'desktop-client', description: '本地 Chat 界面', startTime: null, completeTime: null, plannedStart: '2026-05-18', plannedEnd: '2026-05-21', actualStart: null, actualEnd: null },
-  { id: '43', name: '本地模型调用', status: 'pending', priority: 'high', module: 'desktop-client', description: 'Ollama/Copilot', startTime: null, completeTime: null, plannedStart: '2026-05-22', plannedEnd: '2026-05-25', actualStart: null, actualEnd: null },
-  { id: '44', name: '文件管理', status: 'pending', priority: 'medium', module: 'desktop-client', description: '本地文件操作', startTime: null, completeTime: null, plannedStart: '2026-05-26', plannedEnd: '2026-05-28', actualStart: null, actualEnd: null },
-  { id: '45', name: '系统托盘', status: 'pending', priority: 'medium', module: 'desktop-client', description: '最小化到托盘', startTime: null, completeTime: null, plannedStart: '2026-05-29', plannedEnd: '2026-05-30', actualStart: null, actualEnd: null },
+  { id: '39', name: '项目脚手架', status: 'pending', priority: 'high', module: 'desktop_client', description: 'PyQt6 安装配置', startTime: null, completeTime: null, plannedStart: '2026-05-11', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
+  { id: '40', name: '主窗口设计', status: 'pending', priority: 'high', module: 'desktop_client', description: 'Win11 Fluent UI 风格', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-15', actualStart: null, actualEnd: null },
+  { id: '41', name: '目录结构', status: 'pending', priority: 'high', module: 'desktop_client', description: 'DDD 5 层架构', startTime: null, completeTime: null, plannedStart: '2026-05-16', plannedEnd: '2026-05-17', actualStart: null, actualEnd: null },
+  { id: '42', name: 'AI 对话界面', status: 'pending', priority: 'high', module: 'desktop_client', description: '本地 Chat 界面', startTime: null, completeTime: null, plannedStart: '2026-05-18', plannedEnd: '2026-05-21', actualStart: null, actualEnd: null },
+  { id: '43', name: '本地模型调用', status: 'pending', priority: 'high', module: 'desktop_client', description: 'Ollama/Copilot', startTime: null, completeTime: null, plannedStart: '2026-05-22', plannedEnd: '2026-05-25', actualStart: null, actualEnd: null },
+  { id: '44', name: '文件管理', status: 'pending', priority: 'medium', module: 'desktop_client', description: '本地文件操作', startTime: null, completeTime: null, plannedStart: '2026-05-26', plannedEnd: '2026-05-28', actualStart: null, actualEnd: null },
+  { id: '45', name: '系统托盘', status: 'pending', priority: 'medium', module: 'desktop_client', description: '最小化到托盘', startTime: null, completeTime: null, plannedStart: '2026-05-29', plannedEnd: '2026-05-30', actualStart: null, actualEnd: null },
 
   // Electron
   { id: '46', name: '项目脚手架', status: 'pending', priority: 'high', module: 'electron', description: 'electron-forge 初始化', startTime: null, completeTime: null, plannedStart: '2026-05-11', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
@@ -107,16 +107,16 @@ const INITIAL_TASKS: Task[] = [
 ];
 
 const MODULES = [
-  { id: 'backend-core', name: '后端 核心', category: '后端', color: '#f093fb' },
-  { id: 'backend-application', name: '后端 应用', category: '后端', color: '#f5576c' },
-  { id: 'backend-domain', name: '后端 领域', category: '后端', color: '#f5576c' },
-  { id: 'backend-infrastructure', name: '后端 基础设施', category: '后端', color: '#f5576c' },
-  { id: 'frontend-init', name: '前端 初始化', category: '前端', color: '#4facfe' },
-  { id: 'frontend-pages', name: '前端 页面', category: '前端', color: '#4facfe' },
-  { id: 'frontend-components', name: '前端 组件', category: '前端', color: '#4facfe' },
-  { id: 'frontend-features', name: '前端 功能', category: '前端', color: '#4facfe' },
-  { id: 'desktop-client', name: '桌面客户端', category: '客户端', color: '#43e97b' },
-  { id: 'electron', name: 'Electron', category: '客户端', color: '#43e97b' },
+  { id: 'backend_core', name: '后端 核心', category: '后端', color: '#3b82f6' },
+  { id: 'backend_application', name: '后端 应用', category: '后端', color: '#06b6d4' },
+  { id: 'backend_domain', name: '后端 领域', category: '后端', color: '#14b8a6' },
+  { id: 'backend_infrastructure', name: '后端 基础设施', category: '后端', color: '#f59e0b' },
+  { id: 'frontend_init', name: '前端 初始化', category: '前端', color: '#2563eb' },
+  { id: 'frontend_pages', name: '前端 页面', category: '前端', color: '#0ea5e9' },
+  { id: 'frontend_components', name: '前端 组件', category: '前端', color: '#22c55e' },
+  { id: 'frontend_features', name: '前端 功能', category: '前端', color: '#10b981' },
+  { id: 'desktop_client', name: '桌面客户端', category: '客户端', color: '#22c55e' },
+  { id: 'electron', name: 'Electron', category: '客户端', color: '#0ea5e9' },
 ];
 
 export { MODULES };
@@ -208,7 +208,7 @@ export const useTodoStore = create<TodoStore>()(
       },
     }),
     {
-      name: 'trai-todo-storage',
+      name: 'trai_todo_storage',
     }
   )
 );
