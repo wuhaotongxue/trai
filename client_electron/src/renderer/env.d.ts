@@ -10,5 +10,6 @@ interface Window {
     tools_compress_image: (file_path: string, quality?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_files_to_zip: (file_paths: string[]) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_chat: (session_id: string, message: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    on_agent_chat_chunk?: (callback: (event: any, chunk: any) => void) => (() => void);
   }
 }

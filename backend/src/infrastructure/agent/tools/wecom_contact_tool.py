@@ -43,7 +43,7 @@ class WeComContactTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="wecom.contact",
+                id="wecom_contact",
                 name="企业微信通讯录",
                 description=(
                     "查询企业微信中的用户信息和部门结构。可根据用户姓名、工号查询用户详细信息，"

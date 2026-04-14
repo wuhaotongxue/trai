@@ -95,18 +95,23 @@ class AgentExecutor:
         self,
         messages: list[dict[str, str]],
         context: ExecutionContext,
-    ) -> dict[str, Any]:
+        stream: bool = False,
+    ) -> Any:
         """执行 Agent 对话（支持多轮工具调用 + 自我纠错）
 
         Args:
             messages: 消息历史（含 system/user/assistant/tool 消息）
             context: 执行上下文
+            stream: 是否流式响应
 
         Returns:
-            dict: 最终结果
+            dict | AsyncGenerator: 最终结果或流式生成器
         """
         self._ensure_initialized()
         self._ensure_quota()
+
+        if stream:
+            return self._execute_stream(messages, context)
 
         steps: list[AgentStep] = []
         turn = 0
@@ -231,6 +236,85 @@ class AgentExecutor:
             "total_duration_ms": int(time.time() * 1000) - start_ms,
         }
 
+    async def _execute_stream(
+        self,
+        messages: list[dict[str, str]],
+        context: ExecutionContext,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """执行流式 Agent 对话"""
+        turn = 0
+        current_messages = list(messages)
+        
+        while turn < self.MAX_TURNS:
+            turn += 1
+            logger.info(f"Agent Turn (Stream) {turn} | user_id={context.user_id}")
+            
+            stream_gen = await self._call_ai(current_messages, stream=True)
+            
+            assistant_content = ""
+            reasoning_content = ""
+            tool_calls: list[dict[str, Any]] = []
+            
+            import json
+            
+            async for event in stream_gen:
+                # pass event to client
+                yield {
+                    "type": event.type,
+                    "content": event.content,
+                    "tool_call_id": event.tool_call_id,
+                    "tool_name": event.tool_name,
+                }
+                
+                if event.type == "token":
+                    assistant_content += event.content
+                elif event.type == "reasoning":
+                    reasoning_content += event.content
+                elif event.type == "tool_call_end":
+                    tool_calls.append({
+                        "id": event.tool_call_id,
+                        "type": "function",
+                        "function": {
+                            "name": event.tool_name,
+                            "arguments": event.content
+                        }
+                    })
+            
+            assistant_msg: dict[str, Any] = {
+                "role": "assistant",
+                "content": assistant_content,
+            }
+            if tool_calls:
+                assistant_msg["tool_calls"] = tool_calls
+                
+            current_messages.append(assistant_msg)
+            
+            if not tool_calls:
+                break
+                
+            for tc in tool_calls:
+                tool_call_id = tc.get("id", "")
+                func = tc.get("function", {})
+                tool_id = func.get("name", "")
+                raw_args = func.get("arguments", "{}")
+                
+                try:
+                    args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+                except Exception:
+                    args = {}
+                    
+                tool_result = await self._execute_tool_with_correction(
+                    tool_id, tool_call_id, args, context
+                )
+                
+                tool_content = tool_result.output if tool_result.success else f"[工具执行失败] {tool_result.error or '未知错误'}"
+                
+                current_messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call_id,
+                    "content": tool_content,
+                })
+
     async def _execute_tool_with_correction(
         self,
         tool_id: str,
@@ -321,16 +405,23 @@ class AgentExecutor:
             logger.warning(f"配额检查/扣减失败: {e}")
 
     async def _call_ai(
-        self, messages: list[dict[str, str]]
-    ) -> dict[str, Any]:
+        self, messages: list[dict[str, str]], stream: bool = False
+    ) -> dict[str, Any] | AsyncIterator[StreamEvent]:
         """调用 AI
 
         Args:
             messages: 消息列表
+            stream: 是否使用流式返回
 
         Returns:
-            dict: AI 响应
+            dict | AsyncIterator[StreamEvent]: AI 响应或流
         """
+        if stream:
+            return self._ai_client.chat_stream(
+                messages=messages,
+                tools=self._tools if self._tools else None,
+            )
+        
         return await self._ai_client.chat(
             messages=messages,
             tools=self._tools if self._tools else None,

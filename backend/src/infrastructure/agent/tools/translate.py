@@ -44,7 +44,7 @@ class TranslateTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="utility.translate",
+                id="utility_translate",
                 name="翻译",
                 description="将文本从一种语言翻译成另一种语言",
                 category=ToolCategory.UTILITY,

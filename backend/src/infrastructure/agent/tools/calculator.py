@@ -37,7 +37,7 @@ class CalculatorTool(BaseTool):
     def definition(self) -> ToolDefinition:
         if self._definition is None:
             self._definition = ToolDefinition(
-                id="utility.calculator",
+                id="utility_calculator",
                 name="计算器",
                 description="执行基础数学计算，支持加减乘除、幂运算、开方、三角函数、对数等",
                 category=ToolCategory.UTILITY,

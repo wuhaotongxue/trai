@@ -41,6 +41,11 @@ class OpenAIClient:
             self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://dashscope.aliyuncs.com/compatible-mode/v1")
             self._model: str = os.getenv("MODELSCOPE_CHAT_MODEL", "Qwen/Qwen3.5-0.8B")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
+        elif self._provider == "deepseek":
+            self._api_key: str = os.getenv("DEEPSEEK_API_KEY", "")
+            self._base_url: str = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1")
+            self._model: str = os.getenv("DEEPSEEK_CHAT_MODEL", "deepseek-reasoner")
+            self._timeout: int = int(os.getenv("DEEPSEEK_TIMEOUT", "120"))
         else:
             self._api_key: str = os.getenv("OPENAI_API_KEY", "")
             self._base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
@@ -114,9 +119,11 @@ class OpenAIClient:
                 }
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"OpenAI HTTP 错误 | 状态码: {e.response.status_code}")
+            logger.error(f"OpenAI HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            if e.response.status_code == 400:
+                logger.error(f"导致 400 错误的 Payload: {payload}")
             raise ExternalServiceError(
-                message=f"OpenAI API 请求失败: {e.response.status_code}",
+                message=f"OpenAI API 请求失败: {e.response.status_code} - {e.response.text}",
                 details={"status_code": e.response.status_code},
             )
         except Exception as e:
@@ -296,7 +303,9 @@ class OpenAIClient:
                                 )
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code}")
+            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            if e.response.status_code == 400:
+                logger.error(f"导致流式 400 错误的 Payload: {payload}")
             raise ExternalServiceError(
                 message=f"OpenAI API 流式请求失败: {e.response.status_code}",
                 details={"status_code": e.response.status_code},
