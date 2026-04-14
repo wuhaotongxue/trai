@@ -145,7 +145,7 @@ const create_tray = () => {
       } 
     }
   ])
-  tray.setToolTip('TRAI Desktop')
+  tray.setToolTip('TRAI')
   tray.setContextMenu(context_menu)
   
   // 双击托盘显示窗口

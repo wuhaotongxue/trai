@@ -1,4 +1,4 @@
-# TRAI Desktop Client
+# TRAI Client
 
 基于 Electron, React 19 和 Vite 的桌面客户端, 采用 Win11 Fluent Design 风格.
 
@@ -48,6 +48,9 @@ pnpm build
 5. `src/main/platform/` - Node.js 原生 API 封装 (Platform Layer)
 
 ## 📝 更新日志 (Changelog)
+
+### 💻 客户端_2026_04_14_1630
+- **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
 
 ### 💻 客户端_2026_04_14_1500
 - **重构(client_electron)**: 重构工具箱卡片头部 UI，将图标、标题和描述从垂直居中堆叠改为水平流式布局（图标居左，标题与描述在右侧堆叠），有效节省卡片垂直空间并提升横向阅读体验
