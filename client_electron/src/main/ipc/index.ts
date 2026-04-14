@@ -110,6 +110,11 @@ export const register_ipc_handlers = (): void => {
     return agent_service.generate_comfyui(prompt)
   })
 
+  ipcMain.handle('ai:generate_report', async (_, template_base64: string, template_name: string, description: string) => {
+    // 调用 agent_service 中即将实现的 generate_report 方法
+    return agent_service.generate_report(template_base64, template_name, description)
+  })
+
   // ===================== Agent Management =====================
   ipcMain.handle('agent:management:list', async () => {
     return agent_service.get_agents()
