@@ -11,6 +11,7 @@ from .image import router as image_router
 from .management import router as management_router
 from .music import router as music_router
 from .video import router as video_router
+from .comfyui import router as comfyui_router
 
 router = APIRouter()
 
@@ -19,5 +20,6 @@ router.include_router(image_router)
 router.include_router(music_router)
 router.include_router(video_router)
 router.include_router(management_router)
+router.include_router(comfyui_router)
 
 __all__ = ["router"]
