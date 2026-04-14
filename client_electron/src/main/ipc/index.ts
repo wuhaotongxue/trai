@@ -9,6 +9,7 @@ import log from 'electron-log'
 import { get_system_info } from '../platform/index'
 import { config_store } from '../platform/config_store'
 import { auth_service } from '../services/auth'
+import { tools_service } from '../services/tools'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
@@ -56,5 +57,18 @@ export const register_ipc_handlers = (): void => {
 
   ipcMain.handle('auth:logout', async () => {
     return await auth_service.logout()
+  })
+
+  // ===================== 工具 =====================
+  ipcMain.handle('tools:convert_md_to_pdf', async (_, file_path: string) => {
+    return await tools_service.convert_md_to_pdf(file_path)
+  })
+
+  ipcMain.handle('tools:compress_image', async (_, file_path: string, quality?: number) => {
+    return await tools_service.compress_image(file_path, quality)
+  })
+
+  ipcMain.handle('tools:compress_files_to_zip', async (_, file_paths: string[]) => {
+    return await tools_service.compress_files_to_zip(file_paths)
   })
 }

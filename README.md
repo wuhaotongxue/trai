@@ -38,6 +38,14 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_0812
+- **新增(client_electron)**: `tools.ts` 服务层增加文件转换和压缩等相关接口请求，在 IPC 和 `preload` 层注册对应事件
+- **新增(client_electron)**: `Sidebar` 增加 `工具箱` 入口页面，前端实现与后端的交互：Markdown 转 PDF、多文件 ZIP 压缩、图片压缩的上传测试入口
+
+### 🛠️ 后端_2026_04_14_0812
+- **新增(tools)**: 增加 `ToolsAPI` 类，实现 `md-to-pdf`、`compress-image` 和 `compress-zip` 的逻辑，并注册到 `/api/tools/` 路由
+- **增强(tools)**: 工具接口实现处理结果自动上传至 S3 服务，并利用 S3 预签名机制，生成仅 5 分钟有效的访问链接返回给前端
+
 ### 💻 客户端_2026_04_13_2140
 - **增强(client_electron)**: `auth.ts` 服务层增加 Token 持久化与 Axios 请求拦截器，实现自动携带 `Authorization` 头，方便后续受保护接口调用
 - **新增(client_electron)**: `auth.ts` 增加 `logout` 方法并在 IPC 暴露 `auth:logout` 通道，在侧边栏实现完整的登出功能（清理服务端状态与本地 Token）
