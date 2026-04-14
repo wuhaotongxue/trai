@@ -106,6 +106,10 @@ export const register_ipc_handlers = (): void => {
     return agent_service.generate_video(prompt)
   })
 
+  ipcMain.handle('ai:generate_comfyui', async (_, prompt: string) => {
+    return agent_service.generate_comfyui(prompt)
+  })
+
   // ===================== Agent Management =====================
   ipcMain.handle('agent:management:list', async () => {
     return agent_service.get_agents()

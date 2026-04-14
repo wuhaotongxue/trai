@@ -51,7 +51,8 @@ const Sidebar: React.FC = () => {
         { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
         { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
         { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
-        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
+        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> },
+        { path: '/ai/comfyui', label: 'ComfyUI', icon: <Bot size={18} /> }
       ]
     },
     {
