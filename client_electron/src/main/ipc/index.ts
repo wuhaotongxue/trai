@@ -10,6 +10,7 @@ import { get_system_info } from '../platform/index'
 import { config_store } from '../platform/config_store'
 import { auth_service } from '../services/auth'
 import { tools_service } from '../services/tools'
+import { agent_service } from '../services/agent'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
@@ -70,5 +71,10 @@ export const register_ipc_handlers = (): void => {
 
   ipcMain.handle('tools:compress_files_to_zip', async (_, file_paths: string[]) => {
     return await tools_service.compress_files_to_zip(file_paths)
+  })
+
+  // ===================== Agent =====================
+  ipcMain.handle('agent:chat', async (_, session_id: string, message: string) => {
+    return await agent_service.chat(session_id, message)
   })
 }

@@ -36,6 +36,7 @@ class AgentChatResponse(BaseModel):
 
     session_id: str = Field(description="会话 ID")
     content: str = Field(description="AI 最终回复")
+    reasoning_content: str | None = Field(default=None, description="AI 思维链/推理过程")
     steps: list[dict[str, Any]] = Field(description="执行步骤明细")
     total_turns: int = Field(description="总轮次")
     total_tokens: int = Field(description="总消耗 Token 数")
@@ -79,10 +80,20 @@ async def agent_chat(
     ]
 
     result = await executor.execute(messages, context)
+    
+    # 提取所有步骤中的思维链并拼接
+    reasoning_parts = []
+    for step in result.get("steps", []):
+        rc = step.get("reasoning_content")
+        if rc:
+            reasoning_parts.append(rc)
+            
+    full_reasoning = "\n\n".join(reasoning_parts) if reasoning_parts else None
 
     return AgentChatResponse(
         session_id=request.session_id,
         content=result["final_content"],
+        reasoning_content=full_reasoning,
         steps=result["steps"],
         total_turns=result["total_turns"],
         total_tokens=result["total_tokens"],

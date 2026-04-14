@@ -49,6 +49,10 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_0840
+- **新增(client_electron)**: 新增 `AI 对话` 界面，支持与后端 Agent 交互并解析展示思维链（CoT）推理过程
+- **新增(client_electron)**: 在主进程服务层实现 `agent_service.ts` 及对应的 `agent:chat` IPC 调用
+
 ### 💻 客户端_2026_04_14_0831
 - **修复(client_electron)**: `tools.ts` 中请求路由变更为 `snake_case` 下划线命名风格，与后端一致
 - **修复(client_electron)**: `router/index.tsx` 补充缺少的 `Navigate` 导入，修复 `pnpm dev` 时的构建错误
