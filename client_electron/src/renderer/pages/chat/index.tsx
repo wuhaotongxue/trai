@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -35,6 +35,7 @@ const STORAGE_KEY = 'trai_chat_sessions'
 const AgentChat: React.FC = () => {
   const [sessions, set_sessions] = useState<ChatSession[]>([])
   const [active_session_id, set_active_session_id] = useState<string>('')
+  const [is_sidebar_open, set_is_sidebar_open] = useState(true)
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
@@ -237,13 +238,17 @@ const AgentChat: React.FC = () => {
     <div style={{ display: 'flex', height: '100%', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
       {/* 左侧会话列表 */}
       <div style={{ 
-        width: '260px', 
+        width: is_sidebar_open ? '260px' : '0px', 
+        opacity: is_sidebar_open ? 1 : 0,
         backgroundColor: '#ffffff', 
-        borderRight: '1px solid #e2e8f0',
+        borderRight: is_sidebar_open ? '1px solid #e2e8f0' : 'none',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        transition: 'all 0.3s ease',
+        overflow: 'hidden',
+        flexShrink: 0
       }}>
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: '16px', minWidth: '260px' }}>
           <button
             onClick={create_new_session}
             style={{
@@ -268,7 +273,7 @@ const AgentChat: React.FC = () => {
           </button>
         </div>
         
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '260px' }}>
           {sessions.map(s => (
             <div
               key={s.id}
@@ -325,6 +330,27 @@ const AgentChat: React.FC = () => {
       {/* 右侧聊天区 */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={() => set_is_sidebar_open(!is_sidebar_open)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              marginRight: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#64748b',
+              borderRadius: '4px',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            title={is_sidebar_open ? '收起会话列表' : '展开会话列表'}
+          >
+            {is_sidebar_open ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
+          </button>
           <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
           <span style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
         </div>
