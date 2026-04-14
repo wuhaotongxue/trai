@@ -40,13 +40,9 @@
 - **思维链体验**：针对复杂模型（如 DeepSeek），我们在对话气泡上方增加了带有动画反馈的“思考过程”折叠面板（CoT）。用户可以清晰地看到大模型在输出最终答案前，内心推演的逻辑链条。
 - **阅读优化**：支持流式打字机效果、实时 Markdown 渲染，并为超长回复与代码块加入了自动折叠/展开功能。
 
-![客户端对话的思维链测试](issue_04_03.jpg)
-
 **系统配置与工具箱**：
 - 初步搭建了客户端「系统设置」界面，支持深浅色切换、网络代理、基础账号信息等（后期会补充更多高级配置）。
 - 工具箱页面升级为卡片式布局，不仅接入了图片转换，还预留了 MD转PDF 等多个实用小工具的入口。
-
-![客户端系统设置](issue_04_04.jpg)
 
 ### 2. 前端：从官网全宽视觉到 B 端后台的骨架完善
 
@@ -58,13 +54,9 @@
 - 首页、Features、Pricing 等页面全部抛弃 `max-w-4xl` 的窄边限制，铺开到 `max-w-7xl`。
 - 同步对“字X跳动”、“华X”等测试数据进行脱敏打码，规避侵权。
 
-![官网视觉重构](issue_04_01.png)
-
 **Hydration 痛点与交互**：
 - 在 `/admin` 路由组引入 `mounted` 状态管理，完美解决 Next.js 服务端 HTML 与客户端本地状态（Theme、Token）不一致导致的 React Hydration 崩溃。
 - 左侧菜单现已支持流畅展开折叠，并且整个前端（包括官网和管理后台）完美支持**深色/浅色（Dark/Light）主题自由切换**，解决了切换时的闪烁与断层现象。
-
-![动态图谱与后台交互](issue_04_02.png)
 
 **动态路线图与三域联动**：
 - `/roadmap` 页面摒弃静态写死的时间轴，直接读取仓库真实 Git 日志生成线性时间段。
@@ -84,12 +76,67 @@
   - 在 `git_submit` 技能中嵌入 `ruff_check`，提交代码前自动格式化 Python 导入路径并拦截语法坏味道。
   - 对数据库层新增了强制 `COMMENT` 注释检查脚本，为表字段生成自动化文档兜底。
 
-### 4. 下一期预告：TRAI 第5期
+## 实战示意：官网与全宽视觉重构
 
-<div style="background:#fff7ed;border:1px solid #a7f3d0;border-radius:8px;padding:12px 16px;margin:14px 0;color:#064e3b;">
-  <strong style="color:#047857;">剧透</strong>：完善第三方身份认证与基础业务场景落地。
+<div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:8px;padding:12px 16px;margin:14px 0;color:#881337;">
+  <div style="font-weight:700;color:#be123c;margin-bottom:8px;">&#10060; 产品要点</div>
+  <p style="margin:0;">摒弃 <code>max-w-4xl</code> 的窄边距限制，使用 <code>max-w-7xl</code> 将视野彻底打开，配合深浅色自适应组件，呈现出现代化的 SaaS 官网质感。</p>
+</div>
+
+![官网视觉重构](issue_04_01.png)
+
+## 实战示意：后台管理面板与多端联动
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin:14px 0;">
+  <p style="margin:0;font-size:0.92em;color:#334155;line-height:1.8;">
+    侧边栏支持平滑折叠，右侧消息列表解决 Hydration 服务端/客户端渲染冲突；同时路线图下方新增 FE / BE / CL 多端代码联动图谱，展示开发链路。
+  </p>
+</div>
+
+![动态图谱与后台交互](issue_04_02.png)
+
+## 实战示意：客户端对话的思维链测试 (CoT)
+
+<div style="background:#fff1f2;border:1px solid #fecdd3;border-left:4px solid #e11d48;border-radius:8px;padding:12px 16px;margin:14px 0;color:#881337;">
+  <div style="font-weight:700;color:#be123c;margin-bottom:8px;">&#10060; 产品要点</div>
+  <p style="margin:0;">在复杂推理场景下，将大模型的推理链路（如 DeepSeek）实时暴露给用户，上方展示带动画的折叠态“思考过程”，下方以 Markdown 流式渲染最终答案。</p>
+</div>
+
+![客户端对话的思维链测试](issue_04_03.jpg)
+
+## 实战示意：客户端系统设置
+
+<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;margin:14px 0;">
+  <p style="margin:0;font-size:0.92em;color:#334155;line-height:1.8;">
+    采用 Win11 亮色主题，补充了本地持久化的系统设置入口，后期将承载更多环境、网络及多 Agent 切换的高级配置项。
+  </p>
+</div>
+
+![客户端系统设置](issue_04_04.jpg)
+
+## 本期 Git 摘要（按主题）
+
+| 主题 | 内容要点 |
+|------|----------|
+| 客户端重构 | PyQt6 整体迁移至 Vite + React + Electron，系统托盘与持久化存储 |
+| 对话与 AI | 思维链 (CoT) 展示面板、流式 Markdown 渲染、长回复/长文本折叠 |
+| 工具与生态 | ComfyUI 及多模态接口搭建、图片格式互相转换（支持指定体积压缩与 ICO） |
+| 前端官网 | 全宽视觉重构、企业名打码合规化、深浅色模式平滑切换 |
+| 前端后台 | React Hydration 渲染修复、动态路线图重构、FE/BE/CL 三域联动关系图谱 |
+| 工程与规范 | `ruff_check` 自动格式化拦截、强制中文标点禁令、数据库 `COMMENT` 校验 |
+
+## 下一步方向
+
+<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px 16px;margin:14px 0;color:#1e40af;">
+  <strong style="color:#1d4ed8;">TRAI 第 5 期剧透</strong>：完善第三方身份认证与基础业务场景落地。
 </div>
 
 - **企业微信登录接入**：前端与官网将支持**企业微信（WeCom）扫码与网页登录**，打通第三方账号认证闭环。
 - **官网版块深化**：补充和完善 TRAI 官网的更多业务场景展示与文档支持。
 - **Agent 与客户端进阶**：进一步丰富客户端的高级配置项，深化工作流的可视化编排反馈。
+
+---
+
+<div style="background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:10px 14px;margin:12px 0;font-family:ui-monospace,monospace;font-size:0.88em;color:#475569;">
+  <em>编写说明：本期依据 <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log</code> 自 <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">md/issue_03/index.md</code> 最后入库提交起算；可选样式表见 <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">md/issue_docs.css</code>。</em>
+</div>
