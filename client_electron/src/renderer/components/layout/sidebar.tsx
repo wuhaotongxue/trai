@@ -77,12 +77,16 @@ const Sidebar: React.FC = () => {
         
         {!collapsed && (
           <>
-            <h2 style={{ color: '#202020', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex' }}>
-                <User size={16} color="#ffffff" />
-              </div>
+            <div style={{ color: '#202020', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}>
+              {user?.username === 'admin' ? (
+                <img src="./kity.png" alt="avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                  <User size={16} color="#ffffff" />
+                </div>
+              )}
               {user?.username || '未登录'}
-            </h2>
+            </div>
             <div style={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px', marginTop: '8px', paddingLeft: '40px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.email || ''}
             </div>
