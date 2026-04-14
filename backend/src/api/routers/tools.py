@@ -109,6 +109,7 @@ class ToolsAPI:
         quality: int,
         current_user: CurrentUser,
         s3_service: S3StorageService,
+        target_size_kb: int | None = None,
     ) -> ToolResultResponse:
         """图片压缩接口
 
@@ -132,15 +133,46 @@ class ToolsAPI:
 
         try:
             content = await file.read()
+            original_size = len(content)
             image = Image.open(BytesIO(content))
+            original_width, original_height = image.size
             
             # 转换为 RGB 以支持 JPEG 保存
             if image.mode in ("RGBA", "P"):
                 image = image.convert("RGB")
                 
             output_buffer = BytesIO()
-            image.save(output_buffer, format="JPEG", quality=quality)
+            
+            if target_size_kb and target_size_kb > 0:
+                target_bytes = target_size_kb * 1024
+                low, high = 1, 100
+                best_quality = 60
+                best_bytes = None
+                
+                # 二分查找合适的压缩质量
+                while low <= high:
+                    mid = (low + high) // 2
+                    temp_buffer = BytesIO()
+                    image.save(temp_buffer, format="JPEG", quality=mid)
+                    size = len(temp_buffer.getvalue())
+                    
+                    if size <= target_bytes:
+                        best_quality = mid
+                        best_bytes = temp_buffer.getvalue()
+                        low = mid + 1  # 尝试提高质量
+                    else:
+                        high = mid - 1 # 降低质量
+                        
+                if best_bytes:
+                    output_buffer.write(best_bytes)
+                else:
+                    # 如果连最低质量(1)都无法满足，只能保存最低质量
+                    image.save(output_buffer, format="JPEG", quality=1)
+            else:
+                image.save(output_buffer, format="JPEG", quality=quality)
+                
             compressed_bytes = output_buffer.getvalue()
+            converted_size = len(compressed_bytes)
             
             # 上传到 S3
             object_key = f"tools/images/{current_user.user_id}/{uuid.uuid4().hex}.jpg"
@@ -153,6 +185,12 @@ class ToolsAPI:
                 url=presigned_url,
                 expires_in=300,
                 file_name=f"{original_name}_compressed.jpg",
+                original_size=original_size,
+                converted_size=converted_size,
+                original_width=original_width,
+                original_height=original_height,
+                converted_width=original_width,
+                converted_height=original_height
             )
         except Exception as e:
             logger.error(f"图片压缩失败: {str(e)}")
@@ -170,6 +208,7 @@ class ToolsAPI:
         sizes: list[int] | None = None,
         width: int | None = None,
         height: int | None = None,
+        target_size_kb: int | None = None,
     ) -> ToolResultResponse:
         """图片格式转换接口
 
@@ -229,7 +268,35 @@ class ToolsAPI:
                     image = image.resize((sizes[0], sizes[0]), Image.Resampling.LANCZOS)
                     converted_width, converted_height = sizes[0], sizes[0]
                     
-                image.save(output_buffer, format=fmt)
+                if target_size_kb and target_size_kb > 0 and fmt in ("JPEG", "WEBP"):
+                    target_bytes = target_size_kb * 1024
+                    low, high = 1, 100
+                    best_quality = 80
+                    best_bytes = None
+                    
+                    while low <= high:
+                        mid = (low + high) // 2
+                        temp_buffer = BytesIO()
+                        image.save(temp_buffer, format=fmt, quality=mid)
+                        size = len(temp_buffer.getvalue())
+                        
+                        if size <= target_bytes:
+                            best_quality = mid
+                            best_bytes = temp_buffer.getvalue()
+                            low = mid + 1
+                        else:
+                            high = mid - 1
+                            
+                    if best_bytes:
+                        output_buffer.write(best_bytes)
+                    else:
+                        image.save(output_buffer, format=fmt, quality=1)
+                else:
+                    # PNG, BMP 等不支持 quality 动态调整，或者未指定大小
+                    if fmt in ("JPEG", "WEBP"):
+                        image.save(output_buffer, format=fmt, quality=90)
+                    else:
+                        image.save(output_buffer, format=fmt)
                 
             converted_bytes = output_buffer.getvalue()
             converted_size = len(converted_bytes)
@@ -331,11 +398,12 @@ async def md_to_pdf_endpoint(
 async def compress_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
-    quality: int = 70,
+    quality: int = Form(60, description="压缩质量 (1-100)"),
+    target_size_kb: int | None = Form(None, description="目标文件大小(KB)，若指定则动态调整 quality 尝试逼近该大小"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """压缩图片并上传到 S3 返回限时下载链接"""
-    return await ToolsAPI.compress_image(file, quality, current_user, s3_service)
+    return await ToolsAPI.compress_image(file, quality, current_user, s3_service, target_size_kb)
 
 
 @router.post("/compress_zip", response_model=ToolResultResponse, tags=["工具"])
@@ -356,10 +424,11 @@ async def convert_image_endpoint(
     sizes: str | None = Form(None, description="尺寸列表，逗号分隔，如 16,32,256"),
     width: int | None = Form(None, description="指定转换宽度(像素)"),
     height: int | None = Form(None, description="指定转换高度(像素)"),
+    target_size_kb: int | None = Form(None, description="目标大小(KB)，仅对支持压缩的格式如 JPEG/WEBP 有效"),
     s3_service: S3StorageService = Depends(S3StorageService),
 ) -> ToolResultResponse:
     """转换图片格式并上传到 S3 返回限时下载链接"""
     parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
-    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes, width, height)
+    return await ToolsAPI.convert_image(file, target_format, current_user, s3_service, parsed_sizes, width, height, target_size_kb)
 
 __all__ = ["router", "ToolsAPI"]
