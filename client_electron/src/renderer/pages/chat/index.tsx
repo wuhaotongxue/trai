@@ -559,39 +559,85 @@ const AgentChat: React.FC = () => {
                             fontSize: '14px',
                             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                             border: '1px solid #e2e8f0',
-                            overflowX: 'auto'
+                            overflowX: 'auto',
+                            position: 'relative'
                           }}>
-                            <ReactMarkdown 
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                h1: ({node, ...props}) => <h1 style={{fontSize: '1.5em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
-                                h2: ({node, ...props}) => <h2 style={{fontSize: '1.3em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
-                                h3: ({node, ...props}) => <h3 style={{fontSize: '1.1em', fontWeight: 'bold', margin: '10px 0 6px'}} {...props} />,
-                                p: ({node, ...props}) => <p style={{margin: '0 0 10px 0'}} {...props} />,
-                                ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
-                                ol: ({node, ...props}) => <ol style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
-                                li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
-                                a: ({node, ...props}) => <a style={{color: '#0ea5e9', textDecoration: 'none'}} {...props} />,
-                                blockquote: ({node, ...props}) => <blockquote style={{margin: '0 0 10px 0', padding: '8px 16px', borderLeft: '4px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#64748b'}} {...props} />,
-                                code: ({node, className, children, ...props}) => {
-                                  const match = /language-(\w+)/.exec(className || '')
-                                  return match ? (
-                                    <pre style={{margin: '12px 0', padding: '16px', backgroundColor: '#0f172a', color: '#f8fafc', borderRadius: '8px', overflowX: 'auto'}}>
-                                      <code className={className} {...props}>{children}</code>
-                                    </pre>
-                                  ) : (
-                                    <code style={{backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: '#0ea5e9'}} {...props}>
-                                      {children}
-                                    </code>
-                                  )
-                                },
-                                table: ({node, ...props}) => <table style={{width: '100%', marginBottom: '16px', borderCollapse: 'collapse'}} {...props} />,
-                                th: ({node, ...props}) => <th style={{borderBottom: '2px solid #e2e8f0', padding: '8px', textAlign: 'left', fontWeight: 'bold'}} {...props} />,
-                                td: ({node, ...props}) => <td style={{borderBottom: '1px solid #e2e8f0', padding: '8px'}} {...props} />
-                              }}
-                            >
-                              {msg.content}
-                            </ReactMarkdown>
+                            <div style={{
+                              maxHeight: (!expanded_steps[`assistant_msg_${idx}`] && msg.content.length > 500 && !(loading && idx === messages.length - 1)) ? '240px' : 'none',
+                              overflow: 'hidden',
+                              position: 'relative'
+                            }}>
+                              <ReactMarkdown 
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  h1: ({node, ...props}) => <h1 style={{fontSize: '1.5em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
+                                  h2: ({node, ...props}) => <h2 style={{fontSize: '1.3em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
+                                  h3: ({node, ...props}) => <h3 style={{fontSize: '1.1em', fontWeight: 'bold', margin: '10px 0 6px'}} {...props} />,
+                                  p: ({node, ...props}) => <p style={{margin: '0 0 10px 0'}} {...props} />,
+                                  ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
+                                  ol: ({node, ...props}) => <ol style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
+                                  li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+                                  a: ({node, ...props}) => <a style={{color: '#0ea5e9', textDecoration: 'none'}} {...props} />,
+                                  blockquote: ({node, ...props}) => <blockquote style={{margin: '0 0 10px 0', padding: '8px 16px', borderLeft: '4px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#64748b'}} {...props} />,
+                                  code: ({node, className, children, ...props}) => {
+                                    const match = /language-(\w+)/.exec(className || '')
+                                    return match ? (
+                                      <pre style={{margin: '12px 0', padding: '16px', backgroundColor: '#0f172a', color: '#f8fafc', borderRadius: '8px', overflowX: 'auto'}}>
+                                        <code className={className} {...props}>{children}</code>
+                                      </pre>
+                                    ) : (
+                                      <code style={{backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: '#0ea5e9'}} {...props}>
+                                        {children}
+                                      </code>
+                                    )
+                                  },
+                                  table: ({node, ...props}) => <table style={{width: '100%', marginBottom: '16px', borderCollapse: 'collapse'}} {...props} />,
+                                  th: ({node, ...props}) => <th style={{borderBottom: '2px solid #e2e8f0', padding: '8px', textAlign: 'left', fontWeight: 'bold'}} {...props} />,
+                                  td: ({node, ...props}) => <td style={{borderBottom: '1px solid #e2e8f0', padding: '8px'}} {...props} />
+                                }}
+                              >
+                                {msg.content}
+                              </ReactMarkdown>
+                              {(!expanded_steps[`assistant_msg_${idx}`] && msg.content.length > 500 && !(loading && idx === messages.length - 1)) && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  height: '60px',
+                                  background: 'linear-gradient(to bottom, transparent, #ffffff)'
+                                }} />
+                              )}
+                            </div>
+                            {(msg.content.length > 500 && !(loading && idx === messages.length - 1)) && (
+                              <div 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggle_step(`assistant_msg_${idx}`)
+                                }}
+                                style={{
+                                  marginTop: '8px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '4px',
+                                  fontSize: '12px',
+                                  color: '#94a3b8',
+                                  cursor: 'pointer',
+                                  borderTop: '1px dashed #e2e8f0',
+                                  paddingTop: '8px',
+                                  userSelect: 'none'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#0ea5e9'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                              >
+                                {expanded_steps[`assistant_msg_${idx}`] ? (
+                                  <><ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} /> 收起</>
+                                ) : (
+                                  <><ChevronDown size={14} /> 展开全文</>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
                       </>
