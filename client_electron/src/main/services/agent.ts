@@ -126,5 +126,65 @@ export const agent_service = {
         error: error.message || '对话请求失败' 
       }
     }
+  },
+
+  /**
+   * 文生图
+   */
+  async generate_image(prompt: string, model: string = "AI-ModelScope/FLUX.1-dev") {
+    try {
+      const url = `${get_api_base_url()}/api/ai/image`
+      const payload = { prompt, model }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('generate_image failed:', error.message)
+      return { success: false, error: error.message || '图片生成失败' }
+    }
+  },
+
+  /**
+   * 图生图
+   */
+  async generate_image_to_image(prompt: string, image_url: string) {
+    try {
+      const url = `${get_api_base_url()}/api/ai/image_to_image`
+      const payload = { prompt, image_url }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('generate_image_to_image failed:', error.message)
+      return { success: false, error: error.message || '图生图生成失败' }
+    }
+  },
+
+  /**
+   * AI 音乐
+   */
+  async generate_music(prompt: string) {
+    try {
+      const url = `${get_api_base_url()}/api/ai/music`
+      const payload = { prompt }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('generate_music failed:', error.message)
+      return { success: false, error: error.message || '音乐生成失败' }
+    }
+  },
+
+  /**
+   * AI 视频
+   */
+  async generate_video(prompt: string) {
+    try {
+      const url = `${get_api_base_url()}/api/ai/video`
+      const payload = { prompt }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('generate_video failed:', error.message)
+      return { success: false, error: error.message || '视频生成失败' }
+    }
   }
 }

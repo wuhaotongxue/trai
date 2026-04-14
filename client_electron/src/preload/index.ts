@@ -19,6 +19,10 @@ contextBridge.exposeInMainWorld('electron_api', {
   tools_compress_files_to_zip: (file_paths: string[]) => ipcRenderer.invoke('tools:compress_files_to_zip', file_paths),
   agent_chat: (session_id: string, message: string) => ipcRenderer.invoke('agent:chat', session_id, message),
   agent_stop: (session_id: string) => ipcRenderer.invoke('agent:stop', session_id),
+  ai_generate_image: (prompt: string) => ipcRenderer.invoke('ai:generate_image', prompt),
+  ai_generate_image_to_image: (prompt: string, image_url: string) => ipcRenderer.invoke('ai:generate_image_to_image', prompt, image_url),
+  ai_generate_music: (prompt: string) => ipcRenderer.invoke('ai:generate_music', prompt),
+  ai_generate_video: (prompt: string) => ipcRenderer.invoke('ai:generate_video', prompt),
   on_agent_chat_chunk: (callback: (event: any, chunk: any) => void) => {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }
