@@ -38,7 +38,7 @@ class OpenAIClient:
         self._provider = os.getenv("LLM_PROVIDER", "openai")
         if self._provider == "modelscope":
             self._api_key: str = os.getenv("MODELSCOPE_API_KEY", "")
-            self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://api.modelscope.cn/v1")
+            self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://dashscope.aliyuncs.com/compatible-mode/v1")
             self._model: str = os.getenv("MODELSCOPE_CHAT_MODEL", "Qwen/Qwen3.5-0.8B")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
         else:
