@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('electron_api', {
   ai_generate_music: (prompt: string) => ipcRenderer.invoke('ai:generate_music', prompt),
   ai_generate_video: (prompt: string) => ipcRenderer.invoke('ai:generate_video', prompt),
   ai_generate_comfyui: (prompt: string) => ipcRenderer.invoke('ai:generate_comfyui', prompt),
+  ai_generate_report: (template_base64: string, template_name: string, description: string) => ipcRenderer.invoke('ai:generate_report', template_base64, template_name, description),
   agent_management_list: () => ipcRenderer.invoke('agent:management:list'),
   agent_management_register: (name: string, description: string, model: string, system_prompt: string) => ipcRenderer.invoke('agent:management:register', name, description, model, system_prompt),
   agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => ipcRenderer.invoke('agent:management:toggle', agent_id, action),
