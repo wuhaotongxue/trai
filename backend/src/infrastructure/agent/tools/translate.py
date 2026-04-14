@@ -65,13 +65,13 @@ class TranslateTool(BaseTool):
                     ),
                     ToolParameter(
                         name="source_lang",
-                        description=f"源语言代码，如: zh, en, ja. 设为 auto 则自动检测 ({', '.join(SUPPORTED_LANGUAGES)})",
+                        description=f"源语言代码,如: zh, en, ja. 设为 auto 则自动检测 ({', '.join(SUPPORTED_LANGUAGES)})",
                         type="string",
                         required=True,
                     ),
                     ToolParameter(
                         name="target_lang",
-                        description=f"目标语言代码，如: zh, en, ja ({', '.join(SUPPORTED_LANGUAGES)})",
+                        description=f"目标语言代码,如: zh, en, ja ({', '.join(SUPPORTED_LANGUAGES)})",
                         type="string",
                         required=True,
                     ),

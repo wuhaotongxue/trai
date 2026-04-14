@@ -22,7 +22,7 @@ class IImageGenerationRepository(ABC):
             entity: 图片生成实体
 
         Returns:
-            ImageGeneration: 创建后的实体（含 ID）
+            ImageGeneration: 创建后的实体(含 ID)
         """
         pass
 

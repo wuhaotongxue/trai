@@ -100,7 +100,7 @@ async def send_message(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ) -> SendMessageResponse:
-    """发送消息（联动 AI 对话）
+    """发送消息(联动 AI 对话)
 
     Args:
         session_id: 会话 ID
@@ -112,7 +112,7 @@ async def send_message(
         SendMessageResponse: 发送结果
 
     Raises:
-        HTTPException: 会话不存在（404）或无权访问（403）
+        HTTPException: 会话不存在(404)或无权访问(403)
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
@@ -128,7 +128,7 @@ async def send_message(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # 权限校验：非管理员只能访问自己的会话
+    # 权限校验:非管理员只能访问自己的会话
     if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -146,7 +146,7 @@ async def send_message(
     messages = message_repo.get_messages(session_id)
     messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
-    # 上下文管理：检查并压缩超限上下文
+    # 上下文管理:检查并压缩超限上下文
     context_manager: ContextManager = get_context_manager()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
@@ -167,7 +167,7 @@ async def send_message(
             content=ai_response["content"],
         )
 
-        # 更新会话摘要（标题）
+        # 更新会话摘要(标题)
         if len(messages) == 1:
             title = request.content[:30] + ("..." if len(request.content) > 30 else "")
             session_repo.update_session(session_id=session_id, title=title)
@@ -291,7 +291,7 @@ async def get_session_detail(
         SessionDetailResponse: 会话详情
 
     Raises:
-        HTTPException: 会话不存在（404）
+        HTTPException: 会话不存在(404)
     """
     user_id = current_user.get("user_id")
 
@@ -343,7 +343,7 @@ async def delete_session(
         ActionResponse: 操作结果
 
     Raises:
-        HTTPException: 会话不存在（404）
+        HTTPException: 会话不存在(404)
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
@@ -405,7 +405,7 @@ async def send_message_stream(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ):
-    """发送消息（流式响应，支持 abort 中断）
+    """发送消息(流式响应,支持 abort 中断)
 
     SSE 事件格式:
     - token: 文本片段 {"event": "token", "data": "..."}
@@ -582,8 +582,8 @@ async def policy_confirm(
 ) -> PolicyConfirmResponse:
     """确认危险操作
 
-    当高危操作返回 ASK 状态时，前端调用此接口完成二次确认。
-    确认成功后，操作可直接执行。
+    当高危操作返回 ASK 状态时,前端调用此接口完成二次确认.
+    确认成功后,操作可直接执行.
 
     Args:
         request: 确认请求参数
@@ -609,7 +609,7 @@ async def policy_confirm(
 
     return PolicyConfirmResponse(
         confirmed=success,
-        message="操作已确认" if success else "确认失败，请重试",
+        message="操作已确认" if success else "确认失败,请重试",
     )
 
 

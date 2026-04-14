@@ -16,7 +16,7 @@ from infrastructure.agent.tools.base import (
 
 
 class ToolRegistry:
-    """工具注册表 - 全局单例，管理所有工具"""
+    """工具注册表 - 全局单例,管理所有工具"""
 
     def __init__(self) -> None:
         self._tools: dict[str, BaseTool] = {}
@@ -89,9 +89,9 @@ class ToolRegistry:
     def get_tools_for_user(self, role: str) -> list[ToolDefinition]:
         """获取用户可用的工具定义
 
-        根据角色过滤，返回该角色可使用的工具定义列表。
-        目前所有已注册工具都对所有角色可见，
-        实际权限控制在 ToolGovernor 中处理。
+        根据角色过滤,返回该角色可使用的工具定义列表.
+        目前所有已注册工具都对所有角色可见,
+        实际权限控制在 ToolGovernor 中处理.
 
         Args:
             role: 用户角色

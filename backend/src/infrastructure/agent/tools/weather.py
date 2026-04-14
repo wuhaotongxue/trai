@@ -37,19 +37,19 @@ class WeatherTool(BaseTool):
             self._definition = ToolDefinition(
                 id="weather_current",
                 name="天气查询",
-                description="查询指定城市的当前天气情况，包括温度、湿度、风力、空气质量等",
+                description="查询指定城市的当前天气情况,包括温度、湿度、风力、空气质量等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[
                     ToolParameter(
                         name="city",
-                        description="城市名称，如：北京、上海、Shanghai",
+                        description="城市名称,如:北京、上海、Shanghai",
                         type="string",
                         required=True,
                     ),
                     ToolParameter(
                         name="lang",
-                        description="返回语言，zh-Hans（简体中文）或 en（英文）",
+                        description="返回语言,zh-Hans(简体中文)或 en(英文)",
                         type="string",
                         required=False,
                         default="zh-Hans",
@@ -73,7 +73,7 @@ class WeatherTool(BaseTool):
                 error="城市名称不能为空",
             )
 
-        # 移除强制检查 API key，直接使用 wttr.in 免费接口
+        # 移除强制检查 API key,直接使用 wttr.in 免费接口
         # if not self._api_key:
         #     return await self._mock_weather(city)
 
@@ -114,9 +114,9 @@ class WeatherTool(BaseTool):
             return await self._mock_weather(city)
 
     async def _mock_weather(self, city: str) -> ToolCallResult:
-        """Mock 数据，用于未配置 API Key 时"""
+        """Mock 数据,用于未配置 API Key 时"""
         output = (
-            f"{city}当前天气（Mock数据）:\\n"
+            f"{city}当前天气(Mock数据):\\n"
             f"- 温度: 22°C\\n"
             f"- 天气: 多云\\n"
             f"- 湿度: 65%\\n"

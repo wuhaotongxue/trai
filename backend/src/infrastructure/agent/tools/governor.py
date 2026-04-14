@@ -2,7 +2,7 @@
 # 文件名: governor.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
-# 描述: 工具治理器 - 统一拦截器，执行风险检查、权限校验、审计
+# 描述: 工具治理器 - 统一拦截器,执行风险检查、权限校验、审计
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ class GovernanceResult:
 
 
 class ToolGovernor:
-    """工具治理器 - 统一拦截器，五步校验"""
+    """工具治理器 - 统一拦截器,五步校验"""
 
     def __init__(self) -> None:
         self._rate_limit_enabled: bool = os.getenv("TOOL_GOVERNOR_RATE_LIMIT", "true").lower() == "true"
@@ -47,7 +47,7 @@ class ToolGovernor:
         context: ExecutionContext,
         confirmed: bool = False,
     ) -> ToolCallResult:
-        """执行工具（经过治理拦截）
+        """执行工具(经过治理拦截)
 
         Args:
             tool: 工具实例

@@ -22,7 +22,7 @@ class IUploadTaskRepository(ABC):
             entity: 上传任务实体
 
         Returns:
-            UploadTask: 创建后的实体（含 ID）
+            UploadTask: 创建后的实体(含 ID)
         """
         pass
 

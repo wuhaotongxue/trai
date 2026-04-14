@@ -42,7 +42,7 @@ class QuotaStatus:
 class QuotaService:
     """配额服务 - 统一配额检查和扣减入口
 
-    所有涉及配额的检查必须通过此类，禁止在业务代码中直接操作配额。
+    所有涉及配额的检查必须通过此类,禁止在业务代码中直接操作配额.
     """
 
     def __init__(self, quota_repository: QuotaRepository) -> None:
@@ -66,7 +66,7 @@ class QuotaService:
         role: str,
         tool_id: str,
     ) -> None:
-        """检查配额是否充足（不扣减）
+        """检查配额是否充足(不扣减)
 
         Args:
             user_id: 用户 ID
@@ -101,7 +101,7 @@ class QuotaService:
                 f"quota_type={quota_type} | used={used} | limit={limit}"
             )
             raise AIQuotaExceededError(
-                message="月度配额已用完，请下个月再试或升级为 VIP",
+                message="月度配额已用完,请下个月再试或升级为 VIP",
                 details={
                     "quota_type": quota_type,
                     "used": used,

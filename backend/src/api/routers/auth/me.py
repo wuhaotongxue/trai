@@ -49,14 +49,14 @@ async def get_current_user_info(
     """获取当前登录用户信息
 
     Args:
-        current_user: 当前登录用户（从 Token 中解析）
+        current_user: 当前登录用户(从 Token 中解析)
         session: 数据库会话
 
     Returns:
         MeResponse: 当前用户信息
 
     Raises:
-        HTTPException: 用户不存在（404）
+        HTTPException: 用户不存在(404)
     """
     user_id = current_user.get("user_id", "")
     if not user_id:

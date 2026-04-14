@@ -90,7 +90,7 @@ async def send_notify(
     request: SendNotifyRequest,
     current_user: Annotated[dict, Depends(require_admin)],
 ) -> SendNotifyResponse:
-    """发送通知（仅管理员）
+    """发送通知(仅管理员)
 
     Args:
         request: 通知请求
@@ -160,7 +160,7 @@ async def test_notify(
     request: NotifyTestRequest,
     current_user: Annotated[dict, Depends(require_admin)],
 ) -> SendNotifyResponse:
-    """测试通知发送（仅管理员）
+    """测试通知发送(仅管理员)
 
     Args:
         request: 测试请求
@@ -211,7 +211,7 @@ async def test_notify(
 async def list_notify_configs(
     current_user: Annotated[dict, Depends(require_admin)],
 ) -> NotifyConfigListResponse:
-    """获取通知配置列表（仅管理员）
+    """获取通知配置列表(仅管理员)
 
     Args:
         current_user: 当前登录管理员

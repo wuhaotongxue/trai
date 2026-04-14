@@ -2,7 +2,7 @@
 # 文件名: logging.py
 # 作者: wuhao
 # 日期: 2026_04_09
-# 描述: 请求日志中间件，记录请求和响应信息
+# 描述: 请求日志中间件,记录请求和响应信息
 
 from __future__ import annotations
 

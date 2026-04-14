@@ -48,7 +48,7 @@ def get_tracer(name: str = "trai") -> trace.Tracer:
     # 创建 TracerProvider
     provider = TracerProvider(resource=resource)
 
-    # 添加 Console 导出器（开发环境）
+    # 添加 Console 导出器(开发环境)
     if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
         try:
             otlp_exporter = OTLPSpanExporter()
@@ -210,7 +210,7 @@ def trace_db_call(
     Args:
         operation: 操作类型
         table: 表名
-        latency_ms: 延迟（毫秒）
+        latency_ms: 延迟(毫秒)
         status: 状态
 
     Returns:

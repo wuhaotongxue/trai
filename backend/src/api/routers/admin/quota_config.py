@@ -37,13 +37,13 @@ class QuotaPlanResponse(BaseModel):
 class QuotaPlanUpdateRequest(BaseModel):
     """配额套餐更新请求"""
 
-    image_generation_limit: int = Field(ge=0, description="图片生成配额（0=无限制）")
-    audio_synthesis_limit: int = Field(ge=0, description="语音合成配额（0=无限制）")
-    transcription_minutes_limit: int = Field(ge=0, description="转录配额（0=无限制）")
-    meeting_summary_limit: int = Field(ge=0, description="会议摘要配额（0=无限制）")
-    ai_translation_limit: int = Field(ge=0, description="AI 翻译配额（0=无限制）")
-    ai_summarization_limit: int = Field(ge=0, description="AI 摘要配额（0=无限制）")
-    agent_tool_call_limit: int = Field(ge=0, description="Agent 工具调用配额（0=无限制）")
+    image_generation_limit: int = Field(ge=0, description="图片生成配额(0=无限制)")
+    audio_synthesis_limit: int = Field(ge=0, description="语音合成配额(0=无限制)")
+    transcription_minutes_limit: int = Field(ge=0, description="转录配额(0=无限制)")
+    meeting_summary_limit: int = Field(ge=0, description="会议摘要配额(0=无限制)")
+    ai_translation_limit: int = Field(ge=0, description="AI 翻译配额(0=无限制)")
+    ai_summarization_limit: int = Field(ge=0, description="AI 摘要配额(0=无限制)")
+    agent_tool_call_limit: int = Field(ge=0, description="Agent 工具调用配额(0=无限制)")
 
 
 class CreateQuotaPlanRequest(BaseModel):

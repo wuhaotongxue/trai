@@ -22,7 +22,7 @@ from infrastructure.database.user_model import UserModel
 class UserRepository(IUserRepository):
     """用户数据库仓储
 
-    实现 IUserRepository 接口，负责用户数据的持久化操作
+    实现 IUserRepository 接口,负责用户数据的持久化操作
     使用 SQLAlchemy ORM 与 PostgreSQL 数据库交互
     """
 
@@ -115,10 +115,10 @@ class UserRepository(IUserRepository):
 
         Args:
             user_id: 用户唯一标识
-            tenant_id: 租户 ID（可选）
+            tenant_id: 租户 ID(可选)
 
         Returns:
-            User | None: 用户实体，不存在或已删除返回 None
+            User | None: 用户实体,不存在或已删除返回 None
         """
         stmt = select(UserModel).where(
             UserModel.t_user_id == user_id,
@@ -132,7 +132,7 @@ class UserRepository(IUserRepository):
 
         Args:
             username: 用户名
-            tenant_id: 租户 ID（可选）
+            tenant_id: 租户 ID(可选)
 
         Returns:
             User | None: 用户实体
@@ -149,7 +149,7 @@ class UserRepository(IUserRepository):
 
         Args:
             email: 邮箱地址
-            tenant_id: 租户 ID（可选）
+            tenant_id: 租户 ID(可选)
 
         Returns:
             User | None: 用户实体
@@ -220,7 +220,7 @@ class UserRepository(IUserRepository):
 
         Args:
             user_id: 用户唯一标识
-            tenant_id: 租户 ID（可选）
+            tenant_id: 租户 ID(可选)
 
         Returns:
             bool: 是否删除成功
@@ -249,11 +249,11 @@ class UserRepository(IUserRepository):
         """获取用户列表
 
         Args:
-            tenant_id: 租户 ID（可选）
-            role: 用户角色过滤（可选）
-            status: 用户状态过滤（可选）
-            limit: 每页数量（默认 50）
-            offset: 偏移量（默认 0）
+            tenant_id: 租户 ID(可选)
+            role: 用户角色过滤(可选)
+            status: 用户状态过滤(可选)
+            limit: 每页数量(默认 50)
+            offset: 偏移量(默认 0)
 
         Returns:
             list[User]: 用户实体列表
@@ -275,9 +275,9 @@ class UserRepository(IUserRepository):
         """统计用户数量
 
         Args:
-            tenant_id: 租户 ID（可选）
-            role: 用户角色过滤（可选）
-            status: 用户状态过滤（可选）
+            tenant_id: 租户 ID(可选)
+            role: 用户角色过滤(可选)
+            status: 用户状态过滤(可选)
 
         Returns:
             int: 用户总数

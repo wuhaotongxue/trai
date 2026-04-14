@@ -29,7 +29,7 @@ class DependencyStatus(BaseModel):
 
     name: str = Field(description="服务名称")
     status: str = Field(description="状态")
-    latency_ms: float | None = Field(default=None, description="响应延迟（毫秒）")
+    latency_ms: float | None = Field(default=None, description="响应延迟(毫秒)")
     error: str | None = Field(default=None, description="错误信息")
 
 
@@ -93,7 +93,7 @@ async def detailed_health_check() -> DetailedHealthResponse:
 async def liveness_check() -> dict[str, str]:
     """存活探针
 
-    用于 Kubernetes livenessProbe，判断服务是否存活
+    用于 Kubernetes livenessProbe,判断服务是否存活
 
     Returns:
         dict: 存活状态
@@ -105,7 +105,7 @@ async def liveness_check() -> dict[str, str]:
 async def readiness_check() -> dict[str, Any]:
     """就绪探针
 
-    用于 Kubernetes readinessProbe，判断服务是否可以接收流量
+    用于 Kubernetes readinessProbe,判断服务是否可以接收流量
 
     Returns:
         dict: 就绪状态

@@ -21,7 +21,7 @@ from infrastructure.security.password import PasswordService, get_password_servi
 
 router = APIRouter()
 
-# 用户名正则：字母、数字、下划线，3-32字符
+# 用户名正则:字母、数字、下划线,3-32字符
 USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_]{3,32}$")
 # 邮箱正则
 EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
@@ -64,13 +64,13 @@ async def register(
         RegisterResponse: 注册成功返回用户信息
 
     Raises:
-        HTTPException: 注册失败（400/409）
+        HTTPException: 注册失败(400/409)
     """
     # 验证用户名格式
     if not USERNAME_PATTERN.match(request.username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={"code": 400, "message": "用户名格式不正确，需为字母、数字、下划线，3-32字符"},
+            detail={"code": 400, "message": "用户名格式不正确,需为字母、数字、下划线,3-32字符"},
         )
 
     # 验证邮箱格式

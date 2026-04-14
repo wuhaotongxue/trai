@@ -44,23 +44,23 @@ def create_app() -> FastAPI:
 
 
 def register_middlewares(app: FastAPI) -> None:
-    """注册中间件（顺序很重要）"""
-    # 1. 错误处理（最先，捕获所有异常）
+    """注册中间件(顺序很重要)"""
+    # 1. 错误处理(最先,捕获所有异常)
     app.add_middleware(ErrorHandlerMiddleware)
 
-    # 2. 请求 ID（生成追踪 ID）
+    # 2. 请求 ID(生成追踪 ID)
     app.add_middleware(RequestIdMiddleware)
 
-    # 3. 审计日志（记录操作）
+    # 3. 审计日志(记录操作)
     app.add_middleware(AuditMiddleware)
 
-    # 4. 速率限制（防止滥用）
+    # 4. 速率限制(防止滥用)
     app.add_middleware(RateLimitMiddleware)
 
-    # 5. 日志记录（最后，记录完整请求）
+    # 5. 日志记录(最后,记录完整请求)
     app.add_middleware(LoggingMiddleware)
 
-    # 6. CORS（跨域支持）
+    # 6. CORS(跨域支持)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -103,7 +103,7 @@ def register_routers(app: FastAPI) -> None:
 
     @app.get("/", tags=["首页"])
     async def root() -> dict:
-        """根路径，返回服务信息"""
+        """根路径,返回服务信息"""
         return {
             "service": "TRAI API",
             "version": "0.1.0",

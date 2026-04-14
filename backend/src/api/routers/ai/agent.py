@@ -40,7 +40,7 @@ class AgentChatResponse(BaseModel):
     steps: list[dict[str, Any]] = Field(description="执行步骤明细")
     total_turns: int = Field(description="总轮次")
     total_tokens: int = Field(description="总消耗 Token 数")
-    total_duration_ms: int = Field(description="总耗时（毫秒）")
+    total_duration_ms: int = Field(description="总耗时(毫秒)")
     trace_id: str = Field(description="链路追踪 ID")
 
 
@@ -49,10 +49,10 @@ async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
 ) -> Any:
-    """Agent 对话（支持多轮工具调用）
+    """Agent 对话(支持多轮工具调用)
 
-    支持 AI 自动调用工具（天气/搜索/翻译/计算等），
-    多轮对话直到 AI 完成回答或达到最大轮数。
+    支持 AI 自动调用工具(天气/搜索/翻译/计算等),
+    多轮对话直到 AI 完成回答或达到最大轮数.
 
     Args:
         request: Agent 对话请求
@@ -83,7 +83,7 @@ async def agent_chat(
     result = await executor.execute(messages, context, stream=request.stream)
 
     if request.stream:
-        # 如果是流式响应，executor.execute 会返回一个 AsyncGenerator
+        # 如果是流式响应,executor.execute 会返回一个 AsyncGenerator
         from fastapi.responses import StreamingResponse
 
         async def event_generator():
@@ -129,8 +129,8 @@ async def list_tools(
 ) -> ToolListResponse:
     """获取可用工具列表
 
-    返回所有已注册的工具定义，
-    前端据此构建 AI 的工具选择界面。
+    返回所有已注册的工具定义,
+    前端据此构建 AI 的工具选择界面.
 
     Args:
         current_user: 当前登录用户
@@ -170,8 +170,8 @@ async def call_tool(
 ) -> ToolCallResponse:
     """手动调用指定工具
 
-    不经过 AI，直接执行工具。
-    用于前端手动触发特定工具。
+    不经过 AI,直接执行工具.
+    用于前端手动触发特定工具.
 
     Args:
         request: 工具调用请求
@@ -216,8 +216,8 @@ class QuotaStatusResponse(BaseModel):
 
     quota_type: str = Field(description="配额类型")
     used: int = Field(description="已使用数量")
-    limit: int = Field(description="月度上限（0 表示无限制）")
-    remaining: int = Field(description="剩余数量（无限制时为 0）")
+    limit: int = Field(description="月度上限(0 表示无限制)")
+    remaining: int = Field(description="剩余数量(无限制时为 0)")
     unlimited: bool = Field(description="是否无限制")
     billing_month: str = Field(description="账单月份")
 
@@ -236,7 +236,7 @@ async def get_user_quota(
 ) -> UserQuotaResponse:
     """获取当前用户配额状态
 
-    返回用户所有类型的月度配额使用情况。
+    返回用户所有类型的月度配额使用情况.
 
     Args:
         current_user: 当前登录用户

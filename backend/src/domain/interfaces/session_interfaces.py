@@ -61,9 +61,9 @@ class ISessionRepository(Protocol):
         """获取会话列表
 
         Args:
-            user_id: 用户 ID（可选）
-            limit: 每页数量（默认 50）
-            offset: 偏移量（默认 0）
+            user_id: 用户 ID(可选)
+            limit: 每页数量(默认 50)
+            offset: 偏移量(默认 0)
 
         Returns:
             list[ChatSession]: 会话实体列表
@@ -81,9 +81,9 @@ class ISessionRepository(Protocol):
 
         Args:
             session_id: 会话唯一标识
-            title: 会话标题（可选）
-            messages: 消息列表（可选）
-            extra_data: 扩展数据（可选）
+            title: 会话标题(可选)
+            messages: 消息列表(可选)
+            extra_data: 扩展数据(可选)
 
         Returns:
             ChatSession | None: 更新后的会话实体
@@ -119,9 +119,9 @@ class IMessageRepository(Protocol):
 
         Args:
             session_id: 会话 ID
-            role: 消息角色（system/user/assistant）
+            role: 消息角色(system/user/assistant)
             content: 消息内容
-            msg_metadata: 消息元数据（可选）
+            msg_metadata: 消息元数据(可选)
 
         Returns:
             Message: 创建的消息实体

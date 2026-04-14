@@ -115,7 +115,7 @@ class QuotaRepository:
             quota_type: 配额类型
 
         Returns:
-            int: 配额上限（0 表示无限制）
+            int: 配额上限(0 表示无限制)
         """
         field_map: dict[str, str] = {
             "image_generation": "t_image_generation_limit",
@@ -142,7 +142,7 @@ class QuotaRepository:
         Args:
             record: 配额使用记录
             quota_type: 配额类型
-            delta: 增量（默认 1）
+            delta: 增量(默认 1)
 
         Returns:
             int: 扣减后的新余额

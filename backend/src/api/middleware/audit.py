@@ -185,7 +185,7 @@ def get_audit_logger() -> AuditLogger:
 class AuditMiddleware(BaseHTTPMiddleware):
     """审计日志中间件"""
 
-    # 需要审计的路径（支持前缀匹配）
+    # 需要审计的路径(支持前缀匹配)
     AUDIT_PATHS: list[str] = [
         "/api/auth/",
         "/api/ai/",
@@ -195,7 +195,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
         "/api/system/notify/",
     ]
 
-    # 高危操作（记录 request_body）
+    # 高危操作(记录 request_body)
     HIGH_RISK_PATHS: list[str] = [
         "/api/auth/login",
         "/api/auth/register",

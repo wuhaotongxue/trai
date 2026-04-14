@@ -12,7 +12,7 @@ from typing import Any
 
 
 class ErrorCategory(StrEnum):
-    """错误分类枚举（对应 correction.md 规范）"""
+    """错误分类枚举(对应 correction.md 规范)"""
 
     VALIDATION = "validation"
     PERMISSION = "permission"

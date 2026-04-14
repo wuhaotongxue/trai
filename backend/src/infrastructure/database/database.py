@@ -46,7 +46,7 @@ class DatabaseConfig:
 
     @property
     def url(self) -> URL:
-        """获取数据库连接 URL（密码自动 URL 编码）"""
+        """获取数据库连接 URL(密码自动 URL 编码)"""
         return URL.create(
             drivername="postgresql",
             username=self._user,
@@ -100,7 +100,7 @@ _db: Database | None = None
 
 
 def get_database() -> Database:
-    """获取数据库实例（单例）"""
+    """获取数据库实例(单例)"""
     global _db
     if _db is None:
         _db = Database()
@@ -108,7 +108,7 @@ def get_database() -> Database:
 
 
 def get_session() -> Session:
-    """获取数据库会话（依赖注入）"""
+    """获取数据库会话(依赖注入)"""
     return get_database().get_session()
 
 

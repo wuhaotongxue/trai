@@ -2,7 +2,7 @@
 # 文件名: base.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:55:00
-# 描述: 通知服务基类，定义统一的通知接口
+# 描述: 通知服务基类,定义统一的通知接口
 
 from __future__ import annotations
 
@@ -89,7 +89,7 @@ class NotifyResult:
 class BaseNotifyService(ABC):
     """通知服务基类
 
-    所有通知服务（飞书、企业微信、钉钉等）都应继承此类
+    所有通知服务(飞书、企业微信、钉钉等)都应继承此类
     实现统一的发送接口
     """
 

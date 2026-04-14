@@ -2,7 +2,7 @@
 # 文件名: request_id.py
 # 作者: wuhao
 # 日期: 2026_04_09
-# 描述: 请求 ID 中间件，为每个请求生成唯一 ID
+# 描述: 请求 ID 中间件,为每个请求生成唯一 ID
 
 from __future__ import annotations
 

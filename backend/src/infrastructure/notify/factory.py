@@ -2,7 +2,7 @@
 # 文件名: factory.py
 # 作者: wuhao
 # 日期: 2026_04_09_14:25:00
-# 描述: 通知服务工厂类，根据配置创建对应的通知服务
+# 描述: 通知服务工厂类,根据配置创建对应的通知服务
 
 from __future__ import annotations
 
@@ -61,8 +61,8 @@ class NotifyServiceFactory:
         Args:
             platform: 平台类型
             webhook_url: Webhook 地址
-            timeout: 超时时间（秒）
-            **kwargs: 额外参数（如 secret, agent_id 等）
+            timeout: 超时时间(秒)
+            **kwargs: 额外参数(如 secret, agent_id 等)
 
         Returns:
             BaseNotifyService: 通知服务实例
@@ -162,7 +162,7 @@ class NotifyServiceFactory:
             webhook_url: Webhook 地址
 
         Returns:
-            BaseNotifyService | None: 已存在的服务实例，不存在返回 None
+            BaseNotifyService | None: 已存在的服务实例,不存在返回 None
         """
         platform_str = platform.value if isinstance(platform, NotifyPlatform) else platform.lower()
         service_key = f"{platform_str}:{webhook_url}"
@@ -187,7 +187,7 @@ class NotifyServiceFactory:
         """根据配置创建所有平台的的通知服务
 
         Args:
-            configs: 平台配置字典，格式: {"feishu": {"webhook_url": "...", "secret": "..."}}
+            configs: 平台配置字典,格式: {"feishu": {"webhook_url": "...", "secret": "..."}}
 
         Returns:
             dict[str, BaseNotifyService]: 创建的服务字典

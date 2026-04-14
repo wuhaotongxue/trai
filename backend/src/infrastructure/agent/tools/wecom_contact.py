@@ -70,16 +70,16 @@ class WeComDepartment:
 class WeComContactClient:
     """企业微信通讯录客户端
 
-    提供用户与部门的增删改查封装，内部自动管理 access_token 缓存。
-    需在环境变量或配置中设置以下字段：
+    提供用户与部门的增删改查封装,内部自动管理 access_token 缓存.
+    需在环境变量或配置中设置以下字段:
 
         WECOM_CORP_ID       - 企业 ID
         WECOM_AGENT_ID     - 应用 AgentID
         WECOM_APP_SECRET   - 应用 Secret
-        WECOM_CONTACT_SECRET - 通讯录 Secret（可选，若需通讯录权限）
+        WECOM_CONTACT_SECRET - 通讯录 Secret(可选,若需通讯录权限)
 
-    注意：使用通讯录 API 需要「通讯录」应用权限，
-    若仅有「自建应用」权限请在 Agent 管理后台为应用开启通讯录权限。
+    注意:使用通讯录 API 需要「通讯录」应用权限,
+    若仅有「自建应用」权限请在 Agent 管理后台为应用开启通讯录权限.
     """
 
     _TOKEN_CACHE_KEY = "_wecom_access_token"
@@ -115,7 +115,7 @@ class WeComContactClient:
 
         secret = self._contact_secret
         if not secret:
-            raise RuntimeError("WECOM_APP_SECRET 或 WECOM_CONTACT_SECRET 未配置，无法获取 access_token")
+            raise RuntimeError("WECOM_APP_SECRET 或 WECOM_CONTACT_SECRET 未配置,无法获取 access_token")
 
         params = {
             "grant_type": "client_credential",
@@ -145,7 +145,7 @@ class WeComContactClient:
         """获取部门列表
 
         Args:
-            dept_id: 部门 ID，不传则获取全量部门树
+            dept_id: 部门 ID,不传则获取全量部门树
 
         Returns:
             list[WeComDepartment]: 部门信息列表
@@ -170,7 +170,7 @@ class WeComContactClient:
         return [WeComDepartment.from_dict(d) for d in data.get("department", [])]
 
     async def get_department_tree(self) -> list[dict[str, Any]]:
-        """获取完整部门树（递归构建）
+        """获取完整部门树(递归构建)
 
         Returns:
             list[dict]: 部门树形结构 [{id, name, parent_id, children: []}]
@@ -207,7 +207,7 @@ class WeComContactClient:
         department_id: int,
         fetch_child: bool = True,
     ) -> list[WeComUser]:
-        """获取部门下用户列表（简易信息）
+        """获取部门下用户列表(简易信息)
 
         Args:
             department_id: 部门 ID
@@ -241,7 +241,7 @@ class WeComContactClient:
         """获取单个用户详情
 
         Args:
-            user_id: 用户 ID（工号）
+            user_id: 用户 ID(工号)
 
         Returns:
             WeComUser: 用户详情
@@ -264,7 +264,7 @@ class WeComContactClient:
         return WeComUser.from_dict(data)
 
     async def search_users_by_name(self, name: str, department_id: int | None = None) -> list[WeComUser]:
-        """根据姓名模糊搜索用户（先获取全量再过滤，适用于小规模组织）
+        """根据姓名模糊搜索用户(先获取全量再过滤,适用于小规模组织)
 
         Args:
             name: 姓名关键字
@@ -302,20 +302,20 @@ class WeComContactClient:
         status_str = status_map.get(user.status, f"未知({user.status})")
 
         parts = [
-            f"工号：{user.user_id}",
-            f"姓名：{user.name}",
-            f"部门：{dept_str}",
-            f"职位：{user.position or '未设置'}",
-            f"手机：{user.mobile or '未设置'}",
-            f"邮箱：{user.email or '未设置'}",
-            f"状态：{status_str}",
+            f"工号:{user.user_id}",
+            f"姓名:{user.name}",
+            f"部门:{dept_str}",
+            f"职位:{user.position or '未设置'}",
+            f"手机:{user.mobile or '未设置'}",
+            f"邮箱:{user.email or '未设置'}",
+            f"状态:{status_str}",
         ]
         return "\n".join(parts)
 
     def format_department_summary(self, dept: WeComDepartment) -> str:
         """格式化部门信息为可读摘要"""
 
-        return f"部门ID：{dept.id}\n部门名称：{dept.name}\n上级部门ID：{dept.parent_id}\n排序：{dept.order}"
+        return f"部门ID:{dept.id}\n部门名称:{dept.name}\n上级部门ID:{dept.parent_id}\n排序:{dept.order}"
 
 
 __all__ = [

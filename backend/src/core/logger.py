@@ -2,7 +2,7 @@
 # 文件名: logger.py
 # 作者: wuhao
 # 日期: 2026_04_09_13:42:00
-# 描述: 日志模块，封装 loguru 提供统一日志服务
+# 描述: 日志模块,封装 loguru 提供统一日志服务
 
 from __future__ import annotations
 
@@ -118,7 +118,7 @@ class LoggerConfig:
 
 
 class LoggerManager:
-    """日志管理器，单例模式"""
+    """日志管理器,单例模式"""
 
     _instance: LoggerManager | None = None
     _initialized: bool = False
@@ -187,7 +187,7 @@ class LoggerManager:
         """动态配置日志
 
         Args:
-            **kwargs: 配置参数，支持 level, rotation, retention, format 等
+            **kwargs: 配置参数,支持 level, rotation, retention, format 等
         """
         if "level" in kwargs:
             self._config.level = str(kwargs["level"])

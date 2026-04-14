@@ -50,13 +50,13 @@ class CalculatorTool(BaseTool):
             self._definition = ToolDefinition(
                 id="utility_calculator",
                 name="计算器",
-                description="执行基础数学计算，支持加减乘除、幂运算、开方、三角函数、对数等",
+                description="执行基础数学计算,支持加减乘除、幂运算、开方、三角函数、对数等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[
                     ToolParameter(
                         name="expression",
-                        description="数学表达式，如: 2+3*4, sqrt(16), pow(2, 10), sin(pi/2)",
+                        description="数学表达式,如: 2+3*4, sqrt(16), pow(2, 10), sin(pi/2)",
                         type="string",
                         required=True,
                     ),

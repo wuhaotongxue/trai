@@ -33,7 +33,7 @@ class LoginResponse(BaseModel):
     access_token: str = Field(description="访问令牌")
     refresh_token: str = Field(description="刷新令牌")
     token_type: str = Field(default="Bearer", description="令牌类型")
-    expires_in: int = Field(description="访问令牌过期时间（秒）")
+    expires_in: int = Field(description="访问令牌过期时间(秒)")
     user: dict[str, Any] = Field(description="用户信息")
 
 
@@ -47,7 +47,7 @@ async def login(
     """用户登录
 
     Args:
-        request: 登录请求参数（用户名、密码）
+        request: 登录请求参数(用户名、密码)
         jwt_service: JWT 服务实例
         password_service: 密码服务实例
         session: 数据库会话
@@ -56,7 +56,7 @@ async def login(
         LoginResponse: 登录成功返回令牌和用户信息
 
     Raises:
-        HTTPException: 认证失败（401）
+        HTTPException: 认证失败(401)
     """
     # 从数据库查询用户
     user_repo = UserRepository(session)
@@ -87,7 +87,7 @@ async def login(
     if not user.is_active():
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": 403, "message": "账户已被禁用，请联系管理员"},
+            detail={"code": 403, "message": "账户已被禁用,请联系管理员"},
         )
 
     # 生成令牌

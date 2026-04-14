@@ -118,7 +118,7 @@ class ContextManager:
         summary_message: dict[str, str] = {
             "role": "system",
             "content": (
-                f"[历史消息摘要] 之前的对话摘要如下:\n{summary}\n\n基于以上摘要继续对话，如需了解详情可参考原始记录。"
+                f"[历史消息摘要] 之前的对话摘要如下:\n{summary}\n\n基于以上摘要继续对话,如需了解详情可参考原始记录."
             ),
         }
 
@@ -145,8 +145,8 @@ class ContextManager:
             str: 摘要内容
         """
         summary_instruction = (
-            "你是一个对话摘要助手。请将以下对话历史压缩为一段简洁的摘要，"
-            "保留关键信息、用户意图、重要结论和任何未解决的问题。"
+            "你是一个对话摘要助手.请将以下对话历史压缩为一段简洁的摘要,"
+            "保留关键信息、用户意图、重要结论和任何未解决的问题."
             "摘要应包含:\n"
             "1. 对话主题\n"
             "2. 主要讨论内容\n"
@@ -194,7 +194,7 @@ class ContextManager:
             if len(content) > 20:
                 topics.append(content[:100])
 
-        summary = f"对话共 {len(messages)} 条消息。"
+        summary = f"对话共 {len(messages)} 条消息."
         if topics:
             summary += f"涉及话题: {'; '.join(topics[:3])}"
         if first_msg:
