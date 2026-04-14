@@ -12,6 +12,8 @@ const Tools: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [error_msg, set_error_msg] = useState('')
   const [target_image_format, set_target_image_format] = useState('png')
+  const [ico_sizes, set_ico_sizes] = useState<number[]>([16, 32, 48, 64, 128, 256])
+  const [other_size, set_other_size] = useState<string>('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -111,8 +113,15 @@ const Tools: React.FC = () => {
       set_error_msg('')
       set_result_url('')
       
+      let sizes_param: number[] | undefined = undefined
+      if (target_image_format === 'ico') {
+        sizes_param = ico_sizes.length > 0 ? ico_sizes : undefined
+      } else if (other_size && !isNaN(Number(other_size))) {
+        sizes_param = [Number(other_size)]
+      }
+      
       try {
-        const res = await window.electron_api.tools_convert_image(file.path, target_image_format)
+        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param)
         if (res.success && res.data) {
           set_result_url(res.data.url)
         } else {
@@ -164,27 +173,80 @@ const Tools: React.FC = () => {
       bg_color: '#f0f9ff',
       border_color: '#bae6fd',
       extra_ui: (
-        <div style={{ marginTop: '12px', marginBottom: '16px' }}>
-          <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px' }}>目标格式:</label>
-          <select 
-            value={target_image_format} 
-            onChange={(e) => set_target_image_format(e.target.value)}
-            style={{ 
-              padding: '6px 12px', 
-              borderRadius: '6px', 
-              border: '1px solid #cbd5e1', 
-              fontSize: '13px',
-              outline: 'none',
-              backgroundColor: '#f8fafc',
-              cursor: 'pointer'
-            }}
-          >
-            <option value="png">PNG</option>
-            <option value="jpeg">JPEG</option>
-            <option value="ico">ICO (图标)</option>
-            <option value="webp">WEBP</option>
-            <option value="bmp">BMP</option>
-          </select>
+        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px', minWidth: '60px' }}>目标格式:</label>
+            <select 
+              value={target_image_format} 
+              onChange={(e) => {
+                set_target_image_format(e.target.value)
+                set_error_msg('')
+                set_result_url('')
+              }}
+              style={{ 
+                padding: '6px 12px', 
+                borderRadius: '6px', 
+                border: '1px solid #cbd5e1', 
+                fontSize: '13px',
+                outline: 'none',
+                backgroundColor: '#f8fafc',
+                cursor: 'pointer',
+                flex: 1
+              }}
+            >
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+              <option value="ico">ICO (图标)</option>
+              <option value="webp">WEBP</option>
+              <option value="bmp">BMP</option>
+            </select>
+          </div>
+          
+          {target_image_format === 'ico' && (
+            <div>
+              <label style={{ fontSize: '13px', color: '#475569', display: 'block', marginBottom: '6px' }}>打包尺寸 (多选):</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {[16, 32, 48, 64, 128, 256].map(size => (
+                  <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={ico_sizes.includes(size)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          set_ico_sizes(prev => [...prev, size].sort((a, b) => a - b))
+                        } else {
+                          set_ico_sizes(prev => prev.filter(s => s !== size))
+                        }
+                      }}
+                      style={{ margin: 0 }}
+                    />
+                    {size}x{size}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {target_image_format !== 'ico' && (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label style={{ fontSize: '13px', color: '#475569', marginRight: '8px', minWidth: '60px' }}>目标尺寸:</label>
+              <input 
+                type="number" 
+                placeholder="如 512，留空保持原图"
+                value={other_size}
+                onChange={(e) => set_other_size(e.target.value)}
+                style={{ 
+                  flex: 1,
+                  padding: '6px 12px', 
+                  borderRadius: '6px', 
+                  border: '1px solid #cbd5e1', 
+                  fontSize: '13px', 
+                  outline: 'none',
+                  backgroundColor: '#ffffff'
+                }}
+              />
+            </div>
+          )}
         </div>
       )
     }

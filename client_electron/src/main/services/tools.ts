@@ -103,7 +103,7 @@ export const tools_service = {
   /**
    * 转换本地图片格式
    */
-  async convert_image(file_path: string, target_format: string) {
+  async convert_image(file_path: string, target_format: string, sizes?: number[]) {
     try {
       const url = `${get_api_base_url()}/api/tools/convert_image`
       const form_data = new FormData()
@@ -112,6 +112,9 @@ export const tools_service = {
       const filename = path.basename(file_path)
       form_data.append('file', new Blob([file_buffer]), filename)
       form_data.append('target_format', target_format)
+      if (sizes && sizes.length > 0) {
+        form_data.append('sizes', sizes.join(','))
+      }
       
       const res = await api_client.post(url, form_data)
       
