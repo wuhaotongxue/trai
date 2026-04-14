@@ -2,24 +2,122 @@
  * 文件名: index.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 08:45:00
- * 描述: 客户端 Agent 对话测试页面，支持展示思维链 (CoT)
+ * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare } from 'lucide-react'
+
+interface ToolStep {
+  type: 'tool_start' | 'tool_result'
+  tool_name: string
+  content: string
+  success?: boolean
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   reasoning_content?: string
+  steps?: ToolStep[]
 }
 
+interface ChatSession {
+  id: string
+  title: string
+  updated_at: number
+  messages: ChatMessage[]
+}
+
+const STORAGE_KEY = 'trai_chat_sessions'
+
 const AgentChat: React.FC = () => {
-  const [messages, set_messages] = useState<ChatMessage[]>([])
-  const [input, set_input] = useState('今天北京天气怎么样？')
+  const [sessions, set_sessions] = useState<ChatSession[]>([])
+  const [active_session_id, set_active_session_id] = useState<string>('')
+  const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
+  const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
-  // 简单的 session_id
-  const [session_id] = useState(`session_${Date.now()}`)
+  const active_session_id_ref = useRef<string>('')
+
+  // 初始化会话
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed.length > 0) {
+          set_sessions(parsed)
+          set_active_session_id(parsed[0].id)
+          active_session_id_ref.current = parsed[0].id
+          return
+        }
+      }
+    } catch (e) {
+      console.error('加载历史会话失败', e)
+    }
+    create_new_session()
+  }, [])
+
+  useEffect(() => {
+    active_session_id_ref.current = active_session_id
+  }, [active_session_id])
+
+  const create_new_session = () => {
+    const new_session: ChatSession = {
+      id: `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      title: '新会话',
+      updated_at: Date.now(),
+      messages: []
+    }
+    set_sessions(prev => {
+      const updated = [new_session, ...prev]
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
+    set_active_session_id(new_session.id)
+  }
+
+  const delete_session = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    set_sessions(prev => {
+      const updated = prev.filter(s => s.id !== id)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      if (active_session_id === id) {
+        if (updated.length > 0) {
+          set_active_session_id(updated[0].id)
+        } else {
+          setTimeout(create_new_session, 0)
+        }
+      }
+      return updated
+    })
+  }
+
+  const update_active_session_messages = (updater: (prev: ChatMessage[]) => ChatMessage[], target_sid: string = active_session_id_ref.current) => {
+    set_sessions(prev_sessions => {
+      const updated = prev_sessions.map(s => {
+        if (s.id === target_sid) {
+          const new_msgs = updater(s.messages)
+          let title = s.title
+          if (title === '新会话' && new_msgs.length > 0) {
+            const first_user_msg = new_msgs.find(m => m.role === 'user')
+            if (first_user_msg) {
+              title = first_user_msg.content.slice(0, 15) + (first_user_msg.content.length > 15 ? '...' : '')
+            }
+          }
+          return { ...s, messages: new_msgs, title, updated_at: Date.now() }
+        }
+        return s
+      })
+      updated.sort((a, b) => b.updated_at - a.updated_at)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
+  const active_session = sessions.find(s => s.id === active_session_id)
+  const messages = active_session ? active_session.messages : []
 
   const scroll_to_bottom = () => {
     messages_end_ref.current?.scrollIntoView({ behavior: 'smooth' })
@@ -32,8 +130,9 @@ const AgentChat: React.FC = () => {
   useEffect(() => {
     if (window.electron_api?.on_agent_chat_chunk) {
       const cleanup = window.electron_api.on_agent_chat_chunk((_event: any, chunk: any) => {
-        set_messages(prev => {
-          const new_msgs = [...prev]
+        const target_sid = chunk.session_id || active_session_id_ref.current
+        update_active_session_messages(prev_msgs => {
+          const new_msgs = [...prev_msgs]
           if (new_msgs.length > 0) {
             const last_msg = { ...new_msgs[new_msgs.length - 1] }
             if (last_msg.role === 'assistant') {
@@ -41,51 +140,80 @@ const AgentChat: React.FC = () => {
                 last_msg.content += chunk.content
               } else if (chunk.type === 'reasoning' && chunk.content) {
                 last_msg.reasoning_content = (last_msg.reasoning_content || '') + chunk.content
+              } else if (chunk.type === 'tool_execution_start') {
+                last_msg.steps = last_msg.steps || []
+                last_msg.steps.push({
+                  type: 'tool_start',
+                  tool_name: chunk.tool_name,
+                  content: chunk.content
+                })
+              } else if (chunk.type === 'tool_execution_result') {
+                last_msg.steps = last_msg.steps || []
+                last_msg.steps.push({
+                  type: 'tool_result',
+                  tool_name: chunk.tool_name,
+                  content: chunk.content,
+                  success: chunk.success
+                })
               }
               new_msgs[new_msgs.length - 1] = last_msg
             }
           }
           return new_msgs
-        })
+        }, target_sid)
       })
       return cleanup
     }
   }, [])
 
   const handle_send = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || !active_session_id) return
     
     const user_msg = input.trim()
     set_input('')
-    set_messages(prev => [...prev, { role: 'user', content: user_msg }])
     
-    // Add empty assistant message for streaming
-    set_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '' }])
+    const current_sid = active_session_id
+    update_active_session_messages(prev => [...prev, { role: 'user', content: user_msg }], current_sid)
+    update_active_session_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '', steps: [] }], current_sid)
+    
     set_loading(true)
     
     try {
-      const res = await window.electron_api.agent_chat(session_id, user_msg)
-      if (!res.success) {
-        set_messages(prev => {
+      const res = await window.electron_api.agent_chat(current_sid, user_msg)
+      if (!res.success && !res.is_canceled) {
+        update_active_session_messages(prev => {
           const new_msgs = [...prev]
           new_msgs[new_msgs.length - 1] = { 
             role: 'assistant', 
-            content: `[错误]: ${res.error || '请求失败'}` 
+            content: `[错误] ${res.error || '请求失败'}` 
           }
           return new_msgs
-        })
+        }, current_sid)
       }
     } catch (err: any) {
-      set_messages(prev => {
+      update_active_session_messages(prev => {
         const new_msgs = [...prev]
         new_msgs[new_msgs.length - 1] = { 
           role: 'assistant', 
-          content: `[异常]: ${err.message}` 
+          content: `[异常] ${err.message}` 
         }
         return new_msgs
-      })
+      }, current_sid)
     } finally {
+      // 只有当前活动的会话才取消loading状态（如果用户切换了会话，不应该影响）
+      if (active_session_id_ref.current === current_sid) {
+        set_loading(false)
+      }
+    }
+  }
+
+  const handle_stop = async () => {
+    if (!active_session_id) return
+    try {
+      await window.electron_api.agent_stop(active_session_id)
       set_loading(false)
+    } catch (err) {
+      console.error('Stop failed', err)
     }
   }
 
@@ -96,111 +224,414 @@ const AgentChat: React.FC = () => {
     }
   }
 
+  const toggle_step = (id: string) => {
+    set_expanded_steps(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }))
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <h1 style={{ color: '#202020', marginTop: 0, marginBottom: '16px' }}>AI 助手 (支持思维链测试)</h1>
-      
-      <div style={{
-        flex: 1,
-        backgroundColor: '#ffffff',
-        borderRadius: '8px',
-        border: '1px solid rgba(0, 0, 0, 0.05)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+    <div style={{ display: 'flex', height: '100%', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
+      {/* 左侧会话列表 */}
+      <div style={{ 
+        width: '260px', 
+        backgroundColor: '#ffffff', 
+        borderRight: '1px solid #e2e8f0',
         display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
+        flexDirection: 'column'
       }}>
-        {/* 聊天记录区 */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {messages.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.4)', marginTop: '40px' }}>
-              尝试询问：“今天北京天气怎么样？” 来测试天气工具和思维链。
-            </div>
-          ) : (
-            messages.map((msg, idx) => (
-              <div key={idx} style={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' 
-              }}>
-                <div style={{
-                  maxWidth: '80%',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  backgroundColor: msg.role === 'user' ? '#0078d4' : '#f3f2f1',
-                  color: msg.role === 'user' ? '#ffffff' : '#202020',
-                  lineHeight: '1.5'
-                }}>
-                  {msg.reasoning_content && (
-                    <details style={{ 
-                      marginBottom: '12px', 
-                      padding: '8px', 
-                      backgroundColor: 'rgba(0,0,0,0.05)', 
-                      borderRadius: '4px',
-                      fontSize: '13px'
-                    }}>
-                      <summary style={{ cursor: 'pointer', color: 'rgba(0,0,0,0.6)' }}>🤔 思考过程</summary>
-                      <div style={{ marginTop: '8px', whiteSpace: 'pre-wrap', color: 'rgba(0,0,0,0.7)' }}>
-                        {msg.reasoning_content}
-                      </div>
-                    </details>
-                  )}
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
-                </div>
-              </div>
-            ))
-          )}
-          {loading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: '#f3f2f1', color: 'rgba(0,0,0,0.5)' }}>
-                AI 正在思考中...
-              </div>
-            </div>
-          )}
-          <div ref={messages_end_ref} />
-        </div>
-        
-        {/* 输入区 */}
-        <div style={{ 
-          padding: '16px', 
-          borderTop: '1px solid rgba(0,0,0,0.05)',
-          display: 'flex',
-          gap: '12px'
-        }}>
-          <textarea
-            value={input}
-            onChange={(e) => set_input(e.target.value)}
-            onKeyDown={handle_key_down}
-            placeholder="输入您的问题，按 Enter 发送..."
-            disabled={loading}
-            style={{
-              flex: 1,
-              height: '40px',
-              minHeight: '40px',
-              maxHeight: '120px',
-              padding: '10px 12px',
-              borderRadius: '4px',
-              border: '1px solid rgba(0,0,0,0.1)',
-              resize: 'vertical',
-              outline: 'none',
-              fontFamily: 'inherit'
-            }}
-          />
+        <div style={{ padding: '16px' }}>
           <button
-            onClick={handle_send}
-            disabled={loading || !input.trim()}
+            onClick={create_new_session}
             style={{
-              padding: '0 24px',
-              backgroundColor: loading || !input.trim() ? '#cccccc' : '#0078d4',
-              color: 'white',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px',
+              backgroundColor: '#0ea5e9',
+              color: '#ffffff',
               border: 'none',
-              borderRadius: '4px',
-              cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
-              fontWeight: 'bold'
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px',
+              transition: 'background-color 0.2s'
             }}
           >
-            发送
+            <Plus size={18} />
+            新建会话
           </button>
+        </div>
+        
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {sessions.map(s => (
+            <div
+              key={s.id}
+              onClick={() => set_active_session_id(s.id)}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                backgroundColor: active_session_id === s.id ? '#e0f2fe' : 'transparent',
+                color: active_session_id === s.id ? '#0369a1' : '#475569',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+              }}
+              onMouseLeave={(e) => {
+                if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <MessageCircle size={18} style={{ flexShrink: 0, color: active_session_id === s.id ? '#0ea5e9' : '#94a3b8' }} />
+              <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px', fontWeight: active_session_id === s.id ? 500 : 400 }}>
+                {s.title}
+              </div>
+              <div 
+                onClick={(e) => delete_session(e, s.id)}
+                style={{ 
+                  padding: '4px', 
+                  borderRadius: '4px', 
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fef2f2'
+                  e.currentTarget.style.color = '#ef4444'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = '#94a3b8'
+                }}
+              >
+                <Trash2 size={14} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 右侧聊天区 */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
+          <span style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+        </div>
+        
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {messages.length === 0 ? (
+              <div style={{ textAlign: 'center', color: '#64748b', marginTop: '40px', fontSize: '14px' }}>
+                尝试询问:"今天北京天气怎么样?" 来测试天气工具和思维链.
+              </div>
+            ) : (
+              messages.map((msg, idx) => (
+                <div key={idx} style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+                }}>
+                  <div style={{
+                    maxWidth: '85%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    {msg.role === 'user' ? (
+                      <div style={{
+                        padding: '12px 16px',
+                        borderRadius: '12px 12px 0 12px',
+                        backgroundColor: '#0ea5e9',
+                        color: '#ffffff',
+                        lineHeight: '1.6',
+                        fontSize: '14px',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                      }}>
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <>
+                        {msg.reasoning_content && (
+                          <div style={{ 
+                            backgroundColor: '#f1f5f9', 
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            overflow: 'hidden'
+                          }}>
+                            <div 
+                              onClick={() => toggle_step(`reasoning_${idx}`)}
+                              style={{ 
+                                padding: '10px 14px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                cursor: 'pointer',
+                                backgroundColor: '#f8fafc',
+                                color: '#475569',
+                                fontSize: '13px',
+                                userSelect: 'none'
+                              }}
+                            >
+                              <MessageSquare size={14} style={{ marginRight: '8px', color: '#64748b' }} />
+                              <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                思考过程
+                                {loading && idx === messages.length - 1 && !msg.content && (
+                                  <Loader2 size={14} className="animate-spin" style={{ color: '#0ea5e9' }} />
+                                )}
+                              </span>
+                              {expanded_steps[`reasoning_${idx}`] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                            </div>
+                            {expanded_steps[`reasoning_${idx}`] && (
+                              <div style={{ 
+                                padding: '12px 14px', 
+                                whiteSpace: 'pre-wrap', 
+                                color: '#334155',
+                                fontSize: '13px',
+                                borderTop: '1px solid #e2e8f0',
+                                backgroundColor: '#ffffff',
+                                lineHeight: '1.6'
+                              }}>
+                                {msg.reasoning_content}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {msg.steps && msg.steps.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {msg.steps.map((step, s_idx) => {
+                              const step_id = `step_${idx}_${s_idx}`
+                              const is_start = step.type === 'tool_start'
+                              const is_success = step.success === true
+                              const is_fail = step.success === false
+                              
+                              let border_color = '#e2e8f0'
+                              let bg_color = '#ffffff'
+                              let header_bg = '#f8fafc'
+                              let icon_color = '#64748b'
+                              let text_color = '#475569'
+                              let status_text = '执行中...'
+                              
+                              if (is_start) {
+                                border_color = '#bae6fd'
+                                header_bg = '#f0f9ff'
+                                icon_color = '#0284c7'
+                                text_color = '#0369a1'
+                              } else if (is_success) {
+                                border_color = '#bbf7d0'
+                                header_bg = '#f0fdf4'
+                                icon_color = '#16a34a'
+                                text_color = '#15803d'
+                                status_text = '已完成'
+                              } else if (is_fail) {
+                                border_color = '#fecaca'
+                                header_bg = '#fef2f2'
+                                icon_color = '#dc2626'
+                                text_color = '#b91c1c'
+                                status_text = '失败'
+                              }
+
+                              return (
+                                <div key={s_idx} style={{
+                                  borderRadius: '8px',
+                                  border: `1px solid ${border_color}`,
+                                  backgroundColor: bg_color,
+                                  overflow: 'hidden'
+                                }}>
+                                  <div 
+                                    onClick={() => toggle_step(step_id)}
+                                    style={{
+                                      padding: '10px 14px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      cursor: 'pointer',
+                                      backgroundColor: header_bg,
+                                      fontSize: '13px',
+                                      userSelect: 'none'
+                                    }}
+                                  >
+                                    <Wrench size={14} style={{ marginRight: '8px', color: icon_color }} />
+                                    <span style={{ color: text_color, fontWeight: 500, marginRight: '8px' }}>
+                                      {step.tool_name}
+                                    </span>
+                                    <span style={{ flex: 1, color: '#94a3b8', fontSize: '12px' }}>
+                                      {is_start ? '调用工具' : '返回结果'}
+                                    </span>
+                                    
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: text_color, fontSize: '12px', marginRight: '8px' }}>
+                                      {is_start && <Loader2 size={12} className="animate-spin" />}
+                                      {is_success && <CheckCircle2 size={12} />}
+                                      {is_fail && <XCircle size={12} />}
+                                      <span>{status_text}</span>
+                                    </div>
+                                    
+                                    <div style={{ color: '#94a3b8' }}>
+                                      {expanded_steps[step_id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                    </div>
+                                  </div>
+                                  
+                                  {expanded_steps[step_id] && (
+                                    <div style={{ 
+                                      padding: '12px 14px', 
+                                      whiteSpace: 'pre-wrap', 
+                                      wordBreak: 'break-all',
+                                      color: '#334155',
+                                      fontSize: '13px',
+                                      borderTop: `1px solid ${border_color}`,
+                                      backgroundColor: '#ffffff',
+                                      fontFamily: 'monospace',
+                                      lineHeight: '1.5'
+                                    }}>
+                                      {step.content}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                        
+                        {msg.content && (
+                          <div style={{
+                            padding: '12px 16px',
+                            borderRadius: '0 12px 12px 12px',
+                            backgroundColor: '#ffffff',
+                            color: '#1e293b',
+                            lineHeight: '1.6',
+                            fontSize: '14px',
+                            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                            border: '1px solid #e2e8f0',
+                            whiteSpace: 'pre-wrap'
+                          }}>
+                            {msg.content}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+            {loading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div style={{ 
+                  padding: '12px 16px', 
+                  borderRadius: '0 12px 12px 12px', 
+                  backgroundColor: '#ffffff', 
+                  color: '#64748b',
+                  fontSize: '14px',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>AI 正在思考中...</span>
+                </div>
+              </div>
+            )}
+            <div ref={messages_end_ref} />
+          </div>
+          
+          <div style={{ 
+            padding: '20px 24px', 
+            backgroundColor: '#ffffff',
+            borderTop: '1px solid #e2e8f0',
+            position: 'relative'
+          }}>
+            {loading && (
+              <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
+                <button
+                  onClick={handle_stop}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 16px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    color: '#64748b',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ef4444'
+                    e.currentTarget.style.borderColor = '#fecaca'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#64748b'
+                    e.currentTarget.style.borderColor = '#e2e8f0'
+                  }}
+                >
+                  <SquareSquare size={14} />
+                  停止生成
+                </button>
+              </div>
+            )}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '8px 12px',
+              alignItems: 'flex-end',
+              transition: 'border-color 0.2s',
+              boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)'
+            }}>
+              <textarea
+                value={input}
+                onChange={(e) => set_input(e.target.value)}
+                onKeyDown={handle_key_down}
+                placeholder="追问 Agent..."
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  minHeight: '24px',
+                  maxHeight: '120px',
+                  padding: '8px 4px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  resize: 'none',
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  color: '#1e293b',
+                  lineHeight: '1.5'
+                }}
+              />
+              <button
+                onClick={handle_send}
+                disabled={loading || !input.trim()}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: loading || !input.trim() ? '#e2e8f0' : '#0ea5e9',
+                  color: loading || !input.trim() ? '#94a3b8' : 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                <Send size={18} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -78,33 +78,25 @@ class WeatherTool(BaseTool):
                 error="城市名称不能为空",
             )
 
-        if not self._api_key:
-            return await self._mock_weather(city)
+        # 移除强制检查 API key，直接使用 wttr.in 免费接口
+        # if not self._api_key:
+        #     return await self._mock_weather(city)
 
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(
-                    self._base_url,
-                    params={
-                        "key": self._api_key,
-                        "location": city,
-                        "language": lang,
-                        "unit": "c",
-                    },
-                )
+                response = await client.get(f"https://wttr.in/{city}?format=j1")
                 response.raise_for_status()
                 data = response.json()
 
-                weather_data = data.get("results", [{}])[0]
-                now = weather_data.get("now", {})
-
+                current_condition = data.get("current_condition", [{}])[0]
+                
                 output = (
-                    f"{city}当前天气:\\n"
-                    f"- 温度: {now.get('temperature', 'N/A')}°C\\n"
-                    f"- 天气: {now.get('text', 'N/A')}\\n"
-                    f"- 湿度: {now.get('humidity', 'N/A')}%\\n"
-                    f"- 风力: {now.get('wind_direction', '')}{now.get('wind_speed', '')}级\\n"
-                    f"- 更新时间: {weather_data.get('last_update', 'N/A')}"
+                    f"{city}当前天气 (实时数据):\n"
+                    f"- 温度: {current_condition.get('temp_C', 'N/A')}°C\n"
+                    f"- 天气: {current_condition.get('lang_zh', [{'value': current_condition.get('weatherDesc', [{'value': 'N/A'}])[0]['value']}])[0]['value']}\n"
+                    f"- 湿度: {current_condition.get('humidity', 'N/A')}%\n"
+                    f"- 风向/风速: {current_condition.get('winddir16Point', '')} {current_condition.get('windspeedKmph', '')}km/h\n"
+                    f"- 观测时间: {current_condition.get('observation_time', 'N/A')}"
                 )
 
                 return ToolCallResult(

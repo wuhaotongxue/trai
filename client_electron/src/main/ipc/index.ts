@@ -79,4 +79,8 @@ export const register_ipc_handlers = (): void => {
       event.sender.send(evt, data)
     })
   })
+
+  ipcMain.handle('agent:stop', async (_, session_id: string) => {
+    return agent_service.stop_chat(session_id)
+  })
 }
