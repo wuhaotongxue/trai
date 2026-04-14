@@ -6,6 +6,8 @@
  */
 import React, { useState, useRef, useEffect } from 'react'
 import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface ToolStep {
   type: 'tool_start' | 'tool_result'
@@ -509,9 +511,39 @@ const AgentChat: React.FC = () => {
                             fontSize: '14px',
                             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                             border: '1px solid #e2e8f0',
-                            whiteSpace: 'pre-wrap'
+                            overflowX: 'auto'
                           }}>
-                            {msg.content}
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({node, ...props}) => <h1 style={{fontSize: '1.5em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
+                                h2: ({node, ...props}) => <h2 style={{fontSize: '1.3em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
+                                h3: ({node, ...props}) => <h3 style={{fontSize: '1.1em', fontWeight: 'bold', margin: '10px 0 6px'}} {...props} />,
+                                p: ({node, ...props}) => <p style={{margin: '0 0 10px 0'}} {...props} />,
+                                ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
+                                ol: ({node, ...props}) => <ol style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
+                                li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+                                a: ({node, ...props}) => <a style={{color: '#0ea5e9', textDecoration: 'none'}} {...props} />,
+                                blockquote: ({node, ...props}) => <blockquote style={{margin: '0 0 10px 0', padding: '8px 16px', borderLeft: '4px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#64748b'}} {...props} />,
+                                code: ({node, className, children, ...props}) => {
+                                  const match = /language-(\w+)/.exec(className || '')
+                                  return match ? (
+                                    <pre style={{margin: '12px 0', padding: '16px', backgroundColor: '#0f172a', color: '#f8fafc', borderRadius: '8px', overflowX: 'auto'}}>
+                                      <code className={className} {...props}>{children}</code>
+                                    </pre>
+                                  ) : (
+                                    <code style={{backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: '#0ea5e9'}} {...props}>
+                                      {children}
+                                    </code>
+                                  )
+                                },
+                                table: ({node, ...props}) => <table style={{width: '100%', marginBottom: '16px', borderCollapse: 'collapse'}} {...props} />,
+                                th: ({node, ...props}) => <th style={{borderBottom: '2px solid #e2e8f0', padding: '8px', textAlign: 'left', fontWeight: 'bold'}} {...props} />,
+                                td: ({node, ...props}) => <td style={{borderBottom: '1px solid #e2e8f0', padding: '8px'}} {...props} />
+                              }}
+                            >
+                              {msg.content}
+                            </ReactMarkdown>
                           </div>
                         )}
                       </>
