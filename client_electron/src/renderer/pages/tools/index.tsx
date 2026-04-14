@@ -24,6 +24,8 @@ const Tools: React.FC = () => {
   const [ico_sizes, set_ico_sizes] = useState<number[]>([16, 32, 48, 64, 128, 256])
   const [target_width, set_target_width] = useState<string>('')
   const [target_height, set_target_height] = useState<string>('')
+  const [target_convert_kb, set_target_compress_kb] = useState<string>('')
+  const [target_convert_size_kb, set_target_convert_size_kb] = useState<string>('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -64,11 +66,18 @@ const Tools: React.FC = () => {
       set_loading_task('image')
       set_error_msg('')
       set_result_url('')
+      set_result_info(null)
+      
+      let kb: number | undefined = undefined
+      if (target_convert_kb && !isNaN(Number(target_convert_kb))) {
+        kb = Number(target_convert_kb)
+      }
       
       try {
-        const res = await window.electron_api.tools_compress_image(file.path, 60)
+        const res = await window.electron_api.tools_compress_image(file.path, 60, kb)
         if (res.success && res.data) {
           set_result_url(res.data.url)
+          set_result_info(res.data)
         } else {
           set_error_msg(res.error || '压缩失败')
         }
@@ -127,16 +136,18 @@ const Tools: React.FC = () => {
       let sizes_param: number[] | undefined = undefined
       let w: number | undefined = undefined
       let h: number | undefined = undefined
+      let target_kb: number | undefined = undefined
       
       if (target_image_format === 'ico') {
         sizes_param = ico_sizes.length > 0 ? ico_sizes : undefined
       } else {
         if (target_width && !isNaN(Number(target_width))) w = Number(target_width)
         if (target_height && !isNaN(Number(target_height))) h = Number(target_height)
+        if (target_convert_size_kb && !isNaN(Number(target_convert_size_kb))) target_kb = Number(target_convert_size_kb)
       }
       
       try {
-        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param, w, h)
+        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param, w, h, target_kb)
         if (res.success && res.data) {
           set_result_url(res.data.url)
           set_result_info(res.data)
@@ -165,11 +176,35 @@ const Tools: React.FC = () => {
     {
       id: 'image',
       title: '图片压缩',
-      description: '智能压缩图片体积，支持主流格式',
+      description: '智能压缩图片体积，支持设定目标大小并自动调节质量',
       icon: <ImageIcon size={32} color="#10b981" />,
       action: handle_compress_image,
       bg_color: '#ecfdf5',
-      border_color: '#a7f3d0'
+      border_color: '#a7f3d0',
+      extra_ui: (
+        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <input 
+              type="number" 
+              placeholder="如 500 (留空使用默认质量)"
+              value={target_compress_kb}
+              onChange={(e) => set_target_compress_kb(e.target.value)}
+              style={{ 
+                flex: 1,
+                padding: '8px 12px', 
+                borderRadius: '6px', 
+                border: '1px solid #cbd5e1', 
+                fontSize: '13px', 
+                outline: 'none',
+                backgroundColor: '#ffffff',
+                width: '100%',
+                minWidth: '0'
+              }}
+            />
+          </div>
+        </div>
+      )
     },
     {
       id: 'zip',
@@ -245,7 +280,27 @@ const Tools: React.FC = () => {
           
           {target_image_format !== 'ico' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '13px', color: '#475569' }}>尺寸 (宽 x 高):</label>
+              <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB) - 仅限 JPEG/WEBP:</label>
+              <input 
+                type="number" 
+                placeholder="如 500"
+                value={target_convert_size_kb}
+                onChange={(e) => set_target_convert_size_kb(e.target.value)}
+                disabled={!['jpeg', 'webp'].includes(target_image_format)}
+                style={{ 
+                  flex: 1,
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  border: '1px solid #cbd5e1', 
+                  fontSize: '13px', 
+                  outline: 'none',
+                  backgroundColor: !['jpeg', 'webp'].includes(target_image_format) ? '#f1f5f9' : '#ffffff',
+                  width: '100%',
+                  minWidth: '0',
+                  cursor: !['jpeg', 'webp'].includes(target_image_format) ? 'not-allowed' : 'text'
+                }}
+              />
+              <label style={{ fontSize: '13px', color: '#475569', marginTop: '8px' }}>尺寸 (宽 x 高):</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="number" 

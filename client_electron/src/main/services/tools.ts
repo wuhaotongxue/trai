@@ -51,16 +51,18 @@ export const tools_service = {
   },
 
   /**
-   * 压缩本地图片文件
+   * 压缩本地图片
    */
-  async compress_image(file_path: string, quality: number = 70) {
+  async compress_image(file_path: string, quality: number = 60, target_size_kb?: number) {
     try {
-      const url = `${get_api_base_url()}/api/tools/compress_image?quality=${quality}`
+      const url = `${get_api_base_url()}/api/tools/compress_image`
       const form_data = new FormData()
       
       const file_buffer = await fs.promises.readFile(file_path)
       const filename = path.basename(file_path)
       form_data.append('file', new Blob([file_buffer]), filename)
+      form_data.append('quality', quality.toString())
+      if (target_size_kb) form_data.append('target_size_kb', target_size_kb.toString())
       
       const res = await api_client.post(url, form_data)
       
@@ -103,7 +105,7 @@ export const tools_service = {
   /**
    * 转换本地图片格式
    */
-  async convert_image(file_path: string, target_format: string, sizes?: number[], width?: number, height?: number) {
+  async convert_image(file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) {
     try {
       const url = `${get_api_base_url()}/api/tools/convert_image`
       const form_data = new FormData()
@@ -117,6 +119,7 @@ export const tools_service = {
       }
       if (width) form_data.append('width', width.toString())
       if (height) form_data.append('height', height.toString())
+      if (target_size_kb) form_data.append('target_size_kb', target_size_kb.toString())
       
       const res = await api_client.post(url, form_data)
       

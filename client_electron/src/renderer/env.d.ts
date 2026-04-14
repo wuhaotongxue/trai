@@ -7,9 +7,9 @@ interface Window {
     auth_register: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_logout: () => Promise<{ success: boolean; error?: string }>;
     tools_convert_md_to_pdf: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_compress_image: (file_path: string, quality?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
+    tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_files_to_zip: (file_paths: string[]) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
+    tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_chat: (session_id: string, message: string, agent_id?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_stop: (session_id: string) => Promise<{ success: boolean; error?: string }>;
     ai_generate_image: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;

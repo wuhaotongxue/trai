@@ -38,6 +38,19 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_14_1445
+- **新增(client_electron)**: “图片格式转换”工具也同样加入了“目标文件大小(KB)”的自定义选项，支持将转换和压缩一步到位（仅限 JPEG / WEBP 格式）
+
+### 🛠️ 后端_2026_04_14_1445
+- **优化(backend)**: `convert_image` 接口新增 `target_size_kb` 参数，能够在转换格式为 JPEG 或 WEBP 的同时执行二分查找以压缩至目标大小
+
+### 💻 客户端_2026_04_14_1440
+- **新增(client_electron)**: “图片压缩”工具卡片新增目标文件大小（KB）设置输入框
+- **优化(client_electron)**: “图片压缩”结果现在也能直观显示压缩前后的文件体积对比 (KB/MB)
+
+### 🛠️ 后端_2026_04_14_1440
+- **优化(backend)**: `compress_image` 接口增加 `target_size_kb` 参数，当指定目标大小时，通过二分查找动态寻找最接近目标体积的 JPEG 压缩质量，并返回 `original_size` 和 `converted_size`
+
 ### 💻 客户端_2026_04_14_1435
 - **修复(client_electron)**: 修复工具箱因旧版后端进程未重载导致的新字段 (`original_size`, `converted_size` 等) 无法显示的问题，同时新增 `format_size` 函数，使得结果能够根据体积智能显示为 KB/MB 等格式
 
