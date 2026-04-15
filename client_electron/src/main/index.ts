@@ -9,6 +9,7 @@ import { join } from 'path'
 import log from 'electron-log'
 import { register_ipc_handlers } from './ipc/index'
 import { config_store } from './platform/config_store'
+import { UpdateService } from './services/update_service'
 
 log.info('app starting...')
 
@@ -145,7 +146,7 @@ const create_tray = () => {
       } 
     }
   ])
-  tray.setToolTip('TRAI Desktop')
+  tray.setToolTip('TRAI')
   tray.setContextMenu(context_menu)
   
   // 双击托盘显示窗口
