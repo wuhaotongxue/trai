@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
   return (
     <div>
       <h1 style={{ color: '#202020', marginTop: 0 }}>工作台</h1>
-      <p style={{ color: 'rgba(0, 0, 0, 0.6)' }}>欢迎来到 TRAI 桌面客户端</p>
+      <p style={{ color: 'rgba(0, 0, 0, 0.6)' }}>欢迎来到 TRAI</p>
       
       <div style={{
         marginTop: '24px',

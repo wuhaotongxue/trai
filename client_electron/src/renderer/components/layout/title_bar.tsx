@@ -25,7 +25,7 @@ const TitleBar: React.FC = () => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <img src="./kity.png" alt="logo" style={{ width: '16px', height: '16px' }} />
-        <span>TRAI Desktop</span>
+        <span>TRAI</span>
       </div>
     </div>
   )

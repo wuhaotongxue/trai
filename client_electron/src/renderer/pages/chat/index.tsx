@@ -214,7 +214,7 @@ const AgentChat: React.FC = () => {
     
     try {
       const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id)
-      if (!res.success && !res.is_canceled) {
+      if (!res.success && !(res as any).is_canceled) {
         update_active_session_messages(prev => {
           const new_msgs = [...prev]
           new_msgs[new_msgs.length - 1] = { 
