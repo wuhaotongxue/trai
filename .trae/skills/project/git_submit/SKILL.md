@@ -29,7 +29,7 @@ description: >-
       <li>修改 <code>backend</code> → 必须调用 <code>backend/SKILL.md</code> 检查 DDD 架构，**并调用 <code>ruff_check</code> 技能进行格式化和 Lint 检查**</li>
       <li>修改 <code>desktop_client</code> → 必须调用 <code>desktop_client/SKILL.md</code> 检查防卡死规范</li>
       <li>修改 <code>electron</code> → 必须调用 <code>electron/SKILL.md</code> 检查 Electron 规范</li>
-      <li>修改 <code>frontend_next</code> → 必须调用 <code>frontend_next/SKILL.md</code> 检查 App Router 规范</li>
+      <li>修改 <code>frontend_next</code> → 必须调用 <code>frontend_next/SKILL.md</code> 检查 App Router 规范，**并执行 <code>cd frontend_next && pnpm run lint:fix</code> 进行格式化和代码异常检测**</li>
     </ul>
   </div>
   <div style="background:#FFF9C4;border:1px solid #FFF176;border-radius:8px;padding:12px;">
