@@ -211,10 +211,8 @@ export function ChatPanel() {
             onChange={handleImageUpload}
           />
           <label htmlFor="image-upload" className="cursor-pointer">
-            <Button variant="ghost" size="icon" asChild>
-              <span>
-                <ImageIcon className="h-5 w-5" />
-              </span>
+            <Button variant="ghost" size="icon" type="button">
+              <ImageIcon className="h-5 w-5" />
             </Button>
           </label>
 
