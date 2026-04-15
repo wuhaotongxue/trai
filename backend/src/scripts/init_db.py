@@ -24,7 +24,7 @@ from loguru import logger
 from sqlalchemy import text
 
 from infrastructure.database.database import get_database
-from infrastructure.database.user_model import UserModel
+from infrastructure.database.models import UserModel
 from infrastructure.security.password import PasswordService
 
 
