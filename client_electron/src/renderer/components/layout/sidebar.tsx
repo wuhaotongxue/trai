@@ -42,17 +42,23 @@ const Sidebar: React.FC = () => {
   const nav_items = [
     { path: '/', label: '仪表盘', icon: <Home size={20} /> },
     {
+      id: 'agent',
+      label: '智能体生态',
+      icon: <Cpu size={20} />,
+      children: [
+        { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
+      ]
+    },
+    {
       id: 'ai',
       label: 'AI 创作',
       icon: <Bot size={20} />,
       children: [
         { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={18} /> },
-        { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
         { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
         { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
         { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
-        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> },
-        { path: '/ai/comfyui', label: 'ComfyUI', icon: <Bot size={18} /> }
+        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
       ]
     },
     {
@@ -60,10 +66,10 @@ const Sidebar: React.FC = () => {
       label: '实用工具',
       icon: <Wrench size={20} />,
       children: [
-        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> },
-        { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={18} /> }
+        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
       ]
     },
+    { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={20} /> },
     { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }
   ]
 
