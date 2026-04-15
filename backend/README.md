@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_15_2112
+- **新增(knowledge_base)**: 新增百炼知识库 Demo 创建接口 `/api/admin/knowledge_base/demo_create`，返回 IndexId/FileId/JobId 并轮询任务状态
+- **新增(env)**: `.env.example` 补齐百炼知识库 OpenAPI 的环境变量说明与示例占位
+- **优化(db)**: 启动时数据库连不上 PostgreSQL 自动回退本地 SQLite，并补齐用户表字段避免登录 500
+
 ### 🛠️ 后端_2026_04_15_1641
 - **新增(wecom)**: 增加企业微信组织架构同步用例，补齐部门实体、接口与仓储实现
 - **新增(api)**: 增加组织管理与企业微信登录相关路由，完善用户模型与 JWT 逻辑
