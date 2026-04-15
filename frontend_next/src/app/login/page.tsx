@@ -7,7 +7,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,14 +15,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { authApi } from "@/lib/api_client";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("admin");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);
@@ -31,7 +30,13 @@ export default function LoginPage() {
       const res = await authApi.login({ username: email, password });
       localStorage.setItem("token", res.access_token);
       localStorage.setItem("refresh_token", res.refresh_token);
-      router.replace("/");
+      
+      // 使用 window.location.href 强制刷新跳转，根据角色跳转到不同的后台/工作台
+      if (res.user && res.user.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/agent";
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : "登录失败";
       setErrorMessage(message);
@@ -59,13 +64,14 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <Card className="shadow-xl shadow-blue-500/5 border-slate-200 dark:border-slate-800/60">
-            <CardHeader className="space-y-1 pb-6">
-              <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">欢迎回来</CardTitle>
-              <CardDescription className="text-slate-500 dark:text-slate-400">
-                输入您的账号信息, 继续使用 TRAI
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <form onSubmit={handleLogin}>
+              <CardHeader className="space-y-1 pb-6">
+                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">欢迎回来</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
+                  输入您的账号信息, 继续使用 TRAI
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">邮箱地址或用户名</Label>
                 <Input 
@@ -89,9 +95,6 @@ export default function LoginPage() {
                     placeholder="••••••••" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleLogin();
-                    }}
                     className="h-11 rounded-lg pr-10" 
                   />
                   <button
@@ -113,7 +116,7 @@ export default function LoginPage() {
               )}
 
               <Button 
-                onClick={handleLogin}
+                type="submit"
                 disabled={loading}
                 className="w-full h-11 text-base font-semibold rounded-lg shadow-lg shadow-blue-500/20 mt-2"
               >
@@ -124,14 +127,15 @@ export default function LoginPage() {
                 <div className="h-px bg-slate-200 dark:bg-slate-800 w-full" />
                 <span className="absolute bg-white dark:bg-[#0d1220] px-3 text-xs text-slate-400">或</span>
               </div>
-              <Button variant="outline" className="w-full h-11 rounded-lg text-sm font-medium">
+              <Button type="button" variant="outline" className="w-full h-11 rounded-lg text-sm font-medium">
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866.523 3.952 1.464l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.478 2.543 12s4.478 10 10.002 10c3.31 0 5.954-1.193 8.033-3.152l-3.033-2.609z"/></svg>
                 使用 Google 登录
               </Button>
             </CardContent>
-            <CardFooter className="text-xs text-slate-400 text-center pb-6">
-              登录即表示同意 <Link href="/terms" className="underline">服务条款</Link> 和 <Link href="/privacy" className="underline">隐私政策</Link>
-            </CardFooter>
+              <CardFooter className="text-xs text-slate-400 text-center pb-6">
+                登录即表示同意 <Link href="/terms" className="underline">服务条款</Link> 和 <Link href="/privacy" className="underline">隐私政策</Link>
+              </CardFooter>
+            </form>
           </Card>
         </div>
       </div>

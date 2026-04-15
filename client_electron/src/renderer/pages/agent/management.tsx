@@ -107,9 +107,9 @@ const AgentManagement: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>Agent 管理</h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="no-drag-region" style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={fetch_agents}
             style={{
