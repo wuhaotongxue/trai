@@ -65,6 +65,10 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_15_1000
+- **修复(frontend_next)**: 修复登录页表单提交导致的客户端路由问题，优化表单体验，并根据角色不同(`admin` 或 `user`) 登录后分别跳转后台或工作台
+- **修复(frontend_next)**: 修复 Next.js WebSocket 及热更新在局域网下的 `403 Forbidden` 问题，通过配置 `allowedDevOrigins` 支持内网 IP 访问
+
 ### 🎨 前端_2026_04_15_0940
 - **修复(frontend_next)**: 执行 `eslint --fix` 修复无用变量等 Lint 警告
 

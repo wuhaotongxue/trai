@@ -38,6 +38,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_15_1000
+- **修复(frontend_next)**: 修复登录页表单提交导致的客户端路由问题，优化表单体验，并根据角色不同(`admin` 或 `user`) 登录后分别跳转后台或工作台
+- **修复(frontend_next)**: 修复 Next.js WebSocket 及热更新在局域网下的 `403 Forbidden` 问题，通过配置 `allowedDevOrigins` 支持内网 IP 访问
+
 ### 💻 客户端_2026_04_15_0950
 - **新增(knowledge-base)**: 新增知识库管理页面，并在文件列表增加“重命名/移动”专属列与按钮对齐样式
 - **重构(client_electron)**: 批量更新客户端侧边栏及多个 AI、工具、设置页面的 UI 组件与布局
