@@ -103,7 +103,9 @@ export interface SendMessageRequest {
 export const sessionApi = {
   list: (params?: { limit?: number; offset?: number }) => {
     const qs = new URLSearchParams(
-      Object.entries(params || {}).filter(([, v]) => v !== undefined) as [string, string][]
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
     ).toString();
     return request<{ total: number; sessions: Session[] }>(`/sessions${qs ? `?${qs}` : ""}`);
   },

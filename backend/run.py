@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: run.py
 # 作者: wuhao
 # 日期: 2026_04_09
@@ -8,9 +7,13 @@
 from __future__ import annotations
 
 import os
+import sys
 from typing import Any
 
 import uvicorn
+
+# 添加 src 目录到 sys.path 以解决模块导入问题
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
 from api.main import create_app
 from core.logger import init_logger

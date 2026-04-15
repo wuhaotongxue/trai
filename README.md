@@ -38,6 +38,16 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_15_0940
+- **修复(backend)**: 修复 `run.py` 环境变量导入路径及 `api` 模块无法找到的问题
+- **修复(backend)**: 修复 `client_release.py` 和 `update.py` 中异步 Session 导入及使用的错误
+- **修复(backend)**: 修复 `ruff check` 报告的类型注解等格式规范问题
+- **修复(backend)**: 修改依赖 `requirements.txt` 以补充缺少的 redis 等环境
+- **规范(backend)**: 增加 `conda activate` 必须先执行的强制启动规范记忆
+
+### 🎨 前端_2026_04_15_0940
+- **修复(frontend_next)**: 执行 `eslint --fix` 修复无用变量等 Lint 警告
+
 ### 🎨 前端_2026_04_14_1750
 - **新增(changelog)**: 将 `/changelog` 占位页重构为真实的更新日志页面，采用左侧时间轴设计，按版本 (v0.1.0 ~ v0.4.0) 展示所有迭代与功能进化，并增加多彩的类型标签 (feat/fix/refactor/docs)
 
