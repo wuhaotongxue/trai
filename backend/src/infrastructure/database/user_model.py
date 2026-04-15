@@ -7,8 +7,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
-from sqlalchemy import BigInteger, DateTime, String, Text
+from sqlalchemy import JSON, BigInteger, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -41,6 +42,12 @@ class UserModel(Base):
     t_avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     """头像 URL"""
 
+    t_mobile: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    """手机号"""
+
+    t_position: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    """职位信息"""
+
     t_role: Mapped[str] = mapped_column(String(32), default="normal", nullable=False)
     """用户角色:admin/vip/normal"""
 
@@ -52,6 +59,9 @@ class UserModel(Base):
 
     t_wecom_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
     """企业微信用户 ID(用于 SSO)"""
+
+    t_wecom_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    """企业微信原始数据缓存"""
 
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     """创建时间"""

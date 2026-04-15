@@ -43,6 +43,9 @@ class User:
     status: UserStatus = UserStatus.ACTIVE
     tenant_id: str | None = None
     wecom_user_id: str | None = None
+    mobile: str | None = None
+    position: str | None = None
+    wecom_data: dict[str, Any] | None = None
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     metadata: dict[str, Any] = field(default_factory=dict)

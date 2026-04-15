@@ -73,10 +73,16 @@ def register_middlewares(app: FastAPI) -> None:
 def register_routers(app: FastAPI) -> None:
     """注册路由"""
     from api.routers import tools
-    from api.routers.admin import analytics_router, dashboard_router, quota_config_router, user_router
+    from api.routers.admin import (
+        analytics_router,
+        dashboard_router,
+        organization,
+        quota_config_router,
+        user_router,
+    )
     from api.routers.admin.client_release import router as admin_client_release_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, video
-    from api.routers.auth import login, logout, me, password, refresh, register
+    from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
     from api.routers.media import upload
     from api.routers.session import session
@@ -92,11 +98,13 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(refresh.router, prefix="/api/auth", tags=["认证"])
     app.include_router(me.router, prefix="/api/auth", tags=["认证"])
     app.include_router(password.router, prefix="/api/auth", tags=["认证"])
+    app.include_router(wecom.router, prefix="/api/auth/wecom", tags=["企业微信"])
     app.include_router(user_router, prefix="/api/admin", tags=["管理"])
     app.include_router(dashboard_router, prefix="/api/admin", tags=["管理"])
     app.include_router(analytics_router, prefix="/api/admin", tags=["管理"])
     app.include_router(quota_config_router, prefix="/api/admin", tags=["管理"])
     app.include_router(admin_client_release_router, prefix="/api/admin", tags=["管理"])
+    app.include_router(organization.router, prefix="/api/admin/organization", tags=["管理"])
     app.include_router(client_update_router, prefix="/api/client", tags=["客户端更新"])
     app.include_router(chat.router, prefix="/api/ai", tags=["AI"])
     app.include_router(image.router, prefix="/api/ai", tags=["AI"])

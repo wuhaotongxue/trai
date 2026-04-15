@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BarChart3, Bell, Bot, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, Database, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Search, Settings, UserPlus, Users, Wifi } from "lucide-react";
+import { Activity, BarChart3, Bell, Bot, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, Database, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Search, Settings, UserPlus, Users, Wifi, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/website/theme_toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown_menu";
 
 const menuGroups = [
   {
@@ -48,6 +56,7 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
   const isLoginPage = pathname === "/admin/login";
   const [token, setToken] = useState<string | null | undefined>(undefined);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean | undefined>(undefined);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const syncAuth = () => {
@@ -80,6 +89,10 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     const next = !(sidebarCollapsed ?? false);
     setSidebarCollapsed(next);
     localStorage.setItem("admin_sidebar_collapsed", next ? "1" : "0");
+  };
+
+  const toggleGroup = (label: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
   return (
@@ -146,106 +159,82 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
-          {menuGroups.map((group) => (
-            <div key={group.label}>
-              {!(sidebarCollapsed ?? false) && (
-                <p className="px-2 mb-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                  {group.label}
-                </p>
+          {menuGroups.map((group) => {
+            const isGroupCollapsed = collapsedGroups[group.label];
+            return (
+            <div key={group.label} className={(sidebarCollapsed ?? false) ? "space-y-1" : "space-y-0.5"}>
+              {!(sidebarCollapsed ?? false) ? (
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.label)}
+                  className="w-full flex items-center justify-between px-2 mb-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors"
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isGroupCollapsed ? "-rotate-90" : "")} />
+                </button>
+              ) : (
+                <div className="w-full h-px bg-border/40 my-2 first:mt-0" />
               )}
-              {group.items.map((item) => {
-                const active =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(item.href));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={item.desc}
-                    className={cn(
-                      "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 mb-0.5 relative overflow-hidden",
-                      active
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground active:scale-[0.98]"
-                    )}
-                  >
-                    {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-white rounded-r" />
-                    )}
-                    <item.icon
-                      className={cn(
-                        "h-4 w-4 flex-shrink-0 transition-colors",
-                        active
-                          ? "text-white"
-                          : "text-muted-foreground group-hover:text-blue-400"
-                      )}
-                    />
-                    {!(sidebarCollapsed ?? false) && (
-                      <>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium leading-none">{item.label}</p>
-                          <p
-                            className={cn(
-                              "text-xs mt-0.5 truncate transition-colors",
-                              active ? "text-white/80" : "text-muted-foreground"
-                            )}
-                          >
-                            {item.desc}
-                          </p>
-                        </div>
-                        {active ? (
-                          <ChevronRight className="h-3 w-3 text-white/70 flex-shrink-0" />
-                        ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-border group-hover:bg-blue-400 flex-shrink-0 transition-colors" />
+              {(!(sidebarCollapsed ?? false) && isGroupCollapsed) ? null : (
+                <>
+                  {group.items.map((item) => {
+                    const active =
+                      pathname === item.href ||
+                      (item.href !== "/admin" && pathname.startsWith(item.href));
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        title={item.label + " - " + item.desc}
+                        className={cn(
+                          "group flex items-center rounded-lg text-sm transition-all duration-150 relative overflow-hidden",
+                          (sidebarCollapsed ?? false) ? "justify-center p-2.5 mb-1" : "gap-3 px-3 py-2.5 mb-0.5",
+                          active
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25"
+                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground active:scale-[0.98]"
                         )}
-                      </>
-                    )}
-                  </Link>
-                );
-              })}
+                      >
+                        {active && !(sidebarCollapsed ?? false) && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-white rounded-r" />
+                        )}
+                        <item.icon
+                          className={cn(
+                            "h-4 w-4 flex-shrink-0 transition-colors",
+                            active
+                              ? "text-white"
+                              : "text-muted-foreground group-hover:text-blue-400"
+                          )}
+                        />
+                        {!(sidebarCollapsed ?? false) && (
+                          <>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium leading-none">{item.label}</p>
+                              <p
+                                className={cn(
+                                  "text-xs mt-0.5 truncate transition-colors",
+                                  active ? "text-white/80" : "text-muted-foreground"
+                                )}
+                              >
+                                {item.desc}
+                              </p>
+                            </div>
+                            {active ? (
+                              <ChevronRight className="h-3 w-3 text-white/70 flex-shrink-0" />
+                            ) : (
+                              <div className="w-1.5 h-1.5 rounded-full bg-border group-hover:bg-blue-400 flex-shrink-0 transition-colors" />
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
             </div>
-          ))}
+            );
+          })}
         </nav>
 
-        <div className={cn("py-3 border-t border-border/60 space-y-1", sidebarCollapsed ? "px-3" : "px-3")}>
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all active:scale-[0.98]"
-            aria-label="返回官网"
-            title="返回官网"
-          >
-            <Bot className="h-3.5 w-3.5" />
-            {!(sidebarCollapsed ?? false) && (
-              <>
-                <span>返回官网</span>
-                <span className="ml-auto text-muted-foreground/60">↗</span>
-              </>
-            )}
-          </Link>
-          <button
-            type="button"
-            aria-label="退出登录"
-            title="退出登录"
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-all active:scale-[0.98]"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            {!(sidebarCollapsed ?? false) && <span>退出登录</span>}
-          </button>
-          <div className="px-3 py-2 flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {!(sidebarCollapsed ?? false) && <span className="text-xs text-emerald-400 font-medium">系统正常</span>}
-            </div>
-            <button
-              type="button"
-              aria-label="刷新状态"
-              title="刷新状态"
-              className={cn("p-1 rounded-md hover:bg-muted/40 transition-colors", (sidebarCollapsed ?? false) ? "ml-0" : "ml-auto")}
-            >
-              <RefreshCw className="h-3 w-3 text-muted-foreground/60" />
-            </button>
-          </div>
-        </div>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -258,6 +247,10 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-500/20 mr-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-medium">系统正常</span>
+            </div>
             <ThemeToggle />
             <button
               type="button"
@@ -275,15 +268,43 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
               <Bell className="h-4 w-4 text-muted-foreground" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-card" />
             </button>
-            <div className="flex items-center gap-2 pl-3 border-l border-border/60">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
-                A
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-foreground leading-none">管理员</p>
-                <p className="text-xs text-muted-foreground mt-0.5">admin@trai.ai</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button type="button" className="flex items-center gap-2 pl-3 border-l border-border/60 hover:opacity-80 transition-opacity outline-none">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
+                    A
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-semibold text-foreground leading-none">管理员</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">admin@trai.ai</p>
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>上传用户头像</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>修改密码</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                  onClick={() => {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("refresh_token");
+                    window.location.href = "/login";
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>退出登录</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
