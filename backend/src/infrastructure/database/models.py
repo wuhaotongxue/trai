@@ -13,6 +13,7 @@ from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
+from infrastructure.database.department_model import DepartmentModel, UserDepartmentMappingModel
 from infrastructure.database.user_model import UserModel
 
 
@@ -204,7 +205,7 @@ class ImageGenerationModel(Base):
     """生成结果 URL"""
     t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     """错误信息"""
-    t_model: Mapped[str] = mapped_column(String(64), nullable=True)
+    t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
     """使用的模型"""
     t_width: Mapped[int] = mapped_column(Integer, default=1024, nullable=False)
     """图片宽度"""
@@ -303,4 +304,6 @@ __all__ = [
     "ImageGenerationModel",
     "UploadTaskModel",
     "ClientReleaseModel",
+    "DepartmentModel",
+    "UserDepartmentMappingModel",
 ]

@@ -118,9 +118,8 @@ class WeComContactClient:
             raise RuntimeError("WECOM_APP_SECRET 或 WECOM_CONTACT_SECRET 未配置,无法获取 access_token")
 
         params = {
-            "grant_type": "client_credential",
-            "appid": self._corp_id,
-            "secret": secret,
+            "corpid": self._corp_id,
+            "corpsecret": secret,
         }
 
         async with httpx.AsyncClient(timeout=self._timeout) as client:
@@ -199,6 +198,32 @@ class WeComContactClient:
         return roots
 
     # --------------------------------------------------------------
+    # 授权 API
+    # --------------------------------------------------------------
+
+    async def get_user_info_by_code(self, code: str) -> dict[str, Any]:
+        """通过 OAuth code 获取用户信息
+
+        Args:
+            code: 授权 code
+
+        Returns:
+            dict: 包含 UserId 等信息
+        """
+        token = await self._ensure_token()
+        params = {"access_token": token, "code": code}
+
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            resp = await client.get("https://qyapi.weixin.qq.com/cgi-bin/auth/getuserinfo", params=params)
+
+        data = resp.json()
+        errcode = data.get("errcode", 0)
+        if errcode != 0:
+            raise RuntimeError(f"获取授权用户信息失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
+
+        return data
+
+    # --------------------------------------------------------------
     # 用户 API
     # --------------------------------------------------------------
 
@@ -234,6 +259,41 @@ class WeComContactClient:
         errcode = data.get("errcode", 0)
         if errcode != 0:
             raise RuntimeError(f"获取部门用户列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
+
+        return [WeComUser.from_dict(u) for u in data.get("userlist", [])]
+
+    async def list_detailed_users_by_department(
+        self,
+        department_id: int,
+        fetch_child: bool = True,
+    ) -> list[WeComUser]:
+        """获取部门下用户列表(详细信息)
+
+        Args:
+            department_id: 部门 ID
+            fetch_child: 是否递归获取子部门用户
+
+        Returns:
+            list[WeComUser]: 详细用户信息列表
+        """
+
+        token = await self._ensure_token()
+        params = {
+            "access_token": token,
+            "department_id": department_id,
+            "fetch_child": 1 if fetch_child else 0,
+        }
+
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            resp = await client.get(
+                "https://qyapi.weixin.qq.com/cgi-bin/user/list",
+                params=params,
+            )
+
+        data = resp.json()
+        errcode = data.get("errcode", 0)
+        if errcode != 0:
+            raise RuntimeError(f"获取部门用户详细列表失败 | errcode={errcode} | errmsg={data.get('errmsg', '')}")
 
         return [WeComUser.from_dict(u) for u in data.get("userlist", [])]
 

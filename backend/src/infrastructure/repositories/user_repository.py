@@ -48,6 +48,9 @@ class UserRepository(IUserRepository):
             status=UserStatus(model.t_status),
             tenant_id=model.t_tenant_id,
             wecom_user_id=model.t_wecom_user_id,
+            mobile=model.t_mobile,
+            position=model.t_position,
+            wecom_data=model.t_wecom_data,
             created_at=model.t_created_at,
             updated_at=model.t_updated_at,
         )
@@ -73,6 +76,9 @@ class UserRepository(IUserRepository):
             t_status=user.status.value,
             t_tenant_id=user.tenant_id,
             t_wecom_user_id=user.wecom_user_id,
+            t_mobile=user.mobile,
+            t_position=user.position,
+            t_wecom_data=user.wecom_data,
             t_created_at=user.created_at,
             t_updated_at=user.updated_at,
         )
@@ -100,6 +106,9 @@ class UserRepository(IUserRepository):
             status=UserStatus(kwargs.get("status", "active")),
             tenant_id=kwargs.get("tenant_id"),
             wecom_user_id=kwargs.get("wecom_user_id"),
+            mobile=kwargs.get("mobile"),
+            position=kwargs.get("position"),
+            wecom_data=kwargs.get("wecom_data"),
         )
 
         model = self._to_model(user, password_hash)
@@ -144,6 +153,23 @@ class UserRepository(IUserRepository):
         model = self._session.scalar(stmt)
         return self._to_entity(model) if model else None
 
+    def get_by_wecom_user_id(self, wecom_user_id: str, tenant_id: str | None = None) -> User | None:
+        """根据企业微信 user_id 获取用户
+
+        Args:
+            wecom_user_id: 企业微信用户 ID
+            tenant_id: 租户 ID(可选)
+
+        Returns:
+            User | None: 用户实体
+        """
+        stmt = select(UserModel).where(
+            UserModel.t_wecom_user_id == wecom_user_id,
+            UserModel.t_deleted_at.is_(None),
+        )
+        model = self._session.scalar(stmt)
+        return self._to_entity(model) if model else None
+
     def get_by_email(self, email: str, tenant_id: str | None = None) -> User | None:
         """根据邮箱获取用户
 
@@ -156,22 +182,6 @@ class UserRepository(IUserRepository):
         """
         stmt = select(UserModel).where(
             UserModel.t_email == email,
-            UserModel.t_deleted_at.is_(None),
-        )
-        model = self._session.scalar(stmt)
-        return self._to_entity(model) if model else None
-
-    def get_by_wecom_user_id(self, wecom_user_id: str) -> User | None:
-        """根据企业微信用户 ID 获取用户
-
-        Args:
-            wecom_user_id: 企业微信用户 ID
-
-        Returns:
-            User | None: 用户实体
-        """
-        stmt = select(UserModel).where(
-            UserModel.t_wecom_user_id == wecom_user_id,
             UserModel.t_deleted_at.is_(None),
         )
         model = self._session.scalar(stmt)
