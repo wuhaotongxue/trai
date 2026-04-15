@@ -7,14 +7,38 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { authApi } from "@/lib/api_client";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    if (loading) return;
+    setErrorMessage(null);
+    setLoading(true);
+    try {
+      const res = await authApi.login({ username: email, password });
+      localStorage.setItem("token", res.access_token);
+      localStorage.setItem("refresh_token", res.refresh_token);
+      router.replace("/");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "登录失败";
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-[#080c1a] dark:via-[#0d1220] dark:to-[#080c1a] flex flex-col">
@@ -44,7 +68,14 @@ export default function LoginPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">邮箱地址或用户名</Label>
-                <Input id="email" type="text" placeholder="admin" defaultValue="admin" className="h-11 rounded-lg" />
+                <Input 
+                  id="email" 
+                  type="text" 
+                  placeholder="请输入用户名或邮箱" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-11 rounded-lg" 
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -52,7 +83,17 @@ export default function LoginPage() {
                   <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">忘记密码?</Link>
                 </div>
                 <div className="relative">
-                  <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" defaultValue="admin123" className="h-11 rounded-lg pr-10" />
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleLogin();
+                    }}
+                    className="h-11 rounded-lg pr-10" 
+                  />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -66,9 +107,18 @@ export default function LoginPage() {
                 <input type="checkbox" id="remember" className="rounded border-slate-300" aria-label="记住我" title="记住我" />
                 <Label htmlFor="remember" className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer">记住我</Label>
               </div>
-              <Button className="w-full h-11 text-base font-semibold rounded-lg shadow-lg shadow-blue-500/20 mt-2">
-                登录
-                <ArrowRight className="h-4 w-4 ml-2" />
+              
+              {errorMessage && (
+                <div className="text-sm text-red-500 text-center">{errorMessage}</div>
+              )}
+
+              <Button 
+                onClick={handleLogin}
+                disabled={loading}
+                className="w-full h-11 text-base font-semibold rounded-lg shadow-lg shadow-blue-500/20 mt-2"
+              >
+                {loading ? "正在登录..." : "登录"}
+                {!loading && <ArrowRight className="h-4 w-4 ml-2" />}
               </Button>
               <div className="relative flex items-center justify-center my-2">
                 <div className="h-px bg-slate-200 dark:bg-slate-800 w-full" />

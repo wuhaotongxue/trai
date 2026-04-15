@@ -11,10 +11,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import CurrentUser, get_db
+from api.deps import CurrentUser
 from core.logger import get_logger
+from infrastructure.database import get_session
 from infrastructure.database.models import ClientReleaseModel
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -39,7 +39,6 @@ class AdminClientReleaseAPI:
         latest_yml: Annotated[UploadFile, File(..., description="latest.yml 文件")],
         installer_exe: Annotated[UploadFile, File(..., description="安装包 exe 文件")],
         current_user: CurrentUser,
-        db: AsyncSession = Depends(get_db),
         s3_service: S3StorageService = Depends(),
         release_notes: str | None = Form(None, description="更新日志"),
     ) -> ReleaseResponse:
@@ -61,23 +60,23 @@ class AdminClientReleaseAPI:
             HTTPException: 权限不足或上传失败
         """
         # 简单权限校验
-        if current_user.role != "admin":
+        if current_user.get("role") != "admin":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={"code": 403, "message": "仅管理员可执行发布操作"},
             )
 
-        # 检查版本号是否已存在
-        stmt = select(ClientReleaseModel).where(ClientReleaseModel.t_version == version)
-        result = await db.execute(stmt)
-        existing = result.scalar_one_or_none()
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": 400, "message": f"版本 {version} 已存在"},
-            )
-
+        db = get_session()
         try:
+            # 检查版本号是否已存在
+            stmt = select(ClientReleaseModel).where(ClientReleaseModel.t_version == version)
+            result = db.execute(stmt)
+            existing = result.scalar_one_or_none()
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={"code": 400, "message": f"版本 {version} 已存在"},
+                )
             # 1. 上传 latest.yml
             yml_content = await latest_yml.read()
             yml_key = f"releases/{version}/latest.yml"
@@ -94,19 +93,21 @@ class AdminClientReleaseAPI:
                 t_release_notes=release_notes,
                 t_latest_yml_key=yml_key,
                 t_installer_exe_key=exe_key,
-                t_created_by=current_user.user_id,
+                t_created_by=current_user.get("user_id"),
             )
             db.add(new_release)
-            await db.commit()
+            db.commit()
 
-            logger.info(f"用户 {current_user.user_id} 成功发布客户端新版本 {version}")
+            logger.info(f"用户 {current_user.get('user_id')} 成功发布客户端新版本 {version}")
 
             return ReleaseResponse(version=version, message="发布成功")
 
         except Exception as e:
             logger.error(f"发布客户端失败: {str(e)}")
-            await db.rollback()
+            db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={"code": 500, "message": f"发布客户端失败: {str(e)}"},
             )
+        finally:
+            db.close()
