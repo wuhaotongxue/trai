@@ -144,7 +144,7 @@ export function globalToast(opts: {
 }) {
   if (!globalSetToasts) return;
   const id = `toast-${Date.now()}`;
-  globalSetToasts((prev) => [...prev, { ...opts, id, onDismiss: () => globalSetToasts!((p) => p.filter((t) => t.id !== id)) }]);
+  globalSetToasts((prev) => [...prev, { ...opts, variant: opts.variant || 'info', id, onDismiss: () => globalSetToasts!((p) => p.filter((t) => t.id !== id)) }]);
   setTimeout(() => {
     globalSetToasts!((p) => p.filter((t) => t.id !== id));
   }, opts.duration ?? 3500);

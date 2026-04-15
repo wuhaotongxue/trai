@@ -37,6 +37,13 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_15_0940
+- **修复(backend)**: 修复 `run.py` 环境变量导入路径及 `api` 模块无法找到的问题
+- **修复(backend)**: 修复 `client_release.py` 和 `update.py` 中异步 Session 导入及使用的错误
+- **修复(backend)**: 修复 `ruff check` 报告的类型注解等格式规范问题
+- **修复(backend)**: 修改依赖 `requirements.txt` 以补充缺少的 redis 等环境
+- **规范(backend)**: 增加 `conda activate` 必须先执行的强制启动规范记忆
+
 ### 🛠️ 后端_2026_04_14_1650
 - **新增(backend)**: 新增 `ClientReleaseModel` (PostgreSQL `t_client_releases`)，持久化存储发布的客户端版本及 S3 Key 信息
 - **新增(backend)**: `api.routers.admin.client_release` 中新增 POST `/api/admin/client/release` 接口，支持管理员上传 `latest.yml` 与 `exe` 安装包并保存至 S3
