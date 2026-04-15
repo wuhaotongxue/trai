@@ -150,10 +150,12 @@ const Settings: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <h1 style={{ color: '#202020', marginTop: 0 }}>系统设置</h1>
-      
-      {/* 标签导航 */}
-      <div style={{ display: 'flex', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', marginBottom: '24px' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>系统设置</h1>
+      </div>
+      <div className="no-drag-region" style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+        {/* 标签导航 */}
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(0, 0, 0, 0.1)', marginBottom: '24px' }}>
         <button
           onClick={() => set_active_tab('system')}
           style={{
@@ -447,6 +449,7 @@ const Settings: React.FC = () => {
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   )

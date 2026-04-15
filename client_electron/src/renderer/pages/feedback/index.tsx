@@ -103,11 +103,11 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <MessageSquarePlus size={24} color="#0078d4" />
-        <h1 style={{ margin: 0, fontSize: '20px', color: '#202020' }}>用户反馈</h1>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>用户反馈</h1>
       </div>
+      <div className="no-drag-region" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', height: '100%', overflowY: 'auto', width: '100%' }}>
 
       <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '14px' }}>
@@ -270,7 +270,7 @@ const Feedback: React.FC = () => {
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             提交反馈
           </button>
-        </form>
+        </form></div>
       </div>
     </div>
   )

@@ -97,12 +97,12 @@ const AiReport: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px', boxSizing: 'border-box', overflowY: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+      <div className="drag-region" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
         <FileEdit size={24} color="#0078d4" />
         <h1 style={{ margin: 0, fontSize: '20px', color: '#202020' }}>AI 周报生成</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0 }}>
+      <div className="no-drag-region" style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0 }}>
         {/* 左侧输入区 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '400px' }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '20px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>

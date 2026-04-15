@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeft, MessageSquarePlus, Paperclip, X, Database } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -47,6 +47,7 @@ const AgentChat: React.FC = () => {
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
+  const [use_kb_first, set_use_kb_first] = useState(false)
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
   const active_session_id_ref = useRef<string>('')
@@ -268,7 +269,7 @@ const AgentChat: React.FC = () => {
   return (
     <div style={{ display: 'flex', height: '100%', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
       {/* 左侧会话列表 */}
-      <div style={{ 
+      <div className="no-drag-region" style={{ 
         width: is_sidebar_open ? '260px' : '0px', 
         opacity: is_sidebar_open ? 1 : 0,
         backgroundColor: '#ffffff', 
@@ -279,32 +280,63 @@ const AgentChat: React.FC = () => {
         overflow: 'hidden',
         flexShrink: 0
       }}>
-        <div style={{ padding: '16px', minWidth: '260px' }}>
+        <div className="drag-region" style={{ padding: '16px', minWidth: '260px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
           <button
+            className="no-drag-region"
             onClick={create_new_session}
             style={{
-              width: '100%',
+              flex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              padding: '10px',
-              backgroundColor: '#0ea5e9',
-              color: '#ffffff',
-              border: 'none',
+              padding: '8px 16px',
+              backgroundColor: 'transparent',
+              color: '#0f172a',
+              border: '1px solid #e2e8f0',
               borderRadius: '8px',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px',
-              transition: 'background-color 0.2s'
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc'
+              e.currentTarget.style.borderColor = '#cbd5e1'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.borderColor = '#e2e8f0'
             }}
           >
-            <Plus size={18} />
-            新建会话
+            <MessageSquarePlus size={18} />
+            新建对话
+          </button>
+
+          <button
+            className="no-drag-region"
+            onClick={() => set_is_sidebar_open(false)}
+            title="收起会话列表"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#64748b',
+              borderRadius: '8px',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <PanelLeftClose size={20} />
           </button>
         </div>
         
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '260px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '260px', boxSizing: 'border-box' }}>
           {sessions.map(s => (
             <div
               key={s.id}
@@ -359,34 +391,58 @@ const AgentChat: React.FC = () => {
       </div>
 
       {/* 右侧聊天区 */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-          <button
-            onClick={() => set_is_sidebar_open(!is_sidebar_open)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              marginRight: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#64748b',
-              borderRadius: '4px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            title={is_sidebar_open ? '收起会话列表' : '展开会话列表'}
-          >
-            {is_sidebar_open ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
-          </button>
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          {!is_sidebar_open && (
+            <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <button
+                onClick={() => set_is_sidebar_open(true)}
+                title="展开会话列表"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  borderRadius: '6px',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <PanelLeft size={20} />
+              </button>
+              <button
+                onClick={create_new_session}
+                title="新建对话"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#64748b',
+                  borderRadius: '6px',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <MessageSquarePlus size={20} />
+              </button>
+            </div>
+          )}
           <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
-          <span style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+          <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
           
           {available_agents.length > 0 && (
             <select 
+              className="no-drag-region"
               value={active_session?.agent_id || available_agents[0]?.id || ''}
               onChange={(e) => update_session_agent(e.target.value)}
               style={{
@@ -749,10 +805,13 @@ const AgentChat: React.FC = () => {
           </div>
           
           <div style={{ 
-            padding: '20px 24px', 
+            padding: '16px 24px', 
             backgroundColor: '#ffffff',
             borderTop: '1px solid #e2e8f0',
-            position: 'relative'
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
           }}>
             {loading && (
               <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
@@ -786,6 +845,7 @@ const AgentChat: React.FC = () => {
                 </button>
               </div>
             )}
+
             <div style={{
               display: 'flex',
               gap: '12px',
@@ -818,8 +878,33 @@ const AgentChat: React.FC = () => {
                   lineHeight: '1.5'
                 }}
               />
-              <button
-                onClick={handle_send}
+              
+              {/* 工具栏：知识库选项与发送按钮 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div 
+                  title="优先从知识库获取答案"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 10px',
+                    backgroundColor: use_kb_first ? '#e0f2fe' : 'transparent',
+                    border: `1px solid ${use_kb_first ? '#7dd3fc' : 'transparent'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    userSelect: 'none'
+                  }}
+                  onClick={() => set_use_kb_first(!use_kb_first)}
+                >
+                  <Database size={16} color={use_kb_first ? '#0284c7' : '#94a3b8'} />
+                  <span style={{ fontSize: '12px', color: use_kb_first ? '#0284c7' : '#94a3b8', fontWeight: use_kb_first ? 500 : 'normal' }}>
+                    知识库优先
+                  </span>
+                </div>
+
+                <button
+                  onClick={handle_send}
                 disabled={loading || !input.trim()}
                 style={{
                   width: '36px',
@@ -836,7 +921,8 @@ const AgentChat: React.FC = () => {
                 }}
               >
                 <Send size={18} />
-              </button>
+                </button>
+              </div>
             </div>
           </div>
         </div>

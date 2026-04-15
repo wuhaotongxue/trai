@@ -38,6 +38,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_15_0950
+- **新增(knowledge-base)**: 新增知识库管理页面，并在文件列表增加“重命名/移动”专属列与按钮对齐样式
+- **重构(client_electron)**: 批量更新客户端侧边栏及多个 AI、工具、设置页面的 UI 组件与布局
+- **重构(skills)**: 更新 `electron` 与 `start-services` 技能配置
+
 ### 🛠️ 后端_2026_04_15_0940
 - **修复(backend)**: 修复 `run.py` 环境变量导入路径及 `api` 模块无法找到的问题
 - **修复(backend)**: 修复 `client_release.py` 和 `update.py` 中异步 Session 导入及使用的错误
