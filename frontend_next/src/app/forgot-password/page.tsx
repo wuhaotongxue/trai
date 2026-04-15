@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
 
                 <Button
                   onClick={handleSend}
-                  loading={loading}
+                  disabled={loading}
                   className="w-full h-11 font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
                 >
                   {loading ? "正在发送..." : "发送重置链接"}

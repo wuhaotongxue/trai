@@ -38,6 +38,22 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_15_0940
+- **修复(backend)**: 修复 `run.py` 环境变量导入路径及 `api` 模块无法找到的问题
+- **修复(backend)**: 修复 `client_release.py` 和 `update.py` 中异步 Session 导入及使用的错误
+- **修复(backend)**: 修复 `ruff check` 报告的类型注解等格式规范问题
+- **修复(backend)**: 修改依赖 `requirements.txt` 以补充缺少的 redis 等环境
+- **规范(backend)**: 增加 `conda activate` 必须先执行的强制启动规范记忆
+
+### 🎨 前端_2026_04_15_0940
+- **修复(frontend_next)**: 执行 `eslint --fix` 修复无用变量等 Lint 警告
+
+### 🎨 前端_2026_04_14_1750
+- **新增(changelog)**: 将 `/changelog` 占位页重构为真实的更新日志页面，采用左侧时间轴设计，按版本 (v0.1.0 ~ v0.4.0) 展示所有迭代与功能进化，并增加多彩的类型标签 (feat/fix/refactor/docs)
+
+### 🎨 前端_2026_04_14_1717
+- **新增(docs)**: 补充 `/docs/api` (API 接口文档) 页面，采用全宽视觉布局，展示核心 API (如登录、对话、工具调用等) 概览，并嵌入后端 Swagger 交互文档链接与 Shell 调用示例
+
 ### 💻 客户端_2026_04_14_1716
 - **新增(client_electron)**: `Settings` 系统设置页面新增“个人账号设置”标签页，与原有的系统常规设置拆分，集成显示用户信息、头像上传预览以及修改密码的基础 UI 组件交互
 
@@ -58,6 +74,9 @@ cd trai
 - **新增(docs)**: 补充《TRAI 版本更新与发布指南》(`version_update_guide.md`)，详细说明如何解决 S3 预签名链接时间限制问题并确保客户端稳定获取更新
 - **优化(skills)**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
 - **清理(docs)**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
+
+### 📚 项目(docs)_2026_04_14_1634
+- **新增(md)**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
 
 ### 💻 客户端_2026_04_14_1630
 - **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
