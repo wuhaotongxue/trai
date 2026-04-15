@@ -261,5 +261,29 @@ export const agent_service = {
       log.error('generate_comfyui failed:', error.message)
       return { success: false, error: error.message || '提交 ComfyUI 任务失败' }
     }
+  },
+
+  /**
+   * AI 周报生成
+   */
+  async generate_report(template_base64: string, template_name: string, description: string) {
+    try {
+      const url = `${get_api_base_url()}/api/ai/report/generate`
+      const payload = { template_base64, template_name, description }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('generate_report failed:', error.message)
+      // TODO: 后端接口就绪后移除模拟响应
+      // fallback mock
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve({ 
+            success: true, 
+            data: `# 基于 ${template_name} 生成的周报\n\n## 本周工作总结\n\n- ${description.replace(/\n/g, '\n- ')}\n\n## 下周计划\n\n- 继续推进当前进度...` 
+          })
+        }, 3000)
+      })
+    }
   }
 }

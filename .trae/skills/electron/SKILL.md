@@ -42,11 +42,20 @@ description: "Electron 桌面客户端代码审查主入口。强制执行 TypeS
 | 配置项 | 值 |
 |--------|-----|
 | Node.js | 20 LTS |
+| 包管理器 | 必须使用 `pnpm` (禁止 `npm` 或 `yarn`) |
 | TypeScript | 严格模式 (`strict: true`) |
 | 类型 | 必须显式类型注解，禁止 `any` |
 | 导入 | `import { foo } from './foo'`，禁止 `import * as foo` |
 
-### 4. 五层架构强制分层 (Layered Architecture)
+### 4. 启动与发布前的代码审核 (CRITICAL)
+
+<div style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px; margin: 12px 0;">
+<strong>强制</strong>：每次启动客户端 (`pnpm dev`) 或打包发布客户端 (`pnpm build`) 之前，必须先审核代码并确保没有 TypeScript 语法/类型报错。
+<br/>
+请执行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 进行类型检查。如果存在报错，必须先修复所有错误再启动/上传。
+</div>
+
+### 5. 五层架构强制分层 (Layered Architecture)
 
 Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 
@@ -58,7 +67,7 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | **IPC Layer** | `src/main/ipc/` | IPC 通道注册与处理 | 禁止写 UI 逻辑 |
 | **Platform Layer** | `src/main/platform/` | Node.js 原生 API 封装 | 禁止写业务判断逻辑 |
 
-### 5. IPC 通道规范
+### 6. IPC 通道规范
 
 | 规范 | 说明 |
 |------|------|
@@ -66,7 +75,7 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | 安全 | preload 暴露的 API 必须白名单化 |
 | 通信 | 禁止 `ipcRenderer.send`，必须使用 `ipcRenderer.invoke` |
 
-### 6. 自动更新与 S3 上传
+### 7. 自动更新与 S3 上传
 
 | 规范 | 说明 |
 |------|------|
@@ -74,7 +83,7 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | latest.yml | electron-updater 必需的元数据文件 |
 | 发布流程 | `npm run release` 自动打包 + 调用 Backend API 上传 S3 |
 
-### 7. 日志规范
+### 8. 日志规范
 
 | 进程 | 日志方式 |
 |------|----------|
@@ -85,7 +94,7 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 <strong>禁止</strong>：`console.log` 在主进程中，必须使用 `electron-log`
 </div>
 
-### 8. 代码格式化
+### 9. 代码格式化
 
 | 配置项 | 值 |
 |--------|-----|
@@ -94,7 +103,16 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | 引号 | 单引号 (`'`) |
 | 分号 | 禁止 (`;`) |
 
-### 9. 文件头模板
+### 11. UI 布局与拖拽规范 
+
+| 规范 | 说明 |
+|------|------|
+| **防溢出 (Overflow)** | 包含侧边栏或可折叠区域时，使用固定宽度必须配合 `boxSizing: 'border-box'`，或者通过 Flexbox 避免内容溢出。 |
+| **可拖拽区域** | 自定义顶部导航栏必须添加 `className="drag-region"` 实现窗口拖动 (`-webkit-app-region: drag`)。 |
+| **防误触** | 拖拽区域内的任何可点击元素（如按钮、下拉框、输入框）必须显式添加 `className="no-drag-region"` (`-webkit-app-region: no-drag`)，否则无法被点击。 |
+| **三段式折叠布局** | 对于具有“左侧(大侧边栏)+中间(列表)+右侧(详情)”三段式布局的页面，中间列表的收起按钮应置于其头部最右侧，展开按钮应置于右侧详情头部最左侧。 |
+
+### 12. 文件头模板
 
 | 字段 | 说明 |
 |------|------|

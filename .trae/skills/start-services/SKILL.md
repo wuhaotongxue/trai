@@ -17,12 +17,22 @@ cd backend
 python run.py
 ```
 
-## 2. 启动前端服务
-前端使用 Next.js 和 pnpm 进行包管理。
+## 2. 启动前端与客户端服务
+前端与 Electron 客户端使用 Next.js 和 pnpm 进行包管理。
 
-在另一个新的终端执行以下命令：
+**注意：每次启动前必须先进行代码类型审核。**
+
+在前端终端执行以下命令：
 ```bash
 cd frontend_next
+pnpm run type-check
+pnpm dev
+```
+
+在客户端终端执行以下命令：
+```bash
+cd client_electron
+pnpm run type-check
 pnpm dev
 ```
 
