@@ -48,7 +48,7 @@ const Login: React.FC = () => {
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '320px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
-          <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI 客户端</h2>
+          <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>

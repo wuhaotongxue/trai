@@ -401,7 +401,7 @@ const Tools: React.FC = () => {
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                {React.cloneElement(card.icon as React.ReactElement, { size: 24 })}
+                {React.cloneElement(card.icon as React.ReactElement<any>, { size: 24 })}
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
