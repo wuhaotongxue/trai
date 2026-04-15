@@ -38,6 +38,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_15_1000
+- **修复(frontend_next)**: 修复登录页表单提交导致的客户端路由问题，优化表单体验，并根据角色不同(`admin` 或 `user`) 登录后分别跳转后台或工作台
+- **修复(frontend_next)**: 修复 Next.js WebSocket 及热更新在局域网下的 `403 Forbidden` 问题，通过配置 `allowedDevOrigins` 支持内网 IP 访问
+
 ### 🛠️ 后端_2026_04_15_0940
 - **修复(backend)**: 修复 `run.py` 环境变量导入路径及 `api` 模块无法找到的问题
 - **修复(backend)**: 修复 `client_release.py` 和 `update.py` 中异步 Session 导入及使用的错误
