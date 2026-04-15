@@ -21,6 +21,7 @@ import AiReport from '@/pages/ai/report'
 import ComfyUI from '@/pages/ai/comfyui'
 import AgentManagement from '@/pages/agent/management'
 import Feedback from '@/pages/feedback'
+import KnowledgeBasePage from '@/pages/knowledge-base'
 import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
@@ -81,6 +82,10 @@ export const router = createHashRouter([
       {
         path: '/agent/management',
         element: <AgentManagement />
+      },
+      {
+        path: '/knowledge-base',
+        element: <KnowledgeBasePage />
       },
       {
         path: '/tools',

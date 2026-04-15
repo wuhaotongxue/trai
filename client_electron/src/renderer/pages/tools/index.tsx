@@ -352,9 +352,13 @@ const Tools: React.FC = () => {
   ]
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '24px', fontWeight: 600 }}>工具箱</h1>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>工具箱</h1>
+      </div>
+      <div className="no-drag-region" style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto', height: '100%', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '24px', fontWeight: 600 }}>工具箱</h1>
       </div>
       <p style={{ color: '#64748b', marginBottom: '32px', fontSize: '15px' }}>常用文件处理与格式转换工具，操作将在本地或云端安全处理。</p>
       
@@ -505,6 +509,7 @@ const Tools: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   )
 }
