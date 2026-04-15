@@ -28,11 +28,11 @@ const Dashboard: React.FC = () => {
   }, [])
 
   return (
-    <div>
+    <div className="drag-region">
       <h1 style={{ color: '#202020', marginTop: 0 }}>工作台</h1>
       <p style={{ color: 'rgba(0, 0, 0, 0.6)' }}>欢迎来到 TRAI</p>
       
-      <div style={{
+      <div className="no-drag-region" style={{
         marginTop: '24px',
         padding: '24px',
         backgroundColor: '#ffffff',
