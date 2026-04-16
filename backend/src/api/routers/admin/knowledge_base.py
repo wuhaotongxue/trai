@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# 文件名: knowledge_base.py
+# 作者: wuhao
+# 日期: 2026_04_16_10:21:48
+# 描述: 管理后台知识库相关接口
+
 from __future__ import annotations
 
 import hashlib
@@ -235,7 +242,13 @@ class KnowledgeBaseDemoController:
 controller = KnowledgeBaseDemoController()
 
 
-@router.post("/demo_create", response_model=KnowledgeBaseDemoCreateResponse, tags=["管理"])
+@router.post(
+    "/demo_create",
+    response_model=KnowledgeBaseDemoCreateResponse,
+    summary="创建知识库 Demo",
+    description="用于验证百炼知识库的建库与上传链路. 需要管理员权限与百炼相关环境变量.",
+    tags=["管理后台"],
+)
 async def demo_create(
     request: KnowledgeBaseDemoCreateRequest,
     current_user: AdminUser,
