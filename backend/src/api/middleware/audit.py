@@ -109,6 +109,8 @@ class AuditLogger:
         for key, value in data.items():
             if key.lower() in self._sensitive_fields:
                 masked[key] = "***MASKED***"
+            elif key.lower() == "content" and isinstance(value, str) and len(value) > 100:
+                masked[key] = "***FILE_CONTENT_HIDDEN***"
             elif isinstance(value, dict):
                 masked[key] = self._mask_sensitive(value)
             elif isinstance(value, str) and len(value) > 500:
