@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 
 from core.logger import get_logger
 from core.telemetry import init_telemetry
@@ -26,6 +27,106 @@ if TYPE_CHECKING:
 
 logger = get_logger()
 
+_TAG_NAME_MAP: dict[str, str] = {
+    "AI": "AI 能力",
+    "Agent": "智能体",
+    "Agent 管理": "智能体管理",
+    "管理": "管理后台",
+}
+
+_SUMMARY_TRANSLATION_MAP: dict[str, str] = {
+    "Get Dashboard": "获取仪表盘数据",
+    "Get Analytics": "获取数据分析",
+    "List Quota Plans": "获取配额方案列表",
+    "Create Quota Plan": "创建配额方案",
+    "Update Quota Plan": "更新配额方案",
+    "Chat": "对话",
+    "Chat Stream": "对话流式输出",
+    "Chat With Session": "会话对话",
+    "Generate Image": "生成图片",
+    "List Image Models": "获取图片模型列表",
+    "Generate Music": "生成音乐",
+    "Generate Video": "生成视频",
+}
+
+
+class OpenApiChineseNormalizer:
+    """OpenAPI 文档中文化处理器"""
+
+    @staticmethod
+    def _is_ascii_text(text: str) -> bool:
+        try:
+            text.encode("ascii")
+            return True
+        except UnicodeEncodeError:
+            return False
+
+    @staticmethod
+    def _translate_summary(summary: str) -> str:
+        mapped = _SUMMARY_TRANSLATION_MAP.get(summary)
+        if mapped:
+            return mapped
+
+        if not OpenApiChineseNormalizer._is_ascii_text(summary):
+            return summary
+
+        lowered = summary.strip().lower()
+        verb_map: list[tuple[str, str]] = [
+            ("get ", "获取"),
+            ("list ", "获取"),
+            ("create ", "创建"),
+            ("update ", "更新"),
+            ("delete ", "删除"),
+            ("generate ", "生成"),
+            ("sync ", "同步"),
+        ]
+
+        for prefix, chinese in verb_map:
+            if lowered.startswith(prefix):
+                rest = summary.strip()[len(prefix) :].strip()
+                rest_map: dict[str, str] = {
+                    "dashboard": "仪表盘数据",
+                    "analytics": "数据分析",
+                    "quota plans": "配额方案",
+                    "image models": "图片模型列表",
+                    "image": "图片",
+                    "music": "音乐",
+                    "video": "视频",
+                    "organization": "组织架构",
+                }
+                rest_cn = rest_map.get(rest.lower(), rest)
+                return f"{chinese}{rest_cn}"
+
+        return summary
+
+    @staticmethod
+    def normalize(schema: dict) -> dict:
+        paths = schema.get("paths", {})
+        for path_item in paths.values():
+            if not isinstance(path_item, dict):
+                continue
+            for method, op in path_item.items():
+                if method.lower() not in {"get", "post", "put", "patch", "delete"}:
+                    continue
+                if not isinstance(op, dict):
+                    continue
+
+                tags = op.get("tags", [])
+                if isinstance(tags, list):
+                    op["tags"] = [_TAG_NAME_MAP.get(str(t), str(t)) for t in tags]
+
+                summary = op.get("summary")
+                if isinstance(summary, str) and summary.strip():
+                    op["summary"] = OpenApiChineseNormalizer._translate_summary(summary)
+
+        if "tags" in schema and isinstance(schema["tags"], list):
+            for tag in schema["tags"]:
+                if isinstance(tag, dict) and "name" in tag:
+                    name = str(tag["name"])
+                    tag["name"] = _TAG_NAME_MAP.get(name, name)
+
+        return schema
+
 
 def create_app() -> FastAPI:
     """创建 FastAPI 应用实例"""
@@ -35,10 +136,38 @@ def create_app() -> FastAPI:
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
+        openapi_tags=[
+            {"name": "系统", "description": "健康检查, 监控与系统反馈等接口."},
+            {"name": "通知", "description": "系统通知相关接口."},
+            {"name": "认证", "description": "登录, 注册, 刷新 token 与用户信息."},
+            {"name": "企业微信", "description": "企业微信扫码登录与组织架构相关接口."},
+            {"name": "管理后台", "description": "后台管理接口, 需要管理员权限."},
+            {"name": "AI 能力", "description": "AI 能力接口, 如对话与生成能力."},
+            {"name": "智能体", "description": "智能体对话与工具调用接口."},
+            {"name": "智能体管理", "description": "智能体管理接口."},
+            {"name": "媒体", "description": "文件上传等媒体接口."},
+            {"name": "会话", "description": "会话管理接口."},
+            {"name": "工具", "description": "通用工具接口."},
+            {"name": "客户端更新", "description": "桌面客户端自动更新接口."},
+        ],
     )
 
     register_middlewares(app)
     register_routers(app)
+
+    def custom_openapi() -> dict:
+        if app.openapi_schema:
+            return app.openapi_schema
+        schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+        app.openapi_schema = OpenApiChineseNormalizer.normalize(schema)
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
 
     return app
 
