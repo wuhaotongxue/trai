@@ -304,7 +304,11 @@ class OpenAIClient:
                                 )
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            try:
+                err_text = await e.response.aread() if hasattr(e.response, "aread") else e.response.text
+            except Exception:
+                err_text = "<未读取响应内容>"
+            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code} | 响应: {err_text}")
             if e.response.status_code == 400:
                 logger.error(f"导致流式 400 错误的 Payload: {payload}")
             raise ExternalServiceError(

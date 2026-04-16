@@ -102,7 +102,7 @@ async def agent_chat(
 
     messages = []
     if rag_context:
-        messages.append({"role": "system", "content": f"请结合以下参考资料回答用户问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}"})
+        messages.append({"role": "user", "content": f"请结合以下参考资料回答我的问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}"})
     
     messages.append({"role": "user", "content": request.message})
 
