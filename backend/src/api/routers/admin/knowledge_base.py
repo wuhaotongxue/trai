@@ -45,6 +45,21 @@ class KnowledgeBaseListResponse(BaseModel):
 
 
 class KnowledgeBaseDemoService:
+    def _call_bailian_api(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
+        try:
+            return fn(*args, **kwargs)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": 502,
+                    "message": "调用百炼接口失败",
+                    "detail": str(e),
+                },
+            ) from e
+
     def _get_env(self, key: str) -> str:
         val = os.getenv(key)
         if not val:
@@ -258,7 +273,7 @@ class KnowledgeBaseDemoService:
     def list_categories(self) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListCategoryRequest(max_results=100)
-        resp = client.list_category(workspace_id, req)
+        resp = self._call_bailian_api(client.list_category, workspace_id, req)
         raw = self._extract_raw(resp)
         body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
         items = self._extract_list(body)
@@ -267,7 +282,7 @@ class KnowledgeBaseDemoService:
     def list_indices(self, index_name: str | None = None) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListIndicesRequest(index_name=index_name, page_number="1", page_size="100")
-        resp = client.list_indices(workspace_id, req)
+        resp = self._call_bailian_api(client.list_indices, workspace_id, req)
         raw = self._extract_raw(resp)
         body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
         items = self._extract_list(body)
@@ -276,7 +291,7 @@ class KnowledgeBaseDemoService:
     def list_index_files(self, index_id: str) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListIndexFileDetailsRequest(index_id=index_id, page_number=1, page_size=100)
-        resp = client.list_index_file_details(workspace_id, req)
+        resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
         raw = self._extract_raw(resp)
         body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
         items = self._extract_list(body)
