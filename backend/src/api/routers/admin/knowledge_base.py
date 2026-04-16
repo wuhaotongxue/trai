@@ -43,8 +43,33 @@ class KnowledgeBaseListResponse(BaseModel):
     raw: dict[str, Any] = Field(default_factory=dict, description="原始响应, 便于排查字段变更")
 
 
+class KnowledgeBaseUploadTextRequest(BaseModel):
+    content: str = Field(min_length=1, description="上传到知识库的文本内容(建议 Markdown)")
+    file_name: str | None = Field(default=None, description="上传文件名(为空则自动生成)")
 
-class KnowledgeBaseDemoService:
+
+class KnowledgeBaseUploadTextResponse(BaseModel):
+    index_id: str = Field(description="知识库 ID")
+    file_id: str = Field(description="文档 ID")
+    file_name: str = Field(description="文档名称")
+    job_id: str = Field(description="增量建库任务 ID")
+    job_status: str = Field(description="增量建库任务状态")
+
+
+class KnowledgeBaseRenameIndexRequest(BaseModel):
+    index_name: str = Field(min_length=1, max_length=20, description="知识库名称, 最长 20 字符")
+
+
+class KnowledgeBaseRenameIndexResponse(BaseModel):
+    index_id: str = Field(description="知识库 ID")
+    index_name: str = Field(description="知识库名称")
+
+
+class KnowledgeBaseDeleteResponse(BaseModel):
+    success: bool = Field(description="是否成功")
+
+
+
     def _call_bailian_api(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
         try:
             return fn(*args, **kwargs)
@@ -270,6 +295,127 @@ class KnowledgeBaseDemoService:
             job_status=job_status,
         )
 
+    def upload_text_to_index(self, index_id: str, request: KnowledgeBaseUploadTextRequest) -> KnowledgeBaseUploadTextResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+
+        now_suffix = datetime.now().strftime("%m%d_%H%M")
+        file_name = request.file_name or f"trai_upload_{now_suffix}.md"
+
+        content_bytes = request.content.encode("utf-8")
+        md_5 = hashlib.md5(content_bytes).hexdigest()
+        size_in_bytes = str(len(content_bytes))
+
+        lease_req = bailian_models.ApplyFileUploadLeaseRequest(
+            category_type="UNSTRUCTURED",
+            file_name=file_name,
+            md_5=md_5,
+            size_in_bytes=size_in_bytes,
+        )
+        lease_resp = self._call_bailian_api(client.apply_file_upload_lease, "default", workspace_id, lease_req)
+        lease_body = lease_resp.body
+        if not lease_body or not getattr(lease_body, "data", None):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": 502,
+                    "message": "申请上传租约失败",
+                    "provider_code": getattr(lease_body, "code", None),
+                    "provider_message": getattr(lease_body, "message", None),
+                },
+            )
+
+        lease_id = lease_body.data.file_upload_lease_id
+        upload_param = lease_body.data.param
+        upload_url = upload_param.url
+        headers = self._normalize_headers(upload_param.headers)
+
+        with httpx.Client(timeout=120.0) as http_client:
+            upload_resp = http_client.put(upload_url, content=content_bytes, headers=headers)
+            upload_resp.raise_for_status()
+
+        add_file_req = bailian_models.AddFileRequest(
+            lease_id=lease_id,
+            parser="DASHSCOPE_DOCMIND",
+            category_id="default",
+            category_type="UNSTRUCTURED",
+        )
+        add_file_resp = self._call_bailian_api(client.add_file, workspace_id, add_file_req)
+        add_file_body = add_file_resp.body
+        if not add_file_body or not getattr(add_file_body, "data", None):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": 502,
+                    "message": "导入文件到应用数据失败",
+                    "provider_code": getattr(add_file_body, "code", None),
+                    "provider_message": getattr(add_file_body, "message", None),
+                },
+            )
+
+        file_id = add_file_body.data.file_id
+
+        submit_req = bailian_models.SubmitIndexAddDocumentsJobRequest(index_id=index_id, document_ids=[file_id])
+        submit_resp = self._call_bailian_api(client.submit_index_add_documents_job, workspace_id, submit_req)
+        submit_body = submit_resp.body
+        if not submit_body or not getattr(submit_body, "data", None):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={
+                    "code": 502,
+                    "message": "提交增量建库任务失败",
+                    "provider_code": getattr(submit_body, "code", None),
+                    "provider_message": getattr(submit_body, "message", None),
+                },
+            )
+
+        job_id = submit_body.data.id
+        job_status = "PENDING"
+        for _ in range(12):
+            status_req = bailian_models.GetIndexJobStatusRequest(
+                job_id=job_id,
+                index_id=index_id,
+                page_number=1,
+                page_size=10,
+            )
+            status_resp = self._call_bailian_api(client.get_index_job_status, workspace_id, status_req)
+            status_body = status_resp.body
+            job_status = status_body.data.status if status_body and getattr(status_body, "data", None) else job_status
+            if job_status in {"COMPLETED", "FAILED"}:
+                break
+            time.sleep(1.5)
+
+        return KnowledgeBaseUploadTextResponse(
+            index_id=index_id,
+            file_id=file_id,
+            file_name=file_name,
+            job_id=job_id,
+            job_status=job_status,
+        )
+
+    def rename_index(self, index_id: str, request: KnowledgeBaseRenameIndexRequest) -> KnowledgeBaseRenameIndexResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        req = bailian_models.UpdateIndexRequest(id=index_id, name=request.index_name)
+        resp = self._call_bailian_api(client.update_index, workspace_id, req)
+        raw = self._extract_raw(resp)
+        data = raw.get("data") if isinstance(raw.get("data"), dict) else {}
+        name = str(data.get("name") or request.index_name)
+        return KnowledgeBaseRenameIndexResponse(index_id=index_id, index_name=name)
+
+    def delete_index_file(self, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        self._call_bailian_api(
+            client.delete_index_document,
+            workspace_id,
+            bailian_models.DeleteIndexDocumentRequest(index_id=index_id, document_ids=[file_id]),
+        )
+        self._call_bailian_api(client.delete_file, file_id, workspace_id, bailian_models.DeleteFileRequest())
+        return KnowledgeBaseDeleteResponse(success=True)
+
+    def delete_index(self, index_id: str) -> KnowledgeBaseDeleteResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        self._call_bailian_api(client.delete_index, workspace_id, bailian_models.DeleteIndexRequest(index_id=index_id))
+        return KnowledgeBaseDeleteResponse(success=True)
+
     def list_categories(self) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListCategoryRequest(max_results=100)
@@ -332,6 +478,32 @@ class KnowledgeBaseDemoController:
         _ = current_user
         return self._service.list_index_files(index_id=index_id)
 
+    async def upload_text_to_index(
+        self,
+        current_user: AdminUser,
+        index_id: str,
+        request: KnowledgeBaseUploadTextRequest,
+    ) -> KnowledgeBaseUploadTextResponse:
+        _ = current_user
+        return self._service.upload_text_to_index(index_id=index_id, request=request)
+
+    async def rename_index(
+        self,
+        current_user: AdminUser,
+        index_id: str,
+        request: KnowledgeBaseRenameIndexRequest,
+    ) -> KnowledgeBaseRenameIndexResponse:
+        _ = current_user
+        return self._service.rename_index(index_id=index_id, request=request)
+
+    async def delete_index_file(self, current_user: AdminUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+        _ = current_user
+        return self._service.delete_index_file(index_id=index_id, file_id=file_id)
+
+    async def delete_index(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+        _ = current_user
+        return self._service.delete_index(index_id=index_id)
+
 
 controller = KnowledgeBaseDemoController()
 
@@ -381,3 +553,55 @@ async def list_indices(current_user: AdminUser, index_name: str | None = None) -
 )
 async def list_index_files(current_user: AdminUser, index_id: str) -> KnowledgeBaseListResponse:
     return await controller.list_index_files(current_user, index_id=index_id)
+
+
+@router.post(
+    "/indices/{index_id}/files/upload_text",
+    response_model=KnowledgeBaseUploadTextResponse,
+    summary="上传文本到知识库",
+    description="向指定知识库上传文本文件并触发增量解析.",
+    tags=["管理后台"],
+)
+async def upload_text_to_index(
+    current_user: AdminUser,
+    index_id: str,
+    request: KnowledgeBaseUploadTextRequest,
+) -> KnowledgeBaseUploadTextResponse:
+    return await controller.upload_text_to_index(current_user, index_id=index_id, request=request)
+
+
+@router.put(
+    "/indices/{index_id}",
+    response_model=KnowledgeBaseRenameIndexResponse,
+    summary="修改知识库名称",
+    description="修改知识库名称(百炼 Index).",
+    tags=["管理后台"],
+)
+async def rename_index(
+    current_user: AdminUser,
+    index_id: str,
+    request: KnowledgeBaseRenameIndexRequest,
+) -> KnowledgeBaseRenameIndexResponse:
+    return await controller.rename_index(current_user, index_id=index_id, request=request)
+
+
+@router.delete(
+    "/indices/{index_id}/files/{file_id}",
+    response_model=KnowledgeBaseDeleteResponse,
+    summary="删除知识库文件",
+    description="从知识库移除文件并删除文件资源.",
+    tags=["管理后台"],
+)
+async def delete_index_file(current_user: AdminUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+    return await controller.delete_index_file(current_user, index_id=index_id, file_id=file_id)
+
+
+@router.delete(
+    "/indices/{index_id}",
+    response_model=KnowledgeBaseDeleteResponse,
+    summary="删除知识库",
+    description="删除知识库(百炼 Index).",
+    tags=["管理后台"],
+)
+async def delete_index(current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+    return await controller.delete_index(current_user, index_id=index_id)
