@@ -1,3 +1,10 @@
+/**
+ * 文件名: layout.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-16 09:40:24
+ * 描述: 管理后台布局, 负责鉴权跳转, 侧边栏, 顶部栏与用户菜单.
+ */
+
 "use client";
 
 import Link from "next/link";
