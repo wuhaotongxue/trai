@@ -5,8 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
-import { Bell, CheckCircle2, Edit2, Eye, Mail, Plus, Send, Trash2 } from "lucide-react";
+import { Edit2, Eye, Plus, Send, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +19,6 @@ const notifications = [
 ];
 
 export default function NotificationsPage() {
-  const [draft, setDraft] = useState({ title: "", content: "" });
-
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">

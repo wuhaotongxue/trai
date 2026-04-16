@@ -18,12 +18,12 @@ export default function WeComCallbackPage() {
   useEffect(() => {
     const accessToken = searchParams.get("access_token");
     const refreshToken = searchParams.get("refresh_token");
-    
+
     if (accessToken && refreshToken) {
       // 保存 Token 到本地
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refresh_token", refreshToken);
-      
+
       // 简单解析 token 判断角色 (如果是 admin 则去 /admin)
       try {
         const payload = JSON.parse(atob(accessToken.split(".")[1]));
@@ -32,11 +32,11 @@ export default function WeComCallbackPage() {
         } else {
           window.location.href = "/agent";
         }
-      } catch (e) {
+      } catch {
         window.location.href = "/";
       }
     } else {
-      // 没拿到 token，可能授权失败了，跳回登录页
+      // 没拿到 token, 可能授权失败了, 跳回登录页
       router.replace("/login?error=wecom_auth_failed");
     }
   }, [router, searchParams]);

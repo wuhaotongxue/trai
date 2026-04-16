@@ -7,6 +7,7 @@
 
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
@@ -121,10 +122,13 @@ export function ChatPanel() {
               )}
 
               {images && (msg.images || []).map((img, i) => (
-                <img
+                <Image
                   key={i}
                   src={img}
                   alt="uploaded"
+                  width={512}
+                  height={512}
+                  unoptimized
                   className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
                 />
               ))}
@@ -185,9 +189,12 @@ export function ChatPanel() {
           <div className="flex gap-2 mb-2 flex-wrap">
             {images.map((img, i) => (
               <div key={i} className="relative group">
-                <img
+                <Image
                   src={img}
                   alt={`upload-${i}`}
+                  width={64}
+                  height={64}
+                  unoptimized
                   className="h-16 w-16 object-cover rounded-lg border"
                 />
                 <button

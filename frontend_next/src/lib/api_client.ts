@@ -260,8 +260,9 @@ export function createStreamClient(
     onDone?: () => void;
   }
 ) {
+  const apiBase = getApiBase();
   const es = new EventSource(
-    `${API_BASE}/sessions/${sessionId}/messages/stream` +
+    `${apiBase}/sessions/${sessionId}/messages/stream` +
       `?${new URLSearchParams({
         content: message,
         role: "user",
@@ -295,7 +296,7 @@ export function createStreamClient(
 
   return {
     abort: () => {
-      fetch(`${API_BASE}/sessions/${sessionId}/messages/stream`, { method: "DELETE" });
+      fetch(`${apiBase}/sessions/${sessionId}/messages/stream`, { method: "DELETE" });
       es.close();
     },
   };
