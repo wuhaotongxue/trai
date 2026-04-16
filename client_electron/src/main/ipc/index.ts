@@ -12,6 +12,7 @@ import { auth_service } from '../services/auth'
 import { tools_service } from '../services/tools'
 import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
+import { knowledge_base_service } from '../services/knowledge_base'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
@@ -135,5 +136,10 @@ export const register_ipc_handlers = (): void => {
   // ===================== 系统反馈 =====================
   ipcMain.handle('feedback:submit', async (_, data: { type: string, title: string, content: string, contact?: string }) => {
     return await feedback_service.submit(data)
+  })
+
+  // ===================== 知识库 =====================
+  ipcMain.handle('kb:demo_create', async (_, params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => {
+    return await knowledge_base_service.demo_create(params)
   })
 }

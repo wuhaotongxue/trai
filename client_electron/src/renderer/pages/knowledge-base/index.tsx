@@ -60,6 +60,8 @@ const KnowledgeBasePage: React.FC = () => {
   // 弹窗与表单状态
   const [show_create_modal, set_show_create_modal] = useState(false)
   const [new_kb_name, set_new_kb_name] = useState('')
+  const [creating_kb, set_creating_kb] = useState(false)
+  const [create_kb_error, set_create_kb_error] = useState('')
   const [show_cat_modal, set_show_cat_modal] = useState(false)
   const [new_cat_name, set_new_cat_name] = useState('')
   const [search_query, set_search_query] = useState('')
@@ -91,19 +93,50 @@ const KnowledgeBasePage: React.FC = () => {
     set_new_cat_name('')
   }
 
-  const handle_create_kb = () => {
-    if (!new_kb_name.trim() || !active_cat_id) return
-    const new_kb: KnowledgeBase = {
-      id: `kb_${Date.now()}`,
-      category_id: active_cat_id,
-      name: new_kb_name.trim(),
-      file_count: 0,
-      created_at: new Date().toISOString().slice(0, 16).replace('T', ' ')
+  const handle_create_kb = async () => {
+    const name = new_kb_name.trim()
+    if (!name || !active_cat_id) return
+    if (!window.electron_api.kb_demo_create) {
+      set_create_kb_error('当前客户端版本不支持创建知识库')
+      return
     }
-    set_kb_list([new_kb, ...kb_list])
-    set_active_kb_id(new_kb.id)
-    set_show_create_modal(false)
-    set_new_kb_name('')
+
+    set_create_kb_error('')
+    set_creating_kb(true)
+
+    try {
+      const res = await window.electron_api.kb_demo_create({ index_name: name })
+      if (!res.success || !res.data) {
+        set_create_kb_error(res.error || '创建失败, 请检查服务器配置')
+        return
+      }
+
+      const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      const new_kb: KnowledgeBase = {
+        id: res.data.index_id,
+        category_id: active_cat_id,
+        name: res.data.index_name || name,
+        file_count: 1,
+        created_at: now_str
+      }
+
+      const new_file: KbFile = {
+        id: res.data.file_id,
+        kb_id: res.data.index_id,
+        name: res.data.file_name,
+        size: '-',
+        upload_time: now_str,
+        status: res.data.job_status === 'FAILED' ? 'error' : 'success'
+      }
+
+      set_kb_list((prev) => [new_kb, ...prev])
+      set_files((prev) => [new_file, ...prev])
+      set_active_kb_id(new_kb.id)
+      set_show_create_modal(false)
+      set_new_kb_name('')
+    } finally {
+      set_creating_kb(false)
+    }
   }
 
   const handle_file_upload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -619,9 +652,23 @@ const KnowledgeBasePage: React.FC = () => {
               <button onClick={() => set_show_create_modal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
             <input autoFocus placeholder="请输入知识库名称..." value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { set_show_create_modal(false); set_new_kb_name('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
-              <button onClick={handle_create_kb} style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>确认创建</button>
+              <button
+                onClick={() => { set_show_create_modal(false); set_new_kb_name(''); set_create_kb_error('') }}
+                disabled={creating_kb}
+                style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: creating_kb ? 'not-allowed' : 'pointer', fontSize: '14px' }}
+              >
+                取消
+              </button>
+              <button
+                onClick={handle_create_kb}
+                disabled={creating_kb}
+                style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: creating_kb ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {creating_kb && <Loader2 size={14} className="animate-spin" />}
+                确认创建
+              </button>
             </div>
           </div>
         </div>

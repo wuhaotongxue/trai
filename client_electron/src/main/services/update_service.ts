@@ -8,6 +8,8 @@
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 import { ipcMain } from 'electron'
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 
 export class UpdateService {
   private update_url: string
@@ -19,9 +21,8 @@ export class UpdateService {
 
     // 这里指向后端的动态更新 API,例如 http://localhost:5666/api/client/update 或生产地址
     // 假设在生产中通过环境变量或者固定域名获取
-    this.update_url = process.env.VITE_API_URL 
-      ? `${process.env.VITE_API_URL}/client/update`
-      : 'http://localhost:5666/api/client/update'
+    const base_url = ApiUrl.build_api_base_url_by_env()
+    this.update_url = `${base_url}${ApiEndpoints.client_update}`
 
     autoUpdater.setFeedURL({
       provider: 'generic',
