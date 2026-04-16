@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: main.py
 # 作者: wuhao
-# 日期: 2026_04_16_10:14:02
+# 日期: 2026_04_16_10:28:52
 # 描述: FastAPI 应用配置和路由注册
 
 from __future__ import annotations
@@ -35,6 +35,12 @@ _TAG_NAME_MAP: dict[str, str] = {
 }
 
 _SUMMARY_TRANSLATION_MAP: dict[str, str] = {
+    "Health Check": "健康检查",
+    "Detailed Health Check": "详细健康检查",
+    "Liveness Check": "存活探针",
+    "Readiness Check": "就绪探针",
+    "System Monitor": "系统监控",
+    "Metrics": "监控指标",
     "List Users": "获取用户列表",
     "Get User": "获取用户信息",
     "Update User": "更新用户信息",
@@ -120,7 +126,12 @@ class OpenApiChineseNormalizer:
 
                 tags = op.get("tags", [])
                 if isinstance(tags, list):
-                    op["tags"] = [_TAG_NAME_MAP.get(str(t), str(t)) for t in tags]
+                    renamed = [_TAG_NAME_MAP.get(str(t), str(t)) for t in tags]
+                    deduped: list[str] = []
+                    for t in renamed:
+                        if t not in deduped:
+                            deduped.append(t)
+                    op["tags"] = deduped
 
                 summary = op.get("summary")
                 if isinstance(summary, str) and summary.strip():
