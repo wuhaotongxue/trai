@@ -262,28 +262,44 @@ const KnowledgeBasePage: React.FC = () => {
     }
     
     for (const file of selected_files) {
+      const temp_id = `uploading_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
+      const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      
+      const new_f: KbFile = {
+        id: temp_id,
+        kb_id: active_kb_id,
+        name: file.name,
+        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+        upload_time: now_str,
+        status: 'uploading'
+      }
+      
+      // 先把文件状态设置为 uploading 并展示在列表中
+      set_files(prev => [new_f, ...prev])
+
       try {
         const content = await file.text()
         const res = await window.electron_api.kb_upload_text(active_kb_id, file.name, content)
         if (res.success) {
-          // 这里可以考虑直接 reload files
-          const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
-          const new_f: KbFile = {
-            id: res.data?.file_id || res.data?.data?.file_id || `f_${Date.now()}`,
-            kb_id: active_kb_id,
-            name: file.name,
-            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-            upload_time: now_str,
-            status: 'success'
-          }
-          set_files(prev => [new_f, ...prev])
+          const real_id = res.data?.file_id || res.data?.data?.file_id || temp_id
+          
+          set_files(prev => prev.map(f => 
+            f.id === temp_id ? { ...f, id: real_id, status: 'success' } : f
+          ))
+          
           set_kb_list(prev => prev.map(kb => 
             kb.id === active_kb_id ? { ...kb, file_count: kb.file_count + 1 } : kb
           ))
         } else {
+          set_files(prev => prev.map(f => 
+            f.id === temp_id ? { ...f, status: 'error' } : f
+          ))
           alert(`上传 ${file.name} 失败: ${res.error}`)
         }
       } catch (err: any) {
+        set_files(prev => prev.map(f => 
+          f.id === temp_id ? { ...f, status: 'error' } : f
+        ))
         alert(`读取/上传文件 ${file.name} 失败: ${err.message}`)
       }
     }
