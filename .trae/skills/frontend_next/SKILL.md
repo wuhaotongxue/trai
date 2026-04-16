@@ -61,7 +61,8 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
   <strong style="color:#2E7D32;">&#x2714; 提交前强制要求</strong> — 每次向 Git 提交 frontend_next 目录的代码前，必须执行格式化与异常检查
   <div style="margin-top:8px;font-size:13px;color:#555;">
     1. <strong>异常检测与格式化：</strong> 运行 <code>pnpm run lint:fix</code> (即 <code>eslint --fix</code>)，自动修复可修复的格式问题，并暴露潜在的异常（如未使用的变量、错误的 Hooks 依赖等）。<br>
-    2. <strong>类型检查：</strong> 运行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 确保没有 TypeScript 编译报错。
+    2. <strong>零警告要求：</strong> 运行 <code>pnpm run lint -- --max-warnings 0</code>，要求 lint 结果为 0 warning，发现 warning 必须修复后才能提交。<br>
+    3. <strong>类型检查：</strong> 运行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 确保没有 TypeScript 编译报错。
   </div>
 </div>
 

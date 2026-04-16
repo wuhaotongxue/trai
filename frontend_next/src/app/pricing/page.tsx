@@ -6,7 +6,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check, Zap, Star } from "lucide-react";
+import { ArrowRight, Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";

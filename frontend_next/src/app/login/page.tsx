@@ -166,7 +166,7 @@ function LoginForm() {
                       if (data && data.url) {
                         window.location.href = data.url;
                       }
-                    } catch (e) {
+                    } catch {
                       setErrorMessage("获取企业微信登录链接失败");
                     }
                   }}

@@ -6,10 +6,10 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, ChevronDown, Download, Edit2, Filter, Mail, MoreHorizontal, Search, Shield, Trash2, UserPlus, XCircle } from "lucide-react";
+import { Download, Edit2, Mail, Search, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 const mockUsers = [
   { id: 1, name: "张明", email: "zhangming@example.com", plan: "VIP", status: "active", agent_calls: 1284, joined: "2026-01-15", avatar: "张" },
