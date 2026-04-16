@@ -22,6 +22,7 @@ interface Window {
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: any[] }) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_demo_create?: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
     on_agent_chat_chunk?: (callback: (event: any, chunk: any) => void) => (() => void);
     ai_generate_report?: (file_data: any, filename: string, description: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     app_get_version?: () => Promise<string>;

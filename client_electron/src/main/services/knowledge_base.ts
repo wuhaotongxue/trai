@@ -1,0 +1,54 @@
+/**
+ * 文件名: knowledge_base.ts
+ * 作者: wuhao
+ * 日期: 2026-04-16 10:36:17
+ * 描述: 客户端知识库服务层, 调用后端管理接口创建知识库.
+ */
+import axios from 'axios'
+import log from 'electron-log'
+import { config_store } from '../platform/config_store'
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
+
+const api_client = axios.create()
+
+api_client.interceptors.request.use((config) => {
+  const token = config_store.get('access_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+export interface KnowledgeBaseDemoCreateRequest {
+  content?: string | null
+  file_name?: string | null
+  index_name?: string | null
+}
+
+export interface KnowledgeBaseDemoCreateResponse {
+  index_id: string
+  index_name: string
+  file_id: string
+  file_name: string
+  job_id: string
+  job_status: string
+}
+
+export const knowledge_base_service = {
+  async demo_create(params: KnowledgeBaseDemoCreateRequest) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_demo_create)
+      const res = await api_client.post(url, params)
+      return { success: true, data: res.data as KnowledgeBaseDemoCreateResponse }
+    } catch (error: any) {
+      log.error('knowledge base demo_create failed:', error.response?.data || error.message)
+      const msg =
+        error.response?.data?.detail?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        '创建知识库失败, 请检查网络或服务器配置'
+      return { success: false, error: msg }
+    }
+  }
+}

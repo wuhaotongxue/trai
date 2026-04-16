@@ -7,10 +7,8 @@
 import axios from 'axios'
 import log from 'electron-log'
 import { config_store } from '../platform/config_store'
-
-const get_api_base_url = () => {
-  return config_store.get('api_url', 'http://127.0.0.1:5666')
-}
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 
 // 创建 axios 实例并配置请求拦截器
 const api_client = axios.create()
@@ -26,7 +24,7 @@ api_client.interceptors.request.use((config) => {
 export const auth_service = {
   async login(params: any) {
     try {
-      const url = `${get_api_base_url()}/api/auth/login`
+      const url = ApiUrl.build_api_url(ApiEndpoints.auth_login)
       const res = await api_client.post(url, params)
       
       // 登录成功后持久化 token
@@ -46,7 +44,7 @@ export const auth_service = {
 
   async register(params: any) {
     try {
-      const url = `${get_api_base_url()}/api/auth/register`
+      const url = ApiUrl.build_api_url(ApiEndpoints.auth_register)
       const res = await api_client.post(url, params)
       return { success: true, data: res.data }
     } catch (error: any) {
@@ -61,7 +59,7 @@ export const auth_service = {
   async logout() {
     try {
       // 也可以在此处调用服务端的登出接口
-      const url = `${get_api_base_url()}/api/auth/logout`
+      const url = ApiUrl.build_api_url(ApiEndpoints.auth_logout)
       await api_client.post(url).catch(() => {
         log.warn('server logout failed, but local token will be cleared anyway')
       })
