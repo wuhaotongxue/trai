@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_16_0920
+- **修复(db)**: 数据库配置同时兼容 `POSTGRES_*` 与 `.env` 的 `DB_*`，并在连接失败时打印隐藏密码后的错误日志
+- **修复(sqlite)**: 兼容 SQLite 自增主键写入，避免初始化默认 admin 时登录接口返回 500
+- **新增(test)**: 增加 PostgreSQL 账号密码直连验证测试用例，便于快速排查连接问题
+
 ### 🛠️ 后端_2026_04_15_2112
 - **新增(knowledge_base)**: 新增百炼知识库 Demo 创建接口 `/api/admin/knowledge_base/demo_create`，返回 IndexId/FileId/JobId 并轮询任务状态
 - **新增(env)**: `.env.example` 补齐百炼知识库 OpenAPI 的环境变量说明与示例占位
