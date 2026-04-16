@@ -69,11 +69,11 @@ class KnowledgeBaseDeleteResponse(BaseModel):
     success: bool = Field(description="是否成功")
 
 
+class KnowledgeBaseDemoService:
 
     def _call_bailian_api(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
         try:
             return fn(*args, **kwargs)
-        except HTTPException:
             raise
         except Exception as e:
             raise HTTPException(
