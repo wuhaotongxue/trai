@@ -97,15 +97,12 @@ const KnowledgeBasePage: React.FC = () => {
           return
         }
 
-        const cat_items: any[] = Array.isArray(cat_res.data?.data?.items)
-          ? cat_res.data.data.items
-          : Array.isArray(cat_res.data?.items)
-            ? cat_res.data.items
-            : []
+        const cat_source = cat_res.data?.data?.items || cat_res.data?.items || cat_res.data?.data || cat_res.data || []
+        const cat_items: any[] = Array.isArray(cat_source) ? cat_source : []
         const mapped_categories: KbCategory[] = cat_items
           .map((it) => ({
-            id: String(it.category_id || it.categoryId || it.id || ''),
-            name: String(it.category_name || it.categoryName || it.name || '')
+            id: String(it.category_id || it.categoryId || it.CategoryId || it.id || it.Id || ''),
+            name: String(it.category_name || it.categoryName || it.CategoryName || it.name || it.Name || '')
           }))
           .filter((c) => c.id && c.name)
 
@@ -115,20 +112,17 @@ const KnowledgeBasePage: React.FC = () => {
         set_categories(ensured_categories)
         set_active_cat_id((prev) => prev || ensured_categories[0].id)
 
-        const idx_items: any[] = Array.isArray(idx_res.data?.data?.items)
-          ? idx_res.data.data.items
-          : Array.isArray(idx_res.data?.items)
-            ? idx_res.data.items
-            : []
+        const idx_source = idx_res.data?.data?.items || idx_res.data?.items || idx_res.data?.data || idx_res.data || []
+        const idx_items: any[] = Array.isArray(idx_source) ? idx_source : []
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
         const cat_id_for_kb = ensured_categories[0].id
         const mapped_kbs: KnowledgeBase[] = idx_items
           .map((it) => ({
-            id: String(it.index_id || it.indexId || it.id || ''),
+            id: String(it.index_id || it.indexId || it.IndexId || it.id || it.Id || ''),
             category_id: cat_id_for_kb,
-            name: String(it.index_name || it.indexName || it.name || ''),
-            file_count: Number(it.file_count || it.fileCount || it.document_count || it.documentCount || 0),
-            created_at: String(it.created_at || it.gmtCreate || it.createTime || now_str)
+            name: String(it.index_name || it.indexName || it.IndexName || it.name || it.Name || ''),
+            file_count: Number(it.file_count || it.fileCount || it.DocumentCount || it.document_count || it.documentCount || 0),
+            created_at: String(it.created_at || it.gmtCreate || it.GmtCreate || it.createTime || now_str)
           }))
           .filter((kb) => kb.id && kb.name)
 
@@ -159,25 +153,22 @@ const KnowledgeBasePage: React.FC = () => {
           return
         }
 
-        const items: any[] = Array.isArray(res.data?.data?.items)
-          ? res.data.data.items
-          : Array.isArray(res.data?.items)
-            ? res.data.items
-            : []
+        const items_source = res.data?.data?.items || res.data?.items || res.data?.data || res.data || []
+        const items: any[] = Array.isArray(items_source) ? items_source : []
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
         const mapped_files: KbFile[] = items
           .map((it) => {
-            const raw_status = String(it.status || it.document_status || it.documentStatus || '').toUpperCase()
+            const raw_status = String(it.status || it.Status || it.document_status || it.documentStatus || '').toUpperCase()
             let status: KbFile['status'] = 'success'
             if (raw_status === 'FAILED' || raw_status === 'ERROR') status = 'error'
             if (raw_status === 'PENDING' || raw_status === 'PROCESSING' || raw_status === 'RUNNING') status = 'uploading'
 
             return {
-              id: String(it.file_id || it.fileId || it.document_id || it.documentId || it.id || ''),
+              id: String(it.file_id || it.fileId || it.FileId || it.document_id || it.documentId || it.id || it.Id || ''),
               kb_id: active_kb_id,
-              name: String(it.file_name || it.fileName || it.document_name || it.documentName || it.name || ''),
-              size: String(it.size || it.size_in_bytes || it.sizeInBytes || '-'),
-              upload_time: String(it.upload_time || it.gmtCreate || it.createTime || now_str),
+              name: String(it.file_name || it.fileName || it.FileName || it.document_name || it.documentName || it.name || it.Name || ''),
+              size: String(it.size || it.Size || it.size_in_bytes || it.sizeInBytes || '-'),
+              upload_time: String(it.upload_time || it.gmtCreate || it.GmtCreate || it.createTime || now_str),
               status
             }
           })
