@@ -32,7 +32,12 @@ export class ApiEndpoints {
   static readonly tools_convert_image = '/api/tools/convert_image'
 
   static readonly admin_knowledge_base_demo_create = '/api/admin/knowledge_base/demo_create'
+  static readonly admin_knowledge_base_categories = '/api/admin/knowledge_base/categories'
+  static readonly admin_knowledge_base_indices = '/api/admin/knowledge_base/indices'
+
+  static admin_knowledge_base_index_files(index_id: string) {
+    return `/api/admin/knowledge_base/indices/${encodeURIComponent(index_id)}/files`
+  }
 
   static readonly client_update = '/api/client/update'
 }
-
