@@ -605,7 +605,6 @@ const KnowledgeBasePage: React.FC = () => {
                       <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{active_kb.name}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
                         <button onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
-                        <button onClick={() => { alert('暂不支持移动知识库') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
                         <button onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                       </div>
                     </>
@@ -654,7 +653,6 @@ const KnowledgeBasePage: React.FC = () => {
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '120px' }}>大小</th>
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '160px' }}>上传时间</th>
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '100px' }}>状态</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '180px' }}>重命名&nbsp;&nbsp;&nbsp;&nbsp;移动</th>
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '80px', textAlign: 'right' }}>操作</th>
                         </tr>
                       </thead>
@@ -683,12 +681,6 @@ const KnowledgeBasePage: React.FC = () => {
                               ) : (
                                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px' }}><Loader2 size={12} className="animate-spin" />上传中</span>
                               )}
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginLeft: '12px' }}>
-                                <button onClick={() => { alert('暂不支持重命名文件') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="重命名" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} /></button>
-                                <button onClick={() => { alert('暂不支持移动文件') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="移动到..." onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} /></button>
-                              </div>
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
