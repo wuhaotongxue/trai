@@ -142,9 +142,16 @@ if (!got_the_lock) {
   })
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    void main_window
-      .loadURL(process.env.VITE_DEV_SERVER_URL)
-      .catch((err) => log.error('loadURL failed:', err))
+    void (async () => {
+      try {
+        await main_window?.webContents.session.clearCache()
+        const dev_url = new URL(process.env.VITE_DEV_SERVER_URL)
+        dev_url.searchParams.set('t', Date.now().toString())
+        await main_window?.loadURL(dev_url.toString())
+      } catch (err) {
+        log.error('loadURL failed:', err)
+      }
+    })()
     main_window.webContents.openDevTools({ mode: 'detach' })
   } else {
     void main_window
