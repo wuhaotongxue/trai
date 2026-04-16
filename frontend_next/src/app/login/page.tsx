@@ -22,6 +22,11 @@ function LoginForm() {
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE ||
+    (typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}:5666/api`
+      : "http://localhost:5666/api");
 
   useEffect(() => {
     const err = searchParams.get("error");
@@ -52,7 +57,11 @@ function LoginForm() {
       }
     } catch (e) {
       const message = e instanceof Error ? e.message : "登录失败";
-      setErrorMessage(message);
+      if (message.toLowerCase().includes("fetch")) {
+        setErrorMessage(`后端接口不可达, 请确认后端已启动: ${apiBase}`);
+      } else {
+        setErrorMessage(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -152,7 +161,7 @@ function LoginForm() {
                   onClick={async () => {
                     try {
                       // 调用后端获取企业微信扫码登录链接
-                      const res = await fetch("http://localhost:5666/api/auth/wecom/url");
+                      const res = await fetch(`${apiBase}/auth/wecom/url`);
                       const data = await res.json();
                       if (data && data.url) {
                         window.location.href = data.url;

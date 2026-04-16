@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: database.py
 # 作者: wuhao
-# 日期: 2026_04_09
+# 日期: 2026_04_16_08:54:20
 # 描述: 数据库配置
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.exc import OperationalError
@@ -39,11 +40,11 @@ class DatabaseConfig:
     """数据库配置"""
 
     def __init__(self) -> None:
-        self._server: str = os.getenv("POSTGRES_SERVER", "localhost")
-        self._port: str = os.getenv("POSTGRES_PORT", "5432")
-        self._user: str = os.getenv("POSTGRES_USER", "postgres")
-        self._password: str = os.getenv("POSTGRES_PASSWORD", "")
-        self._database: str = os.getenv("POSTGRES_DB", "trai")
+        self._server: str = os.getenv("POSTGRES_SERVER") or os.getenv("DB_HOST", "localhost")
+        self._port: str = os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT", "5432")
+        self._user: str = os.getenv("POSTGRES_USER") or os.getenv("DB_USER", "postgres")
+        self._password: str = os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD", "")
+        self._database: str = os.getenv("POSTGRES_DB") or os.getenv("DB_NAME", "trai")
         self._sqlite_path: str = os.getenv(
             "SQLITE_PATH",
             str(Path(__file__).resolve().parent.parent.parent.parent / ".local_dev.sqlite3"),
@@ -94,12 +95,15 @@ class Database:
             max_overflow=20,
             pool_pre_ping=True,
             echo=False,
+            connect_args={"connect_timeout": 5},
         )
 
         try:
             with self._engine.connect():
                 pass
-        except OperationalError:
+        except OperationalError as e:
+            safe_url = self._config.url.render_as_string(hide_password=True)
+            logger.warning(f"PostgreSQL connection failed, fallback to sqlite: url={safe_url}, error={e}")
             self._engine = self._config.create_sqlite_engine(
                 pool_pre_ping=True,
                 echo=False,
@@ -112,6 +116,7 @@ class Database:
             self._session_factory = self._config.create_session_factory(self._engine)
 
             self._ensure_postgres_user_schema()
+            self._ensure_default_admin()
 
     @property
     def engine(self) -> Any:
@@ -140,55 +145,100 @@ class Database:
 
         session = self.get_session()
         try:
-            existing = session.execute(
-                text("SELECT t_id FROM t_users WHERE t_username = :username AND t_deleted_at IS NULL"),
-                {"username": "admin"},
-            ).fetchone()
+            try:
+                existing = session.execute(
+                    text("SELECT t_id FROM t_users WHERE t_username = :username AND t_deleted_at IS NULL"),
+                    {"username": "admin"},
+                ).fetchone()
+            except Exception as e:
+                session.rollback()
+                logger.warning(f"Ensure default admin skipped: {e}")
+                return
             if existing:
                 return
 
             password_service = PasswordService()
             now = datetime.now()
 
-            session.execute(
-                text(
-                    """
-                    INSERT INTO t_users (
-                        t_user_id,
-                        t_username,
-                        t_display_name,
-                        t_email,
-                        t_password_hash,
-                        t_role,
-                        t_status,
-                        t_created_at,
-                        t_updated_at
-                    ) VALUES (
-                        :user_id,
-                        :username,
-                        :display_name,
-                        :email,
-                        :password_hash,
-                        :role,
-                        :status,
-                        :created_at,
-                        :updated_at
+            params: dict[str, object] = {
+                "user_id": str(uuid.uuid4()),
+                "username": "admin",
+                "display_name": "管理员",
+                "email": "admin@example.com",
+                "password_hash": password_service.hash("admin123"),
+                "role": "admin",
+                "status": "active",
+                "created_at": now,
+                "updated_at": now,
+            }
+
+            try:
+                if self._engine.dialect.name == "sqlite":
+                    next_id = session.execute(text("SELECT COALESCE(MAX(t_id), 0) + 1 FROM t_users")).scalar_one()
+                    params["t_id"] = int(next_id)
+                    session.execute(
+                        text(
+                            """
+                            INSERT INTO t_users (
+                                t_id,
+                                t_user_id,
+                                t_username,
+                                t_display_name,
+                                t_email,
+                                t_password_hash,
+                                t_role,
+                                t_status,
+                                t_created_at,
+                                t_updated_at
+                            ) VALUES (
+                                :t_id,
+                                :user_id,
+                                :username,
+                                :display_name,
+                                :email,
+                                :password_hash,
+                                :role,
+                                :status,
+                                :created_at,
+                                :updated_at
+                            )
+                            """
+                        ),
+                        params,
                     )
-                    """
-                ),
-                {
-                    "user_id": str(uuid.uuid4()),
-                    "username": "admin",
-                    "display_name": "管理员",
-                    "email": "admin@example.com",
-                    "password_hash": password_service.hash("admin123"),
-                    "role": "admin",
-                    "status": "active",
-                    "created_at": now,
-                    "updated_at": now,
-                },
-            )
-            session.commit()
+                else:
+                    session.execute(
+                        text(
+                            """
+                            INSERT INTO t_users (
+                                t_user_id,
+                                t_username,
+                                t_display_name,
+                                t_email,
+                                t_password_hash,
+                                t_role,
+                                t_status,
+                                t_created_at,
+                                t_updated_at
+                            ) VALUES (
+                                :user_id,
+                                :username,
+                                :display_name,
+                                :email,
+                                :password_hash,
+                                :role,
+                                :status,
+                                :created_at,
+                                :updated_at
+                            )
+                            """
+                        ),
+                        params,
+                    )
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                logger.warning(f"Ensure default admin skipped: {e}")
         finally:
             session.close()
 

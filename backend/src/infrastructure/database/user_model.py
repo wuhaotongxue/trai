@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: user_model.py
 # 作者: wuhao
-# 日期: 2026_04_13
+# 日期: 2026_04_16_08:49:35
 # 描述: 用户数据库模型
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, BigInteger, DateTime, String, Text
+from sqlalchemy import JSON, BigInteger, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -21,7 +21,11 @@ class UserModel(Base):
     __tablename__ = "t_users"
     __comment__ = "用户表,存储用户账户信息"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        primary_key=True,
+        autoincrement=True,
+    )
     """自增主键 ID"""
 
     t_user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
