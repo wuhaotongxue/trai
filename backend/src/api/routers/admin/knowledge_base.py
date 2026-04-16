@@ -151,11 +151,28 @@ class KnowledgeBaseDemoService:
     def _extract_list(self, data: Any) -> list[dict[str, Any]]:
         if isinstance(data, list):
             return [x for x in data if isinstance(x, dict)]
-        if isinstance(data, dict):
-            for key in ("items", "indices", "categories", "files", "documents", "data", "list"):
-                val = data.get(key)
-                if isinstance(val, list):
-                    return [x for x in val if isinstance(x, dict)]
+
+        if not isinstance(data, dict):
+            return []
+
+        preferred_keys = ("items", "indices", "categories", "files", "documents", "data", "list")
+        for key in preferred_keys:
+            val = data.get(key)
+            if isinstance(val, list):
+                return [x for x in val if isinstance(x, dict)]
+            if isinstance(val, dict):
+                nested = self._extract_list(val)
+                if nested:
+                    return nested
+
+        for val in data.values():
+            if isinstance(val, list) and val and all(isinstance(x, dict) for x in val):
+                return val
+            if isinstance(val, dict):
+                nested = self._extract_list(val)
+                if nested:
+                    return nested
+
         return []
 
     def _extract_raw(self, resp: Any) -> dict[str, Any]:
@@ -354,7 +371,11 @@ class KnowledgeBaseDemoService:
 
         file_id = add_file_body.data.file_id
 
-        submit_req = bailian_models.SubmitIndexAddDocumentsJobRequest(index_id=index_id, document_ids=[file_id])
+        submit_req = bailian_models.SubmitIndexAddDocumentsJobRequest(
+            index_id=index_id,
+            document_ids=[file_id],
+            source_type="DATA_CENTER_FILE",
+        )
         submit_resp = self._call_bailian_api(client.submit_index_add_documents_job, workspace_id, submit_req)
         submit_body = submit_resp.body
         if not submit_body or not getattr(submit_body, "data", None):
@@ -418,7 +439,7 @@ class KnowledgeBaseDemoService:
 
     def list_categories(self) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
-        req = bailian_models.ListCategoryRequest(max_results=100)
+        req = bailian_models.ListCategoryRequest(category_type="UNSTRUCTURED", max_results=100)
         try:
             resp = self._call_bailian_api(client.list_category, workspace_id, req)
             raw = self._extract_raw(resp)

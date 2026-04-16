@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 文件名: knowledge_base_workflow_check.py
 # 作者: wuhao
-# 日期: 2026_04_16_11:48:08
+# 日期: 2026_04_16_13:51:12
 # 描述: 知识库全流程自测脚本, 覆盖列表, 新建, 上传, 重命名, 删除等操作
 
 from __future__ import annotations
@@ -22,6 +22,8 @@ class KnowledgeBaseWorkflowCheck:
         self._username = os.getenv("ADMIN_USERNAME", "admin")
         self._password = os.getenv("ADMIN_PASSWORD", "admin123")
         self._timeout = float(os.getenv("API_TIMEOUT", "30"))
+        self._keep_resources = os.getenv("KEEP_RESOURCES", "0") == "1"
+        self._print_raw = os.getenv("PRINT_RAW", "0") == "1"
         self._client = httpx.Client(timeout=self._timeout)
 
     def _url(self, path: str) -> str:
@@ -59,6 +61,18 @@ class KnowledgeBaseWorkflowCheck:
             raise RuntimeError(f"login missing token, body={data}")
         return str(token)
 
+    def _preview_items(self, items: list[Any], key_candidates: list[str], limit: int = 6) -> None:
+        def pick(item: Any) -> str:
+            if not isinstance(item, dict):
+                return str(item)
+            for k in key_candidates:
+                if k in item and item.get(k) is not None:
+                    return str(item.get(k))
+            return str(item)[:120]
+
+        for i, item in enumerate(items[:limit], start=1):
+            print(f"  - {i}. {pick(item)}")
+
     def run(self) -> None:
         print(f"API_BASE={self._base_url}")
         token = self.login()
@@ -66,11 +80,21 @@ class KnowledgeBaseWorkflowCheck:
 
         print("1) list categories")
         categories = self._assert_ok(self._get("/api/admin/knowledge_base/categories", headers=headers), "list categories")
-        print(f"categories items={len(categories.get('items', []))}")
+        cat_items = categories.get("items", [])
+        print(f"categories items={len(cat_items)}")
+        self._preview_items(cat_items, ["category_name", "categoryName", "name", "category_id", "categoryId", "id"])
+        if self._print_raw:
+            print("categories raw:")
+            print(categories.get("raw"))
 
         print("2) list indices")
         indices = self._assert_ok(self._get("/api/admin/knowledge_base/indices", headers=headers), "list indices")
-        print(f"indices items={len(indices.get('items', []))}")
+        idx_items = indices.get("items", [])
+        print(f"indices items={len(idx_items)}")
+        self._preview_items(idx_items, ["index_name", "indexName", "name", "index_id", "indexId", "id"])
+        if self._print_raw:
+            print("indices raw:")
+            print(indices.get("raw"))
 
         suffix = uuid.uuid4().hex[:8]
         index_name = f"kb_{suffix}"[:20]
@@ -95,7 +119,9 @@ class KnowledgeBaseWorkflowCheck:
             self._get(f"/api/admin/knowledge_base/indices/{index_id}/files", headers=headers),
             "list index files",
         )
-        print(f"files items={len(files_resp.get('items', []))}")
+        file_items = files_resp.get("items", [])
+        print(f"files items={len(file_items)}")
+        self._preview_items(file_items, ["file_name", "fileName", "document_name", "documentName", "name", "file_id", "fileId", "id"])
 
         print("5) upload text to index")
         upload = self._assert_ok(
@@ -128,12 +154,15 @@ class KnowledgeBaseWorkflowCheck:
         )
         print(f"delete file success={deleted_file.get('success')}")
 
-        print("8) delete index")
-        deleted_index = self._assert_ok(
-            self._delete(f"/api/admin/knowledge_base/indices/{index_id}", headers=headers),
-            "delete index",
-        )
-        print(f"delete index success={deleted_index.get('success')}")
+        if self._keep_resources:
+            print("8) delete index skipped (KEEP_RESOURCES=1)")
+        else:
+            print("8) delete index")
+            deleted_index = self._assert_ok(
+                self._delete(f"/api/admin/knowledge_base/indices/{index_id}", headers=headers),
+                "delete index",
+            )
+            print(f"delete index success={deleted_index.get('success')}")
 
         print("OK")
 
@@ -149,4 +178,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
