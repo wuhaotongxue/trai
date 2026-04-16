@@ -97,7 +97,11 @@ const KnowledgeBasePage: React.FC = () => {
           return
         }
 
-        const cat_items: any[] = Array.isArray(cat_res.data?.items) ? cat_res.data.items : []
+        const cat_items: any[] = Array.isArray(cat_res.data?.data?.items)
+          ? cat_res.data.data.items
+          : Array.isArray(cat_res.data?.items)
+            ? cat_res.data.items
+            : []
         const mapped_categories: KbCategory[] = cat_items
           .map((it) => ({
             id: String(it.category_id || it.categoryId || it.id || ''),
@@ -111,7 +115,11 @@ const KnowledgeBasePage: React.FC = () => {
         set_categories(ensured_categories)
         set_active_cat_id((prev) => prev || ensured_categories[0].id)
 
-        const idx_items: any[] = Array.isArray(idx_res.data?.items) ? idx_res.data.items : []
+        const idx_items: any[] = Array.isArray(idx_res.data?.data?.items)
+          ? idx_res.data.data.items
+          : Array.isArray(idx_res.data?.items)
+            ? idx_res.data.items
+            : []
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
         const cat_id_for_kb = ensured_categories[0].id
         const mapped_kbs: KnowledgeBase[] = idx_items
@@ -151,7 +159,11 @@ const KnowledgeBasePage: React.FC = () => {
           return
         }
 
-        const items: any[] = Array.isArray(res.data?.items) ? res.data.items : []
+        const items: any[] = Array.isArray(res.data?.data?.items)
+          ? res.data.data.items
+          : Array.isArray(res.data?.items)
+            ? res.data.items
+            : []
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
         const mapped_files: KbFile[] = items
           .map((it) => {
@@ -216,21 +228,22 @@ const KnowledgeBasePage: React.FC = () => {
       }
 
       const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      const actual_data = res.data.data || res.data
       const new_kb: KnowledgeBase = {
-        id: res.data.index_id,
+        id: actual_data.index_id,
         category_id: create_cat_id,
-        name: res.data.index_name || name,
+        name: actual_data.index_name || name,
         file_count: 1,
         created_at: now_str
       }
 
       const new_file: KbFile = {
-        id: res.data.file_id,
-        kb_id: res.data.index_id,
-        name: res.data.file_name,
+        id: actual_data.file_id,
+        kb_id: actual_data.index_id,
+        name: actual_data.file_name,
         size: '-',
         upload_time: now_str,
-        status: res.data.job_status === 'FAILED' ? 'error' : 'success'
+        status: actual_data.job_status === 'FAILED' ? 'error' : 'success'
       }
 
       set_kb_list((prev) => [new_kb, ...prev])
