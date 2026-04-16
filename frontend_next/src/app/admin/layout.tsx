@@ -78,11 +78,33 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
   }
 
   if (token === undefined) {
-    return <div className="min-h-screen bg-background" />;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
+          <div className="text-sm font-semibold text-foreground">TRAI 管理后台</div>
+          <div className="text-xs text-muted-foreground mt-2">正在加载登录状态...</div>
+        </div>
+      </div>
+    );
   }
 
   if (token === null) {
-    return <div className="min-h-screen bg-background" />;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
+          <div className="text-sm font-semibold text-foreground">未登录</div>
+          <div className="text-xs text-muted-foreground mt-2">即将跳转到登录页...</div>
+          <div className="mt-4">
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              去登录
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const toggleSidebar = () => {
