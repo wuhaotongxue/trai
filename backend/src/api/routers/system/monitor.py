@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: monitor.py
 # 作者: wuhao
-# 日期: 2026_04_10
+# 日期: 2026_04_16_10:14:02
 # 描述: 系统监控接口
 
 from __future__ import annotations
@@ -231,7 +231,13 @@ def _check_notify() -> ServiceStatus:
         )
 
 
-@router.get("/monitor", response_model=MonitorResponse, tags=["系统"])
+@router.get(
+    "/monitor",
+    response_model=MonitorResponse,
+    summary="系统监控",
+    description="返回服务运行状态, 包含运行时长, 机器信息, CPU/内存与依赖配置状态.",
+    tags=["系统"],
+)
 async def system_monitor() -> MonitorResponse:
     """系统监控接口
 
@@ -257,7 +263,12 @@ async def system_monitor() -> MonitorResponse:
     )
 
 
-@router.get("/monitor/metrics", tags=["系统"])
+@router.get(
+    "/monitor/metrics",
+    summary="监控指标",
+    description="返回 Prometheus 文本指标. 如需对接 Prometheus, 建议改为直接返回 text/plain.",
+    tags=["系统"],
+)
 async def metrics() -> dict[str, Any]:
     """Prometheus 格式指标
 
