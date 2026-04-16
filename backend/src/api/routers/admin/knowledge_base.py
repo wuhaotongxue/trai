@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: knowledge_base.py
 # 作者: wuhao
 # 日期: 2026_04_16_11:18:54
@@ -70,7 +69,6 @@ class KnowledgeBaseDeleteResponse(BaseModel):
 
 
 class KnowledgeBaseDemoService:
-
     def _call_bailian_api(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
         try:
             return fn(*args, **kwargs)
@@ -322,7 +320,9 @@ class KnowledgeBaseDemoService:
             job_status=job_status,
         )
 
-    def upload_text_to_index(self, index_id: str, request: KnowledgeBaseUploadTextRequest) -> KnowledgeBaseUploadTextResponse:
+    def upload_text_to_index(
+        self, index_id: str, request: KnowledgeBaseUploadTextRequest
+    ) -> KnowledgeBaseUploadTextResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
 
         now_suffix = datetime.now().strftime("%m%d_%H%M")
@@ -527,7 +527,9 @@ class KnowledgeBaseDemoController:
         _ = current_user
         return self._service.rename_index(index_id=index_id, request=request)
 
-    async def delete_index_file(self, current_user: AdminUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+    async def delete_index_file(
+        self, current_user: AdminUser, index_id: str, file_id: str
+    ) -> KnowledgeBaseDeleteResponse:
         _ = current_user
         return self._service.delete_index_file(index_id=index_id, file_id=file_id)
 
