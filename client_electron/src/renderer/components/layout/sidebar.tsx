@@ -49,7 +49,7 @@ const Sidebar: React.FC = () => {
         { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
       ]
     },
-    { path: '/knowledge-base', label: '知识库管理', icon: <Database size={20} /> },
+    { path: '/knowledge_base', label: '知识库管理', icon: <Database size={20} /> },
     {
       id: 'ai',
       label: 'AI 创作',
