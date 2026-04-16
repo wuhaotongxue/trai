@@ -55,17 +55,9 @@ const KnowledgeBasePage: React.FC = () => {
   const [new_cat_name, set_new_cat_name] = useState('')
   const [search_query, set_search_query] = useState('')
   
-  // 文件操作状态
-  const [editing_file_id, set_editing_file_id] = useState<string | null>(null)
-  const [edit_file_name, set_edit_file_name] = useState('')
-  const [moving_file_id, set_moving_file_id] = useState<string | null>(null)
-  const [target_move_kb_id, set_target_move_kb_id] = useState('')
-  
   // 知识库操作状态
   const [editing_kb_id, set_editing_kb_id] = useState<string | null>(null)
   const [edit_kb_name, set_edit_kb_name] = useState('')
-  const [moving_kb_id, set_moving_kb_id] = useState<string | null>(null)
-  const [target_move_cat_id, set_target_move_cat_id] = useState('')
 
   const file_input_ref = useRef<HTMLInputElement>(null)
 
@@ -115,7 +107,10 @@ const KnowledgeBasePage: React.FC = () => {
           ensured_categories.unshift(default_cat)
         }
 
-        set_categories(ensured_categories)
+        // 过滤掉测试期间残留的名为 "trai_demo_cat" 开头的分类
+        const final_categories = ensured_categories.filter(c => !c.name.startsWith('trai_demo_cat'))
+
+        set_categories(final_categories)
         set_active_cat_id((prev) => prev || default_cat.id)
 
         const idx_source = idx_res.data?.data?.items || idx_res.data?.items || idx_res.data?.data || idx_res.data || []
@@ -326,21 +321,7 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
-  const handle_rename_file = (file_id: string) => {
-    if (!edit_file_name.trim()) return
-    set_files(prev => prev.map(f => 
-      f.id === file_id ? { ...f, name: edit_file_name.trim() } : f
-    ))
-    set_editing_file_id(null)
-    set_edit_file_name('')
-    alert('重命名成功')
-  }
-
-  const handle_move_file = (file_id: string) => {
-    alert('暂不支持通过 API 移动文件到其他知识库')
-    set_moving_file_id(null)
-    set_target_move_kb_id('')
-  }
+  // (移除了暂不支持的重命名文件和移动文件的方法)
 
   const handle_rename_kb = async (kb_id: string) => {
     if (!edit_kb_name.trim()) return
@@ -377,11 +358,7 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
-  const handle_move_kb = (kb_id: string) => {
-    alert('暂不支持通过 API 移动知识库到其他分类')
-    set_moving_kb_id(null)
-    set_target_move_cat_id('')
-  }
+  // (移除了暂不支持的移动知识库的方法)
 
   const active_cat = useMemo(() => categories.find(c => c.id === active_cat_id), [categories, active_cat_id])
   const active_kb = useMemo(() => kb_list.find(kb => kb.id === active_kb_id), [kb_list, active_kb_id])
@@ -662,15 +639,7 @@ const KnowledgeBasePage: React.FC = () => {
                             <td style={{ padding: '12px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <FileText size={16} color="#0ea5e9" />
-                                {editing_file_id === file.id ? (
-                                  <input 
-                                    autoFocus value={edit_file_name} onChange={(e) => set_edit_file_name(e.target.value)}
-                                    onBlur={() => handle_rename_file(file.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_file(file.id)}
-                                    style={{ fontSize: '14px', color: '#334155', padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '4px', outline: 'none', width: '100%' }}
-                                  />
-                                ) : (
-                                  <span style={{ fontSize: '14px', color: '#334155', cursor: 'text' }} onDoubleClick={() => { set_editing_file_id(file.id); set_edit_file_name(file.name) }} title="双击重命名">{file.name}</span>
-                                )}
+                                <span style={{ fontSize: '14px', color: '#334155' }}>{file.name}</span>
                               </div>
                             </td>
                             <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b' }}>{file.size}</td>
@@ -702,72 +671,10 @@ const KnowledgeBasePage: React.FC = () => {
           )}
         </div>
         
-        {/* 移动文件弹窗 */}
-        {moving_file_id && (
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '360px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>移动文件到...</h3>
-                <button onClick={() => { set_moving_file_id(null); set_target_move_kb_id('') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
-              </div>
-              <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                {categories.map(cat => (
-                  <div key={`move_cat_${cat.id}`}>
-                    <div style={{ padding: '8px 12px', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: 600, color: '#64748b', borderBottom: '1px solid #f1f5f9' }}>{cat.name}</div>
-                    {kb_list.filter(kb => kb.category_id === cat.id).map(kb => (
-                      <div 
-                        key={`move_kb_${kb.id}`} onClick={() => set_target_move_kb_id(kb.id)}
-                        style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: kb.id === active_kb_id ? 'not-allowed' : 'pointer', backgroundColor: target_move_kb_id === kb.id ? '#e0f2fe' : 'transparent', opacity: kb.id === active_kb_id ? 0.5 : 1, borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }}
-                        onMouseEnter={(e) => { if (target_move_kb_id !== kb.id && kb.id !== active_kb_id) e.currentTarget.style.backgroundColor = '#f8fafc' }}
-                        onMouseLeave={(e) => { if (target_move_kb_id !== kb.id && kb.id !== active_kb_id) e.currentTarget.style.backgroundColor = 'transparent' }}
-                      >
-                        <span style={{ fontSize: '13px', color: target_move_kb_id === kb.id ? '#0369a1' : '#334155' }}>{kb.name} {kb.id === active_kb_id && '(当前)'}</span>
-                        {target_move_kb_id === kb.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0ea5e9' }} />}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                <button onClick={() => { set_moving_file_id(null); set_target_move_kb_id('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
-                <button onClick={() => handle_move_file(moving_file_id)} disabled={!target_move_kb_id || target_move_kb_id === active_kb_id} style={{ padding: '8px 16px', backgroundColor: (!target_move_kb_id || target_move_kb_id === active_kb_id) ? '#cbd5e1' : '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: (!target_move_kb_id || target_move_kb_id === active_kb_id) ? 'not-allowed' : 'pointer', fontSize: '14px' }}>确认移动</button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 移动文件弹窗 (已移除) */}
       </div>
 
-      {/* 移动知识库弹窗 */}
-      {moving_kb_id && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '360px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>移动知识库到...</h3>
-              <button onClick={() => { set_moving_kb_id(null); set_target_move_cat_id('') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
-            </div>
-            <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-              {categories.map(cat => (
-                <div 
-                  key={`move_kb_cat_${cat.id}`} onClick={() => set_target_move_cat_id(cat.id)}
-                  style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: cat.id === active_cat_id ? 'not-allowed' : 'pointer', backgroundColor: target_move_cat_id === cat.id ? '#e0f2fe' : 'transparent', opacity: cat.id === active_cat_id ? 0.5 : 1, borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }}
-                  onMouseEnter={(e) => { if (target_move_cat_id !== cat.id && cat.id !== active_cat_id) e.currentTarget.style.backgroundColor = '#f8fafc' }}
-                  onMouseLeave={(e) => { if (target_move_cat_id !== cat.id && cat.id !== active_cat_id) e.currentTarget.style.backgroundColor = 'transparent' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Folder size={16} color={target_move_cat_id === cat.id ? '#0369a1' : '#64748b'} />
-                    <span style={{ fontSize: '13px', color: target_move_cat_id === cat.id ? '#0369a1' : '#334155', fontWeight: target_move_cat_id === cat.id ? 600 : 400 }}>{cat.name} {cat.id === active_cat_id && '(当前)'}</span>
-                  </div>
-                  {target_move_cat_id === cat.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0ea5e9' }} />}
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { set_moving_kb_id(null); set_target_move_cat_id('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
-              <button onClick={() => handle_move_kb(moving_kb_id)} disabled={!target_move_cat_id || target_move_cat_id === active_cat_id} style={{ padding: '8px 16px', backgroundColor: (!target_move_cat_id || target_move_cat_id === active_cat_id) ? '#cbd5e1' : '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: (!target_move_cat_id || target_move_cat_id === active_cat_id) ? 'not-allowed' : 'pointer', fontSize: '14px' }}>确认移动</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 移动知识库弹窗 (已移除) */}
 
       {/* 新建目录弹窗 */}
       {show_cat_modal && (
