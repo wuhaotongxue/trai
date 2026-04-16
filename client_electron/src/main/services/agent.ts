@@ -40,7 +40,7 @@ export const agent_service = {
   /**
    * 发送消息给 Agent (流式)
    */
-  async chat(session_id: string, message: string, agent_id?: string, event_sender?: (event: string, data: any) => void) {
+  async chat(session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, event_sender?: (event: string, data: any) => void) {
     try {
       // 停止上一个同一 session 的请求（如果存在）
       if (active_requests[session_id]) {
@@ -51,13 +51,16 @@ export const agent_service = {
       active_requests[session_id] = cancel_source
 
       const url = ApiUrl.build_api_url(ApiEndpoints.agent_chat)
-      const payload = {
+      const payload: any = {
         session_id,
         message,
-        agent_id,
         stream: true,
         role: 'user'
       }
+      if (agent_id) payload.agent_id = agent_id
+      if (knowledge_base_id) payload.knowledge_base_id = knowledge_base_id
+
+      log.info('Agent Chat Payload:', payload)
       
       const res = await api_client.post(url, payload, { 
         responseType: 'stream',

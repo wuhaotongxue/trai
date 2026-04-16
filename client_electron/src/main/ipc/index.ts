@@ -80,8 +80,8 @@ export const register_ipc_handlers = (): void => {
   })
 
   // ===================== Agent =====================
-  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string) => {
-    return await agent_service.chat(session_id, message, agent_id, (evt, data) => {
+  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => {
+    return await agent_service.chat(session_id, message, agent_id, knowledge_base_id, (evt, data) => {
       event.sender.send(evt, data)
     })
   })
