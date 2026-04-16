@@ -6,13 +6,7 @@
  */
 
 import { create } from "zustand";
-import { api, type AgentChatResponse, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
-
-export interface ImageContent {
-  type: "text" | "image_url";
-  text?: string;
-  image_url?: { url: string };
-}
+import { api, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
 
 export interface Message {
   id: string;
@@ -70,13 +64,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     try {
       const res = await api.session.create({ model: "gpt-4o" });
       set({ sessionId: res.session_id, messages: [], isLoading: false });
-    } catch (e) {
+    } catch {
       set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });
     }
   },
 
   sendMessage: async (content, images) => {
-    const { sessionId, messages } = get();
+    const { sessionId } = get();
 
     if (!sessionId) {
       await get().startSession();
@@ -101,23 +95,6 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       promptTokens: 0,
     }));
 
-    // 构造多模态消息（Vision）
-    const msgContent: string | ImageContent[] =
-      images && images.length > 0
-        ? [
-            { type: "text" as const, text: content },
-            ...images.map((url) => ({
-              type: "image_url" as const,
-              image_url: { url },
-            })),
-          ]
-        : content;
-
-    const client = api.agent;
-    const streamClient = new EventSource(
-      `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/sessions/${sessionId}/messages/stream`
-    );
-
     const assistantMsgId = crypto.randomUUID();
     let assistantContent = "";
     let lastUsage: StreamUsageEvent["data"] | null = null;
@@ -131,6 +108,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
     const token = localStorage.getItem("token");
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE ||
+      `${window.location.protocol}//${window.location.hostname}:5666/api`;
     let aborted = false;
 
     const abortFn = () => {
@@ -142,14 +122,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/sessions/${sessionId}/messages/stream`,
+        `${apiBase}/sessions/${sessionId}/messages/stream`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ content, role: "user" }),
+          body: JSON.stringify({ content, role: "user", images }),
         }
       );
 
@@ -214,7 +194,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           totalTokens: lastUsage.total_tokens,
         });
       }
-    } catch (e) {
+    } catch {
       set({ error: "消息发送失败, 请检查网络后重试" });
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });

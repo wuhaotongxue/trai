@@ -5,8 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, Cpu, Edit2, Plus, Star, Trash2, Zap } from "lucide-react";
+import { CheckCircle2, Edit2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +46,6 @@ const plans = [
 ];
 
 export default function QuotasPage() {
-  const [editing, setEditing] = useState<string | null>(null);
-  const [values, setValues] = useState({ agent_calls: "50", sessions: "20", messages: "10" });
-
   return (
     <div className="space-y-5">
       <div>
