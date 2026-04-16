@@ -35,11 +35,16 @@ _TAG_NAME_MAP: dict[str, str] = {
 }
 
 _SUMMARY_TRANSLATION_MAP: dict[str, str] = {
+    "List Users": "获取用户列表",
+    "Get User": "获取用户信息",
+    "Update User": "更新用户信息",
+    "Delete User": "删除用户",
     "Get Dashboard": "获取仪表盘数据",
     "Get Analytics": "获取数据分析",
     "List Quota Plans": "获取配额方案列表",
     "Create Quota Plan": "创建配额方案",
     "Update Quota Plan": "更新配额方案",
+    "Demo Create": "创建知识库 Demo",
     "Chat": "对话",
     "Chat Stream": "对话流式输出",
     "Chat With Session": "会话对话",
@@ -88,6 +93,8 @@ class OpenApiChineseNormalizer:
                     "dashboard": "仪表盘数据",
                     "analytics": "数据分析",
                     "quota plans": "配额方案",
+                    "users": "用户列表",
+                    "user": "用户信息",
                     "image models": "图片模型列表",
                     "image": "图片",
                     "music": "音乐",
