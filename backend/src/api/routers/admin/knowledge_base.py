@@ -273,11 +273,21 @@ class KnowledgeBaseDemoService:
     def list_categories(self) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListCategoryRequest(max_results=100)
-        resp = self._call_bailian_api(client.list_category, workspace_id, req)
-        raw = self._extract_raw(resp)
-        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
-        items = self._extract_list(body)
-        return KnowledgeBaseListResponse(items=items, raw=raw)
+        try:
+            resp = self._call_bailian_api(client.list_category, workspace_id, req)
+            raw = self._extract_raw(resp)
+            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+            items = self._extract_list(body)
+            return KnowledgeBaseListResponse(items=items, raw=raw)
+        except HTTPException as e:
+            fallback_items = [
+                {
+                    "category_id": "default",
+                    "category_name": "默认",
+                }
+            ]
+            raw = {"fallback": True, "error": e.detail}
+            return KnowledgeBaseListResponse(items=fallback_items, raw=raw)
 
     def list_indices(self, index_name: str | None = None) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
