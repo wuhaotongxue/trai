@@ -41,6 +41,13 @@ _SUMMARY_TRANSLATION_MAP: dict[str, str] = {
     "Readiness Check": "就绪探针",
     "System Monitor": "系统监控",
     "Metrics": "监控指标",
+    "Login": "登录",
+    "Register": "注册",
+    "Logout": "退出登录",
+    "Refresh Token": "刷新令牌",
+    "Get Current User Info": "获取当前用户信息",
+    "Change Password": "修改密码",
+    "Reset Password": "重置密码",
     "List Users": "获取用户列表",
     "Get User": "获取用户信息",
     "Update User": "更新用户信息",
@@ -80,6 +87,36 @@ class OpenApiChineseNormalizer:
 
         if not OpenApiChineseNormalizer._is_ascii_text(summary):
             return summary
+
+        token_map: dict[str, str] = {
+            "token": "令牌",
+            "user": "用户",
+            "users": "用户列表",
+            "dashboard": "仪表盘数据",
+            "analytics": "数据分析",
+            "quota": "配额",
+            "plans": "方案",
+            "plan": "方案",
+            "password": "密码",
+            "current": "当前",
+            "info": "信息",
+            "health": "健康检查",
+            "detailed": "详细",
+            "liveness": "存活",
+            "readiness": "就绪",
+            "monitor": "监控",
+            "metrics": "指标",
+            "demo": "Demo",
+            "create": "创建",
+        }
+        if " " in summary.strip():
+            words = [w for w in summary.strip().split(" ") if w]
+            translated: list[str] = []
+            for word in words:
+                translated.append(token_map.get(word.lower(), word))
+            joined = "".join(translated)
+            if joined and joined != summary:
+                return joined
 
         lowered = summary.strip().lower()
         verb_map: list[tuple[str, str]] = [
@@ -174,8 +211,6 @@ def create_app() -> FastAPI:
     register_routers(app)
 
     def custom_openapi() -> dict:
-        if app.openapi_schema:
-            return app.openapi_schema
         schema = get_openapi(
             title=app.title,
             version=app.version,
