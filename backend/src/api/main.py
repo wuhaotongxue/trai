@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: main.py
 # 作者: wuhao
-# 日期: 2026_04_09
+# 日期: 2026_04_16_10:14:02
 # 描述: FastAPI 应用配置和路由注册
 
 from __future__ import annotations
@@ -30,8 +30,8 @@ logger = get_logger()
 def create_app() -> FastAPI:
     """创建 FastAPI 应用实例"""
     app = FastAPI(
-        title="TRAI API",
-        description="TRAI 项目后端 API 服务",
+        title="TRAI 项目后端 API 服务",
+        description="TRAI 后端接口文档, 统一返回格式与鉴权规则详见各接口说明.",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
