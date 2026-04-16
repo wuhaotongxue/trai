@@ -76,6 +76,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin import (
         analytics_router,
         dashboard_router,
+        knowledge_base_router,
         organization,
         quota_config_router,
         user_router,
@@ -103,6 +104,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(dashboard_router, prefix="/api/admin", tags=["管理"])
     app.include_router(analytics_router, prefix="/api/admin", tags=["管理"])
     app.include_router(quota_config_router, prefix="/api/admin", tags=["管理"])
+    app.include_router(knowledge_base_router, prefix="/api/admin", tags=["管理"])
     app.include_router(admin_client_release_router, prefix="/api/admin", tags=["管理"])
     app.include_router(organization.router, prefix="/api/admin/organization", tags=["管理"])
     app.include_router(client_update_router, prefix="/api/client", tags=["客户端更新"])

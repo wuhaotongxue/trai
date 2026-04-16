@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Clock, Globe, RefreshCw, Server, Signal, Wifi, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Globe, RefreshCw, Signal, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 

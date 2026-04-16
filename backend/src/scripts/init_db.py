@@ -28,12 +28,31 @@ from infrastructure.database.models import UserModel
 from infrastructure.security.password import PasswordService
 
 
+def upgrade_database_schema() -> None:
+    """升级数据库表结构(仅做幂等的增量补齐,避免因字段缺失导致接口 500)"""
+    db = get_database()
+    session = db.get_session()
+
+    try:
+        session.execute(text('ALTER TABLE "t_users" ADD COLUMN IF NOT EXISTS t_mobile VARCHAR(32)'))
+        session.execute(text('ALTER TABLE "t_users" ADD COLUMN IF NOT EXISTS t_position VARCHAR(128)'))
+        session.commit()
+        logger.info("数据库表结构增量升级完成")
+    except Exception as e:
+        session.rollback()
+        logger.error(f"数据库表结构增量升级失败: {str(e)}")
+        raise
+    finally:
+        session.close()
+
+
 def init_database() -> None:
     """初始化数据库(创建表结构)"""
     logger.info("开始初始化数据库...")
 
     db = get_database()
     db.create_tables()
+    upgrade_database_schema()
 
     logger.info("数据库表结构创建完成")
 

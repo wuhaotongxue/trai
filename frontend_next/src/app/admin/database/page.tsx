@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, AlertCircle, BarChart3, CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload } from "lucide-react";
+import { CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -28,11 +28,6 @@ const backups = [
 
 export default function DatabasePage() {
   const [optimizing, setOptimizing] = useState(false);
-
-  const totalSize = tables.reduce((s, t) => {
-    const num = parseFloat(t.size.replace(" MB", "").replace(" GB", ""));
-    return s + num;
-  }, 0);
 
   const handleOptimize = () => {
     setOptimizing(true);
