@@ -30,6 +30,9 @@ __pycache__/
 # 临时上传目录
 uploads/
 
+# 后端本地开发数据库
+backend/.local_dev.sqlite3
+
 # 前端依赖与构建产物
 frontend_next/node_modules/
 frontend_next/.next/

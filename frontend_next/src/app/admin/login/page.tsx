@@ -24,7 +24,11 @@ export default function AdminLoginPage() {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin123");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api";
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE ||
+    (typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}:5666/api`
+      : "http://localhost:5666/api");
 
   const handleLogin = async () => {
     if (loading) return;

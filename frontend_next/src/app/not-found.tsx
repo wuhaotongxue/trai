@@ -8,7 +8,6 @@
 
 import Link from "next/link";
 import { Bot, ArrowLeft, Home, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -89,7 +88,7 @@ export default function NotFound() {
 
         {/* 错误代码 */}
         <p className="text-xs text-slate-300 mt-4 font-mono">
-          Error 404 · Page Not Found · {new Date().toLocaleDateString("zh-CN")}
+          Error 404 · Page Not Found · <span suppressHydrationWarning>{new Date().toLocaleDateString("zh-CN")}</span>
         </p>
       </div>
     </div>

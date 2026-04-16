@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart3, Bot, Calendar, Download, MessageSquare, PieChart, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { Bot, Download, MessageSquare, TrendingDown, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

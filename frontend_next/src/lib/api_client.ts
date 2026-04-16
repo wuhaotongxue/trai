@@ -5,7 +5,20 @@
  * 描述: TRAI API 客户端 - 与后端所有接口通信
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api";
+const DEFAULT_API_BASE = "http://localhost:5666/api";
+
+function getApiBase(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_API_BASE;
+  if (fromEnv) return fromEnv;
+
+  if (typeof window !== "undefined") {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:5666/api`;
+  }
+
+  return DEFAULT_API_BASE;
+}
 
 interface ApiOptions {
   headers?: Record<string, string>;
@@ -17,7 +30,7 @@ async function request<T>(
 ): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${getApiBase()}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -247,8 +260,9 @@ export function createStreamClient(
     onDone?: () => void;
   }
 ) {
+  const apiBase = getApiBase();
   const es = new EventSource(
-    `${API_BASE}/sessions/${sessionId}/messages/stream` +
+    `${apiBase}/sessions/${sessionId}/messages/stream` +
       `?${new URLSearchParams({
         content: message,
         role: "user",
@@ -282,7 +296,7 @@ export function createStreamClient(
 
   return {
     abort: () => {
-      fetch(`${API_BASE}/sessions/${sessionId}/messages/stream`, { method: "DELETE" });
+      fetch(`${apiBase}/sessions/${sessionId}/messages/stream`, { method: "DELETE" });
       es.close();
     },
   };

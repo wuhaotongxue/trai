@@ -16,7 +16,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll_area';
-import { PRIORITY_CONFIG, STATUS_CONFIG } from '@/types/todo.types';
+import { PRIORITY_CONFIG } from '@/types/todo.types';
 import type { Task } from '@/types/todo.types';
 import { Clock, CheckCircle2 } from 'lucide-react';
 
@@ -25,8 +25,6 @@ interface GanttChartProps {
 }
 
 const DAY_WIDTH = 40;
-const HOURS_START = 8;
-const HOURS_END = 22;
 
 function getDayColumns(startDate: Date, endDate: Date): Date[] {
   const days: Date[] = [];
@@ -49,8 +47,7 @@ function formatDayOfWeek(date: Date): string {
 
 function getTaskPosition(
   task: Task,
-  startDate: Date,
-  days: Date[]
+  startDate: Date
 ): { left: number; width: number } | null {
   const planStart = task.plannedStart ? new Date(task.plannedStart) : null;
   const planEnd = task.plannedEnd ? new Date(task.plannedEnd) : null;
@@ -145,9 +142,8 @@ export function GanttChart({ tasks }: GanttChartProps) {
               {tasks
                 .filter((t) => t.plannedStart && t.plannedEnd)
                 .map((task) => {
-                  const position = getTaskPosition(task, startDate, days);
+                  const position = getTaskPosition(task, startDate);
                   const priority = PRIORITY_CONFIG[task.priority];
-                  const status = STATUS_CONFIG[task.status];
 
                   return (
                     <div
