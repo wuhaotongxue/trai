@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # 文件名: knowledge_base.py
 # 作者: wuhao
-# 日期: 2026_04_16_10:21:48
+# 日期: 2026_04_16_11:18:54
 # 描述: 管理后台知识库相关接口
 
 from __future__ import annotations
@@ -36,6 +36,12 @@ class KnowledgeBaseDemoCreateResponse(BaseModel):
     file_name: str = Field(description="文档名称")
     job_id: str = Field(description="建库任务 ID（JobId）")
     job_status: str = Field(description="建库任务状态")
+
+
+class KnowledgeBaseListResponse(BaseModel):
+    items: list[dict[str, Any]] = Field(default_factory=list, description="列表数据")
+    raw: dict[str, Any] = Field(default_factory=dict, description="原始响应, 便于排查字段变更")
+
 
 
 class KnowledgeBaseDemoService:
@@ -74,7 +80,7 @@ class KnowledgeBaseDemoService:
             detail={"code": 500, "message": "上传参数 headers 格式不支持"},
         )
 
-    def demo_create(self, request: KnowledgeBaseDemoCreateRequest) -> KnowledgeBaseDemoCreateResponse:
+    def _create_bailian_client(self) -> tuple[Any, Any, str]:
         try:
             from alibabacloud_bailian20231229 import models as bailian_models
             from alibabacloud_bailian20231229.client import Client as BailianClient
@@ -84,7 +90,7 @@ class KnowledgeBaseDemoService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={
                     "code": 500,
-                    "message": "缺少依赖 alibabacloud-bailian20231229，请先安装后再调用",
+                    "message": "缺少依赖 alibabacloud-bailian20231229, 请先安装后再调用",
                     "detail": str(e),
                 },
             ) from e
@@ -100,6 +106,30 @@ class KnowledgeBaseDemoService:
             endpoint=f"bailian.{region}.aliyuncs.com",
         )
         client = BailianClient(config)
+        return client, bailian_models, workspace_id
+
+    def _extract_list(self, data: Any) -> list[dict[str, Any]]:
+        if isinstance(data, list):
+            return [x for x in data if isinstance(x, dict)]
+        if isinstance(data, dict):
+            for key in ("items", "indices", "categories", "files", "documents", "data", "list"):
+                val = data.get(key)
+                if isinstance(val, list):
+                    return [x for x in val if isinstance(x, dict)]
+        return []
+
+    def _extract_raw(self, resp: Any) -> dict[str, Any]:
+        try:
+            mapped = resp.to_map()
+            body = mapped.get("body")
+            if isinstance(body, dict):
+                return body
+            return {"body": body} if body is not None else mapped
+        except Exception:
+            return {}
+
+    def demo_create(self, request: KnowledgeBaseDemoCreateRequest) -> KnowledgeBaseDemoCreateResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
 
         now_suffix = datetime.now().strftime("%m%d_%H%M")
 
@@ -225,6 +255,33 @@ class KnowledgeBaseDemoService:
             job_status=job_status,
         )
 
+    def list_categories(self) -> KnowledgeBaseListResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        req = bailian_models.ListCategoryRequest(max_results=100)
+        resp = client.list_category(workspace_id, req)
+        raw = self._extract_raw(resp)
+        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+        items = self._extract_list(body)
+        return KnowledgeBaseListResponse(items=items, raw=raw)
+
+    def list_indices(self, index_name: str | None = None) -> KnowledgeBaseListResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        req = bailian_models.ListIndicesRequest(index_name=index_name, page_number="1", page_size="100")
+        resp = client.list_indices(workspace_id, req)
+        raw = self._extract_raw(resp)
+        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+        items = self._extract_list(body)
+        return KnowledgeBaseListResponse(items=items, raw=raw)
+
+    def list_index_files(self, index_id: str) -> KnowledgeBaseListResponse:
+        client, bailian_models, workspace_id = self._create_bailian_client()
+        req = bailian_models.ListIndexFileDetailsRequest(index_id=index_id, page_number=1, page_size=100)
+        resp = client.list_index_file_details(workspace_id, req)
+        raw = self._extract_raw(resp)
+        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+        items = self._extract_list(body)
+        return KnowledgeBaseListResponse(items=items, raw=raw)
+
 
 class KnowledgeBaseDemoController:
     def __init__(self) -> None:
@@ -237,6 +294,18 @@ class KnowledgeBaseDemoController:
     ) -> KnowledgeBaseDemoCreateResponse:
         _ = current_user
         return self._service.demo_create(request)
+
+    async def list_categories(self, current_user: AdminUser) -> KnowledgeBaseListResponse:
+        _ = current_user
+        return self._service.list_categories()
+
+    async def list_indices(self, current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+        _ = current_user
+        return self._service.list_indices(index_name=index_name)
+
+    async def list_index_files(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseListResponse:
+        _ = current_user
+        return self._service.list_index_files(index_id=index_id)
 
 
 controller = KnowledgeBaseDemoController()
@@ -254,3 +323,36 @@ async def demo_create(
     current_user: AdminUser,
 ) -> KnowledgeBaseDemoCreateResponse:
     return await controller.demo_create(request, current_user)
+
+
+@router.get(
+    "/categories",
+    response_model=KnowledgeBaseListResponse,
+    summary="获取知识库分类列表",
+    description="从百炼工作空间读取知识库分类列表.",
+    tags=["管理后台"],
+)
+async def list_categories(current_user: AdminUser) -> KnowledgeBaseListResponse:
+    return await controller.list_categories(current_user)
+
+
+@router.get(
+    "/indices",
+    response_model=KnowledgeBaseListResponse,
+    summary="获取知识库列表",
+    description="从百炼工作空间读取知识库列表(索引列表).",
+    tags=["管理后台"],
+)
+async def list_indices(current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+    return await controller.list_indices(current_user, index_name=index_name)
+
+
+@router.get(
+    "/indices/{index_id}/files",
+    response_model=KnowledgeBaseListResponse,
+    summary="获取知识库文件列表",
+    description="根据知识库 ID 获取文件明细列表.",
+    tags=["管理后台"],
+)
+async def list_index_files(current_user: AdminUser, index_id: str) -> KnowledgeBaseListResponse:
+    return await controller.list_index_files(current_user, index_id=index_id)

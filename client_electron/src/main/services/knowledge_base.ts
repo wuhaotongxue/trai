@@ -50,5 +50,53 @@ export const knowledge_base_service = {
         '创建知识库失败, 请检查网络或服务器配置'
       return { success: false, error: msg }
     }
+  },
+
+  async list_categories() {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_categories)
+      const res = await api_client.get(url)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base list_categories failed:', error.response?.data || error.message)
+      const msg =
+        error.response?.data?.detail?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        '获取知识库分类失败, 请检查网络或服务器配置'
+      return { success: false, error: msg }
+    }
+  },
+
+  async list_indices(index_name?: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_indices)
+      const res = await api_client.get(url, { params: { index_name } })
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base list_indices failed:', error.response?.data || error.message)
+      const msg =
+        error.response?.data?.detail?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        '获取知识库列表失败, 请检查网络或服务器配置'
+      return { success: false, error: msg }
+    }
+  },
+
+  async list_index_files(index_id: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index_files(index_id))
+      const res = await api_client.get(url)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base list_index_files failed:', error.response?.data || error.message)
+      const msg =
+        error.response?.data?.detail?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        '获取知识库文件失败, 请检查网络或服务器配置'
+      return { success: false, error: msg }
+    }
   }
 }

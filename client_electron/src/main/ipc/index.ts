@@ -142,4 +142,16 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('kb:demo_create', async (_, params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => {
     return await knowledge_base_service.demo_create(params)
   })
+
+  ipcMain.handle('kb:list_categories', async () => {
+    return await knowledge_base_service.list_categories()
+  })
+
+  ipcMain.handle('kb:list_indices', async (_, index_name?: string) => {
+    return await knowledge_base_service.list_indices(index_name)
+  })
+
+  ipcMain.handle('kb:list_index_files', async (_, index_id: string) => {
+    return await knowledge_base_service.list_index_files(index_id)
+  })
 }

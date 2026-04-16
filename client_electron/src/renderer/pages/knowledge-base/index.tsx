@@ -4,7 +4,7 @@
  * 日期: 2026-04-14 15:30:00
  * 描述: 专属知识库管理页面，支持新建知识库与上传文件 (三段式折叠布局)
  */
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen } from 'lucide-react'
 
 interface KbCategory {
@@ -30,28 +30,13 @@ interface KbFile {
 }
 
 const KnowledgeBasePage: React.FC = () => {
-  // 模拟数据
-  const [categories, set_categories] = useState<KbCategory[]>([
-    { id: 'cat_default', name: '默认' },
-    { id: 'cat_work', name: '工作' },
-    { id: 'cat_daily', name: '日常' }
-  ])
-  const [active_cat_id, set_active_cat_id] = useState<string>('cat_default')
+  const [categories, set_categories] = useState<KbCategory[]>([])
+  const [active_cat_id, set_active_cat_id] = useState<string>('')
 
-  const [kb_list, set_kb_list] = useState<KnowledgeBase[]>([
-    { id: 'kb_default', category_id: 'cat_default', name: '默认知识库', file_count: 2, created_at: '2026-04-10 10:00' },
-    { id: 'kb_1', category_id: 'cat_work', name: '产品需求文档', file_count: 1, created_at: '2026-04-10 10:00' },
-    { id: 'kb_2', category_id: 'cat_work', name: '开发技术规范', file_count: 1, created_at: '2026-04-12 14:30' },
-    { id: 'kb_3', category_id: 'cat_daily', name: '生活记录', file_count: 0, created_at: '2026-04-14 09:00' }
-  ])
-  const [active_kb_id, set_active_kb_id] = useState<string>('kb_default')
+  const [kb_list, set_kb_list] = useState<KnowledgeBase[]>([])
+  const [active_kb_id, set_active_kb_id] = useState<string>('')
 
-  const [files, set_files] = useState<KbFile[]>([
-    { id: 'f_0', kb_id: 'kb_default', name: '系统使用说明.pdf', size: '1.2 MB', upload_time: '2026-04-10 09:00', status: 'success' },
-    { id: 'f_01', kb_id: 'kb_default', name: '新手入门指南.docx', size: '0.8 MB', upload_time: '2026-04-10 09:05', status: 'success' },
-    { id: 'f_1', kb_id: 'kb_1', name: 'v1.0_PRD.pdf', size: '2.4 MB', upload_time: '2026-04-10 10:05', status: 'success' },
-    { id: 'f_2', kb_id: 'kb_2', name: 'UI_Design_Guide.docx', size: '1.1 MB', upload_time: '2026-04-10 10:10', status: 'success' },
-  ])
+  const [files, set_files] = useState<KbFile[]>([])
   
   // UI 折叠状态
   const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
@@ -62,6 +47,10 @@ const KnowledgeBasePage: React.FC = () => {
   const [new_kb_name, set_new_kb_name] = useState('')
   const [creating_kb, set_creating_kb] = useState(false)
   const [create_kb_error, set_create_kb_error] = useState('')
+  const [kb_loading, set_kb_loading] = useState(true)
+  const [kb_error, set_kb_error] = useState('')
+  const [files_loading, set_files_loading] = useState(false)
+  const [files_error, set_files_error] = useState('')
   const [show_cat_modal, set_show_cat_modal] = useState(false)
   const [new_cat_name, set_new_cat_name] = useState('')
   const [search_query, set_search_query] = useState('')
@@ -80,6 +69,120 @@ const KnowledgeBasePage: React.FC = () => {
 
   const file_input_ref = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    const load_remote = async () => {
+      set_kb_loading(true)
+      set_kb_error('')
+
+      if (!window.electron_api?.kb_list_categories || !window.electron_api?.kb_list_indices) {
+        set_kb_error('当前客户端版本不支持拉取知识库列表')
+        set_kb_loading(false)
+        return
+      }
+
+      try {
+        const [cat_res, idx_res] = await Promise.all([
+          window.electron_api.kb_list_categories(),
+          window.electron_api.kb_list_indices()
+        ])
+
+        if (!cat_res.success) {
+          set_kb_error(cat_res.error || '获取知识库分类失败')
+          set_kb_loading(false)
+          return
+        }
+        if (!idx_res.success) {
+          set_kb_error(idx_res.error || '获取知识库列表失败')
+          set_kb_loading(false)
+          return
+        }
+
+        const cat_items: any[] = Array.isArray(cat_res.data?.items) ? cat_res.data.items : []
+        const mapped_categories: KbCategory[] = cat_items
+          .map((it) => ({
+            id: String(it.category_id || it.categoryId || it.id || ''),
+            name: String(it.category_name || it.categoryName || it.name || '')
+          }))
+          .filter((c) => c.id && c.name)
+
+        const ensured_categories =
+          mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认' }]
+
+        set_categories(ensured_categories)
+        set_active_cat_id((prev) => prev || ensured_categories[0].id)
+
+        const idx_items: any[] = Array.isArray(idx_res.data?.items) ? idx_res.data.items : []
+        const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+        const cat_id_for_kb = ensured_categories[0].id
+        const mapped_kbs: KnowledgeBase[] = idx_items
+          .map((it) => ({
+            id: String(it.index_id || it.indexId || it.id || ''),
+            category_id: cat_id_for_kb,
+            name: String(it.index_name || it.indexName || it.name || ''),
+            file_count: Number(it.file_count || it.fileCount || it.document_count || it.documentCount || 0),
+            created_at: String(it.created_at || it.gmtCreate || it.createTime || now_str)
+          }))
+          .filter((kb) => kb.id && kb.name)
+
+        set_kb_list(mapped_kbs)
+        set_active_kb_id((prev) => prev || (mapped_kbs[0]?.id || ''))
+      } catch (err: any) {
+        set_kb_error(err?.message || '加载知识库失败')
+      } finally {
+        set_kb_loading(false)
+      }
+    }
+
+    void load_remote()
+  }, [])
+
+  useEffect(() => {
+    const load_files = async () => {
+      if (!active_kb_id) return
+      if (!window.electron_api?.kb_list_index_files) return
+
+      set_files_loading(true)
+      set_files_error('')
+
+      try {
+        const res = await window.electron_api.kb_list_index_files(active_kb_id)
+        if (!res.success) {
+          set_files_error(res.error || '获取知识库文件失败')
+          return
+        }
+
+        const items: any[] = Array.isArray(res.data?.items) ? res.data.items : []
+        const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+        const mapped_files: KbFile[] = items
+          .map((it) => {
+            const raw_status = String(it.status || it.document_status || it.documentStatus || '').toUpperCase()
+            let status: KbFile['status'] = 'success'
+            if (raw_status === 'FAILED' || raw_status === 'ERROR') status = 'error'
+            if (raw_status === 'PENDING' || raw_status === 'PROCESSING' || raw_status === 'RUNNING') status = 'uploading'
+
+            return {
+              id: String(it.file_id || it.fileId || it.document_id || it.documentId || it.id || ''),
+              kb_id: active_kb_id,
+              name: String(it.file_name || it.fileName || it.document_name || it.documentName || it.name || ''),
+              size: String(it.size || it.size_in_bytes || it.sizeInBytes || '-'),
+              upload_time: String(it.upload_time || it.gmtCreate || it.createTime || now_str),
+              status
+            }
+          })
+          .filter((f) => f.id && f.name)
+
+        set_files(mapped_files)
+        set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: mapped_files.length } : kb))
+      } catch (err: any) {
+        set_files_error(err?.message || '获取知识库文件失败')
+      } finally {
+        set_files_loading(false)
+      }
+    }
+
+    void load_files()
+  }, [active_kb_id])
+
   // -- Handlers --
   const handle_create_cat = () => {
     if (!new_cat_name.trim()) return
@@ -87,7 +190,7 @@ const KnowledgeBasePage: React.FC = () => {
       id: `cat_${Date.now()}`,
       name: new_cat_name.trim()
     }
-    set_categories([...categories, new_cat])
+    set_categories((prev) => [...prev, new_cat])
     set_active_cat_id(new_cat.id)
     set_show_cat_modal(false)
     set_new_cat_name('')
@@ -95,7 +198,8 @@ const KnowledgeBasePage: React.FC = () => {
 
   const handle_create_kb = async () => {
     const name = new_kb_name.trim()
-    if (!name || !active_cat_id) return
+    const create_cat_id = active_cat_id || categories[0]?.id || 'default'
+    if (!name || !create_cat_id) return
     if (!window.electron_api.kb_demo_create) {
       set_create_kb_error('当前客户端版本不支持创建知识库')
       return
@@ -114,7 +218,7 @@ const KnowledgeBasePage: React.FC = () => {
       const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
       const new_kb: KnowledgeBase = {
         id: res.data.index_id,
-        category_id: active_cat_id,
+        category_id: create_cat_id,
         name: res.data.index_name || name,
         file_count: 1,
         created_at: now_str
@@ -236,9 +340,12 @@ const KnowledgeBasePage: React.FC = () => {
     alert('知识库移动成功')
   }
 
-  const active_cat = categories.find(c => c.id === active_cat_id)
-  const active_kb = kb_list.find(kb => kb.id === active_kb_id)
-  const current_cat_kbs = kb_list.filter(kb => kb.category_id === active_cat_id)
+  const active_cat = useMemo(() => categories.find(c => c.id === active_cat_id), [categories, active_cat_id])
+  const active_kb = useMemo(() => kb_list.find(kb => kb.id === active_kb_id), [kb_list, active_kb_id])
+  const current_cat_kbs = useMemo(() => {
+    if (!active_cat_id) return kb_list
+    return kb_list.filter(kb => kb.category_id === active_cat_id)
+  }, [kb_list, active_cat_id])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
