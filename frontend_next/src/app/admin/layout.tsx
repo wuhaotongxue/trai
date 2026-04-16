@@ -269,16 +269,14 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-card" />
             </button>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button type="button" className="flex items-center gap-2 pl-3 border-l border-border/60 hover:opacity-80 transition-opacity outline-none">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
-                    A
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-semibold text-foreground leading-none">管理员</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">admin@trai.ai</p>
-                  </div>
-                </button>
+              <DropdownMenuTrigger className="flex items-center gap-2 pl-3 border-l border-border/60 hover:opacity-80 transition-opacity outline-none">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
+                  A
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-semibold text-foreground leading-none">管理员</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">admin@trai.ai</p>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuLabel>我的账户</DropdownMenuLabel>

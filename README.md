@@ -38,6 +38,21 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_16_0934
+- **修复(db)**: 数据库配置同时兼容 `POSTGRES_*` 与 `.env` 的 `DB_*`，并在连接失败时打印隐藏密码后的错误日志
+- **修复(sqlite)**: 兼容 SQLite 自增主键写入，避免初始化默认 admin 时登录接口返回 500
+- **新增(test)**: 增加 PostgreSQL 账号密码直连验证测试用例，便于快速排查连接问题
+
+### 🎨 前端_2026_04_16_0934
+- **修复(api_base)**: 未配置 `NEXT_PUBLIC_API_BASE` 时，自动使用当前页面 hostname 推导后端地址，支持局域网访问
+- **修复(hydration)**: 修复管理后台下拉菜单触发器按钮嵌套导致的 hydration error
+- **优化(lint)**: 清理未使用变量与 `<img>` 规则告警，并补齐流式接口的 API Base 推导逻辑
+
+### 🛠️ 后端_2026_04_15_2112
+- **新增(knowledge_base)**: 新增百炼知识库 Demo 创建接口 `/api/admin/knowledge_base/demo_create`，返回 IndexId/FileId/JobId 并轮询任务状态
+- **新增(env)**: `.env.example` 补齐百炼知识库 OpenAPI 的环境变量说明与示例占位
+- **优化(db)**: 启动时数据库连不上 PostgreSQL 自动回退本地 SQLite，并补齐用户表字段避免登录 500
+
 ### 🛠️ 后端_2026_04_15_1641
 - **新增(wecom)**: 增加企业微信组织架构同步用例，补齐部门实体、接口与仓储实现
 - **新增(api)**: 增加组织管理与企业微信登录相关路由，完善用户模型与 JWT 逻辑
