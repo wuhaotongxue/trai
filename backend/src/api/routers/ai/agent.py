@@ -27,6 +27,7 @@ class AgentChatRequest(BaseModel):
     session_id: Annotated[str, Field(description="会话 ID")]
     message: Annotated[str, Field(description="用户消息")]
     agent_id: Annotated[str | None, Field(default=None, description="指定 Agent ID")]
+    knowledge_base_id: Annotated[str | None, Field(default=None, description="指定知识库 ID")]
     stream: Annotated[bool, Field(default=False, description="是否流式响应")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
 
@@ -71,14 +72,39 @@ async def agent_chat(
         user_role=role,
         session_id=request.session_id,
         agent_id=request.agent_id,
+        knowledge_base_id=request.knowledge_base_id,
         trace_id=trace_id,
     )
 
     executor = AgentExecutor.get_instance()
 
-    messages = [
-        {"role": "user", "content": request.message},
-    ]
+    # == RAG: 若用户选择了知识库,提前去百炼查一次并把结果拼到系统提示里 ==
+    rag_context = ""
+    if request.knowledge_base_id:
+        try:
+            import asyncio
+            from api.routers.admin.knowledge_base import KnowledgeBaseDemoService
+            svc = KnowledgeBaseDemoService()
+            client, m, wid = svc._create_bailian_client()
+            req = m.RetrieveRequest(index_id=request.knowledge_base_id, query=request.message)
+            
+            def _do_retrieve():
+                return client.retrieve(wid, req)
+                
+            res = await asyncio.to_thread(_do_retrieve)
+            if res.body and res.body.data and res.body.data.nodes:
+                rag_context = "\n\n以下是相关的知识库参考资料：\n"
+                for i, node in enumerate(res.body.data.nodes):
+                    rag_context += f"【资料 {i+1}】\n{node.text}\n"
+        except Exception as e:
+            from loguru import logger
+            logger.warning(f"RAG retrieve failed for kb {request.knowledge_base_id}: {e}")
+
+    messages = []
+    if rag_context:
+        messages.append({"role": "system", "content": f"请结合以下参考资料回答用户问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}"})
+    
+    messages.append({"role": "user", "content": request.message})
 
     result = await executor.execute(messages, context, stream=request.stream)
 
