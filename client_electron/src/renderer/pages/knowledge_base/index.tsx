@@ -337,29 +337,9 @@ const KnowledgeBasePage: React.FC = () => {
   }
 
   const handle_move_file = (file_id: string) => {
-    if (!target_move_kb_id || target_move_kb_id === active_kb_id) {
-      set_moving_file_id(null)
-      set_target_move_kb_id('')
-      return
-    }
-    
-    set_files(prev => prev.map(f => 
-      f.id === file_id ? { ...f, kb_id: target_move_kb_id } : f
-    ))
-    
-    set_kb_list(prev => prev.map(kb => {
-      if (kb.id === active_kb_id) {
-        return { ...kb, file_count: Math.max(0, kb.file_count - 1) }
-      }
-      if (kb.id === target_move_kb_id) {
-        return { ...kb, file_count: kb.file_count + 1 }
-      }
-      return kb
-    }))
-    
+    alert('暂不支持通过 API 移动文件到其他知识库')
     set_moving_file_id(null)
     set_target_move_kb_id('')
-    alert('移动成功')
   }
 
   const handle_rename_kb = async (kb_id: string) => {
@@ -398,19 +378,9 @@ const KnowledgeBasePage: React.FC = () => {
   }
 
   const handle_move_kb = (kb_id: string) => {
-    if (!target_move_cat_id || target_move_cat_id === active_cat_id) {
-      set_moving_kb_id(null)
-      set_target_move_cat_id('')
-      return
-    }
-    
-    set_kb_list(prev => prev.map(kb => 
-      kb.id === kb_id ? { ...kb, category_id: target_move_cat_id } : kb
-    ))
-    
+    alert('暂不支持通过 API 移动知识库到其他分类')
     set_moving_kb_id(null)
     set_target_move_cat_id('')
-    alert('知识库移动成功')
   }
 
   const active_cat = useMemo(() => categories.find(c => c.id === active_cat_id), [categories, active_cat_id])
@@ -635,7 +605,7 @@ const KnowledgeBasePage: React.FC = () => {
                       <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{active_kb.name}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
                         <button onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
-                        <button onClick={() => { set_moving_kb_id(active_kb.id); set_target_move_cat_id(active_kb.category_id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
+                        <button onClick={() => { alert('暂不支持移动知识库') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
                         <button onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                       </div>
                     </>
@@ -716,8 +686,8 @@ const KnowledgeBasePage: React.FC = () => {
                             </td>
                             <td style={{ padding: '12px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginLeft: '12px' }}>
-                                <button onClick={() => { set_editing_file_id(file.id); set_edit_file_name(file.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="重命名" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} /></button>
-                                <button onClick={() => { set_moving_file_id(file.id); set_target_move_kb_id(active_kb_id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="移动到..." onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} /></button>
+                                <button onClick={() => { alert('暂不支持重命名文件') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="重命名" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} /></button>
+                                <button onClick={() => { alert('暂不支持移动文件') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px' }} title="移动到..." onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} /></button>
                               </div>
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
