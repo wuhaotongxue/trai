@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: agent.py
 # 作者: wuhao
-# 日期: 2026_04_10_09:21:00
+# 日期: 2026_04_16_17:20:32
 # 描述: Agent 工具调用路由
 
 from __future__ import annotations
@@ -13,12 +13,93 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
+from core.exceptions import ExternalServiceError
 from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
 
 router = APIRouter()
+
+
+class KnowledgeBaseSourceExtractor:
+    """
+    知识库检索结果来源提取器.
+
+    Args:
+        无.
+
+    Returns:
+        无.
+
+    Raises:
+        无.
+    """
+
+    @staticmethod
+    def extract(nodes: list[Any]) -> list[dict[str, Any]]:
+        """
+        从百炼 Retrieve 返回的 nodes 中提取文件来源信息.
+
+        Args:
+            nodes: 百炼检索节点列表.
+
+        Returns:
+            list[dict[str, Any]]: 来源信息列表.
+
+        Raises:
+            无.
+        """
+        sources: list[dict[str, Any]] = []
+        for idx, node in enumerate(nodes):
+            raw: dict[str, Any] = {}
+            to_map = getattr(node, "to_map", None)
+            if callable(to_map):
+                try:
+                    raw = to_map()
+                except Exception:
+                    raw = {}
+
+            text = getattr(node, "text", "") or raw.get("text", "")
+
+            score = getattr(node, "score", None)
+            if score is None:
+                score = raw.get("score")
+
+            file_name = (
+                getattr(node, "title", None)
+                or getattr(node, "file_name", None)
+                or raw.get("title")
+                or raw.get("file_name")
+                or raw.get("source")
+                or "unknown"
+            )
+
+            document_id = (
+                getattr(node, "document_id", None)
+                or getattr(node, "doc_id", None)
+                or getattr(node, "file_id", None)
+                or raw.get("document_id")
+                or raw.get("doc_id")
+                or raw.get("file_id")
+                or raw.get("id")
+            )
+
+            chunk_id = getattr(node, "chunk_id", None) or raw.get("chunk_id") or raw.get("node_id")
+            page = getattr(node, "page", None) or raw.get("page")
+
+            sources.append(
+                {
+                    "index": idx + 1,
+                    "file_name": str(file_name),
+                    "document_id": str(document_id) if document_id is not None else None,
+                    "chunk_id": str(chunk_id) if chunk_id is not None else None,
+                    "page": page,
+                    "score": score,
+                    "snippet": (str(text)[:200] if text else ""),
+                }
+            )
+        return sources
 
 
 class AgentChatRequest(BaseModel):
@@ -38,6 +119,7 @@ class AgentChatResponse(BaseModel):
     session_id: str = Field(description="会话 ID")
     content: str = Field(description="AI 最终回复")
     reasoning_content: str | None = Field(default=None, description="AI 思维链/推理过程")
+    sources: list[dict[str, Any]] = Field(default_factory=list, description="知识库引用来源")
     steps: list[dict[str, Any]] = Field(description="执行步骤明细")
     total_turns: int = Field(description="总轮次")
     total_tokens: int = Field(description="总消耗 Token 数")
@@ -80,31 +162,37 @@ async def agent_chat(
 
     # == RAG: 若用户选择了知识库,提前去百炼查一次并把结果拼到系统提示里 ==
     rag_context = ""
+    rag_sources: list[dict[str, Any]] = []
     if request.knowledge_base_id:
         try:
             import asyncio
+
             from api.routers.admin.knowledge_base import KnowledgeBaseDemoService
+
             svc = KnowledgeBaseDemoService()
             client, m, wid = svc._create_bailian_client()
             req = m.RetrieveRequest(index_id=request.knowledge_base_id, query=request.message)
-            
+
             def _do_retrieve():
                 return client.retrieve(wid, req)
-                
+
             res = await asyncio.to_thread(_do_retrieve)
             if res.body and res.body.data and res.body.data.nodes:
+                rag_sources = KnowledgeBaseSourceExtractor.extract(res.body.data.nodes)
                 rag_context = "\n\n以下是相关的知识库参考资料：\n"
                 for i, node in enumerate(res.body.data.nodes):
-                    rag_context += f"【资料 {i+1}】\n{node.text}\n"
+                    rag_context += f"【资料 {i + 1}】\n{node.text}\n"
         except Exception as e:
             from loguru import logger
+
             logger.warning(f"RAG retrieve failed for kb {request.knowledge_base_id}: {e}")
 
     messages = []
     if rag_context:
-        messages.append({"role": "user", "content": f"请结合以下参考资料回答我的问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}"})
-    
-    messages.append({"role": "user", "content": request.message})
+        final_message = f"请结合以下参考资料回答我的问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}\n\n我的问题是：{request.message}"
+        messages.append({"role": "user", "content": final_message})
+    else:
+        messages.append({"role": "user", "content": request.message})
 
     result = await executor.execute(messages, context, stream=request.stream)
 
@@ -115,10 +203,20 @@ async def agent_chat(
         async def event_generator():
             import json
 
-            async for event in result:
-                # event is a dict containing type, content, etc.
-                yield f"data: {json.dumps(event)}\n\n"
-            yield "data: [DONE]\n\n"
+            from loguru import logger
+
+            try:
+                async for event in result:
+                    yield f"data: {json.dumps(event)}\n\n"
+                if rag_sources:
+                    yield f"data: {json.dumps({'type': 'sources', 'sources': rag_sources})}\n\n"
+                yield "data: [DONE]\n\n"
+            except ExternalServiceError as e:
+                logger.warning(f"event_generator service error: {e}")
+                yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+            except Exception as e:
+                logger.exception("Error in event_generator")
+                yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")
 
@@ -135,6 +233,7 @@ async def agent_chat(
         session_id=request.session_id,
         content=result["final_content"],
         reasoning_content=full_reasoning,
+        sources=rag_sources,
         steps=result["steps"],
         total_turns=result["total_turns"],
         total_tokens=result["total_tokens"],

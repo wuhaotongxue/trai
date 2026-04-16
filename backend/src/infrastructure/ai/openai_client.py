@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: openai_client.py
 # 作者: wuhao
-# 日期: 2026_04_10_09:22:00
+# 日期: 2026_04_16_16:42:28
 # 描述: OpenAI 客户端适配器(支持 Vision 多模态、abort 中断、流式 token 统计)
 
 from __future__ import annotations
@@ -34,23 +34,80 @@ class StreamEvent:
 class OpenAIClient:
     """OpenAI 客户端"""
 
+    @staticmethod
+    def _first_env(*names: str) -> tuple[str, str]:
+        """按优先级获取第一个非空环境变量
+
+        Args:
+            *names: 环境变量名列表,按优先级排列.
+
+        Returns:
+            tuple[str, str]: (env_name, env_value),若都为空则返回 ("","").
+
+        Raises:
+            无.
+        """
+        for name in names:
+            value = os.getenv(name, "")
+            if value:
+                return name, value
+        return "", ""
+
     def __init__(self) -> None:
         self._provider = os.getenv("LLM_PROVIDER", "openai")
         if self._provider == "modelscope":
-            self._api_key: str = os.getenv("MODELSCOPE_API_KEY", "")
-            self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-            self._model: str = os.getenv("MODELSCOPE_CHAT_MODEL", "Qwen/Qwen3.5-0.8B")
+            self._api_key_env: str = "DASHSCOPE_API_KEY"
+            self._api_key_source_env, self._api_key = self._first_env(
+                "DASHSCOPE_API_KEY",
+                "AI_DASHSCOPE_API_KEY",
+                "MODELSCOPE_API_KEY",
+            )
+            self._base_url: str = (
+                os.getenv("DASHSCOPE_API_BASE", "")
+                or os.getenv("MODELSCOPE_API_BASE", "")
+                or os.getenv("AI_DASHSCOPE_API_BASE", "")
+                or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            )
+            self._model: str = os.getenv("DASHSCOPE_CHAT_MODEL", "") or os.getenv("MODELSCOPE_CHAT_MODEL", "qwen-plus")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
         elif self._provider == "deepseek":
+            self._api_key_env = "DEEPSEEK_API_KEY"
             self._api_key: str = os.getenv("DEEPSEEK_API_KEY", "")
+            self._api_key_source_env = "DEEPSEEK_API_KEY" if self._api_key else ""
             self._base_url: str = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1")
             self._model: str = os.getenv("DEEPSEEK_CHAT_MODEL", "deepseek-reasoner")
             self._timeout: int = int(os.getenv("DEEPSEEK_TIMEOUT", "120"))
         else:
+            self._api_key_env = "OPENAI_API_KEY"
             self._api_key: str = os.getenv("OPENAI_API_KEY", "")
+            self._api_key_source_env = "OPENAI_API_KEY" if self._api_key else ""
             self._base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
             self._model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
             self._timeout: int = int(os.getenv("OPENAI_TIMEOUT", "120"))
+
+    def _ensure_api_key(self) -> None:
+        """检查 API 密钥配置
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            ExternalServiceError: 密钥缺失时抛出.
+        """
+        if self._api_key:
+            return
+        raise ExternalServiceError(
+            message="LLM API 密钥未配置",
+            details={
+                "provider": self._provider,
+                "api_key_env": self._api_key_env,
+                "api_key_source_env": getattr(self, "_api_key_source_env", ""),
+                "base_url": self._base_url,
+            },
+        )
 
     async def chat(
         self,
@@ -79,11 +136,7 @@ class OpenAIClient:
         Returns:
             dict: 响应结果
         """
-        if not self._api_key:
-            raise ExternalServiceError(
-                message="OpenAI API 密钥未配置",
-                details={"service": "openai"},
-            )
+        self._ensure_api_key()
 
         url = f"{self._base_url}/chat/completions"
         headers = {
@@ -101,7 +154,9 @@ class OpenAIClient:
             payload["tools"] = tools
             payload["tool_choice"] = tool_choice or "auto"
 
-        logger.info(f"OpenAI 请求 | 模型: {payload['model']} | 工具数: {len(tools) if tools else 0}")
+        logger.info(
+            f"LLM 请求 | provider: {self._provider} | 模型: {payload['model']} | 工具数: {len(tools) if tools else 0}"
+        )
 
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
@@ -119,18 +174,31 @@ class OpenAIClient:
                 }
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"OpenAI HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            logger.error(f"LLM HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
             if e.response.status_code == 400:
                 logger.error(f"导致 400 错误的 Payload: {payload}")
+            provider_hint = f"provider={self._provider}, api_key_env={self._api_key_env}"
             raise ExternalServiceError(
-                message=f"OpenAI API 请求失败: {e.response.status_code} - {e.response.text}",
-                details={"status_code": e.response.status_code},
+                message=f"LLM API 请求失败: {provider_hint}, status_code={e.response.status_code} - {e.response.text}",
+                details={
+                    "provider": self._provider,
+                    "api_key_env": self._api_key_env,
+                    "base_url": self._base_url,
+                    "status_code": e.response.status_code,
+                },
             )
+        except ExternalServiceError:
+            raise
         except Exception as e:
-            logger.error(f"OpenAI 请求异常 | 错误: {str(e)}")
+            logger.error(f"LLM 请求异常 | 错误: {str(e)}")
             raise ExternalServiceError(
-                message=f"OpenAI API 请求异常: {str(e)}",
-                details={"error": str(e)},
+                message=f"LLM API 请求异常: {str(e)}",
+                details={
+                    "provider": self._provider,
+                    "api_key_env": self._api_key_env,
+                    "base_url": self._base_url,
+                    "error": str(e),
+                },
             )
 
     async def chat_stream(
@@ -162,11 +230,7 @@ class OpenAIClient:
         Yields:
             StreamEvent: 流式事件
         """
-        if not self._api_key:
-            raise ExternalServiceError(
-                message="OpenAI API 密钥未配置",
-                details={"service": "openai"},
-            )
+        self._ensure_api_key()
 
         url = f"{self._base_url}/chat/completions"
         headers = {
@@ -183,7 +247,7 @@ class OpenAIClient:
         if tools:
             payload["tools"] = tools
 
-        logger.info(f"OpenAI 流式请求 | 模型: {payload['model']}")
+        logger.info(f"LLM 流式请求 | provider: {self._provider} | 模型: {payload['model']}")
 
         tool_call_id = ""
         tool_name = ""
@@ -193,7 +257,25 @@ class OpenAIClient:
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 async with client.stream("POST", url, headers=headers, json=payload) as response:
-                    response.raise_for_status()
+                    if response.status_code >= 400:
+                        err_bytes = await response.aread()
+                        err_text = err_bytes.decode("utf-8", errors="replace")
+                        logger.error(
+                            "LLM 流式 HTTP 错误 | provider: {} | 状态码: {} | 响应: {}",
+                            self._provider,
+                            response.status_code,
+                            err_text,
+                        )
+                        provider_hint = f"provider={self._provider}, api_key_env={self._api_key_env}"
+                        raise ExternalServiceError(
+                            message=f"LLM API 流式请求失败: {provider_hint}, status_code={response.status_code} - {err_text}",
+                            details={
+                                "provider": self._provider,
+                                "api_key_env": self._api_key_env,
+                                "base_url": self._base_url,
+                                "status_code": response.status_code,
+                            },
+                        )
                     async for line in response.aiter_lines():
                         if abort_event and abort_event.is_set():
                             logger.info("流式请求被 abort 终止")
@@ -303,23 +385,18 @@ class OpenAIClient:
                                     finish_reason=finish_reason,
                                 )
 
-        except httpx.HTTPStatusError as e:
-            try:
-                err_text = await e.response.aread() if hasattr(e.response, "aread") else e.response.text
-            except Exception:
-                err_text = "<未读取响应内容>"
-            logger.error(f"OpenAI 流式 HTTP 错误 | 状态码: {e.response.status_code} | 响应: {err_text}")
-            if e.response.status_code == 400:
-                logger.error(f"导致流式 400 错误的 Payload: {payload}")
-            raise ExternalServiceError(
-                message=f"OpenAI API 流式请求失败: {e.response.status_code}",
-                details={"status_code": e.response.status_code},
-            )
+        except ExternalServiceError:
+            raise
         except Exception as e:
-            logger.error(f"OpenAI 流式请求异常 | 错误: {str(e)}")
+            logger.error(f"LLM 流式请求异常 | 错误: {str(e)}")
             raise ExternalServiceError(
-                message=f"OpenAI API 流式请求异常: {str(e)}",
-                details={"error": str(e)},
+                message=f"LLM API 流式请求异常: {str(e)}",
+                details={
+                    "provider": self._provider,
+                    "api_key_env": self._api_key_env,
+                    "base_url": self._base_url,
+                    "error": str(e),
+                },
             )
 
 
