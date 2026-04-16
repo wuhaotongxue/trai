@@ -154,4 +154,20 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('kb:list_index_files', async (_, index_id: string) => {
     return await knowledge_base_service.list_index_files(index_id)
   })
+
+  ipcMain.handle('kb:rename_index', async (_, index_id: string, index_name: string) => {
+    return await knowledge_base_service.rename_index(index_id, index_name)
+  })
+
+  ipcMain.handle('kb:delete_index', async (_, index_id: string) => {
+    return await knowledge_base_service.delete_index(index_id)
+  })
+
+  ipcMain.handle('kb:delete_index_file', async (_, index_id: string, file_id: string) => {
+    return await knowledge_base_service.delete_index_file(index_id, file_id)
+  })
+
+  ipcMain.handle('kb:upload_text', async (_, index_id: string, file_name: string, content: string) => {
+    return await knowledge_base_service.upload_text(index_id, file_name, content)
+  })
 }

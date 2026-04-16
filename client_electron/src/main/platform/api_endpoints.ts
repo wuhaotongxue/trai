@@ -39,5 +39,17 @@ export class ApiEndpoints {
     return `/api/admin/knowledge_base/indices/${encodeURIComponent(index_id)}/files`
   }
 
+  static admin_knowledge_base_index(index_id: string) {
+    return `/api/admin/knowledge_base/indices/${encodeURIComponent(index_id)}`
+  }
+
+  static admin_knowledge_base_index_file(index_id: string, file_id: string) {
+    return `/api/admin/knowledge_base/indices/${encodeURIComponent(index_id)}/files/${encodeURIComponent(file_id)}`
+  }
+
+  static admin_knowledge_base_upload_text(index_id: string) {
+    return `/api/admin/knowledge_base/indices/${encodeURIComponent(index_id)}/files/upload_text`
+  }
+
   static readonly client_update = '/api/client/update'
 }
