@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 from typing import Any
 
@@ -14,12 +15,19 @@ import httpx
 
 
 class KnowledgeBaseListIndicesCheck:
-    def __init__(self) -> None:
-        self._base_url = os.getenv("API_BASE", "http://127.0.0.1:5666").rstrip("/")
-        self._username = os.getenv("ADMIN_USERNAME", "admin")
-        self._password = os.getenv("ADMIN_PASSWORD", "admin123")
-        self._timeout = float(os.getenv("API_TIMEOUT", "30"))
-        self._print_raw = os.getenv("PRINT_RAW", "0") == "1"
+    def __init__(
+        self,
+        base_url: str,
+        username: str,
+        password: str,
+        timeout: float,
+        print_raw: bool,
+    ) -> None:
+        self._base_url = base_url.rstrip("/")
+        self._username = username
+        self._password = password
+        self._timeout = timeout
+        self._print_raw = print_raw
         self._client = httpx.Client(timeout=self._timeout)
 
     def _url(self, path: str) -> str:
@@ -97,7 +105,21 @@ class KnowledgeBaseListIndicesCheck:
 
 def main() -> int:
     try:
-        KnowledgeBaseListIndicesCheck().run()
+        parser = argparse.ArgumentParser(description="知识库列表自测脚本")
+        parser.add_argument("--base", default="http://127.0.0.1:5666", help="后端地址, 例如 http://127.0.0.1:5666")
+        parser.add_argument("--username", default="admin", help="管理员用户名")
+        parser.add_argument("--password", default="admin123", help="管理员密码")
+        parser.add_argument("--timeout", type=float, default=30.0, help="请求超时(秒)")
+        parser.add_argument("--print_raw", action="store_true", help="打印原始响应, 用于排查字段变化")
+        args = parser.parse_args()
+
+        KnowledgeBaseListIndicesCheck(
+            base_url=args.base,
+            username=args.username,
+            password=args.password,
+            timeout=args.timeout,
+            print_raw=args.print_raw,
+        ).run()
         return 0
     except Exception as e:
         print(str(e))

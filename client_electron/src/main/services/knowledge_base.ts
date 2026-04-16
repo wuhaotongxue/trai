@@ -98,5 +98,53 @@ export const knowledge_base_service = {
         '获取知识库文件失败, 请检查网络或服务器配置'
       return { success: false, error: msg }
     }
+  },
+
+  async rename_index(index_id: string, index_name: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index(index_id))
+      const res = await api_client.put(url, { index_name })
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base rename_index failed:', error.response?.data || error.message)
+      const msg = error.response?.data?.detail?.message || error.response?.data?.message || error.message || '重命名知识库失败'
+      return { success: false, error: msg }
+    }
+  },
+
+  async delete_index(index_id: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index(index_id))
+      const res = await api_client.delete(url)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base delete_index failed:', error.response?.data || error.message)
+      const msg = error.response?.data?.detail?.message || error.response?.data?.message || error.message || '删除知识库失败'
+      return { success: false, error: msg }
+    }
+  },
+
+  async delete_index_file(index_id: string, file_id: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index_file(index_id, file_id))
+      const res = await api_client.delete(url)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base delete_index_file failed:', error.response?.data || error.message)
+      const msg = error.response?.data?.detail?.message || error.response?.data?.message || error.message || '删除文件失败'
+      return { success: false, error: msg }
+    }
+  },
+
+  async upload_text(index_id: string, file_name: string, content: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_upload_text(index_id))
+      const res = await api_client.post(url, { file_name, content })
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('knowledge base upload_text failed:', error.response?.data || error.message)
+      const msg = error.response?.data?.detail?.message || error.response?.data?.message || error.message || '上传文件失败'
+      return { success: false, error: msg }
+    }
   }
 }

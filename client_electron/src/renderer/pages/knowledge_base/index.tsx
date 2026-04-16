@@ -107,15 +107,21 @@ const KnowledgeBasePage: React.FC = () => {
           .filter((c) => c.id && c.name)
 
         const ensured_categories =
-          mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认' }]
+          mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认类目' }]
+        
+        let default_cat = ensured_categories.find(c => c.name === '默认' || c.name === '默认类目')
+        if (!default_cat) {
+          default_cat = { id: 'default', name: '默认类目' }
+          ensured_categories.unshift(default_cat)
+        }
 
         set_categories(ensured_categories)
-        set_active_cat_id((prev) => prev || ensured_categories[0].id)
+        set_active_cat_id((prev) => prev || default_cat.id)
 
         const idx_source = idx_res.data?.data?.items || idx_res.data?.items || idx_res.data?.data || idx_res.data || []
         const idx_items: any[] = Array.isArray(idx_source) ? idx_source : []
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
-        const cat_id_for_kb = ensured_categories[0].id
+        const cat_id_for_kb = default_cat.id
         const mapped_kbs: KnowledgeBase[] = idx_items
           .map((it) => ({
             id: String(it.index_id || it.indexId || it.IndexId || it.id || it.Id || ''),
@@ -247,39 +253,61 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
-  const handle_file_upload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handle_file_upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected_files = Array.from(e.target.files || [])
-    if (selected_files.length === 0) return
+    if (selected_files.length === 0 || !active_kb_id) return
+    if (!window.electron_api?.kb_upload_text) {
+      alert('当前客户端版本不支持上传文件')
+      return
+    }
     
-    const new_files: KbFile[] = selected_files.map((file, idx) => ({
-      id: `f_${Date.now()}_${idx}`,
-      kb_id: active_kb_id,
-      name: file.name,
-      size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-      upload_time: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      status: 'uploading'
-    }))
-    
-    set_files(prev => [...new_files, ...prev])
-    
-    set_kb_list(prev => prev.map(kb => 
-      kb.id === active_kb_id ? { ...kb, file_count: kb.file_count + new_files.length } : kb
-    ))
-    
-    setTimeout(() => {
-      set_files(prev => prev.map(f => 
-        new_files.find(nf => nf.id === f.id) ? { ...f, status: 'success' } : f
-      ))
-    }, 1500)
+    for (const file of selected_files) {
+      try {
+        const content = await file.text()
+        const res = await window.electron_api.kb_upload_text(active_kb_id, file.name, content)
+        if (res.success) {
+          // 这里可以考虑直接 reload files
+          const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+          const new_f: KbFile = {
+            id: res.data?.file_id || res.data?.data?.file_id || `f_${Date.now()}`,
+            kb_id: active_kb_id,
+            name: file.name,
+            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+            upload_time: now_str,
+            status: 'success'
+          }
+          set_files(prev => [new_f, ...prev])
+          set_kb_list(prev => prev.map(kb => 
+            kb.id === active_kb_id ? { ...kb, file_count: kb.file_count + 1 } : kb
+          ))
+        } else {
+          alert(`上传 ${file.name} 失败: ${res.error}`)
+        }
+      } catch (err: any) {
+        alert(`读取/上传文件 ${file.name} 失败: ${err.message}`)
+      }
+    }
     
     if (e.target) e.target.value = ''
   }
 
-  const remove_file = (id: string) => {
-    set_files(prev => prev.filter(f => f.id !== id))
-    set_kb_list(prev => prev.map(kb => 
-      kb.id === active_kb_id ? { ...kb, file_count: Math.max(0, kb.file_count - 1) } : kb
-    ))
+  const handle_delete_file = async (file_id: string) => {
+    if (!active_kb_id || !window.electron_api?.kb_delete_index_file) return
+    if (!confirm('确定要删除该文件吗？')) return
+    
+    try {
+      const res = await window.electron_api.kb_delete_index_file(active_kb_id, file_id)
+      if (res.success) {
+        set_files(prev => prev.filter(f => f.id !== file_id))
+        set_kb_list(prev => prev.map(kb => 
+          kb.id === active_kb_id ? { ...kb, file_count: Math.max(0, kb.file_count - 1) } : kb
+        ))
+      } else {
+        alert(`删除失败: ${res.error}`)
+      }
+    } catch (e: any) {
+      alert(`删除异常: ${e.message}`)
+    }
   }
 
   const handle_rename_file = (file_id: string) => {
@@ -318,14 +346,39 @@ const KnowledgeBasePage: React.FC = () => {
     alert('移动成功')
   }
 
-  const handle_rename_kb = (kb_id: string) => {
+  const handle_rename_kb = async (kb_id: string) => {
     if (!edit_kb_name.trim()) return
-    set_kb_list(prev => prev.map(kb => 
-      kb.id === kb_id ? { ...kb, name: edit_kb_name.trim() } : kb
-    ))
-    set_editing_kb_id(null)
-    set_edit_kb_name('')
-    alert('知识库重命名成功')
+    if (!window.electron_api?.kb_rename_index) return
+    try {
+      const res = await window.electron_api.kb_rename_index(kb_id, edit_kb_name.trim())
+      if (res.success) {
+        set_kb_list(prev => prev.map(kb => 
+          kb.id === kb_id ? { ...kb, name: edit_kb_name.trim() } : kb
+        ))
+        set_editing_kb_id(null)
+        set_edit_kb_name('')
+      } else {
+        alert(`重命名失败: ${res.error}`)
+      }
+    } catch (e: any) {
+      alert(`重命名异常: ${e.message}`)
+    }
+  }
+
+  const handle_delete_kb = async (kb_id: string) => {
+    if (!window.electron_api?.kb_delete_index) return
+    if (!confirm('确定要删除该知识库吗？')) return
+    try {
+      const res = await window.electron_api.kb_delete_index(kb_id)
+      if (res.success) {
+        set_kb_list(prev => prev.filter(k => k.id !== kb_id))
+        if (active_kb_id === kb_id) set_active_kb_id('')
+      } else {
+        alert(`删除知识库失败: ${res.error}`)
+      }
+    } catch (e: any) {
+      alert(`删除异常: ${e.message}`)
+    }
   }
 
   const handle_move_kb = (kb_id: string) => {
@@ -567,6 +620,7 @@ const KnowledgeBasePage: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
                         <button onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
                         <button onClick={() => { set_moving_kb_id(active_kb.id); set_target_move_cat_id(active_kb.category_id) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
+                        <button onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                       </div>
                     </>
                   )}
@@ -652,7 +706,7 @@ const KnowledgeBasePage: React.FC = () => {
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                <button onClick={() => remove_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px' }} title="删除" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
+                                <button onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px' }} title="删除" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
                               </div>
                             </td>
                           </tr>

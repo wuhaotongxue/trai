@@ -179,9 +179,19 @@ class KnowledgeBaseDemoService:
         try:
             mapped = resp.to_map()
             body = mapped.get("body")
+
             if isinstance(body, dict):
                 return body
-            return {"body": body} if body is not None else mapped
+
+            if body is not None and hasattr(body, "to_map"):
+                body_map = body.to_map()
+                if isinstance(body_map, dict):
+                    return body_map
+
+            if body is not None:
+                return {"body": body}
+
+            return mapped if isinstance(mapped, dict) else {"mapped": mapped}
         except Exception:
             return {}
 
