@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from api.deps import require_admin
 from infrastructure.database import get_session
 from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.password import PasswordService, get_password_service
 
 router = APIRouter()
 
@@ -49,12 +50,68 @@ class UpdateUserRequest(BaseModel):
     role: str | None = Field(default=None, description="用户角色")
     status: str | None = Field(default=None, description="用户状态")
 
+class CreateUserRequest(BaseModel):
+    """创建用户请求"""
+
+    username: str = Field(min_length=2, max_length=32, description="用户名")
+    password: str = Field(min_length=8, max_length=64, description="初始密码")
+    email: str | None = Field(default=None, description="邮箱地址(可选)")
+    display_name: str | None = Field(default=None, description="显示名称(可选)")
+    role: str = Field(default="admin", description="用户角色")
+    status: str = Field(default="active", description="用户状态")
+
 
 class ActionResponse(BaseModel):
     """操作响应"""
 
     message: str = Field(description="提示信息")
     user_id: str = Field(description="用户 ID")
+
+@router.post("/users", response_model=ActionResponse, tags=["管理"])
+async def create_user(
+    request: CreateUserRequest,
+    current_user: Annotated[dict, Depends(require_admin)],
+    password_service: Annotated[PasswordService, Depends(get_password_service)],
+    session: Annotated[Session, Depends(get_session)],
+) -> ActionResponse:
+    """创建用户(仅管理员)
+
+    Args:
+        request: 创建用户请求
+        current_user: 当前登录管理员
+        password_service: 密码服务实例
+        session: 数据库会话
+
+    Returns:
+        ActionResponse: 创建结果
+
+    Raises:
+        HTTPException: 用户已存在(409)
+    """
+    _ = current_user
+    user_repo = UserRepository(session)
+
+    existing = user_repo.get_by_username(request.username)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": 409, "message": "用户名已存在"},
+        )
+
+    password_hash = password_service.hash(request.password)
+    email = request.email or f"{request.username}@example.com"
+    display_name = request.display_name or request.username
+
+    user = user_repo.create(
+        username=request.username,
+        email=email,
+        display_name=display_name,
+        password_hash=password_hash,
+        role=request.role,
+        status=request.status,
+    )
+
+    return ActionResponse(message="用户创建成功", user_id=user.user_id)
 
 
 @router.get("/users", response_model=UserListResponse, tags=["管理"])
