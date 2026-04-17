@@ -31,6 +31,7 @@ cd trai
 
 - GitHub：https://github.com/wuhaotongxue/trai
 - Gitee（码云）：https://gitee.com/no5689/trai
+- 如有问题, 请联系邮箱: wuhaotongxue@gmail.com
 
 ## 贡献
 
