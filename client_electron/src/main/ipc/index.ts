@@ -151,8 +151,8 @@ export const register_ipc_handlers = (): void => {
     return await knowledge_base_service.list_indices(index_name)
   })
 
-  ipcMain.handle('kb:list_index_files', async (_, index_id: string) => {
-    return await knowledge_base_service.list_index_files(index_id)
+  ipcMain.handle('kb:list_index_files', async (_, index_id: string, page_number?: number, page_size?: number) => {
+    return await knowledge_base_service.list_index_files(index_id, page_number, page_size)
   })
 
   ipcMain.handle('kb:rename_index', async (_, index_id: string, index_name: string) => {

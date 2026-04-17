@@ -34,7 +34,8 @@ contextBridge.exposeInMainWorld('electron_api', {
   kb_demo_create: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => ipcRenderer.invoke('kb:demo_create', params),
   kb_list_categories: () => ipcRenderer.invoke('kb:list_categories'),
   kb_list_indices: (index_name?: string) => ipcRenderer.invoke('kb:list_indices', index_name),
-  kb_list_index_files: (index_id: string) => ipcRenderer.invoke('kb:list_index_files', index_id),
+  kb_list_index_files: (index_id: string, page_number?: number, page_size?: number) =>
+    ipcRenderer.invoke('kb:list_index_files', index_id, page_number, page_size),
   kb_rename_index: (index_id: string, index_name: string) => ipcRenderer.invoke('kb:rename_index', index_id, index_name),
   kb_delete_index: (index_id: string) => ipcRenderer.invoke('kb:delete_index', index_id),
   kb_delete_index_file: (index_id: string, file_id: string) => ipcRenderer.invoke('kb:delete_index_file', index_id, file_id),

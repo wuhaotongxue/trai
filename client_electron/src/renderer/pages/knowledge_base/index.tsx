@@ -2,7 +2,7 @@
  * 文件名: index.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 15:30:00
- * 描述: 专属知识库管理页面，支持新建知识库与上传文件 (三段式折叠布局)
+ * 描述: 专属知识库管理页面, 支持新建知识库与上传文件 (三段式折叠布局)
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
@@ -56,6 +56,9 @@ const KnowledgeBasePage: React.FC = () => {
   const [search_query, set_search_query] = useState('')
   const [file_page, set_file_page] = useState(1)
   const [file_page_size, set_file_page_size] = useState(10)
+  const [file_total, set_file_total] = useState(0)
+  const [debug_visible, set_debug_visible] = useState(false)
+  const [debug_messages, set_debug_messages] = useState<string[]>([])
   
   // 知识库操作状态
   const [editing_kb_id, set_editing_kb_id] = useState<string | null>(null)
@@ -63,30 +66,28 @@ const KnowledgeBasePage: React.FC = () => {
 
   const file_input_ref = useRef<HTMLInputElement>(null)
 
-  const active_files = useMemo(() => {
-    if (!active_kb_id) return []
-    return files.filter((f) => f.kb_id === active_kb_id)
-  }, [files, active_kb_id])
-
-  const filtered_files = useMemo(() => {
+  const display_files = useMemo(() => {
     const q = search_query.trim().toLowerCase()
-    if (!q) return active_files
-    return active_files.filter((f) => f.name.toLowerCase().includes(q))
-  }, [active_files, search_query])
-
-  const pagination = useMemo(() => {
-    const total = filtered_files.length
-    const total_pages = Math.max(1, Math.ceil(total / file_page_size))
-    const current_page = Math.min(file_page, total_pages)
-    const start_index = (current_page - 1) * file_page_size
-    const end_index = start_index + file_page_size
-    const page_items = filtered_files.slice(start_index, end_index)
-    return { total, total_pages, current_page, start_index, end_index, page_items }
-  }, [filtered_files, file_page, file_page_size])
+    if (!q) return files
+    return files.filter((f) => f.name.toLowerCase().includes(q))
+  }, [files, search_query])
 
   useEffect(() => {
+    const kb = kb_list.find((it) => it.id === active_kb_id)
+    if (kb && typeof kb.file_count === 'number' && kb.file_count > 0) {
+      set_file_total(kb.file_count)
+    }
     set_file_page(1)
-  }, [active_kb_id, search_query, file_page_size])
+  }, [active_kb_id, kb_list])
+
+  const file_total_pages = useMemo(() => {
+    if (file_total <= 0) return 1
+    return Math.max(1, Math.ceil(file_total / file_page_size))
+  }, [file_total, file_page_size])
+
+  const file_current_page = useMemo(() => {
+    return Math.min(Math.max(1, file_page), file_total_pages)
+  }, [file_page, file_total_pages])
 
   useEffect(() => {
     const load_remote = async () => {
@@ -166,70 +167,51 @@ const KnowledgeBasePage: React.FC = () => {
     void load_remote()
   }, [])
 
-  useEffect(() => {
-    const load_files = async () => {
-      if (!active_kb_id) return
-      if (!window.electron_api?.kb_list_index_files) return
-
-      set_files_loading(true)
-      set_files_error('')
-
-      try {
-        const res = await window.electron_api.kb_list_index_files(active_kb_id)
-        if (!res.success) {
-          set_files_error(res.error || '获取知识库文件失败')
-          return
-        }
-
-        const items_source = res.data?.data?.items || res.data?.items || res.data?.data || res.data || []
-        const items: any[] = Array.isArray(items_source) ? items_source : []
-        const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
-        const mapped_files: KbFile[] = items
-          .map((it) => {
-            const raw_status = String(it.status || it.Status || it.document_status || it.documentStatus || '').toUpperCase()
-            let status: KbFile['status'] = 'success'
-            if (raw_status === 'FAILED' || raw_status === 'ERROR') status = 'error'
-            if (raw_status === 'PENDING' || raw_status === 'PROCESSING' || raw_status === 'RUNNING') status = 'uploading'
-
-            return {
-              id: String(it.file_id || it.fileId || it.FileId || it.document_id || it.documentId || it.id || it.Id || ''),
-              kb_id: active_kb_id,
-              name: String(it.file_name || it.fileName || it.FileName || it.document_name || it.documentName || it.name || it.Name || ''),
-              size: String(it.size || it.Size || it.size_in_bytes || it.sizeInBytes || '-'),
-              upload_time: String(it.upload_time || it.gmtCreate || it.GmtCreate || it.createTime || now_str),
-              status
-            }
-          })
-          .filter((f) => f.id && f.name)
-
-        set_files(mapped_files)
-        set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: mapped_files.length } : kb))
-      } catch (err: any) {
-        set_files_error(err?.message || '获取知识库文件失败')
-      } finally {
-        set_files_loading(false)
-      }
-    }
-
-    void load_files()
-  }, [active_kb_id])
-
-  const refresh_files = async () => {
+  const fetch_files_page = async (target_page: number) => {
     if (!active_kb_id) return
     if (!window.electron_api?.kb_list_index_files) return
+
+    const page = Math.max(1, target_page)
 
     set_files_loading(true)
     set_files_error('')
 
+    const append_debug = (msg: string) => {
+      const ts = new Date().toISOString().slice(11, 19)
+      set_debug_messages((prev) => [...prev.slice(-19), `${ts} ${msg}`])
+    }
+
     try {
-      const res = await window.electron_api.kb_list_index_files(active_kb_id)
+      append_debug(`request kb_id=${active_kb_id} page=${page} page_size=${file_page_size}`)
+      console.info('[kb_files] request', { kb_id: active_kb_id, page, page_size: file_page_size })
+
+      const res = await window.electron_api.kb_list_index_files(active_kb_id, page, file_page_size)
       if (!res.success) {
         set_files_error(res.error || '获取知识库文件失败')
+        append_debug(`error page=${page} msg=${res.error || 'unknown'}`)
         return
       }
 
-      const items_source = res.data?.data?.items || res.data?.items || res.data?.data || res.data || []
+      const data_root = res.data?.data || res.data
+      const items_source = data_root?.items || data_root?.data?.items || data_root?.data || []
       const items: any[] = Array.isArray(items_source) ? items_source : []
+
+      const total_source = data_root?.total ?? data_root?.data?.total
+      const fallback_total_from_kb = kb_list.find((it) => it.id === active_kb_id)?.file_count
+      const total_candidate =
+        typeof total_source === 'number'
+          ? total_source
+          : typeof total_source === 'string' && total_source.trim() && !Number.isNaN(Number(total_source))
+            ? Number(total_source)
+            : 0
+      const total =
+        Math.max(
+          total_candidate,
+          typeof fallback_total_from_kb === 'number' ? fallback_total_from_kb : 0,
+          file_total,
+          items.length
+        ) || items.length
+
       const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
       const mapped_files: KbFile[] = items
         .map((it) => {
@@ -250,12 +232,36 @@ const KnowledgeBasePage: React.FC = () => {
         .filter((f) => f.id && f.name)
 
       set_files(mapped_files)
-      set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: mapped_files.length } : kb))
+      set_file_total(total)
+      set_file_page(page)
+      set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: total } : kb))
+      append_debug(
+        `response page=${page} items=${mapped_files.length} total=${total} raw_total=${String(total_source)} kb_total=${String(fallback_total_from_kb)} first=${mapped_files[0]?.name || '-'}`
+      )
+      console.info('[kb_files] response', {
+        kb_id: active_kb_id,
+        page,
+        items: mapped_files.length,
+        total,
+        raw_total: total_source,
+        kb_total: fallback_total_from_kb,
+        first: mapped_files[0]?.name || ''
+      })
     } catch (err: any) {
       set_files_error(err?.message || '获取知识库文件失败')
+      append_debug(`exception page=${page} msg=${String(err?.message || err)}`)
+      console.info('[kb_files] exception', { kb_id: active_kb_id, page, error: err })
     } finally {
       set_files_loading(false)
     }
+  }
+
+  useEffect(() => {
+    void fetch_files_page(1)
+  }, [active_kb_id, file_page_size])
+
+  const refresh_files = async () => {
+    await fetch_files_page(file_current_page)
   }
 
   // -- Handlers --
@@ -300,17 +306,8 @@ const KnowledgeBasePage: React.FC = () => {
         created_at: now_str
       }
 
-      const new_file: KbFile = {
-        id: actual_data.file_id,
-        kb_id: actual_data.index_id,
-        name: actual_data.file_name,
-        size: '-',
-        upload_time: now_str,
-        status: actual_data.job_status === 'FAILED' ? 'error' : 'success'
-      }
-
       set_kb_list((prev) => [new_kb, ...prev])
-      set_files((prev) => [new_file, ...prev])
+      set_file_total(1)
       set_active_kb_id(new_kb.id)
       set_show_create_modal(false)
       set_new_kb_name('')
@@ -327,47 +324,20 @@ const KnowledgeBasePage: React.FC = () => {
       return
     }
     
-    for (const file of selected_files) {
-      const temp_id = `uploading_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`
-      const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
-      
-      const new_f: KbFile = {
-        id: temp_id,
-        kb_id: active_kb_id,
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-        upload_time: now_str,
-        status: 'uploading'
-      }
-      
-      // 先把文件状态设置为 uploading 并展示在列表中
-      set_files(prev => [new_f, ...prev])
-
-      try {
+    set_files_loading(true)
+    try {
+      for (const file of selected_files) {
         const content = await file.text()
         const res = await window.electron_api.kb_upload_text(active_kb_id, file.name, content)
-        if (res.success) {
-          const real_id = res.data?.file_id || res.data?.data?.file_id || temp_id
-          
-          set_files(prev => prev.map(f => 
-            f.id === temp_id ? { ...f, id: real_id, status: 'success' } : f
-          ))
-          
-          set_kb_list(prev => prev.map(kb => 
-            kb.id === active_kb_id ? { ...kb, file_count: kb.file_count + 1 } : kb
-          ))
-        } else {
-          set_files(prev => prev.map(f => 
-            f.id === temp_id ? { ...f, status: 'error' } : f
-          ))
+        if (!res.success) {
           alert(`上传 ${file.name} 失败: ${res.error}`)
         }
-      } catch (err: any) {
-        set_files(prev => prev.map(f => 
-          f.id === temp_id ? { ...f, status: 'error' } : f
-        ))
-        alert(`读取/上传文件 ${file.name} 失败: ${err.message}`)
       }
+    } catch (err: any) {
+      alert(`读取/上传文件失败: ${err.message}`)
+    } finally {
+      set_files_loading(false)
+      await fetch_files_page(1)
     }
     
     if (e.target) e.target.value = ''
@@ -375,15 +345,16 @@ const KnowledgeBasePage: React.FC = () => {
 
   const handle_delete_file = async (file_id: string) => {
     if (!active_kb_id || !window.electron_api?.kb_delete_index_file) return
-    if (!confirm('确定要删除该文件吗？')) return
+    if (!confirm('确定要删除该文件吗?')) return
     
     try {
       const res = await window.electron_api.kb_delete_index_file(active_kb_id, file_id)
       if (res.success) {
-        set_files(prev => prev.filter(f => f.id !== file_id))
-        set_kb_list(prev => prev.map(kb => 
-          kb.id === active_kb_id ? { ...kb, file_count: Math.max(0, kb.file_count - 1) } : kb
-        ))
+        const next_total = Math.max(0, file_total - 1)
+        const next_total_pages = next_total <= 0 ? 1 : Math.max(1, Math.ceil(next_total / file_page_size))
+        const next_page = Math.min(file_current_page, next_total_pages)
+        set_file_total(next_total)
+        await fetch_files_page(next_page)
       } else {
         alert(`删除失败: ${res.error}`)
       }
@@ -415,7 +386,7 @@ const KnowledgeBasePage: React.FC = () => {
 
   const handle_delete_kb = async (kb_id: string) => {
     if (!window.electron_api?.kb_delete_index) return
-    if (!confirm('确定要删除该知识库吗？')) return
+    if (!confirm('确定要删除该知识库吗?')) return
     try {
       const res = await window.electron_api.kb_delete_index(kb_id)
       if (res.success) {
@@ -448,7 +419,7 @@ const KnowledgeBasePage: React.FC = () => {
       </div>
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* 左侧边栏：一级目录 */}
+        {/* 左侧边栏: 一级目录 */}
         <div style={{ 
           width: is_left_sidebar_open ? '200px' : '0px', 
           opacity: is_left_sidebar_open ? 1 : 0,
@@ -529,7 +500,7 @@ const KnowledgeBasePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 中间边栏：子文件夹 (知识库) */}
+        {/* 中间边栏: 子文件夹 (知识库) */}
         <div style={{ 
           width: is_middle_sidebar_open ? '240px' : '0px', 
           opacity: is_middle_sidebar_open ? 1 : 0,
@@ -618,7 +589,7 @@ const KnowledgeBasePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 右侧主区：文件管理 */}
+        {/* 右侧主区: 文件管理 */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {active_kb ? (
             <>
@@ -712,7 +683,7 @@ const KnowledgeBasePage: React.FC = () => {
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-                {filtered_files.length === 0 ? (
+                {display_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                     <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                       <Database size={32} color="#cbd5e1" />
@@ -733,7 +704,7 @@ const KnowledgeBasePage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {pagination.page_items.map(file => (
+                        {display_files.map(file => (
                           <tr key={file.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                             <td style={{ padding: '12px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -760,15 +731,35 @@ const KnowledgeBasePage: React.FC = () => {
                       </tbody>
                     </table>
                     <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        共 {pagination.total} 条
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                          共 {file_total} 条
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => set_debug_visible((v) => !v)}
+                          style={{
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: debug_visible ? '#f1f5f9' : '#ffffff',
+                            color: '#64748b',
+                            borderRadius: '6px',
+                            padding: '4px 8px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          日志
+                        </button>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
                           <span>每页</span>
                           <select
                             value={file_page_size}
-                            onChange={(e) => set_file_page_size(Number(e.target.value))}
+                            onChange={(e) => {
+                              set_file_page(1)
+                              set_file_page_size(Number(e.target.value))
+                            }}
                             style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff' }}
                           >
                             <option value={10}>10</option>
@@ -778,33 +769,33 @@ const KnowledgeBasePage: React.FC = () => {
                         </div>
 
                         <button
-                          onClick={() => set_file_page((p) => Math.max(1, p - 1))}
-                          disabled={pagination.current_page <= 1}
+                          onClick={() => fetch_files_page(file_current_page - 1)}
+                          disabled={file_current_page <= 1 || files_loading}
                           style={{
                             padding: '6px 10px',
                             borderRadius: '6px',
                             border: '1px solid #e2e8f0',
-                            backgroundColor: pagination.current_page <= 1 ? '#f8fafc' : '#ffffff',
-                            color: pagination.current_page <= 1 ? '#cbd5e1' : '#334155',
-                            cursor: pagination.current_page <= 1 ? 'not-allowed' : 'pointer',
+                            backgroundColor: file_current_page <= 1 ? '#f8fafc' : '#ffffff',
+                            color: file_current_page <= 1 ? '#cbd5e1' : '#334155',
+                            cursor: file_current_page <= 1 || files_loading ? 'not-allowed' : 'pointer',
                             fontSize: '12px'
                           }}
                         >
                           上一页
                         </button>
                         <div style={{ fontSize: '12px', color: '#64748b' }}>
-                          第 {pagination.current_page} / {pagination.total_pages} 页
+                          第 {file_current_page} / {file_total_pages} 页
                         </div>
                         <button
-                          onClick={() => set_file_page((p) => Math.min(pagination.total_pages, p + 1))}
-                          disabled={pagination.current_page >= pagination.total_pages}
+                          onClick={() => fetch_files_page(file_current_page + 1)}
+                          disabled={file_current_page >= file_total_pages || files_loading}
                           style={{
                             padding: '6px 10px',
                             borderRadius: '6px',
                             border: '1px solid #e2e8f0',
-                            backgroundColor: pagination.current_page >= pagination.total_pages ? '#f8fafc' : '#ffffff',
-                            color: pagination.current_page >= pagination.total_pages ? '#cbd5e1' : '#334155',
-                            cursor: pagination.current_page >= pagination.total_pages ? 'not-allowed' : 'pointer',
+                            backgroundColor: file_current_page >= file_total_pages ? '#f8fafc' : '#ffffff',
+                            color: file_current_page >= file_total_pages ? '#cbd5e1' : '#334155',
+                            cursor: file_current_page >= file_total_pages || files_loading ? 'not-allowed' : 'pointer',
                             fontSize: '12px'
                           }}
                         >
@@ -812,6 +803,16 @@ const KnowledgeBasePage: React.FC = () => {
                         </button>
                       </div>
                     </div>
+                    {debug_visible ? (
+                      <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 16px', backgroundColor: '#f8fafc' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
+                          debug: kb_id={active_kb_id || '-'} page={file_current_page} page_size={file_page_size} total={file_total} items={display_files.length}
+                        </div>
+                        <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace', fontSize: '12px', color: '#334155', whiteSpace: 'pre-wrap' }}>
+                          {debug_messages.join('\n')}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>

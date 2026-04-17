@@ -84,10 +84,13 @@ export const knowledge_base_service = {
     }
   },
 
-  async list_index_files(index_id: string) {
+  async list_index_files(index_id: string, page_number?: number, page_size?: number) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index_files(index_id))
-      const res = await api_client.get(url)
+      const params: Record<string, number> = {}
+      if (typeof page_number === 'number') params.page_number = page_number
+      if (typeof page_size === 'number') params.page_size = page_size
+      const res = await api_client.get(url, { params })
       return { success: true, data: res.data }
     } catch (error: any) {
       log.error('knowledge base list_index_files failed:', error.response?.data || error.message)
