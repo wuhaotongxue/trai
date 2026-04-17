@@ -6,14 +6,16 @@
  */
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('admin')
-  const [password, set_password] = useState('admin123')
+  const [password, set_password] = useState('Tuoren@@2026')
+  const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
+  const [api_url, set_api_url] = useState('http://trai.tuoren.com:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
   const navigate = useNavigate()
@@ -22,7 +24,7 @@ const Login: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       try {
-        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
+        const res = await window.electron_api.config_get('api_url', 'http://trai.tuoren.com:5666')
         if (res.success && typeof res.data === 'string' && res.data.trim()) {
           set_api_url(res.data.trim())
         }
@@ -108,7 +110,7 @@ const Login: React.FC = () => {
                   value={api_url}
                   onChange={(e) => set_api_url(e.target.value)}
                   style={{ flex: 1, padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                  placeholder="http://127.0.0.1:5666"
+                  placeholder="http://trai.tuoren.com:5666"
                   onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
                   onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                   disabled={api_loading || api_saving}
@@ -123,7 +125,7 @@ const Login: React.FC = () => {
                 </button>
               </div>
               <div style={{ marginTop: '6px', color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px' }}>
-                示例: 127.0.0.1:5666 或 http://192.168.98.72:5666
+                示例: trai.tuoren.com:5666 或 http://192.168.98.72:5666
               </div>
             </div>
             <div>
@@ -140,15 +142,35 @@ const Login: React.FC = () => {
             </div>
             <div>
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => set_password(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                placeholder="请输入密码"
-                onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={password_visible ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => set_password(e.target.value)}
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                  placeholder="请输入密码"
+                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
+                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => set_password_visible((v) => !v)}
+                  title={password_visible ? '隐藏密码' : '显示密码'}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '10px',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    color: 'rgba(0, 0, 0, 0.55)'
+                  }}
+                >
+                  {password_visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             {error_msg && <div style={{ color: '#e51400', fontSize: '12px' }}>{error_msg}</div>}
             <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
