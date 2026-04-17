@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: knowledge_base.py
 # 作者: wuhao
-# 日期: 2026_04_17_11:41:30
+# 日期: 2026_04_17_14:21:28
 # 描述: 管理后台知识库相关接口
 
 from __future__ import annotations
@@ -131,6 +131,61 @@ class KnowledgeBaseDemoService:
             if isinstance(val, str) and val.isdigit():
                 return int(val)
         return None
+
+    def _count_index_files(
+        self,
+        client: Any,
+        bailian_models: Any,
+        workspace_id: str,
+        index_id: str,
+        page_size: int,
+    ) -> int:
+        """
+        统计知识库文件总数.
+
+        Args:
+            client: 百炼客户端.
+            bailian_models: 百炼模型包.
+            workspace_id: 工作空间 ID.
+            index_id: 知识库 ID.
+            page_size: 每页数量.
+
+        Returns:
+            int: 文件总数.
+
+        Raises:
+            HTTPException: 百炼 API 调用失败时抛出.
+        """
+        pages = 0
+        seen_ids: set[str] = set()
+        while True:
+            pages += 1
+            req = bailian_models.ListIndexFileDetailsRequest(
+                index_id=index_id,
+                page_number=str(pages),
+                page_size=str(page_size),
+            )
+            resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
+            raw = self._extract_raw(resp)
+            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+            items = self._extract_list(body)
+            if not items:
+                return len(seen_ids)
+
+            new_count = 0
+            for it in items:
+                fid = str(
+                    it.get("Id") or it.get("id") or it.get("file_id") or it.get("fileId") or it.get("FileId") or ""
+                ).strip()
+                if fid and fid not in seen_ids:
+                    seen_ids.add(fid)
+                    new_count += 1
+
+            if new_count == 0:
+                return len(seen_ids)
+
+            if pages >= 1000:
+                return len(seen_ids)
 
     def _create_bailian_client(self) -> tuple[Any, Any, str]:
         try:
@@ -496,7 +551,7 @@ class KnowledgeBaseDemoService:
         page_size: int | None = None,
     ) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
-        effective_page_size = page_size if page_size and page_size > 0 else 100
+        effective_page_size = page_size if page_size and page_size > 0 else 10
 
         if page_number and page_number > 0:
             req = bailian_models.ListIndexFileDetailsRequest(
@@ -509,10 +564,12 @@ class KnowledgeBaseDemoService:
             body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
             items = self._extract_list(body)
             total = self._extract_total(body) if isinstance(body, dict) else None
+            if total is None:
+                total = self._count_index_files(client, bailian_models, workspace_id, index_id, effective_page_size)
             return KnowledgeBaseListResponse(
                 items=items,
                 raw=raw,
-                total=total if total is not None else len(items),
+                total=total,
                 page_number=page_number,
                 page_size=effective_page_size,
             )
@@ -520,6 +577,7 @@ class KnowledgeBaseDemoService:
         all_items: list[dict[str, Any]] = []
         pages = 0
         total: int | None = None
+        seen_ids: set[str] = set()
         while True:
             pages += 1
             req = bailian_models.ListIndexFileDetailsRequest(
@@ -533,9 +591,31 @@ class KnowledgeBaseDemoService:
             if isinstance(body, dict) and total is None:
                 total = self._extract_total(body)
             items = self._extract_list(body)
-            if items:
-                all_items.extend(items)
-            if not items or len(items) < effective_page_size:
+            if not items:
+                return KnowledgeBaseListResponse(
+                    items=all_items,
+                    raw={**raw, "fetched_pages": pages},
+                    total=total if total is not None else len(all_items),
+                )
+
+            new_items: list[dict[str, Any]] = []
+            for it in items:
+                fid = str(
+                    it.get("Id") or it.get("id") or it.get("file_id") or it.get("fileId") or it.get("FileId") or ""
+                ).strip()
+                if fid and fid not in seen_ids:
+                    seen_ids.add(fid)
+                    new_items.append(it)
+            if new_items:
+                all_items.extend(new_items)
+            else:
+                return KnowledgeBaseListResponse(
+                    items=all_items,
+                    raw={**raw, "fetched_pages": pages, "stopped_reason": "no_new_items"},
+                    total=total if total is not None else len(all_items),
+                )
+
+            if len(items) < effective_page_size:
                 return KnowledgeBaseListResponse(
                     items=all_items,
                     raw={**raw, "fetched_pages": pages},

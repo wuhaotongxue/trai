@@ -180,10 +180,12 @@ class KnowledgeBaseFilesPaginationTester:
 
             page1 = await self._list_index_files(client, token, self.index_id, 1, self.page_size)
             page1_count = self._extract_items_count(page1)
+            page1_total = page1.get("total")
             logger.info("Page1 count={}", page1_count)
 
             page2 = await self._list_index_files(client, token, self.index_id, 2, self.page_size)
             page2_count = self._extract_items_count(page2)
+            page2_total = page2.get("total")
             logger.info("Page2 count={}", page2_count)
 
             if all_count <= self.page_size:
@@ -202,6 +204,16 @@ class KnowledgeBaseFilesPaginationTester:
             if self.expect_total > 0 and all_count != self.expect_total:
                 logger.error("Total mismatch, expect_total={}, got={}", self.expect_total, all_count)
                 return 1
+
+            if self.expect_total > 0:
+                if page1_total != self.expect_total:
+                    logger.error("Page1 total mismatch, expect_total={}, got={}", self.expect_total, page1_total)
+                    logger.info("payload={}", json.dumps(page1, ensure_ascii=False)[:5000])
+                    return 1
+                if page2_total != self.expect_total:
+                    logger.error("Page2 total mismatch, expect_total={}, got={}", self.expect_total, page2_total)
+                    logger.info("payload={}", json.dumps(page2, ensure_ascii=False)[:5000])
+                    return 1
 
         logger.info("OK")
         return 0

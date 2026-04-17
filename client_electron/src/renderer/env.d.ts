@@ -25,7 +25,7 @@ interface Window {
     kb_demo_create?: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_categories?: () => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_indices?: (index_name?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    kb_list_index_files?: (index_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_list_index_files?: (index_id: string, page_number?: number, page_size?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_rename_index?: (index_id: string, index_name: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_delete_index?: (index_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_delete_index_file?: (index_id: string, file_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;

@@ -66,6 +66,7 @@ check_comments.py
 test_*.py
 *test*.py
 !backend/scripts/*test.py
+backend/scripts/local_executor_test.py
 *.test.js
 *.test.ts
 *.spec.js
