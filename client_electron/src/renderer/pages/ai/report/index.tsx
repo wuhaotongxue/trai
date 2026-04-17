@@ -152,6 +152,8 @@ const AiReport: React.FC = () => {
               type="file" 
               ref={file_input_ref} 
               style={{ display: 'none' }} 
+              title="选择模板文件"
+              aria-label="选择模板文件"
               accept=".md,.txt,.doc,.docx"
               onChange={handle_file_change}
             />
@@ -184,6 +186,7 @@ const AiReport: React.FC = () => {
           {error_msg && <div style={{ color: '#e51400', fontSize: '13px' }}>{error_msg}</div>}
 
           <button
+            type="button"
             onClick={handle_generate}
             disabled={is_generating}
             style={{
