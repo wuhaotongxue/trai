@@ -859,6 +859,12 @@ const KnowledgeBasePage: React.FC = () => {
             </div>
             <input autoFocus placeholder="请输入知识库名称..." value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
+            {creating_kb && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
+                <Loader2 size={14} className="animate-spin" />
+                正在创建中...
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 onClick={() => { set_show_create_modal(false); set_new_kb_name(''); set_create_kb_error('') }}
