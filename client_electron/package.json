@@ -46,6 +46,16 @@
       "dist/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "public/kity_16.ico",
+        "to": "kity_16.ico"
+      },
+      {
+        "from": "public/kity_256.ico",
+        "to": "kity_256.ico"
+      }
+    ],
     "win": {
       "icon": "public/kity.ico",
       "target": [
