@@ -337,12 +337,14 @@ const Settings: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    ref={file_input_ref} 
-                    onChange={handle_avatar_change} 
-                    style={{ display: 'none' }} 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={file_input_ref}
+                    onChange={handle_avatar_change}
+                    style={{ display: 'none' }}
+                    title="选择头像图片"
+                    placeholder="选择头像图片"
                   />
                   <button 
                     onClick={trigger_file_select}
