@@ -152,7 +152,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">{item.desc}</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <input type="checkbox" aria-label={item.label} title={item.label} className="sr-only peer" defaultChecked />
                   <div className="w-10 h-5 bg-muted/60 peer-checked:bg-blue-500 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-card after:rounded-full after:h-4 after:w-4 after:transition-all" />
                 </label>
               </div>
