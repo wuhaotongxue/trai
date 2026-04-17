@@ -37,3 +37,5 @@ interface Window {
     app_install_update?: () => Promise<{ success: boolean; error?: string }>;
   }
 }
+
+declare module '*.css'
