@@ -5,6 +5,7 @@
  * 描述: Electron 主进程入口点，集成 Tray 托盘与 Win11 Fluent 窗口样式
  */
 import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import log from 'electron-log'
 import { register_ipc_handlers } from './ipc/index'
@@ -42,11 +43,28 @@ if (!got_the_lock) {
     })
   })
 
+  const resolve_public_asset_path = (file_name: string): string => {
+    const candidates: string[] = []
+
+    if (app.isPackaged) {
+      candidates.push(join(process.resourcesPath, file_name))
+    }
+
+    candidates.push(join(process.cwd(), 'public', file_name))
+    candidates.push(join(app.getAppPath(), 'public', file_name))
+    candidates.push(join(__dirname, '../../public', file_name))
+    candidates.push(join(__dirname, '..', file_name))
+
+    for (const p of candidates) {
+      if (existsSync(p)) return p
+    }
+
+    return candidates[0] || join(process.cwd(), file_name)
+  }
+
   const create_window = () => {
-  // 使用 256x256 的 ICO 作为窗口和任务栏图标
-  const icon_path = process.env.VITE_DEV_SERVER_URL
-    ? join(__dirname, '../../public/kity_256.ico')
-    : join(__dirname, '../kity_256.ico')
+  const icon_path = resolve_public_asset_path('kity_256.ico')
+  log.info(`[icon] window icon: ${icon_path}`)
   const window_icon = nativeImage.createFromPath(icon_path)
 
   main_window = new BrowserWindow({
@@ -161,11 +179,8 @@ if (!got_the_lock) {
 }
 
 const create_tray = () => {
-  // 使用 16x16 的 ICO 作为系统托盘图标
-  const icon_path = process.env.VITE_DEV_SERVER_URL
-    ? join(__dirname, '../../public/kity_16.ico')
-    : join(__dirname, '../kity_16.ico')
-    
+  const icon_path = resolve_public_asset_path('kity_16.ico')
+  log.info(`[icon] tray icon: ${icon_path}`)
   const icon = nativeImage.createFromPath(icon_path)
   tray = new Tray(icon)
   const context_menu = Menu.buildFromTemplate([
