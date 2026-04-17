@@ -57,6 +57,8 @@ const KnowledgeBasePage: React.FC = () => {
   const [file_page, set_file_page] = useState(1)
   const [file_page_size, set_file_page_size] = useState(10)
   const [file_total, set_file_total] = useState(0)
+  const [jump_page_input, set_jump_page_input] = useState('')
+  const [page_action, set_page_action] = useState<'prev' | 'next' | 'jump' | 'refresh' | 'init' | null>(null)
   const [debug_visible, set_debug_visible] = useState(false)
   const [debug_messages, set_debug_messages] = useState<string[]>([])
   
@@ -91,6 +93,10 @@ const KnowledgeBasePage: React.FC = () => {
   const file_current_page = useMemo(() => {
     return Math.min(Math.max(1, file_page), file_total_pages)
   }, [file_page, file_total_pages])
+
+  useEffect(() => {
+    set_jump_page_input(String(file_current_page))
+  }, [file_current_page])
 
   useEffect(() => {
     const load_remote = async () => {
@@ -259,12 +265,22 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
+  const request_files_page = async (target_page: number, action: 'prev' | 'next' | 'jump' | 'refresh' | 'init') => {
+    if (files_loading) return
+    set_page_action(action)
+    try {
+      await fetch_files_page(target_page)
+    } finally {
+      set_page_action(null)
+    }
+  }
+
   useEffect(() => {
-    void fetch_files_page(1)
+    void request_files_page(1, 'init')
   }, [active_kb_id, file_page_size])
 
   const refresh_files = async () => {
-    await fetch_files_page(file_current_page)
+    await request_files_page(file_current_page, 'refresh')
   }
 
   // -- Handlers --
@@ -686,7 +702,12 @@ const KnowledgeBasePage: React.FC = () => {
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-                {display_files.length === 0 ? (
+                {files_loading && display_files.length === 0 ? (
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                    <Loader2 size={28} className="animate-spin" />
+                    <div style={{ marginTop: '12px', fontSize: '13px' }}>正在加载中...</div>
+                  </div>
+                ) : display_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                     <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                       <Database size={32} color="#cbd5e1" />
@@ -695,7 +716,7 @@ const KnowledgeBasePage: React.FC = () => {
                     <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
@@ -733,6 +754,14 @@ const KnowledgeBasePage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    {files_loading ? (
+                      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
+                          <Loader2 size={18} className="animate-spin" />
+                          <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                        </div>
+                      </div>
+                    ) : null}
                     <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ fontSize: '12px', color: '#64748b' }}>
@@ -760,9 +789,9 @@ const KnowledgeBasePage: React.FC = () => {
                           <select
                             value={file_page_size}
                             onChange={(e) => {
-                              set_file_page(1)
                               set_file_page_size(Number(e.target.value))
                             }}
+                            disabled={files_loading}
                             style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff' }}
                           >
                             <option value={10}>10</option>
@@ -772,7 +801,7 @@ const KnowledgeBasePage: React.FC = () => {
                         </div>
 
                         <button
-                          onClick={() => fetch_files_page(file_current_page - 1)}
+                          onClick={() => request_files_page(file_current_page - 1, 'prev')}
                           disabled={file_current_page <= 1 || files_loading}
                           style={{
                             padding: '6px 10px',
@@ -790,7 +819,7 @@ const KnowledgeBasePage: React.FC = () => {
                           第 {file_current_page} / {file_total_pages} 页
                         </div>
                         <button
-                          onClick={() => fetch_files_page(file_current_page + 1)}
+                          onClick={() => request_files_page(file_current_page + 1, 'next')}
                           disabled={file_current_page >= file_total_pages || files_loading}
                           style={{
                             padding: '6px 10px',
@@ -804,6 +833,51 @@ const KnowledgeBasePage: React.FC = () => {
                         >
                           下一页
                         </button>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>跳转</span>
+                          <input
+                            type="number"
+                            min={1}
+                            max={file_total_pages}
+                            value={jump_page_input}
+                            onChange={(e) => set_jump_page_input(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key !== 'Enter') return
+                              const v = Number(jump_page_input)
+                              if (!Number.isFinite(v)) return
+                              const next_page = Math.min(Math.max(1, Math.trunc(v)), file_total_pages)
+                              void request_files_page(next_page, 'jump')
+                            }}
+                            disabled={files_loading}
+                            style={{ width: '72px', padding: '6px 8px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff', fontSize: '12px', color: '#334155' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const v = Number(jump_page_input)
+                              if (!Number.isFinite(v)) return
+                              const next_page = Math.min(Math.max(1, Math.trunc(v)), file_total_pages)
+                              void request_files_page(next_page, 'jump')
+                            }}
+                            disabled={files_loading}
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #e2e8f0',
+                              backgroundColor: files_loading ? '#f8fafc' : '#ffffff',
+                              color: files_loading ? '#cbd5e1' : '#334155',
+                              cursor: files_loading ? 'not-allowed' : 'pointer',
+                              fontSize: '12px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            {files_loading && page_action === 'jump' ? <Loader2 size={12} className="animate-spin" /> : null}
+                            跳转
+                          </button>
+                        </div>
                       </div>
                     </div>
                     {debug_visible ? (
