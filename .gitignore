@@ -65,6 +65,7 @@ yarn-error.log*
 check_comments.py
 test_*.py
 *test*.py
+!backend/scripts/*test.py
 *.test.js
 *.test.ts
 *.spec.js
