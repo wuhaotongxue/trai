@@ -344,9 +344,11 @@ const Settings: React.FC = () => {
                     onChange={handle_avatar_change}
                     style={{ display: 'none' }}
                     title="选择头像图片"
+                    aria-label="选择头像图片"
                     placeholder="选择头像图片"
                   />
                   <button 
+                    type="button"
                     onClick={trigger_file_select}
                     style={{
                       padding: '8px 16px',

@@ -127,6 +127,14 @@ frontend_next/src/
 - 对副作用必须说明: 跳转路由, 读写 localStorage, 调用后端接口, 触发上报, 读写 cookie
 - 允许中文说明, 但禁止全角中文标点, 统一使用半角 `, . : ? !`
 
+### 6.2 可访问性 (MANDATORY)
+
+- 表单控件必须具备可访问名称, `input/select/textarea` 至少提供一个: `aria-label`, `aria-labelledby`, 或显式 `<label htmlFor=...>`
+- 当控件没有可见文本标签时, 必须补 `aria-label` 与 `title`, 避免 Microsoft Edge Tools / axe 报错
+- `button` 必须显式声明 `type`, 默认使用 `type="button"`, 避免 Microsoft Edge Tools 报错
+- 图标按钮必须补 `aria-label` 与 `title`, 不允许只有图标没有文本
+- 尽量避免 JSX 内联 `style`, 优先使用 Tailwind 或 CSS Modules, 减少 Microsoft Edge Tools `no-inline-styles` 告警
+
 ### Import 排版规范
 
 - Import 列表不要一行一个标识符, 优先使用单行或分组换行, 让每行包含多个标识符.

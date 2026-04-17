@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
+import '../../styles/knowledge_base.css'
 
 interface KbCategory {
   id: string
@@ -496,8 +497,10 @@ const KnowledgeBasePage: React.FC = () => {
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>目录分类</span>
             <button
+              type="button"
               onClick={() => set_is_left_sidebar_open(false)}
               title="收起分类栏"
+              aria-label="收起分类栏"
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -548,7 +551,9 @@ const KnowledgeBasePage: React.FC = () => {
 
           <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '200px', boxSizing: 'border-box' }}>
             <button
+              type="button"
               onClick={() => set_show_cat_modal(true)}
+              aria-label="新建分类"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                 padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
@@ -579,8 +584,10 @@ const KnowledgeBasePage: React.FC = () => {
               <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat?.name || '子文件夹'}</span>
             </div>
             <button
+              type="button"
               onClick={() => set_is_middle_sidebar_open(false)}
               title="收起知识库列表"
+              aria-label="收起知识库列表"
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -639,7 +646,9 @@ const KnowledgeBasePage: React.FC = () => {
 
           <div style={{ padding: '12px', borderTop: '1px solid #f1f5f9', minWidth: '240px', boxSizing: 'border-box' }}>
             <button
+              type="button"
               onClick={() => set_show_create_modal(true)}
+              aria-label="新建知识库"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 padding: '10px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none',
@@ -659,11 +668,13 @@ const KnowledgeBasePage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {(!is_left_sidebar_open || !is_middle_sidebar_open) && (
                     <button
+                      type="button"
                       onClick={() => {
                         set_is_left_sidebar_open(true)
                         set_is_middle_sidebar_open(true)
                       }}
                       title="展开全部侧边栏"
+                      aria-label="展开全部侧边栏"
                       style={{
                         background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -677,6 +688,8 @@ const KnowledgeBasePage: React.FC = () => {
                   )}
                   {editing_kb_id === active_kb.id ? (
                     <input 
+                      aria-label="知识库名称"
+                      title="知识库名称"
                       autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value)}
                       onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
                       style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', width: '240px' }}
@@ -685,8 +698,8 @@ const KnowledgeBasePage: React.FC = () => {
                     <>
                       <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{active_kb.name}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-                        <button onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
-                        <button onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
+                        <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
+                        <button type="button" onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" aria-label="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                         <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: '8px', padding: '2px 8px', backgroundColor: '#f1f5f9', borderRadius: '4px' }}>
                           ID: {active_kb.id}
                         </span>
@@ -700,14 +713,18 @@ const KnowledgeBasePage: React.FC = () => {
                     <input 
                       type="text" 
                       placeholder="搜索文件..." 
+                      aria-label="搜索文件"
+                      title="搜索文件"
                       value={search_query}
                       onChange={e => set_search_query(e.target.value)}
                       style={{ padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '13px', width: '200px' }}
                     />
                   </div>
                   <button
+                    type="button"
                     onClick={refresh_files}
                     title="刷新文件列表"
+                    aria-label="刷新文件列表"
                     disabled={files_loading}
                     style={{
                       display: 'flex',
@@ -730,9 +747,11 @@ const KnowledgeBasePage: React.FC = () => {
                   >
                     <RotateCw size={16} className={files_loading ? 'animate-spin' : ''} />
                   </button>
-                  <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} style={{ display: 'none' }} />
+                  <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} title="上传文件" aria-label="上传文件" style={{ display: 'none' }} />
                   <button
+                    type="button"
                     onClick={() => file_input_ref.current?.click()}
+                    aria-label="上传文件"
                     style={{
                       display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
                       backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px',
@@ -791,7 +810,7 @@ const KnowledgeBasePage: React.FC = () => {
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                <button onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px' }} title="删除" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
+                                <button type="button" onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px' }} title="删除" aria-label="删除文件" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
                               </div>
                             </td>
                           </tr>
@@ -832,6 +851,8 @@ const KnowledgeBasePage: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
                           <span>每页</span>
                           <select
+                            aria-label="每页数量"
+                            title="每页数量"
                             value={file_page_size}
                             onChange={(e) => {
                               const next_size = Number(e.target.value)
@@ -839,7 +860,7 @@ const KnowledgeBasePage: React.FC = () => {
                               void request_files_page(1, 'init', next_size)
                             }}
                             disabled={files_loading}
-                            style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff' }}
+                            className="kb_pagination_select"
                           >
                             <option value={10}>10</option>
                             <option value={20}>20</option>
@@ -848,17 +869,10 @@ const KnowledgeBasePage: React.FC = () => {
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => request_files_page(file_current_page - 1, 'prev')}
                           disabled={file_current_page <= 1 || files_loading}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: file_current_page <= 1 ? '#f8fafc' : '#ffffff',
-                            color: file_current_page <= 1 ? '#cbd5e1' : '#334155',
-                            cursor: file_current_page <= 1 || files_loading ? 'not-allowed' : 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="kb_pagination_button"
                         >
                           上一页
                         </button>
@@ -866,17 +880,10 @@ const KnowledgeBasePage: React.FC = () => {
                           第 {file_current_page} / {file_total_pages} 页
                         </div>
                         <button
+                          type="button"
                           onClick={() => request_files_page(file_current_page + 1, 'next')}
                           disabled={file_current_page >= file_total_pages || files_loading}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: file_current_page >= file_total_pages ? '#f8fafc' : '#ffffff',
-                            color: file_current_page >= file_total_pages ? '#cbd5e1' : '#334155',
-                            cursor: file_current_page >= file_total_pages || files_loading ? 'not-allowed' : 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="kb_pagination_button"
                         >
                           下一页
                         </button>
@@ -885,6 +892,8 @@ const KnowledgeBasePage: React.FC = () => {
                           <span style={{ fontSize: '12px', color: '#64748b' }}>跳转</span>
                           <input
                             type="number"
+                            aria-label="跳转页码"
+                            title="跳转页码"
                             min={1}
                             max={file_total_pages}
                             value={jump_page_input}
@@ -897,7 +906,7 @@ const KnowledgeBasePage: React.FC = () => {
                               void request_files_page(next_page, 'jump')
                             }}
                             disabled={files_loading}
-                            style={{ width: '72px', padding: '6px 8px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff', fontSize: '12px', color: '#334155' }}
+                            className="kb_pagination_input"
                           />
                           <button
                             type="button"
@@ -908,18 +917,7 @@ const KnowledgeBasePage: React.FC = () => {
                               void request_files_page(next_page, 'jump')
                             }}
                             disabled={files_loading}
-                            style={{
-                              padding: '6px 10px',
-                              borderRadius: '6px',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: files_loading ? '#f8fafc' : '#ffffff',
-                              color: files_loading ? '#cbd5e1' : '#334155',
-                              cursor: files_loading ? 'not-allowed' : 'pointer',
-                              fontSize: '12px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
+                            className="kb_pagination_button"
                           >
                             {files_loading && page_action === 'jump' ? <Loader2 size={12} className="animate-spin" /> : null}
                             跳转
@@ -959,12 +957,12 @@ const KnowledgeBasePage: React.FC = () => {
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建目录分类</h3>
-              <button onClick={() => set_show_cat_modal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
+              <button type="button" onClick={() => set_show_cat_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
-            <input autoFocus placeholder="请输入目录名称..." value={new_cat_name} onChange={e => set_new_cat_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            <input autoFocus placeholder="请输入目录名称..." aria-label="目录名称" title="目录名称" value={new_cat_name} onChange={e => set_new_cat_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { set_show_cat_modal(false); set_new_cat_name('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
-              <button onClick={handle_create_cat} style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>确认创建</button>
+              <button type="button" onClick={() => { set_show_cat_modal(false); set_new_cat_name('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
+              <button type="button" onClick={handle_create_cat} style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>确认创建</button>
             </div>
           </div>
         </div>
@@ -976,9 +974,9 @@ const KnowledgeBasePage: React.FC = () => {
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建知识库 (所属: {active_cat?.name})</h3>
-              <button onClick={() => set_show_create_modal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
+              <button type="button" onClick={() => set_show_create_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
-            <input autoFocus placeholder="请输入知识库名称..." value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
             {creating_kb && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
@@ -988,6 +986,7 @@ const KnowledgeBasePage: React.FC = () => {
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
+                type="button"
                 onClick={() => { set_show_create_modal(false); set_new_kb_name(''); set_create_kb_error('') }}
                 disabled={creating_kb}
                 style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: creating_kb ? 'not-allowed' : 'pointer', fontSize: '14px' }}
@@ -995,6 +994,7 @@ const KnowledgeBasePage: React.FC = () => {
                 取消
               </button>
               <button
+                type="button"
                 onClick={handle_create_kb}
                 disabled={creating_kb}
                 style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: creating_kb ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}

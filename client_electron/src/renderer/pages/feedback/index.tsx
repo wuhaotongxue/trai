@@ -129,8 +129,11 @@ const Feedback: React.FC = () => {
 
         <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>反馈类型</label>
-            <select 
+            <label htmlFor="feedback_type" style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>反馈类型</label>
+            <select
+              id="feedback_type"
+              aria-label="反馈类型"
+              title="反馈类型"
               value={type}
               onChange={(e) => set_type(e.target.value)}
               style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', backgroundColor: '#f8fafc' }}
@@ -183,6 +186,8 @@ const Feedback: React.FC = () => {
                   ref={file_input_ref} 
                   onChange={handle_file_change} 
                   multiple 
+                  title="添加附件"
+                  aria-label="添加附件"
                   style={{ display: 'none' }} 
                   accept="image/*,.pdf,.doc,.docx,.txt"
                 />
