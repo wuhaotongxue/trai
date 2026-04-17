@@ -5,6 +5,7 @@
  * 描述: Win11 风格的自定义可拖拽顶栏
  */
 import React from 'react'
+import { RotateCw } from 'lucide-react'
 
 const TitleBar: React.FC = () => {
   return (
@@ -26,6 +27,28 @@ const TitleBar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <img src="./kity.png" alt="logo" style={{ width: '16px', height: '16px' }} />
         <span>TRAI</span>
+      </div>
+
+      <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+        <button
+          className="no-drag-region"
+          type="button"
+          title="刷新"
+          onClick={() => window.location.reload()}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            borderRadius: '6px',
+            padding: '4px 6px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(0, 0, 0, 0.65)'
+          }}
+        >
+          <RotateCw size={14} />
+        </button>
       </div>
     </div>
   )

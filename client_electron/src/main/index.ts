@@ -1,7 +1,7 @@
 /**
  * 文件名: index.ts
  * 作者: wuhao
- * 日期: 2026-04-13 19:35:00
+ * 日期: 2026-04-16 09:46:57
  * 描述: Electron 主进程入口点，集成 Tray 托盘与 Win11 Fluent 窗口样式
  */
 import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron'
@@ -62,11 +62,33 @@ if (!got_the_lock) {
       symbolColor: '#202020',
       height: 36
     },
+    show: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: false,
       contextIsolation: true,
     },
+  })
+
+  main_window.once('ready-to-show', () => {
+    main_window?.show()
+  })
+
+  main_window.webContents.on('did-fail-load', (_event, error_code, error_description, validated_url, is_main_frame) => {
+    if (!is_main_frame) return
+    log.error(`window did-fail-load: code=${error_code}, desc=${error_description}, url=${validated_url}`)
+  })
+
+  main_window.webContents.on('render-process-gone', (_event, details) => {
+    log.error(`window render-process-gone: reason=${details.reason}, exit_code=${details.exitCode}`)
+  })
+
+  main_window.webContents.on('unresponsive', () => {
+    log.error('window unresponsive')
+  })
+
+  main_window.webContents.on('did-finish-load', () => {
+    log.info('window did-finish-load')
   })
 
   // 拦截关闭事件，转为隐藏窗口或退出程序
@@ -120,10 +142,21 @@ if (!got_the_lock) {
   })
 
   if (process.env.VITE_DEV_SERVER_URL) {
-    main_window.loadURL(process.env.VITE_DEV_SERVER_URL)
-    // main_window.webContents.openDevTools()
+    void (async () => {
+      try {
+        await main_window?.webContents.session.clearCache()
+        const dev_url = new URL(process.env.VITE_DEV_SERVER_URL)
+        dev_url.searchParams.set('t', Date.now().toString())
+        await main_window?.loadURL(dev_url.toString())
+      } catch (err) {
+        log.error('loadURL failed:', err)
+      }
+    })()
+    main_window.webContents.openDevTools({ mode: 'detach' })
   } else {
-    main_window.loadFile(join(__dirname, '../index.html'))
+    void main_window
+      .loadFile(join(__dirname, '../index.html'))
+      .catch((err) => log.error('loadFile failed:', err))
   }
 }
 

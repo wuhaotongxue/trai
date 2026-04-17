@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: health.py
 # 作者: wuhao
-# 日期: 2026_04_10
+# 日期: 2026_04_16_10:14:02
 # 描述: 健康检查接口
 
 from __future__ import annotations
@@ -43,7 +43,13 @@ class DetailedHealthResponse(BaseModel):
     dependencies: dict[str, DependencyStatus] = Field(description="依赖服务状态")
 
 
-@router.get("/health", response_model=HealthResponse, tags=["系统"])
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    summary="健康检查",
+    description="用于快速确认服务是否存活. 通常用于负载均衡或简单探活.",
+    tags=["系统"],
+)
 async def health_check() -> HealthResponse:
     """健康检查接口
 
@@ -58,7 +64,13 @@ async def health_check() -> HealthResponse:
     )
 
 
-@router.get("/health/detailed", response_model=DetailedHealthResponse, tags=["系统"])
+@router.get(
+    "/health/detailed",
+    response_model=DetailedHealthResponse,
+    summary="详细健康检查",
+    description="用于检查核心依赖组件状态, 如数据库与 AI 配置. 建议仅内部使用.",
+    tags=["系统"],
+)
 async def detailed_health_check() -> DetailedHealthResponse:
     """详细健康检查接口
 
@@ -89,7 +101,12 @@ async def detailed_health_check() -> DetailedHealthResponse:
     )
 
 
-@router.get("/health/liveness", tags=["系统"])
+@router.get(
+    "/health/liveness",
+    summary="存活探针",
+    description="用于 Kubernetes livenessProbe, 判断进程是否存活.",
+    tags=["系统"],
+)
 async def liveness_check() -> dict[str, str]:
     """存活探针
 
@@ -101,7 +118,12 @@ async def liveness_check() -> dict[str, str]:
     return {"status": "alive"}
 
 
-@router.get("/health/readiness", tags=["系统"])
+@router.get(
+    "/health/readiness",
+    summary="就绪探针",
+    description="用于 Kubernetes readinessProbe, 判断服务是否可接收流量.",
+    tags=["系统"],
+)
 async def readiness_check() -> dict[str, Any]:
     """就绪探针
 

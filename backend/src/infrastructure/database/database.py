@@ -165,7 +165,7 @@ class Database:
                 "username": "admin",
                 "display_name": "管理员",
                 "email": "admin@example.com",
-                "password_hash": password_service.hash("admin123"),
+                "password_hash": password_service.hash("Tuoren@@2026"),
                 "role": "admin",
                 "status": "active",
                 "created_at": now,

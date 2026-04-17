@@ -7,10 +7,8 @@
 import axios from 'axios'
 import log from 'electron-log'
 import { config_store } from '../platform/config_store'
-
-const get_api_base_url = () => {
-  return config_store.get('api_url', 'http://127.0.0.1:5666')
-}
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 
 const api_client = axios.create()
 
@@ -25,7 +23,7 @@ api_client.interceptors.request.use((config) => {
 export const feedback_service = {
   async submit(data: { type: string, title: string, content: string, contact?: string }) {
     try {
-      const url = `${get_api_base_url()}/api/system/feedback/submit`
+      const url = ApiUrl.build_api_url(ApiEndpoints.system_feedback_submit)
       const res = await api_client.post(url, data)
       return { success: true, data: res.data }
     } catch (error: any) {

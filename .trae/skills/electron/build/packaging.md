@@ -234,3 +234,52 @@ aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 # ❌ 禁止: 覆盖正式版 latest.yml
 # 除非确认是新版本的正式发布
 ```
+
+## 8. 本地构建辅助流程
+
+说明: 原 `client_electron/scripts` 下的本地辅助脚本已迁移到技能文档, 避免业务目录出现临时脚本文件。
+
+### 8.1 图标构建流程
+
+目标: 从 `client_electron/public/kity.png` 生成多尺寸 `kity.ico`。
+
+步骤:
+
+1. 读取 `kity.png`, 转 RGBA。
+2. 将原图补齐为正方形透明底图。
+3. 生成 4 个尺寸: `16x16`, `32x32`, `48x48`, `256x256`。
+4. 按 ICO 结构写入 `client_electron/public/kity.ico`。
+
+建议命令:
+
+```bash
+python - <<'PY'
+from pathlib import Path
+from PIL import Image
+src = Path('client_electron/public/kity.png')
+dst = Path('client_electron/public/kity.ico')
+raw = Image.open(src).convert('RGBA')
+m = max(raw.size)
+sq = Image.new('RGBA', (m, m), (0, 0, 0, 0))
+sq.paste(raw, ((m - raw.size[0]) // 2, (m - raw.size[1]) // 2), raw)
+sizes = [(16, 16), (32, 32), (48, 48), (256, 256)]
+icons = [sq.resize(s, Image.Resampling.LANCZOS) for s in sizes]
+icons[0].save(dst, format='ICO', sizes=sizes)
+print(dst)
+PY
+```
+
+### 8.2 清理并重打包流程
+
+目标: 清理旧产物后进行标准构建。
+
+步骤:
+
+1. 结束本地运行中的 `TRAI`/`electron` 进程。
+2. 清理构建产物目录: `release`, `release2`, `release3`, `dist`。
+3. 进入 `client_electron` 执行:
+   - `pnpm install --frozen-lockfile`
+   - `pnpm run type-check`
+   - `pnpm run build`
+
+说明: 以上流程已标准化, 推荐统一使用, 不再保留仓库内一次性脚本文件。
