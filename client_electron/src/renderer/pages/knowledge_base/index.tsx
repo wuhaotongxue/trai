@@ -176,6 +176,23 @@ const KnowledgeBasePage: React.FC = () => {
     void load_remote()
   }, [])
 
+  /**
+   * 拉取指定页的知识库文件列表.
+   *
+   * 用途:
+   * - 驱动文件表格展示, 支持分页与每页数量切换
+   * - 同步维护 total, 当前页码与知识库 file_count, 便于分页 UI 计算
+   *
+   * 参数:
+   * - target_page: 目标页码, 从 1 开始
+   * - page_size_override: 可选, 本次请求临时覆盖 page_size, 用于切换每页数量时立即生效
+   *
+   * 返回:
+   * - Promise<void>
+   *
+   * 异常:
+   * - 不抛出异常到调用方, 统一转为 files_error 与 debug 输出
+   */
   const fetch_files_page = async (target_page: number, page_size_override?: number) => {
     if (!active_kb_id) return
     if (!window.electron_api?.kb_list_index_files) return
@@ -266,6 +283,21 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
+  /**
+   * 发起分页动作请求并维护加载态.
+   *
+   * 用途:
+   * - 将上一页, 下一页, 跳转, 刷新等动作统一封装
+   * - 控制 files_loading 与 page_action, 防止重复触发导致 UI 抖动或并发请求
+   *
+   * 参数:
+   * - target_page: 目标页码
+   * - action: 动作来源, 用于 UI 展示与调试
+   * - page_size_override: 可选, 本次请求临时覆盖 page_size
+   *
+   * 返回:
+   * - Promise<void>
+   */
   const request_files_page = async (
     target_page: number,
     action: 'prev' | 'next' | 'jump' | 'refresh' | 'init',
@@ -284,6 +316,12 @@ const KnowledgeBasePage: React.FC = () => {
     void request_files_page(1, 'init')
   }, [active_kb_id, file_page_size])
 
+  /**
+   * 刷新当前页文件列表.
+   *
+   * 返回:
+   * - Promise<void>
+   */
   const refresh_files = async () => {
     await request_files_page(file_current_page, 'refresh')
   }
