@@ -9,7 +9,17 @@ import { createHashRouter, Navigate } from 'react-router-dom'
 import MainLayout from '@/components/layout/main_layout'
 import Login from '@/pages/login'
 import Register from '@/pages/register'
+import Dashboard from '@/pages/dashboard'
+import Settings from '@/pages/settings'
+import Tools from '@/pages/tools'
 import AgentChat from '@/pages/chat'
+import TextToImage from '@/pages/ai/text-to-image'
+import ImageToImage from '@/pages/ai/image-to-image'
+import AiMusic from '@/pages/ai/music'
+import AiVideo from '@/pages/ai/video'
+import ComfyUI from '@/pages/ai/comfyui'
+import AgentManagement from '@/pages/agent/management'
+import Feedback from '@/pages/feedback'
 import KnowledgeBasePage from '@/pages/knowledge_base'
 import UnderDevelopment from '@/pages/under_development'
 import { use_auth_store } from '@/store/auth'
@@ -39,7 +49,7 @@ export const router = createHashRouter([
     children: [
       {
         path: '/',
-        element: <UnderDevelopment />
+        element: <Dashboard />
       },
       {
         path: '/chat',
@@ -47,19 +57,19 @@ export const router = createHashRouter([
       },
       {
         path: '/ai/text-to-image',
-        element: <UnderDevelopment />
+        element: <TextToImage />
       },
       {
         path: '/ai/image-to-image',
-        element: <UnderDevelopment />
+        element: <ImageToImage />
       },
       {
         path: '/ai/music',
-        element: <UnderDevelopment />
+        element: <AiMusic />
       },
       {
         path: '/ai/video',
-        element: <UnderDevelopment />
+        element: <AiVideo />
       },
       {
         path: '/ai/report',
@@ -67,11 +77,11 @@ export const router = createHashRouter([
       },
       {
         path: '/ai/comfyui',
-        element: <UnderDevelopment />
+        element: <ComfyUI />
       },
       {
         path: '/agent/management',
-        element: <UnderDevelopment />
+        element: <AgentManagement />
       },
       {
         path: '/knowledge_base',
@@ -79,15 +89,15 @@ export const router = createHashRouter([
       },
       {
         path: '/tools',
-        element: <UnderDevelopment />
+        element: <Tools />
       },
       {
         path: '/feedback',
-        element: <UnderDevelopment />
+        element: <Feedback />
       },
       {
         path: '/settings',
-        element: <UnderDevelopment />
+        element: <Settings />
       }
     ]
   }
