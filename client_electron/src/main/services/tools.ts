@@ -9,10 +9,8 @@ import log from 'electron-log'
 import fs from 'fs'
 import path from 'path'
 import { config_store } from '../platform/config_store'
-
-const get_api_base_url = () => {
-  return config_store.get('api_url', 'http://127.0.0.1:5666')
-}
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 
 // 创建 axios 实例并配置请求拦截器
 const api_client = axios.create()
@@ -31,7 +29,7 @@ export const tools_service = {
    */
   async convert_md_to_pdf(file_path: string) {
     try {
-      const url = `${get_api_base_url()}/api/tools/md_to_pdf`
+      const url = ApiUrl.build_api_url(ApiEndpoints.tools_md_to_pdf)
       const form_data = new FormData()
       
       const file_buffer = await fs.promises.readFile(file_path)
@@ -55,7 +53,7 @@ export const tools_service = {
    */
   async compress_image(file_path: string, quality: number = 60, target_size_kb?: number) {
     try {
-      const url = `${get_api_base_url()}/api/tools/compress_image`
+      const url = ApiUrl.build_api_url(ApiEndpoints.tools_compress_image)
       const form_data = new FormData()
       
       const file_buffer = await fs.promises.readFile(file_path)
@@ -81,7 +79,7 @@ export const tools_service = {
    */
   async compress_files_to_zip(file_paths: string[]) {
     try {
-      const url = `${get_api_base_url()}/api/tools/compress_zip`
+      const url = ApiUrl.build_api_url(ApiEndpoints.tools_compress_zip)
       const form_data = new FormData()
       
       for (const file_path of file_paths) {
@@ -107,7 +105,7 @@ export const tools_service = {
    */
   async convert_image(file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) {
     try {
-      const url = `${get_api_base_url()}/api/tools/convert_image`
+      const url = ApiUrl.build_api_url(ApiEndpoints.tools_convert_image)
       const form_data = new FormData()
       
       const file_buffer = await fs.promises.readFile(file_path)

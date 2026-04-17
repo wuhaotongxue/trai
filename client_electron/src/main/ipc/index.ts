@@ -12,6 +12,7 @@ import { auth_service } from '../services/auth'
 import { tools_service } from '../services/tools'
 import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
+import { knowledge_base_service } from '../services/knowledge_base'
 
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
@@ -79,8 +80,8 @@ export const register_ipc_handlers = (): void => {
   })
 
   // ===================== Agent =====================
-  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string) => {
-    return await agent_service.chat(session_id, message, agent_id, (evt, data) => {
+  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => {
+    return await agent_service.chat(session_id, message, agent_id, knowledge_base_id, (evt, data) => {
       event.sender.send(evt, data)
     })
   })
@@ -135,5 +136,38 @@ export const register_ipc_handlers = (): void => {
   // ===================== 系统反馈 =====================
   ipcMain.handle('feedback:submit', async (_, data: { type: string, title: string, content: string, contact?: string }) => {
     return await feedback_service.submit(data)
+  })
+
+  // ===================== 知识库 =====================
+  ipcMain.handle('kb:demo_create', async (_, params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => {
+    return await knowledge_base_service.demo_create(params)
+  })
+
+  ipcMain.handle('kb:list_categories', async () => {
+    return await knowledge_base_service.list_categories()
+  })
+
+  ipcMain.handle('kb:list_indices', async (_, index_name?: string) => {
+    return await knowledge_base_service.list_indices(index_name)
+  })
+
+  ipcMain.handle('kb:list_index_files', async (_, index_id: string, page_number?: number, page_size?: number) => {
+    return await knowledge_base_service.list_index_files(index_id, page_number, page_size)
+  })
+
+  ipcMain.handle('kb:rename_index', async (_, index_id: string, index_name: string) => {
+    return await knowledge_base_service.rename_index(index_id, index_name)
+  })
+
+  ipcMain.handle('kb:delete_index', async (_, index_id: string) => {
+    return await knowledge_base_service.delete_index(index_id)
+  })
+
+  ipcMain.handle('kb:delete_index_file', async (_, index_id: string, file_id: string) => {
+    return await knowledge_base_service.delete_index_file(index_id, file_id)
+  })
+
+  ipcMain.handle('kb:upload_text', async (_, index_id: string, file_name: string, content: string) => {
+    return await knowledge_base_service.upload_text(index_id, file_name, content)
   })
 }

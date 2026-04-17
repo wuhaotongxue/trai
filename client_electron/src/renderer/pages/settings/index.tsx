@@ -13,7 +13,7 @@ const Settings: React.FC = () => {
   const [active_tab, set_active_tab] = useState<'system' | 'account'>('system')
 
   // 系统设置状态
-  const [api_url, set_api_url] = useState('http://127.0.0.1:8000')
+  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [saved, set_saved] = useState(false)
   const [update_status, set_update_status] = useState<string>('')
   const [is_checking, set_is_checking] = useState(false)
@@ -337,12 +337,14 @@ const Settings: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    ref={file_input_ref} 
-                    onChange={handle_avatar_change} 
-                    style={{ display: 'none' }} 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={file_input_ref}
+                    onChange={handle_avatar_change}
+                    style={{ display: 'none' }}
+                    title="选择头像图片"
+                    placeholder="选择头像图片"
                   />
                   <button 
                     onClick={trigger_file_select}

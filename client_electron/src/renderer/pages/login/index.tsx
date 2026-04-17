@@ -1,20 +1,69 @@
 /**
  * 文件名: index.tsx
  * 作者: wuhao
- * 日期: 2026-04-13 18:15:00
+ * 日期: 2026-04-16 10:11:04
  * 描述: 客户端登录页面
  */
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('admin')
-  const [password, set_password] = useState('admin123')
+  const [password, set_password] = useState('123456')
+  const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
+  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
+  const [api_loading, set_api_loading] = useState(true)
+  const [api_saving, set_api_saving] = useState(false)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
+
+  useEffect(() => {
+    const load_config = async () => {
+      try {
+        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
+        if (res.success && typeof res.data === 'string' && res.data.trim()) {
+          set_api_url(res.data.trim())
+        }
+      } finally {
+        set_api_loading(false)
+      }
+    }
+
+    void load_config()
+  }, [])
+
+  const normalized_api_url = useMemo(() => {
+    const raw = api_url.trim()
+    if (!raw) return ''
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw
+    return `http://${raw}`
+  }, [api_url])
+
+  const save_api_url = async () => {
+    const next = normalized_api_url
+    if (!next) {
+      set_error_msg('服务地址不能为空')
+      return
+    }
+
+    set_api_saving(true)
+    try {
+      const res = await window.electron_api.config_set('api_url', next)
+      if (!res.success) {
+        set_error_msg(res.error || '保存服务地址失败')
+        return
+      }
+      set_api_url(next)
+    } catch (err: any) {
+      set_error_msg(err?.message || '保存服务地址失败')
+    } finally {
+      set_api_saving(false)
+    }
+  }
 
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +74,9 @@ const Login: React.FC = () => {
     }
 
     try {
+      if (!api_loading) {
+        await save_api_url()
+      }
       const res = await window.electron_api.auth_login({ username, password })
       if (res.success && res.data) {
         // 登录成功
@@ -36,10 +88,20 @@ const Login: React.FC = () => {
         })
         navigate('/')
       } else {
-        set_error_msg(res.error || '登录失败，请检查用户名和密码')
+        const raw = String(res.error || '')
+        if (raw.includes('用户名或密码错误') || raw.includes('401')) {
+          set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
+        } else {
+          set_error_msg(raw || '登录失败, 请检查用户名和密码')
+        }
       }
     } catch (err: any) {
-      set_error_msg(err.message || '登录异常')
+      const raw = String(err?.message || '')
+      if (raw.includes('401')) {
+        set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
+      } else {
+        set_error_msg(raw || '登录异常')
+      }
     }
   }
 
@@ -50,6 +112,32 @@ const Login: React.FC = () => {
         <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '320px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
           <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>服务地址</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={api_url}
+                  onChange={(e) => set_api_url(e.target.value)}
+                  style={{ flex: 1, padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                  placeholder="http://127.0.0.1:5666"
+                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
+                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                  disabled={api_loading || api_saving}
+                />
+                <button
+                  type="button"
+                  onClick={save_api_url}
+                  disabled={api_loading || api_saving}
+                  style={{ width: '72px', backgroundColor: '#f3f3f3', color: '#202020', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', cursor: (api_loading || api_saving) ? 'not-allowed' : 'pointer', fontWeight: 'normal', fontSize: '14px' }}
+                >
+                  {api_saving ? '保存中' : '保存'}
+                </button>
+              </div>
+              <div style={{ marginTop: '6px', color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px' }}>
+                示例: 127.0.0.1:5666 或 http://192.168.98.72:5666
+              </div>
+            </div>
             <div>
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
               <input
@@ -64,15 +152,35 @@ const Login: React.FC = () => {
             </div>
             <div>
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => set_password(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                placeholder="请输入密码"
-                onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={password_visible ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => set_password(e.target.value)}
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                  placeholder="请输入密码"
+                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
+                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => set_password_visible((v) => !v)}
+                  title={password_visible ? '隐藏密码' : '显示密码'}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '10px',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    color: 'rgba(0, 0, 0, 0.55)'
+                  }}
+                >
+                  {password_visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             {error_msg && <div style={{ color: '#e51400', fontSize: '12px' }}>{error_msg}</div>}
             <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>

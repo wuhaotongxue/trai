@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: notify.py
 # 作者: wuhao
-# 日期: 2026_04_10
+# 日期: 2026_04_17_08:28:46
 # 描述: 通知管理接口
 
 from __future__ import annotations
@@ -85,7 +85,13 @@ def _get_secret(platform: str) -> str | None:
     return os.getenv(env_key)
 
 
-@router.post("/notify/send", response_model=SendNotifyResponse, tags=["通知"])
+@router.post(
+    "/notify/send",
+    response_model=SendNotifyResponse,
+    tags=["通知"],
+    summary="发送通知",
+    description="向指定平台发送通知, 仅管理员可用.",
+)
 async def send_notify(
     request: SendNotifyRequest,
     current_user: Annotated[dict, Depends(require_admin)],
@@ -155,7 +161,13 @@ async def send_notify(
         )
 
 
-@router.post("/notify/test", response_model=SendNotifyResponse, tags=["通知"])
+@router.post(
+    "/notify/test",
+    response_model=SendNotifyResponse,
+    tags=["通知"],
+    summary="测试通知",
+    description="向指定平台发送测试通知, 仅管理员可用.",
+)
 async def test_notify(
     request: NotifyTestRequest,
     current_user: Annotated[dict, Depends(require_admin)],
@@ -207,7 +219,13 @@ async def test_notify(
         )
 
 
-@router.get("/notify/configs", response_model=NotifyConfigListResponse, tags=["通知"])
+@router.get(
+    "/notify/configs",
+    response_model=NotifyConfigListResponse,
+    tags=["通知"],
+    summary="通知配置列表",
+    description="获取各通知平台的启用与配置状态, 仅管理员可用.",
+)
 async def list_notify_configs(
     current_user: Annotated[dict, Depends(require_admin)],
 ) -> NotifyConfigListResponse:

@@ -7,10 +7,8 @@
 import axios, { CancelTokenSource } from 'axios'
 import log from 'electron-log'
 import { config_store } from '../platform/config_store'
-
-const get_api_base_url = () => {
-  return config_store.get('api_url', 'http://127.0.0.1:5666')
-}
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 
 const api_client = axios.create()
 
@@ -42,7 +40,7 @@ export const agent_service = {
   /**
    * 发送消息给 Agent (流式)
    */
-  async chat(session_id: string, message: string, agent_id?: string, event_sender?: (event: string, data: any) => void) {
+  async chat(session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, event_sender?: (event: string, data: any) => void) {
     try {
       // 停止上一个同一 session 的请求（如果存在）
       if (active_requests[session_id]) {
@@ -52,14 +50,17 @@ export const agent_service = {
       const cancel_source = axios.CancelToken.source()
       active_requests[session_id] = cancel_source
 
-      const url = `${get_api_base_url()}/api/agent/chat`
-      const payload = {
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_chat)
+      const payload: any = {
         session_id,
         message,
-        agent_id,
         stream: true,
         role: 'user'
       }
+      if (agent_id) payload.agent_id = agent_id
+      if (knowledge_base_id) payload.knowledge_base_id = knowledge_base_id
+
+      log.info('Agent Chat Payload:', payload)
       
       const res = await api_client.post(url, payload, { 
         responseType: 'stream',
@@ -134,7 +135,7 @@ export const agent_service = {
    */
   async generate_image(prompt: string, model: string = "AI-ModelScope/FLUX.1-dev") {
     try {
-      const url = `${get_api_base_url()}/api/ai/image`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_image)
       const payload = { prompt, model }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data }
@@ -149,7 +150,7 @@ export const agent_service = {
    */
   async generate_image_to_image(prompt: string, image_url: string) {
     try {
-      const url = `${get_api_base_url()}/api/ai/image_to_image`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_image_to_image)
       const payload = { prompt, image_url }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data }
@@ -164,7 +165,7 @@ export const agent_service = {
    */
   async generate_music(prompt: string) {
     try {
-      const url = `${get_api_base_url()}/api/ai/music`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_music)
       const payload = { prompt }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data }
@@ -179,7 +180,7 @@ export const agent_service = {
    */
   async generate_video(prompt: string) {
     try {
-      const url = `${get_api_base_url()}/api/ai/video`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_video)
       const payload = { prompt }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data }
@@ -194,7 +195,7 @@ export const agent_service = {
    */
   async get_agents() {
     try {
-      const url = `${get_api_base_url()}/api/agent/management/list`
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_list)
       const res = await api_client.get(url)
       return { success: true, data: res.data.data.agents }
     } catch (error: any) {
@@ -208,7 +209,7 @@ export const agent_service = {
    */
   async register_agent(name: string, description: string, model: string, system_prompt: string) {
     try {
-      const url = `${get_api_base_url()}/api/agent/management/register`
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_register)
       const payload = { name, description, model, system_prompt }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
@@ -223,7 +224,7 @@ export const agent_service = {
    */
   async toggle_agent(agent_id: string, action: 'start' | 'stop') {
     try {
-      const url = `${get_api_base_url()}/api/agent/management/toggle`
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_toggle)
       const payload = { agent_id, action }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
@@ -238,7 +239,7 @@ export const agent_service = {
    */
   async check_agent(agent_id: string) {
     try {
-      const url = `${get_api_base_url()}/api/agent/management/check`
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_check)
       const payload = { agent_id }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
@@ -253,7 +254,7 @@ export const agent_service = {
    */
   async generate_comfyui(prompt: string) {
     try {
-      const url = `${get_api_base_url()}/api/ai/comfyui/generate`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_comfyui)
       const payload = { prompt }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
@@ -268,7 +269,7 @@ export const agent_service = {
    */
   async generate_report(template_base64: string, template_name: string, description: string) {
     try {
-      const url = `${get_api_base_url()}/api/ai/report/generate`
+      const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_report)
       const payload = { template_base64, template_name, description }
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }

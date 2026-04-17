@@ -1,3 +1,10 @@
+/**
+ * 文件名: layout.tsx
+ * 作者: wuhao
+ * 日期: 2026-04-16 09:40:24
+ * 描述: 管理后台布局, 负责鉴权跳转, 侧边栏, 顶部栏与用户菜单.
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -9,6 +16,7 @@ import { ThemeToggle } from "@/components/website/theme_toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -78,11 +86,33 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
   }
 
   if (token === undefined) {
-    return <div className="min-h-screen bg-background" />;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
+          <div className="text-sm font-semibold text-foreground">TRAI 管理后台</div>
+          <div className="text-xs text-muted-foreground mt-2">正在加载登录状态...</div>
+        </div>
+      </div>
+    );
   }
 
   if (token === null) {
-    return <div className="min-h-screen bg-background" />;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
+          <div className="text-sm font-semibold text-foreground">未登录</div>
+          <div className="text-xs text-muted-foreground mt-2">即将跳转到登录页...</div>
+          <div className="mt-4">
+            <Link
+              href="/admin/login"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              去登录
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const toggleSidebar = () => {
@@ -279,16 +309,18 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>我的账户</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <UserIcon className="mr-2 h-4 w-4" />
-                  <span>上传用户头像</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>修改密码</span>
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>上传用户头像</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>修改密码</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="text-red-500 focus:text-red-500 focus:bg-red-500/10"

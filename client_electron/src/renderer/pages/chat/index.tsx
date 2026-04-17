@@ -29,6 +29,7 @@ interface ChatSession {
   updated_at: number
   messages: ChatMessage[]
   agent_id?: string
+  kb_id?: string
 }
 
 interface Agent {
@@ -37,22 +38,27 @@ interface Agent {
   status: string
 }
 
+interface KnowledgeBase {
+  id: string
+  name: string
+}
+
 const STORAGE_KEY = 'trai_chat_sessions'
 
 const AgentChat: React.FC = () => {
   const [sessions, set_sessions] = useState<ChatSession[]>([])
   const [active_session_id, set_active_session_id] = useState<string>('')
   const [available_agents, set_available_agents] = useState<Agent[]>([])
+  const [available_kbs, set_available_kbs] = useState<KnowledgeBase[]>([])
   const [is_sidebar_open, set_is_sidebar_open] = useState(true)
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
-  const [use_kb_first, set_use_kb_first] = useState(false)
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
   const active_session_id_ref = useRef<string>('')
 
-  // 初始化会话与 Agent 列表
+  // 初始化会话与 Agent/知识库 列表
   useEffect(() => {
     const init_data = async () => {
       try {
@@ -62,6 +68,22 @@ const AgentChat: React.FC = () => {
         }
       } catch (err) {
         console.error('Failed to load agents', err)
+      }
+      
+      try {
+        if (window.electron_api.kb_list_indices) {
+          const res = await window.electron_api.kb_list_indices()
+          if (res.success) {
+            const idx_source = res.data?.data?.items || res.data?.items || res.data?.data || res.data || []
+            const idx_items: any[] = Array.isArray(idx_source) ? idx_source : []
+            set_available_kbs(idx_items.map((it: any) => ({
+              id: String(it.index_id || it.indexId || it.IndexId || it.id || it.Id || ''),
+              name: String(it.index_name || it.indexName || it.IndexName || it.name || it.Name || '')
+            })).filter(k => k.id && k.name))
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load kbs', err)
       }
       
       try {
@@ -199,6 +221,14 @@ const AgentChat: React.FC = () => {
     })
   }
 
+  const update_session_kb = (kb_id: string) => {
+    set_sessions(prev => {
+      const updated = prev.map(s => s.id === active_session_id ? { ...s, kb_id: kb_id === 'none' ? undefined : kb_id } : s)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
   const handle_send = async () => {
     if (!input.trim() || !active_session_id) return
     
@@ -207,6 +237,7 @@ const AgentChat: React.FC = () => {
     
     const current_sid = active_session_id
     const current_agent_id = active_session?.agent_id || (available_agents.length > 0 ? available_agents[0].id : undefined)
+    const current_kb_id = active_session?.kb_id
 
     update_active_session_messages(prev => [...prev, { role: 'user', content: user_msg }], current_sid)
     update_active_session_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '', steps: [] }], current_sid)
@@ -214,7 +245,7 @@ const AgentChat: React.FC = () => {
     set_loading(true)
     
     try {
-      const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id)
+      const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id, current_kb_id)
       if (!res.success && !(res as any).is_canceled) {
         update_active_session_messages(prev => {
           const new_msgs = [...prev]
@@ -440,30 +471,58 @@ const AgentChat: React.FC = () => {
           <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
           <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
           
-          {available_agents.length > 0 && (
-            <select 
-              className="no-drag-region"
-              value={active_session?.agent_id || available_agents[0]?.id || ''}
-              onChange={(e) => update_session_agent(e.target.value)}
-              style={{
-                marginLeft: 'auto', // Pushes to the right
-                padding: '6px 12px',
-                borderRadius: '6px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#f8fafc',
-                color: '#475569',
-                fontSize: '13px',
-                outline: 'none',
-                cursor: 'pointer',
-                fontWeight: 500
-              }}
-              title="选择对话 Agent"
-            >
-              {available_agents.map(a => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
-          )}
+          <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+            {available_kbs.length > 0 && (
+              <select 
+                value={active_session?.kb_id || 'none'}
+                onChange={(e) => update_session_kb(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                  backgroundColor: '#f8fafc',
+                  color: '#475569',
+                  fontSize: '13px',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  maxWidth: '150px',
+                  textOverflow: 'ellipsis'
+                }}
+                title="选择知识库(可选)"
+              >
+                <option value="none">无知识库</option>
+                {available_kbs.map(k => (
+                  <option key={k.id} value={k.id}>{k.name}</option>
+                ))}
+              </select>
+            )}
+
+            {available_agents.length > 0 && (
+              <select 
+                value={active_session?.agent_id || available_agents[0]?.id || ''}
+                onChange={(e) => update_session_agent(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                  backgroundColor: '#f8fafc',
+                  color: '#475569',
+                  fontSize: '13px',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  maxWidth: '150px',
+                  textOverflow: 'ellipsis'
+                }}
+                title="选择对话 Agent"
+              >
+                {available_agents.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
         
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -879,30 +938,8 @@ const AgentChat: React.FC = () => {
                 }}
               />
               
-              {/* 工具栏：知识库选项与发送按钮 */}
+              {/* 工具栏：发送按钮 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div 
-                  title="优先从知识库获取答案"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '6px 10px',
-                    backgroundColor: use_kb_first ? '#e0f2fe' : 'transparent',
-                    border: `1px solid ${use_kb_first ? '#7dd3fc' : 'transparent'}`,
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    userSelect: 'none'
-                  }}
-                  onClick={() => set_use_kb_first(!use_kb_first)}
-                >
-                  <Database size={16} color={use_kb_first ? '#0284c7' : '#94a3b8'} />
-                  <span style={{ fontSize: '12px', color: use_kb_first ? '#0284c7' : '#94a3b8', fontWeight: use_kb_first ? 500 : 'normal' }}>
-                    知识库优先
-                  </span>
-                </div>
-
                 <button
                   onClick={handle_send}
                 disabled={loading || !input.trim()}

@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # 文件名: main.py
 # 作者: wuhao
-# 日期: 2026_04_09
+# 日期: 2026_04_17_08:28:46
 # 描述: FastAPI 应用配置和路由注册
 
 from __future__ import annotations
 
+import os
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 
 from core.logger import get_logger
 from core.telemetry import init_telemetry
@@ -26,19 +28,300 @@ if TYPE_CHECKING:
 
 logger = get_logger()
 
+_OPENAPI_LANG = os.getenv("OPENAPI_LANG", "zh").strip().lower()
+
+_TAG_NAME_MAP: dict[str, str] = {
+    "AI": "AI 能力",
+    "Agent": "智能体",
+    "Agent 管理": "智能体管理",
+    "管理": "管理后台",
+}
+
+_TAG_NAME_MAP_EN: dict[str, str] = {
+    "系统": "System",
+    "通知": "Notifications",
+    "认证": "Auth",
+    "企业微信": "WeCom",
+    "管理后台": "Admin",
+    "管理": "Admin",
+    "AI 能力": "AI",
+    "AI": "AI",
+    "智能体": "Agent",
+    "Agent": "Agent",
+    "智能体管理": "Agent Management",
+    "Agent 管理": "Agent Management",
+    "媒体": "Media",
+    "会话": "Sessions",
+    "工具": "Tools",
+    "客户端更新": "Client Update",
+    "首页": "Root",
+    "策略": "Policy",
+}
+
+_SUMMARY_TRANSLATION_MAP: dict[str, str] = {
+    "Health Check": "健康检查",
+    "Detailed Health Check": "详细健康检查",
+    "Liveness Check": "存活探针",
+    "Readiness Check": "就绪探针",
+    "System Monitor": "系统监控",
+    "Metrics": "监控指标",
+    "Login": "登录",
+    "Register": "注册",
+    "Logout": "退出登录",
+    "Refresh Token": "刷新令牌",
+    "Get Current User Info": "获取当前用户信息",
+    "Change Password": "修改密码",
+    "Reset Password": "重置密码",
+    "List Users": "获取用户列表",
+    "Get User": "获取用户信息",
+    "Update User": "更新用户信息",
+    "Delete User": "删除用户",
+    "Get Dashboard": "获取仪表盘数据",
+    "Get Analytics": "获取数据分析",
+    "List Quota Plans": "获取配额方案列表",
+    "Create Quota Plan": "创建配额方案",
+    "Update Quota Plan": "更新配额方案",
+    "Demo Create": "创建知识库 Demo",
+    "Chat": "对话",
+    "Chat Stream": "对话流式输出",
+    "Chat With Session": "会话对话",
+    "Generate Image": "生成图片",
+    "List Image Models": "获取图片模型列表",
+    "Generate Music": "生成音乐",
+    "Generate Video": "生成视频",
+    "SendNotify": "发送通知",
+    "TestNotify": "测试通知",
+    "ListNotifyConfigs": "通知配置列表",
+    "MdToPdfEndpoint": "Markdown转PDF",
+    "CompressImageEndpoint": "压缩图片",
+    "CompressZipEndpoint": "压缩为ZIP",
+    "ConvertImageEndpoint": "转换图片格式",
+    "AgentChat": "智能体对话",
+}
+
+
+class OpenApiChineseNormalizer:
+    """OpenAPI 文档中文化处理器"""
+
+    @staticmethod
+    def _is_ascii_text(text: str) -> bool:
+        try:
+            text.encode("ascii")
+            return True
+        except UnicodeEncodeError:
+            return False
+
+    @staticmethod
+    def _translate_summary(summary: str) -> str:
+        mapped = _SUMMARY_TRANSLATION_MAP.get(summary)
+        if mapped:
+            return mapped
+
+        if not OpenApiChineseNormalizer._is_ascii_text(summary):
+            return summary
+
+        token_map: dict[str, str] = {
+            "send": "发送",
+            "test": "测试",
+            "token": "令牌",
+            "notify": "通知",
+            "configs": "配置列表",
+            "config": "配置",
+            "user": "用户",
+            "users": "用户列表",
+            "dashboard": "仪表盘数据",
+            "analytics": "数据分析",
+            "quota": "配额",
+            "plans": "方案",
+            "plan": "方案",
+            "password": "密码",
+            "current": "当前",
+            "info": "信息",
+            "health": "健康检查",
+            "detailed": "详细",
+            "liveness": "存活",
+            "readiness": "就绪",
+            "monitor": "监控",
+            "metrics": "指标",
+            "demo": "Demo",
+            "create": "创建",
+            "md": "Markdown",
+            "pdf": "PDF",
+            "endpoint": "",
+            "compress": "压缩",
+            "image": "图片",
+            "zip": "ZIP",
+            "convert": "转换",
+            "agent": "智能体",
+        }
+        if " " in summary.strip():
+            words = [w for w in summary.strip().split(" ") if w]
+            translated: list[str] = []
+            for word in words:
+                translated.append(token_map.get(word.lower(), word))
+            joined = "".join(translated)
+            if joined and joined != summary:
+                return joined
+
+        lowered = summary.strip().lower()
+        verb_map: list[tuple[str, str]] = [
+            ("get ", "获取"),
+            ("list ", "获取"),
+            ("create ", "创建"),
+            ("update ", "更新"),
+            ("delete ", "删除"),
+            ("generate ", "生成"),
+            ("sync ", "同步"),
+        ]
+
+        for prefix, chinese in verb_map:
+            if lowered.startswith(prefix):
+                rest = summary.strip()[len(prefix) :].strip()
+                rest_map: dict[str, str] = {
+                    "dashboard": "仪表盘数据",
+                    "analytics": "数据分析",
+                    "quota plans": "配额方案",
+                    "users": "用户列表",
+                    "user": "用户信息",
+                    "image models": "图片模型列表",
+                    "image": "图片",
+                    "music": "音乐",
+                    "video": "视频",
+                    "organization": "组织架构",
+                }
+                rest_cn = rest_map.get(rest.lower(), rest)
+                return f"{chinese}{rest_cn}"
+
+        return summary
+
+    @staticmethod
+    def normalize(schema: dict) -> dict:
+        if _OPENAPI_LANG not in {"zh", "cn", "zh-cn"}:
+            return OpenApiChineseNormalizer._normalize_en(schema)
+
+        paths = schema.get("paths", {})
+        for path_item in paths.values():
+            if not isinstance(path_item, dict):
+                continue
+            for method, op in path_item.items():
+                if method.lower() not in {"get", "post", "put", "patch", "delete"}:
+                    continue
+                if not isinstance(op, dict):
+                    continue
+
+                tags = op.get("tags", [])
+                if isinstance(tags, list):
+                    renamed = [_TAG_NAME_MAP.get(str(t), str(t)) for t in tags]
+                    deduped: list[str] = []
+                    for t in renamed:
+                        if t not in deduped:
+                            deduped.append(t)
+                    op["tags"] = deduped
+
+                summary = op.get("summary")
+                if isinstance(summary, str) and summary.strip():
+                    op["summary"] = OpenApiChineseNormalizer._translate_summary(summary)
+                else:
+                    operation_id = op.get("operationId")
+                    if isinstance(operation_id, str) and operation_id.strip():
+                        op["summary"] = OpenApiChineseNormalizer._translate_summary(operation_id)
+
+        if "tags" in schema and isinstance(schema["tags"], list):
+            for tag in schema["tags"]:
+                if isinstance(tag, dict) and "name" in tag:
+                    name = str(tag["name"])
+                    tag["name"] = _TAG_NAME_MAP.get(name, name)
+
+        return schema
+
+    @staticmethod
+    def _normalize_en(schema: dict) -> dict:
+        paths = schema.get("paths", {})
+        for path_item in paths.values():
+            if not isinstance(path_item, dict):
+                continue
+            for method, op in path_item.items():
+                if method.lower() not in {"get", "post", "put", "patch", "delete"}:
+                    continue
+                if not isinstance(op, dict):
+                    continue
+
+                tags = op.get("tags", [])
+                if isinstance(tags, list):
+                    renamed = [_TAG_NAME_MAP_EN.get(str(t), str(t)) for t in tags]
+                    deduped: list[str] = []
+                    for t in renamed:
+                        if t not in deduped:
+                            deduped.append(t)
+                    op["tags"] = deduped
+
+        if "tags" in schema and isinstance(schema["tags"], list):
+            for tag in schema["tags"]:
+                if isinstance(tag, dict) and "name" in tag:
+                    name = str(tag["name"])
+                    tag["name"] = _TAG_NAME_MAP_EN.get(name, name)
+                    desc = tag.get("description")
+                    if isinstance(desc, str) and desc.strip():
+                        tag["description"] = desc
+
+        return schema
+
 
 def create_app() -> FastAPI:
     """创建 FastAPI 应用实例"""
+    openapi_tags = [
+        {"name": "系统", "description": "健康检查, 监控与系统反馈等接口."},
+        {"name": "通知", "description": "系统通知相关接口."},
+        {"name": "认证", "description": "登录, 注册, 刷新 token 与用户信息."},
+        {"name": "企业微信", "description": "企业微信扫码登录与组织架构相关接口."},
+        {"name": "管理后台", "description": "后台管理接口, 需要管理员权限."},
+        {"name": "AI 能力", "description": "AI 能力接口, 如对话与生成能力."},
+        {"name": "智能体", "description": "智能体对话与工具调用接口."},
+        {"name": "智能体管理", "description": "智能体管理接口."},
+        {"name": "媒体", "description": "文件上传等媒体接口."},
+        {"name": "会话", "description": "会话管理接口."},
+        {"name": "工具", "description": "通用工具接口."},
+        {"name": "客户端更新", "description": "桌面客户端自动更新接口."},
+    ]
+    if _OPENAPI_LANG not in {"zh", "cn", "zh-cn"}:
+        openapi_tags = [
+            {"name": "System", "description": "Health checks, monitoring, and system feedback."},
+            {"name": "Notifications", "description": "System notifications."},
+            {"name": "Auth", "description": "Login, register, token refresh, and user info."},
+            {"name": "WeCom", "description": "WeCom SSO and organization APIs."},
+            {"name": "Admin", "description": "Admin APIs, admin role required."},
+            {"name": "AI", "description": "AI APIs, chat and generations."},
+            {"name": "Agent", "description": "Agent chat and tool calling."},
+            {"name": "Agent Management", "description": "Agent management APIs."},
+            {"name": "Media", "description": "Media upload APIs."},
+            {"name": "Sessions", "description": "Session APIs."},
+            {"name": "Tools", "description": "Utility tools APIs."},
+            {"name": "Client Update", "description": "Desktop client auto-update APIs."},
+        ]
+
     app = FastAPI(
-        title="TRAI API",
-        description="TRAI 项目后端 API 服务",
+        title="TRAI 项目后端 API 服务",
+        description="TRAI 后端接口文档, 统一返回格式与鉴权规则详见各接口说明.",
         version="0.1.0",
         docs_url="/docs",
         redoc_url="/redoc",
+        openapi_tags=openapi_tags,
     )
 
     register_middlewares(app)
     register_routers(app)
+
+    def custom_openapi() -> dict:
+        schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+        app.openapi_schema = OpenApiChineseNormalizer.normalize(schema)
+        return app.openapi_schema
+
+    app.openapi = custom_openapi
 
     return app
 

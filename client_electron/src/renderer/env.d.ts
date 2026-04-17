@@ -10,8 +10,8 @@ interface Window {
     tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_files_to_zip: (file_paths: string[]) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
-    agent_chat: (session_id: string, message: string, agent_id?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    agent_stop: (session_id: string) => Promise<{ success: boolean; error?: string }>;
+    agent_chat: (session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_stop: (session_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_image: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_image_to_image: (prompt: string, image_url: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_music: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
@@ -22,6 +22,14 @@ interface Window {
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: any[] }) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_demo_create?: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_list_categories?: () => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_list_indices?: (index_name?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_list_index_files?: (index_id: string, page_number?: number, page_size?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_rename_index?: (index_id: string, index_name: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_delete_index?: (index_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_delete_index_file?: (index_id: string, file_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_upload_text?: (index_id: string, file_name: string, content: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     on_agent_chat_chunk?: (callback: (event: any, chunk: any) => void) => (() => void);
     ai_generate_report?: (file_data: any, filename: string, description: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     app_get_version?: () => Promise<string>;
