@@ -120,6 +120,13 @@ frontend_next/src/
 || 文件名 | snake_case (`meeting_card.tsx`) |
 || 组件行数 | 建议 <= 200 行，超限拆分 |
 
+### 6.1 注释与说明 (MANDATORY)
+
+- 每个新建或修改的 export 组件, hook, 工具函数, service 方法, 必须补齐 JSDoc
+- JSDoc 必须说明: 用途或流程概述, 参数含义, 返回值含义, 可能的异常或边界条件
+- 对副作用必须说明: 跳转路由, 读写 localStorage, 调用后端接口, 触发上报, 读写 cookie
+- 允许中文说明, 但禁止全角中文标点, 统一使用半角 `, . : ? !`
+
 ### Import 排版规范
 
 - Import 列表不要一行一个标识符, 优先使用单行或分组换行, 让每行包含多个标识符.

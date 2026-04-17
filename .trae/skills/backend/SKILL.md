@@ -182,6 +182,9 @@ async def create_session(req: CreateSessionRequest) -> CreateSessionResponse:
 docstring 内容必须包含：
 - **用途或流程概述** + **参数**（含类型与含义）+ **返回值**（含类型与含义）+ **异常** 四段
 
+提交前自检:
+- 新建或修改后端代码时, 必须逐个检查本次变更涉及到的 class 与 def 是否都补齐 docstring, 不允许遗漏
+
 ### 9. 安全红线 (CRITICAL)
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
