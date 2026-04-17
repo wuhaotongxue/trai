@@ -50,6 +50,7 @@ client_electron/node_modules/
 client_electron/dist/
 client_electron/release/
 client_electron/release*/
+client_electron/trai_*/
 client_electron/out/
 client_electron/.vite/
 client_electron/*.tsbuildinfo
@@ -90,3 +91,4 @@ temp/
 # misc
 .DS_Store
 *.pem
+接口说明.md
