@@ -162,10 +162,14 @@ if (!got_the_lock) {
   if (process.env.VITE_DEV_SERVER_URL) {
     void (async () => {
       try {
-        await main_window?.webContents.session.clearCache()
+        if (main_window) {
+          await main_window.webContents.session.clearCache()
+        }
         const dev_url = new URL(process.env.VITE_DEV_SERVER_URL)
         dev_url.searchParams.set('t', Date.now().toString())
-        await main_window?.loadURL(dev_url.toString())
+        if (main_window) {
+          await main_window.loadURL(dev_url.toString())
+        }
       } catch (err) {
         log.error('loadURL failed:', err)
       }
