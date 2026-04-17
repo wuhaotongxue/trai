@@ -51,7 +51,9 @@ if (!got_the_lock) {
     }
 
     candidates.push(join(process.cwd(), 'public', file_name))
+    candidates.push(join(process.cwd(), 'client_electron', 'public', file_name))
     candidates.push(join(app.getAppPath(), 'public', file_name))
+    candidates.push(join(app.getAppPath(), '..', 'public', file_name))
     candidates.push(join(__dirname, '../../public', file_name))
     candidates.push(join(__dirname, '..', file_name))
 

@@ -209,10 +209,40 @@ class UserRepository(IUserRepository):
         Returns:
             User | None: 更新后的用户实体
         """
+        field_map: dict[str, str] = {
+            "user_id": "t_user_id",
+            "username": "t_username",
+            "display_name": "t_display_name",
+            "email": "t_email",
+            "password_hash": "t_password_hash",
+            "avatar_url": "t_avatar_url",
+            "role": "t_role",
+            "status": "t_status",
+            "tenant_id": "t_tenant_id",
+            "wecom_user_id": "t_wecom_user_id",
+            "mobile": "t_mobile",
+            "position": "t_position",
+            "wecom_data": "t_wecom_data",
+            "created_by": "t_created_by",
+            "updated_by": "t_updated_by",
+            "deleted_by": "t_deleted_by",
+            "deleted_at": "t_deleted_at",
+        }
+
+        values: dict[str, Any] = {}
+        for k, v in kwargs.items():
+            if k.startswith("t_"):
+                values[k] = v
+                continue
+
+            mapped = field_map.get(k)
+            if mapped:
+                values[mapped] = v
+
         stmt = (
             update(UserModel)
             .where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
-            .values(**kwargs, t_updated_at=datetime.now())
+            .values(**values, t_updated_at=datetime.now())
             .returning(UserModel)
         )
         model = self._session.scalar(stmt)
