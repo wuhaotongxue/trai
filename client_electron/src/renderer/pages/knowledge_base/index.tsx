@@ -744,7 +744,7 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '24px', minHeight: 0 }}>
                 {files_loading && display_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                     <Loader2 size={28} className="animate-spin" />
@@ -759,8 +759,8 @@ const KnowledgeBasePage: React.FC = () => {
                     <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
-                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'auto' }}>
                       <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
@@ -798,15 +798,15 @@ const KnowledgeBasePage: React.FC = () => {
                         ))}
                       </tbody>
                       </table>
-                    </div>
-                    {files_loading ? (
-                      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
-                          <Loader2 size={18} className="animate-spin" />
-                          <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                      {files_loading ? (
+                        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
+                            <Loader2 size={18} className="animate-spin" />
+                            <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
+                      ) : null}
+                    </div>
                     <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ fontSize: '12px', color: '#64748b' }}>
@@ -928,7 +928,7 @@ const KnowledgeBasePage: React.FC = () => {
                       </div>
                     </div>
                     {debug_visible ? (
-                      <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 16px', backgroundColor: '#f8fafc' }}>
+                      <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 16px', backgroundColor: '#f8fafc', maxHeight: '160px', overflowY: 'auto' }}>
                         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
                           debug: kb_id={active_kb_id || '-'} page={file_current_page} page_size={file_page_size} total={file_total} items={display_files.length}
                         </div>
