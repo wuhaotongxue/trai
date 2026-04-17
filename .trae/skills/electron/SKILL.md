@@ -110,6 +110,19 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 - 对副作用必须说明: 文件读写, 系统调用, 启动外部进程, IPC 通道名, 网络请求与超时策略
 - 允许中文说明, 但禁止全角中文标点, 统一使用半角 `, . : ? !`
 
+### 9.2 可访问性 (MANDATORY)
+
+- 表单控件必须具备可访问名称, `input/select/textarea` 至少提供一个: `aria-label`, `aria-labelledby`, 或显式 `<label htmlFor=...>`
+- 当控件没有可见文本标签时, 必须补 `aria-label` 与 `title`, 避免 Microsoft Edge Tools / axe 报错
+- `button` 必须显式声明 `type`, 默认使用 `type="button"`, 避免 Microsoft Edge Tools 报错
+- 图标按钮必须补 `aria-label` 与 `title`, 不允许只有图标没有文本
+- 尽量避免 JSX 内联 `style`, 优先使用 CSS Modules 或可复用样式类, 减少 Microsoft Edge Tools `no-inline-styles` 告警
+
+### 10. README 与 Changelog (MANDATORY)
+
+- 修改 `client_electron/` 相关代码后, 必须同步更新两处 Changelog: 根目录 `README.md` 与 `client_electron/README.md`
+- 提交前必须自查 Changelog 是否覆盖本次改动范围, 避免出现代码已变更但日志未更新的情况
+
 ### 11. UI 布局与拖拽规范 
 
 | 规范 | 说明 |

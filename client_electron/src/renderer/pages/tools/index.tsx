@@ -226,8 +226,11 @@ const Tools: React.FC = () => {
       extra_ui: (
         <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '13px', color: '#475569' }}>目标格式:</label>
-            <select 
+            <label htmlFor="convert_image_target_format" style={{ fontSize: '13px', color: '#475569' }}>目标格式:</label>
+            <select
+              id="convert_image_target_format"
+              aria-label="目标格式"
+              title="目标格式"
               value={target_image_format} 
               onChange={(e) => {
                 set_target_image_format(e.target.value)
