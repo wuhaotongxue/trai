@@ -73,4 +73,5 @@ description: "按仓库期数编写 md/issue_NN/index.md：锚定上一期 index
 - [ ] 新文件路径为 `md/issue_NN/index.md`，配图路径正确。  
 - [ ] 文风与第 2 期对齐，避免无关长篇代码块。  
 - [ ] 单段超过 4 行已主动拆成短段或列表。  
+- [ ] 文档末尾已补充联系邮箱, 例如: `如有问题, 请联系邮箱: wuhaotongxue@gmail.com`。  
 - [ ] 若使用 HTML 色块，已采用内联 `style` 或已确认 `<div>` 与内容间无破坏解析的空行；若仅用 `doc-*` 类，已配置 `markdown.styles` 并自测预览。
