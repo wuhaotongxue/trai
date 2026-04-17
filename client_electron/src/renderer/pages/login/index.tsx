@@ -90,7 +90,7 @@ const Login: React.FC = () => {
       } else {
         const raw = String(res.error || '')
         if (raw.includes('用户名或密码错误') || raw.includes('401')) {
-          set_error_msg('密码错误, 请联系邮箱: tuoren.ai@gmail.com')
+          set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
         } else {
           set_error_msg(raw || '登录失败, 请检查用户名和密码')
         }
@@ -98,7 +98,7 @@ const Login: React.FC = () => {
     } catch (err: any) {
       const raw = String(err?.message || '')
       if (raw.includes('401')) {
-        set_error_msg('密码错误, 请联系邮箱: tuoren.ai@gmail.com')
+        set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
       } else {
         set_error_msg(raw || '登录异常')
       }
