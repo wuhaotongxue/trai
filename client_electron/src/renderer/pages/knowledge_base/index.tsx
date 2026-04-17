@@ -176,11 +176,12 @@ const KnowledgeBasePage: React.FC = () => {
     void load_remote()
   }, [])
 
-  const fetch_files_page = async (target_page: number) => {
+  const fetch_files_page = async (target_page: number, page_size_override?: number) => {
     if (!active_kb_id) return
     if (!window.electron_api?.kb_list_index_files) return
 
     const page = Math.max(1, target_page)
+    const effective_page_size = typeof page_size_override === 'number' ? page_size_override : file_page_size
 
     set_files_loading(true)
     set_files_error('')
@@ -191,10 +192,10 @@ const KnowledgeBasePage: React.FC = () => {
     }
 
     try {
-      append_debug(`request kb_id=${active_kb_id} page=${page} page_size=${file_page_size}`)
-      console.info('[kb_files] request', { kb_id: active_kb_id, page, page_size: file_page_size })
+      append_debug(`request kb_id=${active_kb_id} page=${page} page_size=${effective_page_size}`)
+      console.info('[kb_files] request', { kb_id: active_kb_id, page, page_size: effective_page_size })
 
-      const res = await window.electron_api.kb_list_index_files(active_kb_id, page, file_page_size)
+      const res = await window.electron_api.kb_list_index_files(active_kb_id, page, effective_page_size)
       if (!res.success) {
         set_files_error(res.error || '获取知识库文件失败')
         append_debug(`error page=${page} msg=${res.error || 'unknown'}`)
@@ -265,11 +266,15 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
-  const request_files_page = async (target_page: number, action: 'prev' | 'next' | 'jump' | 'refresh' | 'init') => {
+  const request_files_page = async (
+    target_page: number,
+    action: 'prev' | 'next' | 'jump' | 'refresh' | 'init',
+    page_size_override?: number
+  ) => {
     if (files_loading) return
     set_page_action(action)
     try {
-      await fetch_files_page(target_page)
+      await fetch_files_page(target_page, page_size_override)
     } finally {
       set_page_action(null)
     }
@@ -717,7 +722,8 @@ const KnowledgeBasePage: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                      <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b' }}>文件名称</th>
@@ -753,7 +759,8 @@ const KnowledgeBasePage: React.FC = () => {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                      </table>
+                    </div>
                     {files_loading ? (
                       <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
@@ -789,7 +796,9 @@ const KnowledgeBasePage: React.FC = () => {
                           <select
                             value={file_page_size}
                             onChange={(e) => {
-                              set_file_page_size(Number(e.target.value))
+                              const next_size = Number(e.target.value)
+                              set_file_page_size(next_size)
+                              void request_files_page(1, 'init', next_size)
                             }}
                             disabled={files_loading}
                             style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff' }}
