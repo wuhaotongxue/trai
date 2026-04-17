@@ -23,12 +23,44 @@ router = APIRouter(prefix="/knowledge_base")
 
 
 class KnowledgeBaseDemoCreateRequest(BaseModel):
+    """
+    创建知识库 Demo 请求.
+
+    用途:
+        用于触发百炼知识库的建库与上传链路验证.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     content: str | None = Field(default=None, description="上传到知识库的 Markdown 内容（为空则使用默认 demo）")
     file_name: str | None = Field(default=None, description="上传文件名（为空则自动生成）")
     index_name: str | None = Field(default=None, description="知识库名称（为空则自动生成）")
 
 
 class KnowledgeBaseDemoCreateResponse(BaseModel):
+    """
+    创建知识库 Demo 响应.
+
+    用途:
+        返回建库与上传任务的关键 ID, 便于客户端后续轮询与状态展示.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     index_id: str = Field(description="知识库 ID（IndexId）")
     index_name: str = Field(description="知识库名称")
     file_id: str = Field(description="文档 ID（FileId）")
@@ -38,6 +70,22 @@ class KnowledgeBaseDemoCreateResponse(BaseModel):
 
 
 class KnowledgeBaseListResponse(BaseModel):
+    """
+    通用列表响应.
+
+    用途:
+        管理后台知识库相关列表接口的统一响应结构, 支持分页与原始响应透传.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     items: list[dict[str, Any]] = Field(default_factory=list, description="列表数据")
     raw: dict[str, Any] = Field(default_factory=dict, description="原始响应, 便于排查字段变更")
     total: int | None = Field(default=None, description="总数, 可用于分页")
@@ -46,11 +94,43 @@ class KnowledgeBaseListResponse(BaseModel):
 
 
 class KnowledgeBaseUploadTextRequest(BaseModel):
+    """
+    上传文本到知识库请求.
+
+    用途:
+        以文本方式上传内容到指定知识库, 由后端转为百炼数据中心文件并触发解析.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     content: str = Field(min_length=1, description="上传到知识库的文本内容(建议 Markdown)")
     file_name: str | None = Field(default=None, description="上传文件名(为空则自动生成)")
 
 
 class KnowledgeBaseUploadTextResponse(BaseModel):
+    """
+    上传文本到知识库响应.
+
+    用途:
+        返回 file_id 与 job_id, 便于客户端显示上传与解析状态.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     index_id: str = Field(description="知识库 ID")
     file_id: str = Field(description="文档 ID")
     file_name: str = Field(description="文档名称")
@@ -59,20 +139,98 @@ class KnowledgeBaseUploadTextResponse(BaseModel):
 
 
 class KnowledgeBaseRenameIndexRequest(BaseModel):
+    """
+    重命名知识库请求.
+
+    用途:
+        修改百炼知识库的 name 字段.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     index_name: str = Field(min_length=1, max_length=20, description="知识库名称, 最长 20 字符")
 
 
 class KnowledgeBaseRenameIndexResponse(BaseModel):
+    """
+    重命名知识库响应.
+
+    用途:
+        返回最新的 index_name.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     index_id: str = Field(description="知识库 ID")
     index_name: str = Field(description="知识库名称")
 
 
 class KnowledgeBaseDeleteResponse(BaseModel):
+    """
+    删除操作响应.
+
+    用途:
+        用于删除知识库或删除知识库文件等接口的统一返回.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        无.
+    """
+
     success: bool = Field(description="是否成功")
 
 
 class KnowledgeBaseDemoService:
+    """
+    百炼知识库 Demo 服务.
+
+    用途:
+        封装管理后台知识库相关的第三方调用, 包含列表, 上传, 重命名, 删除与分页处理.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        HTTPException: 依赖缺失, 参数不合法, 或三方调用失败时抛出.
+    """
+
     def _call_bailian_api(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
+        """
+        调用百炼 SDK 并统一转为 HTTPException.
+
+        参数:
+            fn: SDK 调用函数.
+            *args: 位置参数.
+            **kwargs: 关键字参数.
+
+        返回:
+            Any: SDK 返回对象.
+
+        异常:
+            HTTPException: SDK 调用失败时抛出.
+        """
         try:
             return fn(*args, **kwargs)
             raise
@@ -87,6 +245,18 @@ class KnowledgeBaseDemoService:
             ) from e
 
     def _get_env(self, key: str) -> str:
+        """
+        读取必需环境变量.
+
+        参数:
+            key: 环境变量名.
+
+        返回:
+            str: 环境变量值.
+
+        异常:
+            HTTPException: 环境变量缺失时抛出.
+        """
         val = os.getenv(key)
         if not val:
             raise HTTPException(
@@ -96,6 +266,18 @@ class KnowledgeBaseDemoService:
         return val
 
     def _normalize_headers(self, headers: Any) -> dict[str, str]:
+        """
+        将百炼上传租约返回的 headers 规范化为 dict[str, str].
+
+        参数:
+            headers: 百炼返回的 headers, 可能为 dict 或字符串.
+
+        返回:
+            dict[str, str]: 规范化后的请求头.
+
+        异常:
+            HTTPException: headers 类型不支持时抛出.
+        """
         if isinstance(headers, Mapping):
             return {str(k): str(v) for k, v in headers.items()}
 
@@ -122,6 +304,18 @@ class KnowledgeBaseDemoService:
         )
 
     def _extract_total(self, body: dict[str, Any]) -> int | None:
+        """
+        从响应体中提取 total.
+
+        参数:
+            body: 响应体字典.
+
+        返回:
+            int | None: total, 若不存在则为 None.
+
+        异常:
+            无.
+        """
         if not isinstance(body, dict):
             return None
         for key in ("total", "total_count", "totalCount", "total_items", "totalItems"):
@@ -143,17 +337,17 @@ class KnowledgeBaseDemoService:
         """
         统计知识库文件总数.
 
-        Args:
+        参数:
             client: 百炼客户端.
             bailian_models: 百炼模型包.
             workspace_id: 工作空间 ID.
             index_id: 知识库 ID.
             page_size: 每页数量.
 
-        Returns:
+        返回:
             int: 文件总数.
 
-        Raises:
+        异常:
             HTTPException: 百炼 API 调用失败时抛出.
         """
         pages = 0
@@ -188,6 +382,18 @@ class KnowledgeBaseDemoService:
                 return len(seen_ids)
 
     def _create_bailian_client(self) -> tuple[Any, Any, str]:
+        """
+        创建百炼客户端并返回模型包与 workspace_id.
+
+        参数:
+            无.
+
+        返回:
+            tuple[Any, Any, str]: (client, bailian_models, workspace_id).
+
+        异常:
+            HTTPException: SDK 依赖缺失或环境变量缺失时抛出.
+        """
         try:
             from alibabacloud_bailian20231229 import models as bailian_models
             from alibabacloud_bailian20231229.client import Client as BailianClient
@@ -216,6 +422,18 @@ class KnowledgeBaseDemoService:
         return client, bailian_models, workspace_id
 
     def _extract_list(self, data: Any) -> list[dict[str, Any]]:
+        """
+        从百炼响应体中提取列表字段.
+
+        参数:
+            data: 响应体, 可能为 dict 或 list.
+
+        返回:
+            list[dict[str, Any]]: 提取到的列表.
+
+        异常:
+            无.
+        """
         if isinstance(data, list):
             return [x for x in data if isinstance(x, dict)]
 
@@ -243,6 +461,18 @@ class KnowledgeBaseDemoService:
         return []
 
     def _extract_raw(self, resp: Any) -> dict[str, Any]:
+        """
+        将百炼 SDK 响应对象转换为 dict 结构.
+
+        参数:
+            resp: 百炼 SDK 响应对象.
+
+        返回:
+            dict[str, Any]: 转换后的响应体.
+
+        异常:
+            无.
+        """
         try:
             mapped = resp.to_map()
             body = mapped.get("body")
@@ -263,6 +493,18 @@ class KnowledgeBaseDemoService:
             return {}
 
     def demo_create(self, request: KnowledgeBaseDemoCreateRequest) -> KnowledgeBaseDemoCreateResponse:
+        """
+        创建知识库 Demo, 用于打通创建, 上传, 建库任务与轮询流程.
+
+        参数:
+            request: Demo 创建请求.
+
+        返回:
+            KnowledgeBaseDemoCreateResponse: 创建结果, 包含 index_id, file_id, job_id.
+
+        异常:
+            HTTPException: 三方调用失败或响应缺失时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
 
         now_suffix = datetime.now().strftime("%m%d_%H%M")
@@ -392,6 +634,19 @@ class KnowledgeBaseDemoService:
     def upload_text_to_index(
         self, index_id: str, request: KnowledgeBaseUploadTextRequest
     ) -> KnowledgeBaseUploadTextResponse:
+        """
+        上传文本内容到指定知识库并触发增量解析.
+
+        参数:
+            index_id: 知识库 ID.
+            request: 上传请求, 包含 content 与可选 file_name.
+
+        返回:
+            KnowledgeBaseUploadTextResponse: 上传结果, 包含 file_id, job_id 等.
+
+        异常:
+            HTTPException: 三方调用失败或响应缺失时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
 
         now_suffix = datetime.now().strftime("%m%d_%H%M")
@@ -493,6 +748,19 @@ class KnowledgeBaseDemoService:
         )
 
     def rename_index(self, index_id: str, request: KnowledgeBaseRenameIndexRequest) -> KnowledgeBaseRenameIndexResponse:
+        """
+        重命名知识库.
+
+        参数:
+            index_id: 知识库 ID.
+            request: 重命名请求.
+
+        返回:
+            KnowledgeBaseRenameIndexResponse: 重命名结果.
+
+        异常:
+            HTTPException: 三方调用失败时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.UpdateIndexRequest(id=index_id, name=request.index_name)
         resp = self._call_bailian_api(client.update_index, workspace_id, req)
@@ -502,6 +770,19 @@ class KnowledgeBaseDemoService:
         return KnowledgeBaseRenameIndexResponse(index_id=index_id, index_name=name)
 
     def delete_index_file(self, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+        """
+        删除知识库内指定文件, 同时删除数据中心文件.
+
+        参数:
+            index_id: 知识库 ID.
+            file_id: 文件 ID.
+
+        返回:
+            KnowledgeBaseDeleteResponse: 删除结果.
+
+        异常:
+            HTTPException: 三方调用失败时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         self._call_bailian_api(
             client.delete_index_document,
@@ -512,11 +793,35 @@ class KnowledgeBaseDemoService:
         return KnowledgeBaseDeleteResponse(success=True)
 
     def delete_index(self, index_id: str) -> KnowledgeBaseDeleteResponse:
+        """
+        删除知识库.
+
+        参数:
+            index_id: 知识库 ID.
+
+        返回:
+            KnowledgeBaseDeleteResponse: 删除结果.
+
+        异常:
+            HTTPException: 三方调用失败时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         self._call_bailian_api(client.delete_index, workspace_id, bailian_models.DeleteIndexRequest(index_id=index_id))
         return KnowledgeBaseDeleteResponse(success=True)
 
     def list_categories(self) -> KnowledgeBaseListResponse:
+        """
+        获取知识库分类列表.
+
+        参数:
+            无.
+
+        返回:
+            KnowledgeBaseListResponse: 分类列表.
+
+        异常:
+            HTTPException: 三方调用失败时抛出, 会在上层做降级返回默认分类.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListCategoryRequest(category_type="UNSTRUCTURED", max_results=100)
         try:
@@ -536,6 +841,18 @@ class KnowledgeBaseDemoService:
             return KnowledgeBaseListResponse(items=fallback_items, raw=raw)
 
     def list_indices(self, index_name: str | None = None) -> KnowledgeBaseListResponse:
+        """
+        获取知识库列表.
+
+        参数:
+            index_name: 可选, 按名称过滤.
+
+        返回:
+            KnowledgeBaseListResponse: 知识库列表.
+
+        异常:
+            HTTPException: 三方调用失败时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListIndicesRequest(index_name=index_name, page_number="1", page_size="100")
         resp = self._call_bailian_api(client.list_indices, workspace_id, req)
@@ -550,6 +867,24 @@ class KnowledgeBaseDemoService:
         page_number: int | None = None,
         page_size: int | None = None,
     ) -> KnowledgeBaseListResponse:
+        """
+        获取知识库文件列表.
+
+        说明:
+            百炼文件列表接口可能固定使用 page_size=10, 本方法会在需要时自动多页拉取并切片,
+            以支持客户端选择 10, 20, 50 等每页数量.
+
+        参数:
+            index_id: 知识库 ID.
+            page_number: 页码, 从 1 开始.
+            page_size: 每页数量.
+
+        返回:
+            KnowledgeBaseListResponse: 文件列表与分页信息.
+
+        异常:
+            HTTPException: 三方调用失败时抛出.
+        """
         client, bailian_models, workspace_id = self._create_bailian_client()
         effective_page_size = page_size if page_size and page_size > 0 else 10
 
@@ -649,7 +984,35 @@ class KnowledgeBaseDemoService:
 
 
 class KnowledgeBaseDemoController:
+    """
+    知识库管理接口控制器.
+
+    用途:
+        作为 Router 与 Service 的薄层桥接, 负责权限入参对齐与调用编排.
+
+    参数:
+        无.
+
+    返回:
+        无.
+
+    异常:
+        HTTPException: 由 Service 层透出.
+    """
+
     def __init__(self) -> None:
+        """
+        初始化控制器.
+
+        参数:
+            无.
+
+        返回:
+            无.
+
+        异常:
+            无.
+        """
         self._service = KnowledgeBaseDemoService()
 
     async def demo_create(
@@ -657,14 +1020,52 @@ class KnowledgeBaseDemoController:
         request: KnowledgeBaseDemoCreateRequest,
         current_user: AdminUser,
     ) -> KnowledgeBaseDemoCreateResponse:
+        """
+        创建知识库 Demo.
+
+        参数:
+            request: Demo 创建请求.
+            current_user: 当前管理员.
+
+        返回:
+            KnowledgeBaseDemoCreateResponse: 创建结果.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.demo_create(request)
 
     async def list_categories(self, current_user: AdminUser) -> KnowledgeBaseListResponse:
+        """
+        获取知识库分类列表.
+
+        参数:
+            current_user: 当前管理员.
+
+        返回:
+            KnowledgeBaseListResponse: 分类列表.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.list_categories()
 
     async def list_indices(self, current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+        """
+        获取知识库列表.
+
+        参数:
+            current_user: 当前管理员.
+            index_name: 可选, 按名称过滤.
+
+        返回:
+            KnowledgeBaseListResponse: 知识库列表.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.list_indices(index_name=index_name)
 
@@ -675,6 +1076,21 @@ class KnowledgeBaseDemoController:
         page_number: int | None = None,
         page_size: int | None = None,
     ) -> KnowledgeBaseListResponse:
+        """
+        获取知识库文件列表.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+            page_number: 页码.
+            page_size: 每页数量.
+
+        返回:
+            KnowledgeBaseListResponse: 文件列表.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.list_index_files(index_id=index_id, page_number=page_number, page_size=page_size)
 
@@ -684,6 +1100,20 @@ class KnowledgeBaseDemoController:
         index_id: str,
         request: KnowledgeBaseUploadTextRequest,
     ) -> KnowledgeBaseUploadTextResponse:
+        """
+        上传文本到知识库.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+            request: 上传请求.
+
+        返回:
+            KnowledgeBaseUploadTextResponse: 上传结果.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.upload_text_to_index(index_id=index_id, request=request)
 
@@ -693,16 +1123,57 @@ class KnowledgeBaseDemoController:
         index_id: str,
         request: KnowledgeBaseRenameIndexRequest,
     ) -> KnowledgeBaseRenameIndexResponse:
+        """
+        重命名知识库.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+            request: 重命名请求.
+
+        返回:
+            KnowledgeBaseRenameIndexResponse: 重命名结果.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.rename_index(index_id=index_id, request=request)
 
     async def delete_index_file(
         self, current_user: AdminUser, index_id: str, file_id: str
     ) -> KnowledgeBaseDeleteResponse:
+        """
+        删除知识库文件.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+            file_id: 文件 ID.
+
+        返回:
+            KnowledgeBaseDeleteResponse: 删除结果.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.delete_index_file(index_id=index_id, file_id=file_id)
 
     async def delete_index(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+        """
+        删除知识库.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+
+        返回:
+            KnowledgeBaseDeleteResponse: 删除结果.
+
+        异常:
+            HTTPException: Service 调用失败时抛出.
+        """
         _ = current_user
         return self._service.delete_index(index_id=index_id)
 
@@ -721,6 +1192,22 @@ async def demo_create(
     request: KnowledgeBaseDemoCreateRequest,
     current_user: AdminUser,
 ) -> KnowledgeBaseDemoCreateResponse:
+    """
+    创建知识库 Demo.
+
+    用途:
+        用于验证百炼知识库建库与上传链路, 便于联调与问题定位.
+
+    参数:
+        request: Demo 创建请求.
+        current_user: 当前管理员.
+
+    返回:
+        KnowledgeBaseDemoCreateResponse: 创建结果.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.demo_create(request, current_user)
 
 
@@ -732,6 +1219,18 @@ async def demo_create(
     tags=["管理后台"],
 )
 async def list_categories(current_user: AdminUser) -> KnowledgeBaseListResponse:
+    """
+    获取知识库分类列表.
+
+    参数:
+        current_user: 当前管理员.
+
+    返回:
+        KnowledgeBaseListResponse: 分类列表.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.list_categories(current_user)
 
 
@@ -743,6 +1242,19 @@ async def list_categories(current_user: AdminUser) -> KnowledgeBaseListResponse:
     tags=["管理后台"],
 )
 async def list_indices(current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+    """
+    获取知识库列表.
+
+    参数:
+        current_user: 当前管理员.
+        index_name: 可选, 按名称过滤.
+
+    返回:
+        KnowledgeBaseListResponse: 知识库列表.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.list_indices(current_user, index_name=index_name)
 
 
@@ -759,6 +1271,21 @@ async def list_index_files(
     page_number: int | None = None,
     page_size: int | None = None,
 ) -> KnowledgeBaseListResponse:
+    """
+    获取知识库文件列表.
+
+    参数:
+        current_user: 当前管理员.
+        index_id: 知识库 ID.
+        page_number: 页码, 从 1 开始.
+        page_size: 每页数量.
+
+    返回:
+        KnowledgeBaseListResponse: 文件列表与分页信息.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.list_index_files(
         current_user, index_id=index_id, page_number=page_number, page_size=page_size
     )
@@ -776,6 +1303,20 @@ async def upload_text_to_index(
     index_id: str,
     request: KnowledgeBaseUploadTextRequest,
 ) -> KnowledgeBaseUploadTextResponse:
+    """
+    上传文本到知识库.
+
+    参数:
+        current_user: 当前管理员.
+        index_id: 知识库 ID.
+        request: 上传请求.
+
+    返回:
+        KnowledgeBaseUploadTextResponse: 上传结果.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.upload_text_to_index(current_user, index_id=index_id, request=request)
 
 
@@ -791,6 +1332,20 @@ async def rename_index(
     index_id: str,
     request: KnowledgeBaseRenameIndexRequest,
 ) -> KnowledgeBaseRenameIndexResponse:
+    """
+    重命名知识库.
+
+    参数:
+        current_user: 当前管理员.
+        index_id: 知识库 ID.
+        request: 重命名请求.
+
+    返回:
+        KnowledgeBaseRenameIndexResponse: 重命名结果.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.rename_index(current_user, index_id=index_id, request=request)
 
 
@@ -802,6 +1357,20 @@ async def rename_index(
     tags=["管理后台"],
 )
 async def delete_index_file(current_user: AdminUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+    """
+    删除知识库文件.
+
+    参数:
+        current_user: 当前管理员.
+        index_id: 知识库 ID.
+        file_id: 文件 ID.
+
+    返回:
+        KnowledgeBaseDeleteResponse: 删除结果.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.delete_index_file(current_user, index_id=index_id, file_id=file_id)
 
 
@@ -813,4 +1382,17 @@ async def delete_index_file(current_user: AdminUser, index_id: str, file_id: str
     tags=["管理后台"],
 )
 async def delete_index(current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+    """
+    删除知识库.
+
+    参数:
+        current_user: 当前管理员.
+        index_id: 知识库 ID.
+
+    返回:
+        KnowledgeBaseDeleteResponse: 删除结果.
+
+    异常:
+        HTTPException: 由控制器与服务层透出.
+    """
     return await controller.delete_index(current_user, index_id=index_id)
