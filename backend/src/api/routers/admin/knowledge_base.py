@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: knowledge_base.py
 # 作者: wuhao
-# 日期: 2026_04_16_11:18:54
+# 日期: 2026_04_17_11:41:30
 # 描述: 管理后台知识库相关接口
 
 from __future__ import annotations
@@ -40,6 +40,9 @@ class KnowledgeBaseDemoCreateResponse(BaseModel):
 class KnowledgeBaseListResponse(BaseModel):
     items: list[dict[str, Any]] = Field(default_factory=list, description="列表数据")
     raw: dict[str, Any] = Field(default_factory=dict, description="原始响应, 便于排查字段变更")
+    total: int | None = Field(default=None, description="总数, 可用于分页")
+    page_number: int | None = Field(default=None, description="页码, 从 1 开始")
+    page_size: int | None = Field(default=None, description="每页数量")
 
 
 class KnowledgeBaseUploadTextRequest(BaseModel):
@@ -117,6 +120,17 @@ class KnowledgeBaseDemoService:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"code": 500, "message": "上传参数 headers 格式不支持"},
         )
+
+    def _extract_total(self, body: dict[str, Any]) -> int | None:
+        if not isinstance(body, dict):
+            return None
+        for key in ("total", "total_count", "totalCount", "total_items", "totalItems"):
+            val = body.get(key)
+            if isinstance(val, int):
+                return val
+            if isinstance(val, str) and val.isdigit():
+                return int(val)
+        return None
 
     def _create_bailian_client(self) -> tuple[Any, Any, str]:
         try:
@@ -475,14 +489,58 @@ class KnowledgeBaseDemoService:
         items = self._extract_list(body)
         return KnowledgeBaseListResponse(items=items, raw=raw)
 
-    def list_index_files(self, index_id: str) -> KnowledgeBaseListResponse:
+    def list_index_files(
+        self,
+        index_id: str,
+        page_number: int | None = None,
+        page_size: int | None = None,
+    ) -> KnowledgeBaseListResponse:
         client, bailian_models, workspace_id = self._create_bailian_client()
-        req = bailian_models.ListIndexFileDetailsRequest(index_id=index_id, page_number=1, page_size=100)
-        resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
-        raw = self._extract_raw(resp)
-        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
-        items = self._extract_list(body)
-        return KnowledgeBaseListResponse(items=items, raw=raw)
+        effective_page_size = page_size if page_size and page_size > 0 else 100
+
+        if page_number and page_number > 0:
+            req = bailian_models.ListIndexFileDetailsRequest(
+                index_id=index_id,
+                page_number=str(page_number),
+                page_size=str(effective_page_size),
+            )
+            resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
+            raw = self._extract_raw(resp)
+            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+            items = self._extract_list(body)
+            total = self._extract_total(body) if isinstance(body, dict) else None
+            return KnowledgeBaseListResponse(
+                items=items,
+                raw=raw,
+                total=total if total is not None else len(items),
+                page_number=page_number,
+                page_size=effective_page_size,
+            )
+
+        all_items: list[dict[str, Any]] = []
+        pages = 0
+        total: int | None = None
+        while True:
+            pages += 1
+            req = bailian_models.ListIndexFileDetailsRequest(
+                index_id=index_id,
+                page_number=str(pages),
+                page_size=str(effective_page_size),
+            )
+            resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
+            raw = self._extract_raw(resp)
+            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+            if isinstance(body, dict) and total is None:
+                total = self._extract_total(body)
+            items = self._extract_list(body)
+            if items:
+                all_items.extend(items)
+            if not items or len(items) < effective_page_size:
+                return KnowledgeBaseListResponse(
+                    items=all_items,
+                    raw={**raw, "fetched_pages": pages},
+                    total=total if total is not None else len(all_items),
+                )
 
 
 class KnowledgeBaseDemoController:
@@ -505,9 +563,15 @@ class KnowledgeBaseDemoController:
         _ = current_user
         return self._service.list_indices(index_name=index_name)
 
-    async def list_index_files(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseListResponse:
+    async def list_index_files(
+        self,
+        current_user: AdminUser,
+        index_id: str,
+        page_number: int | None = None,
+        page_size: int | None = None,
+    ) -> KnowledgeBaseListResponse:
         _ = current_user
-        return self._service.list_index_files(index_id=index_id)
+        return self._service.list_index_files(index_id=index_id, page_number=page_number, page_size=page_size)
 
     async def upload_text_to_index(
         self,
@@ -581,11 +645,18 @@ async def list_indices(current_user: AdminUser, index_name: str | None = None) -
     "/indices/{index_id}/files",
     response_model=KnowledgeBaseListResponse,
     summary="获取知识库文件列表",
-    description="根据知识库 ID 获取文件明细列表.",
+    description="根据知识库 ID 获取文件明细列表, 支持分页参数.",
     tags=["管理后台"],
 )
-async def list_index_files(current_user: AdminUser, index_id: str) -> KnowledgeBaseListResponse:
-    return await controller.list_index_files(current_user, index_id=index_id)
+async def list_index_files(
+    current_user: AdminUser,
+    index_id: str,
+    page_number: int | None = None,
+    page_size: int | None = None,
+) -> KnowledgeBaseListResponse:
+    return await controller.list_index_files(
+        current_user, index_id=index_id, page_number=page_number, page_size=page_size
+    )
 
 
 @router.post(

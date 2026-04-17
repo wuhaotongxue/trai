@@ -5,7 +5,7 @@
  * 描述: 专属知识库管理页面，支持新建知识库与上传文件 (三段式折叠布局)
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen } from 'lucide-react'
+import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
 
 interface KbCategory {
   id: string
@@ -54,12 +54,39 @@ const KnowledgeBasePage: React.FC = () => {
   const [show_cat_modal, set_show_cat_modal] = useState(false)
   const [new_cat_name, set_new_cat_name] = useState('')
   const [search_query, set_search_query] = useState('')
+  const [file_page, set_file_page] = useState(1)
+  const [file_page_size, set_file_page_size] = useState(10)
   
   // 知识库操作状态
   const [editing_kb_id, set_editing_kb_id] = useState<string | null>(null)
   const [edit_kb_name, set_edit_kb_name] = useState('')
 
   const file_input_ref = useRef<HTMLInputElement>(null)
+
+  const active_files = useMemo(() => {
+    if (!active_kb_id) return []
+    return files.filter((f) => f.kb_id === active_kb_id)
+  }, [files, active_kb_id])
+
+  const filtered_files = useMemo(() => {
+    const q = search_query.trim().toLowerCase()
+    if (!q) return active_files
+    return active_files.filter((f) => f.name.toLowerCase().includes(q))
+  }, [active_files, search_query])
+
+  const pagination = useMemo(() => {
+    const total = filtered_files.length
+    const total_pages = Math.max(1, Math.ceil(total / file_page_size))
+    const current_page = Math.min(file_page, total_pages)
+    const start_index = (current_page - 1) * file_page_size
+    const end_index = start_index + file_page_size
+    const page_items = filtered_files.slice(start_index, end_index)
+    return { total, total_pages, current_page, start_index, end_index, page_items }
+  }, [filtered_files, file_page, file_page_size])
+
+  useEffect(() => {
+    set_file_page(1)
+  }, [active_kb_id, search_query, file_page_size])
 
   useEffect(() => {
     const load_remote = async () => {
@@ -186,6 +213,50 @@ const KnowledgeBasePage: React.FC = () => {
 
     void load_files()
   }, [active_kb_id])
+
+  const refresh_files = async () => {
+    if (!active_kb_id) return
+    if (!window.electron_api?.kb_list_index_files) return
+
+    set_files_loading(true)
+    set_files_error('')
+
+    try {
+      const res = await window.electron_api.kb_list_index_files(active_kb_id)
+      if (!res.success) {
+        set_files_error(res.error || '获取知识库文件失败')
+        return
+      }
+
+      const items_source = res.data?.data?.items || res.data?.items || res.data?.data || res.data || []
+      const items: any[] = Array.isArray(items_source) ? items_source : []
+      const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      const mapped_files: KbFile[] = items
+        .map((it) => {
+          const raw_status = String(it.status || it.Status || it.document_status || it.documentStatus || '').toUpperCase()
+          let status: KbFile['status'] = 'success'
+          if (raw_status === 'FAILED' || raw_status === 'ERROR') status = 'error'
+          if (raw_status === 'PENDING' || raw_status === 'PROCESSING' || raw_status === 'RUNNING') status = 'uploading'
+
+          return {
+            id: String(it.file_id || it.fileId || it.FileId || it.document_id || it.documentId || it.id || it.Id || ''),
+            kb_id: active_kb_id,
+            name: String(it.file_name || it.fileName || it.FileName || it.document_name || it.documentName || it.name || it.Name || ''),
+            size: String(it.size || it.Size || it.size_in_bytes || it.sizeInBytes || '-'),
+            upload_time: String(it.upload_time || it.gmtCreate || it.GmtCreate || it.createTime || now_str),
+            status
+          }
+        })
+        .filter((f) => f.id && f.name)
+
+      set_files(mapped_files)
+      set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: mapped_files.length } : kb))
+    } catch (err: any) {
+      set_files_error(err?.message || '获取知识库文件失败')
+    } finally {
+      set_files_loading(false)
+    }
+  }
 
   // -- Handlers --
   const handle_create_cat = () => {
@@ -601,6 +672,31 @@ const KnowledgeBasePage: React.FC = () => {
                       style={{ padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '13px', width: '200px' }}
                     />
                   </div>
+                  <button
+                    onClick={refresh_files}
+                    title="刷新文件列表"
+                    disabled={files_loading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '36px',
+                      height: '36px',
+                      backgroundColor: 'transparent',
+                      color: '#64748b',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      cursor: files_loading ? 'not-allowed' : 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!files_loading) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <RotateCw size={16} className={files_loading ? 'animate-spin' : ''} />
+                  </button>
                   <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} style={{ display: 'none' }} />
                   <button
                     onClick={() => file_input_ref.current?.click()}
@@ -616,13 +712,13 @@ const KnowledgeBasePage: React.FC = () => {
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-                {files.filter(f => f.kb_id === active_kb_id).length === 0 ? (
+                {filtered_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                     <div style={{ width: '80px', height: '80px', backgroundColor: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                       <Database size={32} color="#cbd5e1" />
                     </div>
                     <p style={{ fontSize: '15px', marginBottom: '8px' }}>该知识库暂无文件</p>
-                    <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件，支持 PDF、Word、TXT 等格式</p>
+                    <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
@@ -637,7 +733,7 @@ const KnowledgeBasePage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {files.filter(f => f.kb_id === active_kb_id && f.name.toLowerCase().includes(search_query.toLowerCase())).map(file => (
+                        {pagination.page_items.map(file => (
                           <tr key={file.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                             <td style={{ padding: '12px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -663,6 +759,59 @@ const KnowledgeBasePage: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+                    <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        共 {pagination.total} 条
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
+                          <span>每页</span>
+                          <select
+                            value={file_page_size}
+                            onChange={(e) => set_file_page_size(Number(e.target.value))}
+                            style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #e2e8f0', outline: 'none', backgroundColor: '#ffffff' }}
+                          >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                          </select>
+                        </div>
+
+                        <button
+                          onClick={() => set_file_page((p) => Math.max(1, p - 1))}
+                          disabled={pagination.current_page <= 1}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: pagination.current_page <= 1 ? '#f8fafc' : '#ffffff',
+                            color: pagination.current_page <= 1 ? '#cbd5e1' : '#334155',
+                            cursor: pagination.current_page <= 1 ? 'not-allowed' : 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          上一页
+                        </button>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                          第 {pagination.current_page} / {pagination.total_pages} 页
+                        </div>
+                        <button
+                          onClick={() => set_file_page((p) => Math.min(pagination.total_pages, p + 1))}
+                          disabled={pagination.current_page >= pagination.total_pages}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: pagination.current_page >= pagination.total_pages ? '#f8fafc' : '#ffffff',
+                            color: pagination.current_page >= pagination.total_pages ? '#cbd5e1' : '#334155',
+                            cursor: pagination.current_page >= pagination.total_pages ? 'not-allowed' : 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          下一页
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
