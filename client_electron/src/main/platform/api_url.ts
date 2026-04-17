@@ -8,8 +8,8 @@ import { config_store } from './config_store'
 
 export class ApiUrl {
   static get_api_base_url(): string {
-    const raw = String(config_store.get('api_url', 'http://trai.tuoren.com:5666')).trim()
-    if (!raw) return 'http://trai.tuoren.com:5666'
+    const raw = String(config_store.get('api_url', 'http://127.0.0.1:5666')).trim()
+    if (!raw) return 'http://127.0.0.1:5666'
     return raw.replace(/\/+$/, '')
   }
 

@@ -12,10 +12,10 @@ import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('admin')
-  const [password, set_password] = useState('Tuoren@@2026')
+  const [password, set_password] = useState('123456')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('http://trai.tuoren.com:5666')
+  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ const Login: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       try {
-        const res = await window.electron_api.config_get('api_url', 'http://trai.tuoren.com:5666')
+        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
         if (res.success && typeof res.data === 'string' && res.data.trim()) {
           set_api_url(res.data.trim())
         }
@@ -88,10 +88,20 @@ const Login: React.FC = () => {
         })
         navigate('/')
       } else {
-        set_error_msg(res.error || '登录失败, 请检查用户名和密码')
+        const raw = String(res.error || '')
+        if (raw.includes('用户名或密码错误') || raw.includes('401')) {
+          set_error_msg('密码错误, 请联系邮箱: tuoren.ai@gmail.com')
+        } else {
+          set_error_msg(raw || '登录失败, 请检查用户名和密码')
+        }
       }
     } catch (err: any) {
-      set_error_msg(err.message || '登录异常')
+      const raw = String(err?.message || '')
+      if (raw.includes('401')) {
+        set_error_msg('密码错误, 请联系邮箱: tuoren.ai@gmail.com')
+      } else {
+        set_error_msg(raw || '登录异常')
+      }
     }
   }
 
@@ -110,7 +120,7 @@ const Login: React.FC = () => {
                   value={api_url}
                   onChange={(e) => set_api_url(e.target.value)}
                   style={{ flex: 1, padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                  placeholder="http://trai.tuoren.com:5666"
+                  placeholder="http://127.0.0.1:5666"
                   onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
                   onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                   disabled={api_loading || api_saving}
@@ -125,7 +135,7 @@ const Login: React.FC = () => {
                 </button>
               </div>
               <div style={{ marginTop: '6px', color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px' }}>
-                示例: trai.tuoren.com:5666 或 http://192.168.98.72:5666
+                示例: 127.0.0.1:5666 或 http://192.168.98.72:5666
               </div>
             </div>
             <div>
