@@ -176,6 +176,23 @@ const KnowledgeBasePage: React.FC = () => {
     void load_remote()
   }, [])
 
+  /**
+   * 拉取指定页的知识库文件列表.
+   *
+   * 用途:
+   * - 驱动文件表格展示, 支持分页与每页数量切换
+   * - 同步维护 total, 当前页码与知识库 file_count, 便于分页 UI 计算
+   *
+   * 参数:
+   * - target_page: 目标页码, 从 1 开始
+   * - page_size_override: 可选, 本次请求临时覆盖 page_size, 用于切换每页数量时立即生效
+   *
+   * 返回:
+   * - Promise<void>
+   *
+   * 异常:
+   * - 不抛出异常到调用方, 统一转为 files_error 与 debug 输出
+   */
   const fetch_files_page = async (target_page: number, page_size_override?: number) => {
     if (!active_kb_id) return
     if (!window.electron_api?.kb_list_index_files) return
@@ -266,6 +283,21 @@ const KnowledgeBasePage: React.FC = () => {
     }
   }
 
+  /**
+   * 发起分页动作请求并维护加载态.
+   *
+   * 用途:
+   * - 将上一页, 下一页, 跳转, 刷新等动作统一封装
+   * - 控制 files_loading 与 page_action, 防止重复触发导致 UI 抖动或并发请求
+   *
+   * 参数:
+   * - target_page: 目标页码
+   * - action: 动作来源, 用于 UI 展示与调试
+   * - page_size_override: 可选, 本次请求临时覆盖 page_size
+   *
+   * 返回:
+   * - Promise<void>
+   */
   const request_files_page = async (
     target_page: number,
     action: 'prev' | 'next' | 'jump' | 'refresh' | 'init',
@@ -284,6 +316,12 @@ const KnowledgeBasePage: React.FC = () => {
     void request_files_page(1, 'init')
   }, [active_kb_id, file_page_size])
 
+  /**
+   * 刷新当前页文件列表.
+   *
+   * 返回:
+   * - Promise<void>
+   */
   const refresh_files = async () => {
     await request_files_page(file_current_page, 'refresh')
   }
@@ -706,7 +744,7 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '24px', minHeight: 0 }}>
                 {files_loading && display_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                     <Loader2 size={28} className="animate-spin" />
@@ -721,8 +759,8 @@ const KnowledgeBasePage: React.FC = () => {
                     <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
-                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'auto' }}>
                       <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
@@ -760,15 +798,15 @@ const KnowledgeBasePage: React.FC = () => {
                         ))}
                       </tbody>
                       </table>
-                    </div>
-                    {files_loading ? (
-                      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
-                          <Loader2 size={18} className="animate-spin" />
-                          <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                      {files_loading ? (
+                        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
+                            <Loader2 size={18} className="animate-spin" />
+                            <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
+                      ) : null}
+                    </div>
                     <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ fontSize: '12px', color: '#64748b' }}>
@@ -890,7 +928,7 @@ const KnowledgeBasePage: React.FC = () => {
                       </div>
                     </div>
                     {debug_visible ? (
-                      <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 16px', backgroundColor: '#f8fafc' }}>
+                      <div style={{ borderTop: '1px solid #e2e8f0', padding: '10px 16px', backgroundColor: '#f8fafc', maxHeight: '160px', overflowY: 'auto' }}>
                         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
                           debug: kb_id={active_kb_id || '-'} page={file_current_page} page_size={file_page_size} total={file_total} items={display_files.length}
                         </div>
