@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: session.py
 # 作者: wuhao
-# 日期: 2026_04_10
+# 日期: 2026_04_17_08:28:46
 # 描述: 会话管理接口
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ class SessionDetailResponse(BaseModel):
 class SendMessageRequest(BaseModel):
     """发送消息请求"""
 
-    content: Annotated[str, Field(min_length=1, max_length=32000, description="消息���容")]
+    content: Annotated[str, Field(min_length=1, max_length=32000, description="消息内容")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
 
 
@@ -93,7 +93,13 @@ class ActionResponse(BaseModel):
     message: str = Field(description="提示信息")
 
 
-@router.post("/sessions/{session_id}/messages", response_model=SendMessageResponse, tags=["会话"])
+@router.post(
+    "/sessions/{session_id}/messages",
+    response_model=SendMessageResponse,
+    tags=["会话"],
+    summary="发送消息",
+    description="向指定会话追加消息, 并返回助手回复.",
+)
 async def send_message(
     session_id: str,
     request: SendMessageRequest,
@@ -185,7 +191,13 @@ async def send_message(
         )
 
 
-@router.post("/sessions", response_model=CreateSessionResponse, tags=["会话"])
+@router.post(
+    "/sessions",
+    response_model=CreateSessionResponse,
+    tags=["会话"],
+    summary="创建会话",
+    description="创建一个新的会话, 用于后续多轮对话.",
+)
 async def create_session(
     request: CreateSessionRequest,
     current_user: CurrentUser,
@@ -225,7 +237,13 @@ async def create_session(
     )
 
 
-@router.get("/sessions", response_model=SessionListResponse, tags=["会话"])
+@router.get(
+    "/sessions",
+    response_model=SessionListResponse,
+    tags=["会话"],
+    summary="会话列表",
+    description="获取当前用户的会话列表.",
+)
 async def list_sessions(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
@@ -274,7 +292,13 @@ async def list_sessions(
     )
 
 
-@router.get("/sessions/{session_id}", response_model=SessionDetailResponse, tags=["会话"])
+@router.get(
+    "/sessions/{session_id}",
+    response_model=SessionDetailResponse,
+    tags=["会话"],
+    summary="会话详情",
+    description="获取指定会话的详情与历史消息.",
+)
 async def get_session_detail(
     session_id: str,
     current_user: CurrentUser,
@@ -326,7 +350,13 @@ async def get_session_detail(
     )
 
 
-@router.delete("/sessions/{session_id}", response_model=ActionResponse, tags=["会话"])
+@router.delete(
+    "/sessions/{session_id}",
+    response_model=ActionResponse,
+    tags=["会话"],
+    summary="删除会话",
+    description="删除指定会话及其消息, 需要权限校验与策略确认.",
+)
 async def delete_session(
     session_id: str,
     current_user: CurrentUser,
@@ -398,7 +428,12 @@ async def delete_session(
     return ActionResponse(message="会话已删除")
 
 
-@router.post("/sessions/{session_id}/messages/stream", tags=["会话"])
+@router.post(
+    "/sessions/{session_id}/messages/stream",
+    tags=["会话"],
+    summary="发送消息(流式)",
+    description="向指定会话发送消息, 以 SSE 流式返回助手回复, 支持 AbortStream 中断.",
+)
 async def send_message_stream(
     session_id: str,
     request: SendMessageRequest,
@@ -538,7 +573,12 @@ async def send_message_stream(
 _active_abort_events: dict[str, asyncio.Event] = {}
 
 
-@router.delete("/sessions/{session_id}/messages/stream", tags=["会话"])
+@router.delete(
+    "/sessions/{session_id}/messages/stream",
+    tags=["会话"],
+    summary="中断流式输出",
+    description="中断指定会话当前正在进行的流式对话输出.",
+)
 async def abort_stream(
     session_id: str,
     current_user: CurrentUser,
@@ -575,7 +615,13 @@ class PolicyConfirmResponse(BaseModel):
     message: str = Field(description="提示信息")
 
 
-@router.post("/policy/confirm", response_model=PolicyConfirmResponse, tags=["策略"])
+@router.post(
+    "/policy/confirm",
+    response_model=PolicyConfirmResponse,
+    tags=["策略"],
+    summary="策略确认",
+    description="对策略引擎返回 ASK 的高危操作进行二次确认.",
+)
 async def policy_confirm(
     request: PolicyConfirmRequest,
     current_user: CurrentUser,

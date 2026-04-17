@@ -59,7 +59,7 @@ def init_database() -> None:
 
 def create_admin_user(
     username: str = "admin",
-    password: str = "admin123",
+    password: str = "Tuoren@@2026",
     email: str = "admin@example.com",
     display_name: str = "管理员",
 ) -> None:
@@ -113,7 +113,6 @@ def create_admin_user(
 
         logger.info("管理员账户创建成功!")
         logger.info(f"  用户名: {username}")
-        logger.info(f"  密码: {password}")
         logger.info(f"  邮箱: {email}")
         logger.info("  请尽快修改默认密码!")
 
@@ -237,8 +236,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--admin-password",
-        default="admin123",
-        help="管理员密码(默认: admin123)",
+        default="Tuoren@@2026",
+        help="管理员密码(默认: Tuoren@@2026)",
     )
     parser.add_argument(
         "--admin-email",

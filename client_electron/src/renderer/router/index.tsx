@@ -17,11 +17,11 @@ import TextToImage from '@/pages/ai/text-to-image'
 import ImageToImage from '@/pages/ai/image-to-image'
 import AiMusic from '@/pages/ai/music'
 import AiVideo from '@/pages/ai/video'
-import AiReport from '@/pages/ai/report'
 import ComfyUI from '@/pages/ai/comfyui'
 import AgentManagement from '@/pages/agent/management'
 import Feedback from '@/pages/feedback'
-import KnowledgeBasePage from '@/pages/knowledge-base'
+import KnowledgeBasePage from '@/pages/knowledge_base'
+import UnderDevelopment from '@/pages/under_development'
 import { use_auth_store } from '@/store/auth'
 
 // 需要认证的路由守卫
@@ -73,7 +73,7 @@ export const router = createHashRouter([
       },
       {
         path: '/ai/report',
-        element: <AiReport />
+        element: <UnderDevelopment />
       },
       {
         path: '/ai/comfyui',
@@ -84,7 +84,7 @@ export const router = createHashRouter([
         element: <AgentManagement />
       },
       {
-        path: '/knowledge-base',
+        path: '/knowledge_base',
         element: <KnowledgeBasePage />
       },
       {

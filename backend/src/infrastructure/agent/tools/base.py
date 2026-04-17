@@ -84,6 +84,7 @@ class ExecutionContext:
     user_role: str = "normal"
     session_id: str | None = None
     agent_id: str | None = None
+    knowledge_base_id: str | None = None
     trace_id: str | None = None
     tenant_id: str | None = None
 
