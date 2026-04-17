@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: agent.py
 # 作者: wuhao
-# 日期: 2026_04_16_17:20:32
+# 日期: 2026_04_17_08:28:46
 # 描述: Agent 工具调用路由
 
 from __future__ import annotations
@@ -127,7 +127,12 @@ class AgentChatResponse(BaseModel):
     trace_id: str = Field(description="链路追踪 ID")
 
 
-@router.post("/agent/chat", tags=["Agent"])
+@router.post(
+    "/agent/chat",
+    tags=["Agent"],
+    summary="智能体对话",
+    description="智能体对话入口, 支持工具调用与知识库检索, 可选流式输出.",
+)
 async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
@@ -160,7 +165,7 @@ async def agent_chat(
 
     executor = AgentExecutor.get_instance()
 
-    # == RAG: 若用户选择了知识库,提前去百炼查一次并把结果拼到系统提示里 ==
+    # == RAG: 若用户选择了知识库, 提前去百炼查一次并把结果拼到系统提示里 ==
     rag_context = ""
     rag_sources: list[dict[str, Any]] = []
     if request.knowledge_base_id:
@@ -179,7 +184,7 @@ async def agent_chat(
             res = await asyncio.to_thread(_do_retrieve)
             if res.body and res.body.data and res.body.data.nodes:
                 rag_sources = KnowledgeBaseSourceExtractor.extract(res.body.data.nodes)
-                rag_context = "\n\n以下是相关的知识库参考资料：\n"
+                rag_context = "\n\n以下是相关的知识库参考资料:\n"
                 for i, node in enumerate(res.body.data.nodes):
                     rag_context += f"【资料 {i + 1}】\n{node.text}\n"
         except Exception as e:
@@ -189,7 +194,11 @@ async def agent_chat(
 
     messages = []
     if rag_context:
-        final_message = f"请结合以下参考资料回答我的问题。如果资料中没有相关信息，请明确说明无法从知识库获取答案。{rag_context}\n\n我的问题是：{request.message}"
+        final_message = (
+            "请结合以下参考资料回答我的问题. "
+            "如果资料中没有相关信息, 请明确说明无法从知识库获取答案. "
+            f"{rag_context}\n\n我的问题是: {request.message}"
+        )
         messages.append({"role": "user", "content": final_message})
     else:
         messages.append({"role": "user", "content": request.message})
@@ -248,7 +257,13 @@ class ToolListResponse(BaseModel):
     tools: list[dict[str, Any]] = Field(description="工具定义列表")
 
 
-@router.get("/agent/tools", response_model=ToolListResponse, tags=["Agent"])
+@router.get(
+    "/agent/tools",
+    response_model=ToolListResponse,
+    tags=["Agent"],
+    summary="工具列表",
+    description="获取智能体可用工具列表.",
+)
 async def list_tools(
     current_user: CurrentUser,
 ) -> ToolListResponse:
@@ -288,7 +303,13 @@ class ToolCallResponse(BaseModel):
     duration_ms: int = Field(description="执行耗时")
 
 
-@router.post("/agent/tools/call", response_model=ToolCallResponse, tags=["Agent"])
+@router.post(
+    "/agent/tools/call",
+    response_model=ToolCallResponse,
+    tags=["Agent"],
+    summary="调用工具",
+    description="手动调用指定工具, 便于联调与排查.",
+)
 async def call_tool(
     request: ToolCallRequest,
     current_user: CurrentUser,
@@ -355,7 +376,13 @@ class UserQuotaResponse(BaseModel):
     quotas: list[QuotaStatusResponse] = Field(description="各类型配额状态")
 
 
-@router.get("/agent/quota", response_model=UserQuotaResponse, tags=["Agent"])
+@router.get(
+    "/agent/quota",
+    response_model=UserQuotaResponse,
+    tags=["Agent"],
+    summary="配额信息",
+    description="获取当前用户的智能体配额信息.",
+)
 async def get_user_quota(
     current_user: CurrentUser,
 ) -> UserQuotaResponse:
