@@ -1015,6 +1015,78 @@ class KnowledgeBaseDemoController:
         """
         self._service = KnowledgeBaseDemoService()
 
+    def _is_super_admin(self, current_user: AdminUser) -> bool:
+        """
+        判断是否为超级管理员.
+
+        规则:
+            目前以 username=admin 作为超级管理员标识.
+
+        参数:
+            current_user: 当前管理员.
+
+        返回:
+            bool: True 为超级管理员.
+
+        异常:
+            无.
+        """
+        return str(current_user.get("username") or "") == "admin"
+
+    def _get_owner_prefix(self, current_user: AdminUser) -> str:
+        """
+        获取当前用户的知识库名称前缀.
+
+        参数:
+            current_user: 当前管理员.
+
+        返回:
+            str: 前缀, 例如 `wuhao__`.
+
+        异常:
+            无.
+        """
+        username = str(current_user.get("username") or "").strip()
+        return f"{username}__" if username else ""
+
+    def _ensure_index_access(self, current_user: AdminUser, index_id: str) -> None:
+        """
+        校验当前用户是否有权限访问指定知识库.
+
+        说明:
+            为了实现多账号隔离, 非超级管理员仅允许访问 index_name 以 `{username}__` 开头的知识库.
+            若用户拿到其他知识库的 index_id, 也会被拦截.
+
+        参数:
+            current_user: 当前管理员.
+            index_id: 知识库 ID.
+
+        返回:
+            无.
+
+        异常:
+            HTTPException: 权限不足时抛出.
+        """
+        if self._is_super_admin(current_user):
+            return
+
+        owner_prefix = self._get_owner_prefix(current_user)
+        if not owner_prefix:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"code": 403, "message": "权限不足"},
+            )
+
+        indices = self._service.list_indices(index_name=owner_prefix).items
+        for item in indices:
+            if str(item.get("id") or item.get("index_id") or "") == index_id:
+                return
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "无权访问该知识库"},
+        )
+
     async def demo_create(
         self,
         request: KnowledgeBaseDemoCreateRequest,
@@ -1033,8 +1105,23 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
-        return self._service.demo_create(request)
+        if self._is_super_admin(current_user):
+            return self._service.demo_create(request)
+
+        owner_prefix = self._get_owner_prefix(current_user)
+        index_name = request.index_name or ""
+        if index_name and not index_name.startswith(owner_prefix):
+            index_name = f"{owner_prefix}{index_name}"
+        elif not index_name:
+            suffix = datetime.now().strftime("%m%d_%H%M%S")
+            index_name = f"{owner_prefix}kb_{suffix}"
+
+        scoped_request = KnowledgeBaseDemoCreateRequest(
+            content=request.content,
+            file_name=request.file_name,
+            index_name=index_name,
+        )
+        return self._service.demo_create(scoped_request)
 
     async def list_categories(self, current_user: AdminUser) -> KnowledgeBaseListResponse:
         """
@@ -1066,8 +1153,14 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
-        return self._service.list_indices(index_name=index_name)
+        if self._is_super_admin(current_user):
+            return self._service.list_indices(index_name=index_name)
+
+        owner_prefix = self._get_owner_prefix(current_user)
+        effective_filter = owner_prefix
+        if index_name:
+            effective_filter = f"{owner_prefix}{index_name}"
+        return self._service.list_indices(index_name=effective_filter)
 
     async def list_index_files(
         self,
@@ -1091,7 +1184,7 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
+        self._ensure_index_access(current_user, index_id)
         return self._service.list_index_files(index_id=index_id, page_number=page_number, page_size=page_size)
 
     async def upload_text_to_index(
@@ -1114,7 +1207,7 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
+        self._ensure_index_access(current_user, index_id)
         return self._service.upload_text_to_index(index_id=index_id, request=request)
 
     async def rename_index(
@@ -1137,8 +1230,16 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
-        return self._service.rename_index(index_id=index_id, request=request)
+        self._ensure_index_access(current_user, index_id)
+        if self._is_super_admin(current_user):
+            return self._service.rename_index(index_id=index_id, request=request)
+
+        owner_prefix = self._get_owner_prefix(current_user)
+        index_name = request.index_name
+        if not index_name.startswith(owner_prefix):
+            index_name = f"{owner_prefix}{index_name}"
+        scoped_request = KnowledgeBaseRenameIndexRequest(index_name=index_name)
+        return self._service.rename_index(index_id=index_id, request=scoped_request)
 
     async def delete_index_file(
         self, current_user: AdminUser, index_id: str, file_id: str
@@ -1157,7 +1258,7 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
+        self._ensure_index_access(current_user, index_id)
         return self._service.delete_index_file(index_id=index_id, file_id=file_id)
 
     async def delete_index(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
@@ -1174,7 +1275,7 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
+        self._ensure_index_access(current_user, index_id)
         return self._service.delete_index(index_id=index_id)
 
 
