@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: upload.py
 # 作者: wuhao
-# 日期: 2026_04_10_09:22:00
+# 日期: 2026_04_17_08:28:46
 # 描述: 媒体上传接口
 
 from __future__ import annotations
@@ -41,7 +41,13 @@ class FileInfo(BaseModel):
     created_at: str = Field(description="上传时间")
 
 
-@router.post("/upload", response_model=UploadResponse, tags=["媒体"])
+@router.post(
+    "/upload",
+    response_model=UploadResponse,
+    tags=["媒体"],
+    summary="上传文件",
+    description="上传单个文件到存储, 返回文件 URL 与任务信息.",
+)
 async def upload_file(
     file: UploadFile = File(..., description="上传文件"),
     folder: Annotated[str, Form(description="存储文件夹")] = "general",
@@ -103,7 +109,12 @@ async def upload_file(
         )
 
 
-@router.post("/upload/batch", tags=["媒体"])
+@router.post(
+    "/upload/batch",
+    tags=["媒体"],
+    summary="批量上传文件",
+    description="批量上传多个文件, 默认最多 10 个.",
+)
 async def upload_batch(
     files: list[UploadFile] = File(..., description="上传的文件列表(最多 10 个)"),
     folder: Annotated[str, Form(description="存储文件夹")] = "general",
@@ -167,7 +178,12 @@ async def upload_batch(
     }
 
 
-@router.get("/upload/presign", tags=["媒体"])
+@router.get(
+    "/upload/presign",
+    tags=["媒体"],
+    summary="获取预签名 URL",
+    description="获取对象的预签名 URL, 用于直传或下载.",
+)
 async def get_presigned_url(
     object_key: Annotated[str, Query(description="S3 对象键")],
     expires_in: Annotated[int, Query(ge=60, le=3600, description="过期时间(秒)")] = 300,
@@ -200,7 +216,12 @@ async def get_presigned_url(
         )
 
 
-@router.delete("/upload/{object_key:path}", tags=["媒体"])
+@router.delete(
+    "/upload/{object_key:path}",
+    tags=["媒体"],
+    summary="删除文件",
+    description="删除指定对象, 仅管理员允许.",
+)
 async def delete_file(
     object_key: str,
     current_user: CurrentUser = None,

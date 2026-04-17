@@ -49,6 +49,7 @@ frontend_next/.pnp.*
 client_electron/node_modules/
 client_electron/dist/
 client_electron/release/
+client_electron/release*/
 client_electron/out/
 client_electron/.vite/
 client_electron/*.tsbuildinfo

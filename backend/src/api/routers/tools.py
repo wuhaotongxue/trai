@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: tools.py
 # 作者: wuhao
-# 日期: 2026_04_14_08:12:51
+# 日期: 2026_04_17_08:28:46
 # 描述: 常见文件转换和压缩工具接口
 
 from __future__ import annotations
@@ -380,7 +380,13 @@ class ToolsAPI:
 
 
 # 注册路由
-@router.post("/md_to_pdf", response_model=ToolResultResponse, tags=["工具"])
+@router.post(
+    "/md_to_pdf",
+    response_model=ToolResultResponse,
+    tags=["工具"],
+    summary="Markdown 转 PDF",
+    description="将 Markdown 文件转换为 PDF, 并上传到 S3 返回限时下载链接.",
+)
 async def md_to_pdf_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
@@ -390,7 +396,13 @@ async def md_to_pdf_endpoint(
     return await ToolsAPI.convert_md_to_pdf(file, current_user, s3_service)
 
 
-@router.post("/compress_image", response_model=ToolResultResponse, tags=["工具"])
+@router.post(
+    "/compress_image",
+    response_model=ToolResultResponse,
+    tags=["工具"],
+    summary="压缩图片",
+    description="压缩图片并上传到 S3, 返回限时下载链接.",
+)
 async def compress_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
@@ -402,7 +414,13 @@ async def compress_image_endpoint(
     return await ToolsAPI.compress_image(file, quality, current_user, s3_service, target_size_kb)
 
 
-@router.post("/compress_zip", response_model=ToolResultResponse, tags=["工具"])
+@router.post(
+    "/compress_zip",
+    response_model=ToolResultResponse,
+    tags=["工具"],
+    summary="压缩为 ZIP",
+    description="将多个文件打包为 ZIP 并上传到 S3, 返回限时下载链接.",
+)
 async def compress_zip_endpoint(
     current_user: CurrentUser,
     files: list[UploadFile] = File(...),
@@ -412,7 +430,13 @@ async def compress_zip_endpoint(
     return await ToolsAPI.compress_files_to_zip(files, current_user, s3_service)
 
 
-@router.post("/convert_image", response_model=ToolResultResponse, tags=["工具"])
+@router.post(
+    "/convert_image",
+    response_model=ToolResultResponse,
+    tags=["工具"],
+    summary="转换图片格式",
+    description="转换图片格式并上传到 S3, 返回限时下载链接.",
+)
 async def convert_image_endpoint(
     current_user: CurrentUser,
     file: UploadFile = File(...),
