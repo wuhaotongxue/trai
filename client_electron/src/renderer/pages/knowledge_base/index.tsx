@@ -73,12 +73,15 @@ const KnowledgeBasePage: React.FC = () => {
   }, [files, search_query])
 
   useEffect(() => {
+    set_file_page(1)
+  }, [active_kb_id])
+
+  useEffect(() => {
     const kb = kb_list.find((it) => it.id === active_kb_id)
-    if (kb && typeof kb.file_count === 'number' && kb.file_count > 0) {
+    if (file_total <= 0 && kb && typeof kb.file_count === 'number' && kb.file_count > 0) {
       set_file_total(kb.file_count)
     }
-    set_file_page(1)
-  }, [active_kb_id, kb_list])
+  }, [active_kb_id, kb_list, file_total])
 
   const file_total_pages = useMemo(() => {
     if (file_total <= 0) return 1
