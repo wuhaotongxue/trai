@@ -65,6 +65,9 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_17_1702
+- **修复(admin)**: 修复下拉菜单分组 Label 组件上下文报错
+
 ### 🎨 前端_2026_04_16_0934
 - **修复(api_base)**: 未配置 `NEXT_PUBLIC_API_BASE` 时，自动使用当前页面 hostname 推导后端地址，支持局域网访问
 - **修复(hydration)**: 修复管理后台下拉菜单触发器按钮嵌套导致的 hydration error

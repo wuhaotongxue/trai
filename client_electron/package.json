@@ -41,12 +41,13 @@
     "directories": {
       "output": "release"
     },
-    "icon": "public/kity_256.ico",
+    "icon": "public/kity.ico",
     "files": [
       "dist/**/*",
       "package.json"
     ],
     "win": {
+      "icon": "public/kity.ico",
       "target": [
         "nsis"
       ]
@@ -58,7 +59,10 @@
       "createStartMenuShortcut": true,
       "shortcutName": "TRAI",
       "uninstallDisplayName": "卸载 TRAI",
-      "deleteAppDataOnUninstall": true
+      "deleteAppDataOnUninstall": true,
+      "installerIcon": "public/kity.ico",
+      "uninstallerIcon": "public/kity.ico",
+      "installerHeaderIcon": "public/kity.ico"
     }
   },
   "pnpm": {
