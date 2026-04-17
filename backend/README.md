@@ -37,6 +37,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_17_2154
+- **修复(knowledge_base)**: 文件分页支持 page_size 大于 10, 自动多页拉取并切片返回
+- **规范(docstring)**: 知识库路由与服务补齐 class/def docstring, 便于维护与交付
+
 ### 🛠️ 后端_2026_04_17_1702
 - **修复(knowledge_base)**: 分页接口返回正确 total, 支持稳定翻页
 
