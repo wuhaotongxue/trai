@@ -620,12 +620,11 @@ const KnowledgeBasePage: React.FC = () => {
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* 左侧边栏: 一级目录 */}
-        <div style={{ 
-          width: is_left_sidebar_open ? '200px' : '0px', 
-          minWidth: is_left_sidebar_open ? '180px' : '0px',
-          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+        <div style={{
+          width: is_left_sidebar_open ? '18%' : '0px',
+          minWidth: is_left_sidebar_open ? '100px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#f1f5f9', 
+          backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
@@ -633,7 +632,7 @@ const KnowledgeBasePage: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>目录分类</span>
             <button
               type="button"
@@ -819,20 +818,19 @@ const KnowledgeBasePage: React.FC = () => {
         </div>
 
         {/* 中间边栏: 子文件夹 (知识库) */}
-        <div style={{ 
-          width: is_middle_sidebar_open ? '220px' : '0px', 
-          minWidth: is_middle_sidebar_open ? '200px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+        <div style={{
+          width: is_middle_sidebar_open ? '220px' : '0px',
+          flexShrink: 1,
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
+          backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
-          flexShrink: 1
+          minWidth: 0
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -993,7 +991,7 @@ const KnowledgeBasePage: React.FC = () => {
         </div>
 
         {/* 右侧主区: 文件管理 */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {active_kb ? (
             <>
               <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
