@@ -72,3 +72,4 @@ uvicorn
 win32_setctime
 wrapt
 zipp
+duckduckgo-search
