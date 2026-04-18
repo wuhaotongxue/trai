@@ -8,44 +8,107 @@
 import { create } from "zustand";
 import { api, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
 
+/**
+ * 消息接口
+ * @property id - 消息 ID
+ * @property role - 角色
+ * @property content - 内容
+ * @property images - 图片数组
+ * @property toolCallId - 工具调用 ID
+ * @property toolName - 工具名称
+ * @property toolSuccess - 工具调用是否成功
+ * @property timestamp - 时间戳
+ */
 export interface Message {
+  /** 消息 ID */
   id: string;
+  /** 角色 */
   role: "user" | "assistant" | "system" | "tool";
+  /** 内容 */
   content: string;
+  /** 图片数组 */
   images?: string[];
+  /** 工具调用 ID */
   toolCallId?: string;
+  /** 工具名称 */
   toolName?: string;
+  /** 工具调用是否成功 */
   toolSuccess?: boolean;
+  /** 时间戳 */
   timestamp: number;
 }
 
+/**
+ * 活动工具调用接口
+ * @property id - 工具调用 ID
+ * @property name - 工具名称
+ * @property arguments - 参数
+ */
 export interface ToolCallActive {
+  /** 工具调用 ID */
   id: string;
+  /** 工具名称 */
   name: string;
+  /** 参数 */
   arguments: string;
 }
 
+/**
+ * Agent 状态管理接口
+ * @property sessionId - 会话 ID
+ * @property messages - 消息列表
+ * @property isStreaming - 是否正在流式传输
+ * @property isLoading - 是否正在加载
+ * @property error - 错误信息
+ * @property totalTokens - 总 Token 数
+ * @property completionTokens - 完成 Token 数
+ * @property promptTokens - 提示 Token 数
+ * @property quotas - 配额列表
+ * @property activeToolCall - 活动工具调用
+ * @property streamClient - 流客户端
+ */
 interface AgentState {
+  /** 会话 ID */
   sessionId: string | null;
+  /** 消息列表 */
   messages: Message[];
+  /** 是否正在流式传输 */
   isStreaming: boolean;
+  /** 是否正在加载 */
   isLoading: boolean;
+  /** 错误信息 */
   error: string | null;
+  /** 总 Token 数 */
   totalTokens: number;
+  /** 完成 Token 数 */
   completionTokens: number;
+  /** 提示 Token 数 */
   promptTokens: number;
+  /** 配额列表 */
   quotas: QuotaStatus[];
+  /** 活动工具调用 */
   activeToolCall: ToolCallActive | null;
+  /** 流客户端 */
   streamClient: { abort: () => void } | null;
 
+  /** 开始会话 */
   startSession: () => Promise<void>;
+  /** 发送消息 */
   sendMessage: (content: string, images?: string[]) => Promise<void>;
+  /** 中止流 */
   abortStream: () => void;
+  /** 清空消息 */
   clearMessages: () => void;
+  /** 加载配额 */
   loadQuotas: () => Promise<void>;
+  /** 删除会话 */
   deleteSession: () => Promise<void>;
 }
 
+/**
+ * Agent 状态管理 Hook
+ * @returns Agent 状态管理对象
+ */
 export const useAgentStore = create<AgentState>((set, get) => ({
   sessionId: null,
   messages: [],

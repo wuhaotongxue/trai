@@ -196,20 +196,26 @@ const AgentChat: React.FC = () => {
               } else if (chunk.type === 'reasoning' && chunk.content) {
                 last_msg.reasoning_content = (last_msg.reasoning_content || '') + chunk.content
               } else if (chunk.type === 'tool_execution_start') {
-                last_msg.steps = last_msg.steps || []
-                last_msg.steps.push({
-                  type: 'tool_start',
-                  tool_name: chunk.tool_name,
-                  content: chunk.content
-                })
+                // 只添加有真实工具名的事件
+                if (chunk.tool_name && chunk.tool_name.trim()) {
+                  last_msg.steps = last_msg.steps || []
+                  last_msg.steps.push({
+                    type: 'tool_start',
+                    tool_name: chunk.tool_name,
+                    content: chunk.content
+                  })
+                }
               } else if (chunk.type === 'tool_execution_result') {
-                last_msg.steps = last_msg.steps || []
-                last_msg.steps.push({
-                  type: 'tool_result',
-                  tool_name: chunk.tool_name,
-                  content: chunk.content,
-                  success: chunk.success
-                })
+                // 只添加有真实工具名的事件
+                if (chunk.tool_name && chunk.tool_name.trim()) {
+                  last_msg.steps = last_msg.steps || []
+                  last_msg.steps.push({
+                    type: 'tool_result',
+                    tool_name: chunk.tool_name,
+                    content: chunk.content,
+                    success: chunk.success
+                  })
+                }
               }
               new_msgs[new_msgs.length - 1] = last_msg
             }
@@ -572,15 +578,15 @@ const AgentChat: React.FC = () => {
                   value={active_session?.kb_id || 'none'}
                   onChange={(e) => update_session_kb(e.target.value)}
                   style={{
-                    padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0',
-                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '13px',
+                    padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0',
+                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '14px', lineHeight: '1.5',
                     outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
                   }}
                   title="选择知识库(可选)"
                 >
                   <option value="none">无知识库</option>
                   {available_kbs.map(k => (
-                    <option key={k.id} value={k.id}>{k.name}</option>
+                    <option key={k.id} value={k.id} style={{ padding: '10px 14px', fontSize: '14px' }}>{k.name}</option>
                   ))}
                 </select>
               )}
@@ -713,99 +719,153 @@ const AgentChat: React.FC = () => {
                           </div>
                         )}
                         
-                        {msg.steps && msg.steps.length > 0 && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {msg.steps.map((step, s_idx) => {
-                              const step_id = `step_${idx}_${s_idx}`
-                              const is_start = step.type === 'tool_start'
-                              const is_success = step.success === true
-                              const is_fail = step.success === false
-                              
-                              let border_color = '#e2e8f0'
-                              let bg_color = '#ffffff'
-                              let header_bg = '#f8fafc'
-                              let icon_color = '#64748b'
-                              let text_color = '#475569'
-                              let status_text = '执行中...'
-                              
-                              if (is_start) {
-                                border_color = '#bae6fd'
-                                header_bg = '#f0f9ff'
-                                icon_color = '#0284c7'
-                                text_color = '#0369a1'
-                              } else if (is_success) {
-                                border_color = '#bbf7d0'
-                                header_bg = '#f0fdf4'
-                                icon_color = '#16a34a'
-                                text_color = '#15803d'
-                                status_text = '已完成'
-                              } else if (is_fail) {
-                                border_color = '#fecaca'
-                                header_bg = '#fef2f2'
-                                icon_color = '#dc2626'
-                                text_color = '#b91c1c'
-                                status_text = '失败'
-                              }
+                        {(() => {
+                          // 过滤步骤，只保留有意义的
+                          const valid_steps = (msg.steps || []).filter(step => {
+                            if (!step.tool_name || !step.tool_name.trim()) return false
+                            // 过滤掉空内容的结果
+                            if (step.content && step.content.trim() === '{}') return false
+                            return true
+                          })
 
-                              return (
-                                <div key={s_idx} style={{
-                                  borderRadius: '8px',
-                                  border: `1px solid ${border_color}`,
-                                  backgroundColor: bg_color,
-                                  overflow: 'hidden'
-                                }}>
-                                  <div 
-                                    onClick={() => toggle_step(step_id)}
-                                    style={{
-                                      padding: '10px 14px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      cursor: 'pointer',
-                                      backgroundColor: header_bg,
-                                      fontSize: '13px',
-                                      userSelect: 'none'
-                                    }}
-                                  >
-                                    <Wrench size={14} style={{ marginRight: '8px', color: icon_color }} />
-                                    <span style={{ color: text_color, fontWeight: 500, marginRight: '8px' }}>
-                                      {step.tool_name}
-                                    </span>
-                                    <span style={{ flex: 1, color: '#94a3b8', fontSize: '12px' }}>
-                                      {is_start ? '调用工具' : '返回结果'}
-                                    </span>
-                                    
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: text_color, fontSize: '12px', marginRight: '8px' }}>
-                                      {is_start && <Loader2 size={12} className="animate-spin" />}
-                                      {is_success && <CheckCircle2 size={12} />}
-                                      {is_fail && <XCircle size={12} />}
-                                      <span>{status_text}</span>
-                                    </div>
-                                    
-                                    <div style={{ color: '#94a3b8' }}>
-                                      {expanded_steps[step_id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                                    </div>
-                                  </div>
-                                  
-                                  {expanded_steps[step_id] && (
-                                    <div style={{ 
-                                      padding: '12px 14px', 
-                                      whiteSpace: 'pre-wrap', 
-                                      wordBreak: 'break-all',
-                                      color: '#334155',
-                                      fontSize: '13px',
-                                      borderTop: `1px solid ${border_color}`,
-                                      backgroundColor: '#ffffff',
-                                      fontFamily: 'monospace',
-                                      lineHeight: '1.5'
-                                    }}>
-                                      {step.content}
-                                    </div>
-                                  )}
+                          // 去重：只保留每个工具的最后一个结果
+                          const unique_steps: ToolStep[] = []
+                          const tool_latest: Record<string, ToolStep> = {}
+                          
+                          for (const step of valid_steps.reverse()) {
+                            const key = `${step.tool_name}_${step.type}`
+                            if (!tool_latest[key]) {
+                              tool_latest[key] = step
+                              unique_steps.unshift(step)
+                            }
+                          }
+
+                          if (unique_steps.length === 0) return null
+
+                          // 找出最后的成功结果
+                          const has_any_success = unique_steps.some(step => 
+                            step.type === 'tool_result' && step.success === true
+                          )
+
+                          return (
+                            <div style={{ 
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              overflow: 'hidden',
+                              backgroundColor: '#ffffff'
+                            }}>
+                              <div 
+                                onClick={() => toggle_step(`all_steps_${idx}`)}
+                                style={{
+                                  padding: '10px 14px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  cursor: 'pointer',
+                                  backgroundColor: '#f8fafc',
+                                  fontSize: '13px',
+                                  userSelect: 'none'
+                                }}
+                              >
+                                <Wrench size={14} style={{ marginRight: '8px', color: has_any_success ? '#16a34a' : '#64748b' }} />
+                                <span style={{ color: '#475569', fontWeight: 500 }}>
+                                  工具调用 {has_any_success ? '✅' : ''}
+                                </span>
+                                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', color: '#94a3b8' }}>
+                                  {expanded_steps[`all_steps_${idx}`] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                 </div>
-                              )
-                            })}
-                          </div>
-                        )}
+                              </div>
+                              
+                              {expanded_steps[`all_steps_${idx}`] && (
+                                <div style={{ borderTop: '1px solid #e2e8f0' }}>
+                                  {unique_steps.map((step, s_idx) => {
+                                    const step_id = `step_${idx}_${s_idx}`
+                                    const is_start = step.type === 'tool_start'
+                                    const is_success = step.success === true
+                                    const is_fail = step.success === false
+                                    
+                                    let border_color = '#e2e8f0'
+                                    let header_bg = '#ffffff'
+                                    let icon_color = '#64748b'
+                                    let text_color = '#475569'
+                                    let status_text = '执行中...'
+                                    
+                                    if (is_start) {
+                                      border_color = '#bae6fd'
+                                      header_bg = '#f0f9ff'
+                                      icon_color = '#0284c7'
+                                      text_color = '#0369a1'
+                                    } else if (is_success) {
+                                      border_color = '#bbf7d0'
+                                      header_bg = '#f0fdf4'
+                                      icon_color = '#16a34a'
+                                      text_color = '#15803d'
+                                      status_text = '已完成'
+                                    } else if (is_fail) {
+                                      border_color = '#fecaca'
+                                      header_bg = '#fef2f2'
+                                      icon_color = '#dc2626'
+                                      text_color = '#b91c1c'
+                                      status_text = '失败'
+                                    }
+
+                                    return (
+                                      <div key={s_idx} style={{
+                                        borderBottom: s_idx < unique_steps.length - 1 ? '1px solid #e2e8f0' : 'none'
+                                      }}>
+                                        <div 
+                                          onClick={() => toggle_step(step_id)}
+                                          style={{
+                                            padding: '10px 14px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            cursor: 'pointer',
+                                            backgroundColor: header_bg,
+                                            fontSize: '13px',
+                                            userSelect: 'none'
+                                          }}
+                                        >
+                                          <span style={{ color: text_color, fontWeight: 500, marginRight: '8px' }}>
+                                            {step.tool_name}
+                                          </span>
+                                          <span style={{ flex: 1, color: '#94a3b8', fontSize: '12px' }}>
+                                            {is_start ? '调用工具' : '返回结果'}
+                                          </span>
+                                          
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: text_color, fontSize: '12px', marginRight: '8px' }}>
+                                            {is_start && <Loader2 size={12} className="animate-spin" />}
+                                            {is_success && <CheckCircle2 size={12} />}
+                                            {is_fail && <XCircle size={12} />}
+                                            <span>{status_text}</span>
+                                          </div>
+                                          
+                                          <div style={{ color: '#94a3b8' }}>
+                                            {expanded_steps[step_id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                          </div>
+                                        </div>
+                                        
+                                        {expanded_steps[step_id] && (
+                                          <div style={{ 
+                                            padding: '12px 14px', 
+                                            whiteSpace: 'pre-wrap', 
+                                            wordBreak: 'break-all',
+                                            color: '#334155',
+                                            fontSize: '13px',
+                                            borderTop: `1px solid ${border_color}`,
+                                            backgroundColor: '#ffffff',
+                                            fontFamily: 'monospace',
+                                            lineHeight: '1.5'
+                                          }}>
+                                            {step.content}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })()}
                         
                         {msg.content && (
                           <div style={{

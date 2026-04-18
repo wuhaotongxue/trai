@@ -49,6 +49,13 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_0302
+- **修复(utils)**: 修复 `api_url.ts` 中的正则表达式错误，从 `/$+/` 修正为 `/\/+$/`
+- **规范(naming)**: 统一文件和目录命名为 snake_case，禁止 kebab-case
+- **修复(router)**: 更新路由配置和侧边栏导航，路径从 `text-to-image` 改为 `text_to_image`
+- **新增(skills)**: 创建命名规范 skill（naming-convention），规范文件和目录命名
+- **新增(skills)**: 创建代码注释自动添加 skill（code-commenter），规范代码注释
+
 ### 💻 客户端_2026_04_19_0020
 - **功能(agent)**: 新增默认 Agent，AI 对话打开时自动选择默认 Agent
 - **优化(agent)**: AI 对话左侧显示所有可用 Agent（包括 stopped 状态），并显示状态指示器

@@ -9,6 +9,9 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
+/**
+ * 侧边栏组件
+ */
 const Sidebar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -17,6 +20,9 @@ const Sidebar: React.FC = () => {
   const [collapsed, set_collapsed] = useState(false)
   const [expanded_groups, set_expanded_groups] = useState<Record<string, boolean>>({ ai: true, tools: true })
 
+  /**
+   * 处理登出
+   */
   const handle_logout = async () => {
     try {
       if (window.electron_api?.auth_logout) {
@@ -30,6 +36,10 @@ const Sidebar: React.FC = () => {
     }
   }
 
+  /**
+   * 切换分组展开状态
+   * @param id 分组ID
+   */
   const toggle_group = (id: string) => {
     if (collapsed) {
       set_collapsed(false)
@@ -56,8 +66,8 @@ const Sidebar: React.FC = () => {
       icon: <Bot size={20} />,
       children: [
         { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={18} /> },
-        { path: '/ai/text-to-image', label: '文生图', icon: <Image size={18} /> },
-        { path: '/ai/image-to-image', label: '图生图', icon: <ImagePlus size={18} /> },
+        { path: '/ai/text_to_image', label: '文生图', icon: <Image size={18} /> },
+        { path: '/ai/image_to_image', label: '图生图', icon: <ImagePlus size={18} /> },
         { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
         { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
       ]
