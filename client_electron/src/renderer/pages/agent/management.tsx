@@ -463,7 +463,7 @@ const AgentManagement: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!is_middle_sidebar_open && (
                 <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
@@ -529,10 +529,10 @@ const AgentManagement: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
             {active_agent ? (
               <div style={{ maxWidth: '100%' }}>
-                <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{
                       width: '64px',
@@ -557,13 +557,13 @@ const AgentManagement: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                    <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+                    <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', overflow: 'hidden' }}>
                       <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>模型</div>
-                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500 }}>{active_agent.model}</div>
+                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_agent.model}</div>
                     </div>
-                    <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+                    <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', overflow: 'hidden' }}>
                       <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>状态</div>
-                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500 }}>
+                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         <span style={{
                           color: active_agent.status === 'running' ? '#10b981' : active_agent.status === 'error' ? '#ef4444' : '#64748b'
                         }}>
