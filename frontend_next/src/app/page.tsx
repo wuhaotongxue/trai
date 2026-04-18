@@ -109,7 +109,12 @@ const faqs = [
   { q: "支持私有化部署吗?", a: "支持, 企业版提供完整的私有化部署方案, 可接入内网环境, 支持定制模型接入。" },
 ];
 
-// ---- Intersection Observer Hook ----
+/**
+ * Intersection Observer Hook
+ * 检测元素是否进入视口，用于触发滚动动画
+ * @param threshold - 可见度阈值，默认 0.15（15% 可见时触发）
+ * @returns ref - 引用对象，inView - 是否在视口中
+ */
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -131,7 +136,14 @@ function useInView(threshold = 0.15) {
   return { ref, inView };
 }
 
-// ---- 滚动入场动画 ----
+/**
+ * 滚动入场动画组件
+ * 当元素进入视口时，显示淡入上移的动画效果
+ * @param children - 子元素
+ * @param delay - 动画延迟时间（毫秒），默认 0
+ * @param className - 自定义类名
+ * @returns React 组件
+ */
 function Reveal({ children, delay = 0, className = "" }: {
   children: React.ReactNode;
   delay?: number;
@@ -168,6 +180,11 @@ function Reveal({ children, delay = 0, className = "" }: {
   );
 }
 
+/**
+ * 首页组件
+ * 展示 TRAI 平台的主要功能、特性和使用指南
+ * @returns React 组件
+ */
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 

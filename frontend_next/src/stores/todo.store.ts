@@ -9,28 +9,87 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Task, TaskStatus, Priority } from '@/types/todo.types';
 
+/**
+ * TODO 状态管理接口
+ * @property tasks - 任务列表
+ * @property filterModule - 模块过滤条件
+ * @property filterPriority - 优先级过滤条件
+ * @property filterStatus - 状态过滤条件
+ * @property searchQuery - 搜索关键词
+ */
 interface TodoStore {
+  /** 任务列表 */
   tasks: Task[];
+  /** 模块过滤条件 */
   filterModule: string | null;
+  /** 优先级过滤条件 */
   filterPriority: Priority | null;
+  /** 状态过滤条件 */
   filterStatus: TaskStatus | null;
+  /** 搜索关键词 */
   searchQuery: string;
 
   // Actions
+  /**
+   * 添加任务
+   * @param task - 任务信息（不包含自动生成的字段）
+   */
   addTask: (task: Omit<Task, 'id' | 'startTime' | 'completeTime'>) => void;
+  /**
+   * 更新任务
+   * @param id - 任务 ID
+   * @param updates - 更新字段
+   */
   updateTask: (id: string, updates: Partial<Task>) => void;
+  /**
+   * 删除任务
+   * @param id - 任务 ID
+   */
   deleteTask: (id: string) => void;
+  /**
+   * 开始任务
+   * @param id - 任务 ID
+   */
   startTask: (id: string) => void;
+  /**
+   * 完成任务
+   * @param id - 任务 ID
+   */
   completeTask: (id: string) => void;
+  /**
+   * 设置过滤条件
+   * @param filter - 过滤条件
+   */
   setFilter: (filter: { module?: string | null; priority?: Priority | null; status?: TaskStatus | null }) => void;
+  /**
+   * 设置搜索关键词
+   * @param query - 搜索关键词
+   */
   setSearchQuery: (query: string) => void;
 
   // Computed
+  /**
+   * 获取过滤后的任务
+   * @returns 过滤后的任务列表
+   */
   getFilteredTasks: () => Task[];
+  /**
+   * 获取指定状态的任务
+   * @param status - 任务状态
+   * @returns 指定状态的任务列表
+   */
   getTasksByStatus: (status: TaskStatus) => Task[];
+  /**
+   * 获取模块进度
+   * @param module - 模块 ID
+   * @returns 模块进度信息（总数、完成数、完成百分比）
+   */
   getModuleProgress: (module: string) => { total: number; completed: number; percentage: number };
 }
 
+/**
+ * 初始任务数据
+ */
 const INITIAL_TASKS: Task[] = [
   // Backend Core
   { id: '1', name: 'run.py 应用入口', status: 'completed', priority: 'high', module: 'backend_core', description: 'FastAPI 实例、生命周期管理', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-02', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
@@ -106,6 +165,9 @@ const INITIAL_TASKS: Task[] = [
   { id: '53', name: '系统托盘', status: 'pending', priority: 'medium', module: 'electron', description: '最小化托盘', startTime: null, completeTime: null, plannedStart: '2026-05-30', plannedEnd: '2026-05-31', actualStart: null, actualEnd: null },
 ];
 
+/**
+ * 模块配置常量
+ */
 const MODULES = [
   { id: 'backend_core', name: '后端 核心', category: '后端', color: '#3b82f6' },
   { id: 'backend_application', name: '后端 应用', category: '后端', color: '#06b6d4' },
@@ -121,6 +183,10 @@ const MODULES = [
 
 export { MODULES };
 
+/**
+ * TODO 状态管理 Hook
+ * @returns TODO 状态管理对象
+ */
 export const useTodoStore = create<TodoStore>()(
   persist(
     (set, get) => ({

@@ -13,8 +13,8 @@ import Dashboard from '@/pages/dashboard'
 import Settings from '@/pages/settings'
 import Tools from '@/pages/tools'
 import AgentChat from '@/pages/chat'
-import TextToImage from '@/pages/ai/text-to-image'
-import ImageToImage from '@/pages/ai/image-to-image'
+import TextToImage from '@/pages/ai/text_to_image'
+import ImageToImage from '@/pages/ai/image_to_image'
 import AiMusic from '@/pages/ai/music'
 import AiVideo from '@/pages/ai/video'
 import ComfyUI from '@/pages/ai/comfyui'
@@ -24,12 +24,18 @@ import KnowledgeBasePage from '@/pages/knowledge_base'
 import UnderDevelopment from '@/pages/under_development'
 import { use_auth_store } from '@/store/auth'
 
-// 需要认证的路由守卫
+/**
+ * 需要认证的路由守卫
+ * @param children 子组件
+ */
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
   return is_authenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+/**
+ * 路由配置
+ */
 export const router = createHashRouter([
   {
     path: '/login',
@@ -64,11 +70,11 @@ export const router = createHashRouter([
         element: <AgentChat />
       },
       {
-        path: '/ai/text-to-image',
+        path: '/ai/text_to_image',
         element: <TextToImage />
       },
       {
-        path: '/ai/image-to-image',
+        path: '/ai/image_to_image',
         element: <ImageToImage />
       },
       {

@@ -12,6 +12,9 @@ import { setup_axios_interceptors } from './utils/axios_interceptor'
 // 拓展 window 对象类型
 
 
+/**
+ * 主应用组件
+ */
 const App: React.FC = () => {
   useEffect(() => {
     setup_axios_interceptors()
@@ -20,4 +23,7 @@ const App: React.FC = () => {
   return <RouterProvider router={router} />
 }
 
+/**
+ * 主应用组件导出
+ */
 export default App
