@@ -820,13 +820,19 @@ const KnowledgeBasePage: React.FC = () => {
                     </>
                   )}
                   {editing_kb_id === active_kb.id ? (
-                    <input 
-                      aria-label="知识库名称"
-                      title="知识库名称"
-                      autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value)}
-                      onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
-                      style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', minWidth: '100px', flex: 1 }}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                      <input 
+                        aria-label="知识库名称"
+                        title="知识库名称"
+                        autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value.slice(0, 15))}
+                        onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
+                        style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', minWidth: '100px', flex: 1 }}
+                        maxLength={15}
+                      />
+                      <div style={{ fontSize: '12px', color: edit_kb_name.length >= 15 ? '#ef4444' : '#94a3b8', whiteSpace: 'nowrap' }}>
+                        {edit_kb_name.length}/15
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name)}</h2>
@@ -1136,7 +1142,12 @@ const KnowledgeBasePage: React.FC = () => {
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建知识库 (所属: {active_cat?.name})</h3>
               <button type="button" onClick={() => set_show_create_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
-            <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            <div style={{ marginBottom: '12px' }}>
+              <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value.slice(0, 15))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={15} />
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_kb_name.length >= 15 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+                {new_kb_name.length}/15
+              </div>
+            </div>
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
             {creating_kb && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>

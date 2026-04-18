@@ -66,12 +66,12 @@ const AgentChat: React.FC = () => {
       try {
         const res = await window.electron_api.agent_management_list()
         if (res.success && res.data) {
-          set_available_agents(res.data)
+          // 只显示运行中的 Agent
+          const running_agents = res.data.filter((a: Agent) => a.status === 'running')
+          set_available_agents(running_agents)
           // 默认选择第一个 Agent（如果有）
-          if (res.data.length > 0) {
-            // 优先选择 running 状态的第一个，如果没有就选择第一个
-            const default_agent = res.data.find((a: Agent) => a.status === 'running') || res.data[0]
-            set_active_agent_id(default_agent.id)
+          if (running_agents.length > 0) {
+            set_active_agent_id(running_agents[0].id)
           }
         }
       } catch (err) {
@@ -574,7 +574,7 @@ const AgentChat: React.FC = () => {
                   style={{
                     padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0',
                     backgroundColor: '#f8fafc', color: '#475569', fontSize: '13px',
-                    outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '150px', textOverflow: 'ellipsis'
+                    outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
                   }}
                   title="选择知识库(可选)"
                 >
