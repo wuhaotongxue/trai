@@ -196,19 +196,30 @@ const AgentChat: React.FC = () => {
               } else if (chunk.type === 'reasoning' && chunk.content) {
                 last_msg.reasoning_content = (last_msg.reasoning_content || '') + chunk.content
               } else if (chunk.type === 'tool_execution_start') {
-                // 只添加有真实工具名的事件
+                // 只添加有真实工具名的事件，且避免重复添加同工具的start
                 if (chunk.tool_name && chunk.tool_name.trim()) {
                   last_msg.steps = last_msg.steps || []
-                  last_msg.steps.push({
-                    type: 'tool_start',
-                    tool_name: chunk.tool_name,
-                    content: chunk.content
-                  })
+                  // 检查是否已有同工具的tool_start步骤且还没结果
+                  const has_pending_start = last_msg.steps.some(s => 
+                    s.type === 'tool_start' && s.tool_name === chunk.tool_name
+                  )
+                  if (!has_pending_start) {
+                    last_msg.steps.push({
+                      type: 'tool_start',
+                      tool_name: chunk.tool_name,
+                      content: chunk.content
+                    })
+                  }
                 }
               } else if (chunk.type === 'tool_execution_result') {
-                // 只添加有真实工具名的事件
+                // 只添加有真实工具名的事件，且移除同工具的tool_start步骤
                 if (chunk.tool_name && chunk.tool_name.trim()) {
                   last_msg.steps = last_msg.steps || []
+                  // 过滤掉同工具的tool_start步骤
+                  last_msg.steps = last_msg.steps.filter(s => 
+                    !(s.type === 'tool_start' && s.tool_name === chunk.tool_name)
+                  )
+                  // 添加结果
                   last_msg.steps.push({
                     type: 'tool_result',
                     tool_name: chunk.tool_name,

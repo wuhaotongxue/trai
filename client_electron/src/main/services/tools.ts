@@ -4,28 +4,18 @@
  * 日期: 2026-04-14 08:12:51
  * 描述: 客户端工具服务层，提供文件转换和压缩等功能
  */
-import axios from 'axios'
 import log from 'electron-log'
 import fs from 'fs'
 import path from 'path'
-import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
-
-// 创建 axios 实例并配置请求拦截器
-const api_client = axios.create()
-
-api_client.interceptors.request.use((config) => {
-  const token = config_store.get('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import { api_client } from '../platform/api_client'
 
 export const tools_service = {
   /**
    * 将本地 Markdown 文件转换为 PDF
+   * @param file_path - Markdown 文件路径
+   * @returns 转换结果
    */
   async convert_md_to_pdf(file_path: string) {
     try {
@@ -50,6 +40,10 @@ export const tools_service = {
 
   /**
    * 压缩本地图片
+   * @param file_path - 图片文件路径
+   * @param quality - 压缩质量 0-100，默认为 60
+   * @param target_size_kb - 目标文件大小 KB（可选）
+   * @returns 压缩结果
    */
   async compress_image(file_path: string, quality: number = 60, target_size_kb?: number) {
     try {
@@ -76,6 +70,8 @@ export const tools_service = {
 
   /**
    * 将多个本地文件压缩为 ZIP
+   * @param file_paths - 文件路径数组
+   * @returns 压缩结果
    */
   async compress_files_to_zip(file_paths: string[]) {
     try {
@@ -102,6 +98,13 @@ export const tools_service = {
 
   /**
    * 转换本地图片格式
+   * @param file_path - 图片文件路径
+   * @param target_format - 目标格式（如 'png', 'jpg'）
+   * @param sizes - 缩放尺寸（可选）
+   * @param width - 目标宽度（可选）
+   * @param height - 目标高度（可选）
+   * @param target_size_kb - 目标文件大小 KB（可选）
+   * @returns 转换结果
    */
   async convert_image(file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) {
     try {

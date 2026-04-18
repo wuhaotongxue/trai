@@ -7,9 +7,11 @@
 import React, { useEffect, useRef } from 'react'
 import { RotateCw, FileText, X } from 'lucide-react'
 import { use_log_store } from '@/store/log'
+import { use_notification_store } from '@/store/notification'
 
 const TitleBar: React.FC = () => {
   const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
+  const { is_visible, message, show } = use_notification_store()
   const log_card_ref = useRef<HTMLDivElement>(null)
 
   // 点击其他地方关闭日志卡片
@@ -53,7 +55,13 @@ const TitleBar: React.FC = () => {
           className="no-drag-region"
           type="button"
           title="刷新"
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            show('正在刷新...', 0) // 不自动隐藏，因为要刷新
+            // 延迟 1500ms 刷新，确保用户能看到通知
+            setTimeout(() => {
+              window.location.reload()
+            }, 1500)
+          }}
           style={{
             background: 'transparent',
             border: '1px solid rgba(0, 0, 0, 0.08)',
@@ -176,6 +184,29 @@ const TitleBar: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 全局通知 */}
+      {is_visible && (
+        <div
+          className="no-drag-region"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '16px',
+            transform: 'translateY(-50%)',
+            backgroundColor: '#10b981',
+            color: 'white',
+            padding: '6px 16px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            zIndex: 1001,
+            animation: 'fadeIn 0.3s ease-out'
+          }}
+        >
+          {message}
+        </div>
+      )}
     </div>
   )
 }
