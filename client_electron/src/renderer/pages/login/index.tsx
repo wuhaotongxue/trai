@@ -83,6 +83,11 @@ const Login: React.FC = () => {
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (is_default_password) {
+      set_error_msg('请输入密码')
+      return
+    }
+
     if (!username || !password) {
       set_error_msg('用户名和密码不能为空')
       return
