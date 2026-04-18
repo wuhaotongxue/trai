@@ -209,46 +209,46 @@ const AiMusic: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '20px', gap: '6px' }}>
                 {!is_left_sidebar_open && (
                   <button
                     onClick={() => set_is_left_sidebar_open(true)}
                     title="展开AI能力栏"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <PanelLeftOpen size={18} />
+                    <PanelLeftOpen size={20} />
                   </button>
                 )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开音乐风格栏"
                   style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>AI 音乐生成</span>
+            <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>AI 音乐生成</span>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', position: 'relative' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '28px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: '#334155', fontWeight: 500, fontSize: '15px' }}>描述你想生成的音乐</label>
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', marginBottom: '12px', color: '#334155', fontWeight: 600, fontSize: '15px' }}>描述你想生成的音乐</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
@@ -277,31 +277,31 @@ const AiMusic: React.FC = () => {
               </div>
 
               {error && (
-                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '28px', fontSize: '15px' }}>
+                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '32px', fontSize: '14px' }}>
                   {error}
                 </div>
               )}
 
               <div style={{ 
-                width: '100%', minHeight: '280px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
+                width: '100%', minHeight: '500px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
               }}>
                 {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '15px' }}>
-                    <Loader2 size={40} className="animate-spin" style={{ marginBottom: '16px' }} />
-                    <span>AI 正在创作乐曲，请稍候...</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '12px' }}>
+                    <Loader2 size={40} className="animate-spin" />
+                    <span style={{ fontSize: '15px' }}>AI 正在创作乐曲，请稍候...</span>
                   </div>
                 ) : result_url ? (
                   <div style={{ width: '100%', padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Music size={56} style={{ color: '#0ea5e9', marginBottom: '28px' }} />
+                    <Music size={60} style={{ color: '#0ea5e9', marginBottom: '32px' }} />
                     <audio controls src={result_url} style={{ width: '100%', maxWidth: '500px' }}>
                       您的浏览器不支持 audio 标签。
                     </audio>
                   </div>
                 ) : (
-                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '15px' }}>
-                    <Music size={56} style={{ marginBottom: '16px', opacity: 0.5 }} />
-                    <span>生成的音乐将在这里展示</span>
+                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                    <Music size={60} style={{ opacity: 0.5 }} />
+                    <span style={{ fontSize: '15px' }}>生成的音乐将在这里展示</span>
                   </div>
                 )}
               </div>
