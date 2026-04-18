@@ -39,6 +39,17 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_0210
+- **修复(tool_calls)**: 修复流式工具调用中 tool_name 可能为空的问题，在任何 tool_call chunk 中发现有 function.name 时都更新 tool_name
+- **修复(tool_calls)**: 修复同 tool_call_id 可能被重复添加到 tool_calls 数组的问题，并增加替换逻辑，优先保留非空参数或内容更长的版本
+- **修复(weather)**: 天气工具集成 Open-Meteo 地理编码 API，支持任意城市（中文/英文/拼音），移除预设城市列表的限制
+- **修复(weather)**: 改进天气工具参数解析，即使参数为空也有合理的默认城市处理
+- **优化(logging)**: 在 openai_client.py 和 executor.py 中增加详细的 tool_call 相关日志，便于调试问题
+
+### 💻 客户端_2026_04_19_0210
+- **优化(tools)**: 优化工具调用步骤展示，过滤空内容和重复步骤，提升用户体验
+- **修复(tool_execution)**: 修复工具执行状态显示问题，确保执行中、成功、失败状态正确切换
+
 ### 🛠️ 后端_2026_04_19_0040
 - **修复(agent)**: AgentExecutor 现在会根据 context.agent_id 自动添加对应的系统提示词
 - **优化(agent)**: 天气助手系统提示词优化，更明确地要求使用 weather_current 工具并正确传递参数
