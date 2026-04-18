@@ -81,6 +81,26 @@ _MOCK_AGENTS = [
         "status": "stopped",
         "created_at": "2026-04-11T12:30:00Z",
     },
+    {
+        "id": "agent-calculator",
+        "name": "计算器",
+        "description": "专业的数学计算工具，可以处理各种数学问题",
+        "model": "gpt-4o",
+        "system_prompt": "你是一位专业的数学助手，专门帮助用户解决各种数学问题。你可以进行基本运算、代数计算、几何分析、统计计算等。请给出准确的计算结果和详细的解题过程。",
+        "icon": "Calculator",
+        "status": "running",
+        "created_at": "2026-04-19T00:45:00Z",
+    },
+    {
+        "id": "agent-weather",
+        "name": "天气助手",
+        "description": "专业的天气预报和气象信息查询助手",
+        "model": "gpt-4o",
+        "system_prompt": "你是一位专业的天气助手，专门帮助用户查询和分析天气信息。你可以提供天气预报、气象数据、出行建议等服务。请用清晰、友好的方式提供天气相关的信息。",
+        "icon": "Cloud",
+        "status": "stopped",
+        "created_at": "2026-04-19T00:45:00Z",
+    },
 ]
 
 
