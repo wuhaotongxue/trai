@@ -243,59 +243,59 @@ const TextToImage: React.FC = () => {
             )}
             <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>文生图</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '32px' }}>
-                <label style={{ display: 'block', marginBottom: '12px', color: '#334155', fontWeight: 600, fontSize: '15px' }}>描述你想生成的画面</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>描述你想生成的画面</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="例如: 一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影..."
                   style={{
-                    width: '100%', minHeight: '160px', padding: '16px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                    resize: 'vertical', outline: 'none', fontSize: '15px', fontFamily: 'inherit', lineHeight: '1.6'
+                    width: '100%', minHeight: '120px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                    resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
                 <button
                   onClick={handle_generate}
                   disabled={loading || !prompt.trim()}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 32px', 
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
                     backgroundColor: loading || !prompt.trim() ? '#94a3b8' : '#0ea5e9', 
-                    color: '#ffffff', border: 'none', borderRadius: '10px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
-                    fontWeight: 600, fontSize: '15px', transition: 'background-color 0.2s'
+                    color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
                   }}
                 >
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
+                  {loading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
                   {loading ? '生成中...' : '开始生成'}
                 </button>
               </div>
 
               {error && (
-                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '32px', fontSize: '14px' }}>
+                <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '20px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
               <div style={{ 
-                width: '100%', minHeight: '500px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
+                width: '100%', minHeight: '280px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
               }}>
                 {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '12px' }}>
-                    <Loader2 size={40} className="animate-spin" />
-                    <span style={{ fontSize: '15px' }}>AI 正在努力作画，请稍候...</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '10px' }}>
+                    <Loader2 size={32} className="animate-spin" />
+                    <span style={{ fontSize: '14px' }}>AI 正在努力作画，请稍候...</span>
                   </div>
                 ) : result_url ? (
-                  <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '700px', objectFit: 'contain' }} />
+                  <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }} />
                 ) : (
-                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                    <ImageIcon size={60} style={{ opacity: 0.5 }} />
-                    <span style={{ fontSize: '15px' }}>生成的图片将在这里展示</span>
+                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                    <ImageIcon size={48} style={{ opacity: 0.5 }} />
+                    <span style={{ fontSize: '14px' }}>生成的图片将在这里展示</span>
                   </div>
                 )}
               </div>

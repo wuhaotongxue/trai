@@ -244,60 +244,60 @@ const AiVideo: React.FC = () => {
             )}
             <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>AI 视频生成</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '28px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: '#334155', fontWeight: 500, fontSize: '15px' }}>描述你想生成的视频画面</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>描述你想生成的视频画面</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="例如: 镜头从高空俯冲穿过赛博朋克城市的街道，霓虹灯闪烁，飞行器穿梭..."
                   style={{
-                    width: '100%', minHeight: '160px', padding: '16px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                    resize: 'vertical', outline: 'none', fontSize: '15px', fontFamily: 'inherit', lineHeight: '1.6'
+                    width: '100%', minHeight: '120px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                    resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
                 <button
                   onClick={handle_generate}
                   disabled={loading || !prompt.trim()}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 32px', 
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
                     backgroundColor: loading || !prompt.trim() ? '#94a3b8' : '#0ea5e9', 
-                    color: '#ffffff', border: 'none', borderRadius: '10px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
-                    fontWeight: 600, fontSize: '15px', transition: 'background-color 0.2s'
+                    color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
                   }}
                 >
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : <Video size={20} />}
+                  {loading ? <Loader2 size={18} className="animate-spin" /> : <Video size={18} />}
                   {loading ? '生成中...' : '开始生成'}
                 </button>
               </div>
 
               {error && (
-                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '28px', fontSize: '15px' }}>
+                <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
                   {error}
                 </div>
               )}
 
               <div style={{ 
-                width: '100%', minHeight: '500px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
+                width: '100%', minHeight: '280px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
               }}>
                 {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '15px' }}>
-                    <Loader2 size={40} className="animate-spin" style={{ marginBottom: '16px' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '14px' }}>
+                    <Loader2 size={36} className="animate-spin" style={{ marginBottom: '12px' }} />
                     <span>AI 正在渲染视频，请稍候...</span>
                   </div>
                 ) : result_url ? (
-                  <video controls src={result_url} style={{ width: '100%', maxHeight: '700px', objectFit: 'contain', backgroundColor: '#000' }}>
+                  <video controls src={result_url} style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', backgroundColor: '#000' }}>
                     您的浏览器不支持 video 标签。
                   </video>
                 ) : (
-                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '15px' }}>
-                    <Video size={56} style={{ marginBottom: '16px', opacity: 0.5 }} />
+                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '14px' }}>
+                    <Video size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
                     <span>生成的视频将在这里展示</span>
                   </div>
                 )}

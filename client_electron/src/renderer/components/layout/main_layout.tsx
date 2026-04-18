@@ -49,7 +49,7 @@ const MainLayout: React.FC = () => {
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: '#f3f3f3' }}>
+        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#f3f3f3' }}>
           <Outlet />
         </div>
       </div>
