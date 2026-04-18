@@ -207,7 +207,7 @@ const AgentManagement: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>Agent列表</span>
             <button
               type="button"
@@ -226,7 +226,7 @@ const AgentManagement: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
             <div style={{ marginBottom: '12px' }}>
               <button
                 onClick={() => set_show_register_modal(true)}
@@ -314,7 +314,7 @@ const AgentManagement: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -353,7 +353,7 @@ const AgentManagement: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
             {active_agent ? (
               <div>
                 <div style={{ marginBottom: '12px', padding: '0 4px', fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
@@ -546,11 +546,11 @@ const AgentManagement: React.FC = () => {
                     }}>
                       <IconComponent size={32} />
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {active_agent.name}
                       </h3>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6' }}>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {active_agent.description}
                       </p>
                     </div>
