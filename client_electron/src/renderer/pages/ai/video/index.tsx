@@ -91,7 +91,7 @@ const AiVideo: React.FC = () => {
   return (
     <ThreePanelLayout
       title="AI 视频生成"
-      middlePanelTitle="视频风格"
+      middlePanelTitle="视频预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>

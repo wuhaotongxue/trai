@@ -227,9 +227,9 @@ const Dashboard: React.FC = () => {
   return (
     <ThreePanelLayout
       title="工作台"
-      leftPanelTitle="仪表盘"
+      leftPanelTitle="功能分类"
       leftPanel={left_panel}
-      middlePanelTitle="查看项目"
+      middlePanelTitle="项目列表"
       middlePanel={middle_panel}
       contentPadding="32px"
     >

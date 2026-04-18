@@ -335,7 +335,7 @@ const AgentChat: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>Agent 列表</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能助手</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -436,7 +436,7 @@ const AgentChat: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>会话列表</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>对话记录</span>
             </div>
             <button
               type="button"

@@ -93,7 +93,7 @@ const ComfyUI: React.FC = () => {
   return (
     <ThreePanelLayout
       title="ComfyUI 工作流"
-      middlePanelTitle="工作流预设"
+      middlePanelTitle="工作预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
