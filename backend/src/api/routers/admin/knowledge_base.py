@@ -1136,7 +1136,17 @@ class KnowledgeBaseDemoController:
         异常:
             HTTPException: Service 调用失败时抛出.
         """
-        _ = current_user
+        if not self._is_super_admin(current_user):
+            # 非管理员只返回默认分类
+            return KnowledgeBaseListResponse(
+                items=[
+                    {
+                        "category_id": "default",
+                        "category_name": "默认类目",
+                    }
+                ],
+                raw={"permission": "user", "filtered": True}
+            )
         return self._service.list_categories()
 
     async def list_indices(self, current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:

@@ -9,6 +9,7 @@ export class ApiEndpoints {
   static readonly auth_login = '/api/auth/login'
   static readonly auth_register = '/api/auth/register'
   static readonly auth_logout = '/api/auth/logout'
+  static readonly auth_password_change = '/api/auth/password/change'
 
   static readonly agent_chat = '/api/agent/chat'
 

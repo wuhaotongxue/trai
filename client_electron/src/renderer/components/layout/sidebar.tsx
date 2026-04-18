@@ -40,7 +40,7 @@ const Sidebar: React.FC = () => {
   }
 
   const nav_items = [
-    { path: '/', label: '仪表盘', icon: <Home size={20} /> },
+    { path: '/dashboard', label: '仪表盘', icon: <Home size={20} /> },
     {
       id: 'agent',
       label: '智能体生态',

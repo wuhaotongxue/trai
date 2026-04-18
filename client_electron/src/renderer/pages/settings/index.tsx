@@ -111,7 +111,11 @@ const Settings: React.FC = () => {
     }
     
     try {
-      // 占位逻辑: TODO 后续接通后端修改密码接口
+      const res = await window.electron_api.auth_change_password({ old_password, new_password })
+      if (!res.success) {
+        set_pwd_msg({ type: 'error', text: res.error || '密码修改失败' })
+        return
+      }
       set_pwd_msg({ type: 'success', text: '密码修改成功' })
       set_old_password('')
       set_new_password('')
