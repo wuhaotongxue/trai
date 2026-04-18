@@ -180,7 +180,7 @@ const Settings: React.FC = () => {
       case 'api_config':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>网络配置</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>网络配置</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '400px' }}>
               <label style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>后端 API 地址</label>
               <input 
@@ -223,7 +223,7 @@ const Settings: React.FC = () => {
       case 'update':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>系统更新</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>系统更新</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
               <div style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>
                 当前版本: <span style={{ fontWeight: '500', color: '#202020' }}>v{current_version || '未知'}</span>
@@ -278,7 +278,7 @@ const Settings: React.FC = () => {
       case 'avatar':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '15px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Upload size={18} color="#0078d4" />
               头像设置
             </h3>
@@ -343,7 +343,7 @@ const Settings: React.FC = () => {
       case 'password':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '15px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <KeyRound size={18} color="#0078d4" />
               修改密码
             </h3>
@@ -432,7 +432,7 @@ const Settings: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <SettingsIcon size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>设置</h1>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>设置</h1>
         </div>
       </div>
       
