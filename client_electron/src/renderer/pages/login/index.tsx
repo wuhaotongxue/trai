@@ -7,31 +7,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import CryptoJS from 'crypto-js'
 import { use_auth_store } from '@/store/auth'
 import TitleBar from '@/components/layout/title_bar'
 
-const AES_KEY = 'TraiSecretKey32BytesLong!!'
-const AES_IV = 'TraiInitVector'
-
-const aes_decrypt = (ciphertext: string): string => {
-  const decrypted = CryptoJS.AES.decrypt(ciphertext, CryptoJS.enc.Utf8.parse(AES_KEY), {
-    iv: CryptoJS.enc.Utf8.parse(AES_IV),
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  })
-  return decrypted.toString(CryptoJS.enc.Utf8)
-}
-
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
-  const [password, set_password] = useState('********')
+  const [password, set_password] = useState('')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
   const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
-  const [is_demo_mode, set_is_demo_mode] = useState(true)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
 
@@ -53,9 +39,7 @@ const Login: React.FC = () => {
         const res = await fetch(`${api_base}/api/auth/demo`)
         if (res.ok) {
           const data = await res.json()
-          const decrypted = aes_decrypt(data.encrypted_password)
           set_username(data.username)
-          set_password(decrypted)
         }
       } catch (err) {
         console.error('加载 demo 账号失败:', err)
@@ -183,19 +167,13 @@ const Login: React.FC = () => {
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type={is_demo_mode ? 'password' : (password_visible ? 'text' : 'password')}
-                  value={is_demo_mode ? '********' : password}
-                  onChange={(e) => {
-                    set_password(e.target.value)
-                    set_is_demo_mode(false)
-                  }}
-                  onFocus={() => set_password_visible(true)}
-                  onBlur={(e) => {
-                    set_password_visible(false)
-                    e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'
-                  }}
+                  type={password_visible ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => set_password(e.target.value)}
                   style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                   placeholder="请输入密码"
+                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
+                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                 />
                 <button
                   type="button"

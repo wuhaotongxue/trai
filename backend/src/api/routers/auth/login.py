@@ -63,7 +63,6 @@ class DemoAccountResponse(BaseModel):
     """Demo 账号响应"""
 
     username: str = Field(description="用户名")
-    encrypted_password: str = Field(description="AES 加密的密码")
 
 
 class LoginResponse(BaseModel):
@@ -185,12 +184,9 @@ async def get_demo_account() -> DemoAccountResponse:
     """获取 demo 测试账号信息
 
     Returns:
-        DemoAccountResponse: demo 账号信息（密码已加密）
+        DemoAccountResponse: demo 账号信息
     """
-    return DemoAccountResponse(
-        username=DEMO_USERNAME,
-        encrypted_password=aes_encrypt(DEMO_PASSWORD_PLAIN),
-    )
+    return DemoAccountResponse(username=DEMO_USERNAME)
 
 
 __all__ = ["router"]
