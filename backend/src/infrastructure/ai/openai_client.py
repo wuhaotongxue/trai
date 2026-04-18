@@ -254,6 +254,8 @@ class OpenAIClient:
         tool_args_parts: list[str] = []
         in_tool_call = False
 
+        logger.info(f"[Stream] 开始处理流式响应")
+
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 async with client.stream("POST", url, headers=headers, json=payload) as response:
@@ -313,11 +315,21 @@ class OpenAIClient:
                         # 处理 tool_calls
                         if "tool_calls" in delta and delta["tool_calls"]:
                             tc = delta["tool_calls"][0]
+                            logger.info(f"[Stream] 收到 tool_call 块: {repr(tc)}")
+
+                            # 只要有 function.name 就更新，不管是哪个块！
+                            if tc.get("function", {}).get("name"):
+                                new_name = tc["function"]["name"]
+                                if tool_name != new_name:
+                                    logger.info(f"[Stream] 更新 tool_name 更新: {tool_name} → {new_name}")
+                                    tool_name = new_name
 
                             # 新的一个工具调用开始
                             if tc.get("id"):
+                                logger.info(f"[Stream] 新工具调用开始: id={tc['id']}, name={tool_name}")
                                 # 如果上一个工具还在处理中,则先发送结束事件
                                 if in_tool_call and tool_call_id:
+                                    logger.info(f"[Stream] 结束前一个工具调用: id={tool_call_id}, args={repr(''.join(tool_args_parts))}")
                                     yield StreamEvent(
                                         type="tool_call_end",
                                         tool_call_id=tool_call_id,
@@ -328,10 +340,10 @@ class OpenAIClient:
 
                                 in_tool_call = True
                                 tool_call_id = tc["id"]
-                                tool_name = tc.get("function", {}).get("name", "")
                                 tool_args_parts = []
                                 arg_text = tc.get("function", {}).get("arguments", "")
                                 if arg_text:
+                                    logger.info(f"[Stream] 初始参数块: {repr(arg_text)}")
                                     tool_args_parts.append(arg_text)
                                     yield StreamEvent(
                                         type="tool_call_arg",
@@ -343,7 +355,9 @@ class OpenAIClient:
                                 # 参数追加
                                 arg_text = tc.get("function", {}).get("arguments", "")
                                 if arg_text:
+                                    logger.info(f"[Stream] 追加参数块: {repr(arg_text)}")
                                     tool_args_parts.append(arg_text)
+                                    logger.info(f"[Stream] 当前 tool_args_parts 总长度: {len(tool_args_parts)}, 内容: {repr(''.join(tool_args_parts))}")
                                     yield StreamEvent(
                                         type="tool_call_arg",
                                         tool_call_id=tool_call_id,
@@ -355,11 +369,13 @@ class OpenAIClient:
                         finish_reason = choice.get("finish_reason")
                         if finish_reason is not None:
                             if in_tool_call and tool_call_id:
+                                final_args = "".join(tool_args_parts)
+                                logger.info(f"[Stream] 工具调用结束 (finish_reason={finish_reason}): id={tool_call_id}, name={tool_name}, final_args={repr(final_args)}")
                                 yield StreamEvent(
                                     type="tool_call_end",
                                     tool_call_id=tool_call_id,
                                     tool_name=tool_name,
-                                    content="".join(tool_args_parts),
+                                    content=final_args,
                                     finish_reason=finish_reason,
                                 )
                                 in_tool_call = False

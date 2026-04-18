@@ -65,13 +65,41 @@ const KnowledgeBasePage: React.FC = () => {
   const [debug_visible, set_debug_visible] = useState(false)
   const [debug_messages, set_debug_messages] = useState<string[]>([])
   
+  // 自定义弹框状态
+  const [show_custom_modal, set_show_custom_modal] = useState(false)
+  const [custom_modal_type, set_custom_modal_type] = useState<'alert' | 'confirm'>('alert')
+  const [custom_modal_title, set_custom_modal_title] = useState('')
+  const [custom_modal_message, set_custom_modal_message] = useState('')
+  const [custom_modal_callback, set_custom_modal_callback] = useState<(() => void) | null>(null)
+  
   // 知识库操作状态
   const [editing_kb_id, set_editing_kb_id] = useState<string | null>(null)
   const [edit_kb_name, set_edit_kb_name] = useState('')
   const [moving_kb_id, set_moving_kb_id] = useState<string | null>(null)
   const [target_cat_id, set_target_cat_id] = useState<string>('')
+  
+  // 分类操作状态
+  const [editing_cat_id, set_editing_cat_id] = useState<string | null>(null)
+  const [edit_cat_name, set_edit_cat_name] = useState('')
 
   const file_input_ref = useRef<HTMLInputElement>(null)
+  
+  // 自定义弹框辅助函数
+  const show_alert = (title: string, message: string) => {
+    set_custom_modal_title(title)
+    set_custom_modal_message(message)
+    set_custom_modal_type('alert')
+    set_custom_modal_callback(null)
+    set_show_custom_modal(true)
+  }
+  
+  const show_confirm = (title: string, message: string, callback: () => void) => {
+    set_custom_modal_title(title)
+    set_custom_modal_message(message)
+    set_custom_modal_type('confirm')
+    set_custom_modal_callback(() => callback)
+    set_show_custom_modal(true)
+  }
 
   const display_files = useMemo(() => {
     const q = search_query.trim().toLowerCase()
@@ -387,21 +415,35 @@ const KnowledgeBasePage: React.FC = () => {
     const selected_files = Array.from(e.target.files || [])
     if (selected_files.length === 0 || !active_kb_id) return
     if (!window.electron_api?.kb_upload_text) {
-      alert('当前客户端版本不支持上传文件')
+      show_alert('提示', '当前客户端版本不支持上传文件')
       return
     }
     
     set_files_loading(true)
     try {
       for (const file of selected_files) {
-        const content = await file.text()
+        // 读取文件内容，对于文本文件用 text()，对于二进制文件用 base64 编码
+        let content: string
+        const ext = file.name.toLowerCase().split('.').pop() || ''
+        const text_extensions = ['txt', 'md', 'csv', 'json', 'xml', 'html', 'htm']
+        
+        if (text_extensions.includes(ext)) {
+          // 文本文件直接读取文本
+          content = await file.text()
+        } else {
+          // 二进制文件读取为 base64 编码
+          const array_buffer = await file.arrayBuffer()
+          const uint8_array = new Uint8Array(array_buffer)
+          content = btoa(String.fromCharCode(...uint8_array))
+        }
+        
         const res = await window.electron_api.kb_upload_text(active_kb_id, file.name, content)
         if (!res.success) {
-          alert(`上传 ${file.name} 失败: ${res.error}`)
+          show_alert('上传失败', `上传 ${file.name} 失败: ${res.error}`)
         }
       }
     } catch (err: any) {
-      alert(`读取/上传文件失败: ${err.message}`)
+      show_alert('上传失败', `读取/上传文件失败: ${err.message}`)
     } finally {
       set_files_loading(false)
       await fetch_files_page(1)
@@ -412,22 +454,22 @@ const KnowledgeBasePage: React.FC = () => {
 
   const handle_delete_file = async (file_id: string) => {
     if (!active_kb_id || !window.electron_api?.kb_delete_index_file) return
-    if (!confirm('确定要删除该文件吗?')) return
-    
-    try {
-      const res = await window.electron_api.kb_delete_index_file(active_kb_id, file_id)
-      if (res.success) {
-        const next_total = Math.max(0, file_total - 1)
-        const next_total_pages = next_total <= 0 ? 1 : Math.max(1, Math.ceil(next_total / file_page_size))
-        const next_page = Math.min(file_current_page, next_total_pages)
-        set_file_total(next_total)
-        await fetch_files_page(next_page)
-      } else {
-        alert(`删除失败: ${res.error}`)
+    show_confirm('确认删除', '确定要删除该文件吗?', async () => {
+      try {
+        const res = await window.electron_api.kb_delete_index_file(active_kb_id, file_id)
+        if (res.success) {
+          const next_total = Math.max(0, file_total - 1)
+          const next_total_pages = next_total <= 0 ? 1 : Math.max(1, Math.ceil(next_total / file_page_size))
+          const next_page = Math.min(file_current_page, next_total_pages)
+          set_file_total(next_total)
+          await fetch_files_page(next_page)
+        } else {
+          show_alert('删除失败', `删除失败: ${res.error}`)
+        }
+      } catch (e: any) {
+        show_alert('删除失败', `删除异常: ${e.message}`)
       }
-    } catch (e: any) {
-      alert(`删除异常: ${e.message}`)
-    }
+    })
   }
 
   // (移除了暂不支持的重命名文件和移动文件的方法)
@@ -435,37 +477,39 @@ const KnowledgeBasePage: React.FC = () => {
   const handle_rename_kb = async (kb_id: string) => {
     if (!edit_kb_name.trim()) return
     if (!window.electron_api?.kb_rename_index) return
-    if (!confirm(`确认将知识库重命名为 "${edit_kb_name.trim()}" 吗?`)) return
-    try {
-      const res = await window.electron_api.kb_rename_index(kb_id, edit_kb_name.trim())
-      if (res.success) {
-        set_kb_list(prev => prev.map(kb => 
-          kb.id === kb_id ? { ...kb, name: edit_kb_name.trim() } : kb
-        ))
-        set_editing_kb_id(null)
-        set_edit_kb_name('')
-      } else {
-        alert(`重命名失败: ${res.error}`)
+    show_confirm('确认重命名', `确认将知识库重命名为 "${edit_kb_name.trim()}" 吗?`, async () => {
+      try {
+        const res = await window.electron_api.kb_rename_index(kb_id, edit_kb_name.trim())
+        if (res.success) {
+          set_kb_list(prev => prev.map(kb => 
+            kb.id === kb_id ? { ...kb, name: edit_kb_name.trim() } : kb
+          ))
+          set_editing_kb_id(null)
+          set_edit_kb_name('')
+        } else {
+          show_alert('重命名失败', `重命名失败: ${res.error}`)
+        }
+      } catch (e: any) {
+        show_alert('重命名失败', `重命名异常: ${e.message}`)
       }
-    } catch (e: any) {
-      alert(`重命名异常: ${e.message}`)
-    }
+    })
   }
 
   const handle_delete_kb = async (kb_id: string) => {
     if (!window.electron_api?.kb_delete_index) return
-    if (!confirm('确认要删除该知识库吗? 此操作不可恢复!')) return
-    try {
-      const res = await window.electron_api.kb_delete_index(kb_id)
-      if (res.success) {
-        set_kb_list(prev => prev.filter(k => k.id !== kb_id))
-        if (active_kb_id === kb_id) set_active_kb_id('')
-      } else {
-        alert(`删除知识库失败: ${res.error}`)
+    show_confirm('确认删除', '确认要删除该知识库吗? 此操作不可恢复!', async () => {
+      try {
+        const res = await window.electron_api.kb_delete_index(kb_id)
+        if (res.success) {
+          set_kb_list(prev => prev.filter(k => k.id !== kb_id))
+          if (active_kb_id === kb_id) set_active_kb_id('')
+        } else {
+          show_alert('删除失败', `删除知识库失败: ${res.error}`)
+        }
+      } catch (e: any) {
+        show_alert('删除失败', `删除异常: ${e.message}`)
       }
-    } catch (e: any) {
-      alert(`删除异常: ${e.message}`)
-    }
+    })
   }
 
   const handle_move_kb = (kb_id: string) => {
@@ -483,6 +527,66 @@ const KnowledgeBasePage: React.FC = () => {
     ))
     set_moving_kb_id(null)
     set_target_cat_id('')
+  }
+
+  // 分类操作
+  const handle_rename_cat = (cat_id: string) => {
+    const cat = categories.find(c => c.id === cat_id)
+    if (cat) {
+      set_editing_cat_id(cat_id)
+      set_edit_cat_name(cat.name)
+    }
+  }
+
+  const confirm_rename_cat = () => {
+    if (!editing_cat_id || !edit_cat_name.trim()) {
+      set_editing_cat_id(null)
+      return
+    }
+    set_categories(prev => prev.map(c => 
+      c.id === editing_cat_id ? { ...c, name: edit_cat_name.trim() } : c
+    ))
+    set_editing_cat_id(null)
+    set_edit_cat_name('')
+  }
+
+  const handle_delete_cat = (cat_id: string) => {
+    // 检查是否是默认分类
+    if (cat_id === 'default') {
+      show_alert('无法删除', '默认分类不能删除')
+      return
+    }
+    
+    const cat = categories.find(c => c.id === cat_id)
+    if (!cat) return
+    
+    const kbs_in_cat = kb_list.filter(k => k.category_id === cat_id)
+    
+    if (kbs_in_cat.length === 0) {
+      // 没有知识库，直接删除
+      show_confirm('删除分类', `确定要删除分类"${cat.name}"吗？`, () => {
+        set_categories(prev => prev.filter(c => c.id !== cat_id))
+        if (active_cat_id === cat_id) {
+          set_active_cat_id('default')
+        }
+      })
+    } else {
+      // 有知识库，提示是否转移
+      show_confirm(
+        '删除分类', 
+        `分类"${cat.name}"下有${kbs_in_cat.length}个知识库，删除分类会同时删除这些知识库。\n\n是否要先将这些知识库转移到默认分类？`,
+        () => {
+          // 用户确认，转移知识库到默认分类，然后删除分类
+          set_kb_list(prev => prev.map(kb => 
+            kb.category_id === cat_id ? { ...kb, category_id: 'default' } : kb
+          ))
+          set_categories(prev => prev.filter(c => c.id !== cat_id))
+          if (active_cat_id === cat_id) {
+            set_active_cat_id('default')
+          }
+        }
+      )
+    }
   }
 
   // (移除了暂不支持的移动知识库的方法)
@@ -552,20 +656,15 @@ const KnowledgeBasePage: React.FC = () => {
             {categories.map(cat => (
               <div 
                 key={cat.id}
-                onClick={() => {
-                  set_active_cat_id(cat.id)
-                  const first_kb = kb_list.find(k => k.category_id === cat.id)
-                  if (first_kb) set_active_kb_id(first_kb.id)
-                }}
                 style={{
-                  padding: '10px 12px',
+                  padding: '6px 8px',
                   borderRadius: '6px',
                   backgroundColor: active_cat_id === cat.id ? '#e0f2fe' : 'transparent',
                   color: active_cat_id === cat.id ? '#0369a1' : '#475569',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  justifyContent: 'space-between',
                   marginBottom: '4px',
                   fontSize: '13px',
                   fontWeight: active_cat_id === cat.id ? 600 : 400,
@@ -578,8 +677,125 @@ const KnowledgeBasePage: React.FC = () => {
                   if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = 'transparent'
                 }}
               >
-                <Folder size={16} />
-                {cat.name}
+                {editing_cat_id === cat.id ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                    <Folder size={16} />
+                    <input
+                      autoFocus
+                      value={edit_cat_name}
+                      onChange={(e) => set_edit_cat_name(e.target.value)}
+                      onBlur={confirm_rename_cat}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') confirm_rename_cat()
+                        if (e.key === 'Escape') {
+                          set_editing_cat_id(null)
+                          set_edit_cat_name('')
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '4px 8px',
+                        border: '1px solid #0ea5e9',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        fontSize: '13px',
+                        minWidth: 0
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      flex: 1,
+                      minWidth: 0
+                    }}
+                    onClick={() => {
+                      set_active_cat_id(cat.id)
+                      const first_kb = kb_list.find(k => k.category_id === cat.id)
+                      if (first_kb) set_active_kb_id(first_kb.id)
+                    }}
+                  >
+                    <Folder size={16} />
+                    <span style={{ 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      minWidth: 0
+                    }}>
+                      {cat.name}
+                    </span>
+                  </div>
+                )}
+                
+                {editing_cat_id !== cat.id && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: active_cat_id === cat.id ? 1 : 0, transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = active_cat_id === cat.id ? '1' : '0'}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handle_rename_cat(cat.id)
+                      }}
+                      title="重命名分类"
+                      aria-label="重命名分类"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#64748b',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#cbd5e1'
+                        e.currentTarget.style.color = '#334155'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.color = '#64748b'
+                      }}
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handle_delete_cat(cat.id)
+                      }}
+                      title="删除分类"
+                      aria-label="删除分类"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#64748b',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fee2e2'
+                        e.currentTarget.style.color = '#dc2626'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.color = '#64748b'
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -887,7 +1103,7 @@ const KnowledgeBasePage: React.FC = () => {
                   >
                     <RotateCw size={16} className={files_loading ? 'animate-spin' : ''} />
                   </button>
-                  <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} title="上传文件" aria-label="上传文件" style={{ display: 'none' }} />
+                  <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} title="上传文件" aria-label="上传文件" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md" style={{ display: 'none' }} />
                   <button
                     type="button"
                     onClick={() => file_input_ref.current?.click()}
@@ -1172,6 +1388,52 @@ const KnowledgeBasePage: React.FC = () => {
               >
                 {creating_kb && <Loader2 size={14} className="animate-spin" />}
                 确认创建
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 自定义弹框 */}
+      {show_custom_modal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', width: '380px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+              <img src="kity.png" alt="Kity" style={{ width: '48px', height: '48px', borderRadius: '8px' }} />
+              <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{custom_modal_title}</h2>
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#475569', lineHeight: '1.6' }}>{custom_modal_message}</p>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              {custom_modal_type === 'confirm' && (
+                <button
+                  onClick={() => set_show_custom_modal(false)}
+                  style={{
+                    padding: '10px 20px', fontSize: '14px', fontWeight: 500,
+                    border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: '#ffffff',
+                    color: '#475569', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                >
+                  取消
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  set_show_custom_modal(false)
+                  if (custom_modal_callback) custom_modal_callback()
+                }}
+                style={{
+                  padding: '10px 20px', fontSize: '14px', fontWeight: 500,
+                  border: 'none', borderRadius: '6px', backgroundColor: '#0ea5e9',
+                  color: '#ffffff', cursor: 'pointer', transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0284c7'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0ea5e9'}
+              >
+                {custom_modal_type === 'confirm' ? '确认' : '确定'}
               </button>
             </div>
           </div>
