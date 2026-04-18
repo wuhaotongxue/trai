@@ -4,10 +4,11 @@
  * 日期: 2026-04-16 10:11:04
  * 描述: 客户端登录页面
  */
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, FileText, RotateCw } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
+import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
@@ -19,8 +20,11 @@ const Login: React.FC = () => {
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
   const [is_default_password, set_is_default_password] = useState(true)
+  const [show_logs, set_show_logs] = useState(false)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
+  const { logs, add_log, clear_logs } = use_log_store()
+  const log_card_ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const load_config = async () => {
@@ -34,22 +38,22 @@ const Login: React.FC = () => {
       }
     }
 
-    const load_demo_account = async () => {
-      try {
-        const api_base = api_url.trim() ? (api_url.startsWith('http') ? api_url : `http://${api_url}`) : 'http://127.0.0.1:5666'
-        const res = await fetch(`${api_base}/api/auth/demo`)
-        if (res.ok) {
-          const data = await res.json()
-          set_username(data.username)
-        }
-      } catch (err) {
-        console.error('加载 demo 账号失败:', err)
+    void load_config()
+  }, [])
+
+  // 点击其他地方关闭日志卡片
+  useEffect(() => {
+    const handle_click_outside = (event: MouseEvent) => {
+      if (log_card_ref.current && !log_card_ref.current.contains(event.target as Node)) {
+        set_show_logs(false)
       }
     }
 
-    void load_config()
-    void load_demo_account()
-  }, [api_url])
+    document.addEventListener('mousedown', handle_click_outside)
+    return () => {
+      document.removeEventListener('mousedown', handle_click_outside)
+    }
+  }, [])
 
   const normalized_api_url = useMemo(() => {
     const raw = api_url.trim()
@@ -87,16 +91,24 @@ const Login: React.FC = () => {
 
     if (!username || !submit_password) {
       set_error_msg('用户名和密码不能为空')
+      add_log('错误: 用户名和密码不能为空')
       return
     }
 
+    add_log(`开始登录: 用户名=${username}, 密码长度=${submit_password.length}`)
+    add_log(`服务地址: ${normalized_api_url}`)
+
     try {
       if (!api_loading) {
+        add_log('保存服务地址...')
         await save_api_url()
       }
+      add_log('调用登录接口...')
       const res = await window.electron_api.auth_login({ username, password: submit_password })
+      add_log(`登录响应: ${JSON.stringify(res, null, 2)}`)
       if (res.success && res.data) {
         const user_info = res.data.user
+        add_log(`登录成功: ${user_info.username || username}`)
         login({
           username: user_info.username || username,
           email: user_info.email || `${username}@trai.local`,
@@ -105,6 +117,7 @@ const Login: React.FC = () => {
         navigate('/')
       } else {
         const raw = String(res.error || '')
+        add_log(`登录失败: ${raw}`)
         if (raw.includes('用户名或密码错误') || raw.includes('401')) {
           set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
         } else {
@@ -113,6 +126,7 @@ const Login: React.FC = () => {
       }
     } catch (err: any) {
       const raw = String(err?.message || '')
+      add_log(`登录异常: ${raw}`)
       if (raw.includes('401')) {
         set_error_msg('密码错误, 请联系邮箱: wuhaotongxue@gmail.com')
       } else {
@@ -123,7 +137,159 @@ const Login: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f3f3f3', overflow: 'hidden' }}>
-      <TitleBar />
+      {/* 自定义标题栏 */}
+      <div
+        className="drag-region"
+        style={{
+          height: '36px',
+          width: '100%',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          fontSize: '12px',
+          color: '#333333',
+          boxSizing: 'border-box',
+          borderBottom: '1px solid #e0e0e0',
+          position: 'relative',
+          zIndex: 1000,
+          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src="./kity.png" alt="logo" style={{ width: '16px', height: '16px' }} />
+          <span style={{ fontWeight: '500' }}>TRAI</span>
+          <button
+            className="no-drag-region"
+            type="button"
+            title="刷新"
+            onClick={() => window.location.reload()}
+            style={{
+              background: '#f5f5f5',
+              border: '1px solid #e0e0e0',
+              borderRadius: '6px',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#333333'
+            }}
+          >
+            <RotateCw size={14} />
+          </button>
+
+          <div style={{ position: 'relative' }}>
+            <button
+              className="no-drag-region"
+              type="button"
+              title={show_logs ? '隐藏日志' : '显示日志'}
+              onClick={() => set_show_logs(!show_logs)}
+              style={{
+                background: '#f5f5f5',
+                border: '1px solid #e0e0e0',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#333333'
+              }}
+            >
+              <FileText size={14} />
+            </button>
+
+            {show_logs && (
+              <div 
+                ref={log_card_ref}
+                className="no-drag-region"
+                style={{
+                  position: 'absolute',
+                  top: '40px',
+                  left: '0',
+                  width: '400px',
+                  maxWidth: '90vw',
+                  maxHeight: '300px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  padding: '8px',
+                  overflow: 'auto',
+                  zIndex: 1000
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '4px 8px' }}>
+                  <h3 style={{ margin: 0, fontSize: '14px', color: '#333' }}>系统日志</h3>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button
+                      className="no-drag-region"
+                      type="button"
+                      onClick={() => window.location.reload()}
+                      title="刷新"
+                      style={{
+                        background: 'none',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      刷新
+                    </button>
+                    <button
+                      className="no-drag-region"
+                      type="button"
+                      onClick={clear_logs}
+                      title="清除"
+                      style={{
+                        background: 'none',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      清除
+                    </button>
+                    <button
+                      className="no-drag-region"
+                      type="button"
+                      onClick={() => set_show_logs(false)}
+                      title="关闭"
+                      style={{
+                        background: 'none',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      关闭
+                    </button>
+                  </div>
+                </div>
+                <div style={{ fontSize: '12px', fontFamily: 'monospace', padding: '0 8px' }}>
+                  {logs.length > 0 ? (
+                    logs.map((log, index) => (
+                      <div key={index} style={{ marginBottom: '4px' }}>{log}</div>
+                    ))
+                  ) : (
+                    <div style={{ color: '#666' }}>暂无日志</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '320px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
           <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>

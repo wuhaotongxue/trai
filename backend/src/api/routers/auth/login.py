@@ -106,20 +106,26 @@ async def login(
             detail={"code": 401, "message": "用户名或密码错误"},
         )
 
-    # 获取密码哈希并验证
-    password_hash = user_repo.get_password_hash(user.user_id)
-    if not password_hash:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"code": 401, "message": "用户名或密码错误"},
-        )
+    # 检查是否为 demo 账号
+    if request.username == DEMO_USERNAME and request.password == DEMO_PASSWORD_PLAIN:
+        # demo 账号直接通过
+        pass
+    else:
+        # 普通账号验证密码
+        # 获取密码哈希并验证
+        password_hash = user_repo.get_password_hash(user.user_id)
+        if not password_hash:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"code": 401, "message": "用户名或密码错误"},
+            )
 
-    # 验证密码
-    if not password_service.verify(request.password, password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"code": 401, "message": "用户名或密码错误"},
-        )
+        # 验证密码
+        if not password_service.verify(request.password, password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"code": 401, "message": "用户名或密码错误"},
+            )
 
     # 检查用户状态
     if not user.is_active():

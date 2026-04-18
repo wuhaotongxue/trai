@@ -4,32 +4,51 @@
  * 日期: 2026-04-13 19:40:00
  * 描述: Win11 风格的自定义可拖拽顶栏
  */
-import React from 'react'
-import { RotateCw } from 'lucide-react'
+import React, { useEffect, useRef } from 'react'
+import { RotateCw, FileText, X } from 'lucide-react'
+import { use_log_store } from '@/store/log'
 
 const TitleBar: React.FC = () => {
+  const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
+  const log_card_ref = useRef<HTMLDivElement>(null)
+
+  // 点击其他地方关闭日志卡片
+  useEffect(() => {
+    const handle_click_outside = (event: MouseEvent) => {
+      if (log_card_ref.current && !log_card_ref.current.contains(event.target as Node)) {
+        if (show_logs) {
+          toggle_logs()
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handle_click_outside)
+    return () => {
+      document.removeEventListener('mousedown', handle_click_outside)
+    }
+  }, [show_logs, toggle_logs])
+
   return (
     <div
       className="drag-region"
       style={{
         height: '36px',
         width: '100%',
-        backgroundColor: 'transparent',
+        backgroundColor: '#ffffff',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: '16px',
         fontSize: '12px',
         color: 'rgba(0, 0, 0, 0.7)',
         boxSizing: 'border-box',
-        // 因为原生 titleBarOverlay 占据了右侧，我们只负责左侧和中间的拖拽区域
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+        position: 'relative',
+        zIndex: 1000
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <img src="./kity.png" alt="logo" style={{ width: '16px', height: '16px' }} />
         <span>TRAI</span>
-      </div>
-
-      <div style={{ marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
         <button
           className="no-drag-region"
           type="button"
@@ -49,6 +68,113 @@ const TitleBar: React.FC = () => {
         >
           <RotateCw size={14} />
         </button>
+
+        <div style={{ position: 'relative' }}>
+          <button
+            className="no-drag-region"
+            type="button"
+            title={show_logs ? '隐藏日志' : '显示日志'}
+            onClick={toggle_logs}
+            style={{
+              background: 'transparent',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: '6px',
+              padding: '4px 6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(0, 0, 0, 0.65)'
+            }}
+          >
+            <FileText size={14} />
+          </button>
+
+          {show_logs && (
+            <div 
+              ref={log_card_ref}
+              className="no-drag-region"
+              style={{
+                position: 'absolute',
+                top: '36px',
+                left: '0',
+                width: '400px',
+                maxWidth: '90vw',
+                maxHeight: '300px',
+                backgroundColor: '#ffffff',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                padding: '8px',
+                overflow: 'auto',
+                zIndex: 1000
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '4px 8px' }}>
+                <h3 style={{ margin: 0, fontSize: '14px', color: '#333' }}>系统日志</h3>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button
+                    className="no-drag-region"
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    title="刷新"
+                    style={{
+                      background: 'none',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      padding: '2px 6px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    刷新
+                  </button>
+                  <button
+                    className="no-drag-region"
+                    type="button"
+                    onClick={clear_logs}
+                    title="清除"
+                    style={{
+                      background: 'none',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      padding: '2px 6px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    清除
+                  </button>
+                  <button
+                    className="no-drag-region"
+                    type="button"
+                    onClick={toggle_logs}
+                    title="关闭"
+                    style={{
+                      background: 'none',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      padding: '2px 6px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    关闭
+                  </button>
+                </div>
+              </div>
+              <div style={{ fontSize: '12px', fontFamily: 'monospace', padding: '0 8px' }}>
+                {logs.length > 0 ? (
+                  logs.map((log, index) => (
+                    <div key={index} style={{ marginBottom: '4px' }}>{log}</div>
+                  ))
+                ) : (
+                  <div style={{ color: '#666' }}>暂无日志</div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
