@@ -37,6 +37,12 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_0020
+- **功能(agent)**: 新增默认 Agent（agent-default），全能型助手
+- **功能(agent)**: 新增 `/api/agent/management/update` 接口，支持更新 Agent 信息
+- **优化(agent)**: Agent 数据结构新增 `icon` 和 `system_prompt` 字段
+- **优化(agent)**: 注册和更新接口支持保存图标和系统提示词
+
 ### 🛠️ 后端_2026_04_17_2257
 - **新增(user)**: 管理后台新增创建用户接口, 支持创建多账号登录
 - **修复(password)**: 修复修改密码接口无法更新密码哈希导致 500 的问题

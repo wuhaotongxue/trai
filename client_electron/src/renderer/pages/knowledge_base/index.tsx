@@ -5,7 +5,7 @@
  * 描述: 专属知识库管理页面, 支持新建知识库与上传文件 (三段式折叠布局)
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeft, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
+import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeftOpen, List, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import '../../styles/knowledge_base.css'
 
@@ -544,7 +544,7 @@ const KnowledgeBasePage: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <PanelLeftOpen size={18} />
             </button>
           </div>
           
@@ -618,6 +618,24 @@ const KnowledgeBasePage: React.FC = () => {
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开分类栏"
+                  aria-label="展开分类栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
               <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat?.name || '子文件夹'}</span>
             </div>
             <button
@@ -633,7 +651,7 @@ const KnowledgeBasePage: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <List size={18} />
             </button>
           </div>
           
@@ -764,34 +782,57 @@ const KnowledgeBasePage: React.FC = () => {
             <>
               <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
-                  {(!is_left_sidebar_open || !is_middle_sidebar_open) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        set_is_left_sidebar_open(true)
-                        set_is_middle_sidebar_open(true)
-                      }}
-                      title="展开全部侧边栏"
-                      aria-label="展开全部侧边栏"
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <PanelLeft size={20} />
-                    </button>
+                  {!is_middle_sidebar_open && (
+                    <>
+                      {!is_left_sidebar_open && (
+                        <button
+                          type="button"
+                          onClick={() => set_is_left_sidebar_open(true)}
+                          title="展开分类栏"
+                          aria-label="展开分类栏"
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s',
+                            marginRight: '4px'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <PanelLeftOpen size={20} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => set_is_middle_sidebar_open(true)}
+                        title="展开知识库列表"
+                        aria-label="展开知识库列表"
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <List size={20} />
+                      </button>
+                    </>
                   )}
                   {editing_kb_id === active_kb.id ? (
-                    <input 
-                      aria-label="知识库名称"
-                      title="知识库名称"
-                      autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value)}
-                      onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
-                      style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', minWidth: '100px', flex: 1 }}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                      <input 
+                        aria-label="知识库名称"
+                        title="知识库名称"
+                        autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value.slice(0, 15))}
+                        onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
+                        style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', minWidth: '100px', flex: 1 }}
+                        maxLength={15}
+                      />
+                      <div style={{ fontSize: '12px', color: edit_kb_name.length >= 15 ? '#ef4444' : '#94a3b8', whiteSpace: 'nowrap' }}>
+                        {edit_kb_name.length}/15
+                      </div>
+                    </div>
                   ) : (
                     <>
                       <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name)}</h2>
@@ -1101,7 +1142,12 @@ const KnowledgeBasePage: React.FC = () => {
               <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建知识库 (所属: {active_cat?.name})</h3>
               <button type="button" onClick={() => set_show_create_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
-            <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            <div style={{ marginBottom: '12px' }}>
+              <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value.slice(0, 15))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={15} />
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_kb_name.length >= 15 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+                {new_kb_name.length}/15
+              </div>
+            </div>
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
             {creating_kb && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
