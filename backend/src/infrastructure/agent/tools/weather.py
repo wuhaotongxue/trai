@@ -67,8 +67,15 @@ class WeatherTool(BaseTool):
 
         # 如果城市为空，默认使用北京
         if not city:
-            logger.warning("城市参数为空，默认使用北京")
+            logger.warning(f"城市参数为空: {params}，默认使用北京")
             city = "北京"
+        
+        # 尝试清理城市名称
+        city = city.strip()
+        if not city:
+            city = "北京"
+
+        logger.info(f"查询天气 | 城市: {city}")
 
         try:
             async with httpx.AsyncClient(timeout=10) as client:
