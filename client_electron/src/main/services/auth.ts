@@ -56,6 +56,20 @@ export const auth_service = {
     }
   },
 
+  async change_password(params: { old_password: string; new_password: string }) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.auth_password_change)
+      const res = await api_client.post(url, params)
+      return { success: true, data: res.data }
+    } catch (error: any) {
+      log.error('change_password failed:', error.response?.data || error.message)
+      return {
+        success: false,
+        error: error.response?.data?.detail?.message || error.response?.data?.message || '密码修改失败, 请检查网络或服务器配置'
+      }
+    }
+  },
+
   async logout() {
     try {
       // 也可以在此处调用服务端的登出接口

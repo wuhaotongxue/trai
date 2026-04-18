@@ -11,8 +11,8 @@ import { use_auth_store } from '@/store/auth'
 import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
-  const [username, set_username] = useState('admin')
-  const [password, set_password] = useState('123456')
+  const [username, set_username] = useState('wuhao')
+  const [password, set_password] = useState('Dorians@2026...')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
   const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
