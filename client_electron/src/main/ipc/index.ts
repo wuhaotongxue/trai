@@ -125,8 +125,12 @@ export const register_ipc_handlers = (): void => {
     return agent_service.get_agents()
   })
 
-  ipcMain.handle('agent:management:register', async (_, name: string, description: string, model: string, system_prompt: string) => {
-    return agent_service.register_agent(name, description, model, system_prompt)
+  ipcMain.handle('agent:management:register', async (_, name: string, description: string, model: string, system_prompt: string, icon?: string) => {
+    return agent_service.register_agent(name, description, model, system_prompt, icon)
+  })
+
+  ipcMain.handle('agent:management:update', async (_, agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) => {
+    return agent_service.update_agent(agent_id, name, description, model, system_prompt, icon)
   })
 
   ipcMain.handle('agent:management:toggle', async (_, agent_id: string, action: 'start' | 'stop') => {
