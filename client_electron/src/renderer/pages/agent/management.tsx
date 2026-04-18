@@ -535,8 +535,9 @@ const AgentManagement: React.FC = () => {
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{
-                      width: '64px',
-                      height: '64px',
+                      width: '48px',
+                      height: '48px',
+                      minWidth: '48px',
                       borderRadius: '12px',
                       backgroundColor: '#e0f2fe',
                       display: 'flex',
@@ -544,7 +545,7 @@ const AgentManagement: React.FC = () => {
                       justifyContent: 'center',
                       color: '#0369a1'
                     }}>
-                      <IconComponent size={32} />
+                      <IconComponent size={24} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -578,9 +579,9 @@ const AgentManagement: React.FC = () => {
                       系统提示词
                     </div>
                     <div style={{
-                      padding: '16px', backgroundColor: '#f1f5f9', borderRadius: '8px',
+                      padding: '12px', backgroundColor: '#f1f5f9', borderRadius: '8px',
                       fontSize: '13px', color: '#475569', lineHeight: '1.6',
-                      whiteSpace: 'pre-wrap', wordBreak: 'break-word'
+                      overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
                     }}>
                       {active_agent.system_prompt || '暂无系统提示词'}
                     </div>
