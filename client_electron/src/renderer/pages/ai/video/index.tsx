@@ -209,40 +209,40 @@ const AiVideo: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '20px', gap: '6px' }}>
                 {!is_left_sidebar_open && (
                   <button
                     onClick={() => set_is_left_sidebar_open(true)}
                     title="展开AI能力栏"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <PanelLeftOpen size={18} />
+                    <PanelLeftOpen size={20} />
                   </button>
                 )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开视频风格栏"
                   style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>AI 视频生成</span>
+            <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>AI 视频生成</span>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
             <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
