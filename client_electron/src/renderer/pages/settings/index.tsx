@@ -437,12 +437,11 @@ const Settings: React.FC = () => {
       </div>
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div style={{ 
-          width: is_left_sidebar_open ? '200px' : '0px', 
-          minWidth: is_left_sidebar_open ? '180px' : '0px',
-          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+        <div style={{
+          width: is_left_sidebar_open ? '18%' : '0px',
+          minWidth: is_left_sidebar_open ? '100px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#f1f5f9', 
+          backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
@@ -450,7 +449,7 @@ const Settings: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>设置分类</span>
             <button
               type="button"
@@ -520,12 +519,11 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ 
-          width: is_middle_sidebar_open ? '220px' : '0px', 
-          minWidth: is_middle_sidebar_open ? '200px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+        <div style={{
+          width: is_middle_sidebar_open ? '20%' : '0px',
+          minWidth: is_middle_sidebar_open ? '120px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
+          backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
@@ -533,7 +531,7 @@ const Settings: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -553,7 +551,7 @@ const Settings: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
                 {active_category === 'system' ? '系统设置项' : '账号设置项'}
               </span>
             </div>
@@ -607,42 +605,7 @@ const Settings: React.FC = () => {
           </div>
         </div>
 
-        <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-            {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
-                {!is_left_sidebar_open && (
-                  <button
-                    onClick={() => set_is_left_sidebar_open(true)}
-                    title="展开设置分类栏"
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <PanelLeftOpen size={18} />
-                  </button>
-                )}
-                <button
-                  onClick={() => set_is_middle_sidebar_open(true)}
-                  title="展开设置项栏"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <List size={18} />
-                </button>
-              </div>
-            )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>设置</span>
-          </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#ffffff' }}>
             {render_content()}
           </div>
