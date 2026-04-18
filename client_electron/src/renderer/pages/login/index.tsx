@@ -83,12 +83,9 @@ const Login: React.FC = () => {
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (is_default_password) {
-      set_error_msg('请输入密码')
-      return
-    }
+    const submit_password = is_default_password ? 'Tr@@2026...' : password
 
-    if (!username || !password) {
+    if (!username || !submit_password) {
       set_error_msg('用户名和密码不能为空')
       return
     }
@@ -97,7 +94,7 @@ const Login: React.FC = () => {
       if (!api_loading) {
         await save_api_url()
       }
-      const res = await window.electron_api.auth_login({ username, password })
+      const res = await window.electron_api.auth_login({ username, password: submit_password })
       if (res.success && res.data) {
         const user_info = res.data.user
         login({
