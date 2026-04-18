@@ -272,7 +272,7 @@ const AgentManagement: React.FC = () => {
                     alignItems: 'center',
                     gap: '8px',
                     marginBottom: '4px',
-                    fontSize: '13px',
+                    fontSize: '14px',
                     fontWeight: active_agent_id === agent.id ? 600 : 400,
                     transition: 'background-color 0.2s'
                   }}
