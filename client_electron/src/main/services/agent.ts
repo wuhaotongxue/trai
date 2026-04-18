@@ -207,15 +207,31 @@ export const agent_service = {
   /**
    * 注册新 Agent
    */
-  async register_agent(name: string, description: string, model: string, system_prompt: string) {
+  async register_agent(name: string, description: string, model: string, system_prompt: string, icon?: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_register)
-      const payload = { name, description, model, system_prompt }
+      const payload: any = { name, description, model, system_prompt }
+      if (icon) payload.icon = icon
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
     } catch (error: any) {
       log.error('register_agent failed:', error.message)
       return { success: false, error: error.message || '注册 Agent 失败' }
+    }
+  },
+
+  /**
+   * 更新 Agent
+   */
+  async update_agent(agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_update)
+      const payload = { agent_id, name, description, model, system_prompt, icon }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('update_agent failed:', error.message)
+      return { success: false, error: error.message || '更新 Agent 失败' }
     }
   },
 
