@@ -96,7 +96,7 @@ _MOCK_AGENTS = [
         "name": "天气助手",
         "description": "专业的天气预报和气象信息查询助手",
         "model": "gpt-4o",
-        "system_prompt": "你是天气查询助手。当用户问天气时，你必须使用 weather_current 工具来查询天气信息。你要从用户的问题里找出城市名，用这个城市名来调用天气工具。",
+        "system_prompt": "你是天气查询助手。当用户问天气时，必须使用 weather_current 工具。\n\n使用规则：\n- 从用户问题提取城市名\n- 城市名作为 city 参数传递\n- 如果用户没说城市，默认北京\n- 不要加其他内容，只调用工具即可",
         "icon": "Cloud",
         "status": "running",
         "created_at": "2026-04-19T00:45:00Z",

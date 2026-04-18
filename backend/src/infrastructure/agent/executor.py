@@ -182,12 +182,15 @@ class AgentExecutor:
 
                 import json
 
+                logger.info(f"工具调用原始数据 | turn={turn} | tool_id={tool_id} | raw_args={repr(raw_args)}")
+
                 try:
                     args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"工具调用参数解析失败 | error={e}")
                     args = {}
 
-                logger.info(f"工具调用 | turn={turn} | tool_id={tool_id} | args={args}")
+                logger.info(f"工具调用解析后 | turn={turn} | tool_id={tool_id} | args={args}")
 
                 tool_result = await self._execute_tool_with_correction(tool_id, tool_call_id, args, context)
                 tool_results.append(tool_result)
@@ -305,13 +308,31 @@ class AgentExecutor:
                 elif event.type == "reasoning":
                     reasoning_content += event.content
                 elif event.type == "tool_call_end":
-                    tool_calls.append(
-                        {
-                            "id": event.tool_call_id,
-                            "type": "function",
-                            "function": {"name": event.tool_name, "arguments": event.content},
-                        }
-                    )
+                    # 检查是否已存在同 id 的 tool_call
+                    existing_idx = next((i for i, tc in enumerate(tool_calls) if tc["id"] == event.tool_call_id), None)
+                    if existing_idx is None:
+                        # 不存在，添加新的
+                        logger.info(f"[Stream] 添加 tool_call 到数组: id={event.tool_call_id}, name={event.tool_name}, args={repr(event.content)}")
+                        tool_calls.append(
+                            {
+                                "id": event.tool_call_id,
+                                "type": "function",
+                                "function": {"name": event.tool_name, "arguments": event.content},
+                            }
+                        )
+                    else:
+                        # 已存在，检查新 content 是否非空，如果是就替换旧的（避免旧的是空参数！）
+                        old_tc = tool_calls[existing_idx]
+                        old_args = old_tc["function"]["arguments"]
+                        if event.content and (not old_args or len(event.content) > len(old_args)):
+                            logger.info(f"[Stream] 替换 tool_call: id={event.tool_call_id} 的 args 从 {repr(old_args)} → {repr(event.content)}")
+                            tool_calls[existing_idx] = {
+                                "id": event.tool_call_id,
+                                "type": "function",
+                                "function": {"name": event.tool_name, "arguments": event.content},
+                            }
+                        else:
+                            logger.warning(f"[Stream] 跳过重复的 tool_call_id: id={event.tool_call_id} (新旧 args 相同或新 args 空)")
 
             assistant_msg: dict[str, Any] = {
                 "role": "assistant",
@@ -329,12 +350,22 @@ class AgentExecutor:
                 tool_call_id = tc.get("id", "")
                 func = tc.get("function", {})
                 tool_id = func.get("name", "")
-                raw_args = func.get("arguments", "{}")
+                raw_args = func.get("arguments", "")
+
+                # 过滤无效调用：tool_id 空、tool_call_id 空、raw_args 空
+                if not tool_call_id or not tool_id or not raw_args:
+                    logger.warning(f"[Stream] 跳过无效的 tool_call: id={tool_call_id}, name={tool_id}, args={repr(raw_args)}")
+                    continue
+
+                logger.info(f"流式工具调用原始数据 | tool_id={tool_id} | raw_args={repr(raw_args)}")
 
                 try:
                     args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"流式工具调用参数解析失败 | error={e}")
                     args = {}
+
+                logger.info(f"流式工具调用解析后 | tool_id={tool_id} | args={args}")
 
                 # 通知客户端工具开始执行
                 yield {

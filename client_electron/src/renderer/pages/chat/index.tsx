@@ -722,13 +722,28 @@ const AgentChat: React.FC = () => {
                         {(() => {
                           // 过滤步骤，只保留有意义的
                           const valid_steps = (msg.steps || []).filter(step => {
-                            return step.tool_name && step.tool_name.trim()
+                            if (!step.tool_name || !step.tool_name.trim()) return false
+                            // 过滤掉空内容的结果
+                            if (step.content && step.content.trim() === '{}') return false
+                            return true
                           })
 
-                          if (valid_steps.length === 0) return null
+                          // 去重：只保留每个工具的最后一个结果
+                          const unique_steps: ToolStep[] = []
+                          const tool_latest: Record<string, ToolStep> = {}
+                          
+                          for (const step of valid_steps.reverse()) {
+                            const key = `${step.tool_name}_${step.type}`
+                            if (!tool_latest[key]) {
+                              tool_latest[key] = step
+                              unique_steps.unshift(step)
+                            }
+                          }
+
+                          if (unique_steps.length === 0) return null
 
                           // 找出最后的成功结果
-                          const has_any_success = valid_steps.some(step => 
+                          const has_any_success = unique_steps.some(step => 
                             step.type === 'tool_result' && step.success === true
                           )
 
@@ -762,7 +777,7 @@ const AgentChat: React.FC = () => {
                               
                               {expanded_steps[`all_steps_${idx}`] && (
                                 <div style={{ borderTop: '1px solid #e2e8f0' }}>
-                                  {valid_steps.map((step, s_idx) => {
+                                  {unique_steps.map((step, s_idx) => {
                                     const step_id = `step_${idx}_${s_idx}`
                                     const is_start = step.type === 'tool_start'
                                     const is_success = step.success === true
@@ -795,7 +810,7 @@ const AgentChat: React.FC = () => {
 
                                     return (
                                       <div key={s_idx} style={{
-                                        borderBottom: s_idx < valid_steps.length - 1 ? '1px solid #e2e8f0' : 'none'
+                                        borderBottom: s_idx < unique_steps.length - 1 ? '1px solid #e2e8f0' : 'none'
                                       }}>
                                         <div 
                                           onClick={() => toggle_step(step_id)}
