@@ -22,8 +22,8 @@ interface Window {
     agent_management_register: (name: string, description: string, model: string, system_prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: any[]) => Promise<{ success: boolean; data?: any; error?: string }>;
-    kb_demo_create?: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
+    feedback_submit: (data: { type: string; title: string; content: string; contact?: string; attachments?: any[] }) => Promise<{ success: boolean; data?: any; error?: string }>;
+    kb_demo_create?: (params: { content?: string | null; file_name?: string | null; index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_categories?: () => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_indices?: (index_name?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_index_files?: (index_id: string, page_number?: number, page_size?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
