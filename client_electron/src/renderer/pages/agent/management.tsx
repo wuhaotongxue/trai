@@ -5,7 +5,7 @@
  * 描述: Agent 管理页面，支持列表、注册、启停 - 三段式布局
  */
 import React, { useState, useEffect } from 'react'
-import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit } from 'lucide-react'
+import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud } from 'lucide-react'
 
 interface Agent {
   id: string
@@ -25,6 +25,8 @@ const icon_options = [
   { value: 'Cpu', label: 'Cpu', component: Cpu },
   { value: 'MessageSquare', label: 'MessageSquare', component: MessageSquare },
   { value: 'BrainCircuit', label: 'BrainCircuit', component: BrainCircuit },
+  { value: 'Calculator', label: 'Calculator', component: Calculator },
+  { value: 'Cloud', label: 'Cloud', component: Cloud },
 ]
 
 const model_options = [
