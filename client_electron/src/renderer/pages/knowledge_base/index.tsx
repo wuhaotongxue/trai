@@ -465,7 +465,18 @@ const KnowledgeBasePage: React.FC = () => {
 
   // (移除了暂不支持的移动知识库的方法)
 
+  // 辅助函数：移除用户名前缀，只显示实际知识库名称
+  const get_display_name = (name: string) => {
+    const parts = name.split('__');
+    if (parts.length > 1) {
+      return parts.slice(1).join('__');
+    }
+    return name;
+  };
+  
+  // 当前活动分类
   const active_cat = useMemo(() => categories.find(c => c.id === active_cat_id), [categories, active_cat_id])
+  // 当前活动知识库
   const active_kb = useMemo(() => kb_list.find(kb => kb.id === active_kb_id), [kb_list, active_kb_id])
   const current_cat_kbs = useMemo(() => {
     if (!active_cat_id) return kb_list
@@ -485,6 +496,8 @@ const KnowledgeBasePage: React.FC = () => {
         {/* 左侧边栏: 一级目录 */}
         <div style={{ 
           width: is_left_sidebar_open ? '200px' : '0px', 
+          minWidth: is_left_sidebar_open ? '180px' : '0px',
+          maxWidth: is_left_sidebar_open ? '250px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9', 
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -492,9 +505,9 @@ const KnowledgeBasePage: React.FC = () => {
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
-          flexShrink: 0
+          flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>目录分类</span>
             <button
               type="button"
@@ -513,7 +526,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
             {categories.map(cat => (
               <div 
                 key={cat.id}
@@ -549,7 +562,7 @@ const KnowledgeBasePage: React.FC = () => {
             ))}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '180px', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_cat_modal(true)}
@@ -569,7 +582,9 @@ const KnowledgeBasePage: React.FC = () => {
 
         {/* 中间边栏: 子文件夹 (知识库) */}
         <div style={{ 
-          width: is_middle_sidebar_open ? '240px' : '0px', 
+          width: is_middle_sidebar_open ? '220px' : '0px', 
+          minWidth: is_middle_sidebar_open ? '200px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff', 
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -577,9 +592,9 @@ const KnowledgeBasePage: React.FC = () => {
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
-          flexShrink: 0
+          flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '240px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat?.name || '子文件夹'}</span>
             </div>
@@ -600,7 +615,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '240px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
             {current_cat_kbs.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>当前分类暂无子知识库</div>
             ) : (
@@ -628,13 +643,13 @@ const KnowledgeBasePage: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                       <BookOpen size={14} color={active_kb_id === kb.id ? '#0ea5e9' : '#64748b'} />
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: active_kb_id === kb.id ? '#0f172a' : '#334155' }}>
-                        {kb.name}
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: active_kb_id === kb.id ? '#0f172a' : '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {get_display_name(kb.name)}
                       </span>
                     </div>
-                    <span style={{ fontSize: '12px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '12px' }}>
+                    <span style={{ fontSize: '12px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '12px', marginLeft: '8px' }}>
                       {kb.file_count}
                     </span>
                   </div>
@@ -644,7 +659,7 @@ const KnowledgeBasePage: React.FC = () => {
             )}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #f1f5f9', minWidth: '240px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #f1f5f9', minWidth: '200px', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_create_modal(true)}
@@ -664,8 +679,8 @@ const KnowledgeBasePage: React.FC = () => {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {active_kb ? (
             <>
-              <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
                   {(!is_left_sidebar_open || !is_middle_sidebar_open) && (
                     <button
                       type="button"
@@ -692,12 +707,12 @@ const KnowledgeBasePage: React.FC = () => {
                       title="知识库名称"
                       autoFocus value={edit_kb_name} onChange={(e) => set_edit_kb_name(e.target.value)}
                       onBlur={() => handle_rename_kb(active_kb.id)} onKeyDown={(e) => e.key === 'Enter' && handle_rename_kb(active_kb.id)}
-                      style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', width: '240px' }}
+                      style={{ fontSize: '18px', color: '#0f172a', fontWeight: 600, padding: '4px 8px', border: '1px solid #0ea5e9', borderRadius: '6px', outline: 'none', minWidth: '100px', flex: 1 }}
                     />
                   ) : (
                     <>
-                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{active_kb.name}</h2>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
+                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name)}</h2>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(active_kb.name) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
                         <button type="button" onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" aria-label="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                         <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: '8px', padding: '2px 8px', backgroundColor: '#f1f5f9', borderRadius: '4px' }}>

@@ -5,6 +5,7 @@ interface Window {
     config_set: (key: string, value: any) => Promise<{ success: boolean; error?: string }>;
     auth_login: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_register: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+    auth_change_password: (params: { old_password: string; new_password: string }) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_logout: () => Promise<{ success: boolean; error?: string }>;
     tools_convert_md_to_pdf: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
