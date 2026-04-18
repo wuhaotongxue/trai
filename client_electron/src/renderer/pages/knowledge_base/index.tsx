@@ -592,12 +592,13 @@ const KnowledgeBasePage: React.FC = () => {
   // (移除了暂不支持的移动知识库的方法)
 
   // 辅助函数：所有用户都不显示用户名前缀 (前缀仅用于后台权限区分)
-  const get_display_name = (name: string) => {
+  const get_display_name = (name: string, maxLength: number = 4) => {
     const parts = name.split('__');
-    if (parts.length > 1) {
-      return parts.slice(1).join('__');
+    const displayName = parts.length > 1 ? parts.slice(1).join('__') : name;
+    if (displayName.length > maxLength) {
+      return displayName.slice(0, maxLength) + '...';
     }
-    return name;
+    return displayName;
   };
   
   // 当前活动分类
@@ -1049,7 +1050,7 @@ const KnowledgeBasePage: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name)}</h2>
+                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name, 20)}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <button type="button" onClick={() => handle_move_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" aria-label="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
                         <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name)) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
