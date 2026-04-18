@@ -535,17 +535,17 @@ const AgentManagement: React.FC = () => {
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                     <div style={{
-                      width: '48px',
-                      height: '48px',
-                      minWidth: '48px',
-                      borderRadius: '12px',
+                      width: '36px',
+                      height: '36px',
+                      minWidth: '36px',
+                      borderRadius: '8px',
                       backgroundColor: '#e0f2fe',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: '#0369a1'
                     }}>
-                      <IconComponent size={24} />
+                      <IconComponent size={20} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                       <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
