@@ -49,7 +49,15 @@ export const router = createHashRouter([
     children: [
       {
         path: '/',
+        element: <Navigate to="/knowledge_base" replace />
+      },
+      {
+        path: '/dashboard',
         element: <Dashboard />
+      },
+      {
+        path: '/knowledge_base',
+        element: <KnowledgeBasePage />
       },
       {
         path: '/chat',
