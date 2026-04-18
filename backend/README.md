@@ -37,6 +37,20 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_0210
+- **修复(tool_calls)**: 修复流式工具调用中 tool_name 可能为空的问题，在任何 tool_call chunk 中发现有 function.name 时都更新 tool_name
+- **修复(tool_calls)**: 修复同 tool_call_id 可能被重复添加到 tool_calls 数组的问题，并增加替换逻辑，优先保留非空参数或内容更长的版本
+- **修复(weather)**: 天气工具集成 Open-Meteo 地理编码 API，支持任意城市（中文/英文/拼音），移除预设城市列表的限制
+- **修复(weather)**: 改进天气工具参数解析，即使参数为空也有合理的默认城市处理
+- **优化(logging)**: 在 openai_client.py 和 executor.py 中增加详细的 tool_call 相关日志，便于调试问题
+
+### 🛠️ 后端_2026_04_19_0030
+- **功能(agent)**: 新增计算器Agent（agent-calculator）和天气助手Agent（agent-weather），默认运行
+- **功能(search)**: 集成DuckDuckGo免费搜索，无需API Key
+- **优化(weather)**: 移除天气工具mock fallback，直接使用wttr.in免费接口
+- **修复(knowledge_base)**: 简化知识库权限检查，允许非超级管理员访问所有知识库
+- **优化(dependencies)**: 新增duckduckgo-search依赖
+
 ### 🛠️ 后端_2026_04_19_0020
 - **功能(agent)**: 新增默认 Agent（agent-default），全能型助手
 - **功能(agent)**: 新增 `/api/agent/management/update` 接口，支持更新 Agent 信息

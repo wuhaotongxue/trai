@@ -4,21 +4,10 @@
  * 日期: 2026-04-16 10:36:17
  * 描述: 客户端知识库服务层, 调用后端管理接口创建知识库.
  */
-import axios from 'axios'
 import log from 'electron-log'
-import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
-
-const api_client = axios.create()
-
-api_client.interceptors.request.use((config) => {
-  const token = config_store.get('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import { api_client } from '../platform/api_client'
 
 export interface KnowledgeBaseDemoCreateRequest {
   content?: string | null
@@ -36,6 +25,11 @@ export interface KnowledgeBaseDemoCreateResponse {
 }
 
 export const knowledge_base_service = {
+  /**
+   * 创建演示知识库
+   * @param params - 知识库创建参数
+   * @returns 创建结果，包含索引ID、文件ID等信息
+   */
   async demo_create(params: KnowledgeBaseDemoCreateRequest) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_demo_create)
@@ -52,6 +46,10 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 获取知识库分类列表
+   * @returns 分类列表
+   */
   async list_categories() {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_categories)
@@ -68,6 +66,11 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 获取知识库索引列表
+   * @param index_name - 可选的索引名称过滤
+   * @returns 索引列表
+   */
   async list_indices(index_name?: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_indices)
@@ -84,6 +87,13 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 获取指定索引下的文件列表
+   * @param index_id - 索引ID
+   * @param page_number - 页码
+   * @param page_size - 每页数量
+   * @returns 文件列表
+   */
   async list_index_files(index_id: string, page_number?: number, page_size?: number) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index_files(index_id))
@@ -103,6 +113,12 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 重命名知识库索引
+   * @param index_id - 索引ID
+   * @param index_name - 新的索引名称
+   * @returns 操作结果
+   */
   async rename_index(index_id: string, index_name: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index(index_id))
@@ -115,6 +131,11 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 删除知识库索引
+   * @param index_id - 索引ID
+   * @returns 操作结果
+   */
   async delete_index(index_id: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index(index_id))
@@ -127,6 +148,12 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 删除索引中的文件
+   * @param index_id - 索引ID
+   * @param file_id - 文件ID
+   * @returns 操作结果
+   */
   async delete_index_file(index_id: string, file_id: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_index_file(index_id, file_id))
@@ -139,6 +166,13 @@ export const knowledge_base_service = {
     }
   },
 
+  /**
+   * 上传文本文件到知识库
+   * @param index_id - 索引ID
+   * @param file_name - 文件名
+   * @param content - 文件内容
+   * @returns 上传结果
+   */
   async upload_text(index_id: string, file_name: string, content: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.admin_knowledge_base_upload_text(index_id))

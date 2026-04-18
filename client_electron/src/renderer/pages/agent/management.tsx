@@ -702,7 +702,7 @@ const AgentManagement: React.FC = () => {
                 value={new_agent.model}
                 onChange={(e) => set_new_agent(prev => ({ ...prev, model: e.target.value }))}
                 style={{
-                  width: '100%', padding: '10px 12px', fontSize: '14px',
+                  width: '100%', padding: '10px 14px', fontSize: '14px', lineHeight: '1.5',
                   border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
                   backgroundColor: '#f8fafc', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box'
                 }}
@@ -710,7 +710,7 @@ const AgentManagement: React.FC = () => {
                 onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
               >
                 {model_options.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value} style={{ padding: '10px 14px', fontSize: '14px' }}>{opt.label}</option>
                 ))}
               </select>
             </div>

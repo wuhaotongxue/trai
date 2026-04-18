@@ -4,23 +4,21 @@
  * 日期: 2026-04-14 13:35:00
  * 描述: 用户反馈服务
  */
-import axios from 'axios'
 import log from 'electron-log'
-import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
-
-const api_client = axios.create()
-
-api_client.interceptors.request.use((config) => {
-  const token = config_store.get('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import { api_client } from '../platform/api_client'
 
 export const feedback_service = {
+  /**
+   * 提交用户反馈
+   * @param data - 反馈数据
+   * @param data.type - 反馈类型
+   * @param data.title - 反馈标题
+   * @param data.content - 反馈内容
+   * @param data.contact - 联系方式（可选）
+   * @returns 提交结果
+   */
   async submit(data: { type: string, title: string, content: string, contact?: string }) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.system_feedback_submit)

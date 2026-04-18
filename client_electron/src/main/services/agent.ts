@@ -6,26 +6,18 @@
  */
 import axios, { CancelTokenSource } from 'axios'
 import log from 'electron-log'
-import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
-
-const api_client = axios.create()
-
-api_client.interceptors.request.use((config) => {
-  const token = config_store.get('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+import { api_client } from '../platform/api_client'
 
 // 保存每个 session_id 对应的 CancelToken，用于中止请求
 const active_requests: Record<string, CancelTokenSource> = {}
 
 export const agent_service = {
   /**
-   * 停止生成
+   * 停止正在进行的对话生成
+   * @param session_id - 会话 ID
+   * @returns 停止结果
    */
   stop_chat(session_id: string) {
     if (active_requests[session_id]) {
@@ -38,7 +30,13 @@ export const agent_service = {
   },
 
   /**
-   * 发送消息给 Agent (流式)
+   * 发送消息给 Agent（流式响应）
+   * @param session_id - 会话 ID
+   * @param message - 用户消息内容
+   * @param agent_id - Agent ID（可选）
+   * @param knowledge_base_id - 知识库 ID（可选）
+   * @param event_sender - 事件发送回调函数（可选）
+   * @returns 对话响应结果
    */
   async chat(session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, event_sender?: (event: string, data: any) => void) {
     try {
@@ -131,7 +129,10 @@ export const agent_service = {
   },
 
   /**
-   * 文生图
+   * 文生图（文本生成图片）
+   * @param prompt - 提示词
+   * @param model - 模型名称，默认使用 FLUX.1-dev
+   * @returns 生成结果
    */
   async generate_image(prompt: string, model: string = "AI-ModelScope/FLUX.1-dev") {
     try {
@@ -146,7 +147,10 @@ export const agent_service = {
   },
 
   /**
-   * 图生图
+   * 图生图（图片生成图片）
+   * @param prompt - 提示词
+   * @param image_url - 原图 URL
+   * @returns 生成结果
    */
   async generate_image_to_image(prompt: string, image_url: string) {
     try {
@@ -161,7 +165,9 @@ export const agent_service = {
   },
 
   /**
-   * AI 音乐
+   * AI 音乐生成
+   * @param prompt - 提示词
+   * @returns 生成结果
    */
   async generate_music(prompt: string) {
     try {
@@ -176,7 +182,9 @@ export const agent_service = {
   },
 
   /**
-   * AI 视频
+   * AI 视频生成
+   * @param prompt - 提示词
+   * @returns 生成结果
    */
   async generate_video(prompt: string) {
     try {
@@ -192,6 +200,7 @@ export const agent_service = {
 
   /**
    * 获取 Agent 列表
+   * @returns Agent 列表
    */
   async get_agents() {
     try {
@@ -206,6 +215,12 @@ export const agent_service = {
 
   /**
    * 注册新 Agent
+   * @param name - Agent 名称
+   * @param description - Agent 描述
+   * @param model - 使用的模型
+   * @param system_prompt - 系统提示词
+   * @param icon - Agent 图标（可选）
+   * @returns 注册结果
    */
   async register_agent(name: string, description: string, model: string, system_prompt: string, icon?: string) {
     try {
@@ -222,6 +237,13 @@ export const agent_service = {
 
   /**
    * 更新 Agent
+   * @param agent_id - Agent ID
+   * @param name - Agent 名称
+   * @param description - Agent 描述
+   * @param model - 使用的模型
+   * @param system_prompt - 系统提示词
+   * @param icon - Agent 图标
+   * @returns 更新结果
    */
   async update_agent(agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) {
     try {
@@ -236,7 +258,10 @@ export const agent_service = {
   },
 
   /**
-   * 启停 Agent
+   * 启停 Agent（启动或停止）
+   * @param agent_id - Agent ID
+   * @param action - 动作类型：'start' 或 'stop'
+   * @returns 操作结果
    */
   async toggle_agent(agent_id: string, action: 'start' | 'stop') {
     try {
@@ -252,6 +277,8 @@ export const agent_service = {
 
   /**
    * 检测 Agent 状态
+   * @param agent_id - Agent ID
+   * @returns Agent 状态信息
    */
   async check_agent(agent_id: string) {
     try {
@@ -267,6 +294,8 @@ export const agent_service = {
 
   /**
    * 提交 ComfyUI 任务
+   * @param prompt - ComfyUI 工作流提示词
+   * @returns 任务提交结果
    */
   async generate_comfyui(prompt: string) {
     try {
@@ -282,6 +311,10 @@ export const agent_service = {
 
   /**
    * AI 周报生成
+   * @param template_base64 - 模板文件 Base64
+   * @param template_name - 模板名称
+   * @param description - 周报内容描述
+   * @returns 生成的周报
    */
   async generate_report(template_base64: string, template_name: string, description: string) {
     try {

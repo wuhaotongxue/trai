@@ -4,58 +4,18 @@
  * 日期: 2026-04-13 21:15:00
  * 描述: 客户端用户认证服务层
  */
-import axios from 'axios'
 import log from 'electron-log'
-import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
-
-// 创建 axios 实例并配置请求拦截器
-const api_client = axios.create()
-
-api_client.interceptors.request.use((config) => {
-  const token = config_store.get('access_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
-// 响应拦截器 - 处理 401 Token 过期
-api_client.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      log.warn('Token expired or invalid, showing re-login prompt')
-      
-      // 清理无效 token
-      config_store.set('access_token', '')
-      
-      // 获取当前窗口
-      const win = BrowserWindow.getFocusedWindow()
-      if (win) {
-        // 显示提示对话框
-        const result = await dialog.showMessageBox(win, {
-          type: 'warning',
-          title: '登录已过期',
-          message: '您的登录已过期，请重新登录',
-          detail: 'Token 有效期 30 分钟，过期后需要重新登录以继续使用',
-          buttons: ['去登录'],
-          defaultId: 0
-        })
-        
-        if (result.response === 0) {
-          // 通知渲染进程跳转到登录页面
-          win.webContents.send('auth:need-login')
-        }
-      }
-    }
-    return Promise.reject(error)
-  }
-)
+import { api_client } from '../platform/api_client'
 
 export const auth_service = {
+  /**
+   * 用户登录
+   * @param params - 登录参数（用户名/密码等）
+   * @returns 登录结果，包含 access_token
+   */
   async login(params: any) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.auth_login)
@@ -76,6 +36,11 @@ export const auth_service = {
     }
   },
 
+  /**
+   * 用户注册
+   * @param params - 注册参数（用户名/密码等）
+   * @returns 注册结果
+   */
   async register(params: any) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.auth_register)
@@ -90,6 +55,13 @@ export const auth_service = {
     }
   },
 
+  /**
+   * 修改密码
+   * @param params - 参数对象
+   * @param params.old_password - 旧密码
+   * @param params.new_password - 新密码
+   * @returns 修改结果
+   */
   async change_password(params: { old_password: string; new_password: string }) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.auth_password_change)
@@ -104,6 +76,10 @@ export const auth_service = {
     }
   },
 
+  /**
+   * 用户登出
+   * @returns 登出结果
+   */
   async logout() {
     try {
       // 也可以在此处调用服务端的登出接口
