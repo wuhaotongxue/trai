@@ -136,9 +136,9 @@ const AiReport: React.FC = () => {
             transition: 'all 0.2s'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {template.icon}
-            {template.name}
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</span>
           </div>
           {active_template === template.id && <ChevronRight size={14} />}
         </button>

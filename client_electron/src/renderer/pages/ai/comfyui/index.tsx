@@ -80,9 +80,9 @@ const ComfyUI: React.FC = () => {
             transition: 'all 0.2s'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {workflow.icon}
-            {workflow.name}
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workflow.name}</span>
           </div>
           {active_workflow === workflow.id && <ChevronRight size={14} />}
         </button>

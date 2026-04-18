@@ -78,9 +78,9 @@ const AiVideo: React.FC = () => {
             transition: 'all 0.2s'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {style.icon}
-            {style.name}
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{style.name}</span>
           </div>
           {active_style === style.id && <ChevronRight size={14} />}
         </button>
