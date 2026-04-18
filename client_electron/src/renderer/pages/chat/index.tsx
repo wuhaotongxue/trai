@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeft, MessageSquarePlus, Paperclip, X, Database } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -66,10 +66,12 @@ const AgentChat: React.FC = () => {
       try {
         const res = await window.electron_api.agent_management_list()
         if (res.success && res.data) {
-          const running_agents = res.data.filter((a: Agent) => a.status === 'running')
-          set_available_agents(running_agents)
-          if (running_agents.length > 0) {
-            set_active_agent_id(running_agents[0].id)
+          set_available_agents(res.data)
+          // 默认选择第一个 Agent（如果有）
+          if (res.data.length > 0) {
+            // 优先选择 running 状态的第一个，如果没有就选择第一个
+            const default_agent = res.data.find((a: Agent) => a.status === 'running') || res.data[0]
+            set_active_agent_id(default_agent.id)
           }
         }
       } catch (err) {
@@ -121,7 +123,8 @@ const AgentChat: React.FC = () => {
       id: `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title: '新会话',
       updated_at: Date.now(),
-      messages: []
+      messages: [],
+      agent_id: active_agent_id
     }
     set_sessions(prev => {
       const updated = [new_session, ...prev]
@@ -133,18 +136,17 @@ const AgentChat: React.FC = () => {
 
   const delete_session = (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
-    set_sessions(prev => {
-      const updated = prev.filter(s => s.id !== id)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-      if (active_session_id === id) {
-        if (updated.length > 0) {
-          set_active_session_id(updated[0].id)
-        } else {
-          setTimeout(create_new_session, 0)
-        }
+    const is_current_session = active_session_id === id
+    const new_sessions = sessions.filter(s => s.id !== id)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(new_sessions))
+    set_sessions(new_sessions)
+    if (is_current_session) {
+      if (new_sessions.length > 0) {
+        set_active_session_id(new_sessions[0].id)
+      } else {
+        create_new_session()
       }
-      return updated
-    })
+    }
   }
 
   const update_active_session_messages = (updater: (prev: ChatMessage[]) => ChatMessage[], target_sid: string = active_session_id_ref.current) => {
@@ -342,7 +344,7 @@ const AgentChat: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <PanelLeftOpen size={18} />
             </button>
           </div>
           
@@ -365,6 +367,7 @@ const AgentChat: React.FC = () => {
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
                     gap: '8px',
                     marginBottom: '4px',
                     fontSize: '13px',
@@ -378,8 +381,18 @@ const AgentChat: React.FC = () => {
                     if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
                   }}
                 >
-                  <MessageSquare size={16} />
-                  {agent.name}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MessageSquare size={16} />
+                    {agent.name}
+                  </div>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: 
+                      agent.status === 'running' ? '#10b981' : 
+                      agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
+                  }} />
                 </div>
               ))
             )}
@@ -401,6 +414,24 @@ const AgentChat: React.FC = () => {
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开 Agent 栏"
+                  aria-label="展开 Agent 栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
               <span style={{ fontSize: '14px', fontWeight: 600 }}>会话列表</span>
             </div>
             <button
@@ -416,7 +447,7 @@ const AgentChat: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <List size={18} />
             </button>
           </div>
           
@@ -500,25 +531,23 @@ const AgentChat: React.FC = () => {
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-            {!is_left_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
-                <button
-                  onClick={() => set_is_left_sidebar_open(true)}
-                  title="展开 Agent 栏"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PanelLeft size={20} />
-                </button>
-              </div>
-            )}
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开 Agent 栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={20} />
+                  </button>
+                )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开会话栏"
@@ -530,7 +559,7 @@ const AgentChat: React.FC = () => {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <PanelLeft size={20} />
+                  <List size={20} />
                 </button>
               </div>
             )}

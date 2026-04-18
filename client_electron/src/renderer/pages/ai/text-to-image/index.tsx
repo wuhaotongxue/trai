@@ -5,7 +5,7 @@
  * 描述: 文生图页面 - 三段式布局
  */
 import React, { useState } from 'react'
-import { Image as ImageIcon, Loader2, Send, Sparkles, Palette, Camera, ChevronRight, History } from 'lucide-react'
+import { Image as ImageIcon, Loader2, Send, Sparkles, Palette, Camera, ChevronRight, History, PanelLeftOpen, List } from 'lucide-react'
 
 interface PromptTemplate {
   id: string
@@ -77,8 +77,26 @@ const TextToImage: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>AI 能力</div>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>AI 能力</span>
+            <button
+              type="button"
+              onClick={() => set_is_left_sidebar_open(false)}
+              title="收起AI能力栏"
+              aria-label="收起AI能力栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <PanelLeftOpen size={18} />
+            </button>
+          </div>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
             <button
               style={{
                 width: '100%',
@@ -117,12 +135,46 @@ const TextToImage: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', paddingLeft: '8px' }}>
-              提示词模板
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开AI能力栏"
+                  aria-label="展开AI能力栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              <span style={{ fontSize: '14px', fontWeight: 600 }}>提示词模板</span>
             </div>
+            <button
+              type="button"
+              onClick={() => set_is_middle_sidebar_open(false)}
+              title="收起提示词模板栏"
+              aria-label="收起提示词模板栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <List size={18} />
+            </button>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
             {prompt_templates.map(template => (
               <button
                 key={template.id}
@@ -156,6 +208,41 @@ const TextToImage: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+            {!is_middle_sidebar_open && (
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开AI能力栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={18} />
+                  </button>
+                )}
+                <button
+                  onClick={() => set_is_middle_sidebar_open(true)}
+                  title="展开提示词模板栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <List size={18} />
+                </button>
+              </div>
+            )}
+            <span style={{ fontSize: '14px', color: '#64748b' }}>文生图</span>
+          </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
             <div style={{ width: '100%', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
               
