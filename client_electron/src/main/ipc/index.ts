@@ -14,6 +14,10 @@ import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
 import { knowledge_base_service } from '../services/knowledge_base'
 
+/**
+ * 注册所有 IPC 处理器
+ * 包括系统配置、用户认证、工具、Agent、AI生成、反馈、知识库等模块
+ */
 export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
 
