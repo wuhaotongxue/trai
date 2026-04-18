@@ -5,7 +5,7 @@
  * 描述: 客户端工具箱页面，提供文件处理功能
  */
 import React, { useState } from 'react'
-import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftClose, PanelLeft, Wrench, Folder } from 'lucide-react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, List, Wrench, Folder } from 'lucide-react'
 
 const format_size = (bytes: number) => {
   if (bytes === 0) return '0 B'
@@ -47,7 +47,7 @@ const Tools: React.FC = () => {
   const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [active_cat_id, set_active_cat_id] = useState('all')
-  const [active_tool_id, set_active_tool_id] = useState<string>('')
+  const [active_tool_id, set_active_tool_id] = useState<string>('md2pdf')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -422,7 +422,7 @@ const Tools: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <PanelLeftOpen size={18} />
             </button>
           </div>
           
@@ -432,7 +432,7 @@ const Tools: React.FC = () => {
                 key={cat.id}
                 onClick={() => {
                   set_active_cat_id(cat.id)
-                  if (cat.tools.length > 0 && !active_tool_id) {
+                  if (cat.tools.length > 0) {
                     set_active_tool_id(cat.tools[0].id)
                   }
                 }}
@@ -479,6 +479,24 @@ const Tools: React.FC = () => {
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开分类栏"
+                  aria-label="展开分类栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
               <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat.name}</span>
             </div>
             <button
@@ -494,7 +512,7 @@ const Tools: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <List size={18} />
             </button>
           </div>
           
@@ -539,25 +557,23 @@ const Tools: React.FC = () => {
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-            {!is_left_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
-                <button
-                  onClick={() => set_is_left_sidebar_open(true)}
-                  title="展开分类栏"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PanelLeft size={20} />
-                </button>
-              </div>
-            )}
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开分类栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={20} />
+                  </button>
+                )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开工具列表"
@@ -569,7 +585,7 @@ const Tools: React.FC = () => {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <PanelLeft size={20} />
+                  <List size={20} />
                 </button>
               </div>
             )}

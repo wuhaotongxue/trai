@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react'
 import { use_auth_store } from '@/store/auth'
-import { User, Upload, KeyRound, Save, Settings as SettingsIcon, Monitor, ChevronRight, Globe, RefreshCw } from 'lucide-react'
+import { User, Upload, KeyRound, Save, Settings as SettingsIcon, Monitor, ChevronRight, Globe, RefreshCw, PanelLeftClose, PanelLeftOpen, List } from 'lucide-react'
 
 interface SettingItem {
   id: string
@@ -450,7 +450,26 @@ const Settings: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>设置分类</span>
+            <button
+              type="button"
+              onClick={() => set_is_left_sidebar_open(false)}
+              title="收起设置分类栏"
+              aria-label="收起设置分类栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <PanelLeftOpen size={18} />
+            </button>
+          </div>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
             <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>设置分类</div>
             <button
               onClick={() => handle_category_change('system')}
@@ -514,12 +533,48 @@ const Settings: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', paddingLeft: '8px' }}>
-              {active_category === 'system' ? '系统设置项' : '账号设置项'}
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开设置分类栏"
+                  aria-label="展开设置分类栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>
+                {active_category === 'system' ? '系统设置项' : '账号设置项'}
+              </span>
             </div>
+            <button
+              type="button"
+              onClick={() => set_is_middle_sidebar_open(false)}
+              title="收起设置项栏"
+              aria-label="收起设置项栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <List size={18} />
+            </button>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
             {filtered_items.map(item => (
               <button
                 key={item.id}
@@ -553,6 +608,41 @@ const Settings: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+            {!is_middle_sidebar_open && (
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开设置分类栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={18} />
+                  </button>
+                )}
+                <button
+                  onClick={() => set_is_middle_sidebar_open(true)}
+                  title="展开设置项栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <List size={18} />
+                </button>
+              </div>
+            )}
+            <span style={{ fontSize: '14px', color: '#64748b' }}>设置</span>
+          </div>
           <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#ffffff' }}>
             {render_content()}
           </div>

@@ -22,6 +22,7 @@ class AgentRegisterRequest(BaseModel):
     description: str = Field(..., description="Agent 描述")
     model: str = Field("gpt-4o", description="使用模型")
     system_prompt: str = Field(..., description="系统提示词")
+    icon: str = Field("Bot", description="Agent 图标")
 
 
 class AgentToggleRequest(BaseModel):
@@ -37,13 +38,36 @@ class AgentCheckRequest(BaseModel):
     agent_id: str = Field(..., description="Agent ID")
 
 
+class AgentUpdateRequest(BaseModel):
+    """更新 Agent 请求模型"""
+
+    agent_id: str = Field(..., description="Agent ID")
+    name: str = Field(..., description="Agent 名称")
+    description: str = Field(..., description="Agent 描述")
+    model: str = Field(..., description="使用模型")
+    system_prompt: str = Field(..., description="系统提示词")
+    icon: str = Field(..., description="Agent 图标")
+
+
 # 模拟内存中的 Agent 列表库
 _MOCK_AGENTS = [
+    {
+        "id": "agent-default",
+        "name": "默认",
+        "description": "全能型助手，可以处理各种问题",
+        "model": "gpt-4o",
+        "system_prompt": "你是一个友好、专业的全能型 AI 助手。你可以回答各种问题，帮助用户解决困难。请用清晰、简洁、有帮助的方式回复。",
+        "icon": "Bot",
+        "status": "running",
+        "created_at": "2026-04-10T10:00:00Z",
+    },
     {
         "id": "agent-001",
         "name": "代码助手",
         "description": "精通多种语言的代码编写和审查",
         "model": "gpt-4o",
+        "system_prompt": "你是一位精通多种编程语言的资深开发工程师。你可以帮助用户编写代码、调试问题、优化性能、审查代码。请给出专业、清晰、可运行的代码解决方案。",
+        "icon": "Wrench",
         "status": "running",
         "created_at": "2026-04-10T10:00:00Z",
     },
@@ -52,6 +76,8 @@ _MOCK_AGENTS = [
         "name": "设计大师",
         "description": "专门负责文生图和图生图的提示词优化",
         "model": "claude-3-opus",
+        "system_prompt": "你是一位创意设计大师，专门负责生成高质量的图像提示词。你擅长将用户的想法转化为详细、专业的 AI 绘画提示词，以生成精美的图像。",
+        "icon": "Sparkles",
         "status": "stopped",
         "created_at": "2026-04-11T12:30:00Z",
     },
@@ -97,6 +123,8 @@ class AgentManagementAPI:
             "name": request.name,
             "description": request.description,
             "model": request.model,
+            "system_prompt": request.system_prompt,
+            "icon": request.icon,
             "status": "stopped",
             "created_at": "2026-04-14T12:45:00Z",
         }
@@ -169,4 +197,35 @@ class AgentManagementAPI:
             "code": 200,
             "msg": "检测完成" if is_normal else "检测到 Agent 运行异常",
             "data": {"agent": target_agent, "is_normal": is_normal},
+        }
+
+    @staticmethod
+    @router.post("/update", summary="更新 Agent 信息")
+    async def update_agent(request: AgentUpdateRequest, user: dict[str, Any] = Depends(get_current_user)) -> Any:
+        """更新已注册的 Agent 信息
+
+        Args:
+            request: 更新参数
+            user: 当前登录用户
+
+        Returns:
+            更新结果的统一响应
+        """
+        target_agent = next((a for a in _MOCK_AGENTS if a["id"] == request.agent_id), None)
+        if not target_agent:
+            return {"code": 404, "msg": f"Agent {request.agent_id} 不存在"}
+
+        # 更新 Agent 信息
+        target_agent["name"] = request.name
+        target_agent["description"] = request.description
+        target_agent["model"] = request.model
+        target_agent["system_prompt"] = request.system_prompt
+        target_agent["icon"] = request.icon
+
+        logger.info(f"User {user.get('user_id')} updated agent {request.agent_id}")
+
+        return {
+            "code": 200,
+            "msg": "Agent 更新成功",
+            "data": {"agent": target_agent},
         }

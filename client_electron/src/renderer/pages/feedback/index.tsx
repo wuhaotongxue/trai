@@ -5,7 +5,7 @@
  * 描述: 用户反馈页面 - 三段式布局
  */
 import React, { useState, useRef } from 'react'
-import { MessageSquarePlus, Send, Loader2, Paperclip, X, Lightbulb, Bug, HelpCircle, ChevronRight, History } from 'lucide-react'
+import { MessageSquarePlus, Send, Loader2, Paperclip, X, Lightbulb, Bug, HelpCircle, ChevronRight, History, PanelLeftClose, PanelLeftOpen, List } from 'lucide-react'
 
 interface FeedbackType {
   id: string
@@ -137,8 +137,26 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>反馈类型</div>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>反馈类型</span>
+            <button
+              type="button"
+              onClick={() => set_is_left_sidebar_open(false)}
+              title="收起反馈类型栏"
+              aria-label="收起反馈类型栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <PanelLeftOpen size={18} />
+            </button>
+          </div>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
             {feedback_types.map(type => (
               <button
                 key={type.id}
@@ -181,12 +199,26 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', paddingLeft: '8px' }}>
-              反馈说明
-            </div>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>反馈说明</span>
+            <button
+              type="button"
+              onClick={() => set_is_middle_sidebar_open(false)}
+              title="收起反馈说明栏"
+              aria-label="收起反馈说明栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <List size={18} />
+            </button>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', minWidth: '200px', boxSizing: 'border-box' }}>
             <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
               {active_type === 'suggestion' && (
                 <>
@@ -224,7 +256,48 @@ const Feedback: React.FC = () => {
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
+              
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开反馈类型栏"
+                  aria-label="展开反馈类型栏"
+                  style={{
+                    position: 'absolute', left: '0', top: '24px', transform: 'translateX(-100%)',
+                    background: '#ffffff', border: '1px solid #e2e8f0', borderRight: 'none',
+                    cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '6px 0 0 6px', transition: 'all 0.2s',
+                    boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0ea5e9'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748b'; }}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              
+              {!is_middle_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_middle_sidebar_open(true)}
+                  title="展开反馈说明栏"
+                  aria-label="展开反馈说明栏"
+                  style={{
+                    position: 'absolute', left: is_left_sidebar_open ? '200px' : '0', top: '24px', transform: 'translateX(-100%)',
+                    background: '#ffffff', border: '1px solid #e2e8f0', borderRight: 'none',
+                    cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '6px 0 0 6px', transition: 'all 0.2s',
+                    boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)',
+                    zIndex: is_left_sidebar_open ? 10 : 5
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0ea5e9'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748b'; }}
+                >
+                  <List size={18} />
+                </button>
+              )}
               {message && (
                 <div style={{ 
                   padding: '12px 16px', 
