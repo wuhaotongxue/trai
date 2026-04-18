@@ -7,8 +7,15 @@
 import axios from 'axios'
 import { use_auth_store } from '@/store/auth'
 
+/**
+ * 拦截器是否已设置
+ */
 let interceptor_set = false
 
+/**
+ * 设置 axios 拦截器
+ * 处理 401 认证过期
+ */
 export const setup_axios_interceptors = () => {
   if (interceptor_set) return
   interceptor_set = true

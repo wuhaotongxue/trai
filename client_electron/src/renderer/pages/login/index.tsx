@@ -11,6 +11,9 @@ import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
 
+/**
+ * 登录页面组件
+ */
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
   const [password, set_password] = useState('')
@@ -55,6 +58,9 @@ const Login: React.FC = () => {
     }
   }, [])
 
+  /**
+   * 标准化的 API 地址
+   */
   const normalized_api_url = useMemo(() => {
     const raw = api_url.trim()
     if (!raw) return ''
@@ -62,6 +68,9 @@ const Login: React.FC = () => {
     return `http://${raw}`
   }, [api_url])
 
+  /**
+   * 保存 API 地址
+   */
   const save_api_url = async () => {
     const next = normalized_api_url
     if (!next) {
@@ -84,6 +93,10 @@ const Login: React.FC = () => {
     }
   }
 
+  /**
+   * 处理表单提交
+   * @param e 表单事件
+   */
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
 

@@ -10,6 +10,9 @@ import Sidebar from './sidebar'
 import TitleBar from './title_bar'
 import { use_auth_store } from '@/store/auth'
 
+/**
+ * 主布局组件
+ */
 const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
   const logout = use_auth_store((state) => state.logout)
@@ -54,4 +57,7 @@ const MainLayout: React.FC = () => {
   )
 }
 
+/**
+ * 主布局组件导出
+ */
 export default MainLayout

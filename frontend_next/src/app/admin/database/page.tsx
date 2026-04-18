@@ -1,6 +1,7 @@
 /**
  * page.tsx
  * 数据库管理页面
+ * 提供数据库表的查看、优化和备份管理功能
  */
 
 "use client";
@@ -10,7 +11,42 @@ import { CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const tables = [
+/**
+ * 数据表信息接口
+ * @property name - 表名
+ * @property rows - 记录数
+ * @property size - 占用空间
+ * @property engine - 数据库引擎
+ * @property charset - 字符集
+ * @property lastOptimize - 上次优化时间
+ */
+interface TableInfo {
+  name: string;
+  rows: number;
+  size: string;
+  engine: string;
+  charset: string;
+  lastOptimize: string;
+}
+
+/**
+ * 备份记录接口
+ * @property name - 备份名称
+ * @property time - 备份时间
+ * @property size - 备份大小
+ * @property status - 备份状态
+ */
+interface BackupInfo {
+  name: string;
+  time: string;
+  size: string;
+  status: string;
+}
+
+/**
+ * 示例数据表信息
+ */
+const tables: TableInfo[] = [
   { name: "users", rows: 1248, size: "12 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-09 03:00" },
   { name: "chat_sessions", rows: 8420, size: "85 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-08 03:00" },
   { name: "messages", rows: 128400, size: "320 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-07 03:00" },
@@ -19,16 +55,31 @@ const tables = [
   { name: "notifications", rows: 5680, size: "8 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-04 03:00" },
 ];
 
-const backups = [
+/**
+ * 示例备份记录
+ */
+const backups: BackupInfo[] = [
   { name: "daily_backup_20260410", time: "2026-04-10 03:00", size: "512 MB", status: "done" },
   { name: "daily_backup_20260409", time: "2026-04-09 03:00", size: "498 MB", status: "done" },
   { name: "weekly_backup_20260406", time: "2026-04-06 03:00", size: "2.1 GB", status: "done" },
   { name: "daily_backup_20260408", time: "2026-04-08 03:00", size: "505 MB", status: "done" },
 ];
 
+/**
+ * 数据库管理页面组件
+ * 展示数据库概览、表详情和备份记录
+ * @returns React 组件
+ */
 export default function DatabasePage() {
+  /**
+   * 优化中状态
+   */
   const [optimizing, setOptimizing] = useState(false);
 
+  /**
+   * 处理优化表操作
+   * 模拟优化过程，3秒后自动完成
+   */
   const handleOptimize = () => {
     setOptimizing(true);
     setTimeout(() => setOptimizing(false), 3000);

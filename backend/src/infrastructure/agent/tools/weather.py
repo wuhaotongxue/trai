@@ -106,12 +106,15 @@ class WeatherTool(BaseTool):
         try:
             # 步骤1: 先用Open-Meteo的地理编码API搜索城市
             geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=3&language=zh&format=json"
+            logger.info(f"调用地理编码API: {geocode_url}")
             
             async with httpx.AsyncClient(timeout=15) as client:
                 geocode_response = await client.get(geocode_url)
+                logger.info(f"地理编码API状态码: {geocode_response.status_code}")
                 geocode_data = geocode_response.json()
                 
                 results = geocode_data.get("results", [])
+                logger.info(f"地理编码结果数: {len(results)}")
                 
                 if results:
                     # 找到了结果，优先找城市（administration_level >= 2）
@@ -186,9 +189,11 @@ class WeatherTool(BaseTool):
 
             # 步骤2: 查询天气
             weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto"
+            logger.info(f"调用天气API: {weather_url}")
             
             async with httpx.AsyncClient(timeout=15) as client:
                 weather_response = await client.get(weather_url)
+                logger.info(f"天气API状态码: {weather_response.status_code}")
                 weather_response.raise_for_status()
                 data = weather_response.json()
 
@@ -224,13 +229,36 @@ class WeatherTool(BaseTool):
                 output=output,
             )
 
-        except Exception as e:
-            logger.error(f"天气查询异常: {e}")
+        except httpx.HTTPStatusError as e:
+            import traceback
+            logger.error(f"HTTP错误: {e}")
+            logger.error(f"响应内容: {e.response.text}")
+            logger.error(f"堆栈:\n{traceback.format_exc()}")
             return ToolCallResult(
                 tool_call_id="",
                 tool_id=self.definition.id,
                 success=False,
-                error=f"天气查询失败: {str(e)}",
+                error=f"天气查询失败: HTTP {e.response.status_code}",
+            )
+        except httpx.RequestError as e:
+            import traceback
+            logger.error(f"请求错误: {type(e).__name__}: {e}")
+            logger.error(f"堆栈:\n{traceback.format_exc()}")
+            return ToolCallResult(
+                tool_call_id="",
+                tool_id=self.definition.id,
+                success=False,
+                error=f"天气查询失败: 请求错误 {type(e).__name__}",
+            )
+        except Exception as e:
+            import traceback
+            logger.error(f"天气查询异常: {type(e).__name__}: {e}")
+            logger.error(f"堆栈:\n{traceback.format_exc()}")
+            return ToolCallResult(
+                tool_call_id="",
+                tool_id=self.definition.id,
+                success=False,
+                error=f"天气查询失败: {type(e).__name__}: {e}",
             )
 
     def _get_weather_description(self, code: int) -> str:

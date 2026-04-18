@@ -9,16 +9,33 @@ import * as fs from 'fs'
 import * as path from 'path'
 import log from 'electron-log'
 
+/**
+ * 配置存储类
+ * 使用本地 JSON 文件持久化存储应用配置
+ */
 class ConfigStore {
+  /**
+   * 配置文件路径
+   */
   private config_path: string
+  /**
+   * 配置数据对象
+   */
   private data: Record<string, any> = {}
 
+  /**
+   * 构造函数
+   * 初始化配置存储，加载已保存的配置
+   */
   constructor() {
     // 配置文件保存在用户数据的漫游目录下，通常在 AppData/Roaming/TRAI
     this.config_path = path.join(app.getPath('userData'), 'config.json')
     this.load()
   }
 
+  /**
+   * 从文件加载配置
+   */
   private load(): void {
     try {
       if (fs.existsSync(this.config_path)) {
@@ -33,6 +50,9 @@ class ConfigStore {
     }
   }
 
+  /**
+   * 保存配置到文件
+   */
   private save(): void {
     try {
       fs.writeFileSync(this.config_path, JSON.stringify(this.data, null, 2), 'utf-8')
@@ -45,6 +65,7 @@ class ConfigStore {
    * 获取配置项
    * @param key 配置键名
    * @param default_value 默认值
+   * @returns 配置值
    */
   public get(key: string, default_value: any = null): any {
     return this.data[key] !== undefined ? this.data[key] : default_value
@@ -61,4 +82,7 @@ class ConfigStore {
   }
 }
 
+/**
+ * 配置存储单例
+ */
 export const config_store = new ConfigStore()
