@@ -102,9 +102,9 @@ const Dashboard: React.FC = () => {
             transition: 'all 0.2s'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {item.icon}
-            {item.name}
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
           </div>
           {active_item === item.id && <ChevronRight size={14} />}
         </button>
@@ -119,7 +119,7 @@ const Dashboard: React.FC = () => {
           <div style={{ padding: '24px' }}>
             <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>系统概览</h2>
             {sys_info ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
                 <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <Monitor size={16} color="#64748b" />

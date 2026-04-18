@@ -1134,7 +1134,7 @@ const KnowledgeBasePage: React.FC = () => {
                 ) : (
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                     <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'auto' }}>
-                      <table style={{ width: '100%', minWidth: '760px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                           <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b' }}>文件名称</th>
@@ -1147,10 +1147,10 @@ const KnowledgeBasePage: React.FC = () => {
                       <tbody>
                         {display_files.map(file => (
                           <tr key={file.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '12px 16px' }}>
+                            <td style={{ padding: '12px 16px', maxWidth: '200px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <FileText size={16} color="#0ea5e9" />
-                                <span style={{ fontSize: '14px', color: '#334155' }}>{file.name}</span>
+                                <span style={{ fontSize: '14px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
                               </div>
                             </td>
                             <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b' }}>{file.size}</td>
