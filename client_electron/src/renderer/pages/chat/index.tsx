@@ -572,15 +572,15 @@ const AgentChat: React.FC = () => {
                   value={active_session?.kb_id || 'none'}
                   onChange={(e) => update_session_kb(e.target.value)}
                   style={{
-                    padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0',
-                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '13px',
+                    padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0',
+                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '14px', lineHeight: '1.5',
                     outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
                   }}
                   title="选择知识库(可选)"
                 >
                   <option value="none">无知识库</option>
                   {available_kbs.map(k => (
-                    <option key={k.id} value={k.id}>{k.name}</option>
+                    <option key={k.id} value={k.id} style={{ padding: '10px 14px', fontSize: '14px' }}>{k.name}</option>
                   ))}
                 </select>
               )}

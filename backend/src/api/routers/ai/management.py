@@ -98,7 +98,7 @@ _MOCK_AGENTS = [
         "model": "gpt-4o",
         "system_prompt": "你是一位专业的天气助手，专门帮助用户查询和分析天气信息。你可以提供天气预报、气象数据、出行建议等服务。请用清晰、友好的方式提供天气相关的信息。",
         "icon": "Cloud",
-        "status": "stopped",
+        "status": "running",
         "created_at": "2026-04-19T00:45:00Z",
     },
 ]
