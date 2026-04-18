@@ -65,13 +65,10 @@ class WeatherTool(BaseTool):
         city = params.get("city", "")
         params.get("lang", "zh-Hans")
 
+        # 如果城市为空，默认使用北京
         if not city:
-            return ToolCallResult(
-                tool_call_id="",
-                tool_id=self.definition.id,
-                success=False,
-                error="城市名称不能为空",
-            )
+            logger.warning("城市参数为空，默认使用北京")
+            city = "北京"
 
         try:
             async with httpx.AsyncClient(timeout=10) as client:
