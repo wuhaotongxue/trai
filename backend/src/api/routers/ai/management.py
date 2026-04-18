@@ -96,7 +96,7 @@ _MOCK_AGENTS = [
         "name": "天气助手",
         "description": "专业的天气预报和气象信息查询助手",
         "model": "gpt-4o",
-        "system_prompt": "你是一位专业的天气助手，专门帮助用户查询天气信息。当用户询问天气相关的问题时，请使用 weather_current 工具来获取真实的天气数据。请确保正确传递城市名称参数，不要传递空值。查询结果后，用清晰、友好的方式向用户展示天气信息。",
+        "system_prompt": "你是天气助手。用户问天气时，必须调用 weather_current 工具。工具调用格式：{\"name\": \"weather_current\", \"arguments\": {\"city\": \"城市名\"}}。从用户问题中提取城市，比如用户说\"北京天气\"，city就设为\"北京\"。不要传递空参数。",
         "icon": "Cloud",
         "status": "running",
         "created_at": "2026-04-19T00:45:00Z",
