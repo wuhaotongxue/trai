@@ -22,6 +22,7 @@ export class ApiEndpoints {
 
   static readonly agent_management_list = '/api/agent/management/list'
   static readonly agent_management_register = '/api/agent/management/register'
+  static readonly agent_management_update = '/api/agent/management/update'
   static readonly agent_management_toggle = '/api/agent/management/toggle'
   static readonly agent_management_check = '/api/agent/management/check'
 
