@@ -39,6 +39,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_0040
+- **修复(agent)**: AgentExecutor 现在会根据 context.agent_id 自动添加对应的系统提示词
+- **优化(agent)**: 天气助手系统提示词优化，更明确地要求使用 weather_current 工具并正确传递参数
+
 ### 💻 客户端_2026_04_19_0030
 - **优化(chat)**: AI对话页面只显示运行中的Agent（stopped状态不显示）
 - **优化(knowledge_base)**: 知识库下拉框宽度优化，选项高度调整
