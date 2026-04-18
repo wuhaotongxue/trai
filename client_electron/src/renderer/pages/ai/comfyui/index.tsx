@@ -246,25 +246,25 @@ const ComfyUI: React.FC = () => {
             )}
             <span style={{ fontSize: '14px', color: '#64748b' }}>ComfyUI 工作流</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ width: '100%', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '16px' }}>提交生成任务</h2>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '17px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '20px' }}>提交生成任务</h2>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="请输入正向提示词，例如：A beautiful landscape with mountains..."
                   style={{
                     width: '100%',
-                    minHeight: '120px',
-                    padding: '12px',
-                    borderRadius: '8px',
+                    minHeight: '160px',
+                    padding: '16px',
+                    borderRadius: '10px',
                     border: '1px solid #cbd5e1',
                     outline: 'none',
                     resize: 'vertical',
-                    fontSize: '14px',
-                    lineHeight: '1.5'
+                    fontSize: '15px',
+                    lineHeight: '1.6'
                   }}
                 />
                 
@@ -275,49 +275,49 @@ const ComfyUI: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 24px',
+                      gap: '10px',
+                      padding: '14px 32px',
                       backgroundColor: '#0ea5e9',
                       color: '#ffffff',
                       border: 'none',
-                      borderRadius: '8px',
+                      borderRadius: '10px',
                       cursor: loading ? 'not-allowed' : 'pointer',
-                      fontWeight: 500,
-                      fontSize: '14px',
+                      fontWeight: 600,
+                      fontSize: '15px',
                       opacity: loading ? 0.7 : 1
                     }}
                   >
-                    {loading ? <Loader2 size={16} className="animate-spin" /> : <Bot size={16} />}
+                    {loading ? <Loader2 size={20} className="animate-spin" /> : <Bot size={20} />}
                     {loading ? '生成中...' : '提交任务'}
                   </button>
                 </div>
               </div>
               
               {error && (
-                <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', fontSize: '14px' }}>
+                <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', fontSize: '15px' }}>
                   {error}
                 </div>
               )}
             </div>
 
             {result && (
-              <div style={{ backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <RefreshCw size={18} color="#10b981" />
+              <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                <h2 style={{ fontSize: '17px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <RefreshCw size={20} color="#10b981" />
                   生成结果
                 </h2>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '15px' }}>
                     <span style={{ color: '#64748b' }}>任务 ID:</span>
                     <span style={{ fontWeight: 500, color: '#0f172a' }}>{result.task_id}</span>
-                    <span style={{ padding: '2px 8px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '12px', fontSize: '12px', fontWeight: 500 }}>
+                    <span style={{ padding: '4px 12px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '16px', fontSize: '13px', fontWeight: 600 }}>
                       {result.status === 'completed' ? '已完成' : result.status}
                     </span>
                   </div>
                   
                   {result.image_url && (
-                    <div style={{ marginTop: '8px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                    <div style={{ marginTop: '12px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
                       <img src={result.image_url} alt="Generated" style={{ width: '100%', display: 'block' }} />
                     </div>
                   )}

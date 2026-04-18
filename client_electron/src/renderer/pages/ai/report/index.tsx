@@ -302,25 +302,25 @@ const AiReport: React.FC = () => {
             )}
             <span style={{ fontSize: '14px', color: '#64748b' }}>AI 周报生成</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ width: '100%', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '15px', margin: '0 0 12px 0', color: '#202020', fontWeight: '600' }}>1. 上传周报模板</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>支持 Markdown、TXT、DOCX 格式的模板文件，AI 将学习其中的结构并填入内容。</p>
+              <div style={{ marginBottom: '28px' }}>
+                <h2 style={{ fontSize: '16px', margin: '0 0 14px 0', color: '#202020', fontWeight: '600' }}>1. 上传周报模板</h2>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '18px' }}>支持 Markdown、TXT、DOCX 格式的模板文件，AI 将学习其中的结构并填入内容。</p>
                 
                 {!template_file ? (
                   <div 
                     onClick={() => file_input_ref.current?.click()}
                     style={{
-                      border: '1px dashed #cbd5e1',
-                      borderRadius: '8px',
-                      padding: '32px',
+                      border: '2px dashed #cbd5e1',
+                      borderRadius: '12px',
+                      padding: '40px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '12px',
+                      gap: '14px',
                       cursor: 'pointer',
                       backgroundColor: '#f8fafc',
                       transition: 'border-color 0.2s'
@@ -328,20 +328,20 @@ const AiReport: React.FC = () => {
                     onMouseEnter={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
                     onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
                   >
-                    <UploadCloud size={32} color="#94a3b8" />
-                    <span style={{ fontSize: '14px', color: '#475569' }}>点击选择模板文件</span>
+                    <UploadCloud size={40} color="#94a3b8" />
+                    <span style={{ fontSize: '15px', color: '#475569' }}>点击选择模板文件</span>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f1f5f9', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <File size={20} color="#0ea5e9" />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', backgroundColor: '#f1f5f9', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <File size={24} color="#0ea5e9" />
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '14px', color: '#334155', fontWeight: 500 }}>{template_file.name}</span>
-                        <span style={{ fontSize: '12px', color: '#94a3b8' }}>{(template_file.size / 1024).toFixed(1)} KB</span>
+                        <span style={{ fontSize: '15px', color: '#334155', fontWeight: 500 }}>{template_file.name}</span>
+                        <span style={{ fontSize: '13px', color: '#94a3b8' }}>{(template_file.size / 1024).toFixed(1)} KB</span>
                       </div>
                     </div>
                     <X 
-                      size={18} 
+                      size={20} 
                       color="#64748b" 
                       style={{ cursor: 'pointer' }} 
                       onClick={() => set_template_file(null)}
@@ -359,9 +359,9 @@ const AiReport: React.FC = () => {
                 />
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '15px', margin: '0 0 12px 0', color: '#202020', fontWeight: '600' }}>2. 描述本周工作</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>请简要列出你本周完成的任务、遇到的问题以及下周计划，AI 将自动为你扩写润色。</p>
+              <div style={{ marginBottom: '28px' }}>
+                <h2 style={{ fontSize: '16px', margin: '0 0 14px 0', color: '#202020', fontWeight: '600' }}>2. 描述本周工作</h2>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '18px' }}>请简要列出你本周完成的任务、遇到的问题以及下周计划，AI 将自动为你扩写润色。</p>
                 <textarea 
                   value={description}
                   onChange={(e) => set_description(e.target.value)}
@@ -371,22 +371,22 @@ const AiReport: React.FC = () => {
 3. 下周计划完成后台管理面板重构"
                   style={{
                     width: '100%',
-                    minHeight: '120px',
-                    padding: '12px',
-                    borderRadius: '6px',
+                    minHeight: '160px',
+                    padding: '16px',
+                    borderRadius: '10px',
                     border: '1px solid #cbd5e1',
                     outline: 'none',
-                    fontSize: '14px',
+                    fontSize: '15px',
                     resize: 'vertical',
                     fontFamily: 'inherit',
-                    lineHeight: 1.5
+                    lineHeight: 1.6
                   }}
                 />
               </div>
 
-              {error_msg && <div style={{ color: '#e51400', fontSize: '13px', marginBottom: '16px' }}>{error_msg}</div>}
+              {error_msg && <div style={{ color: '#ef4444', fontSize: '14px', marginBottom: '20px', padding: '12px 16px', backgroundColor: '#fef2f2', borderRadius: '10px' }}>{error_msg}</div>}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
                 <button
                   type="button"
                   onClick={handle_generate}
@@ -395,59 +395,59 @@ const AiReport: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px',
-                    padding: '12px 24px',
+                    gap: '10px',
+                    padding: '14px 32px',
                     backgroundColor: '#0ea5e9',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     fontSize: '15px',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     cursor: is_generating ? 'not-allowed' : 'pointer',
                     opacity: is_generating ? 0.7 : 1
                   }}
                 >
-                  {is_generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                  {is_generating ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
                   {is_generating ? '正在智能生成中...' : '生成周报'}
                 </button>
               </div>
 
-              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h2 style={{ fontSize: '15px', margin: 0, color: '#202020', fontWeight: '600' }}>生成结果</h2>
+              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '32px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '16px', margin: 0, color: '#202020', fontWeight: '600' }}>生成结果</h2>
                   {generated_report && (
                     <button
                       onClick={handle_download}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 12px',
+                        gap: '8px',
+                        padding: '8px 16px',
                         backgroundColor: 'transparent',
                         color: '#0ea5e9',
                         border: '1px solid #0ea5e9',
-                        borderRadius: '4px',
-                        fontSize: '13px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
                         cursor: 'pointer'
                       }}
                     >
-                      <Download size={14} />
+                      <Download size={16} />
                       下载 Markdown
                     </button>
                   )}
                 </div>
                 
-                <div style={{ minHeight: '300px', maxHeight: '500px', overflowY: 'auto' }}>
+                <div style={{ minHeight: '350px', maxHeight: '550px', overflowY: 'auto', borderRadius: '10px' }}>
                   {!generated_report && !is_generating ? (
-                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-                      <FileEdit size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
-                      <span style={{ fontSize: '14px' }}>生成的周报内容将显示在这里</span>
-                      <span style={{ fontSize: '12px', marginTop: '8px' }}>支持直接修改与编辑</span>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', padding: '40px', border: '2px dashed #cbd5e1', borderRadius: '10px', backgroundColor: '#f8fafc' }}>
+                      <FileEdit size={56} style={{ opacity: 0.3, marginBottom: '20px' }} />
+                      <span style={{ fontSize: '15px' }}>生成的周报内容将显示在这里</span>
+                      <span style={{ fontSize: '13px', marginTop: '10px' }}>支持直接修改与编辑</span>
                     </div>
                   ) : is_generating ? (
-                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9' }}>
-                      <Loader2 size={32} className="animate-spin" style={{ marginBottom: '16px' }} />
-                      <span style={{ fontSize: '14px' }}>AI 正在努力撰写中，请稍候...</span>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9', padding: '40px', borderRadius: '10px', backgroundColor: '#f0f9ff' }}>
+                      <Loader2 size={40} className="animate-spin" style={{ marginBottom: '20px' }} />
+                      <span style={{ fontSize: '15px' }}>AI 正在努力撰写中，请稍候...</span>
                     </div>
                   ) : (
                     <textarea
@@ -455,16 +455,16 @@ const AiReport: React.FC = () => {
                       onChange={(e) => set_generated_report(e.target.value)}
                       style={{
                         width: '100%',
-                        height: '400px',
+                        height: '450px',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
+                        borderRadius: '10px',
                         outline: 'none',
                         resize: 'vertical',
-                        fontSize: '14px',
-                        lineHeight: 1.6,
+                        fontSize: '15px',
+                        lineHeight: 1.7,
                         fontFamily: 'inherit',
                         color: '#334155',
-                        padding: '16px'
+                        padding: '20px'
                       }}
                     />
                   )}

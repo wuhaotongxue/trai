@@ -1,3 +1,6 @@
+---
+alwaysApply: false
+---
 # Desktop_Client_PyQt6_规范
 
 ## 1. 信号槽规范
