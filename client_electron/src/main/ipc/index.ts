@@ -58,6 +58,10 @@ export const register_ipc_handlers = (): void => {
     return await auth_service.register(params)
   })
 
+  ipcMain.handle('auth:change_password', async (_, params: { old_password: string; new_password: string }) => {
+    return await auth_service.change_password(params)
+  })
+
   ipcMain.handle('auth:logout', async () => {
     return await auth_service.logout()
   })
