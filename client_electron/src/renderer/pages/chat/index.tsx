@@ -386,9 +386,9 @@ const AgentChat: React.FC = () => {
                     if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                     <MessageSquare size={16} />
-                    {agent.name}
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.name}</span>
                   </div>
                   <div style={{
                     width: '8px',

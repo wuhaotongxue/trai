@@ -53,13 +53,13 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard', label: '仪表盘', icon: <Home size={20} /> },
     {
       id: 'agent',
-      label: '智能体生态',
+      label: '智能体',
       icon: <Cpu size={20} />,
       children: [
-        { path: '/agent/management', label: 'Agent 管理', icon: <Cpu size={18} /> },
+        { path: '/agent/management', label: 'Agent', icon: <Cpu size={18} /> },
       ]
     },
-    { path: '/knowledge_base', label: '知识库管理', icon: <Database size={20} /> },
+    { path: '/knowledge_base', label: '知识库', icon: <Database size={20} /> },
     {
       id: 'ai',
       label: 'AI 创作',
@@ -74,7 +74,7 @@ const Sidebar: React.FC = () => {
     },
     {
       id: 'tools',
-      label: '实用工具',
+      label: '工具箱',
       icon: <Wrench size={20} />,
       children: [
         { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
@@ -103,9 +103,6 @@ const Sidebar: React.FC = () => {
                 </div>
               )}
               {user?.username || '未登录'}
-            </div>
-            <div style={{ color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px', marginTop: '8px', paddingLeft: '40px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user?.email || ''}
             </div>
           </>
         )}
