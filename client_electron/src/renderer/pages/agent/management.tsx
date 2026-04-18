@@ -533,7 +533,7 @@ const AgentManagement: React.FC = () => {
             {active_agent ? (
               <div style={{ maxWidth: '100%' }}>
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                     <div style={{
                       width: '48px',
                       height: '48px',
@@ -548,10 +548,7 @@ const AgentManagement: React.FC = () => {
                       <IconComponent size={24} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                      <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {active_agent.name}
-                      </h3>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                         {active_agent.description}
                       </p>
                     </div>
