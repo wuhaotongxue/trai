@@ -2,17 +2,33 @@
  * 文件名: index.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 11:20:00
- * 描述: 图生图页面
+ * 描述: 图生图页面 - 三段式布局
  */
 import React, { useState } from 'react'
-import { ImagePlus, Loader2, Upload } from 'lucide-react'
+import { ImagePlus, Loader2, Upload, Sparkles, Palette, ChevronRight, Image } from 'lucide-react'
+
+interface StylePreset {
+  id: string
+  name: string
+  prompt: string
+}
 
 const ImageToImage: React.FC = () => {
+  const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
+  const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [prompt, set_prompt] = useState('')
   const [source_url, set_source_url] = useState('')
   const [loading, set_loading] = useState(false)
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
+  const [active_style, set_active_style] = useState<string>('')
+
+  const style_presets: StylePreset[] = [
+    { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格，霓虹灯，未来感' },
+    { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格，色彩鲜艳' },
+    { id: 'watercolor', name: '水彩画', prompt: '将图片转换为水彩画风格，柔和的色彩' },
+    { id: 'oil_painting', name: '油画', prompt: '将图片转换为古典油画风格，厚重的笔触' }
+  ]
 
   const handle_generate = async () => {
     if (!prompt.trim() || !source_url.trim()) return
@@ -34,99 +50,202 @@ const ImageToImage: React.FC = () => {
     }
   }
 
+  const apply_style = (style: StylePreset) => {
+    set_prompt(style.prompt)
+    set_active_style(style.id)
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-        <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>图生图</h1>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Image size={20} color="#0ea5e9" />
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>图生图</h1>
+        </div>
       </div>
       
-      <div className="no-drag-region" style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ width: '100%', maxWidth: '800px', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-          
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 500 }}>参考图片 URL (这里暂用 URL 模拟上传)</label>
-            <input
-              type="text"
-              value={source_url}
-              onChange={(e) => set_source_url(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', 
-                outline: 'none', fontSize: '14px', fontFamily: 'inherit'
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 500 }}>修改描述</label>
-            <textarea
-              value={prompt}
-              onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 将图片转换为赛博朋克风格..."
-              style={{
-                width: '100%', minHeight: '100px', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', 
-                resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit'
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div style={{ 
+          width: is_left_sidebar_open ? '200px' : '0px', 
+          minWidth: is_left_sidebar_open ? '180px' : '0px',
+          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+          opacity: is_left_sidebar_open ? 1 : 0,
+          backgroundColor: '#f1f5f9', 
+          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.3s ease',
+          overflow: 'hidden',
+          flexShrink: 1
+        }}>
+          <div style={{ padding: '12px' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>AI 能力</div>
             <button
-              onClick={handle_generate}
-              disabled={loading || !prompt.trim() || !source_url.trim()}
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
-                backgroundColor: loading || !prompt.trim() || !source_url.trim() ? '#94a3b8' : '#0ea5e9', 
-                color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() || !source_url.trim() ? 'not-allowed' : 'pointer',
-                fontWeight: 500, transition: 'background-color 0.2s'
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                color: '#0ea5e9',
+                fontWeight: 600,
+                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '4px',
+                transition: 'all 0.2s'
               }}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
-              {loading ? '生成中...' : '开始生成'}
+              <Sparkles size={16} />
+              图生图
             </button>
           </div>
+        </div>
 
-          {error && (
-            <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '24px' }}>
-              {error}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '16px', minHeight: '300px' }}>
-            <div style={{ 
-              flex: 1, backgroundColor: '#f1f5f9', borderRadius: '8px', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px dashed #cbd5e1' 
-            }}>
-              {source_url ? (
-                <img src={source_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
-              ) : (
-                <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Upload size={32} style={{ marginBottom: '8px', opacity: 0.5 }} />
-                  <span style={{ fontSize: '14px' }}>参考图预览</span>
-                </div>
-              )}
-            </div>
-
-            <div style={{ 
-              flex: 1, backgroundColor: '#f1f5f9', borderRadius: '8px', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px dashed #cbd5e1' 
-            }}>
-              {loading ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
-                  <Loader2 size={24} className="animate-spin" style={{ marginBottom: '8px' }} />
-                  <span style={{ fontSize: '14px' }}>生成中...</span>
-                </div>
-              ) : result_url ? (
-                <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
-              ) : (
-                <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <ImagePlus size={32} style={{ marginBottom: '8px', opacity: 0.5 }} />
-                  <span style={{ fontSize: '14px' }}>结果图预览</span>
-                </div>
-              )}
+        <div style={{ 
+          width: is_middle_sidebar_open ? '220px' : '0px', 
+          minWidth: is_middle_sidebar_open ? '200px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+          opacity: is_middle_sidebar_open ? 1 : 0,
+          backgroundColor: '#ffffff', 
+          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.3s ease',
+          overflow: 'hidden',
+          flexShrink: 1
+        }}>
+          <div style={{ padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', paddingLeft: '8px' }}>
+              风格预设
             </div>
           </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+            {style_presets.map(style => (
+              <button
+                key={style.id}
+                onClick={() => apply_style(style)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  backgroundColor: active_style === style.id ? '#f0f9ff' : 'transparent',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  color: active_style === style.id ? '#0ea5e9' : '#475569',
+                  fontWeight: active_style === style.id ? '600' : 'normal',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '4px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Palette size={14} />
+                  {style.name}
+                </div>
+                {active_style === style.id && <ChevronRight size={14} />}
+              </button>
+            ))}
+          </div>
+        </div>
 
+        <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+            <div style={{ width: '100%', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 500 }}>参考图片 URL</label>
+                <input
+                  type="text"
+                  value={source_url}
+                  onChange={(e) => set_source_url(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', 
+                    outline: 'none', fontSize: '14px', fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 500 }}>修改描述</label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => set_prompt(e.target.value)}
+                  placeholder="例如: 将图片转换为赛博朋克风格..."
+                  style={{
+                    width: '100%', minHeight: '100px', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', 
+                    resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+                <button
+                  onClick={handle_generate}
+                  disabled={loading || !prompt.trim() || !source_url.trim()}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
+                    backgroundColor: loading || !prompt.trim() || !source_url.trim() ? '#94a3b8' : '#0ea5e9', 
+                    color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() || !source_url.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 500, transition: 'background-color 0.2s'
+                  }}
+                >
+                  {loading ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
+                  {loading ? '生成中...' : '开始生成'}
+                </button>
+              </div>
+
+              {error && (
+                <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '24px' }}>
+                  {error}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '16px', minHeight: '300px' }}>
+                <div style={{ 
+                  flex: 1, backgroundColor: '#f1f5f9', borderRadius: '8px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px dashed #cbd5e1' 
+                }}>
+                  {source_url ? (
+                    <img src={source_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  ) : (
+                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <Upload size={32} style={{ marginBottom: '8px', opacity: 0.5 }} />
+                      <span style={{ fontSize: '14px' }}>参考图预览</span>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ 
+                  flex: 1, backgroundColor: '#f1f5f9', borderRadius: '8px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px dashed #cbd5e1' 
+                }}>
+                  {loading ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
+                      <Loader2 size={24} className="animate-spin" style={{ marginBottom: '8px' }} />
+                      <span style={{ fontSize: '14px' }}>生成中...</span>
+                    </div>
+                  ) : result_url ? (
+                    <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} />
+                  ) : (
+                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <ImagePlus size={32} style={{ marginBottom: '8px', opacity: 0.5 }} />
+                      <span style={{ fontSize: '14px' }}>结果图预览</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
