@@ -78,8 +78,8 @@ if (!got_the_lock) {
     // 隐藏原生边框，保留系统控制按钮 (Win11 风格)
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#f3f3f3',
-      symbolColor: '#202020',
+      color: '#ffffff',
+      symbolColor: '#333333',
       height: 36
     },
     show: false,
