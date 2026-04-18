@@ -37,6 +37,13 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_0030
+- **功能(agent)**: 新增计算器Agent（agent-calculator）和天气助手Agent（agent-weather），默认运行
+- **功能(search)**: 集成DuckDuckGo免费搜索，无需API Key
+- **优化(weather)**: 移除天气工具mock fallback，直接使用wttr.in免费接口
+- **修复(knowledge_base)**: 简化知识库权限检查，允许非超级管理员访问所有知识库
+- **优化(dependencies)**: 新增duckduckgo-search依赖
+
 ### 🛠️ 后端_2026_04_19_0020
 - **功能(agent)**: 新增默认 Agent（agent-default），全能型助手
 - **功能(agent)**: 新增 `/api/agent/management/update` 接口，支持更新 Agent 信息

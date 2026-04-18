@@ -73,10 +73,6 @@ class WeatherTool(BaseTool):
                 error="城市名称不能为空",
             )
 
-        # 移除强制检查 API key,直接使用 wttr.in 免费接口
-        # if not self._api_key:
-        #     return await self._mock_weather(city)
-
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.get(f"https://wttr.in/{city}?format=j1")
@@ -111,24 +107,12 @@ class WeatherTool(BaseTool):
             )
         except Exception as e:
             logger.error(f"天气查询异常: {e}")
-            return await self._mock_weather(city)
-
-    async def _mock_weather(self, city: str) -> ToolCallResult:
-        """Mock 数据,用于未配置 API Key 时"""
-        output = (
-            f"{city}当前天气(Mock数据):\\n"
-            f"- 温度: 22°C\\n"
-            f"- 天气: 多云\\n"
-            f"- 湿度: 65%\\n"
-            f"- 风力: 东南风3级\\n"
-            f"- 更新时间: 2026-04-10T10:00:00+08:00"
-        )
-        return ToolCallResult(
-            tool_call_id="",
-            tool_id=self.definition.id,
-            success=True,
-            output=output,
-        )
+            return ToolCallResult(
+                tool_call_id="",
+                tool_id=self.definition.id,
+                success=False,
+                error=f"天气查询失败: {str(e)}",
+            )
 
 
 __all__ = ["WeatherTool"]

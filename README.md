@@ -39,6 +39,19 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_0030
+- **优化(chat)**: AI对话页面只显示运行中的Agent（stopped状态不显示）
+- **优化(knowledge_base)**: 知识库下拉框宽度优化，选项高度调整
+- **修复(upload)**: 修复文件上传失败问题，支持PDF/Word/Excel等二进制文件
+- **优化(tools)**: 优化工具调用步骤展示，根据success状态显示不同颜色
+
+### 🛠️ 后端_2026_04_19_0030
+- **功能(agent)**: 新增计算器Agent（agent-calculator）和天气助手Agent（agent-weather），默认运行
+- **功能(search)**: 集成DuckDuckGo免费搜索，无需API Key
+- **优化(weather)**: 移除天气工具mock fallback，直接使用wttr.in免费接口
+- **修复(knowledge_base)**: 简化知识库权限检查，允许非超级管理员访问所有知识库
+- **优化(dependencies)**: 新增duckduckgo-search依赖
+
 ### 💻 客户端_2026_04_19_0020
 - **功能(agent)**: 新增默认 Agent，AI 对话打开时自动选择默认 Agent
 - **优化(agent)**: AI 对话左侧显示所有可用 Agent（包括 stopped 状态），并显示状态指示器

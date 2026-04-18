@@ -89,48 +89,31 @@ class SearchTool(BaseTool):
         try:
             with DDGS() as ddgs:
                 results = list(ddgs.text(query, max_results=self._max_results))
-            
-            if not results:
-                return ToolCallResult(
-                    tool_call_id="",
-                    tool_id=self.definition.id,
-                    success=True,
-                    output=f"未找到与「{query}」相关的搜索结果",
-                )
+        except Exception as e:
+            logger.error(f"DuckDuckGo搜索异常: {e}")
+            return ToolCallResult(
+                tool_call_id="",
+                tool_id=self.definition.id,
+                success=False,
+                error=f"搜索失败: {str(e)}",
+            )
 
-            lines = [f"搜索「{query}」找到 {len(results)} 条结果:\n"]
-            for i, r in enumerate(results, 1):
-                lines.append(f"{i}. {r.get('title', 'N/A')} ({r.get('href', '')})")
-                snippet = r.get('body', 'N/A')
-                if len(snippet) > 200:
-                    snippet = snippet[:197] + "..."
-                lines.append(f"   {snippet}\n")
-
+        if not results:
             return ToolCallResult(
                 tool_call_id="",
                 tool_id=self.definition.id,
                 success=True,
-                output="\n".join(lines),
+                output="未找到相关结果",
             )
-        except Exception as e:
-            logger.error(f"DuckDuckGo搜索异常: {e}")
-            return await self._mock_search(query)
 
-    async def _mock_search(self, query: str) -> ToolCallResult:
-        lines = [
-            f"搜索「{query}」找到 3 条结果(Mock数据):\n",
-            f"1. {query} - 相关介绍",
-            f"   这里是关于 {query} 的简要说明...\n",
-            f"2. {query} 的使用方法",
-            f"   本页面介绍 {query} 的基本操作步骤...\n",
-            f"3. {query} 常见问题",
-            f"   FAQ: 收集了 {query} 相关的常见问题与解答...",
-        ]
         return ToolCallResult(
             tool_call_id="",
             tool_id=self.definition.id,
             success=True,
-            output="\n".join(lines),
+            output=" ||| ".join([
+                f"{r['title']}({r['href']}): {r['body'][:300]}"
+                for r in results
+            ]),
         )
 
 
