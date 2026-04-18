@@ -58,19 +58,29 @@ def init_database() -> None:
 
 
 def create_admin_user(
-    username: str = "admin",
-    password: str = "Tuoren@@2026",
-    email: str = "admin@example.com",
+    username: str = None,
+    password: str = None,
+    email: str = None,
     display_name: str = "管理员",
 ) -> None:
     """创建管理员账户
 
     Args:
-        username: 用户名
-        password: 密码
-        email: 邮箱
+        username: 用户名 (从环境变量 ADMIN_USERNAME 读取，默认 admin)
+        password: 密码 (从环境变量 ADMIN_PASSWORD 读取)
+        email: 邮箱 (从环境变量 ADMIN_EMAIL 读取)
         display_name: 显示名称
     """
+    import os
+    username = username or os.getenv("ADMIN_USERNAME", "admin")
+    password = password or os.getenv("ADMIN_PASSWORD")
+    email = email or os.getenv("ADMIN_EMAIL", "admin@example.com")
+
+    if not password:
+        logger.error("未设置 ADMIN_PASSWORD 环境变量，请先设置管理员密码")
+        logger.info("示例: ADMIN_PASSWORD=YourSecurePassword python -m scripts.init_db --create-admin")
+        return
+
     logger.info(f"开始创建管理员账户: {username}")
 
     db = get_database()
@@ -202,7 +212,7 @@ def main() -> None:
         epilog="""
 示例:
   python -m scripts.init_db                    # 初始化数据库
-  python -m scripts.init_db --create-admin    # 创建管理员账户
+  ADMIN_PASSWORD=YourSecurePassword python -m scripts.init_db --create-admin  # 创建管理员账户(必须设置密码)
   python -m scripts.init_db --show-tables    # 显示所有表
   python -m scripts.init_db --show-users     # 显示所有用户
   python -m scripts.init_db --reset          # 重置数据库(危险!)
@@ -231,18 +241,18 @@ def main() -> None:
     )
     parser.add_argument(
         "--admin-username",
-        default="admin",
-        help="管理员用户名(默认: admin)",
+        default=None,
+        help="管理员用户名(从环境变量 ADMIN_USERNAME 读取)",
     )
     parser.add_argument(
         "--admin-password",
-        default="Tuoren@@2026",
-        help="管理员密码(默认: Tuoren@@2026)",
+        default=None,
+        help="管理员密码(必须从环境变量 ADMIN_PASSWORD 读取)",
     )
     parser.add_argument(
         "--admin-email",
-        default="admin@example.com",
-        help="管理员邮箱(默认: admin@example.com)",
+        default=None,
+        help="管理员邮箱(从环境变量 ADMIN_EMAIL 读取)",
     )
 
     args = parser.parse_args()
