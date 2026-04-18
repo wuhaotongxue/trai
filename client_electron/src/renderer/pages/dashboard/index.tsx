@@ -117,7 +117,7 @@ const Dashboard: React.FC = () => {
       case 'overview':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>系统概览</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>系统概览</h2>
             {sys_info ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
                 <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -125,21 +125,21 @@ const Dashboard: React.FC = () => {
                     <Monitor size={16} color="#64748b" />
                     <div style={{ color: '#64748b', fontSize: '12px' }}>系统平台</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '18px', fontWeight: 600 }}>{sys_info.platform}</div>
+                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{sys_info.platform}</div>
                 </div>
                 <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <Cpu size={16} color="#64748b" />
                     <div style={{ color: '#64748b', fontSize: '12px' }}>CPU 架构</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '18px', fontWeight: 600 }}>{sys_info.arch}</div>
+                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{sys_info.arch}</div>
                 </div>
                 <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <HardDrive size={16} color="#64748b" />
                     <div style={{ color: '#64748b', fontSize: '12px' }}>总内存</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '18px', fontWeight: 600 }}>{format_bytes(sys_info.total_mem)}</div>
+                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{format_bytes(sys_info.total_mem)}</div>
                 </div>
               </div>
             ) : (
@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
       case 'hardware':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>硬件信息</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>硬件信息</h2>
             {sys_info ? (
               <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
@@ -183,7 +183,7 @@ const Dashboard: React.FC = () => {
       case 'memory':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>内存状态</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>内存状态</h2>
             {sys_info ? (
               <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '24px' }}>
                 <div style={{ marginBottom: '20px' }}>
