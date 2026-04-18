@@ -435,6 +435,7 @@ const KnowledgeBasePage: React.FC = () => {
   const handle_rename_kb = async (kb_id: string) => {
     if (!edit_kb_name.trim()) return
     if (!window.electron_api?.kb_rename_index) return
+    if (!confirm(`确认将知识库重命名为 "${edit_kb_name.trim()}" 吗?`)) return
     try {
       const res = await window.electron_api.kb_rename_index(kb_id, edit_kb_name.trim())
       if (res.success) {
@@ -453,7 +454,7 @@ const KnowledgeBasePage: React.FC = () => {
 
   const handle_delete_kb = async (kb_id: string) => {
     if (!window.electron_api?.kb_delete_index) return
-    if (!confirm('确定要删除该知识库吗?')) return
+    if (!confirm('确认要删除该知识库吗? 此操作不可恢复!')) return
     try {
       const res = await window.electron_api.kb_delete_index(kb_id)
       if (res.success) {
@@ -486,13 +487,8 @@ const KnowledgeBasePage: React.FC = () => {
 
   // (移除了暂不支持的移动知识库的方法)
 
-  // 辅助函数：根据用户角色显示知识库名称
-  const get_display_name = (name: string, is_admin: boolean = false) => {
-    if (is_admin) {
-      // 超级管理员显示完整名称（包含前缀）
-      return name;
-    }
-    // 普通用户移除用户名前缀
+  // 辅助函数：所有用户都不显示用户名前缀 (前缀仅用于后台权限区分)
+  const get_display_name = (name: string) => {
     const parts = name.split('__');
     if (parts.length > 1) {
       return parts.slice(1).join('__');
@@ -672,7 +668,7 @@ const KnowledgeBasePage: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
                       <BookOpen size={14} color={active_kb_id === kb.id ? '#0ea5e9' : '#64748b'} />
                       <span style={{ fontSize: '13px', fontWeight: 500, color: active_kb_id === kb.id ? '#0f172a' : '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {get_display_name(kb.name, user?.role === 'admin')}
+                        {get_display_name(kb.name)}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -704,7 +700,7 @@ const KnowledgeBasePage: React.FC = () => {
                             onClick={(e) => {
                               e.stopPropagation()
                               set_editing_kb_id(kb.id)
-                              set_edit_kb_name(get_display_name(kb.name, user?.role === 'admin'))
+                              set_edit_kb_name(get_display_name(kb.name))
                             }}
                             title="重命名"
                             aria-label="重命名知识库"
@@ -798,9 +794,10 @@ const KnowledgeBasePage: React.FC = () => {
                     />
                   ) : (
                     <>
-                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name, user?.role === 'admin')}</h2>
+                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name)}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name, user?.role === 'admin')) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
+                        <button type="button" onClick={() => handle_move_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" aria-label="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
+                        <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name)) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
                         <button type="button" onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" aria-label="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
                         <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: '8px', padding: '2px 8px', backgroundColor: '#f1f5f9', borderRadius: '4px' }}>
                           ID: {active_kb.id}
