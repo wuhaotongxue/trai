@@ -209,104 +209,104 @@ const ImageToImage: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '20px', gap: '6px' }}>
                 {!is_left_sidebar_open && (
                   <button
                     onClick={() => set_is_left_sidebar_open(true)}
                     title="展开AI能力栏"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <PanelLeftOpen size={18} />
+                    <PanelLeftOpen size={20} />
                   </button>
                 )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开风格预设栏"
                   style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>图生图</span>
+            <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>图生图</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '28px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: '#334155', fontWeight: 500, fontSize: '15px' }}>参考图片 URL</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>参考图片 URL</label>
                 <input
                   type="text"
                   value={source_url}
                   onChange={(e) => set_source_url(e.target.value)}
                   placeholder="https://example.com/image.jpg"
                   style={{
-                    width: '100%', padding: '14px 16px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                    outline: 'none', fontSize: '15px', fontFamily: 'inherit'
+                    width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                    outline: 'none', fontSize: '14px', fontFamily: 'inherit'
                   }}
                 />
               </div>
 
-              <div style={{ marginBottom: '28px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', color: '#334155', fontWeight: 500, fontSize: '15px' }}>修改描述</label>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>修改描述</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="例如: 将图片转换为赛博朋克风格..."
                   style={{
-                    width: '100%', minHeight: '140px', padding: '16px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                    resize: 'vertical', outline: 'none', fontSize: '15px', fontFamily: 'inherit', lineHeight: '1.6'
+                    width: '100%', minHeight: '100px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                    resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
                 <button
                   onClick={handle_generate}
                   disabled={loading || !prompt.trim() || !source_url.trim()}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 32px', 
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
                     backgroundColor: loading || !prompt.trim() || !source_url.trim() ? '#94a3b8' : '#0ea5e9', 
-                    color: '#ffffff', border: 'none', borderRadius: '10px', cursor: loading || !prompt.trim() || !source_url.trim() ? 'not-allowed' : 'pointer',
-                    fontWeight: 600, fontSize: '15px', transition: 'background-color 0.2s'
+                    color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() || !source_url.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
                   }}
                 >
-                  {loading ? <Loader2 size={20} className="animate-spin" /> : <ImagePlus size={20} />}
+                  {loading ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
                   {loading ? '生成中...' : '开始生成'}
                 </button>
               </div>
 
               {error && (
-                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '28px', fontSize: '15px' }}>
+                <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '20px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '20px', minHeight: '400px' }}>
+              <div style={{ display: 'flex', gap: '16px', minHeight: '240px' }}>
                 <div style={{ 
                   flex: 1, backgroundColor: '#f1f5f9', borderRadius: '12px', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
                 }}>
                   {source_url ? (
-                    <img src={source_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }} />
+                    <img src={source_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '350px', objectFit: 'contain' }} />
                   ) : (
-                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <Upload size={40} style={{ marginBottom: '12px', opacity: 0.5 }} />
-                      <span style={{ fontSize: '15px' }}>参考图预览</span>
+                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <Upload size={36} style={{ opacity: 0.5 }} />
+                      <span style={{ fontSize: '14px' }}>参考图预览</span>
                     </div>
                   )}
                 </div>
@@ -316,16 +316,16 @@ const ImageToImage: React.FC = () => {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
                 }}>
                   {loading ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
-                      <Loader2 size={32} className="animate-spin" style={{ marginBottom: '12px' }} />
-                      <span style={{ fontSize: '15px' }}>生成中...</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '8px' }}>
+                      <Loader2 size={28} className="animate-spin" />
+                      <span style={{ fontSize: '14px' }}>生成中...</span>
                     </div>
                   ) : result_url ? (
-                    <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }} />
+                    <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '350px', objectFit: 'contain' }} />
                   ) : (
-                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <ImagePlus size={40} style={{ marginBottom: '12px', opacity: 0.5 }} />
-                      <span style={{ fontSize: '15px' }}>结果图预览</span>
+                    <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                      <ImagePlus size={36} style={{ opacity: 0.5 }} />
+                      <span style={{ fontSize: '14px' }}>结果图预览</span>
                     </div>
                   )}
                 </div>

@@ -211,60 +211,60 @@ const ComfyUI: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '20px', gap: '6px' }}>
                 {!is_left_sidebar_open && (
                   <button
                     onClick={() => set_is_left_sidebar_open(true)}
                     title="展开AI能力栏"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <PanelLeftOpen size={18} />
+                    <PanelLeftOpen size={20} />
                   </button>
                 )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开工作流预设栏"
                   style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>ComfyUI 工作流</span>
+            <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>ComfyUI 工作流</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '17px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '20px' }}>提交生成任务</h2>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#334155', marginTop: 0, marginBottom: '16px' }}>提交生成任务</h2>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="请输入正向提示词，例如：A beautiful landscape with mountains..."
                   style={{
                     width: '100%',
-                    minHeight: '160px',
-                    padding: '16px',
+                    minHeight: '100px',
+                    padding: '14px',
                     borderRadius: '10px',
                     border: '1px solid #cbd5e1',
                     outline: 'none',
                     resize: 'vertical',
-                    fontSize: '15px',
-                    lineHeight: '1.6'
+                    fontSize: '14px',
+                    lineHeight: '1.5'
                   }}
                 />
                 
@@ -275,49 +275,49 @@ const ComfyUI: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '10px',
-                      padding: '14px 32px',
+                      gap: '8px',
+                      padding: '10px 24px',
                       backgroundColor: '#0ea5e9',
                       color: '#ffffff',
                       border: 'none',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       cursor: loading ? 'not-allowed' : 'pointer',
                       fontWeight: 600,
-                      fontSize: '15px',
+                      fontSize: '14px',
                       opacity: loading ? 0.7 : 1
                     }}
                   >
-                    {loading ? <Loader2 size={20} className="animate-spin" /> : <Bot size={20} />}
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : <Bot size={18} />}
                     {loading ? '生成中...' : '提交任务'}
                   </button>
                 </div>
               </div>
               
               {error && (
-                <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', fontSize: '15px' }}>
+                <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', fontSize: '13px' }}>
                   {error}
                 </div>
               )}
             </div>
 
             {result && (
-              <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                <h2 style={{ fontSize: '17px', fontWeight: 600, color: '#1e293b', marginTop: 0, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <RefreshCw size={20} color="#10b981" />
+              <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#334155', marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <RefreshCw size={18} color="#10b981" />
                   生成结果
                 </h2>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px' }}>
                     <span style={{ color: '#64748b' }}>任务 ID:</span>
                     <span style={{ fontWeight: 500, color: '#0f172a' }}>{result.task_id}</span>
-                    <span style={{ padding: '4px 12px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '16px', fontSize: '13px', fontWeight: 600 }}>
+                    <span style={{ padding: '3px 10px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '14px', fontSize: '12px', fontWeight: 600 }}>
                       {result.status === 'completed' ? '已完成' : result.status}
                     </span>
                   </div>
                   
                   {result.image_url && (
-                    <div style={{ marginTop: '12px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
+                    <div style={{ marginTop: '10px', borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
                       <img src={result.image_url} alt="Generated" style={{ width: '100%', display: 'block' }} />
                     </div>
                   )}
