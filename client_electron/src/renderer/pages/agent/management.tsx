@@ -208,7 +208,7 @@ const AgentManagement: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>Agent 管理</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>Agent列表</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -334,7 +334,7 @@ const AgentManagement: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>操作</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>操作面板</span>
             </div>
             <button
               type="button"
@@ -497,7 +497,7 @@ const AgentManagement: React.FC = () => {
                   </button>
                 </div>
               )}
-              <h2 style={{ color: '#0f172a', margin: 0, fontSize: '16px', fontWeight: 600 }}>
+              <h2 style={{ color: '#0f172a', margin: 0, fontSize: '16px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
                 {active_agent ? active_agent.name : 'Agent 详情'}
               </h2>
             </div>
@@ -531,7 +531,7 @@ const AgentManagement: React.FC = () => {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
             {active_agent ? (
-              <div style={{ maxWidth: '800px' }}>
+              <div style={{ maxWidth: '100%' }}>
                 <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{
@@ -546,8 +546,8 @@ const AgentManagement: React.FC = () => {
                     }}>
                       <IconComponent size={32} />
                     </div>
-                    <div>
-                      <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {active_agent.name}
                       </h3>
                       <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6' }}>
@@ -556,7 +556,7 @@ const AgentManagement: React.FC = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                     <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
                       <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>模型</div>
                       <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500 }}>{active_agent.model}</div>
