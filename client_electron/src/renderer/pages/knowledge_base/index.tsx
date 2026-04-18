@@ -1183,7 +1183,7 @@ const KnowledgeBasePage: React.FC = () => {
                     </div>
                     <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
                           共 {file_total} 条
                         </div>
                         <button
@@ -1203,7 +1203,7 @@ const KnowledgeBasePage: React.FC = () => {
                         </button>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
                           <span>每页</span>
                           <select
                             aria-label="每页数量"
@@ -1231,7 +1231,7 @@ const KnowledgeBasePage: React.FC = () => {
                         >
                           上一页
                         </button>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
                           第 {file_current_page} / {file_total_pages} 页
                         </div>
                         <button
@@ -1244,7 +1244,7 @@ const KnowledgeBasePage: React.FC = () => {
                         </button>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
-                          <span style={{ fontSize: '12px', color: '#64748b' }}>跳转</span>
+                          <span style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>跳转</span>
                           <input
                             type="number"
                             aria-label="跳转页码"
