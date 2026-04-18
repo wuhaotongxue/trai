@@ -497,7 +497,7 @@ const AgentManagement: React.FC = () => {
                   </button>
                 </div>
               )}
-              <h2 style={{ color: '#0f172a', margin: 0, fontSize: '16px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+              <h2 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
                 {active_agent ? active_agent.name : 'Agent 详情'}
               </h2>
             </div>
