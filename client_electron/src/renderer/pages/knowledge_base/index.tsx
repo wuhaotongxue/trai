@@ -1050,7 +1050,7 @@ const KnowledgeBasePage: React.FC = () => {
                     </div>
                   ) : (
                     <>
-                      <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name, 20)}</h2>
+                      <h2 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name, 20)}</h2>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <button type="button" onClick={() => handle_move_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" aria-label="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
                         <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name)) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
@@ -1309,7 +1309,7 @@ const KnowledgeBasePage: React.FC = () => {
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>移动知识库</h3>
+              <h3 style={{ margin: 0, fontSize: '14px', color: '#0f172a' }}>移动知识库</h3>
               <button type="button" onClick={() => set_moving_kb_id(null)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
             <div style={{ marginBottom: '20px' }}>
@@ -1337,7 +1337,7 @@ const KnowledgeBasePage: React.FC = () => {
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建目录分类</h3>
+              <h3 style={{ margin: 0, fontSize: '14px', color: '#0f172a' }}>新建目录分类</h3>
               <button type="button" onClick={() => set_show_cat_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
             <input autoFocus placeholder="请输入目录名称..." aria-label="目录名称" title="目录名称" value={new_cat_name} onChange={e => set_new_cat_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
@@ -1354,7 +1354,7 @@ const KnowledgeBasePage: React.FC = () => {
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>新建知识库 (所属: {active_cat?.name})</h3>
+              <h3 style={{ margin: 0, fontSize: '14px', color: '#0f172a' }}>新建知识库 (所属: {active_cat?.name})</h3>
               <button type="button" onClick={() => set_show_create_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
             <div style={{ marginBottom: '12px' }}>
@@ -1399,7 +1399,7 @@ const KnowledgeBasePage: React.FC = () => {
           <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', width: '380px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
               <img src="kity.png" alt="Kity" style={{ width: '48px', height: '48px', borderRadius: '8px' }} />
-              <h2 style={{ margin: 0, fontSize: '18px', color: '#0f172a', fontWeight: 600 }}>{custom_modal_title}</h2>
+              <h2 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: 600 }}>{custom_modal_title}</h2>
             </div>
             <div style={{ marginBottom: '24px' }}>
               <p style={{ margin: 0, fontSize: '14px', color: '#475569', lineHeight: '1.6' }}>{custom_modal_message}</p>
