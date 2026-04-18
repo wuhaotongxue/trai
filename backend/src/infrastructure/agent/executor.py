@@ -108,6 +108,25 @@ class AgentExecutor:
         self._ensure_initialized()
         self._ensure_quota()
 
+        # 根据 agent_id 查找对应的系统提示词
+        if context.agent_id:
+            try:
+                from api.routers.ai.management import _MOCK_AGENTS
+
+                agent = next((a for a in _MOCK_AGENTS if a["id"] == context.agent_id), None)
+                if agent:
+                    # 检查是否已经有 system 消息
+                    has_system_msg = len(messages) > 0 and messages[0]["role"] == "system"
+                    if not has_system_msg:
+                        # 在消息列表开头添加系统提示词
+                        messages = [
+                            {"role": "system", "content": agent["system_prompt"]},
+                            *messages,
+                        ]
+                        logger.info(f"已设置 Agent {context.agent_id} 的系统提示词")
+            except Exception as e:
+                logger.warning(f"设置 Agent 系统提示词失败: {e}")
+
         if stream:
             return self._execute_stream(messages, context)
 
