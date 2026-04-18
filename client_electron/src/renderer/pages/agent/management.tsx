@@ -548,8 +548,8 @@ const AgentManagement: React.FC = () => {
                       <IconComponent size={20} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
-                        {active_agent.description}
+                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {active_agent.description.length > 4 ? active_agent.description.slice(0, 4) + '...' : active_agent.description}
                       </p>
                     </div>
                   </div>
@@ -578,9 +578,9 @@ const AgentManagement: React.FC = () => {
                     <div style={{
                       padding: '12px', backgroundColor: '#f1f5f9', borderRadius: '8px',
                       fontSize: '13px', color: '#475569', lineHeight: '1.6',
-                      overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                     }}>
-                      {active_agent.system_prompt || '暂无系统提示词'}
+                      {active_agent.system_prompt ? (active_agent.system_prompt.length > 4 ? active_agent.system_prompt.slice(0, 4) + '...' : active_agent.system_prompt) : '暂无...'}
                     </div>
                   </div>
                 </div>
