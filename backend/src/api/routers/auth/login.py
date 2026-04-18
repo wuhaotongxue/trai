@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import base64
+import os
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,12 +21,49 @@ from infrastructure.security.password import PasswordService, get_password_servi
 
 router = APIRouter()
 
+DEMO_USERNAME = os.getenv("DEMO_USERNAME", "wuhao")
+DEMO_PASSWORD_PLAIN = os.getenv("DEMO_PASSWORD", "Tr@@2026...")
+AES_KEY = os.getenv("AES_KEY", "TraiSecretKey32BytesLong!!").encode().ljust(32, b"0")[:32]
+AES_IV = os.getenv("AES_IV", "TraiInitVector").encode().ljust(16, b"0")[:16]
+
+
+def aes_encrypt(plaintext: str) -> str:
+    """AES 加密密码"""
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
+    encryptor = cipher.encryptor()
+    padded = plaintext.encode().ljust(32, b" ")
+    return base64.b64encode(encryptor.update(padded) + encryptor.finalize()).decode()
+
+
+def aes_decrypt(ciphertext: str) -> str:
+    """AES 解密密码"""
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
+    decryptor = cipher.decryptor()
+    padded = decryptor.update(base64.b64decode(ciphertext)) + decryptor.finalize()
+    return padded.decode().strip()
+
 
 class LoginRequest(BaseModel):
     """登录请求"""
 
     username: Annotated[str, Field(min_length=3, max_length=64, description="用户名")]
     password: Annotated[str, Field(min_length=6, max_length=128, description="密码")]
+
+
+class EncryptedLoginRequest(BaseModel):
+    """加密密码登录请求"""
+
+    username: Annotated[str, Field(min_length=3, max_length=64, description="用户名")]
+    encrypted_password: Annotated[str, Field(description="AES 加密的密码")]
+
+
+class DemoAccountResponse(BaseModel):
+    """Demo 账号响应"""
+
+    username: str = Field(description="用户名")
+    encrypted_password: str = Field(description="AES 加密的密码")
 
 
 class LoginResponse(BaseModel):
@@ -111,6 +150,46 @@ async def login(
             "email": user.email,
             "role": user.role.value,
         },
+    )
+
+
+@router.post("/login/encrypted", response_model=LoginResponse, tags=["认证"])
+async def login_with_encrypted_password(
+    request: EncryptedLoginRequest,
+    jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    password_service: Annotated[PasswordService, Depends(get_password_service)],
+    session: Annotated[Session, Depends(get_session)],
+) -> LoginResponse:
+    """使用加密密码登录（demo 账号专用）
+
+    Args:
+        request: 加密登录请求
+        jwt_service: JWT 服务实例
+        password_service: 密码服务实例
+        session: 数据库会话
+
+    Returns:
+        LoginResponse: 登录成功返回令牌和用户信息
+    """
+    decrypted_password = aes_decrypt(request.encrypted_password)
+    return await login(
+        LoginRequest(username=request.username, password=decrypted_password),
+        jwt_service,
+        password_service,
+        session,
+    )
+
+
+@router.get("/demo", response_model=DemoAccountResponse, tags=["认证"])
+async def get_demo_account() -> DemoAccountResponse:
+    """获取 demo 测试账号信息
+
+    Returns:
+        DemoAccountResponse: demo 账号信息（密码已加密）
+    """
+    return DemoAccountResponse(
+        username=DEMO_USERNAME,
+        encrypted_password=aes_encrypt(DEMO_PASSWORD_PLAIN),
     )
 
 
