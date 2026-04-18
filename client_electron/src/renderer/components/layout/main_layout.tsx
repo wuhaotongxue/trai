@@ -12,6 +12,7 @@ import { use_auth_store } from '@/store/auth'
 
 const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
+  const logout = use_auth_store((state) => state.logout)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -19,6 +20,22 @@ const MainLayout: React.FC = () => {
       navigate('/login')
     }
   }, [is_authenticated, navigate])
+
+  useEffect(() => {
+    // 监听 Token 过期事件
+    const handle_need_login = () => {
+      logout()
+      navigate('/login')
+    }
+
+    // 添加 IPC 监听器
+    window.electron_api.on('auth:need-login', handle_need_login)
+
+    // 清理监听器
+    return () => {
+      window.electron_api.off('auth:need-login', handle_need_login)
+    }
+  }, [logout, navigate])
 
   if (!is_authenticated) {
     return null

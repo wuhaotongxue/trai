@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeft, MessageSquarePlus, Paperclip, X, Database } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -50,7 +50,9 @@ const AgentChat: React.FC = () => {
   const [active_session_id, set_active_session_id] = useState<string>('')
   const [available_agents, set_available_agents] = useState<Agent[]>([])
   const [available_kbs, set_available_kbs] = useState<KnowledgeBase[]>([])
-  const [is_sidebar_open, set_is_sidebar_open] = useState(true)
+  const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
+  const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
+  const [active_agent_id, set_active_agent_id] = useState<string>('')
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
@@ -64,7 +66,13 @@ const AgentChat: React.FC = () => {
       try {
         const res = await window.electron_api.agent_management_list()
         if (res.success && res.data) {
-          set_available_agents(res.data.filter((a: Agent) => a.status === 'running'))
+          // 只显示运行中的 Agent
+          const running_agents = res.data.filter((a: Agent) => a.status === 'running')
+          set_available_agents(running_agents)
+          // 默认选择第一个 Agent（如果有）
+          if (running_agents.length > 0) {
+            set_active_agent_id(running_agents[0].id)
+          }
         }
       } catch (err) {
         console.error('Failed to load agents', err)
@@ -115,7 +123,8 @@ const AgentChat: React.FC = () => {
       id: `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title: '新会话',
       updated_at: Date.now(),
-      messages: []
+      messages: [],
+      agent_id: active_agent_id
     }
     set_sessions(prev => {
       const updated = [new_session, ...prev]
@@ -127,18 +136,17 @@ const AgentChat: React.FC = () => {
 
   const delete_session = (e: React.MouseEvent, id: string) => {
     e.stopPropagation()
-    set_sessions(prev => {
-      const updated = prev.filter(s => s.id !== id)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-      if (active_session_id === id) {
-        if (updated.length > 0) {
-          set_active_session_id(updated[0].id)
-        } else {
-          setTimeout(create_new_session, 0)
-        }
+    const is_current_session = active_session_id === id
+    const new_sessions = sessions.filter(s => s.id !== id)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(new_sessions))
+    set_sessions(new_sessions)
+    if (is_current_session) {
+      if (new_sessions.length > 0) {
+        set_active_session_id(new_sessions[0].id)
+      } else {
+        create_new_session()
       }
-      return updated
-    })
+    }
   }
 
   const update_active_session_messages = (updater: (prev: ChatMessage[]) => ChatMessage[], target_sid: string = active_session_id_ref.current) => {
@@ -214,6 +222,7 @@ const AgentChat: React.FC = () => {
   }, [])
 
   const update_session_agent = (agent_id: string) => {
+    set_active_agent_id(agent_id)
     set_sessions(prev => {
       const updated = prev.map(s => s.id === active_session_id ? { ...s, agent_id } : s)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
@@ -298,235 +307,288 @@ const AgentChat: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
-      {/* 左侧会话列表 */}
-      <div className="no-drag-region" style={{ 
-        width: is_sidebar_open ? '260px' : '0px', 
-        opacity: is_sidebar_open ? 1 : 0,
-        backgroundColor: '#ffffff', 
-        borderRight: is_sidebar_open ? '1px solid #e2e8f0' : 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.3s ease',
-        overflow: 'hidden',
-        flexShrink: 0
-      }}>
-        <div className="drag-region" style={{ padding: '16px', minWidth: '260px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-          <button
-            className="no-drag-region"
-            onClick={create_new_session}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              backgroundColor: 'transparent',
-              color: '#0f172a',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc'
-              e.currentTarget.style.borderColor = '#cbd5e1'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.borderColor = '#e2e8f0'
-            }}
-          >
-            <MessageSquarePlus size={18} />
-            新建对话
-          </button>
-
-          <button
-            className="no-drag-region"
-            onClick={() => set_is_sidebar_open(false)}
-            title="收起会话列表"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#64748b',
-              borderRadius: '8px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <PanelLeftClose size={20} />
-          </button>
-        </div>
-        
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '260px', boxSizing: 'border-box' }}>
-          {sessions.map(s => (
-            <div
-              key={s.id}
-              onClick={() => set_active_session_id(s.id)}
-              style={{
-                padding: '12px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                backgroundColor: active_session_id === s.id ? '#e0f2fe' : 'transparent',
-                color: active_session_id === s.id ? '#0369a1' : '#475569',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
-              }}
-              onMouseLeave={(e) => {
-                if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <MessageCircle size={18} style={{ flexShrink: 0, color: active_session_id === s.id ? '#0ea5e9' : '#94a3b8' }} />
-              <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px', fontWeight: active_session_id === s.id ? 500 : 400 }}>
-                {s.title}
-              </div>
-              <div 
-                onClick={(e) => delete_session(e, s.id)}
-                style={{ 
-                  padding: '4px', 
-                  borderRadius: '4px', 
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fef2f2'
-                  e.currentTarget.style.color = '#ef4444'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = '#94a3b8'
-                }}
-              >
-                <Trash2 size={14} />
-              </div>
-            </div>
-          ))}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <MessageSquare size={20} color="#0ea5e9" />
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>AI 对话</h1>
         </div>
       </div>
-
-      {/* 右侧聊天区 */}
-      <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-          {!is_sidebar_open && (
-            <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
-              <button
-                onClick={() => set_is_sidebar_open(true)}
-                title="展开会话列表"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#64748b',
-                  borderRadius: '6px',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <PanelLeft size={20} />
-              </button>
-              <button
-                onClick={create_new_session}
-                title="新建对话"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#64748b',
-                  borderRadius: '6px',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <MessageSquarePlus size={20} />
-              </button>
-            </div>
-          )}
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
-          <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+      
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div style={{ 
+          width: is_left_sidebar_open ? '200px' : '0px', 
+          minWidth: is_left_sidebar_open ? '180px' : '0px',
+          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+          opacity: is_left_sidebar_open ? 1 : 0,
+          backgroundColor: '#f1f5f9', 
+          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.3s ease',
+          overflow: 'hidden',
+          flexShrink: 1
+        }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>Agent 列表</span>
+            <button
+              type="button"
+              onClick={() => set_is_left_sidebar_open(false)}
+              title="收起 Agent 栏"
+              aria-label="收起 Agent 栏"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <PanelLeftOpen size={18} />
+            </button>
+          </div>
           
-          <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-            {available_kbs.length > 0 && (
-              <select 
-                value={active_session?.kb_id || 'none'}
-                onChange={(e) => update_session_kb(e.target.value)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  color: '#475569',
-                  fontSize: '13px',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                  maxWidth: '150px',
-                  textOverflow: 'ellipsis'
-                }}
-                title="选择知识库(可选)"
-              >
-                <option value="none">无知识库</option>
-                {available_kbs.map(k => (
-                  <option key={k.id} value={k.id}>{k.name}</option>
-                ))}
-              </select>
-            )}
-
-            {available_agents.length > 0 && (
-              <select 
-                value={active_session?.agent_id || available_agents[0]?.id || ''}
-                onChange={(e) => update_session_agent(e.target.value)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  color: '#475569',
-                  fontSize: '13px',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                  maxWidth: '150px',
-                  textOverflow: 'ellipsis'
-                }}
-                title="选择对话 Agent"
-              >
-                {available_agents.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
+            {available_agents.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无可用 Agent</div>
+            ) : (
+              available_agents.map(agent => (
+                <div 
+                  key={agent.id}
+                  onClick={() => {
+                    set_active_agent_id(agent.id)
+                    update_session_agent(agent.id)
+                  }}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: active_agent_id === agent.id ? '#e0f2fe' : 'transparent',
+                    color: active_agent_id === agent.id ? '#0369a1' : '#475569',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                    marginBottom: '4px',
+                    fontSize: '13px',
+                    fontWeight: active_agent_id === agent.id ? 600 : 400,
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = '#e2e8f0'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MessageSquare size={16} />
+                    {agent.name}
+                  </div>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: 
+                      agent.status === 'running' ? '#10b981' : 
+                      agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
+                  }} />
+                </div>
+              ))
             )}
           </div>
         </div>
-        
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+        <div style={{ 
+          width: is_middle_sidebar_open ? '220px' : '0px', 
+          minWidth: is_middle_sidebar_open ? '200px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+          opacity: is_middle_sidebar_open ? 1 : 0,
+          backgroundColor: '#ffffff', 
+          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.3s ease',
+          overflow: 'hidden',
+          flexShrink: 1
+        }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开 Agent 栏"
+                  aria-label="展开 Agent 栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    marginRight: '4px'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              <span style={{ fontSize: '14px', fontWeight: 600 }}>会话列表</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => set_is_middle_sidebar_open(false)}
+              title="收起会话列表"
+              aria-label="收起会话列表"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <List size={18} />
+            </button>
+          </div>
+          
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '200px', boxSizing: 'border-box' }}>
+            <button
+              type="button"
+              onClick={create_new_session}
+              aria-label="新建会话"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <Plus size={14} /> 新建会话
+            </button>
+          </div>
+          
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
+            {sessions.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无会话</div>
+            ) : (
+              sessions.map(s => (
+                <div 
+                  key={s.id}
+                  onClick={() => set_active_session_id(s.id)}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    backgroundColor: active_session_id === s.id ? '#e0f2fe' : 'transparent',
+                    color: active_session_id === s.id ? '#0369a1' : '#475569',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '4px',
+                    fontSize: '13px',
+                    fontWeight: active_session_id === s.id ? 600 : 400,
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  <MessageCircle size={16} />
+                  <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {s.title}
+                  </div>
+                  <div 
+                    onClick={(e) => delete_session(e, s.id)}
+                    style={{ 
+                      padding: '4px', 
+                      borderRadius: '4px', 
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fef2f2'
+                      e.currentTarget.style.color = '#ef4444'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.color = '#94a3b8'
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+            {!is_middle_sidebar_open && (
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开 Agent 栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={20} />
+                  </button>
+                )}
+                <button
+                  onClick={() => set_is_middle_sidebar_open(true)}
+                  title="展开会话栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <List size={20} />
+                </button>
+              </div>
+            )}
+            <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
+            <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+            
+            <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+              {available_kbs.length > 0 && (
+                <select 
+                  value={active_session?.kb_id || 'none'}
+                  onChange={(e) => update_session_kb(e.target.value)}
+                  style={{
+                    padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0',
+                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '13px',
+                    outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
+                  }}
+                  title="选择知识库(可选)"
+                >
+                  <option value="none">无知识库</option>
+                  {available_kbs.map(k => (
+                    <option key={k.id} value={k.id}>{k.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+          
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {messages.length === 0 ? (
               <div style={{ textAlign: 'center', color: '#64748b', marginTop: '40px', fontSize: '14px' }}>
                 尝试询问:"今天北京天气怎么样?" 来测试天气工具和思维链.
@@ -942,22 +1004,22 @@ const AgentChat: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={handle_send}
-                disabled={loading || !input.trim()}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: loading || !input.trim() ? '#e2e8f0' : '#0ea5e9',
-                  color: loading || !input.trim() ? '#94a3b8' : 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                <Send size={18} />
+                  disabled={loading || !input.trim()}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: loading || !input.trim() ? '#e2e8f0' : '#0ea5e9',
+                    color: loading || !input.trim() ? '#94a3b8' : 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  <Send size={18} />
                 </button>
               </div>
             </div>
@@ -965,7 +1027,9 @@ const AgentChat: React.FC = () => {
         </div>
       </div>
     </div>
+    </div>
   )
 }
 
 export default AgentChat
+

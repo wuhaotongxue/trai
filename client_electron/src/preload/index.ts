@@ -28,7 +28,8 @@ contextBridge.exposeInMainWorld('electron_api', {
   ai_generate_comfyui: (prompt: string) => ipcRenderer.invoke('ai:generate_comfyui', prompt),
   ai_generate_report: (template_base64: string, template_name: string, description: string) => ipcRenderer.invoke('ai:generate_report', template_base64, template_name, description),
   agent_management_list: () => ipcRenderer.invoke('agent:management:list'),
-  agent_management_register: (name: string, description: string, model: string, system_prompt: string) => ipcRenderer.invoke('agent:management:register', name, description, model, system_prompt),
+  agent_management_register: (name: string, description: string, model: string, system_prompt: string, icon?: string) => ipcRenderer.invoke('agent:management:register', name, description, model, system_prompt, icon),
+  agent_management_update: (agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) => ipcRenderer.invoke('agent:management:update', agent_id, name, description, model, system_prompt, icon),
   agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => ipcRenderer.invoke('agent:management:toggle', agent_id, action),
   agent_management_check: (agent_id: string) => ipcRenderer.invoke('agent:management:check', agent_id),
   feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: { name: string, data: string }[] }) => ipcRenderer.invoke('feedback:submit', data),
@@ -47,5 +48,12 @@ contextBridge.exposeInMainWorld('electron_api', {
   on_agent_chat_chunk: (callback: (event: any, chunk: any) => void) => {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }
+  },
+  // 通用的 IPC 事件监听
+  on: (channel: string, callback: (...args: any[]) => void) => {
+    ipcRenderer.on(channel, callback)
+  },
+  off: (channel: string, callback: (...args: any[]) => void) => {
+    ipcRenderer.removeListener(channel, callback)
   }
 })

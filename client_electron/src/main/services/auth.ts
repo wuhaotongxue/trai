@@ -6,6 +6,7 @@
  */
 import axios from 'axios'
 import log from 'electron-log'
+import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { config_store } from '../platform/config_store'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
@@ -20,6 +21,39 @@ api_client.interceptors.request.use((config) => {
   }
   return config
 })
+
+// 响应拦截器 - 处理 401 Token 过期
+api_client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      log.warn('Token expired or invalid, showing re-login prompt')
+      
+      // 清理无效 token
+      config_store.set('access_token', '')
+      
+      // 获取当前窗口
+      const win = BrowserWindow.getFocusedWindow()
+      if (win) {
+        // 显示提示对话框
+        const result = await dialog.showMessageBox(win, {
+          type: 'warning',
+          title: '登录已过期',
+          message: '您的登录已过期，请重新登录',
+          detail: 'Token 有效期 30 分钟，过期后需要重新登录以继续使用',
+          buttons: ['去登录'],
+          defaultId: 0
+        })
+        
+        if (result.response === 0) {
+          // 通知渲染进程跳转到登录页面
+          win.webContents.send('auth:need-login')
+        }
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 
 export const auth_service = {
   async login(params: any) {
