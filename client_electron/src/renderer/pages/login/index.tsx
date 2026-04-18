@@ -12,7 +12,7 @@ import TitleBar from '@/components/layout/title_bar'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
-  const [password, set_password] = useState('Dorians@2026...')
+  const [password, set_password] = useState('')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
   const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
@@ -67,7 +67,7 @@ const Login: React.FC = () => {
 
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!username || !password) {
       set_error_msg('用户名和密码不能为空')
       return
@@ -79,12 +79,11 @@ const Login: React.FC = () => {
       }
       const res = await window.electron_api.auth_login({ username, password })
       if (res.success && res.data) {
-        // 登录成功
         const user_info = res.data.user
-        login({ 
-          username: user_info.username || username, 
-          email: user_info.email || `${username}@trai.local`, 
-          role: user_info.role || 'user' 
+        login({
+          username: user_info.username || username,
+          email: user_info.email || `${username}@trai.local`,
+          role: user_info.role || 'user'
         })
         navigate('/')
       } else {
