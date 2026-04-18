@@ -39,6 +39,27 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### � 客户端_2026_04_19_0427
+- **优化(ui)**: 优化 AI 创作页面（文生图、图生图、AI音乐、ComfyUI、周报、视频）布局，增加内容宽度、高度和元素间距，提升用户体验
+- **修复(merge)**: 修复合并问题，恢复 AI 对话页面、Agent 管理页面的正确代码
+- **修复(api_url)**: 修复 api_url.ts 中的正则表达式错误
+- **优化(naming)**: 文件和路径命名统一 snake_case，移除 kebab-case
+
+### �🛠️ 后端_2026_04_19_0302
+- **修复(weather)**: 天气工具完全恢复到 commit 9ae0c25 版本，确保使用 Open-Meteo 免费 API，优化异常处理和详细日志
+- **修复(merge)**: 修复合并问题，恢复之前提交的正确代码，包括流式工具调用、Agent 系统提示词等功能
+
+### 💻 客户端_2026_04_19_0302
+- **修复(utils)**: 修复 `api_url.ts` 中的正则表达式错误，从 `/$+/` 修正为 `/\/+$/`
+- **规范(naming)**: 统一文件和目录命名为 snake_case，禁止 kebab-case
+- **修复(router)**: 更新路由配置和侧边栏导航，路径从 `text-to-image` 改为 `text_to_image`
+- **新增(skills)**: 创建命名规范 skill（naming-convention），规范文件和目录命名
+- **新增(skills)**: 创建代码注释自动添加 skill（code-commenter），规范代码注释
+
+### 🎨 前端_2026_04_19_0210
+- **优化(naming)**: 文件和路径命名统一 snake_case，移除 kebab-case
+- **优化(comments)**: 为 Todo Store、Agent Store、API Client 等核心文件添加详细的 JSDoc 注释
+
 ### 🛠️ 后端_2026_04_19_0210
 - **修复(tool_calls)**: 修复流式工具调用中 tool_name 可能为空的问题，在任何 tool_call chunk 中发现有 function.name 时都更新 tool_name
 - **修复(tool_calls)**: 修复同 tool_call_id 可能被重复添加到 tool_calls 数组的问题，并增加替换逻辑，优先保留非空参数或内容更长的版本

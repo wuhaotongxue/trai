@@ -208,94 +208,94 @@ const TextToImage: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
-              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '20px', gap: '6px' }}>
                 {!is_left_sidebar_open && (
                   <button
                     onClick={() => set_is_left_sidebar_open(true)}
                     title="展开AI能力栏"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <PanelLeftOpen size={18} />
+                    <PanelLeftOpen size={20} />
                   </button>
                 )}
                 <button
                   onClick={() => set_is_middle_sidebar_open(true)}
                   title="展开提示词模板栏"
                   style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', color: '#64748b' }}>文生图</span>
+            <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>文生图</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ width: '100%', backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+            <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
               
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 500 }}>描述你想生成的画面</label>
+              <div style={{ marginBottom: '32px' }}>
+                <label style={{ display: 'block', marginBottom: '12px', color: '#334155', fontWeight: 600, fontSize: '15px' }}>描述你想生成的画面</label>
                 <textarea
                   value={prompt}
                   onChange={(e) => set_prompt(e.target.value)}
                   placeholder="例如: 一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影..."
                   style={{
-                    width: '100%', minHeight: '120px', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', 
-                    resize: 'vertical', outline: 'none', fontSize: '14px', fontFamily: 'inherit'
+                    width: '100%', minHeight: '160px', padding: '16px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                    resize: 'vertical', outline: 'none', fontSize: '15px', fontFamily: 'inherit', lineHeight: '1.6'
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
                 <button
                   onClick={handle_generate}
                   disabled={loading || !prompt.trim()}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 32px', 
                     backgroundColor: loading || !prompt.trim() ? '#94a3b8' : '#0ea5e9', 
-                    color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
-                    fontWeight: 500, transition: 'background-color 0.2s'
+                    color: '#ffffff', border: 'none', borderRadius: '10px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
+                    fontWeight: 600, fontSize: '15px', transition: 'background-color 0.2s'
                   }}
                 >
-                  {loading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+                  {loading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
                   {loading ? '生成中...' : '开始生成'}
                 </button>
               </div>
 
               {error && (
-                <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '24px' }}>
+                <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '10px', marginBottom: '32px', fontSize: '14px' }}>
                   {error}
                 </div>
               )}
 
               <div style={{ 
-                width: '100%', minHeight: '400px', backgroundColor: '#f1f5f9', borderRadius: '8px', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px dashed #cbd5e1' 
+                width: '100%', minHeight: '500px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1' 
               }}>
                 {loading ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
-                    <Loader2 size={32} className="animate-spin" style={{ marginBottom: '12px' }} />
-                    <span>AI 正在努力作画，请稍候...</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '12px' }}>
+                    <Loader2 size={40} className="animate-spin" />
+                    <span style={{ fontSize: '15px' }}>AI 正在努力作画，请稍候...</span>
                   </div>
                 ) : result_url ? (
-                  <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain' }} />
+                  <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '700px', objectFit: 'contain' }} />
                 ) : (
-                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <ImageIcon size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
-                    <span>生成的图片将在这里展示</span>
+                  <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                    <ImageIcon size={60} style={{ opacity: 0.5 }} />
+                    <span style={{ fontSize: '15px' }}>生成的图片将在这里展示</span>
                   </div>
                 )}
               </div>
