@@ -18,6 +18,7 @@ const Login: React.FC = () => {
   const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
+  const [is_default_password, set_is_default_password] = useState(true)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
 
@@ -168,16 +169,27 @@ const Login: React.FC = () => {
               <div style={{ position: 'relative' }}>
                 <input
                   type={password_visible ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => set_password(e.target.value)}
+                  value={is_default_password ? '***************' : password}
+                  onChange={(e) => {
+                    set_password(e.target.value)
+                    set_is_default_password(false)
+                  }}
+                  onFocus={(e) => {
+                    set_is_default_password(false)
+                    e.target.style.border = '1px solid #0078d4'
+                  }}
+                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                   style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                   placeholder="请输入密码"
-                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                 />
                 <button
                   type="button"
-                  onClick={() => set_password_visible((v) => !v)}
+                  onClick={() => {
+                    if (is_default_password) {
+                      set_is_default_password(false)
+                    }
+                    set_password_visible((v) => !v)
+                  }}
                   title={password_visible ? '隐藏密码' : '显示密码'}
                   style={{
                     position: 'absolute',
