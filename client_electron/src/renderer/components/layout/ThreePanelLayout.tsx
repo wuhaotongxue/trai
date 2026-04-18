@@ -66,7 +66,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {leftPanelTitle && (
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{leftPanelTitle}</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
             )}
             <button
               type="button"
@@ -115,7 +115,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 </button>
               )}
               {middlePanelTitle && (
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{middlePanelTitle}</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
               )}
             </div>
             <button

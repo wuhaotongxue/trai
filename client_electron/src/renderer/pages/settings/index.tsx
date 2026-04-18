@@ -450,7 +450,7 @@ const Settings: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>设置分类</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>分类设置</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -552,7 +552,7 @@ const Settings: React.FC = () => {
                 </button>
               )}
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
-                {active_category === 'system' ? '系统设置项' : '账号设置项'}
+                {active_category === 'system' ? '系统设置' : '账号设置'}
               </span>
             </div>
             <button

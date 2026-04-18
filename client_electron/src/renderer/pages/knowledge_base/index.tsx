@@ -633,7 +633,7 @@ const KnowledgeBasePage: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>目录分类</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>知识分类</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -850,7 +850,7 @@ const KnowledgeBasePage: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat?.name || '子文件夹'}</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>{active_cat?.name || '知识库'}</span>
             </div>
             <button
               type="button"

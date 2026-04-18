@@ -91,7 +91,7 @@ const ImageToImage: React.FC = () => {
   return (
     <ThreePanelLayout
       title="图生图"
-      middlePanelTitle="风格预设"
+      middlePanelTitle="图生预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>

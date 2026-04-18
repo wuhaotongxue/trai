@@ -149,7 +149,7 @@ const AiReport: React.FC = () => {
   return (
     <ThreePanelLayout
       title="AI 周报生成"
-      middlePanelTitle="报告模板"
+      middlePanelTitle="报告预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>

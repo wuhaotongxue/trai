@@ -91,7 +91,7 @@ const AiMusic: React.FC = () => {
   return (
     <ThreePanelLayout
       title="AI 音乐生成"
-      middlePanelTitle="音乐风格"
+      middlePanelTitle="风格预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>

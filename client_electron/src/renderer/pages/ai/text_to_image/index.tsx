@@ -90,7 +90,7 @@ const TextToImage: React.FC = () => {
   return (
     <ThreePanelLayout
       title="文生图"
-      middlePanelTitle="提示词模板"
+      middlePanelTitle="模板预设"
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
