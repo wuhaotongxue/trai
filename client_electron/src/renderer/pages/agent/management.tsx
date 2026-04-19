@@ -5,7 +5,7 @@
  * 描述: Agent 管理页面，支持列表、注册、启停 - 三段式布局
  */
 import React, { useState, useEffect } from 'react'
-import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud } from 'lucide-react'
+import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
 
 interface Agent {
   id: string
@@ -20,6 +20,8 @@ interface Agent {
 
 const icon_options = [
   { value: 'Bot', label: 'Bot', component: Bot },
+  { value: 'Settings', label: 'Settings', component: Settings },
+  { value: 'Code', label: 'Code', component: Code },
   { value: 'Wrench', label: 'Wrench', component: Wrench },
   { value: 'Sparkles', label: 'Sparkles', component: Sparkles },
   { value: 'Cpu', label: 'Cpu', component: Cpu },
@@ -227,29 +229,20 @@ const AgentManagement: React.FC = () => {
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
               <button
+                type="button"
                 onClick={() => set_show_register_modal(true)}
+                aria-label="新建 Agent"
                 style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  backgroundColor: '#0ea5e9',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  color: '#ffffff',
-                  fontWeight: 600,
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '4px',
-                  transition: 'all 0.2s'
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                  borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <Plus size={16} />
-                新建 Agent
+                <Plus size={14} /> Agent
               </button>
             </div>
 
