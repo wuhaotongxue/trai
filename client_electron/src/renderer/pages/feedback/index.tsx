@@ -286,51 +286,46 @@ const Feedback: React.FC = () => {
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>提交反馈</span>
-          </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
-              
-              {!is_left_sidebar_open && (
-                <button
-                  type="button"
-                  onClick={() => set_is_left_sidebar_open(true)}
-                  title="展开反馈类型栏"
-                  aria-label="展开反馈类型栏"
-                  style={{
-                    position: 'absolute', left: '0', top: '24px', transform: 'translateX(-100%)',
-                    background: '#ffffff', border: '1px solid #e2e8f0', borderRight: 'none',
-                    cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px 0 0 6px', transition: 'all 0.2s',
-                    boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0ea5e9'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748b'; }}
-                >
-                  <PanelLeftOpen size={18} />
-                </button>
-              )}
-              
-              {!is_middle_sidebar_open && (
+            {!is_middle_sidebar_open && (
+              <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
+                {!is_left_sidebar_open && (
+                  <button
+                    type="button"
+                    onClick={() => set_is_left_sidebar_open(true)}
+                    title="展开反馈类型栏"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={20} />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => set_is_middle_sidebar_open(true)}
-                  title="展开反馈说明栏"
-                  aria-label="展开反馈说明栏"
+                  title="展开反馈分类栏"
                   style={{
-                    position: 'absolute', left: is_left_sidebar_open ? '200px' : '0', top: '24px', transform: 'translateX(-100%)',
-                    background: '#ffffff', border: '1px solid #e2e8f0', borderRight: 'none',
-                    cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px 0 0 6px', transition: 'all 0.2s',
-                    boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)',
-                    zIndex: is_left_sidebar_open ? 10 : 5
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0ea5e9'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748b'; }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={20} />
                 </button>
-              )}
+              </div>
+            )}
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+              {active_sub_category ? sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name : '提交反馈'}
+            </span>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               {message && (
                 <div style={{ 
                   padding: '12px 16px', 
@@ -345,13 +340,20 @@ const Feedback: React.FC = () => {
               )}
 
               <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {active_sub_category && (
+                  <div style={{ padding: '12px 16px', backgroundColor: '#f0f9ff', borderRadius: '6px', border: '1px solid #bae6fd' }}>
+                    <p style={{ fontSize: '13px', color: '#0369a1', margin: 0 }}>
+                      当前分类: {sub_categories[active_type]?.find(s => s.id === active_sub_category)?.description}
+                    </p>
+                  </div>
+                )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>标题 <span style={{ color: '#ef4444' }}>*</span></label>
                   <input 
                     type="text" 
                     value={title}
                     onChange={(e) => set_title(e.target.value)}
-                    placeholder="请简要描述反馈内容"
+                    placeholder={active_sub_category ? `请输入${sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name}相关的标题` : '请简要描述反馈内容'}
                     style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }}
                   />
                 </div>
@@ -361,7 +363,7 @@ const Feedback: React.FC = () => {
                   <textarea 
                     value={content}
                     onChange={(e) => set_content(e.target.value)}
-                    placeholder="请详细描述您的问题或建议..."
+                    placeholder={active_sub_category ? `请详细描述您关于${sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name}的问题或建议...` : '请详细描述您的问题或建议...'}
                     rows={6}
                     style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', resize: 'vertical' }}
                   />
