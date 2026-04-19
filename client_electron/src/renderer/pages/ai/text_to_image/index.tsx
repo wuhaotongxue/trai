@@ -5,7 +5,7 @@
  * 描述: 文生图页面 - 使用通用三段式布局, 自适应缩放
  */
 import React, { useState } from 'react'
-import { Image as ImageIcon, Loader2, Palette, ChevronRight, Folder, Sparkles } from 'lucide-react'
+import { Image as ImageIcon, Loader2, Palette, ChevronRight, Cat, Building2, Mountain, User } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
 
 interface PromptTemplate {
@@ -27,14 +27,13 @@ const TextToImage: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
   const [active_template, set_active_template] = useState<string>('')
-  const [active_category, set_active_category] = useState<string>('all')
+  const [active_category, set_active_category] = useState<string>('animal')
 
   const categories: StyleCategory[] = [
-    { id: 'all', name: '全部模板', icon: <Folder size={14} /> },
-    { id: 'animal', name: '动物', icon: <Sparkles size={14} /> },
-    { id: 'city', name: '城市', icon: <Sparkles size={14} /> },
-    { id: 'landscape', name: '风景', icon: <Sparkles size={14} /> },
-    { id: 'portrait', name: '人物', icon: <Sparkles size={14} /> }
+    { id: 'animal', name: '动物', icon: <Cat size={14} /> },
+    { id: 'city', name: '城市', icon: <Building2 size={14} /> },
+    { id: 'landscape', name: '风景', icon: <Mountain size={14} /> },
+    { id: 'portrait', name: '人物', icon: <User size={14} /> }
   ]
 
   const prompt_templates: PromptTemplate[] = [
@@ -44,9 +43,7 @@ const TextToImage: React.FC = () => {
     { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像，柔和的光线，电影级构图，高分辨率', category: 'portrait' }
   ]
 
-  const filtered_templates = active_category === 'all' 
-    ? prompt_templates 
-    : prompt_templates.filter(t => t.category === active_category)
+  const filtered_templates = prompt_templates.filter(t => t.category === active_category)
 
   const handle_generate = async () => {
     if (!prompt.trim()) return
@@ -78,7 +75,15 @@ const TextToImage: React.FC = () => {
       {categories.map(category => (
         <button
           key={category.id}
-          onClick={() => set_active_category(category.id)}
+          onClick={() => {
+            set_active_category(category.id)
+            // 自动填充该分类的第一个模板
+            const first_template = prompt_templates.find(t => t.category === category.id)
+            if (first_template) {
+              set_prompt(first_template.prompt)
+              set_active_template(first_template.id)
+            }
+          }}
           style={{
             width: '100%',
             padding: '10px 12px',

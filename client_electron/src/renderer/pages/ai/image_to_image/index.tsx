@@ -5,13 +5,20 @@
  * 描述: 图生图页面 - 使用通用三段式布局, 自适应缩放
  */
 import React, { useState } from 'react'
-import { ImagePlus, Loader2, Upload, Palette, ChevronRight, Image } from 'lucide-react'
+import { ImagePlus, Loader2, Upload, Palette, ChevronRight, Image, Rocket, Palette as PaletteIcon } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
 
 interface StylePreset {
   id: string
   name: string
   prompt: string
+  category: string
+}
+
+interface StyleCategory {
+  id: string
+  name: string
+  icon: React.ReactNode
 }
 
 const ImageToImage: React.FC = () => {
@@ -21,13 +28,21 @@ const ImageToImage: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
   const [active_style, set_active_style] = useState<string>('')
+  const [active_category, set_active_category] = useState<string>('scifi')
+
+  const categories: StyleCategory[] = [
+    { id: 'scifi', name: '科幻', icon: <Rocket size={14} /> },
+    { id: 'art', name: '艺术', icon: <PaletteIcon size={14} /> }
+  ]
 
   const style_presets: StylePreset[] = [
-    { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格，霓虹灯，未来感' },
-    { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格，色彩鲜艳' },
-    { id: 'watercolor', name: '水彩画', prompt: '将图片转换为水彩画风格，柔和的色彩' },
-    { id: 'oil_painting', name: '油画', prompt: '将图片转换为古典油画风格，厚重的笔触' }
+    { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格，霓虹灯，未来感', category: 'scifi' },
+    { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格，色彩鲜艳', category: 'art' },
+    { id: 'watercolor', name: '水彩画', prompt: '将图片转换为水彩画风格，柔和的色彩', category: 'art' },
+    { id: 'oil_painting', name: '油画', prompt: '将图片转换为古典油画风格，厚重的笔触', category: 'art' }
   ]
+
+  const filtered_styles = style_presets.filter(s => s.category === active_category)
 
   const handle_generate = async () => {
     if (!prompt.trim() || !source_url.trim()) return
@@ -54,9 +69,48 @@ const ImageToImage: React.FC = () => {
     set_active_style(style.id)
   }
 
+  const leftPanel = (
+    <>
+      {categories.map(category => (
+        <button
+          key={category.id}
+          onClick={() => {
+            set_active_category(category.id)
+            // 自动填充该分类的第一个模板
+            const first_style = style_presets.find(s => s.category === category.id)
+            if (first_style) {
+              set_prompt(first_style.prompt)
+              set_active_style(first_style.id)
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            backgroundColor: active_category === category.id ? '#f0f9ff' : 'transparent',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: active_category === category.id ? '#0ea5e9' : '#475569',
+            fontWeight: active_category === category.id ? '600' : 'normal',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          {category.icon}
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+        </button>
+      ))}
+    </>
+  )
+
   const middlePanel = (
     <>
-      {style_presets.map(style => (
+      {filtered_styles.map(style => (
         <button
           key={style.id}
           onClick={() => apply_style(style)}
@@ -92,8 +146,11 @@ const ImageToImage: React.FC = () => {
     <ThreePanelLayout
       title="图生图"
       titleIcon={<ImagePlus size={20} color="#0ea5e9" />}
+      leftPanelTitle="风格分类"
+      leftPanel={leftPanel}
       middlePanelTitle="图生预设"
       middlePanel={middlePanel}
+      rightPanelTitle="图片转换"
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
