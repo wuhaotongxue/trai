@@ -441,7 +441,7 @@ const Settings: React.FC = () => {
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#f1f5f9',
+          backgroundColor: '#ffffff',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
