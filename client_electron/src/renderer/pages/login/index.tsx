@@ -304,7 +304,7 @@ const Login: React.FC = () => {
       </div>
       
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '38.2%', minWidth: '360px', maxWidth: '480px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
+        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '61.8%', minWidth: '400px', maxWidth: '600px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
           <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
