@@ -802,14 +802,14 @@ const KnowledgeBasePage: React.FC = () => {
             ))}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_cat_modal(true)}
               aria-label="分类"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                padding: '6px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
                 borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
@@ -976,14 +976,14 @@ const KnowledgeBasePage: React.FC = () => {
             )}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_create_modal(true)}
               aria-label="知识库"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                padding: '6px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
                 borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
@@ -999,7 +999,7 @@ const KnowledgeBasePage: React.FC = () => {
           {active_kb ? (
             <>
               <div style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                   {!is_middle_sidebar_open && (
                     <>
                       {!is_left_sidebar_open && (
@@ -1064,7 +1064,7 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ position: 'relative' }}>
-                    <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
                     <input 
                       type="text" 
                       placeholder="搜索文件..." 
@@ -1099,7 +1099,7 @@ const KnowledgeBasePage: React.FC = () => {
                       e.currentTarget.style.backgroundColor = 'transparent'
                     }}
                   >
-                    <RotateCw size={16} className={files_loading ? 'animate-spin' : ''} />
+                    <RotateCw size={18} className={files_loading ? 'animate-spin' : ''} />
                   </button>
                   <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} title="上传文件" aria-label="上传文件" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md" style={{ display: 'none' }} />
                   <button
