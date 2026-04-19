@@ -5,13 +5,20 @@
  * 描述: 文生图页面 - 使用通用三段式布局, 自适应缩放
  */
 import React, { useState } from 'react'
-import { Image as ImageIcon, Loader2, Palette, ChevronRight } from 'lucide-react'
+import { Image as ImageIcon, Loader2, Palette, ChevronRight, Folder, Sparkles } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
 
 interface PromptTemplate {
   id: string
   name: string
   prompt: string
+  category: string
+}
+
+interface StyleCategory {
+  id: string
+  name: string
+  icon: React.ReactNode
 }
 
 const TextToImage: React.FC = () => {
@@ -20,13 +27,26 @@ const TextToImage: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
   const [active_template, set_active_template] = useState<string>('')
+  const [active_category, set_active_category] = useState<string>('all')
+
+  const categories: StyleCategory[] = [
+    { id: 'all', name: '全部模板', icon: <Folder size={14} /> },
+    { id: 'animal', name: '动物', icon: <Sparkles size={14} /> },
+    { id: 'city', name: '城市', icon: <Sparkles size={14} /> },
+    { id: 'landscape', name: '风景', icon: <Sparkles size={14} /> },
+    { id: 'portrait', name: '人物', icon: <Sparkles size={14} /> }
+  ]
 
   const prompt_templates: PromptTemplate[] = [
-    { id: 'cat_astronaut', name: '宇航员猫', prompt: '一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影' },
-    { id: 'cyberpunk_city', name: '赛博朋克城市', prompt: '未来赛博朋克城市夜景，霓虹灯，雨夜，反射，科幻风格' },
-    { id: 'fantasy_landscape', name: '奇幻风景', prompt: '奇幻风格的山水风景，漂浮的岛屿，瀑布，魔法光芒，梦幻色彩' },
-    { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像，柔和的光线，电影级构图，高分辨率' }
+    { id: 'cat_astronaut', name: '宇航员猫', prompt: '一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影', category: 'animal' },
+    { id: 'cyberpunk_city', name: '赛博朋克城市', prompt: '未来赛博朋克城市夜景，霓虹灯，雨夜，反射，科幻风格', category: 'city' },
+    { id: 'fantasy_landscape', name: '奇幻风景', prompt: '奇幻风格的山水风景，漂浮的岛屿，瀑布，魔法光芒，梦幻色彩', category: 'landscape' },
+    { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像，柔和的光线，电影级构图，高分辨率', category: 'portrait' }
   ]
+
+  const filtered_templates = active_category === 'all' 
+    ? prompt_templates 
+    : prompt_templates.filter(t => t.category === active_category)
 
   const handle_generate = async () => {
     if (!prompt.trim()) return
@@ -53,9 +73,40 @@ const TextToImage: React.FC = () => {
     set_active_template(template.id)
   }
 
+  const leftPanel = (
+    <>
+      {categories.map(category => (
+        <button
+          key={category.id}
+          onClick={() => set_active_category(category.id)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            backgroundColor: active_category === category.id ? '#f0f9ff' : 'transparent',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: active_category === category.id ? '#0ea5e9' : '#475569',
+            fontWeight: active_category === category.id ? '600' : 'normal',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          {category.icon}
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+        </button>
+      ))}
+    </>
+  )
+
   const middlePanel = (
     <>
-      {prompt_templates.map(template => (
+      {filtered_templates.map(template => (
         <button
           key={template.id}
           onClick={() => apply_template(template)}
@@ -91,6 +142,8 @@ const TextToImage: React.FC = () => {
     <ThreePanelLayout
       title="文生图"
       titleIcon={<ImageIcon size={20} color="#0ea5e9" />}
+      leftPanelTitle="风格分类"
+      leftPanel={leftPanel}
       middlePanelTitle="模板预设"
       middlePanel={middlePanel}
     >
