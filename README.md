@@ -39,6 +39,14 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_0940
+- **优化(knowledge)**: 统一知识库三个标题栏按钮样式、padding和图标大小
+- **优化(knowledge)**: 调整搜索框高度至28px，与按钮高度一致
+- **优化(knowledge)**: 调整上传文件按钮padding，适配标题栏高度
+- **优化(knowledge)**: 统一底部按钮区域padding，与右侧分页区域对齐
+- **fix(chat)**: 修复工具调用步骤状态显示，当tool_result返回后更新tool_start状态为已完成
+- **fix(chat)**: 修复工具调用图标显示逻辑，已完成状态不再显示转圈
+
 ### 💻 客户端_2026_04_19_0812
 - **优化(agent)**: Agent管理页面新建按钮样式改为虚线边框，与AI对话页面保持一致
 - **优化(agent)**: Agent列表图标支持Settings和Code选项
