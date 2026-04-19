@@ -169,11 +169,11 @@ const KnowledgeBasePage: React.FC = () => {
           .filter((c) => c.id && c.name)
 
         const ensured_categories =
-          mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认类目' }]
+          mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认' }]
         
         let default_cat = ensured_categories.find(c => c.name === '默认' || c.name === '默认类目')
         if (!default_cat) {
-          default_cat = { id: 'default', name: '默认类目' }
+          default_cat = { id: 'default', name: '默认' }
           ensured_categories.unshift(default_cat)
         }
 
@@ -622,8 +622,8 @@ const KnowledgeBasePage: React.FC = () => {
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* 左侧边栏: 一级目录 */}
         <div style={{
-          width: is_left_sidebar_open ? '18%' : '0px',
-          minWidth: is_left_sidebar_open ? '100px' : '0px',
+          width: is_left_sidebar_open ? '10%' : '0px',
+          minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -634,7 +634,7 @@ const KnowledgeBasePage: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>知识分类</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>知识库</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -652,7 +652,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             {categories.map(cat => (
               <div 
                 key={cat.id}
@@ -800,11 +800,11 @@ const KnowledgeBasePage: React.FC = () => {
             ))}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_cat_modal(true)}
-              aria-label="新建分类"
+              aria-label="分类"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                 padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
@@ -813,14 +813,16 @@ const KnowledgeBasePage: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <Plus size={14} /> 新建分类
+              <Plus size={14} /> 分类
             </button>
           </div>
         </div>
 
         {/* 中间边栏: 子文件夹 (知识库) */}
         <div style={{
-          width: is_middle_sidebar_open ? '220px' : '0px',
+          width: is_middle_sidebar_open ? '12%' : '0px',
+          minWidth: is_middle_sidebar_open ? '80px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           flexShrink: 1,
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
@@ -828,8 +830,7 @@ const KnowledgeBasePage: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          minWidth: 0
+          overflow: 'hidden'
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
@@ -870,7 +871,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             {current_cat_kbs.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>当前分类暂无子知识库</div>
             ) : (
@@ -975,18 +976,20 @@ const KnowledgeBasePage: React.FC = () => {
             )}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #f1f5f9', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_create_modal(true)}
-              aria-label="新建知识库"
+              aria-label="知识库"
               style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                padding: '10px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none',
-                borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '14px', transition: 'background-color 0.2s'
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <Plus size={16} /> 新建知识库
+              <Plus size={14} /> 知识库
             </button>
           </div>
         </div>
@@ -1148,19 +1151,19 @@ const KnowledgeBasePage: React.FC = () => {
                       <tbody>
                         {display_files.map(file => (
                           <tr key={file.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '12px 16px', maxWidth: '200px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <FileText size={16} color="#0ea5e9" />
-                                <span style={{ fontSize: '14px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                            <td style={{ padding: '12px 16px', width: '100%', minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                <FileText size={16} color="#0ea5e9" style={{ flexShrink: 0 }} />
+                                <span style={{ fontSize: '14px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{file.name}</span>
                               </div>
                             </td>
                             <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b' }}>{file.size}</td>
-                            <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b' }}>{file.upload_time}</td>
+                            <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap' }}>{file.upload_time}</td>
                             <td style={{ padding: '12px 16px' }}>
                               {file.status === 'success' ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px' }}>已解析</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
                               ) : (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px' }}><Loader2 size={12} className="animate-spin" />上传中</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
                               )}
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
@@ -1340,7 +1343,15 @@ const KnowledgeBasePage: React.FC = () => {
               <h3 style={{ margin: 0, fontSize: '14px', color: '#0f172a' }}>新建目录分类</h3>
               <button type="button" onClick={() => set_show_cat_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
-            <input autoFocus placeholder="请输入目录名称..." aria-label="目录名称" title="目录名称" value={new_cat_name} onChange={e => set_new_cat_name(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', marginBottom: '20px', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} />
+            <div style={{ marginBottom: '12px' }}>
+              <input autoFocus placeholder="请输入目录名称..." aria-label="目录名称" title="目录名称" value={new_cat_name} onChange={e => set_new_cat_name(e.target.value.slice(0, 4))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={4} />
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
+                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+              </div>
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_cat_name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+                {new_cat_name.length}/4
+              </div>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button type="button" onClick={() => { set_show_cat_modal(false); set_new_cat_name('') }} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>取消</button>
               <button type="button" onClick={handle_create_cat} style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}>确认创建</button>
@@ -1358,9 +1369,12 @@ const KnowledgeBasePage: React.FC = () => {
               <button type="button" onClick={() => set_show_create_modal(false)} title="关闭" aria-label="关闭" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={18} /></button>
             </div>
             <div style={{ marginBottom: '12px' }}>
-              <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value.slice(0, 15))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={15} />
-              <div style={{ textAlign: 'right', fontSize: '12px', color: new_kb_name.length >= 15 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
-                {new_kb_name.length}/15
+              <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value.slice(0, 4))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={4} />
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
+                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+              </div>
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_kb_name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+                {new_kb_name.length}/4
               </div>
             </div>
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}

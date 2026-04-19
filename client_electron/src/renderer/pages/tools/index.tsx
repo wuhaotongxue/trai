@@ -395,9 +395,9 @@ const Tools: React.FC = () => {
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{ 
-          width: is_left_sidebar_open ? '200px' : '0px', 
-          minWidth: is_left_sidebar_open ? '180px' : '0px',
-          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+          width: is_left_sidebar_open ? '10%' : '0px', 
+          minWidth: is_left_sidebar_open ? '70px' : '0px',
+          maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9', 
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -408,7 +408,7 @@ const Tools: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>工具分类</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>工具箱</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -465,9 +465,9 @@ const Tools: React.FC = () => {
         </div>
 
         <div style={{ 
-          width: is_middle_sidebar_open ? '220px' : '0px', 
-          minWidth: is_middle_sidebar_open ? '200px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+          width: is_middle_sidebar_open ? '12%' : '0px', 
+          minWidth: is_middle_sidebar_open ? '80px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff', 
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',

@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List, Edit2, Cpu } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -56,6 +56,8 @@ const AgentChat: React.FC = () => {
   const [input, set_input] = useState('')
   const [loading, set_loading] = useState(false)
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
+  const [editing_session_id, set_editing_session_id] = useState<string>('')
+  const [edit_session_name, set_edit_session_name] = useState('')
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
   const active_session_id_ref = useRef<string>('')
@@ -147,6 +149,28 @@ const AgentChat: React.FC = () => {
         create_new_session()
       }
     }
+  }
+
+  const start_edit_session = (e: React.MouseEvent, session: ChatSession) => {
+    e.stopPropagation()
+    set_editing_session_id(session.id)
+    set_edit_session_name(session.title.slice(0, 4))
+  }
+
+  const confirm_edit_session = () => {
+    if (!edit_session_name.trim()) return
+    const new_sessions = sessions.map(s => 
+      s.id === editing_session_id ? { ...s, title: edit_session_name.trim() } : s
+    )
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(new_sessions))
+    set_sessions(new_sessions)
+    set_editing_session_id('')
+    set_edit_session_name('')
+  }
+
+  const cancel_edit_session = () => {
+    set_editing_session_id('')
+    set_edit_session_name('')
   }
 
   const update_active_session_messages = (updater: (prev: ChatMessage[]) => ChatMessage[], target_sid: string = active_session_id_ref.current) => {
@@ -323,8 +347,8 @@ const AgentChat: React.FC = () => {
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{
-          width: is_left_sidebar_open ? '18%' : '0px',
-          minWidth: is_left_sidebar_open ? '100px' : '0px',
+          width: is_left_sidebar_open ? '10%' : '0px',
+          minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -387,7 +411,7 @@ const AgentChat: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                    <MessageSquare size={16} />
+                    <Cpu size={16} />
                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.name}</span>
                   </div>
                   <div style={{
@@ -405,8 +429,8 @@ const AgentChat: React.FC = () => {
         </div>
 
         <div style={{
-          width: is_middle_sidebar_open ? '20%' : '0px',
-          minWidth: is_middle_sidebar_open ? '120px' : '0px',
+          width: is_middle_sidebar_open ? '12%' : '0px',
+          minWidth: is_middle_sidebar_open ? '70px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -455,7 +479,7 @@ const AgentChat: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={create_new_session}
@@ -468,11 +492,11 @@ const AgentChat: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <Plus size={14} /> 新建会话
+              <Plus size={14} /> 会话
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             {sessions.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无会话</div>
             ) : (
@@ -502,31 +526,85 @@ const AgentChat: React.FC = () => {
                   }}
                 >
                   <MessageCircle size={16} />
-                  <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {s.title}
-                  </div>
-                  <div 
-                    onClick={(e) => delete_session(e, s.id)}
-                    style={{ 
-                      padding: '4px', 
-                      borderRadius: '4px', 
-                      color: '#94a3b8',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#fef2f2'
-                      e.currentTarget.style.color = '#ef4444'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                      e.currentTarget.style.color = '#94a3b8'
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </div>
+                  {editing_session_id === s.id ? (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <input
+                        autoFocus
+                        value={edit_session_name}
+                        onChange={(e) => set_edit_session_name(e.target.value.slice(0, 4))}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') confirm_edit_session()
+                          if (e.key === 'Escape') cancel_edit_session()
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        maxLength={4}
+                        style={{
+                          width: '100%',
+                          padding: '4px 8px',
+                          border: '1px solid #0ea5e9',
+                          borderRadius: '4px',
+                          fontSize: '13px',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>
+                        不超过4个字符,勿用标点符号
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ flex: 1, overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                        {s.title.length > 4 ? s.title.slice(0, 4) + '...' : s.title}
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <div 
+                          onClick={(e) => start_edit_session(e, s)}
+                          style={{ 
+                            padding: '4px', 
+                            borderRadius: '4px', 
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#e0f2fe'
+                            e.currentTarget.style.color = '#0ea5e9'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.color = '#94a3b8'
+                          }}
+                        >
+                          <Edit2 size={14} />
+                        </div>
+                        <div 
+                          onClick={(e) => delete_session(e, s.id)}
+                          style={{ 
+                            padding: '4px', 
+                            borderRadius: '4px', 
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#fef2f2'
+                            e.currentTarget.style.color = '#ef4444'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.color = '#94a3b8'
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))
             )}
@@ -987,6 +1065,7 @@ const AgentChat: React.FC = () => {
             padding: '16px 24px', 
             backgroundColor: '#ffffff',
             borderTop: '1px solid #e2e8f0',
+            borderBottom: '1px solid #e2e8f0',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',

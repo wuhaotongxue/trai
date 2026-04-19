@@ -91,6 +91,7 @@ const ImageToImage: React.FC = () => {
   return (
     <ThreePanelLayout
       title="图生图"
+      titleIcon={<ImagePlus size={20} color="#0ea5e9" />}
       middlePanelTitle="图生预设"
       middlePanel={middlePanel}
     >

@@ -91,6 +91,7 @@ const AiMusic: React.FC = () => {
   return (
     <ThreePanelLayout
       title="AI 音乐生成"
+      titleIcon={<Music size={20} color="#0ea5e9" />}
       middlePanelTitle="风格预设"
       middlePanel={middlePanel}
     >

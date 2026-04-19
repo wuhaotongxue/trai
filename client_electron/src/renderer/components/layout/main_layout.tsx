@@ -49,9 +49,14 @@ const MainLayout: React.FC = () => {
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#f3f3f3' }}>
+        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#f3f3f3', borderBottom: '1px solid #cbd5e1' }}>
           <Outlet />
         </div>
+      </div>
+      <div style={{ padding: '8px 16px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: '#64748b' }}>
+        <span>TRAI</span>
+        <span>|</span>
+        <span>开发联系: wuhaotongxue@gmail.com</span>
       </div>
     </div>
   )

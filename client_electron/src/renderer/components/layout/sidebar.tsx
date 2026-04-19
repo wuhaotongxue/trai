@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 /**
@@ -50,26 +50,40 @@ const Sidebar: React.FC = () => {
   }
 
   const nav_items = [
-    { path: '/dashboard', label: '仪表盘', icon: <Home size={20} /> },
+    {
+      id: 'dashboard',
+      label: '仪表盘',
+      icon: <Home size={20} />,
+      children: [
+        { path: '/dashboard', label: '概览', icon: <LayoutDashboard size={18} /> }
+      ]
+    },
     {
       id: 'agent',
       label: '智能体',
       icon: <Cpu size={20} />,
       children: [
-        { path: '/agent/management', label: 'Agent', icon: <Cpu size={18} /> },
+        { path: '/agent/management', label: '管理', icon: <Bot size={18} /> }
       ]
     },
-    { path: '/knowledge_base', label: '知识库', icon: <Database size={20} /> },
+    {
+      id: 'knowledge',
+      label: '知识库',
+      icon: <Database size={20} />,
+      children: [
+        { path: '/knowledge_base', label: '文件', icon: <FolderOpen size={18} /> }
+      ]
+    },
     {
       id: 'ai',
       label: 'AI 创作',
       icon: <Bot size={20} />,
       children: [
-        { path: '/chat', label: 'AI 对话', icon: <MessageSquare size={18} /> },
+        { path: '/chat', label: '对话', icon: <MessageSquare size={18} /> },
         { path: '/ai/text_to_image', label: '文生图', icon: <Image size={18} /> },
         { path: '/ai/image_to_image', label: '图生图', icon: <ImagePlus size={18} /> },
-        { path: '/ai/music', label: 'AI 音乐', icon: <Music size={18} /> },
-        { path: '/ai/video', label: 'AI 视频', icon: <Video size={18} /> }
+        { path: '/ai/music', label: '音乐', icon: <Music size={18} /> },
+        { path: '/ai/video', label: '视频', icon: <Video size={18} /> }
       ]
     },
     {
@@ -77,15 +91,15 @@ const Sidebar: React.FC = () => {
       label: '工具箱',
       icon: <Wrench size={20} />,
       children: [
-        { path: '/tools', label: '工具箱', icon: <Wrench size={18} /> }
+        { path: '/tools', label: '工具', icon: <FileText size={18} /> }
       ]
     },
-    { path: '/feedback', label: '用户反馈', icon: <MessageSquarePlus size={20} /> },
-    { path: '/settings', label: '系统设置', icon: <Settings size={20} /> }
+    { path: '/feedback', label: '反馈', icon: <MessageSquarePlus size={20} /> },
+    { path: '/settings', label: '设置', icon: <Settings size={20} /> }
   ]
 
   return (
-    <div className="no-drag-region" style={{ width: collapsed ? '68px' : '15%', minWidth: collapsed ? '68px' : '180px', maxWidth: collapsed ? '68px' : '260px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}>
+    <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}>
       <div style={{ padding: collapsed ? '16px 0' : '16px 24px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: collapsed ? '0' : '16px' }}>
           {!collapsed && <span style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', fontWeight: '600' }}>导航菜单</span>}
@@ -214,28 +228,27 @@ const Sidebar: React.FC = () => {
             </div>
           )
         })}
-      </div>
-
-      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(0, 0, 0, 0.05)' }}>
         <div
           onClick={handle_logout}
-          title={collapsed ? '退出登录' : undefined}
-          style={{ 
-            display: 'flex', alignItems: 'center', 
+          title={collapsed ? '退出' : undefined}
+          style={{
+            display: 'flex', alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'flex-start',
-            gap: collapsed ? '0' : '12px', 
-            color: '#202020', cursor: 'pointer', 
-            padding: collapsed ? '12px 0' : '10px 16px', 
+            gap: collapsed ? '0' : '12px',
+            color: '#202020', cursor: 'pointer',
+            padding: collapsed ? '12px 0' : '10px 16px',
             borderRadius: '6px',
-            transition: 'background-color 0.15s ease'
+            transition: 'background-color 0.15s ease',
+            marginTop: '4px'
           }}
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <LogOut size={20} />
-          {!collapsed && <span style={{ fontSize: '14px' }}>退出登录</span>}
+          {!collapsed && <span style={{ fontSize: '14px' }}>退出</span>}
         </div>
       </div>
+
     </div>
   )
 }

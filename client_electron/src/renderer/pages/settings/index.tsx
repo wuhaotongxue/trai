@@ -438,8 +438,8 @@ const Settings: React.FC = () => {
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{
-          width: is_left_sidebar_open ? '18%' : '0px',
-          minWidth: is_left_sidebar_open ? '100px' : '0px',
+          width: is_left_sidebar_open ? '10%' : '0px',
+          minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -450,7 +450,7 @@ const Settings: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>分类设置</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>设置分类</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -468,7 +468,7 @@ const Settings: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>设置分类</div>
             <button
               onClick={() => handle_category_change('system')}
@@ -491,7 +491,7 @@ const Settings: React.FC = () => {
               }}
             >
               <Monitor size={16} />
-              系统设置
+              系统
             </button>
             <button
               onClick={() => handle_category_change('account')}
@@ -514,14 +514,15 @@ const Settings: React.FC = () => {
               }}
             >
               <User size={16} />
-              账号设置
+              账号
             </button>
           </div>
         </div>
 
         <div style={{
-          width: is_middle_sidebar_open ? '20%' : '0px',
-          minWidth: is_middle_sidebar_open ? '120px' : '0px',
+          width: is_middle_sidebar_open ? '12%' : '0px',
+          minWidth: is_middle_sidebar_open ? '80px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -552,7 +553,7 @@ const Settings: React.FC = () => {
                 </button>
               )}
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
-                {active_category === 'system' ? '系统设置' : '账号设置'}
+                {active_category === 'system' ? '系统' : '账号'}
               </span>
             </div>
             <button
