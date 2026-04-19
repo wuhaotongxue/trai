@@ -463,7 +463,7 @@ const AgentChat: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -673,11 +673,11 @@ const AgentChat: React.FC = () => {
             
             <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
               {available_kbs.length > 0 && (
-                <select 
+                <select
                   value={active_session?.kb_id || 'none'}
                   onChange={(e) => update_session_kb(e.target.value)}
                   style={{
-                    padding: '10px 14px', borderRadius: '6px', border: '1px solid #e2e8f0',
+                    padding: '4px 8px', borderRadius: '6px', border: '1px solid #e2e8f0',
                     backgroundColor: '#f8fafc', color: '#475569', fontSize: '14px', lineHeight: '1.5',
                     outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
                   }}
