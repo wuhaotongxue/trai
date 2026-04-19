@@ -115,28 +115,30 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             flexShrink: 1
           }}>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              {leftPanel && !is_left_open && (
-                <button
-                  type="button"
-                  onClick={() => set_is_left_open(true)}
-                  title="展开左侧面板"
-                  aria-label="展开左侧面板"
-                  style={{ ...hover_btn_style }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PanelLeftOpen size={18} />
-                </button>
-              )}
-              {middlePanelTitle && (
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {leftPanel && !is_left_open && (
+                  <button
+                    type="button"
+                    onClick={() => set_is_left_open(true)}
+                    title="展开左侧面板"
+                    aria-label="展开左侧面板"
+                    style={{ ...hover_btn_style }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={18} />
+                  </button>
+                )}
+                {middlePanelTitle && (
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => set_is_middle_open(false)}
                 title="收起"
                 aria-label="收起中间面板"
-                style={{ ...hover_btn_style, marginLeft: 'auto' }}
+                style={{ ...hover_btn_style }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >

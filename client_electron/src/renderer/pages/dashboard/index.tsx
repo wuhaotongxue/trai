@@ -232,6 +232,7 @@ const Dashboard: React.FC = () => {
       leftPanel={left_panel}
       middlePanelTitle="项目"
       middlePanel={middle_panel}
+      rightPanelTitle="详情"
       contentPadding="32px"
     >
       <div style={{ flex: 1, height: '100%', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', overflow: 'auto', minWidth: 0 }}>
