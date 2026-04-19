@@ -68,8 +68,8 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
       <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
         {leftPanel && (
           <div style={{
-            width: is_left_open ? '18%' : '0px',
-            minWidth: is_left_open ? '100px' : '0px',
+            width: is_left_open ? '10%' : '0px',
+            minWidth: is_left_open ? '70px' : '0px',
             opacity: is_left_open ? 1 : 0,
             backgroundColor: '#ffffff',
             borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
@@ -103,8 +103,8 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
 
         {middlePanel && (
           <div style={{
-            width: is_middle_open ? '20%' : '0px',
-            minWidth: is_middle_open ? '120px' : '0px',
+            width: is_middle_open ? '12%' : '0px',
+            minWidth: is_middle_open ? '80px' : '0px',
             opacity: is_middle_open ? 1 : 0,
             backgroundColor: '#ffffff',
             borderRight: is_middle_open ? '1px solid #e2e8f0' : 'none',

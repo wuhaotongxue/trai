@@ -160,7 +160,7 @@ const Sidebar: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? '0' : '12px' }}>
                     {item.icon}
-                    {!collapsed && <span style={{ fontSize: '13px', fontWeight: '600' }}>{item.label}</span>}
+                    {!collapsed && <span style={{ fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap' }}>{item.label}</span>}
                   </div>
                   {!collapsed && (
                     is_expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
@@ -194,7 +194,7 @@ const Sidebar: React.FC = () => {
                           }}
                         >
                           {child.icon}
-                          <span style={{ fontSize: '13px', fontWeight: is_child_active ? '600' : 'normal' }}>{child.label}</span>
+                          <span style={{ fontSize: '13px', fontWeight: is_child_active ? '600' : 'normal', whiteSpace: 'nowrap' }}>{child.label}</span>
                         </div>
                       )
                     })}
@@ -231,7 +231,7 @@ const Sidebar: React.FC = () => {
               }}
             >
               {item.icon}
-              {!collapsed && <span style={{ fontSize: '13px', fontWeight: is_active ? '600' : 'normal' }}>{item.label}</span>}
+              {!collapsed && <span style={{ fontSize: '13px', fontWeight: is_active ? '600' : 'normal', whiteSpace: 'nowrap' }}>{item.label}</span>}
             </div>
           )
         })}
