@@ -209,7 +209,9 @@ const AgentManagement: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能体</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能体</span>
+            </div>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -455,7 +457,7 @@ const AgentManagement: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!is_middle_sidebar_open && (
                 <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
@@ -464,7 +466,7 @@ const AgentManagement: React.FC = () => {
                       onClick={() => set_is_left_sidebar_open(true)}
                       title="Expand"
                       style={{
-                        background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                       }}
@@ -478,7 +480,7 @@ const AgentManagement: React.FC = () => {
                     onClick={() => set_is_middle_sidebar_open(true)}
                     title="Expand"
                     style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                     }}
