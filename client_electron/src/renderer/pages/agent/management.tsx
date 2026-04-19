@@ -499,9 +499,9 @@ const AgentManagement: React.FC = () => {
               onClick={fetch_agents}
               disabled={loading}
               style={{
-                display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px',
                 backgroundColor: loading ? '#f1f5f9' : 'transparent',
-                border: '1px solid #e2e8f0', borderRadius: '6px',
+                border: '1px solid #e2e8f0', borderRadius: '4px',
                 color: loading ? '#94a3b8' : '#475569', cursor: loading ? 'not-allowed' : 'pointer',
                 fontSize: '13px', fontWeight: 500, transition: 'all 0.2s'
               }}
