@@ -654,7 +654,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box', minHeight: 0 }}>
             {categories.map(cat => (
               <div 
                 key={cat.id}
@@ -871,7 +871,7 @@ const KnowledgeBasePage: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box', minHeight: 0 }}>
             {current_cat_kbs.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>当前分类暂无子知识库</div>
             ) : (
@@ -1107,12 +1107,12 @@ const KnowledgeBasePage: React.FC = () => {
                     onClick={() => file_input_ref.current?.click()}
                     aria-label="上传文件"
                     style={{
-                      display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px',
-                      backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px',
-                      cursor: 'pointer', fontSize: '14px', fontWeight: 500
+                      display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 12px',
+                      backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '4px',
+                      cursor: 'pointer', fontSize: '13px', fontWeight: 500
                     }}
                   >
-                    <UploadCloud size={16} /> 上传文件
+                    <UploadCloud size={18} /> 上传文件
                   </button>
                 </div>
               </div>
