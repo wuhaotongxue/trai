@@ -254,7 +254,7 @@ class OpenAIClient:
         tool_args_parts: list[str] = []
         in_tool_call = False
 
-        logger.info(f"[Stream] 开始处理流式响应")
+        logger.info("[Stream] 开始处理流式响应")
 
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
@@ -329,7 +329,9 @@ class OpenAIClient:
                                 logger.info(f"[Stream] 新工具调用开始: id={tc['id']}, name={tool_name}")
                                 # 如果上一个工具还在处理中,则先发送结束事件
                                 if in_tool_call and tool_call_id:
-                                    logger.info(f"[Stream] 结束前一个工具调用: id={tool_call_id}, args={repr(''.join(tool_args_parts))}")
+                                    logger.info(
+                                        f"[Stream] 结束前一个工具调用: id={tool_call_id}, args={repr(''.join(tool_args_parts))}"
+                                    )
                                     yield StreamEvent(
                                         type="tool_call_end",
                                         tool_call_id=tool_call_id,
@@ -357,7 +359,9 @@ class OpenAIClient:
                                 if arg_text:
                                     logger.info(f"[Stream] 追加参数块: {repr(arg_text)}")
                                     tool_args_parts.append(arg_text)
-                                    logger.info(f"[Stream] 当前 tool_args_parts 总长度: {len(tool_args_parts)}, 内容: {repr(''.join(tool_args_parts))}")
+                                    logger.info(
+                                        f"[Stream] 当前 tool_args_parts 总长度: {len(tool_args_parts)}, 内容: {repr(''.join(tool_args_parts))}"
+                                    )
                                     yield StreamEvent(
                                         type="tool_call_arg",
                                         tool_call_id=tool_call_id,
@@ -370,7 +374,9 @@ class OpenAIClient:
                         if finish_reason is not None:
                             if in_tool_call and tool_call_id:
                                 final_args = "".join(tool_args_parts)
-                                logger.info(f"[Stream] 工具调用结束 (finish_reason={finish_reason}): id={tool_call_id}, name={tool_name}, final_args={repr(final_args)}")
+                                logger.info(
+                                    f"[Stream] 工具调用结束 (finish_reason={finish_reason}): id={tool_call_id}, name={tool_name}, final_args={repr(final_args)}"
+                                )
                                 yield StreamEvent(
                                     type="tool_call_end",
                                     tool_call_id=tool_call_id,

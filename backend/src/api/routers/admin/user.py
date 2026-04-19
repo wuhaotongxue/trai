@@ -50,6 +50,7 @@ class UpdateUserRequest(BaseModel):
     role: str | None = Field(default=None, description="用户角色")
     status: str | None = Field(default=None, description="用户状态")
 
+
 class CreateUserRequest(BaseModel):
     """创建用户请求"""
 
@@ -66,6 +67,7 @@ class ActionResponse(BaseModel):
 
     message: str = Field(description="提示信息")
     user_id: str = Field(description="用户 ID")
+
 
 @router.post("/users", response_model=ActionResponse, tags=["管理"])
 async def create_user(

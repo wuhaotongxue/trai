@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen, Compass } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image as ImageIcon, Music, Video, ImagePlus as ImagePlusIcon, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen, Compass } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 /**
@@ -94,11 +94,11 @@ const Sidebar: React.FC = () => {
       label: 'AI 创作',
       icon: <Bot size={20} />,
       children: [
-        { path: '/chat', label: '对话', icon: <MessageSquare size={18} /> },
-        { path: '/ai/text_to_image', label: '文生图', icon: <Image size={18} /> },
-        { path: '/ai/image_to_image', label: '图生图', icon: <ImagePlus size={18} /> },
-        { path: '/ai/music', label: '音乐', icon: <Music size={18} /> },
-        { path: '/ai/video', label: '视频', icon: <Video size={18} /> }
+        { path: '/chat', label: '智能对话', icon: <MessageSquare size={18} /> },
+        { path: '/ai/text_to_image', label: '文生图像', icon: <ImageIcon size={18} /> },
+        { path: '/ai/image_to_image', label: '图生图像', icon: <ImagePlusIcon size={18} /> },
+        { path: '/ai/music', label: '音乐生成', icon: <Music size={18} /> },
+        { path: '/ai/video', label: '视频生成', icon: <Video size={18} /> }
       ]
     },
     {
@@ -113,17 +113,19 @@ const Sidebar: React.FC = () => {
     { path: '/settings', label: '设置', icon: <Settings size={20} /> }
   ]
 
+  type LucideIconElement = React.ReactElement<{ color?: string }>
+
   return (
-    <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #e2e8f0' }}>
-      <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
+    <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'var(--ui_panel_alt)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--ui_border)' }}>
+      <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid var(--ui_border)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between' }}>
           {!collapsed && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Compass size={16} color="rgba(0, 0, 0, 0.5)" />
-              <span style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', fontWeight: '600' }}>导航菜单</span>
+              <Compass size={16} color="var(--ui_text_muted)" />
+              <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)', fontWeight: '600' }}>导航菜单</span>
             </div>
           )}
-          <Menu size={20} color="#202020" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />
+          <Menu size={20} color="var(--ui_text)" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />
         </div>
         
         {/* 用户名和头像已注释掉
@@ -186,6 +188,10 @@ const Sidebar: React.FC = () => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
                     {item.children.map(child => {
                       const is_child_active = location.pathname === child.path
+                      const child_icon = React.isValidElement<{ color?: string }>(child.icon)
+                        ? React.cloneElement(child.icon as LucideIconElement, { color: is_child_active ? '#0078d4' : '#475569' })
+                        : null
+
                       return (
                         <div
                           key={child.path}
@@ -208,7 +214,7 @@ const Sidebar: React.FC = () => {
                             if (!is_child_active) e.currentTarget.style.backgroundColor = 'transparent'
                           }}
                         >
-                          {child.icon}
+                          {child_icon}
                           <span style={{ fontSize: '13px', fontWeight: is_child_active ? '600' : 'normal', whiteSpace: 'nowrap' }}>{child.label}</span>
                         </div>
                       )

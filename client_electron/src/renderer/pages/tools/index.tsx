@@ -6,6 +6,9 @@
  */
 import React, { useState } from 'react'
 import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { should_ellipsis } from '@/utils/ui_text'
 
 const format_size = (bytes: number) => {
   if (bytes === 0) return '0 B'
@@ -48,6 +51,9 @@ const Tools: React.FC = () => {
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [active_cat_id, set_active_cat_id] = useState('all')
   const [active_tool_id, set_active_tool_id] = useState<string>('md2pdf')
+  const [md_preview_text, set_md_preview_text] = useState('')
+  const [md_preview_name, set_md_preview_name] = useState('')
+  const [md_preview_error, set_md_preview_error] = useState('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -60,16 +66,24 @@ const Tools: React.FC = () => {
       set_loading_task('md2pdf')
       set_error_msg('')
       set_result_url('')
+      set_result_info(null)
+      set_md_preview_error('')
       
       try {
+        const preview_text = await file.text()
+        set_md_preview_name(file.name)
+        set_md_preview_text(preview_text.length > 20000 ? `${preview_text.slice(0, 20000)}\n\n... (预览已截断)` : preview_text)
+
         const res = await window.electron_api.tools_convert_md_to_pdf(file.path)
         if (res.success && res.data) {
           set_result_url(res.data.url)
+          set_result_info(res.data)
         } else {
           set_error_msg(res.error || '转换失败')
         }
       } catch (err: any) {
         set_error_msg(err.message || '转换异常')
+        set_md_preview_error('Markdown 预览读取失败')
       } finally {
         set_loading_task(null)
       }
@@ -229,7 +243,7 @@ const Tools: React.FC = () => {
     },
     {
       id: 'zip',
-      title: 'ZIP 打包压缩',
+      title: 'ZIP 压缩',
       description: '将多个文件打包压缩成一个 ZIP 文件',
       icon: <FileArchive size={32} color="#f59e0b" />,
       action: handle_compress_zip,
@@ -238,7 +252,7 @@ const Tools: React.FC = () => {
     },
     {
       id: 'convert_image',
-      title: '图片格式转换',
+      title: '格式转换',
       description: '在常见格式间互转 (如 png, jpeg, ico, webp)',
       icon: <RefreshCw size={32} color="#0ea5e9" />,
       action: handle_convert_image,
@@ -378,7 +392,7 @@ const Tools: React.FC = () => {
   const categories: ToolCategory[] = [
     { id: 'all', name: '全部工具', icon: <Wrench size={16} />, tools: all_tools },
     { id: 'convert', name: '格式转换', icon: <RefreshCw size={16} />, tools: all_tools.filter(t => ['md2pdf', 'convert_image'].includes(t.id)) },
-    { id: 'compress', name: '压缩打包', icon: <FileArchive size={16} />, tools: all_tools.filter(t => ['image', 'zip'].includes(t.id)) }
+    { id: 'compress', name: '压缩工具', icon: <FileArchive size={16} />, tools: all_tools.filter(t => ['image', 'zip'].includes(t.id)) }
   ]
 
   const active_cat = categories.find(c => c.id === active_cat_id) || categories[0]
@@ -407,7 +421,7 @@ const Tools: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>工具箱</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>工具箱</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -497,7 +511,15 @@ const Tools: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_cat.name}</span>
+              <span
+                style={
+                  should_ellipsis(active_cat.name)
+                    ? { fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                    : { fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }
+                }
+              >
+                {active_cat.name}
+              </span>
             </div>
             <button
               type="button"
@@ -547,7 +569,13 @@ const Tools: React.FC = () => {
                   }}
                 >
                   {React.cloneElement(tool.icon as React.ReactElement<any>, { size: 16 })}
-                  <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div
+                    style={
+                      should_ellipsis(tool.title)
+                        ? { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                        : { flex: 1, whiteSpace: 'nowrap' }
+                    }
+                  >
                     {tool.title}
                   </div>
                 </div>
@@ -634,6 +662,27 @@ const Tools: React.FC = () => {
 
                 {active_tool.extra_ui && active_tool.extra_ui}
 
+                {active_tool.id === 'md2pdf' && (
+                  <div style={{ marginTop: '14px', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: 600 }}>
+                      Markdown 预览{md_preview_name ? `: ${md_preview_name}` : ''}
+                    </div>
+                    {md_preview_error ? (
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12px' }}>
+                        {md_preview_error}
+                      </div>
+                    ) : md_preview_text ? (
+                      <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#ffffff', padding: '12px' }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{md_preview_text}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '12px' }}>
+                        选择 Markdown 文件后可预览
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <button 
                   onClick={active_tool.action} 
                   disabled={loading_task !== null}
@@ -686,7 +735,17 @@ const Tools: React.FC = () => {
                     <p style={{ margin: 0, color: '#b91c1c', fontSize: '14px' }}>{error_msg}</p>
                   ) : (
                     <div>
-                      <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>文件已成功生成，请点击下方按钮下载（链接有效期 5 分钟）。</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>
+                        {result_info?.expires_in && result_info.expires_in > 0
+                          ? '文件已成功生成，请点击下方按钮下载，链接有效期 5 分钟。'
+                          : '文件已成功生成，请点击下方按钮下载。'}
+                      </p>
+
+                      {result_info?.message && result_info.message !== '处理成功' && (
+                        <p style={{ margin: '0 0 12px 0', color: '#065f46', fontSize: '13px' }}>
+                          {result_info.message}
+                        </p>
+                      )}
                       
                       {result_info && result_info.original_size !== undefined && (
                         <div style={{ marginBottom: '12px', fontSize: '13px', color: '#047857', display: 'flex', gap: '16px', backgroundColor: '#d1fae5', padding: '8px 12px', borderRadius: '6px' }}>
@@ -722,6 +781,23 @@ const Tools: React.FC = () => {
                         <ArrowDownToLine size={16} />
                         下载文件
                       </a>
+
+                      {active_tool?.id === 'md2pdf' && result_url && (
+                        <div style={{ marginTop: '14px' }}>
+                          <p style={{ margin: '0 0 8px 0', color: '#166534', fontSize: '13px' }}>转换结果预览</p>
+                          <iframe
+                            src={result_url}
+                            title="PDF 预览"
+                            style={{
+                              width: '100%',
+                              height: '360px',
+                              border: '1px solid #bbf7d0',
+                              borderRadius: '8px',
+                              backgroundColor: '#ffffff'
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

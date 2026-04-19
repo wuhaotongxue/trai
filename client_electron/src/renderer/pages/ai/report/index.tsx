@@ -7,6 +7,7 @@
 import React, { useState, useRef } from 'react'
 import { FileEdit, UploadCloud, File, X, Sparkles, Download, Loader2, ChevronRight, FileText, Calendar, ListChecks } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface ReportTemplate {
   id: string
@@ -138,7 +139,15 @@ const AiReport: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {template.icon}
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</span>
+            <span
+              style={
+                should_ellipsis(template.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {template.name}
+            </span>
           </div>
           {active_template === template.id && <ChevronRight size={14} />}
         </button>

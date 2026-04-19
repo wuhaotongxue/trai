@@ -6,6 +6,7 @@
  */
 import React, { useState, useRef } from 'react'
 import { MessageSquarePlus, Send, Loader2, Paperclip, X, Lightbulb, Bug, HelpCircle, ChevronRight, History, PanelLeftClose, PanelLeftOpen, List } from 'lucide-react'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface FeedbackType {
   id: string
@@ -38,7 +39,7 @@ const Feedback: React.FC = () => {
   const feedback_types: FeedbackType[] = [
     { id: 'suggestion', name: '产品建议', icon: <Lightbulb size={16} />, value: 'suggestion' },
     { id: 'bug', name: '问题报告', icon: <Bug size={16} />, value: 'bug' },
-    { id: 'other', name: '其他', icon: <HelpCircle size={16} />, value: 'other' }
+    { id: 'other', name: '其他反馈', icon: <HelpCircle size={16} />, value: 'other' }
   ]
 
   const sub_categories: Record<string, FeedbackSubCategory[]> = {
@@ -166,7 +167,7 @@ const Feedback: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>反馈</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>反馈类型</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -250,11 +251,24 @@ const Feedback: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {active_type === 'suggestion' && '产品建议'}
-                {active_type === 'bug' && '问题报告'}
-                {active_type === 'other' && '其他反馈'}
-              </span>
+              {(() => {
+                const title =
+                  (active_type === 'suggestion' && '产品建议') ||
+                  (active_type === 'bug' && '问题报告') ||
+                  (active_type === 'other' && '其他反馈') ||
+                  ''
+                return (
+                  <span
+                    style={
+                      should_ellipsis(title)
+                        ? { fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                        : { fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }
+                    }
+                  >
+                    {title}
+                  </span>
+                )
+              })()}
             </div>
             <button
               type="button"

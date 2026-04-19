@@ -4,9 +4,10 @@
  * 日期: 2026-04-14 11:20:00
  * 描述: 图生图页面 - 使用通用三段式布局, 自适应缩放
  */
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ImagePlus, Loader2, Upload, Palette, ChevronRight, Image, Rocket, Palette as PaletteIcon } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis, to_fixed_chars } from '@/utils/ui_text'
 
 interface StylePreset {
   id: string
@@ -24,22 +25,40 @@ interface StyleCategory {
 const ImageToImage: React.FC = () => {
   const [prompt, set_prompt] = useState('')
   const [source_url, set_source_url] = useState('')
+  const [source_preview_url, set_source_preview_url] = useState('')
+  const [source_file_name, set_source_file_name] = useState('')
   const [loading, set_loading] = useState(false)
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
   const [active_style, set_active_style] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('scifi')
+  const file_input_ref = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    return () => {
+      if (source_preview_url) URL.revokeObjectURL(source_preview_url)
+    }
+  }, [source_preview_url])
+
+  const read_as_data_url = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = (e) => reject(e)
+    })
+  }
 
   const categories: StyleCategory[] = [
-    { id: 'scifi', name: '科幻', icon: <Rocket size={14} /> },
-    { id: 'art', name: '艺术', icon: <PaletteIcon size={14} /> }
+    { id: 'scifi', name: '科幻风格', icon: <Rocket size={14} /> },
+    { id: 'art', name: '艺术风格', icon: <PaletteIcon size={14} /> }
   ]
 
   const style_presets: StylePreset[] = [
     { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格，霓虹灯，未来感', category: 'scifi' },
     { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格，色彩鲜艳', category: 'art' },
-    { id: 'watercolor', name: '水彩画', prompt: '将图片转换为水彩画风格，柔和的色彩', category: 'art' },
-    { id: 'oil_painting', name: '油画', prompt: '将图片转换为古典油画风格，厚重的笔触', category: 'art' }
+    { id: 'watercolor', name: '水彩风格', prompt: '将图片转换为水彩画风格，柔和的色彩', category: 'art' },
+    { id: 'oil_painting', name: '油画风格', prompt: '将图片转换为古典油画风格，厚重的笔触', category: 'art' }
   ]
 
   const filtered_styles = style_presets.filter(s => s.category === active_category)
@@ -102,7 +121,15 @@ const ImageToImage: React.FC = () => {
           }}
         >
           {category.icon}
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+          <span
+            style={
+              should_ellipsis(category.name)
+                ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                : { whiteSpace: 'nowrap' }
+            }
+          >
+            {category.name}
+          </span>
         </button>
       ))}
     </>
@@ -134,7 +161,15 @@ const ImageToImage: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             <Palette size={14} />
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{style.name}</span>
+            <span
+              style={
+                should_ellipsis(style.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {style.name}
+            </span>
           </div>
           {active_style === style.id && <ChevronRight size={14} />}
         </button>
@@ -144,31 +179,105 @@ const ImageToImage: React.FC = () => {
 
   const active_style_name = active_style ? style_presets.find(s => s.id === active_style)?.name : ''
   const active_category_name = categories.find(c => c.id === active_category)?.name || '图生预设'
+  const middle_title = to_fixed_chars(active_category_name, 4, '风格')
+  const source_display_url = source_preview_url || source_url
 
   return (
     <ThreePanelLayout
-      title="图生图"
+      title="图生图像"
       titleIcon={<ImagePlus size={20} color="#0ea5e9" />}
       leftPanelTitle="风格分类"
       leftPanel={leftPanel}
-      middlePanelTitle={active_category_name}
+      middlePanelTitle={middle_title}
       middlePanel={middlePanel}
       rightPanelTitle={active_style_name || '图片转换'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>参考图片 URL</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>参考图片</label>
             <input
               type="text"
               value={source_url}
-              onChange={(e) => set_source_url(e.target.value)}
-              placeholder="https://example.com/image.jpg"
+              onChange={(e) => {
+                set_source_url(e.target.value)
+                set_source_file_name('')
+                if (source_preview_url) {
+                  URL.revokeObjectURL(source_preview_url)
+                  set_source_preview_url('')
+                }
+              }}
+              placeholder="https://example.com/image.jpg 或上传本地图片"
               style={{
                 width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
                 outline: 'none', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box'
               }}
             />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', gap: '10px' }}>
+              <input
+                ref={file_input_ref}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+
+                  try {
+                    const data_url = await read_as_data_url(file)
+                    set_source_url(data_url)
+                    set_source_file_name(file.name)
+
+                    const next_preview = URL.createObjectURL(file)
+                    if (source_preview_url) URL.revokeObjectURL(source_preview_url)
+                    set_source_preview_url(next_preview)
+                  } catch {
+                    set_error('读取图片失败, 请重试')
+                  } finally {
+                    e.target.value = ''
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => file_input_ref.current?.click()}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                  backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px',
+                  cursor: 'pointer', fontSize: '13px', color: '#0f172a'
+                }}
+              >
+                <Upload size={16} />
+                上传图片
+              </button>
+              <div style={{ flex: 1, minWidth: 0, color: '#64748b', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {source_file_name || (source_url ? '已填写 URL' : '未选择')}
+              </div>
+              {(source_url || source_preview_url) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    set_source_url('')
+                    set_source_file_name('')
+                    if (source_preview_url) {
+                      URL.revokeObjectURL(source_preview_url)
+                      set_source_preview_url('')
+                    }
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: '#475569'
+                  }}
+                >
+                  清除
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ marginBottom: '16px' }}>
@@ -212,8 +321,8 @@ const ImageToImage: React.FC = () => {
             flex: 1, backgroundColor: '#f1f5f9', borderRadius: '12px', 
             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1', boxSizing: 'border-box'
           }}>
-            {source_url ? (
-              <img src={source_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            {source_display_url ? (
+              <img src={source_display_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
             ) : (
               <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <Upload size={36} style={{ opacity: 0.5 }} />

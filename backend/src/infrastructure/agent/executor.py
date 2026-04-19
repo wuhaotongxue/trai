@@ -312,7 +312,9 @@ class AgentExecutor:
                     existing_idx = next((i for i, tc in enumerate(tool_calls) if tc["id"] == event.tool_call_id), None)
                     if existing_idx is None:
                         # 不存在，添加新的
-                        logger.info(f"[Stream] 添加 tool_call 到数组: id={event.tool_call_id}, name={event.tool_name}, args={repr(event.content)}")
+                        logger.info(
+                            f"[Stream] 添加 tool_call 到数组: id={event.tool_call_id}, name={event.tool_name}, args={repr(event.content)}"
+                        )
                         tool_calls.append(
                             {
                                 "id": event.tool_call_id,
@@ -325,14 +327,18 @@ class AgentExecutor:
                         old_tc = tool_calls[existing_idx]
                         old_args = old_tc["function"]["arguments"]
                         if event.content and (not old_args or len(event.content) > len(old_args)):
-                            logger.info(f"[Stream] 替换 tool_call: id={event.tool_call_id} 的 args 从 {repr(old_args)} → {repr(event.content)}")
+                            logger.info(
+                                f"[Stream] 替换 tool_call: id={event.tool_call_id} 的 args 从 {repr(old_args)} → {repr(event.content)}"
+                            )
                             tool_calls[existing_idx] = {
                                 "id": event.tool_call_id,
                                 "type": "function",
                                 "function": {"name": event.tool_name, "arguments": event.content},
                             }
                         else:
-                            logger.warning(f"[Stream] 跳过重复的 tool_call_id: id={event.tool_call_id} (新旧 args 相同或新 args 空)")
+                            logger.warning(
+                                f"[Stream] 跳过重复的 tool_call_id: id={event.tool_call_id} (新旧 args 相同或新 args 空)"
+                            )
 
             assistant_msg: dict[str, Any] = {
                 "role": "assistant",
@@ -354,7 +360,9 @@ class AgentExecutor:
 
                 # 过滤无效调用：tool_id 空、tool_call_id 空、raw_args 空
                 if not tool_call_id or not tool_id or not raw_args:
-                    logger.warning(f"[Stream] 跳过无效的 tool_call: id={tool_call_id}, name={tool_id}, args={repr(raw_args)}")
+                    logger.warning(
+                        f"[Stream] 跳过无效的 tool_call: id={tool_call_id}, name={tool_id}, args={repr(raw_args)}"
+                    )
                     continue
 
                 logger.info(f"流式工具调用原始数据 | tool_id={tool_id} | raw_args={repr(raw_args)}")
