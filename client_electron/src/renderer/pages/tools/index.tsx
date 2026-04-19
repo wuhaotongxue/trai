@@ -386,7 +386,7 @@ const Tools: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Wrench size={20} color="#0ea5e9" />
           <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>工具箱</span>
@@ -555,7 +555,7 @@ const Tools: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
                 {!is_left_sidebar_open && (

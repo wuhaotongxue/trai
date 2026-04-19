@@ -429,7 +429,7 @@ const Settings: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <SettingsIcon size={20} color="#0ea5e9" />
           <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>设置</span>
