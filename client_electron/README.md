@@ -49,6 +49,13 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_1109
+- **fix(layout)**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
+- **fix(layout)**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
+- **fix(settings)**: 修复设置页面右侧标题栏高度问题，移除justifyContent: 'space-between'
+- **fix(agent)**: 添加PanelLeftClose导入，修复未定义错误
+- **fix(tools)**: 添加PanelLeftClose导入，修复未定义错误
+
 ### 💻 客户端_2026_04_19_1019
 - **feat(text_to_image)**: 添加左侧风格分类栏（动物/城市/风景/人物），使用不同图标
 - **feat(image_to_image)**: 添加左侧风格分类栏（科幻/艺术），使用不同图标
