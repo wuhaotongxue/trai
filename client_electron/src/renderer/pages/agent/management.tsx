@@ -5,7 +5,7 @@
  * 描述: Agent 管理页面，支持列表、注册、启停 - 三段式布局
  */
 import React, { useState, useEffect } from 'react'
-import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
+import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
 
 interface Agent {
   id: string
