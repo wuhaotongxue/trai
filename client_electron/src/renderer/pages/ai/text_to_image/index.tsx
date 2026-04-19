@@ -143,15 +143,18 @@ const TextToImage: React.FC = () => {
     </>
   )
 
+  const active_template_name = active_template ? prompt_templates.find(t => t.id === active_template)?.name : ''
+  const active_category_name = categories.find(c => c.id === active_category)?.name || '模板预设'
+
   return (
     <ThreePanelLayout
       title="文生图"
       titleIcon={<ImageIcon size={20} color="#0ea5e9" />}
       leftPanelTitle="风格分类"
       leftPanel={leftPanel}
-      middlePanelTitle="模板预设"
+      middlePanelTitle={active_category_name}
       middlePanel={middlePanel}
-      rightPanelTitle="图片生成"
+      rightPanelTitle={active_template_name || '图片生成'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>

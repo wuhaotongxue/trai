@@ -142,15 +142,18 @@ const ImageToImage: React.FC = () => {
     </>
   )
 
+  const active_style_name = active_style ? style_presets.find(s => s.id === active_style)?.name : ''
+  const active_category_name = categories.find(c => c.id === active_category)?.name || '图生预设'
+
   return (
     <ThreePanelLayout
       title="图生图"
       titleIcon={<ImagePlus size={20} color="#0ea5e9" />}
       leftPanelTitle="风格分类"
       leftPanel={leftPanel}
-      middlePanelTitle="图生预设"
+      middlePanelTitle={active_category_name}
       middlePanel={middlePanel}
-      rightPanelTitle="图片转换"
+      rightPanelTitle={active_style_name || '图片转换'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
