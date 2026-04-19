@@ -339,13 +339,69 @@ const Feedback: React.FC = () => {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>联系方式 (选填)</label>
-                  <input 
-                    type="text" 
-                    value={contact}
-                    onChange={(e) => set_contact(e.target.value)}
-                    placeholder="留下您的邮箱或微信，方便我们与您联系"
-                    style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }}
-                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="text" 
+                      value={contact}
+                      onChange={(e) => set_contact(e.target.value)}
+                      placeholder="请输入您的邮箱前缀"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }}
+                    />
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          const prefix = contact.split('@')[0] || contact
+                          set_contact(prefix + e.target.value)
+                        }
+                      }}
+                      style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', backgroundColor: '#fff', cursor: 'pointer', minWidth: '140px' }}
+                    >
+                      <option value="">选择邮箱后缀</option>
+                      <option value="@qq.com">@qq.com</option>
+                      <option value="@163.com">@163.com</option>
+                      <option value="@126.com">@126.com</option>
+                      <option value="@gmail.com">@gmail.com</option>
+                      <option value="@outlook.com">@outlook.com</option>
+                      <option value="@sina.com">@sina.com</option>
+                      <option value="@sohu.com">@sohu.com</option>
+                      <option value="@foxmail.com">@foxmail.com</option>
+                      <option value="@aliyun.com">@aliyun.com</option>
+                      <option value="@yeah.net">@yeah.net</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                    {['@qq.com', '@163.com', '@gmail.com', '@outlook.com'].map(suffix => (
+                      <button
+                        key={suffix}
+                        type="button"
+                        onClick={() => {
+                          const prefix = contact.split('@')[0] || contact
+                          set_contact(prefix + suffix)
+                        }}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #e2e8f0',
+                          backgroundColor: '#f8fafc',
+                          color: '#64748b',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#e2e8f0'
+                          e.currentTarget.style.color = '#334155'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8fafc'
+                          e.currentTarget.style.color = '#64748b'
+                        }}
+                      >
+                        {suffix}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
