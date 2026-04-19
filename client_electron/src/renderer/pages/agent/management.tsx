@@ -6,6 +6,7 @@
  */
 import React, { useState, useEffect } from 'react'
 import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface Agent {
   id: string
@@ -197,8 +198,8 @@ const AgentManagement: React.FC = () => {
 
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{
-          width: is_left_sidebar_open ? '10%' : '0px',
-          minWidth: is_left_sidebar_open ? '70px' : '0px',
+          width: is_left_sidebar_open ? '12%' : '0px',
+          minWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -261,7 +262,13 @@ const AgentManagement: React.FC = () => {
                     }}
                   >
                     <AgentIcon size={16} />
-                    <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div
+                      style={
+                        should_ellipsis(agent.name)
+                          ? { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                          : { flex: 1, whiteSpace: 'nowrap' }
+                      }
+                    >
                       {agent.name}
                     </div>
                     <div style={{
@@ -298,7 +305,7 @@ const AgentManagement: React.FC = () => {
 
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '70px' : '0px',
+          minWidth: is_middle_sidebar_open ? '120px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',

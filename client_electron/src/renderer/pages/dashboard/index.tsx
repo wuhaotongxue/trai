@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react'
 import { Monitor, Cpu, HardDrive, ChevronRight, LayoutDashboard, Activity } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface SystemInfo {
   platform: string
@@ -14,6 +15,7 @@ interface SystemInfo {
   release: string
   total_mem: number
   free_mem: number
+  gpu_name: string
 }
 
 interface SystemMetrics {
@@ -26,6 +28,7 @@ interface SystemMetrics {
   process_rss: number
   process_heap_used: number
   process_heap_total: number
+  gpu_name: string
 }
 
 interface DashboardItem {
@@ -55,10 +58,6 @@ const format_bytes = (bytes: number): string => {
 }
 
 const format_gb = (bytes: number) => (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB'
-
-const should_ellipsis = (text: string): boolean => {
-  return text.replace(/\s+/g, '').length > 4
-}
 
 const build_line_path = (
   values: number[],
@@ -170,7 +169,7 @@ const Dashboard: React.FC = () => {
     }
 
     tick()
-    const timer = window.setInterval(tick, 1000)
+    const timer = window.setInterval(tick, 2000)
     return () => {
       is_active = false
       window.clearInterval(timer)
@@ -278,6 +277,15 @@ const Dashboard: React.FC = () => {
                     <div style={{ color: '#64748b', fontSize: '12px' }}>总内存</div>
                   </div>
                   <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{format_gb(sys_info.total_mem)}</div>
+                </div>
+                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <Cpu size={16} color="#64748b" />
+                    <div style={{ color: '#64748b', fontSize: '12px' }}>GPU</div>
+                  </div>
+                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>
+                    {(metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU')}
+                  </div>
                 </div>
                 <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -399,6 +407,10 @@ const Dashboard: React.FC = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
                     <span style={{ color: '#64748b', fontSize: '14px' }}>内核版本</span>
                     <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{sys_info.release}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
+                    <span style={{ color: '#64748b', fontSize: '14px' }}>GPU</span>
+                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU'}</span>
                   </div>
                 </div>
               </div>

@@ -6,6 +6,7 @@
  */
 import os from 'os'
 import log from 'electron-log'
+import { execSync } from 'child_process'
 
 /**
  * 系统信息接口
@@ -21,6 +22,7 @@ export interface SystemInfo {
   release: string
   total_mem: number
   free_mem: number
+  gpu_name: string
 }
 
 export interface SystemMetrics {
@@ -33,6 +35,31 @@ export interface SystemMetrics {
   process_rss: number
   process_heap_used: number
   process_heap_total: number
+  gpu_name: string
+}
+
+let cached_gpu_name = ''
+
+const get_gpu_name = (): string => {
+  if (cached_gpu_name) return cached_gpu_name
+  try {
+    if (process.platform === 'win32') {
+      const output = execSync('wmic path win32_VideoController get name', {
+        encoding: 'utf-8',
+        windowsHide: true,
+      })
+      const lines = output
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line && line.toLowerCase() !== 'name')
+      cached_gpu_name = lines.join(' / ') || 'Unknown GPU'
+      return cached_gpu_name
+    }
+  } catch (error) {
+    log.warn('failed to detect gpu name', error)
+  }
+  cached_gpu_name = 'Unknown GPU'
+  return cached_gpu_name
 }
 
 /**
@@ -47,6 +74,7 @@ export const get_system_info = (): SystemInfo => {
     release: os.release(),
     total_mem: os.totalmem(),
     free_mem: os.freemem(),
+    gpu_name: get_gpu_name(),
   }
 }
 
@@ -98,5 +126,6 @@ export const get_system_metrics = (): SystemMetrics => {
     process_rss: mu.rss,
     process_heap_used: mu.heapUsed,
     process_heap_total: mu.heapTotal,
+    gpu_name: get_gpu_name(),
   }
 }

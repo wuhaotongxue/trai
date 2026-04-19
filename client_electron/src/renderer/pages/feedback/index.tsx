@@ -6,6 +6,7 @@
  */
 import React, { useState, useRef } from 'react'
 import { MessageSquarePlus, Send, Loader2, Paperclip, X, Lightbulb, Bug, HelpCircle, ChevronRight, History, PanelLeftClose, PanelLeftOpen, List } from 'lucide-react'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface FeedbackType {
   id: string
@@ -35,14 +36,10 @@ const Feedback: React.FC = () => {
   
   const file_input_ref = useRef<HTMLInputElement>(null)
 
-  const should_ellipsis = (text: string): boolean => {
-    return text.replace(/\s+/g, '').length > 4
-  }
-
   const feedback_types: FeedbackType[] = [
     { id: 'suggestion', name: '产品建议', icon: <Lightbulb size={16} />, value: 'suggestion' },
     { id: 'bug', name: '问题报告', icon: <Bug size={16} />, value: 'bug' },
-    { id: 'other', name: '其他', icon: <HelpCircle size={16} />, value: 'other' }
+    { id: 'other', name: '其他反馈', icon: <HelpCircle size={16} />, value: 'other' }
   ]
 
   const sub_categories: Record<string, FeedbackSubCategory[]> = {
@@ -170,7 +167,7 @@ const Feedback: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>反馈</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>反馈类型</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}

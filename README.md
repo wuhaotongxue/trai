@@ -39,6 +39,16 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_2241
+- **feat(theme)**: 顶栏新增浅色/深色切换(太阳/月亮), 并持久化保存
+- **feat(tools)**: MD 转 PDF 支持 Markdown 预览与转换结果 PDF 预览
+- **feat(ai)**: 图生图支持本地图片上传, 自动转 data URL 并预览
+- **feat(dashboard)**: 性能折线图刷新间隔调整为 2s, 新增 GPU 名称展示
+- **refactor(ui)**: 抽取 should_ellipsis/to_fixed_chars 工具并统一四字风格文案
+
+### 🛠️ 后端_2026_04_19_2241
+- **feat(ai)**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
+
 ### 💻 客户端_2026_04_19_2159
 - **feat(platform)**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
 - **feat(ipc)**: 注册 system:get_info 和 system:get_metrics IPC 处理器
