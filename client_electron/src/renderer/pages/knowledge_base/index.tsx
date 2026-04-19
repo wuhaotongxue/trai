@@ -1054,13 +1054,10 @@ const KnowledgeBasePage: React.FC = () => {
                   ) : (
                     <>
                       <h2 style={{ margin: 0, fontSize: '14px', color: '#0f172a', fontWeight: 600, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{get_display_name(active_kb.name, 20)}</h2>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <button type="button" onClick={() => handle_move_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="移动知识库" aria-label="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={16} />移动</button>
-                        <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name)) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={16} />重命名</button>
-                        <button type="button" onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }} title="删除知识库" aria-label="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} />删除</button>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: '8px', padding: '2px 8px', backgroundColor: '#f1f5f9', borderRadius: '4px' }}>
-                          ID: {active_kb.id}
-                        </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button type="button" onClick={() => handle_move_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }} title="移动知识库" aria-label="移动知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><FolderInput size={18} /></button>
+                        <button type="button" onClick={() => { set_editing_kb_id(active_kb.id); set_edit_kb_name(get_display_name(active_kb.name)) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }} title="重命名知识库" aria-label="重命名知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Edit2 size={18} /></button>
+                        <button type="button" onClick={() => handle_delete_kb(active_kb.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }} title="删除知识库" aria-label="删除知识库" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={18} /></button>
                       </div>
                     </>
                   )}
@@ -1075,7 +1072,7 @@ const KnowledgeBasePage: React.FC = () => {
                       title="搜索文件"
                       value={search_query}
                       onChange={e => set_search_query(e.target.value)}
-                      style={{ padding: '8px 12px 8px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '13px', width: '200px' }}
+                      style={{ padding: '6px 12px 6px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '13px', width: '200px', height: '32px', boxSizing: 'border-box' }}
                     />
                   </div>
                   <button
@@ -1088,12 +1085,11 @@ const KnowledgeBasePage: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: '36px',
-                      height: '36px',
+                      padding: '4px',
                       backgroundColor: 'transparent',
                       color: '#64748b',
                       border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
+                      borderRadius: '4px',
                       cursor: files_loading ? 'not-allowed' : 'pointer'
                     }}
                     onMouseEnter={(e) => {
