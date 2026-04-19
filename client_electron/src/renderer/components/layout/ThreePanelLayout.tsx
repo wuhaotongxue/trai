@@ -7,7 +7,7 @@
  *       全局 Sidebar 由 MainLayout 提供, 此组件不再重复
  */
 import React, { useState } from 'react'
-import { PanelLeftOpen, List } from 'lucide-react'
+import { PanelLeftOpen, PanelLeftClose, List } from 'lucide-react'
 
 interface ThreePanelLayoutProps {
   title: string
@@ -89,10 +89,10 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 title="收起"
                 aria-label="收起左侧面板"
                 style={{ ...hover_btn_style, marginLeft: 'auto' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <PanelLeftOpen size={18} />
+                <PanelLeftClose size={18} />
               </button>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
