@@ -30,6 +30,7 @@ AES_IV = os.getenv("AES_IV", "TraiInitVector").encode().ljust(16, b"0")[:16]
 def aes_encrypt(plaintext: str) -> str:
     """AES 加密密码"""
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
     encryptor = cipher.encryptor()
     padded = plaintext.encode().ljust(32, b" ")
@@ -39,6 +40,7 @@ def aes_encrypt(plaintext: str) -> str:
 def aes_decrypt(ciphertext: str) -> str:
     """AES 解密密码"""
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
     decryptor = cipher.decryptor()
     padded = decryptor.update(base64.b64decode(ciphertext)) + decryptor.finalize()

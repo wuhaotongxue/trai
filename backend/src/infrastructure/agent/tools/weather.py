@@ -87,7 +87,7 @@ class WeatherTool(BaseTool):
 
     async def execute(self, params: dict[str, Any], context: ExecutionContext) -> ToolCallResult:
         city = params.get("city", "")
-        lang = params.get("lang", "zh-Hans")
+        _lang = params.get("lang", "zh-Hans")  # noqa: F841
 
         logger.info(f"天气工具收到参数: {params}")
 
@@ -95,7 +95,7 @@ class WeatherTool(BaseTool):
         if not city:
             logger.warning(f"城市参数为空: {params}，默认使用北京")
             city = "北京"
-        
+
         # 清理城市名
         city = city.strip()
         if not city:
@@ -107,15 +107,15 @@ class WeatherTool(BaseTool):
             # 步骤1: 先用Open-Meteo的地理编码API搜索城市
             geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=3&language=zh&format=json"
             logger.info(f"调用地理编码API: {geocode_url}")
-            
+
             async with httpx.AsyncClient(timeout=15) as client:
                 geocode_response = await client.get(geocode_url)
                 logger.info(f"地理编码API状态码: {geocode_response.status_code}")
                 geocode_data = geocode_response.json()
-                
+
                 results = geocode_data.get("results", [])
                 logger.info(f"地理编码结果数: {len(results)}")
-                
+
                 if results:
                     # 找到了结果，优先找城市（administration_level >= 2）
                     location = None
@@ -128,7 +128,7 @@ class WeatherTool(BaseTool):
                     # 如果没找到合适的，用第一个
                     if not location:
                         location = results[0]
-                    
+
                     lat = location.get("latitude")
                     lon = location.get("longitude")
                     display_name = location.get("name", city)
@@ -190,7 +190,7 @@ class WeatherTool(BaseTool):
             # 步骤2: 查询天气
             weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto"
             logger.info(f"调用天气API: {weather_url}")
-            
+
             async with httpx.AsyncClient(timeout=15) as client:
                 weather_response = await client.get(weather_url)
                 logger.info(f"天气API状态码: {weather_response.status_code}")
@@ -231,6 +231,7 @@ class WeatherTool(BaseTool):
 
         except httpx.HTTPStatusError as e:
             import traceback
+
             logger.error(f"HTTP错误: {e}")
             logger.error(f"响应内容: {e.response.text}")
             logger.error(f"堆栈:\n{traceback.format_exc()}")
@@ -242,6 +243,7 @@ class WeatherTool(BaseTool):
             )
         except httpx.RequestError as e:
             import traceback
+
             logger.error(f"请求错误: {type(e).__name__}: {e}")
             logger.error(f"堆栈:\n{traceback.format_exc()}")
             return ToolCallResult(
@@ -252,6 +254,7 @@ class WeatherTool(BaseTool):
             )
         except Exception as e:
             import traceback
+
             logger.error(f"天气查询异常: {type(e).__name__}: {e}")
             logger.error(f"堆栈:\n{traceback.format_exc()}")
             return ToolCallResult(
