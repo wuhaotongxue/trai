@@ -191,7 +191,7 @@ const AgentManagement: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Bot size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>Agent 管理</h1>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>Agent 管理</h1>
         </div>
       </div>
 
@@ -199,7 +199,6 @@ const AgentManagement: React.FC = () => {
         <div style={{
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
-          maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -297,8 +296,7 @@ const AgentManagement: React.FC = () => {
 
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '80px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
+          minWidth: is_middle_sidebar_open ? '70px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -457,7 +455,7 @@ const AgentManagement: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!is_middle_sidebar_open && (
                 <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>

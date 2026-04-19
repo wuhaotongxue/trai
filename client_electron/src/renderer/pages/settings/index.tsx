@@ -521,8 +521,7 @@ const Settings: React.FC = () => {
 
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '80px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
+          minWidth: is_middle_sidebar_open ? '70px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',

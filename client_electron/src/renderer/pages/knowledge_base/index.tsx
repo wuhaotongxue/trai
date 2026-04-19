@@ -615,7 +615,7 @@ const KnowledgeBasePage: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Database size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>知识库管理</h1>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>知识库管理</h1>
         </div>
       </div>
       
@@ -821,8 +821,7 @@ const KnowledgeBasePage: React.FC = () => {
         {/* 中间边栏: 子文件夹 (知识库) */}
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '80px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
+          minWidth: is_middle_sidebar_open ? '70px' : '0px',
           flexShrink: 1,
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',

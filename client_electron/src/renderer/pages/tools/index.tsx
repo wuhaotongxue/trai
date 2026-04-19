@@ -389,15 +389,14 @@ const Tools: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Wrench size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>工具箱</h1>
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>工具箱</h1>
         </div>
       </div>
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div style={{ 
-          width: is_left_sidebar_open ? '10%' : '0px', 
+        <div style={{
+          width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
-          maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9', 
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
