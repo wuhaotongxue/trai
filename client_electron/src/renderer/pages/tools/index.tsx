@@ -406,8 +406,8 @@ const Tools: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>工具箱</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>工具箱</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -416,7 +416,8 @@ const Tools: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                flexShrink: 0
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -476,8 +477,8 @@ const Tools: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155', overflow: 'hidden' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -487,7 +488,8 @@ const Tools: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    flexShrink: 0
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -495,7 +497,7 @@ const Tools: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>{active_cat.name}</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_cat.name}</span>
             </div>
             <button
               type="button"
@@ -505,7 +507,8 @@ const Tools: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                flexShrink: 0
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
