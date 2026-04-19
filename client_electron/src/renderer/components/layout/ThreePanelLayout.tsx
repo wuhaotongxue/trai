@@ -44,44 +44,44 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   const hover_btn_style = {
     background: 'none' as const, border: 'none', cursor: 'pointer', padding: '4px',
     display: 'flex' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
-    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
   }
 
   const hover_btn_lg_style = {
     background: 'none' as const, border: 'none', cursor: 'pointer', padding: '8px',
     display: 'flex' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
-    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s',
+    color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s',
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
       {/* 顶部标题栏 - 横跨整个宽度 */}
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {titleIcon}
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{title}</span>
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{title}</span>
         </div>
         {titleExtra && <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>{titleExtra}</div>}
       </div>
       
       {/* 内容区域 */}
-      <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+      <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
         {leftPanel && (
           <div style={{
             width: is_left_open ? '10%' : '0px',
-            minWidth: is_left_open ? '70px' : '0px',
+            minWidth: is_left_open ? '140px' : '0px',
             opacity: is_left_open ? 1 : 0,
-            backgroundColor: '#ffffff',
-            borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
+            backgroundColor: 'var(--ui_panel)',
+            borderRight: is_left_open ? '1px solid var(--ui_border)' : 'none',
             display: 'flex',
             flexDirection: 'column',
             transition: 'all 0.3s ease',
             overflow: 'hidden',
             flexShrink: 1
           }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {leftPanelTitle && (
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
               )}
               <button
                 type="button"
@@ -89,7 +89,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 title="收起"
                 aria-label="收起左侧面板"
                 style={{ ...hover_btn_style, marginLeft: 'auto' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <PanelLeftClose size={18} />
@@ -104,17 +104,17 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
         {middlePanel && (
           <div style={{
             width: is_middle_open ? '12%' : '0px',
-            minWidth: is_middle_open ? '80px' : '0px',
+            minWidth: is_middle_open ? '140px' : '0px',
             opacity: is_middle_open ? 1 : 0,
-            backgroundColor: '#ffffff',
-            borderRight: is_middle_open ? '1px solid #e2e8f0' : 'none',
+            backgroundColor: 'var(--ui_panel)',
+            borderRight: is_middle_open ? '1px solid var(--ui_border)' : 'none',
             display: 'flex',
             flexDirection: 'column',
             transition: 'all 0.3s ease',
             overflow: 'hidden',
             flexShrink: 1
           }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {leftPanel && !is_left_open && (
                   <button
@@ -123,14 +123,14 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                     title="展开左侧面板"
                     aria-label="展开左侧面板"
                     style={{ ...hover_btn_style }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <PanelLeftOpen size={18} />
                   </button>
                 )}
                 {middlePanelTitle && (
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
                 )}
               </div>
               <button
@@ -139,7 +139,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 title="收起"
                 aria-label="收起中间面板"
                 style={{ ...hover_btn_style }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <List size={18} />
@@ -153,7 +153,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {/* 右侧内容区标题栏 */}
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {leftPanel && !is_left_open && (
                 <button
@@ -162,7 +162,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   title="展开左侧面板"
                   aria-label="展开左侧面板"
                   style={{ ...hover_btn_style }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -175,14 +175,14 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   title="展开中间面板"
                   aria-label="展开中间面板"
                   style={{ ...hover_btn_style }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <List size={18} />
                 </button>
               )}
               {rightPanelTitle && (
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap' }}>{rightPanelTitle}</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{rightPanelTitle}</span>
               )}
             </div>
             <button

@@ -7,6 +7,7 @@
 import React, { useState } from 'react'
 import { Music, Loader2, ChevronRight, Headphones, Radio, Guitar, Piano, Zap, Music2 } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis, to_fixed_chars } from '@/utils/ui_text'
 
 interface MusicStyle {
   id: string
@@ -31,13 +32,13 @@ const AiMusic: React.FC = () => {
   const [active_category, set_active_category] = useState<string>('modern')
 
   const categories: MusicCategory[] = [
-    { id: 'modern', name: '现代', icon: <Zap size={14} /> },
-    { id: 'classic', name: '古典', icon: <Music2 size={14} /> }
+    { id: 'modern', name: '现代风格', icon: <Zap size={14} /> },
+    { id: 'classic', name: '古典风格', icon: <Music2 size={14} /> }
   ]
 
   const music_styles: MusicStyle[] = [
-    { id: 'electronic', name: '电子乐', prompt: '一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
-    { id: 'rock', name: '摇滚', prompt: '一首充满力量的摇滚乐，激昂的吉他独奏，强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
+    { id: 'electronic', name: '电子音乐', prompt: '一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
+    { id: 'rock', name: '摇滚音乐', prompt: '一首充满力量的摇滚乐，激昂的吉他独奏，强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
     { id: 'classical', name: '古典音乐', prompt: '一首优美的古典钢琴曲，柔和的旋律，浪漫的氛围', icon: <Piano size={14} />, category: 'classic' },
     { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐，适合冥想和放松，自然音效', icon: <Headphones size={14} />, category: 'classic' }
   ]
@@ -102,7 +103,15 @@ const AiMusic: React.FC = () => {
           }}
         >
           {category.icon}
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+          <span
+            style={
+              should_ellipsis(category.name)
+                ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                : { whiteSpace: 'nowrap' }
+            }
+          >
+            {category.name}
+          </span>
         </button>
       ))}
     </>
@@ -134,7 +143,15 @@ const AiMusic: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {style.icon}
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{style.name}</span>
+            <span
+              style={
+                should_ellipsis(style.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {style.name}
+            </span>
           </div>
           {active_style === style.id && <ChevronRight size={14} />}
         </button>
@@ -144,14 +161,15 @@ const AiMusic: React.FC = () => {
 
   const active_style_name = active_style ? music_styles.find(s => s.id === active_style)?.name : ''
   const active_category_name = categories.find(c => c.id === active_category)?.name || '风格预设'
+  const middle_title = to_fixed_chars(active_category_name, 4, '风格')
 
   return (
     <ThreePanelLayout
-      title="AI 音乐生成"
+      title="音乐生成"
       titleIcon={<Music size={20} color="#0ea5e9" />}
       leftPanelTitle="音乐分类"
       leftPanel={leftPanel}
-      middlePanelTitle={active_category_name}
+      middlePanelTitle={middle_title}
       middlePanel={middlePanel}
       rightPanelTitle={active_style_name || '音乐生成'}
     >

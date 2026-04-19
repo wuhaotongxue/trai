@@ -72,6 +72,7 @@ def create_admin_user(
         display_name: 显示名称
     """
     import os
+
     username = username or os.getenv("ADMIN_USERNAME", "admin")
     password = password or os.getenv("ADMIN_PASSWORD")
     email = email or os.getenv("ADMIN_EMAIL", "admin@example.com")

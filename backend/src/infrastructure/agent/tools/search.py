@@ -110,10 +110,7 @@ class SearchTool(BaseTool):
             tool_call_id="",
             tool_id=self.definition.id,
             success=True,
-            output=" ||| ".join([
-                f"{r['title']}({r['href']}): {r['body'][:300]}"
-                for r in results
-            ]),
+            output=" ||| ".join([f"{r['title']}({r['href']}): {r['body'][:300]}" for r in results]),
         )
 
 

@@ -7,6 +7,7 @@
 import React, { useState } from 'react'
 import { Bot, Loader2, RefreshCw, ChevronRight, Workflow, Image, Settings } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface WorkflowPreset {
   id: string
@@ -82,7 +83,15 @@ const ComfyUI: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {workflow.icon}
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workflow.name}</span>
+            <span
+              style={
+                should_ellipsis(workflow.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {workflow.name}
+            </span>
           </div>
           {active_workflow === workflow.id && <ChevronRight size={14} />}
         </button>

@@ -9,6 +9,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 // 仅通过 invoke 暴露白名单 API
 contextBridge.exposeInMainWorld('electron_api', {
   get_system_info: () => ipcRenderer.invoke('system:get_info'),
+  get_system_metrics: () => ipcRenderer.invoke('system:get_metrics'),
   config_get: (key: string, default_value?: any) => ipcRenderer.invoke('config:get', key, default_value),
   config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value),
   auth_login: (params: any) => ipcRenderer.invoke('auth:login', params),

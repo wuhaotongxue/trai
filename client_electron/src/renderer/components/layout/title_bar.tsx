@@ -4,8 +4,8 @@
  * 日期: 2026-04-13 19:40:00
  * 描述: Win11 风格的自定义可拖拽顶栏
  */
-import React, { useEffect, useRef } from 'react'
-import { RotateCw, FileText, X } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { RotateCw, FileText, Sun, Moon } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
 
@@ -13,6 +13,21 @@ const TitleBar: React.FC = () => {
   const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
   const { is_visible, message, show } = use_notification_store()
   const log_card_ref = useRef<HTMLDivElement>(null)
+  const [theme, set_theme] = useState<'light' | 'dark'>('light')
+
+  useEffect(() => {
+    window.electron_api
+      .config_get('ui:theme', 'light')
+      .then((res) => {
+        const next = res.success && (res.data === 'dark' || res.data === 'light') ? (res.data as 'light' | 'dark') : 'light'
+        document.documentElement.dataset.theme = next
+        set_theme(next)
+      })
+      .catch(() => {
+        document.documentElement.dataset.theme = 'light'
+        set_theme('light')
+      })
+  }, [])
 
   // 点击其他地方关闭日志卡片
   useEffect(() => {
@@ -36,14 +51,14 @@ const TitleBar: React.FC = () => {
       style={{
         height: '36px',
         width: '100%',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--ui_panel)',
         display: 'flex',
         alignItems: 'center',
         paddingLeft: '16px',
         fontSize: '12px',
-        color: 'rgba(0, 0, 0, 0.7)',
+        color: 'var(--ui_text)',
         boxSizing: 'border-box',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+        borderBottom: '1px solid var(--ui_border)',
         position: 'relative',
         zIndex: 1000
       }}
@@ -51,6 +66,31 @@ const TitleBar: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <img src="./kity.png" alt="logo" style={{ width: '16px', height: '16px' }} />
         <span>TRAI</span>
+        <button
+          className="no-drag-region"
+          type="button"
+          title={theme === 'dark' ? '切换浅色' : '切换深色'}
+          aria-label={theme === 'dark' ? '切换浅色' : '切换深色'}
+          onClick={() => {
+            const next = theme === 'dark' ? 'light' : 'dark'
+            document.documentElement.dataset.theme = next
+            set_theme(next)
+            window.electron_api.config_set('ui:theme', next).catch(() => {})
+          }}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--ui_border)',
+            borderRadius: '6px',
+            padding: '4px 6px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--ui_text_muted)'
+          }}
+        >
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </button>
         <button
           className="no-drag-region"
           type="button"
@@ -64,14 +104,14 @@ const TitleBar: React.FC = () => {
           }}
           style={{
             background: 'transparent',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
+            border: '1px solid var(--ui_border)',
             borderRadius: '6px',
             padding: '4px 6px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'rgba(0, 0, 0, 0.65)'
+            color: 'var(--ui_text_muted)'
           }}
         >
           <RotateCw size={14} />
@@ -85,14 +125,14 @@ const TitleBar: React.FC = () => {
             onClick={toggle_logs}
             style={{
               background: 'transparent',
-              border: '1px solid rgba(0, 0, 0, 0.08)',
+              border: '1px solid var(--ui_border)',
               borderRadius: '6px',
               padding: '4px 6px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'rgba(0, 0, 0, 0.65)'
+              color: 'var(--ui_text_muted)'
             }}
           >
             <FileText size={14} />
@@ -109,8 +149,8 @@ const TitleBar: React.FC = () => {
                 width: '400px',
                 maxWidth: '90vw',
                 maxHeight: '300px',
-                backgroundColor: '#ffffff',
-                border: '1px solid rgba(0, 0, 0, 0.1)',
+                backgroundColor: 'var(--ui_panel)',
+                border: '1px solid var(--ui_border)',
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 padding: '8px',
@@ -119,7 +159,7 @@ const TitleBar: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '4px 8px' }}>
-                <h3 style={{ margin: 0, fontSize: '14px', color: '#333' }}>系统日志</h3>
+                <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text)' }}>系统日志</h3>
                 <div style={{ display: 'flex', gap: '4px' }}>
                   <button
                     className="no-drag-region"
@@ -128,11 +168,12 @@ const TitleBar: React.FC = () => {
                     title="刷新"
                     style={{
                       background: 'none',
-                      border: '1px solid #e0e0e0',
+                      border: '1px solid var(--ui_border)',
                       borderRadius: '4px',
                       padding: '2px 6px',
                       cursor: 'pointer',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'var(--ui_text)'
                     }}
                   >
                     刷新
@@ -144,11 +185,12 @@ const TitleBar: React.FC = () => {
                     title="清除"
                     style={{
                       background: 'none',
-                      border: '1px solid #e0e0e0',
+                      border: '1px solid var(--ui_border)',
                       borderRadius: '4px',
                       padding: '2px 6px',
                       cursor: 'pointer',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'var(--ui_text)'
                     }}
                   >
                     清除
@@ -160,11 +202,12 @@ const TitleBar: React.FC = () => {
                     title="关闭"
                     style={{
                       background: 'none',
-                      border: '1px solid #e0e0e0',
+                      border: '1px solid var(--ui_border)',
                       borderRadius: '4px',
                       padding: '2px 6px',
                       cursor: 'pointer',
-                      fontSize: '12px'
+                      fontSize: '12px',
+                      color: 'var(--ui_text)'
                     }}
                   >
                     关闭
@@ -174,10 +217,10 @@ const TitleBar: React.FC = () => {
               <div style={{ fontSize: '12px', fontFamily: 'monospace', padding: '0 8px' }}>
                 {logs.length > 0 ? (
                   logs.map((log, index) => (
-                    <div key={index} style={{ marginBottom: '4px' }}>{log}</div>
+                    <div key={index} style={{ marginBottom: '4px', color: 'var(--ui_text)' }}>{log}</div>
                   ))
                 ) : (
-                  <div style={{ color: '#666' }}>暂无日志</div>
+                  <div style={{ color: 'var(--ui_text_muted)' }}>暂无日志</div>
                 )}
               </div>
             </div>
@@ -194,7 +237,7 @@ const TitleBar: React.FC = () => {
             top: '50%',
             right: '16px',
             transform: 'translateY(-50%)',
-            backgroundColor: '#10b981',
+            backgroundColor: 'var(--ui_success)',
             color: 'white',
             padding: '6px 16px',
             borderRadius: '6px',
