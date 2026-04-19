@@ -154,18 +154,18 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {/* 右侧内容区标题栏 */}
           <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {leftPanel && !is_left_open && (
                 <button
                   type="button"
                   onClick={() => set_is_left_open(true)}
                   title="展开左侧面板"
                   aria-label="展开左侧面板"
-                  style={{ ...hover_btn_lg_style }}
+                  style={{ ...hover_btn_style }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <PanelLeftOpen size={20} />
+                  <PanelLeftOpen size={18} />
                 </button>
               )}
               {middlePanel && !is_middle_open && (
@@ -174,17 +174,23 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   onClick={() => set_is_middle_open(true)}
                   title="展开中间面板"
                   aria-label="展开中间面板"
-                  style={{ ...hover_btn_lg_style }}
+                  style={{ ...hover_btn_style }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={20} />
+                  <List size={18} />
                 </button>
               )}
               {rightPanelTitle && (
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap' }}>{rightPanelTitle}</span>
               )}
             </div>
+            <button
+              type="button"
+              style={{ ...hover_btn_style, visibility: 'hidden' }}
+            >
+              <List size={18} />
+            </button>
           </div>
           <div style={{ flex: 1, overflow: 'hidden', padding: contentPadding }}>
             {children}
