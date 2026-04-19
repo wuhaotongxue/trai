@@ -146,6 +146,7 @@ const TextToImage: React.FC = () => {
       leftPanel={leftPanel}
       middlePanelTitle="模板预设"
       middlePanel={middlePanel}
+      rightPanelTitle="图片生成"
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
