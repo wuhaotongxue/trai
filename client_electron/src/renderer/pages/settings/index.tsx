@@ -524,6 +524,23 @@ const Settings: React.FC = () => {
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开设置分类栏"
+                  aria-label="展开设置分类栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={16} />
+                </button>
+              )}
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
                 {active_category === 'system' ? '系统' : '账号'}
               </span>
@@ -579,25 +596,8 @@ const Settings: React.FC = () => {
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
-              {!is_left_sidebar_open && (
-                <button
-                  type="button"
-                  onClick={() => set_is_left_sidebar_open(true)}
-                  title="展开设置分类栏"
-                  aria-label="展开设置分类栏"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PanelLeftOpen size={16} />
-                </button>
-              )}
               {!is_middle_sidebar_open && (
                 <button
                   type="button"

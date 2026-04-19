@@ -225,7 +225,7 @@ const AgentManagement: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftOpen size={18} />
+              <PanelLeftClose size={18} />
             </button>
           </div>
 

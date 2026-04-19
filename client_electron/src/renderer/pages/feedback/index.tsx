@@ -181,7 +181,7 @@ const Feedback: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftOpen size={18} />
+              <PanelLeftClose size={18} />
             </button>
           </div>
           
@@ -232,11 +232,30 @@ const Feedback: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {active_type === 'suggestion' && '产品建议'}
-              {active_type === 'bug' && '问题报告'}
-              {active_type === 'other' && '其他反馈'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {!is_left_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_left_sidebar_open(true)}
+                  title="展开反馈类型栏"
+                  aria-label="展开反馈类型栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {active_type === 'suggestion' && '产品建议'}
+                {active_type === 'bug' && '问题报告'}
+                {active_type === 'other' && '其他反馈'}
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => set_is_middle_sidebar_open(false)}
