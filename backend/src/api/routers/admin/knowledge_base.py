@@ -515,7 +515,7 @@ class KnowledgeBaseDemoService:
             f"- created_at: {datetime.now().isoformat()}\n"
             "- purpose: verify kb create + upload + index build\n"
         )
-        
+
         # 检查 content 是否是 base64 编码的二进制数据
         try:
             # 尝试解码 base64
@@ -523,7 +523,7 @@ class KnowledgeBaseDemoService:
         except (base64.binascii.Error, TypeError):
             # 如果不是有效的 base64，则按 UTF-8 文本处理
             content_bytes = content.encode("utf-8")
-            
+
         md_5 = hashlib.md5(content_bytes).hexdigest()
         size_in_bytes = str(len(content_bytes))
 
@@ -669,7 +669,7 @@ class KnowledgeBaseDemoService:
         except (base64.binascii.Error, TypeError):
             # 如果不是有效的 base64，则按 UTF-8 文本处理
             content_bytes = content.encode("utf-8")
-            
+
         md_5 = hashlib.md5(content_bytes).hexdigest()
         size_in_bytes = str(len(content_bytes))
 
@@ -1149,7 +1149,7 @@ class KnowledgeBaseDemoController:
                         "category_name": "默认类目",
                     }
                 ],
-                raw={"permission": "user", "filtered": True}
+                raw={"permission": "user", "filtered": True},
             )
         return self._service.list_categories()
 

@@ -6,13 +6,17 @@
 
 from __future__ import annotations
 
+import asyncio
+import base64
+import mimetypes
+import os
+import re
 import uuid
 import zipfile
 from io import BytesIO
 from pathlib import Path
 
 import markdown
-import pdfkit
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from PIL import Image
 from pydantic import BaseModel, Field
@@ -23,6 +27,221 @@ from infrastructure.storage.s3_storage import S3StorageService
 
 logger = get_logger()
 router = APIRouter()
+
+
+class PDFGenerator:
+    """PDF 生成器.
+
+    支持多种 PDF 生成方案, 优先使用 Playwright, 备选其他方案.
+    """
+
+    def __init__(self) -> None:
+        """初始化 PDF 生成器."""
+        self._playwright_available = False
+        self._weasyprint_available = False
+        self._pdfkit_available = False
+        self._wkhtmltopdf_path: str | None = None
+        self._init_backends()
+
+    def _init_backends(self) -> None:
+        """初始化可用的 PDF 后端."""
+        # 检查 Playwright (首选, 支持 emoji 最好)
+        try:
+            from playwright.sync_api import sync_playwright  # noqa: F401
+
+            self._playwright_available = True
+            logger.info("Playwright 已启用")
+        except ImportError:
+            logger.warning("Playwright 未安装")
+
+        # 检查 WeasyPrint
+        try:
+            import weasyprint  # noqa: F401
+
+            self._weasyprint_available = True
+            logger.info("WeasyPrint 已启用")
+        except (ImportError, OSError) as e:
+            logger.warning(f"WeasyPrint 不可用: {e}")
+
+        # 检查 pdfkit + wkhtmltopdf
+        try:
+            import pdfkit  # noqa: F401
+
+            self._pdfkit_available = True
+            self._wkhtmltopdf_path = self._find_wkhtmltopdf()
+            if self._wkhtmltopdf_path:
+                logger.info(f"pdfkit 已启用, wkhtmltopdf: {self._wkhtmltopdf_path}")
+            else:
+                logger.warning("pdfkit 可用但 wkhtmltopdf 未找到")
+                self._pdfkit_available = False
+        except ImportError:
+            logger.warning("pdfkit 未安装")
+
+    def _find_wkhtmltopdf(self) -> str | None:
+        """查找 wkhtmltopdf 可执行文件."""
+        import shutil
+
+        env_path = os.environ.get("WKHTMLTOPDF_PATH")
+        if env_path and Path(env_path).exists():
+            return env_path
+
+        conda_prefix = os.environ.get("CONDA_PREFIX")
+        if conda_prefix:
+            conda_path = Path(conda_prefix) / "Library" / "bin" / "wkhtmltopdf.exe"
+            if conda_path.exists():
+                return str(conda_path)
+
+        system_path = shutil.which("wkhtmltopdf")
+        if system_path:
+            return system_path
+
+        return None
+
+    async def generate_pdf(self, html_content: str) -> bytes:
+        """生成 PDF."""
+        # 优先使用 Playwright
+        if self._playwright_available:
+            return await self._generate_with_playwright(html_content)
+
+        # 备选 WeasyPrint
+        if self._weasyprint_available:
+            return await self._generate_with_weasyprint(html_content)
+
+        # 最后备选 pdfkit
+        if self._pdfkit_available and self._wkhtmltopdf_path:
+            return await self._generate_with_pdfkit(html_content)
+
+        raise RuntimeError(
+            "没有可用的 PDF 生成后端. 请安装 playwright: pip install playwright && playwright install chromium"
+        )
+
+    async def _generate_with_playwright(self, html_content: str) -> bytes:
+        """使用 Playwright 生成 PDF.
+
+        使用同步 API 在后台线程中执行, 避免 Windows 上 asyncio subprocess 问题.
+        等待 JavaScript 执行完成(包括 Mermaid 和 KaTeX 渲染).
+        """
+        from playwright.sync_api import sync_playwright
+
+        backend_dir = Path(__file__).resolve().parents[3]
+        vendor_dir = backend_dir / "assets" / "pdf_vendor"
+
+        def _pick_vendor_file(name: str) -> Path:
+            preferred = vendor_dir / name
+            if preferred.exists():
+                return preferred
+            fallback = backend_dir / name
+            return fallback
+
+        mermaid_js_path = _pick_vendor_file("mermaid.min.js")
+        katex_js_path = _pick_vendor_file("katex.min.js")
+        katex_css_path = _pick_vendor_file("katex.min.css")
+        auto_render_js_path = _pick_vendor_file("auto-render.min.js")
+
+        def _generate():
+            with sync_playwright() as p:
+                try:
+                    browser = p.chromium.launch()
+                except Exception as e:
+                    raise RuntimeError("Playwright Chromium 不可用, 请先执行: playwright install chromium") from e
+                page = browser.new_page()
+
+                # 设置内容并等待加载
+                page.set_content(html_content, wait_until="domcontentloaded", timeout=60000)
+
+                if katex_css_path.exists():
+                    page.add_style_tag(path=str(katex_css_path))
+                else:
+                    logger.warning(f"KaTeX CSS 不存在: {katex_css_path}")
+
+                if mermaid_js_path.exists():
+                    page.add_script_tag(path=str(mermaid_js_path))
+                else:
+                    logger.warning(f"Mermaid JS 不存在: {mermaid_js_path}")
+
+                if katex_js_path.exists():
+                    page.add_script_tag(path=str(katex_js_path))
+                else:
+                    logger.warning(f"KaTeX JS 不存在: {katex_js_path}")
+
+                if auto_render_js_path.exists():
+                    page.add_script_tag(path=str(auto_render_js_path))
+                else:
+                    logger.warning(f"KaTeX auto-render JS 不存在: {auto_render_js_path}")
+
+                page.evaluate(
+                    """() => {
+                      try {
+                        if (window.mermaid) {
+                          window.mermaid.initialize({
+                            startOnLoad: false,
+                            theme: 'default',
+                            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+                          });
+                          window.mermaid.run();
+                        }
+                      } catch (e) {}
+
+                      try {
+                        if (window.renderMathInElement) {
+                          window.renderMathInElement(document.body, {
+                            delimiters: [
+                              { left: '$$', right: '$$', display: true },
+                              { left: '$', right: '$', display: false },
+                            ],
+                            throwOnError: false,
+                          });
+                        }
+                      } catch (e) {}
+                    }"""
+                )
+
+                # 等待 Mermaid 渲染完成
+                try:
+                    has_mermaid = page.evaluate("() => !!document.querySelector('.mermaid')")
+                    if has_mermaid:
+                        page.wait_for_selector(".mermaid svg", timeout=8000)
+                        logger.info("Mermaid 渲染完成")
+                except Exception as e:
+                    logger.warning(f"Mermaid 渲染超时或未找到: {e}")
+
+                # 额外等待确保渲染完成
+                page.wait_for_timeout(1500)
+
+                pdf_bytes = page.pdf(
+                    format="A4", margin={"top": "20px", "right": "20px", "bottom": "20px", "left": "20px"}
+                )
+                browser.close()
+                return pdf_bytes
+
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _generate)
+
+    async def _generate_with_weasyprint(self, html_content: str) -> bytes:
+        """使用 WeasyPrint 生成 PDF."""
+        from weasyprint import HTML
+
+        def _generate():
+            html = HTML(string=html_content)
+            return html.write_pdf()
+
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _generate)
+
+    async def _generate_with_pdfkit(self, html_content: str) -> bytes:
+        """使用 pdfkit 生成 PDF."""
+        import pdfkit
+
+        def _generate():
+            config = pdfkit.configuration(wkhtmltopdf=self._wkhtmltopdf_path)
+            return pdfkit.from_string(html_content, False, configuration=config)
+
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _generate)
+
+
+# 全局 PDF 生成器实例
+_pdf_generator = PDFGenerator()
 
 
 class ToolResultResponse(BaseModel):
@@ -44,24 +263,164 @@ class ToolsAPI:
     """工具接口类"""
 
     @staticmethod
+    def _convert_images_to_base64(html_text: str, base_path: Path) -> str:
+        """将 HTML 中的本地图片路径转换为 base64 编码.
+
+        Args:
+            html_text: HTML 内容
+            base_path: Markdown 文件所在目录, 用于解析相对路径
+
+        Returns:
+            str: 处理后的 HTML, 图片已转为 base64
+        """
+        # 匹配 img 标签的 src 属性
+        img_pattern = r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>'
+
+        def replace_image(match: re.Match) -> str:
+            img_tag = match.group(0)
+            src = match.group(1)
+
+            # 跳过已经是 base64 或 URL 的图片
+            if src.startswith(("data:", "http://", "https://")):
+                return img_tag
+
+            # 解析图片路径
+            if src.startswith("/"):
+                # 绝对路径, 从工作目录开始
+                img_path = Path(src.lstrip("/"))
+            else:
+                # 相对路径, 基于 Markdown 文件所在目录
+                img_path = base_path / src
+
+            try:
+                if img_path.exists():
+                    # 读取图片并转为 base64
+                    with open(img_path, "rb") as f:
+                        img_data = f.read()
+                    mime_type, _ = mimetypes.guess_type(str(img_path))
+                    if not mime_type:
+                        mime_type = "image/png"
+                    base64_data = base64.b64encode(img_data).decode("utf-8")
+                    new_src = f"data:{mime_type};base64,{base64_data}"
+                    return img_tag.replace(src, new_src)
+                else:
+                    logger.warning(f"图片文件不存在: {img_path}")
+                    return img_tag
+            except Exception as e:
+                logger.warning(f"转换图片失败 {src}: {e}")
+                return img_tag
+
+        return re.sub(img_pattern, replace_image, html_text)
+
+    @staticmethod
+    def _process_mermaid_blocks(md_text: str) -> tuple[str, list[str]]:
+        """提取 Mermaid 代码块并在 Markdown 中替换为占位符.
+
+        Args:
+            md_text: 原始 Markdown 文本
+
+        Returns:
+            tuple: (处理后的 Markdown 文本, Mermaid 代码列表)
+        """
+        mermaid_blocks: list[str] = []
+
+        normalized = md_text.replace("\r\n", "\n").replace("\r", "\n")
+        lines = normalized.split("\n")
+
+        open_re = re.compile(r"^[ \t]*```+[ \t]*mermaid[ \t]*$", flags=re.IGNORECASE)
+        close_re = re.compile(r"^[ \t]*```+[ \t]*$", flags=0)
+
+        out_lines: list[str] = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if open_re.match(line):
+                i += 1
+                block_lines: list[str] = []
+                while i < len(lines) and not close_re.match(lines[i]):
+                    block_lines.append(lines[i])
+                    i += 1
+
+                if i >= len(lines):
+                    out_lines.append(line)
+                    out_lines.extend(block_lines)
+                    logger.info("Mermaid 代码块未闭合, 已跳过提取")
+                    break
+
+                code = "\n".join(block_lines).strip()
+                mermaid_blocks.append(code)
+                logger.info(f"提取 Mermaid 代码块 #{len(mermaid_blocks)}: {code[:50]}...")
+                out_lines.append(f'<div data-mermaid-placeholder="{len(mermaid_blocks) - 1}"></div>')
+                i += 1
+                continue
+
+            out_lines.append(line)
+            i += 1
+
+        processed_md = "\n".join(out_lines)
+        logger.info(f"共提取 {len(mermaid_blocks)} 个 Mermaid 代码块")
+        return processed_md, mermaid_blocks
+
+    @staticmethod
+    def _restore_mermaid_blocks(html_text: str, mermaid_blocks: list[str]) -> str:
+        """将占位符替换为 Mermaid div.
+
+        Args:
+            html_text: HTML 文本
+            mermaid_blocks: Mermaid 代码列表
+
+        Returns:
+            str: 恢复 Mermaid 后的 HTML
+        """
+        for i, code in enumerate(mermaid_blocks):
+            placeholder = f'<div data-mermaid-placeholder="{i}"></div>'
+            # 注意: Mermaid 代码不需要 HTML 转义, 保持原样
+            mermaid_div = f'<div class="mermaid">\n{code}\n</div>'
+            if placeholder in html_text:
+                html_text = html_text.replace(placeholder, mermaid_div)
+                logger.info(f"恢复 Mermaid 代码块 #{i + 1}")
+            else:
+                logger.warning(f"未找到占位符 #{i + 1}: {placeholder}")
+        return html_text
+
+    @staticmethod
+    def _process_math_blocks(md_text: str) -> tuple[str, list[dict[str, str]]]:
+        math_blocks: list[dict[str, str]] = []
+
+        display_pattern = r"\$\$([\s\S]*?)\$\$"
+
+        def _replace_display(match: re.Match) -> str:
+            math_blocks.append({"kind": "block", "text": f"$${match.group(1)}$$"})
+            return f'<div data-math-placeholder="{len(math_blocks) - 1}"></div>'
+
+        processed = re.sub(display_pattern, _replace_display, md_text, flags=re.DOTALL)
+
+        inline_pattern = r"(?<!\\)\$(?!\$)([^\n]*?)(?<!\\)\$(?!\$)"
+
+        def _replace_inline(match: re.Match) -> str:
+            math_blocks.append({"kind": "inline", "text": f"${match.group(1)}$"})
+            return f'<span data-math-placeholder="{len(math_blocks) - 1}"></span>'
+
+        processed = re.sub(inline_pattern, _replace_inline, processed)
+        return processed, math_blocks
+
+    @staticmethod
+    def _restore_math_blocks(html_text: str, math_blocks: list[dict[str, str]]) -> str:
+        restored = html_text
+        for i, item in enumerate(math_blocks):
+            text = item["text"]
+            restored = restored.replace(f'<div data-math-placeholder="{i}"></div>', text)
+            restored = restored.replace(f'<span data-math-placeholder="{i}"></span>', text)
+        return restored
+
+    @staticmethod
     async def convert_md_to_pdf(
         file: UploadFile,
         current_user: CurrentUser,
         s3_service: S3StorageService,
+        base_dir: str = "",
     ) -> ToolResultResponse:
-        """Markdown 转 PDF 接口
-
-        Args:
-            file: 上传的 Markdown 文件
-            current_user: 当前用户
-            s3_service: S3 存储服务
-
-        Returns:
-            ToolResultResponse: 转换后的 PDF 文件信息和预签名 URL
-
-        Raises:
-            HTTPException: 转换失败或文件格式不正确
-        """
+        """Markdown 转 PDF 接口"""
         if not file.filename or not file.filename.endswith(".md"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -71,27 +430,141 @@ class ToolsAPI:
         try:
             content = await file.read()
             md_text = content.decode("utf-8")
-            html_text = markdown.markdown(md_text, extensions=["tables", "fenced_code"])
 
-            # 使用 pdfkit 将 HTML 转换为 PDF
-            # 注意: 需要系统安装 wkhtmltopdf
-            pdf_bytes = pdfkit.from_string(html_text, False)
+            has_mermaid_fence = re.search(r"```\s*mermaid\b", md_text, flags=re.IGNORECASE) is not None
+
+            # 提取 Mermaid 代码块
+            md_without_mermaid, mermaid_blocks = ToolsAPI._process_mermaid_blocks(md_text)
+            logger.info(f"提取到 {len(mermaid_blocks)} 个 Mermaid 图表")
+
+            # 提取数学公式, 避免 markdown 转换时破坏 ^ 等字符
+            md_without_math, math_blocks = ToolsAPI._process_math_blocks(md_without_mermaid)
+
+            # 转换 Markdown 为 HTML
+            html_text = markdown.markdown(md_without_math, extensions=["tables", "fenced_code"])
+
+            # 恢复数学公式
+            html_text = ToolsAPI._restore_math_blocks(html_text, math_blocks)
+
+            # 恢复 Mermaid 代码块为 div
+            html_text = ToolsAPI._restore_mermaid_blocks(html_text, mermaid_blocks)
+
+            # 获取 Markdown 文件所在目录
+            # 优先使用前端传递的 base_dir, 否则尝试从文件名解析
+            if base_dir:
+                base_path = Path(base_dir)
+                logger.info(f"使用前端传递的基础路径: {base_path}")
+            else:
+                md_file_path = Path(file.filename)
+                base_path = md_file_path.parent
+                logger.info(f"从文件名解析基础路径: {base_path}")
+
+            logger.info(f"基础路径是否存在: {base_path.exists()}")
+
+            # 将本地图片转换为 base64
+            html_with_images = ToolsAPI._convert_images_to_base64(html_text, base_path)
+
+            # 添加中文字体、emoji、数学公式和 Mermaid 支持的 HTML 模板
+            # 使用内联资源避免网络加载超时
+            html_with_font = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {{
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Microsoft YaHei', 'SimHei', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 20px;
+        }}
+        pre {{
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }}
+        code {{
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }}
+        table {{
+            border-collapse: collapse;
+            width: 100%;
+        }}
+        th, td {{
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }}
+        th {{
+            background-color: #f5f5f5;
+        }}
+        img {{
+            max-width: 100%;
+            height: auto;
+        }}
+        /* Mermaid 图表样式 */
+        .mermaid {{
+            text-align: center;
+            margin: 20px 0;
+        }}
+        /* 数学公式样式 - 简化版 */
+        .math {{
+            font-style: italic;
+            font-family: 'Times New Roman', serif;
+        }}
+        .math-display {{
+            text-align: center;
+            margin: 10px 0;
+        }}
+    </style>
+</head>
+<body>
+    {html_with_images}
+</body>
+</html>"""
+
+            # 使用 PDF 生成器将 HTML 转换为 PDF
+            pdf_bytes = await _pdf_generator.generate_pdf(html_with_font)
 
             if not pdf_bytes:
                 raise ValueError("PDF 生成为空")
 
-            # 上传到 S3
-            object_key = f"tools/pdf/{current_user.user_id}/{uuid.uuid4().hex}.pdf"
-            s3_service.upload_bytes(pdf_bytes, object_key, content_type="application/pdf")
+            file_name = file.filename.replace(".md", ".pdf")
+            converted_size = len(pdf_bytes)
 
-            # 获取预签名 URL (5分钟有效)
-            presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
+            message = "处理成功"
+            if has_mermaid_fence and len(mermaid_blocks) == 0:
+                message = "Mermaid 未识别, 请检查 ```mermaid 代码块是否以 ``` 正确闭合"
+                logger.warning(message)
 
-            return ToolResultResponse(
-                url=presigned_url,
-                expires_in=300,
-                file_name=file.filename.replace(".md", ".pdf"),
-            )
+            try:
+                object_key = f"tools/pdf/{current_user['user_id']}/{uuid.uuid4().hex}.pdf"
+                s3_service.upload_bytes(pdf_bytes, object_key, content_type="application/pdf")
+                presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
+
+                return ToolResultResponse(
+                    url=presigned_url,
+                    expires_in=300,
+                    file_name=file_name,
+                    message=message,
+                    original_size=len(content),
+                    converted_size=converted_size,
+                )
+            except Exception as e:
+                logger.warning(f"S3 不可用, 返回 data URL: {e}")
+                data_url = f"data:application/pdf;base64,{base64.b64encode(pdf_bytes).decode('ascii')}"
+                return ToolResultResponse(
+                    url=data_url,
+                    expires_in=0,
+                    file_name=file_name,
+                    message="S3 不可用, 已返回 data URL" if message == "处理成功" else message,
+                    original_size=len(content),
+                    converted_size=converted_size,
+                )
+
         except Exception as e:
             logger.error(f"Markdown 转 PDF 失败: {str(e)}")
             raise HTTPException(
@@ -107,20 +580,7 @@ class ToolsAPI:
         s3_service: S3StorageService,
         target_size_kb: int | None = None,
     ) -> ToolResultResponse:
-        """图片压缩接口
-
-        Args:
-            file: 上传的图片文件
-            quality: 压缩质量 (1-100)
-            current_user: 当前用户
-            s3_service: S3 存储服务
-
-        Returns:
-            ToolResultResponse: 压缩后的图片信息和预签名 URL
-
-        Raises:
-            HTTPException: 压缩失败或格式不支持
-        """
+        """图片压缩接口"""
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -153,14 +613,13 @@ class ToolsAPI:
 
                     if size <= target_bytes:
                         best_bytes = temp_buffer.getvalue()
-                        low = mid + 1  # 尝试提高质量
+                        low = mid + 1
                     else:
-                        high = mid - 1  # 降低质量
+                        high = mid - 1
 
                 if best_bytes:
                     output_buffer.write(best_bytes)
                 else:
-                    # 如果连最低质量(1)都无法满足,只能保存最低质量
                     image.save(output_buffer, format="JPEG", quality=1)
             else:
                 image.save(output_buffer, format="JPEG", quality=quality)
@@ -169,7 +628,7 @@ class ToolsAPI:
             converted_size = len(compressed_bytes)
 
             # 上传到 S3
-            object_key = f"tools/images/{current_user.user_id}/{uuid.uuid4().hex}.jpg"
+            object_key = f"tools/images/{current_user['user_id']}/{uuid.uuid4().hex}.jpg"
             s3_service.upload_bytes(compressed_bytes, object_key, content_type="image/jpeg")
 
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
@@ -204,17 +663,7 @@ class ToolsAPI:
         height: int | None = None,
         target_size_kb: int | None = None,
     ) -> ToolResultResponse:
-        """图片格式转换接口
-
-        Args:
-            file: 上传的图片文件
-            target_format: 目标格式 (如 png, jpeg, ico, webp)
-            current_user: 当前用户
-            s3_service: S3 存储服务
-
-        Returns:
-            转换后的图片信息和预签名 URL
-        """
+        """图片格式转换接口"""
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -231,9 +680,8 @@ class ToolsAPI:
             image = Image.open(BytesIO(content))
             original_width, original_height = image.size
 
-            # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式,且原图带 Alpha
+            # 如果目标是 JPEG 或目标是不支持 Alpha 通道的格式
             if fmt in ("JPEG", "BMP") and image.mode in ("RGBA", "LA", "P"):
-                # 处理透明背景为白色
                 background = Image.new("RGB", image.size, (255, 255, 255))
                 if image.mode == "RGBA":
                     background.paste(image, mask=image.split()[3])
@@ -251,10 +699,9 @@ class ToolsAPI:
                     if sizes
                     else [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
                 )
-                # Pillow 保存 ICO 时支持 sizes 参数来打包多尺寸
                 image.save(output_buffer, format=fmt, sizes=ico_sizes)
                 if ico_sizes:
-                    converted_width, converted_height = ico_sizes[-1]  # use largest for display
+                    converted_width, converted_height = ico_sizes[-1]
             else:
                 if width or height:
                     target_w = width if width else int(original_width * (height / original_height))
@@ -262,7 +709,6 @@ class ToolsAPI:
                     image = image.resize((target_w, target_h), Image.Resampling.LANCZOS)
                     converted_width, converted_height = target_w, target_h
                 elif sizes and len(sizes) > 0:
-                    # Fallback for older param if still passed for non-ico
                     image = image.resize((sizes[0], sizes[0]), Image.Resampling.LANCZOS)
                     converted_width, converted_height = sizes[0], sizes[0]
 
@@ -288,7 +734,6 @@ class ToolsAPI:
                     else:
                         image.save(output_buffer, format=fmt, quality=1)
                 else:
-                    # PNG, BMP 等不支持 quality 动态调整,或者未指定大小
                     if fmt in ("JPEG", "WEBP"):
                         image.save(output_buffer, format=fmt, quality=90)
                     else:
@@ -301,7 +746,7 @@ class ToolsAPI:
             content_type = f"image/{ext}" if ext != "ico" else "image/x-icon"
 
             # 上传到 S3
-            object_key = f"tools/images_converted/{current_user.user_id}/{uuid.uuid4().hex}.{ext}"
+            object_key = f"tools/images_converted/{current_user['user_id']}/{uuid.uuid4().hex}.{ext}"
             s3_service.upload_bytes(converted_bytes, object_key, content_type=content_type)
 
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
@@ -322,7 +767,7 @@ class ToolsAPI:
             logger.error(f"图片格式转换失败: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={"code": 500, "message": "图片格式转换失败,可能是不支持的格式"},
+                detail={"code": 500, "message": "图片格式转换失败"},
             )
 
     @staticmethod
@@ -331,19 +776,7 @@ class ToolsAPI:
         current_user: CurrentUser,
         s3_service: S3StorageService,
     ) -> ToolResultResponse:
-        """多文件 ZIP 压缩接口
-
-        Args:
-            files: 多个上传的文件
-            current_user: 当前用户
-            s3_service: S3 存储服务
-
-        Returns:
-            ToolResultResponse: 压缩后的 ZIP 文件信息和预签名 URL
-
-        Raises:
-            HTTPException: 压缩失败
-        """
+        """多文件 ZIP 压缩接口"""
         if not files:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -361,7 +794,7 @@ class ToolsAPI:
             zip_bytes = zip_buffer.getvalue()
 
             # 上传到 S3
-            object_key = f"tools/zip/{current_user.user_id}/{uuid.uuid4().hex}.zip"
+            object_key = f"tools/zip/{current_user['user_id']}/{uuid.uuid4().hex}.zip"
             s3_service.upload_bytes(zip_bytes, object_key, content_type="application/zip")
 
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
@@ -379,79 +812,83 @@ class ToolsAPI:
             )
 
 
-# 注册路由
-@router.post(
-    "/md_to_pdf",
-    response_model=ToolResultResponse,
-    tags=["工具"],
-    summary="Markdown 转 PDF",
-    description="将 Markdown 文件转换为 PDF, 并上传到 S3 返回限时下载链接.",
-)
-async def md_to_pdf_endpoint(
-    current_user: CurrentUser,
-    file: UploadFile = File(...),
-    s3_service: S3StorageService = Depends(S3StorageService),
-) -> ToolResultResponse:
-    """将 Markdown 文件转换为 PDF 并上传到 S3 返回限时下载链接"""
-    return await ToolsAPI.convert_md_to_pdf(file, current_user, s3_service)
+class ToolsRouter:
+    """工具路由类"""
 
-
-@router.post(
-    "/compress_image",
-    response_model=ToolResultResponse,
-    tags=["工具"],
-    summary="压缩图片",
-    description="压缩图片并上传到 S3, 返回限时下载链接.",
-)
-async def compress_image_endpoint(
-    current_user: CurrentUser,
-    file: UploadFile = File(...),
-    quality: int = Form(60, description="压缩质量 (1-100)"),
-    target_size_kb: int | None = Form(None, description="目标文件大小(KB),若指定则动态调整 quality 尝试逼近该大小"),
-    s3_service: S3StorageService = Depends(S3StorageService),
-) -> ToolResultResponse:
-    """压缩图片并上传到 S3 返回限时下载链接"""
-    return await ToolsAPI.compress_image(file, quality, current_user, s3_service, target_size_kb)
-
-
-@router.post(
-    "/compress_zip",
-    response_model=ToolResultResponse,
-    tags=["工具"],
-    summary="压缩为 ZIP",
-    description="将多个文件打包为 ZIP 并上传到 S3, 返回限时下载链接.",
-)
-async def compress_zip_endpoint(
-    current_user: CurrentUser,
-    files: list[UploadFile] = File(...),
-    s3_service: S3StorageService = Depends(S3StorageService),
-) -> ToolResultResponse:
-    """将多个文件压缩为 ZIP 并上传到 S3 返回限时下载链接"""
-    return await ToolsAPI.compress_files_to_zip(files, current_user, s3_service)
-
-
-@router.post(
-    "/convert_image",
-    response_model=ToolResultResponse,
-    tags=["工具"],
-    summary="转换图片格式",
-    description="转换图片格式并上传到 S3, 返回限时下载链接.",
-)
-async def convert_image_endpoint(
-    current_user: CurrentUser,
-    file: UploadFile = File(...),
-    target_format: str = Form(..., description="目标格式,如 png, jpeg, ico, webp"),
-    sizes: str | None = Form(None, description="尺寸列表,逗号分隔,如 16,32,256"),
-    width: int | None = Form(None, description="指定转换宽度(像素)"),
-    height: int | None = Form(None, description="指定转换高度(像素)"),
-    target_size_kb: int | None = Form(None, description="目标大小(KB),仅对支持压缩的格式如 JPEG/WEBP 有效"),
-    s3_service: S3StorageService = Depends(S3StorageService),
-) -> ToolResultResponse:
-    """转换图片格式并上传到 S3 返回限时下载链接"""
-    parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
-    return await ToolsAPI.convert_image(
-        file, target_format, current_user, s3_service, parsed_sizes, width, height, target_size_kb
+    @staticmethod
+    @router.post(
+        "/md_to_pdf",
+        response_model=ToolResultResponse,
+        tags=["工具"],
+        summary="Markdown 转 PDF",
+        description="将 Markdown 文件转换为 PDF, 并上传到 S3 返回限时下载链接.",
     )
+    async def md_to_pdf(
+        current_user: CurrentUser,
+        file: UploadFile = File(...),
+        base_dir: str = Form("", description="Markdown 文件所在目录, 用于解析相对路径图片"),
+        s3_service: S3StorageService = Depends(S3StorageService),
+    ) -> ToolResultResponse:
+        """将 Markdown 文件转换为 PDF 并上传到 S3 返回限时下载链接."""
+        return await ToolsAPI.convert_md_to_pdf(file, current_user, s3_service, base_dir)
+
+    @staticmethod
+    @router.post(
+        "/compress_image",
+        response_model=ToolResultResponse,
+        tags=["工具"],
+        summary="压缩图片",
+        description="压缩图片并上传到 S3, 返回限时下载链接.",
+    )
+    async def compress_image(
+        current_user: CurrentUser,
+        file: UploadFile = File(...),
+        quality: int = Form(60, description="压缩质量 (1-100)"),
+        target_size_kb: int | None = Form(None, description="目标文件大小(KB)"),
+        s3_service: S3StorageService = Depends(S3StorageService),
+    ) -> ToolResultResponse:
+        """压缩图片并上传到 S3 返回限时下载链接."""
+        return await ToolsAPI.compress_image(file, quality, current_user, s3_service, target_size_kb)
+
+    @staticmethod
+    @router.post(
+        "/compress_zip",
+        response_model=ToolResultResponse,
+        tags=["工具"],
+        summary="压缩为 ZIP",
+        description="将多个文件打包为 ZIP 并上传到 S3, 返回限时下载链接.",
+    )
+    async def compress_zip(
+        current_user: CurrentUser,
+        files: list[UploadFile] = File(...),
+        s3_service: S3StorageService = Depends(S3StorageService),
+    ) -> ToolResultResponse:
+        """将多个文件压缩为 ZIP 并上传到 S3 返回限时下载链接."""
+        return await ToolsAPI.compress_files_to_zip(files, current_user, s3_service)
+
+    @staticmethod
+    @router.post(
+        "/convert_image",
+        response_model=ToolResultResponse,
+        tags=["工具"],
+        summary="转换图片格式",
+        description="转换图片格式并上传到 S3, 返回限时下载链接.",
+    )
+    async def convert_image(
+        current_user: CurrentUser,
+        file: UploadFile = File(...),
+        target_format: str = Form(..., description="目标格式"),
+        sizes: str | None = Form(None, description="尺寸列表"),
+        width: int | None = Form(None, description="宽度"),
+        height: int | None = Form(None, description="高度"),
+        target_size_kb: int | None = Form(None, description="目标大小(KB)"),
+        s3_service: S3StorageService = Depends(S3StorageService),
+    ) -> ToolResultResponse:
+        """转换图片格式并上传到 S3 返回限时下载链接."""
+        parsed_sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()] if sizes else None
+        return await ToolsAPI.convert_image(
+            file, target_format, current_user, s3_service, parsed_sizes, width, height, target_size_kb
+        )
 
 
-__all__ = ["router", "ToolsAPI"]
+__all__ = ["router", "ToolsAPI", "ToolsRouter", "PDFGenerator"]
