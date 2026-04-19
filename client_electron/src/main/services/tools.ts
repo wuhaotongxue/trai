@@ -21,11 +21,15 @@ export const tools_service = {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.tools_md_to_pdf)
       const form_data = new FormData()
-      
+
       const file_buffer = await fs.promises.readFile(file_path)
       const filename = path.basename(file_path)
+      const base_dir = path.dirname(file_path)
+
       form_data.append('file', new Blob([file_buffer]), filename)
-      
+      // 额外传递文件所在目录, 用于解析相对路径的图片
+      form_data.append('base_dir', base_dir)
+
       const res = await api_client.post(url, form_data)
       
       return { success: true, data: res.data }

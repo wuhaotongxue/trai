@@ -60,11 +60,13 @@ const Tools: React.FC = () => {
       set_loading_task('md2pdf')
       set_error_msg('')
       set_result_url('')
+      set_result_info(null)
       
       try {
         const res = await window.electron_api.tools_convert_md_to_pdf(file.path)
         if (res.success && res.data) {
           set_result_url(res.data.url)
+          set_result_info(res.data)
         } else {
           set_error_msg(res.error || '转换失败')
         }
@@ -229,7 +231,7 @@ const Tools: React.FC = () => {
     },
     {
       id: 'zip',
-      title: 'ZIP 打包压缩',
+      title: 'ZIP 压缩',
       description: '将多个文件打包压缩成一个 ZIP 文件',
       icon: <FileArchive size={32} color="#f59e0b" />,
       action: handle_compress_zip,
@@ -238,7 +240,7 @@ const Tools: React.FC = () => {
     },
     {
       id: 'convert_image',
-      title: '图片格式转换',
+      title: '格式转换',
       description: '在常见格式间互转 (如 png, jpeg, ico, webp)',
       icon: <RefreshCw size={32} color="#0ea5e9" />,
       action: handle_convert_image,
@@ -378,11 +380,15 @@ const Tools: React.FC = () => {
   const categories: ToolCategory[] = [
     { id: 'all', name: '全部工具', icon: <Wrench size={16} />, tools: all_tools },
     { id: 'convert', name: '格式转换', icon: <RefreshCw size={16} />, tools: all_tools.filter(t => ['md2pdf', 'convert_image'].includes(t.id)) },
-    { id: 'compress', name: '压缩打包', icon: <FileArchive size={16} />, tools: all_tools.filter(t => ['image', 'zip'].includes(t.id)) }
+    { id: 'compress', name: '压缩工具', icon: <FileArchive size={16} />, tools: all_tools.filter(t => ['image', 'zip'].includes(t.id)) }
   ]
 
   const active_cat = categories.find(c => c.id === active_cat_id) || categories[0]
   const active_tool = all_tools.find(t => t.id === active_tool_id)
+
+  const should_ellipsis = (text: string): boolean => {
+    return text.replace(/\s+/g, '').length > 4
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
@@ -407,7 +413,7 @@ const Tools: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>工具箱</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>工具箱</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -497,7 +503,15 @@ const Tools: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_cat.name}</span>
+              <span
+                style={
+                  should_ellipsis(active_cat.name)
+                    ? { fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                    : { fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }
+                }
+              >
+                {active_cat.name}
+              </span>
             </div>
             <button
               type="button"
@@ -547,7 +561,13 @@ const Tools: React.FC = () => {
                   }}
                 >
                   {React.cloneElement(tool.icon as React.ReactElement<any>, { size: 16 })}
-                  <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div
+                    style={
+                      should_ellipsis(tool.title)
+                        ? { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                        : { flex: 1, whiteSpace: 'nowrap' }
+                    }
+                  >
                     {tool.title}
                   </div>
                 </div>
@@ -686,7 +706,17 @@ const Tools: React.FC = () => {
                     <p style={{ margin: 0, color: '#b91c1c', fontSize: '14px' }}>{error_msg}</p>
                   ) : (
                     <div>
-                      <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>文件已成功生成，请点击下方按钮下载（链接有效期 5 分钟）。</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>
+                        {result_info?.expires_in && result_info.expires_in > 0
+                          ? '文件已成功生成，请点击下方按钮下载，链接有效期 5 分钟。'
+                          : '文件已成功生成，请点击下方按钮下载。'}
+                      </p>
+
+                      {result_info?.message && result_info.message !== '处理成功' && (
+                        <p style={{ margin: '0 0 12px 0', color: '#065f46', fontSize: '13px' }}>
+                          {result_info.message}
+                        </p>
+                      )}
                       
                       {result_info && result_info.original_size !== undefined && (
                         <div style={{ marginBottom: '12px', fontSize: '13px', color: '#047857', display: 'flex', gap: '16px', backgroundColor: '#d1fae5', padding: '8px 12px', borderRadius: '6px' }}>

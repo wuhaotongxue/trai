@@ -6,7 +6,7 @@
  */
 import { ipcMain } from 'electron'
 import log from 'electron-log'
-import { get_system_info } from '../platform/index'
+import { get_system_info, get_system_metrics } from '../platform/index'
 import { config_store } from '../platform/config_store'
 import { auth_service } from '../services/auth'
 import { tools_service } from '../services/tools'
@@ -29,6 +29,16 @@ export const register_ipc_handlers = (): void => {
     } catch (error) {
       log.error('failed to get system info', error)
       return { success: false, error: 'failed to get system info' }
+    }
+  })
+
+  ipcMain.handle('system:get_metrics', async () => {
+    try {
+      const metrics = get_system_metrics()
+      return { success: true, data: metrics }
+    } catch (error) {
+      log.error('failed to get system metrics', error)
+      return { success: false, error: 'failed to get system metrics' }
     }
   })
 

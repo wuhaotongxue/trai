@@ -49,6 +49,15 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_2159
+- **feat(platform)**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
+- **feat(ipc)**: 注册 system:get_info 和 system:get_metrics IPC 处理器
+- **feat(tools)**: 工具箱页面支持 Markdown 转 PDF 功能
+- **优化(layout)**: 优化三栏布局组件和侧边栏组件
+- **优化(ui)**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
+- **优化(dashboard)**: 优化仪表盘页面布局
+- **优化(feedback)**: 优化反馈页面布局
+
 ### 💻 客户端_2026_04_19_1109
 - **fix(layout)**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
 - **fix(layout)**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
