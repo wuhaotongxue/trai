@@ -54,7 +54,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
       {/* 顶部标题栏 - 横跨整个宽度 */}
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {titleIcon}
           <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{title}</span>
@@ -69,7 +69,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             width: is_left_open ? '18%' : '0px',
             minWidth: is_left_open ? '100px' : '0px',
             opacity: is_left_open ? 1 : 0,
-            backgroundColor: '#f1f5f9',
+            backgroundColor: '#ffffff',
             borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
             display: 'flex',
             flexDirection: 'column',
@@ -77,7 +77,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             overflow: 'hidden',
             flexShrink: 1
           }}>
-            <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {leftPanelTitle && (
                 <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
               )}
@@ -112,7 +112,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             overflow: 'hidden',
             flexShrink: 1
           }}>
-            <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {leftPanel && !is_left_open && (
                   <button
@@ -120,7 +120,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                     onClick={() => set_is_left_open(true)}
                     title="展开左侧面板"
                     aria-label="展开左侧面板"
-                    style={{ ...hover_btn_style, marginRight: '4px' }}
+                    style={{ ...hover_btn_style }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
@@ -151,7 +151,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {/* 展开按钮区域 */}
-          <div style={{ padding: '16px 24px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
             {leftPanel && !is_left_open && (
               <button
                 onClick={() => set_is_left_open(true)}
