@@ -39,6 +39,19 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_19_2159
+- **feat(platform)**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
+- **feat(ipc)**: 注册 system:get_info 和 system:get_metrics IPC 处理器
+- **feat(tools)**: 工具箱页面支持 Markdown 转 PDF 功能
+- **优化(layout)**: 优化三栏布局组件和侧边栏组件
+- **优化(ui)**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
+- **优化(dashboard)**: 优化仪表盘页面布局
+- **优化(feedback)**: 优化反馈页面布局
+
+### 🛠️ 后端_2026_04_19_2132
+- **fix(ruff)**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
+- **fix(ruff)**: 修复 weather.py 未使用变量 lang，添加 noqa 标记
+
 ### 💻 客户端_2026_04_19_1109
 - **fix(layout)**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
 - **fix(layout)**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
@@ -87,7 +100,7 @@ cd trai
 - **修复(api_url)**: 修复 api_url.ts 中的正则表达式错误
 - **优化(naming)**: 文件和路径命名统一 snake_case，移除 kebab-case
 
-### �🛠️ 后端_2026_04_19_0302
+### 🛠️ 后端_2026_04_19_0302
 - **修复(weather)**: 天气工具完全恢复到 commit 9ae0c25 版本，确保使用 Open-Meteo 免费 API，优化异常处理和详细日志
 - **修复(merge)**: 修复合并问题，恢复之前提交的正确代码，包括流式工具调用、Agent 系统提示词等功能
 
@@ -176,7 +189,7 @@ cd trai
 - **优化(responsive)**: 添加弹性布局和溢出处理，确保所有内容都能正常显示
 - **修复(typescript)**: 修复所有类型错误，确保代码的类型安全
 
-### �🔐 账号_2026_04_17_2257
+### 🔐 账号_2026_04_17_2257
 - **新增(admin_user)**: 管理后台新增创建用户接口, 支持创建 `wuhao` 等账号用于登录
 - **修复(password)**: 修复修改密码接口无法更新密码哈希导致 500 的问题
 - **隔离(knowledge_base)**: 非超级管理员仅可访问自己前缀知识库, 避免跨账号查看
@@ -509,7 +522,7 @@ cd trai
 ### 📚 docs(project)_2026_04_13_1803
 - **新增(project)**: README 补充 Conda 后端环境创建指南，新增 `pip install -i https://pypi.tuna.tsinghua.edu.cn/simple` 清华源加速说明
 
-### � 客户端_2026_04_13_1754
+### 💻 客户端_2026_04_13_1754
 - **重构(client_electron)**: 删除冗余的 `desktop_client` 目录，统一桌面端架构为基于 Electron 的 `client_electron` 模块
 - **重构(skills)**: 修改 `desktop_client` 审查规范为重定向通知，引导使用者使用 `electron` 的开发规范
 

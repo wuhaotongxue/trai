@@ -30,6 +30,10 @@ const AiMusic: React.FC = () => {
   const [active_style, set_active_style] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('modern')
 
+  const should_ellipsis = (text: string): boolean => {
+    return text.replace(/\s+/g, '').length > 4
+  }
+
   const categories: MusicCategory[] = [
     { id: 'modern', name: '现代', icon: <Zap size={14} /> },
     { id: 'classic', name: '古典', icon: <Music2 size={14} /> }
@@ -102,7 +106,15 @@ const AiMusic: React.FC = () => {
           }}
         >
           {category.icon}
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+          <span
+            style={
+              should_ellipsis(category.name)
+                ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                : { whiteSpace: 'nowrap' }
+            }
+          >
+            {category.name}
+          </span>
         </button>
       ))}
     </>
@@ -134,7 +146,15 @@ const AiMusic: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             {style.icon}
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{style.name}</span>
+            <span
+              style={
+                should_ellipsis(style.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {style.name}
+            </span>
           </div>
           {active_style === style.id && <ChevronRight size={14} />}
         </button>

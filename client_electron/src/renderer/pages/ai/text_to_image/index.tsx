@@ -29,6 +29,10 @@ const TextToImage: React.FC = () => {
   const [active_template, set_active_template] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('animal')
 
+  const should_ellipsis = (text: string): boolean => {
+    return text.replace(/\s+/g, '').length > 4
+  }
+
   const categories: StyleCategory[] = [
     { id: 'animal', name: '动物', icon: <Cat size={14} /> },
     { id: 'city', name: '城市', icon: <Building2 size={14} /> },
@@ -103,7 +107,15 @@ const TextToImage: React.FC = () => {
           }}
         >
           {category.icon}
-          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+          <span
+            style={
+              should_ellipsis(category.name)
+                ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                : { whiteSpace: 'nowrap' }
+            }
+          >
+            {category.name}
+          </span>
         </button>
       ))}
     </>
@@ -135,7 +147,15 @@ const TextToImage: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
             <Palette size={14} />
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{template.name}</span>
+            <span
+              style={
+                should_ellipsis(template.name)
+                  ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                  : { whiteSpace: 'nowrap' }
+              }
+            >
+              {template.name}
+            </span>
           </div>
           {active_template === template.id && <ChevronRight size={14} />}
         </button>

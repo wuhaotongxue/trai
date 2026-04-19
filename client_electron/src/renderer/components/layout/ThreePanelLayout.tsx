@@ -69,7 +69,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
         {leftPanel && (
           <div style={{
             width: is_left_open ? '10%' : '0px',
-            minWidth: is_left_open ? '70px' : '0px',
+            minWidth: is_left_open ? '140px' : '0px',
             opacity: is_left_open ? 1 : 0,
             backgroundColor: '#ffffff',
             borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
