@@ -456,7 +456,7 @@ const Settings: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <PanelLeftClose size={18} />
+              <PanelLeftClose size={16} />
             </button>
           </div>
           
@@ -541,7 +541,7 @@ const Settings: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <List size={18} />
+              <List size={16} />
             </button>
           </div>
           
@@ -595,7 +595,7 @@ const Settings: React.FC = () => {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <PanelLeftOpen size={18} />
+                  <PanelLeftOpen size={16} />
                 </button>
               )}
               {!is_middle_sidebar_open && (
@@ -612,7 +612,7 @@ const Settings: React.FC = () => {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <List size={18} />
+                  <List size={16} />
                 </button>
               )}
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
