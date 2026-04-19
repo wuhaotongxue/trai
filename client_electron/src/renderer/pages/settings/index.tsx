@@ -180,7 +180,6 @@ const Settings: React.FC = () => {
       case 'api_config':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>网络配置</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '400px' }}>
               <label style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>后端 API 地址</label>
               <input 
@@ -223,7 +222,6 @@ const Settings: React.FC = () => {
       case 'update':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600' }}>系统更新</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
               <div style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>
                 当前版本: <span style={{ fontWeight: '500', color: '#202020' }}>v{current_version || '未知'}</span>
@@ -278,10 +276,6 @@ const Settings: React.FC = () => {
       case 'avatar':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Upload size={18} color="#0078d4" />
-              头像设置
-            </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               <div style={{ 
                 width: '80px', 
@@ -343,10 +337,6 @@ const Settings: React.FC = () => {
       case 'password':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '14px', margin: '0 0 16px 0', color: '#202020', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <KeyRound size={18} color="#0078d4" />
-              修改密码
-            </h3>
             <form onSubmit={handle_change_password} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
               <div>
                 <label style={{ fontSize: '13px', color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '6px' }}>原密码</label>
@@ -605,6 +595,30 @@ const Settings: React.FC = () => {
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              {!is_middle_sidebar_open && (
+                <button
+                  type="button"
+                  onClick={() => set_is_middle_sidebar_open(true)}
+                  title="展开设置项栏"
+                  aria-label="展开设置项栏"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+              )}
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+                {setting_items.find(item => item.id === active_item)?.name || '设置详情'}
+              </span>
+            </div>
+          </div>
           <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#ffffff' }}>
             {render_content()}
           </div>
