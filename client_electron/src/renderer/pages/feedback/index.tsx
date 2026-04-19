@@ -116,7 +116,7 @@ const Feedback: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquarePlus size={20} color="#0ea5e9" />
           <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>用户反馈</span>
@@ -129,7 +129,7 @@ const Feedback: React.FC = () => {
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#f1f5f9', 
+          backgroundColor: '#ffffff', 
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
@@ -137,7 +137,7 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>反馈</span>
             <button
               type="button"
@@ -199,7 +199,7 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>说明</span>
             <button
               type="button"
