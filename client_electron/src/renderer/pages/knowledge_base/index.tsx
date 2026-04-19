@@ -879,6 +879,7 @@ const KnowledgeBasePage: React.FC = () => {
                 <div 
                   key={kb.id}
                   onClick={() => set_active_kb_id(kb.id)}
+                  title={`创建时间: ${kb.created_at}`}
                   style={{
                     padding: '12px 16px',
                     borderRadius: '8px',
@@ -970,7 +971,6 @@ const KnowledgeBasePage: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginLeft: '20px' }}>{kb.created_at}</div>
                 </div>
               ))
             )}
