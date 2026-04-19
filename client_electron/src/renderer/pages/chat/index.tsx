@@ -373,7 +373,7 @@ const AgentChat: React.FC = () => {
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#f1f5f9',
+          backgroundColor: '#ffffff',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
           display: 'flex',
           flexDirection: 'column',
@@ -474,8 +474,7 @@ const AgentChat: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
-                    marginRight: '4px'
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
