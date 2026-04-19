@@ -1072,7 +1072,7 @@ const KnowledgeBasePage: React.FC = () => {
                       title="搜索文件"
                       value={search_query}
                       onChange={e => set_search_query(e.target.value)}
-                      style={{ padding: '6px 12px 6px 32px', border: '1px solid #e2e8f0', borderRadius: '6px', outline: 'none', fontSize: '13px', width: '200px', height: '32px', boxSizing: 'border-box' }}
+                      style={{ padding: '4px 12px 4px 32px', border: '1px solid #e2e8f0', borderRadius: '4px', outline: 'none', fontSize: '13px', width: '200px', height: '28px', boxSizing: 'border-box' }}
                     />
                   </div>
                   <button
