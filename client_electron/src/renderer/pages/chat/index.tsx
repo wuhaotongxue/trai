@@ -952,9 +952,9 @@ const AgentChat: React.FC = () => {
                                           </span>
                                           
                                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: text_color, fontSize: '12px', marginRight: '8px' }}>
-                                            {is_start && <Loader2 size={12} className="animate-spin" />}
-                                            {is_success && <CheckCircle2 size={12} />}
-                                            {is_fail && <XCircle size={12} />}
+                                            {is_start && !has_success_result && !has_fail_result && <Loader2 size={12} className="animate-spin" />}
+                                            {(is_success || (is_start && has_success_result)) && <CheckCircle2 size={12} />}
+                                            {(is_fail || (is_start && has_fail_result)) && <XCircle size={12} />}
                                             <span>{status_text}</span>
                                           </div>
                                           
