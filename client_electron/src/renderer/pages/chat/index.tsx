@@ -880,14 +880,36 @@ const AgentChat: React.FC = () => {
                                     const is_start = step.type === 'tool_start'
                                     const is_success = step.success === true
                                     const is_fail = step.success === false
-                                    
+
+                                    // 检查是否有对应的 tool_result 成功返回
+                                    const has_success_result = unique_steps.some(s =>
+                                      s.type === 'tool_result' && s.tool_name === step.tool_name && s.success === true
+                                    )
+                                    const has_fail_result = unique_steps.some(s =>
+                                      s.type === 'tool_result' && s.tool_name === step.tool_name && s.success === false
+                                    )
+
                                     let border_color = '#e2e8f0'
                                     let header_bg = '#ffffff'
                                     let icon_color = '#64748b'
                                     let text_color = '#475569'
                                     let status_text = '执行中...'
-                                    
-                                    if (is_start) {
+
+                                    if (is_start && has_success_result) {
+                                      // tool_start 且对应的 tool_result 成功
+                                      border_color = '#bbf7d0'
+                                      header_bg = '#f0fdf4'
+                                      icon_color = '#16a34a'
+                                      text_color = '#15803d'
+                                      status_text = '已完成'
+                                    } else if (is_start && has_fail_result) {
+                                      // tool_start 且对应的 tool_result 失败
+                                      border_color = '#fecaca'
+                                      header_bg = '#fef2f2'
+                                      icon_color = '#dc2626'
+                                      text_color = '#b91c1c'
+                                      status_text = '失败'
+                                    } else if (is_start) {
                                       border_color = '#bae6fd'
                                       header_bg = '#f0f9ff'
                                       icon_color = '#0284c7'
