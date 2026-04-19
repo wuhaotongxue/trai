@@ -5,13 +5,20 @@
  * 描述: AI 音乐页面 - 使用通用三段式布局, 自适应缩放
  */
 import React, { useState } from 'react'
-import { Music, Loader2, ChevronRight, Headphones, Radio, Guitar, Piano } from 'lucide-react'
+import { Music, Loader2, ChevronRight, Headphones, Radio, Guitar, Piano, Zap, Music2 } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
 
 interface MusicStyle {
   id: string
   name: string
   prompt: string
+  icon: React.ReactNode
+  category: string
+}
+
+interface MusicCategory {
+  id: string
+  name: string
   icon: React.ReactNode
 }
 
@@ -21,13 +28,21 @@ const AiMusic: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
   const [active_style, set_active_style] = useState<string>('')
+  const [active_category, set_active_category] = useState<string>('modern')
+
+  const categories: MusicCategory[] = [
+    { id: 'modern', name: '现代', icon: <Zap size={14} /> },
+    { id: 'classic', name: '古典', icon: <Music2 size={14} /> }
+  ]
 
   const music_styles: MusicStyle[] = [
-    { id: 'electronic', name: '电子乐', prompt: '一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点', icon: <Radio size={14} /> },
-    { id: 'classical', name: '古典音乐', prompt: '一首优美的古典钢琴曲，柔和的旋律，浪漫的氛围', icon: <Piano size={14} /> },
-    { id: 'rock', name: '摇滚', prompt: '一首充满力量的摇滚乐，激昂的吉他独奏，强烈的节奏', icon: <Guitar size={14} /> },
-    { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐，适合冥想和放松，自然音效', icon: <Headphones size={14} /> }
+    { id: 'electronic', name: '电子乐', prompt: '一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
+    { id: 'rock', name: '摇滚', prompt: '一首充满力量的摇滚乐，激昂的吉他独奏，强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
+    { id: 'classical', name: '古典音乐', prompt: '一首优美的古典钢琴曲，柔和的旋律，浪漫的氛围', icon: <Piano size={14} />, category: 'classic' },
+    { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐，适合冥想和放松，自然音效', icon: <Headphones size={14} />, category: 'classic' }
   ]
+
+  const filtered_styles = music_styles.filter(s => s.category === active_category)
 
   const handle_generate = async () => {
     if (!prompt.trim()) return
@@ -54,9 +69,48 @@ const AiMusic: React.FC = () => {
     set_active_style(style.id)
   }
 
+  const leftPanel = (
+    <>
+      {categories.map(category => (
+        <button
+          key={category.id}
+          onClick={() => {
+            set_active_category(category.id)
+            // 自动填充该分类的第一个模板
+            const first_style = music_styles.find(s => s.category === category.id)
+            if (first_style) {
+              set_prompt(first_style.prompt)
+              set_active_style(first_style.id)
+            }
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            backgroundColor: active_category === category.id ? '#f0f9ff' : 'transparent',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: active_category === category.id ? '#0ea5e9' : '#475569',
+            fontWeight: active_category === category.id ? '600' : 'normal',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '4px',
+            transition: 'all 0.2s'
+          }}
+        >
+          {category.icon}
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{category.name}</span>
+        </button>
+      ))}
+    </>
+  )
+
   const middlePanel = (
     <>
-      {music_styles.map(style => (
+      {filtered_styles.map(style => (
         <button
           key={style.id}
           onClick={() => apply_style(style)}
@@ -92,8 +146,11 @@ const AiMusic: React.FC = () => {
     <ThreePanelLayout
       title="AI 音乐生成"
       titleIcon={<Music size={20} color="#0ea5e9" />}
+      leftPanelTitle="音乐分类"
+      leftPanel={leftPanel}
       middlePanelTitle="风格预设"
       middlePanel={middlePanel}
+      rightPanelTitle="音乐生成"
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
