@@ -228,69 +228,70 @@ const AgentManagement: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-            <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
-              <button
-                type="button"
-                onClick={() => set_show_register_modal(true)}
-                aria-label="新建 Agent"
-                style={{
-                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                  padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
-                  borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <Plus size={14} /> Agent
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '8px', padding: '0 4px', fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
-              已注册 Agent
-            </div>
-            {agents.map(agent => {
-              const AgentIcon = get_icon_component(agent.icon)
-              return (
-                <div
-                  key={agent.id}
-                  onClick={() => set_active_agent_id(agent.id)}
-                  style={{
-                    padding: '10px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: active_agent_id === agent.id ? '#e0f2fe' : 'transparent',
-                    color: active_agent_id === agent.id ? '#0369a1' : '#475569',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '4px',
-                    fontSize: '14px',
-                    fontWeight: active_agent_id === agent.id ? 600 : 400,
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = '#e2e8f0'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
-                  }}
-                >
-                  <AgentIcon size={16} />
-                  <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {agent.name}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
+            {agents.length === 0 ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无Agent</div>
+            ) : (
+              agents.map(agent => {
+                const AgentIcon = get_icon_component(agent.icon)
+                return (
+                  <div
+                    key={agent.id}
+                    onClick={() => set_active_agent_id(agent.id)}
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '6px',
+                      backgroundColor: active_agent_id === agent.id ? '#e0f2fe' : 'transparent',
+                      color: active_agent_id === agent.id ? '#0369a1' : '#475569',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '4px',
+                      fontSize: '13px',
+                      fontWeight: active_agent_id === agent.id ? 600 : 400,
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <AgentIcon size={16} />
+                    <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {agent.name}
+                    </div>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor:
+                        agent.status === 'running' ? '#10b981' :
+                        agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
+                    }} />
                   </div>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor:
-                      agent.status === 'running' ? '#10b981' :
-                      agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
-                  }} />
-                </div>
-              )
-            })}
+                )
+              })
+            )}
+          </div>
+
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+            <button
+              type="button"
+              onClick={() => set_show_register_modal(true)}
+              aria-label="新建 Agent"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <Plus size={14} /> Agent
+            </button>
           </div>
         </div>
 
