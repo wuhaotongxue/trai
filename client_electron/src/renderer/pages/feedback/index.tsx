@@ -137,8 +137,8 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '180px', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>反馈</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>反馈</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -147,7 +147,8 @@ const Feedback: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                flexShrink: 0
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -199,8 +200,8 @@ const Feedback: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '200px', boxSizing: 'border-box' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>说明</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>说明</span>
             <button
               type="button"
               onClick={() => set_is_middle_sidebar_open(false)}
@@ -209,7 +210,8 @@ const Feedback: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                flexShrink: 0
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -218,35 +220,69 @@ const Feedback: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', minWidth: '200px', boxSizing: 'border-box' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
             <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
               {active_type === 'suggestion' && (
                 <>
+                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
+                    产品建议
+                  </p>
                   <p style={{ marginBottom: '12px' }}>
                     欢迎您提出宝贵的产品建议，我们将不断优化产品体验。
                   </p>
-                  <p style={{ color: '#64748b', fontSize: '12px' }}>
-                    请详细描述您的建议，包括功能改进、界面优化等方面。
+                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>建议包含以下内容：</p>
+                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
+                      <li>功能改进的具体描述</li>
+                      <li>界面优化的建议</li>
+                      <li>使用场景和预期效果</li>
+                    </ul>
+                  </div>
+                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
+                    您的建议将帮助我们做得更好！
                   </p>
                 </>
               )}
               {active_type === 'bug' && (
                 <>
+                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
+                    问题报告
+                  </p>
                   <p style={{ marginBottom: '12px' }}>
                     遇到问题？请详细描述您遇到的情况，我们会尽快修复。
                   </p>
-                  <p style={{ color: '#64748b', fontSize: '12px' }}>
-                    建议包含：操作步骤、预期结果、实际结果、截图等。
+                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>请提供以下信息：</p>
+                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
+                      <li>详细的操作步骤</li>
+                      <li>预期结果与实际结果</li>
+                      <li>错误提示信息</li>
+                      <li>相关截图（如有）</li>
+                    </ul>
+                  </div>
+                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
+                    信息越详细，我们修复越快！
                   </p>
                 </>
               )}
               {active_type === 'other' && (
                 <>
+                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
+                    其他反馈
+                  </p>
                   <p style={{ marginBottom: '12px' }}>
                     其他类型的反馈，请详细描述您的需求。
                   </p>
-                  <p style={{ color: '#64748b', fontSize: '12px' }}>
-                    我们会认真阅读每一条反馈。
+                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
+                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>可以包括：</p>
+                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
+                      <li>使用咨询</li>
+                      <li>合作意向</li>
+                      <li>其他问题</li>
+                    </ul>
+                  </div>
+                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
+                    我们会认真阅读每一条反馈！
                   </p>
                 </>
               )}
@@ -255,7 +291,7 @@ const Feedback: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>提交反馈</span>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
