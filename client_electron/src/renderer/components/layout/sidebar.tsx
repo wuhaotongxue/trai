@@ -4,7 +4,7 @@
  * 日期: 2026-04-13 18:15:00
  * 描述: 左侧侧边栏导航组件
  */
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen, Compass } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
@@ -19,6 +19,21 @@ const Sidebar: React.FC = () => {
   const user = use_auth_store((state) => state.user)
   const [collapsed, set_collapsed] = useState(false)
   const [expanded_groups, set_expanded_groups] = useState<Record<string, boolean>>({ ai: true, tools: true })
+  const [version, set_version] = useState('1.0.0')
+
+  useEffect(() => {
+    const load_version = async () => {
+      if (window.electron_api?.app_get_version) {
+        try {
+          const v = await window.electron_api.app_get_version()
+          set_version(v)
+        } catch (e) {
+          console.error('Failed to get app version', e)
+        }
+      }
+    }
+    load_version()
+  }, [])
 
   /**
    * 处理登出
@@ -265,7 +280,7 @@ const Sidebar: React.FC = () => {
         justifyContent: collapsed ? 'center' : 'flex-start'
       }}>
         {!collapsed ? (
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>v1.0.0</span>
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>v{version}</span>
         ) : (
           <span style={{ fontSize: '10px', color: '#94a3b8' }}>v1</span>
         )}

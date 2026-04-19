@@ -440,7 +440,9 @@ const Settings: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>设置分类</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>设置分类</span>
+            </div>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -451,7 +453,7 @@ const Settings: React.FC = () => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftOpen size={18} />
@@ -459,7 +461,6 @@ const Settings: React.FC = () => {
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', paddingLeft: '8px' }}>设置分类</div>
             <button
               onClick={() => handle_category_change('system')}
               style={{
@@ -534,7 +535,7 @@ const Settings: React.FC = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -554,7 +555,7 @@ const Settings: React.FC = () => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
@@ -608,7 +609,7 @@ const Settings: React.FC = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
