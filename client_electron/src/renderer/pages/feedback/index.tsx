@@ -255,6 +255,9 @@ const Feedback: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div className="drag-region" style={{ padding: '12px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>提交反馈</span>
+          </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
             <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
               
