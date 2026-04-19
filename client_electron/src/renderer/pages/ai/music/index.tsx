@@ -142,15 +142,18 @@ const AiMusic: React.FC = () => {
     </>
   )
 
+  const active_style_name = active_style ? music_styles.find(s => s.id === active_style)?.name : ''
+  const active_category_name = categories.find(c => c.id === active_category)?.name || '风格预设'
+
   return (
     <ThreePanelLayout
       title="AI 音乐生成"
       titleIcon={<Music size={20} color="#0ea5e9" />}
       leftPanelTitle="音乐分类"
       leftPanel={leftPanel}
-      middlePanelTitle="风格预设"
+      middlePanelTitle={active_category_name}
       middlePanel={middlePanel}
-      rightPanelTitle="音乐生成"
+      rightPanelTitle={active_style_name || '音乐生成'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>

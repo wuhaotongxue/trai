@@ -256,6 +256,21 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
 
+      {/* 版本号 */}
+      <div style={{
+        padding: collapsed ? '12px 0' : '12px 16px',
+        borderTop: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'flex-start'
+      }}>
+        {!collapsed ? (
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>v1.0.0</span>
+        ) : (
+          <span style={{ fontSize: '10px', color: '#94a3b8' }}>v1</span>
+        )}
+      </div>
+
     </div>
   )
 }
