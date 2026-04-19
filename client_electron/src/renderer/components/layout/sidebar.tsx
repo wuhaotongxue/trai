@@ -226,7 +226,7 @@ const Sidebar: React.FC = () => {
               }}
             >
               {item.icon}
-              {!collapsed && <span style={{ fontSize: '14px', fontWeight: is_active ? '600' : 'normal' }}>{item.label}</span>}
+              {!collapsed && <span style={{ fontSize: '13px', fontWeight: is_active ? '600' : 'normal' }}>{item.label}</span>}
             </div>
           )
         })}
@@ -247,7 +247,7 @@ const Sidebar: React.FC = () => {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <LogOut size={20} />
-          {!collapsed && <span style={{ fontSize: '14px' }}>退出</span>}
+          {!collapsed && <span style={{ fontSize: '13px' }}>退出</span>}
         </div>
       </div>
 

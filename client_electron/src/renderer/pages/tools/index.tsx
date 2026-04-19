@@ -187,8 +187,8 @@ const Tools: React.FC = () => {
   const all_tools: ToolItem[] = [
     {
       id: 'md2pdf',
-      title: 'Markdown 转 PDF',
-      description: '将 Markdown 文件渲染并导出为 PDF 文档',
+      title: 'MD 转 PDF',
+      description: '将 MD 文件渲染并导出为 PDF 文档',
       icon: <FileText size={32} color="#0ea5e9" />,
       action: handle_md_to_pdf,
       bg_color: '#f0f9ff',
@@ -389,7 +389,7 @@ const Tools: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Wrench size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>工具箱</h1>
+          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>工具箱</span>
         </div>
       </div>
       

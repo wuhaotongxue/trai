@@ -364,7 +364,7 @@ const AgentChat: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquare size={20} color="#0ea5e9" />
-          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>AI 对话</h1>
+          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>AI 对话</span>
         </div>
       </div>
       
@@ -381,7 +381,7 @@ const AgentChat: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能助手</span>
             <button
               type="button"
@@ -463,7 +463,7 @@ const AgentChat: React.FC = () => {
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -635,7 +635,7 @@ const AgentChat: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '16px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
                 {!is_left_sidebar_open && (
@@ -668,7 +668,7 @@ const AgentChat: React.FC = () => {
                 </button>
               </div>
             )}
-            <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</h1>
+            <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</span>
             <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
             
             <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
