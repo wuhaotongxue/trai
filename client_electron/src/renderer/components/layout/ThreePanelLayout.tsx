@@ -54,7 +54,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
       {/* 顶部标题栏 - 横跨整个宽度 */}
-      <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {titleIcon}
           <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{title}</span>
