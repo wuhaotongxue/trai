@@ -14,10 +14,17 @@ interface FeedbackType {
   value: string
 }
 
+interface FeedbackSubCategory {
+  id: string
+  name: string
+  description: string
+}
+
 const Feedback: React.FC = () => {
   const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [active_type, set_active_type] = useState<string>('suggestion')
+  const [active_sub_category, set_active_sub_category] = useState<string>('')
 
   const [title, set_title] = useState('')
   const [content, set_content] = useState('')
@@ -33,6 +40,27 @@ const Feedback: React.FC = () => {
     { id: 'bug', name: '问题报告', icon: <Bug size={16} />, value: 'bug' },
     { id: 'other', name: '其他', icon: <HelpCircle size={16} />, value: 'other' }
   ]
+
+  const sub_categories: Record<string, FeedbackSubCategory[]> = {
+    suggestion: [
+      { id: 'performance', name: '性能优化', description: '提升软件运行速度和响应效率' },
+      { id: 'feature', name: '功能建议', description: '新增功能或改进现有功能' },
+      { id: 'ui', name: '界面优化', description: '改进用户界面和交互体验' },
+      { id: 'update', name: '更新建议', description: '版本更新相关的建议' }
+    ],
+    bug: [
+      { id: 'crash', name: '崩溃闪退', description: '软件意外关闭或无法启动' },
+      { id: 'function', name: '功能异常', description: '功能无法正常使用' },
+      { id: 'display', name: '显示问题', description: '界面显示异常或错位' },
+      { id: 'performance_bug', name: '性能问题', description: '运行缓慢或卡顿' }
+    ],
+    other: [
+      { id: 'consult', name: '使用咨询', description: '产品使用相关问题' },
+      { id: 'cooperation', name: '合作意向', description: '商务合作或定制需求' },
+      { id: 'complaint', name: '投诉建议', description: '服务质量相关反馈' },
+      { id: 'other_type', name: '其他类型', description: '不属于以上分类的反馈' }
+    ]
+  }
 
   const handle_file_change = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -161,7 +189,10 @@ const Feedback: React.FC = () => {
             {feedback_types.map(type => (
               <button
                 key={type.id}
-                onClick={() => set_active_type(type.value)}
+                onClick={() => {
+                  set_active_type(type.value)
+                  set_active_sub_category('')
+                }}
                 style={{
                   width: '100%',
                   padding: '10px 12px',
@@ -201,7 +232,11 @@ const Feedback: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>说明</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {active_type === 'suggestion' && '产品建议'}
+              {active_type === 'bug' && '问题报告'}
+              {active_type === 'other' && '其他反馈'}
+            </span>
             <button
               type="button"
               onClick={() => set_is_middle_sidebar_open(false)}
@@ -220,73 +255,32 @@ const Feedback: React.FC = () => {
             </button>
           </div>
           
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
-              {active_type === 'suggestion' && (
-                <>
-                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
-                    产品建议
-                  </p>
-                  <p style={{ marginBottom: '12px' }}>
-                    欢迎您提出宝贵的产品建议，我们将不断优化产品体验。
-                  </p>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>建议包含以下内容：</p>
-                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
-                      <li>功能改进的具体描述</li>
-                      <li>界面优化的建议</li>
-                      <li>使用场景和预期效果</li>
-                    </ul>
-                  </div>
-                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
-                    您的建议将帮助我们做得更好！
-                  </p>
-                </>
-              )}
-              {active_type === 'bug' && (
-                <>
-                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
-                    问题报告
-                  </p>
-                  <p style={{ marginBottom: '12px' }}>
-                    遇到问题？请详细描述您遇到的情况，我们会尽快修复。
-                  </p>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>请提供以下信息：</p>
-                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
-                      <li>详细的操作步骤</li>
-                      <li>预期结果与实际结果</li>
-                      <li>错误提示信息</li>
-                      <li>相关截图（如有）</li>
-                    </ul>
-                  </div>
-                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
-                    信息越详细，我们修复越快！
-                  </p>
-                </>
-              )}
-              {active_type === 'other' && (
-                <>
-                  <p style={{ marginBottom: '12px', fontWeight: 500, color: '#334155' }}>
-                    其他反馈
-                  </p>
-                  <p style={{ marginBottom: '12px' }}>
-                    其他类型的反馈，请详细描述您的需求。
-                  </p>
-                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', marginBottom: '12px' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>可以包括：</p>
-                    <ul style={{ fontSize: '12px', color: '#64748b', paddingLeft: '16px', margin: 0 }}>
-                      <li>使用咨询</li>
-                      <li>合作意向</li>
-                      <li>其他问题</li>
-                    </ul>
-                  </div>
-                  <p style={{ color: '#94a3b8', fontSize: '11px' }}>
-                    我们会认真阅读每一条反馈！
-                  </p>
-                </>
-              )}
-            </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+            {sub_categories[active_type]?.map(sub => (
+              <div
+                key={sub.id}
+                onClick={() => set_active_sub_category(sub.id)}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: active_sub_category === sub.id ? '#e0f2fe' : 'transparent',
+                  color: active_sub_category === sub.id ? '#0369a1' : '#475569',
+                  cursor: 'pointer',
+                  marginBottom: '4px',
+                  transition: 'all 0.2s',
+                  fontSize: '13px',
+                  fontWeight: active_sub_category === sub.id ? 600 : 400
+                }}
+                onMouseEnter={(e) => {
+                  if (active_sub_category !== sub.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                }}
+                onMouseLeave={(e) => {
+                  if (active_sub_category !== sub.id) e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                {sub.name}
+              </div>
+            ))}
           </div>
         </div>
 
