@@ -5,7 +5,7 @@
  * 描述: 客户端工具箱页面，提供文件处理功能
  */
 import React, { useState } from 'react'
-import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, List, Wrench, Folder } from 'lucide-react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder } from 'lucide-react'
 
 const format_size = (bytes: number) => {
   if (bytes === 0) return '0 B'
