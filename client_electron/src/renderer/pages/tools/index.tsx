@@ -6,6 +6,9 @@
  */
 import React, { useState } from 'react'
 import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { should_ellipsis } from '@/utils/ui_text'
 
 const format_size = (bytes: number) => {
   if (bytes === 0) return '0 B'
@@ -48,6 +51,9 @@ const Tools: React.FC = () => {
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [active_cat_id, set_active_cat_id] = useState('all')
   const [active_tool_id, set_active_tool_id] = useState<string>('md2pdf')
+  const [md_preview_text, set_md_preview_text] = useState('')
+  const [md_preview_name, set_md_preview_name] = useState('')
+  const [md_preview_error, set_md_preview_error] = useState('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -61,8 +67,13 @@ const Tools: React.FC = () => {
       set_error_msg('')
       set_result_url('')
       set_result_info(null)
+      set_md_preview_error('')
       
       try {
+        const preview_text = await file.text()
+        set_md_preview_name(file.name)
+        set_md_preview_text(preview_text.length > 20000 ? `${preview_text.slice(0, 20000)}\n\n... (预览已截断)` : preview_text)
+
         const res = await window.electron_api.tools_convert_md_to_pdf(file.path)
         if (res.success && res.data) {
           set_result_url(res.data.url)
@@ -72,6 +83,7 @@ const Tools: React.FC = () => {
         }
       } catch (err: any) {
         set_error_msg(err.message || '转换异常')
+        set_md_preview_error('Markdown 预览读取失败')
       } finally {
         set_loading_task(null)
       }
@@ -386,10 +398,6 @@ const Tools: React.FC = () => {
   const active_cat = categories.find(c => c.id === active_cat_id) || categories[0]
   const active_tool = all_tools.find(t => t.id === active_tool_id)
 
-  const should_ellipsis = (text: string): boolean => {
-    return text.replace(/\s+/g, '').length > 4
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -654,6 +662,27 @@ const Tools: React.FC = () => {
 
                 {active_tool.extra_ui && active_tool.extra_ui}
 
+                {active_tool.id === 'md2pdf' && (
+                  <div style={{ marginTop: '14px', marginBottom: '14px' }}>
+                    <div style={{ fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: 600 }}>
+                      Markdown 预览{md_preview_name ? `: ${md_preview_name}` : ''}
+                    </div>
+                    {md_preview_error ? (
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12px' }}>
+                        {md_preview_error}
+                      </div>
+                    ) : md_preview_text ? (
+                      <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#ffffff', padding: '12px' }}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{md_preview_text}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '12px' }}>
+                        选择 Markdown 文件后可预览
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <button 
                   onClick={active_tool.action} 
                   disabled={loading_task !== null}
@@ -752,6 +781,23 @@ const Tools: React.FC = () => {
                         <ArrowDownToLine size={16} />
                         下载文件
                       </a>
+
+                      {active_tool?.id === 'md2pdf' && result_url && (
+                        <div style={{ marginTop: '14px' }}>
+                          <p style={{ margin: '0 0 8px 0', color: '#166534', fontSize: '13px' }}>转换结果预览</p>
+                          <iframe
+                            src={result_url}
+                            title="PDF 预览"
+                            style={{
+                              width: '100%',
+                              height: '360px',
+                              border: '1px solid #bbf7d0',
+                              borderRadius: '8px',
+                              backgroundColor: '#ffffff'
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

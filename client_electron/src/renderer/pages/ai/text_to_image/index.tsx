@@ -7,6 +7,7 @@
 import React, { useState } from 'react'
 import { Image as ImageIcon, Loader2, Palette, ChevronRight, Cat, Building2, Mountain, User } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis, to_fixed_chars } from '@/utils/ui_text'
 
 interface PromptTemplate {
   id: string
@@ -29,15 +30,11 @@ const TextToImage: React.FC = () => {
   const [active_template, set_active_template] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('animal')
 
-  const should_ellipsis = (text: string): boolean => {
-    return text.replace(/\s+/g, '').length > 4
-  }
-
   const categories: StyleCategory[] = [
-    { id: 'animal', name: '动物', icon: <Cat size={14} /> },
-    { id: 'city', name: '城市', icon: <Building2 size={14} /> },
-    { id: 'landscape', name: '风景', icon: <Mountain size={14} /> },
-    { id: 'portrait', name: '人物', icon: <User size={14} /> }
+    { id: 'animal', name: '动物风格', icon: <Cat size={14} /> },
+    { id: 'city', name: '城市风格', icon: <Building2 size={14} /> },
+    { id: 'landscape', name: '风景风格', icon: <Mountain size={14} /> },
+    { id: 'portrait', name: '人物风格', icon: <User size={14} /> }
   ]
 
   const prompt_templates: PromptTemplate[] = [
@@ -165,14 +162,15 @@ const TextToImage: React.FC = () => {
 
   const active_template_name = active_template ? prompt_templates.find(t => t.id === active_template)?.name : ''
   const active_category_name = categories.find(c => c.id === active_category)?.name || '模板预设'
+  const middle_title = to_fixed_chars(active_category_name, 4, '风格')
 
   return (
     <ThreePanelLayout
-      title="文生图"
+      title="文生图像"
       titleIcon={<ImageIcon size={20} color="#0ea5e9" />}
       leftPanelTitle="风格分类"
       leftPanel={leftPanel}
-      middlePanelTitle={active_category_name}
+      middlePanelTitle={middle_title}
       middlePanel={middlePanel}
       rightPanelTitle={active_template_name || '图片生成'}
     >

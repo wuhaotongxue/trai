@@ -45,17 +45,17 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f3f3f3', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#f3f3f3', borderBottom: '1px solid #cbd5e1' }}>
+        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)', borderBottom: '1px solid var(--ui_border)' }}>
           <Outlet />
         </div>
       </div>
-      <div style={{ display: 'flex', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
-        <div style={{ width: '12%', minWidth: '160px', maxWidth: '220px', flexShrink: 1, borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}></div>
-        <div style={{ flex: 1, padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: '#64748b' }}>
+      <div style={{ display: 'flex', backgroundColor: 'var(--ui_panel_alt)', borderTop: '1px solid var(--ui_border)' }}>
+        <div style={{ width: '12%', minWidth: '160px', maxWidth: '220px', flexShrink: 1, borderRight: '1px solid var(--ui_border)' }}></div>
+        <div style={{ flex: 1, padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: 'var(--ui_text_muted)' }}>
           <span>TRAI</span>
           <span>|</span>
           <span>开发联系: wuhaotongxue@gmail.com</span>

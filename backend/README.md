@@ -37,6 +37,9 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_19_2241
+- **feat(ai)**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
+
 ### 🛠️ 后端_2026_04_19_2132
 - **fix(ruff)**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
 - **fix(ruff)**: 修复 weather.py 未使用变量 lang，添加 noqa 标记

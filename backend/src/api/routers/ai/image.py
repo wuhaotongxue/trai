@@ -44,6 +44,20 @@ class ImageGenerationResponse(BaseModel):
     error: str | None = Field(default=None, description="错误信息")
 
 
+class ImageToImageRequest(BaseModel):
+    """图生图请求"""
+
+    prompt: Annotated[str, Field(min_length=1, max_length=2000, description="图片修改描述")]
+    image_url: Annotated[str, Field(min_length=1, max_length=2000000, description="参考图片 URL 或 data URL")]
+    model: Annotated[str, Field(default="AI-ModelScope/FLUX.1-dev", description="模型名称")] = (
+        "AI-ModelScope/FLUX.1-dev"
+    )
+    width: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片宽度")] = 1024
+    height: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片高度")] = 1024
+    steps: Annotated[int, Field(ge=1, le=100, default=30, description="采样步数")] = 30
+    seed: Annotated[int, Field(ge=-1, default=-1, description="随机种子,-1 表示随机")] = -1
+
+
 class ImageStatusRequest(BaseModel):
     """图片生成状态查询请求"""
 
@@ -101,6 +115,48 @@ async def generate_image(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": 502, "message": f"AI 图片生成服务错误: {str(e)}"},
+        )
+
+
+@router.post("/image_to_image", response_model=ImageGenerationResponse, tags=["AI"])
+async def generate_image_to_image(
+    request: ImageToImageRequest,
+    current_user: CurrentUser,
+) -> ImageGenerationResponse:
+    from infrastructure.repositories.image_generation_repository import (
+        ImageGenerationRepository,
+    )
+
+    user_id = current_user.get("user_id", "")
+
+    try:
+        db = get_session()
+        repo = ImageGenerationRepository(db)
+        client = ModelScopeClient()
+        use_case = ImageGenerationUseCase(client=client, repository=repo)
+
+        input_data = ImageGenerationInput(
+            prompt=request.prompt,
+            user_id=user_id,
+            model=request.model,
+            width=request.width,
+            height=request.height,
+            steps=request.steps,
+            seed=request.seed if request.seed >= 0 else -1,
+        )
+        result = await use_case.execute(input_data)
+
+        return ImageGenerationResponse(
+            task_id=result.task_id,
+            status=result.status,
+            image_url=result.image_url,
+            error=result.error,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"code": 502, "message": f"AI 图生图服务错误: {str(e)}"},
         )
 
 

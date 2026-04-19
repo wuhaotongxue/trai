@@ -7,6 +7,7 @@
 import React, { useState } from 'react'
 import { Video, Loader2, ChevronRight, Film, Clapperboard, Camera, Tv, Rocket, TreePine } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
+import { should_ellipsis, to_fixed_chars } from '@/utils/ui_text'
 
 interface VideoStyle {
   id: string
@@ -30,13 +31,9 @@ const AiVideo: React.FC = () => {
   const [active_style, set_active_style] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('city')
 
-  const should_ellipsis = (text: string): boolean => {
-    return text.replace(/\s+/g, '').length > 4
-  }
-
   const categories: VideoCategory[] = [
-    { id: 'city', name: '城市', icon: <Rocket size={14} /> },
-    { id: 'nature', name: '自然', icon: <TreePine size={14} /> }
+    { id: 'city', name: '城市风格', icon: <Rocket size={14} /> },
+    { id: 'nature', name: '自然风格', icon: <TreePine size={14} /> }
   ]
 
   const video_styles: VideoStyle[] = [
@@ -164,14 +161,15 @@ const AiVideo: React.FC = () => {
 
   const active_style_name = active_style ? video_styles.find(s => s.id === active_style)?.name : ''
   const active_category_name = categories.find(c => c.id === active_category)?.name || '视频预设'
+  const middle_title = to_fixed_chars(active_category_name, 4, '风格')
 
   return (
     <ThreePanelLayout
-      title="AI 视频生成"
+      title="视频生成"
       titleIcon={<Video size={20} color="#0ea5e9" />}
       leftPanelTitle="视频分类"
       leftPanel={leftPanel}
-      middlePanelTitle={active_category_name}
+      middlePanelTitle={middle_title}
       middlePanel={middlePanel}
       rightPanelTitle={active_style_name || '视频生成'}
     >

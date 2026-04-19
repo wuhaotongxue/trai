@@ -422,7 +422,7 @@ const Settings: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <SettingsIcon size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>设置</span>
+          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{active_category === 'system' ? '系统设置' : '账号设置'}</span>
         </div>
       </div>
       
@@ -482,7 +482,7 @@ const Settings: React.FC = () => {
               }}
             >
               <Monitor size={16} />
-              系统
+              系统设置
             </button>
             <button
               onClick={() => handle_category_change('account')}
@@ -505,7 +505,7 @@ const Settings: React.FC = () => {
               }}
             >
               <User size={16} />
-              账号
+              账号设置
             </button>
           </div>
         </div>
@@ -542,7 +542,7 @@ const Settings: React.FC = () => {
                 </button>
               )}
               <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
-                {active_category === 'system' ? '系统' : '账号'}
+                {active_category === 'system' ? '系统设置' : '账号设置'}
               </span>
             </div>
             <button

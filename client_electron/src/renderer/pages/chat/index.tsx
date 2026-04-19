@@ -8,6 +8,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List, Edit2, Cpu, Settings, Code, Calculator, Cloud } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { should_ellipsis } from '@/utils/ui_text'
 
 interface ToolStep {
   type: 'tool_start' | 'tool_result'
@@ -364,14 +365,14 @@ const AgentChat: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquare size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>AI 对话</span>
+          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>智能对话</span>
         </div>
       </div>
       
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{
-          width: is_left_sidebar_open ? '10%' : '0px',
-          minWidth: is_left_sidebar_open ? '70px' : '0px',
+          width: is_left_sidebar_open ? '12%' : '0px',
+          minWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -435,7 +436,15 @@ const AgentChat: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                     {get_agent_icon(agent.name)}
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.name}</span>
+                    <span
+                      style={
+                        should_ellipsis(agent.name)
+                          ? { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                          : { whiteSpace: 'nowrap' }
+                      }
+                    >
+                      {agent.name}
+                    </span>
                   </div>
                   <div style={{
                     width: '8px',
@@ -453,7 +462,7 @@ const AgentChat: React.FC = () => {
 
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '70px' : '0px',
+          minWidth: is_middle_sidebar_open ? '120px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
