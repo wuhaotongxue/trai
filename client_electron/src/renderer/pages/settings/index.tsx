@@ -542,8 +542,7 @@ const Settings: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
-                    marginRight: '4px'
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}

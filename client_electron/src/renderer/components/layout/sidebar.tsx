@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen } from 'lucide-react'
+import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image, Music, Video, ImagePlus, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen, Compass } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 
 /**
@@ -102,7 +102,12 @@ const Sidebar: React.FC = () => {
     <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #e2e8f0' }}>
       <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between' }}>
-          {!collapsed && <span style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', fontWeight: '600' }}>导航菜单</span>}
+          {!collapsed && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Compass size={16} color="rgba(0, 0, 0, 0.5)" />
+              <span style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', fontWeight: '600' }}>导航菜单</span>
+            </div>
+          )}
           <Menu size={20} color="#202020" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />
         </div>
         
