@@ -5,7 +5,7 @@
  * 描述: 仪表盘页面组件 - 自适应三段式布局
  */
 import React, { useState, useEffect } from 'react'
-import { Monitor, Cpu, HardDrive, ChevronRight } from 'lucide-react'
+import { Monitor, Cpu, HardDrive, ChevronRight, LayoutDashboard } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
 
 interface SystemInfo {
@@ -226,10 +226,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <ThreePanelLayout
-      title="工作台"
-      leftPanelTitle="功能分类"
+      title="概览"
+      titleIcon={<LayoutDashboard size={20} color="#0ea5e9" />}
+      leftPanelTitle="功能"
       leftPanel={left_panel}
-      middlePanelTitle="项目列表"
+      middlePanelTitle="项目"
       middlePanel={middle_panel}
       contentPadding="32px"
     >

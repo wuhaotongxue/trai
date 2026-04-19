@@ -11,6 +11,7 @@ import { PanelLeftOpen, List } from 'lucide-react'
 
 interface ThreePanelLayoutProps {
   title: string
+  titleIcon?: React.ReactNode
   leftPanelTitle?: string
   leftPanel?: React.ReactNode
   leftPanelDefaultOpen?: boolean
@@ -24,6 +25,7 @@ interface ThreePanelLayoutProps {
 
 const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   title,
+  titleIcon,
   leftPanelTitle,
   leftPanel,
   leftPanelDefaultOpen = true,
@@ -50,123 +52,132 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   }
 
   return (
-    <div className="no-drag-region" style={{ display: 'flex', height: '100%', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
-      {leftPanel && (
-        <div style={{
-          width: is_left_open ? '18%' : '0px',
-          minWidth: is_left_open ? '100px' : '0px',
-          opacity: is_left_open ? 1 : 0,
-          backgroundColor: '#f1f5f9',
-          borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          flexShrink: 1
-        }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            {leftPanelTitle && (
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
-            )}
-            <button
-              type="button"
-              onClick={() => set_is_left_open(false)}
-              title="收起"
-              aria-label="收起左侧面板"
-              style={{ ...hover_btn_style, marginLeft: 'auto' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <PanelLeftOpen size={18} />
-            </button>
-          </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-            {leftPanel}
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+      {/* 顶部标题栏 - 横跨整个宽度 */}
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {titleIcon}
+          <h1 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600 }}>{title}</h1>
         </div>
-      )}
-
-      {middlePanel && (
-        <div style={{
-          width: is_middle_open ? '20%' : '0px',
-          minWidth: is_middle_open ? '120px' : '0px',
-          opacity: is_middle_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_middle_open ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          flexShrink: 1
-        }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {leftPanel && !is_left_open && (
-                <button
-                  type="button"
-                  onClick={() => set_is_left_open(true)}
-                  title="展开左侧面板"
-                  aria-label="展开左侧面板"
-                  style={{ ...hover_btn_style, marginRight: '4px' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PanelLeftOpen size={18} />
-                </button>
+        {titleExtra && <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>{titleExtra}</div>}
+      </div>
+      
+      {/* 内容区域 */}
+      <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+        {leftPanel && (
+          <div style={{
+            width: is_left_open ? '18%' : '0px',
+            minWidth: is_left_open ? '100px' : '0px',
+            opacity: is_left_open ? 1 : 0,
+            backgroundColor: '#f1f5f9',
+            borderRight: is_left_open ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'all 0.3s ease',
+            overflow: 'hidden',
+            flexShrink: 1
+          }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              {leftPanelTitle && (
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
               )}
-              {middlePanelTitle && (
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
-              )}
+              <button
+                type="button"
+                onClick={() => set_is_left_open(false)}
+                title="收起"
+                aria-label="收起左侧面板"
+                style={{ ...hover_btn_style, marginLeft: 'auto' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <PanelLeftOpen size={18} />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => set_is_middle_open(false)}
-              title="收起"
-              aria-label="收起中间面板"
-              style={{ ...hover_btn_style, marginLeft: 'auto' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <List size={18} />
-            </button>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+              {leftPanel}
+            </div>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-            {middlePanel}
-          </div>
-        </div>
-      )}
+        )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        <div className="drag-region" style={{ padding: '18px 32px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-          {leftPanel && !is_left_open && !is_middle_open && (
-            <button
-              className="no-drag-region"
-              onClick={() => set_is_left_open(true)}
-              title="展开左侧面板"
-              style={{ ...hover_btn_lg_style, marginRight: '12px' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <PanelLeftOpen size={20} />
-            </button>
-          )}
-          {middlePanel && !is_middle_open && (
-            <button
-              className="no-drag-region"
-              onClick={() => set_is_middle_open(true)}
-              title="展开中间面板"
-              style={{ ...hover_btn_lg_style, marginRight: '12px' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <List size={20} />
-            </button>
-          )}
-          <span style={{ fontSize: '15px', color: '#475569', fontWeight: 500 }}>{title}</span>
-          {titleExtra && <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>{titleExtra}</div>}
-        </div>
-        <div style={{ flex: 1, overflow: 'hidden', padding: contentPadding }}>
-          {children}
+        {middlePanel && (
+          <div style={{
+            width: is_middle_open ? '20%' : '0px',
+            minWidth: is_middle_open ? '120px' : '0px',
+            opacity: is_middle_open ? 1 : 0,
+            backgroundColor: '#ffffff',
+            borderRight: is_middle_open ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'all 0.3s ease',
+            overflow: 'hidden',
+            flexShrink: 1
+          }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {leftPanel && !is_left_open && (
+                  <button
+                    type="button"
+                    onClick={() => set_is_left_open(true)}
+                    title="展开左侧面板"
+                    aria-label="展开左侧面板"
+                    style={{ ...hover_btn_style, marginRight: '4px' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <PanelLeftOpen size={18} />
+                  </button>
+                )}
+                {middlePanelTitle && (
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>{middlePanelTitle}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => set_is_middle_open(false)}
+                title="收起"
+                aria-label="收起中间面板"
+                style={{ ...hover_btn_style, marginLeft: 'auto' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <List size={18} />
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+              {middlePanel}
+            </div>
+          </div>
+        )}
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+          {/* 展开按钮区域 */}
+          <div style={{ padding: '12px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {leftPanel && !is_left_open && (
+              <button
+                onClick={() => set_is_left_open(true)}
+                title="展开左侧面板"
+                style={{ ...hover_btn_lg_style }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <PanelLeftOpen size={20} />
+              </button>
+            )}
+            {middlePanel && !is_middle_open && (
+              <button
+                onClick={() => set_is_middle_open(true)}
+                title="展开中间面板"
+                style={{ ...hover_btn_lg_style }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <List size={20} />
+              </button>
+            )}
+          </div>
+          <div style={{ flex: 1, overflow: 'hidden', padding: contentPadding }}>
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -195,9 +195,9 @@ const AgentManagement: React.FC = () => {
 
       <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{
-          width: is_left_sidebar_open ? '200px' : '0px',
-          minWidth: is_left_sidebar_open ? '180px' : '0px',
-          maxWidth: is_left_sidebar_open ? '250px' : '0px',
+          width: is_left_sidebar_open ? '10%' : '0px',
+          minWidth: is_left_sidebar_open ? '70px' : '0px',
+          maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#f1f5f9',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -208,7 +208,7 @@ const AgentManagement: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>Agent列表</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能体</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -302,9 +302,9 @@ const AgentManagement: React.FC = () => {
         </div>
 
         <div style={{
-          width: is_middle_sidebar_open ? '220px' : '0px',
-          minWidth: is_middle_sidebar_open ? '200px' : '0px',
-          maxWidth: is_middle_sidebar_open ? '300px' : '0px',
+          width: is_middle_sidebar_open ? '12%' : '0px',
+          minWidth: is_middle_sidebar_open ? '80px' : '0px',
+          maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -334,7 +334,7 @@ const AgentManagement: React.FC = () => {
                   <PanelLeftOpen size={18} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>操作面板</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>操作</span>
             </div>
             <button
               type="button"
@@ -605,7 +605,7 @@ const AgentManagement: React.FC = () => {
             width: '500px', maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             maxHeight: '90vh', overflowY: 'auto'
           }}>
-            <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600 }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#1e293b', fontWeight: 600 }}>
               新建 Agent
             </h2>
 
@@ -616,8 +616,9 @@ const AgentManagement: React.FC = () => {
               <input
                 type="text"
                 value={new_agent.name}
-                onChange={(e) => set_new_agent(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => set_new_agent(prev => ({ ...prev, name: e.target.value.slice(0, 4) }))}
                 placeholder="请输入 Agent 名称"
+                maxLength={4}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
                   border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
@@ -626,6 +627,12 @@ const AgentManagement: React.FC = () => {
                 onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
                 onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
               />
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
+                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+              </div>
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_agent.name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+                {new_agent.name.length}/4
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>

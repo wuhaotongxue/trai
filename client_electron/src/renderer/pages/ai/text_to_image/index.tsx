@@ -90,6 +90,7 @@ const TextToImage: React.FC = () => {
   return (
     <ThreePanelLayout
       title="文生图"
+      titleIcon={<ImageIcon size={20} color="#0ea5e9" />}
       middlePanelTitle="模板预设"
       middlePanel={middlePanel}
     >

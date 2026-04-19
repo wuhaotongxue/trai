@@ -33,6 +33,7 @@
   color: #334155;
   cursor: pointer;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .kb_pagination_button:disabled {
