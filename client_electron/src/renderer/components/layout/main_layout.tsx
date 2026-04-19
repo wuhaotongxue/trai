@@ -53,10 +53,13 @@ const MainLayout: React.FC = () => {
           <Outlet />
         </div>
       </div>
-      <div style={{ padding: '8px 16px', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: '#64748b' }}>
-        <span>TRAI</span>
-        <span>|</span>
-        <span>开发联系: wuhaotongxue@gmail.com</span>
+      <div style={{ display: 'flex', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ width: '12%', minWidth: '160px', maxWidth: '220px', flexShrink: 1, borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}></div>
+        <div style={{ flex: 1, padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: '#64748b' }}>
+          <span>TRAI</span>
+          <span>|</span>
+          <span>开发联系: wuhaotongxue@gmail.com</span>
+        </div>
       </div>
     </div>
   )
