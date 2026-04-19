@@ -487,8 +487,7 @@ const Tools: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
-                    marginRight: '4px'
+                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -588,7 +587,7 @@ const Tools: React.FC = () => {
                 </button>
               </div>
             )}
-            <h1 style={{ color: '#0f172a', margin: 0, fontSize: '18px', fontWeight: 600 }}>{active_tool?.title || '工具箱'}</h1>
+            <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{active_tool?.title || '工具箱'}</span>
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
