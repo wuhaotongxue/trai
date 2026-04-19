@@ -222,6 +222,9 @@ app.whenReady().then(() => {
   create_window()
   create_tray()
 
+  // 初始化更新服务
+  new UpdateService()
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       create_window()
