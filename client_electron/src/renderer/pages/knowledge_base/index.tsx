@@ -623,7 +623,7 @@ const KnowledgeBasePage: React.FC = () => {
         {/* 左侧边栏: 一级目录 */}
         <div style={{
           width: is_left_sidebar_open ? '10%' : '0px',
-          minWidth: is_left_sidebar_open ? '70px' : '0px',
+          minWidth: is_left_sidebar_open ? '100px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
           borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
@@ -821,7 +821,7 @@ const KnowledgeBasePage: React.FC = () => {
         {/* 中间边栏: 子文件夹 (知识库) */}
         <div style={{
           width: is_middle_sidebar_open ? '12%' : '0px',
-          minWidth: is_middle_sidebar_open ? '70px' : '0px',
+          minWidth: is_middle_sidebar_open ? '100px' : '0px',
           flexShrink: 1,
           opacity: is_middle_sidebar_open ? 1 : 0,
           backgroundColor: '#ffffff',
