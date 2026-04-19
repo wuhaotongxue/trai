@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'rgba(255, 255, 255, 0.5)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(0, 0, 0, 0.05)' }}>
-      <div style={{ padding: collapsed ? '16px 0' : '16px 24px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
+      <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between' }}>
           {!collapsed && <span style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', fontWeight: '600' }}>导航菜单</span>}
           <Menu size={20} color="#202020" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />

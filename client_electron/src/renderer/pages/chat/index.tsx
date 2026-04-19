@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List, Edit2, Cpu } from 'lucide-react'
+import { CheckCircle2, XCircle, MessageSquare, Wrench, ChevronDown, ChevronRight, Loader2, Send, Plus, MessageCircle, Trash2, SquareSquare, PanelLeftClose, PanelLeftOpen, MessageSquarePlus, Paperclip, X, Database, Bot, List, Edit2, Cpu, Settings, Code, Calculator, Cloud } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -36,6 +36,7 @@ interface Agent {
   id: string
   name: string
   status: string
+  icon?: string
 }
 
 interface KnowledgeBase {
@@ -44,6 +45,28 @@ interface KnowledgeBase {
 }
 
 const STORAGE_KEY = 'trai_chat_sessions'
+
+/**
+ * 根据Agent名称获取对应图标
+ * @param name Agent名称
+ * @returns 对应的图标组件
+ */
+const get_agent_icon = (name: string) => {
+  const name_lower = name.toLowerCase()
+  if (name_lower.includes('代码') || name_lower.includes('code')) {
+    return <Code size={16} />
+  }
+  if (name_lower.includes('计算') || name_lower.includes('calculator')) {
+    return <Calculator size={16} />
+  }
+  if (name_lower.includes('天气') || name_lower.includes('weather')) {
+    return <Cloud size={16} />
+  }
+  if (name_lower.includes('默认') || name_lower.includes('default')) {
+    return <Settings size={16} />
+  }
+  return <Cpu size={16} />
+}
 
 const AgentChat: React.FC = () => {
   const [sessions, set_sessions] = useState<ChatSession[]>([])
@@ -411,7 +434,7 @@ const AgentChat: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                    <Cpu size={16} />
+                    {get_agent_icon(agent.name)}
                     <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{agent.name}</span>
                   </div>
                   <div style={{
