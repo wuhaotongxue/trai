@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from core.exceptions import AuthenticationError
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 
@@ -39,7 +39,7 @@ class RefreshResponse(BaseModel):
 async def refresh_token(
     request: RefreshRequest,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> RefreshResponse:
     """刷新访问令牌
 

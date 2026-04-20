@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import require_admin
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.password import PasswordService, get_password_service
 
@@ -74,7 +74,7 @@ async def create_user(
     request: CreateUserRequest,
     current_user: Annotated[dict, Depends(require_admin)],
     password_service: Annotated[PasswordService, Depends(get_password_service)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
     """创建用户(仅管理员)
 
@@ -119,7 +119,7 @@ async def create_user(
 @router.get("/users", response_model=UserListResponse, tags=["管理"])
 async def list_users(
     current_user: Annotated[dict, Depends(require_admin)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
     role: Annotated[str | None, Query(description="按角色过滤")] = None,
     status_filter: Annotated[str | None, Query(alias="status", description="按状态过滤")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
@@ -171,7 +171,7 @@ async def list_users(
 async def get_user(
     user_id: str,
     current_user: Annotated[dict, Depends(require_admin)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> UserListItem:
     """获取指定用户信息(仅管理员)
 
@@ -213,7 +213,7 @@ async def update_user(
     user_id: str,
     request: UpdateUserRequest,
     current_user: Annotated[dict, Depends(require_admin)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
     """更新用户信息(仅管理员)
 
@@ -265,7 +265,7 @@ async def update_user(
 async def delete_user(
     user_id: str,
     current_user: Annotated[dict, Depends(require_admin)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
     """删除用户(仅管理员,物理删除)
 

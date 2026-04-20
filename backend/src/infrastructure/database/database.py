@@ -278,4 +278,13 @@ def get_session() -> Session:
     return get_database().get_session()
 
 
-__all__ = ["Base", "Database", "DatabaseConfig", "get_database", "get_session"]
+def get_db_session():
+    """获取数据库会话生成器(用于 FastAPI Depends)"""
+    session = get_database().get_session()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+__all__ = ["Base", "Database", "DatabaseConfig", "get_database", "get_session", "get_db_session"]
