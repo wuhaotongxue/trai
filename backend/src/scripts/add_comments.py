@@ -11,6 +11,7 @@ import os
 import sys
 
 import psycopg2
+from loguru import logger
 
 # 表注释
 TABLE_COMMENTS = {
@@ -162,9 +163,9 @@ FIELD_COMMENTS = {
 
 def add_comments():
     """为数据库表和字段添加 COMMENT 注释"""
-    print("=" * 60, flush=True)
-    print("开始添加数据库 COMMENT 注释", flush=True)
-    print("=" * 60, flush=True)
+    logger.info("=" * 60)
+    logger.info("开始添加数据库 COMMENT 注释")
+    logger.info("=" * 60)
 
     try:
         password = os.getenv("POSTGRES_PASSWORD", "")
@@ -178,10 +179,9 @@ def add_comments():
             database=os.getenv("POSTGRES_DB", "trai"),
             connect_timeout=10,
         )
-        print("数据库连接成功", flush=True)
+        logger.info("数据库连接成功")
         cur = conn.cursor()
 
-        # 终止阻塞会话
         cur.execute("""
             SELECT pg_terminate_backend(pid)
             FROM pg_stat_activity
@@ -190,36 +190,34 @@ def add_comments():
             AND state IN ('active', 'idle in transaction')
         """)
         conn.commit()
-        print("已终止阻塞会话", flush=True)
+        logger.info("已终止阻塞会话")
 
-        # 添加表注释
-        print("\n=== 添加表注释 ===", flush=True)
+        logger.info("\n=== 添加表注释 ===")
         for table, comment in TABLE_COMMENTS.items():
             cur.execute(f'COMMENT ON TABLE "{table}" IS %s', (comment,))
             conn.commit()
-            print(f"  [OK] {table}: {comment}", flush=True)
+            logger.info(f"  [OK] {table}: {comment}")
 
-        # 添加字段注释
-        print("\n=== 添加字段注释 ===", flush=True)
+        logger.info("\n=== 添加字段注释 ===")
         for table, fields in FIELD_COMMENTS.items():
             for field, comment in fields.items():
                 try:
                     cur.execute(f'COMMENT ON COLUMN "{table}"."{field}" IS %s', (comment,))
                     conn.commit()
-                    print(f"  [OK] {table}.{field}: {comment}", flush=True)
+                    logger.info(f"  [OK] {table}.{field}: {comment}")
                 except Exception as e:
                     conn.rollback()
-                    print(f"  [WARN] {table}.{field}: {e}", flush=True)
+                    logger.warning(f"  [WARN] {table}.{field}: {e}")
 
         cur.close()
         conn.close()
 
-        print("\n" + "=" * 60, flush=True)
-        print("COMMENT 注释添加完成!", flush=True)
-        print("=" * 60, flush=True)
+        logger.info("\n" + "=" * 60)
+        logger.info("COMMENT 注释添加完成!")
+        logger.info("=" * 60)
 
     except Exception as e:
-        print(f"添加 COMMENT 失败: {e}", flush=True)
+        logger.error(f"添加 COMMENT 失败: {e}")
         import traceback
 
         traceback.print_exc()
