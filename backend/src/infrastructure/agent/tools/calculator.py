@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import math
-import re
 from typing import Any
 
 from infrastructure.agent.tools.base import (
@@ -104,13 +103,31 @@ class CalculatorTool(BaseTool):
         Returns:
             tuple: (结果, 错误信息)
         """
+        import ast
+        import operator
+
         expression = expression.strip().lower()
+        if not expression:
+            return None, "表达式不能为空"
 
-        if not re.match(r"^[\d\s\+\-\*\/\.\(\)\,\%]+$", expression):
-            return None, "表达式包含非法字符"
+        if len(expression) > 200:
+            return None, "表达式过长, 限制200字符"
 
+        # 允许的运算符
+        operators = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.FloorDiv: operator.floordiv,
+            ast.Pow: operator.pow,
+            ast.Mod: operator.mod,
+            ast.USub: operator.neg,
+            ast.UAdd: operator.pos,
+        }
+
+        # 允许的函数和常量
         math_ctx = {
-            "__builtins__": {},
             "sqrt": math.sqrt,
             "pow": pow,
             "sin": math.sin,
@@ -127,19 +144,68 @@ class CalculatorTool(BaseTool):
             "sum": sum,
         }
 
+        def eval_node(node: ast.AST) -> Any:
+            if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+                return node.value
+            elif isinstance(node, ast.BinOp):
+                left = eval_node(node.left)
+                right = eval_node(node.right)
+                # 限制幂运算大小防止 DoS
+                if isinstance(node.op, ast.Pow):
+                    if right > 1000 or right < -1000:
+                        raise ValueError("幂运算指数过大")
+                    if left > 10000 or left < -10000:
+                        raise ValueError("幂运算底数过大")
+                if type(node.op) not in operators:
+                    raise ValueError(f"不支持的运算符: {type(node.op).__name__}")
+                return operators[type(node.op)](left, right)
+            elif isinstance(node, ast.UnaryOp):
+                operand = eval_node(node.operand)
+                if type(node.op) not in operators:
+                    raise ValueError(f"不支持的一元运算符: {type(node.op).__name__}")
+                return operators[type(node.op)](operand)
+            elif isinstance(node, ast.Call):
+                if not isinstance(node.func, ast.Name):
+                    raise ValueError("只支持调用简单函数")
+                func_name = node.func.id
+                if func_name not in math_ctx:
+                    raise ValueError(f"不支持的函数: {func_name}")
+                func = math_ctx[func_name]
+                if not callable(func):
+                    raise ValueError(f"{func_name} 不是一个可调用的函数")
+                args = [eval_node(arg) for arg in node.args]
+                return func(*args)
+            elif isinstance(node, ast.Name):
+                if node.id in math_ctx:
+                    val = math_ctx[node.id]
+                    if not isinstance(val, (int, float)):
+                        raise ValueError(f"不支持的变量类型: {node.id}")
+                    return val
+                raise ValueError(f"不支持的变量: {node.id}")
+            elif isinstance(node, ast.Expression):
+                return eval_node(node.body)
+            else:
+                raise ValueError(f"不支持的表达式节点: {type(node).__name__}")
+
         try:
-            result = eval(expression, math_ctx)
-            if isinstance(result, float) and math.isnan(result):
-                return None, "计算结果无效"
-            if isinstance(result, float) and math.isinf(result):
-                return None, "计算结果无穷大"
-            return round(result, 10), None
+            tree = ast.parse(expression, mode="eval")
+            result = eval_node(tree.body)
+
+            if isinstance(result, (int, float)):
+                if isinstance(result, float) and math.isnan(result):
+                    return None, "计算结果无效(NaN)"
+                if isinstance(result, float) and math.isinf(result):
+                    return None, "计算结果无穷大(Inf)"
+                return round(float(result), 10), None
+            else:
+                return None, "表达式必须返回数字"
+
         except ZeroDivisionError:
             return None, "除数不能为零"
         except SyntaxError:
             return None, "表达式语法错误"
-        except NameError:
-            return None, "表达式包含不支持的函数"
+        except ValueError as e:
+            return None, str(e)
         except Exception as e:
             return None, f"计算错误: {e}"
 

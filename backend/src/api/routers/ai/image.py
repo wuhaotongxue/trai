@@ -88,28 +88,28 @@ async def generate_image(
     user_id = current_user.get("user_id", "")
 
     try:
-        db = get_session()
-        repo = ImageGenerationRepository(db)
-        client = ModelScopeClient()
-        use_case = ImageGenerationUseCase(client=client, repository=repo)
+        with get_session() as db:
+            repo = ImageGenerationRepository(db)
+            client = ModelScopeClient()
+            use_case = ImageGenerationUseCase(client=client, repository=repo)
 
-        input_data = ImageGenerationInput(
-            prompt=request.prompt,
-            user_id=user_id,
-            model=request.model,
-            width=request.width,
-            height=request.height,
-            steps=request.steps,
-            seed=request.seed if request.seed >= 0 else -1,
-        )
-        result = await use_case.execute(input_data)
+            input_data = ImageGenerationInput(
+                prompt=request.prompt,
+                user_id=user_id,
+                model=request.model,
+                width=request.width,
+                height=request.height,
+                steps=request.steps,
+                seed=request.seed if request.seed >= 0 else -1,
+            )
+            result = await use_case.execute(input_data)
 
-        return ImageGenerationResponse(
-            task_id=result.task_id,
-            status=result.status,
-            image_url=result.image_url,
-            error=result.error,
-        )
+            return ImageGenerationResponse(
+                task_id=result.task_id,
+                status=result.status,
+                image_url=result.image_url,
+                error=result.error,
+            )
 
     except Exception as e:
         raise HTTPException(
