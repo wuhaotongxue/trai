@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import base64
 import mimetypes
-import os
 import re
 import uuid
 import zipfile
@@ -32,20 +31,16 @@ router = APIRouter()
 class PDFGenerator:
     """PDF 生成器.
 
-    支持多种 PDF 生成方案, 优先使用 Playwright, 备选其他方案.
+    使用 Playwright 将 HTML 转换为 PDF, 支持 Mermaid 图表和 KaTeX 公式渲染.
     """
 
     def __init__(self) -> None:
         """初始化 PDF 生成器."""
         self._playwright_available = False
-        self._weasyprint_available = False
-        self._pdfkit_available = False
-        self._wkhtmltopdf_path: str | None = None
-        self._init_backends()
+        self._init_backend()
 
-    def _init_backends(self) -> None:
-        """初始化可用的 PDF 后端."""
-        # 检查 Playwright (首选, 支持 emoji 最好)
+    def _init_backend(self) -> None:
+        """初始化 Playwright."""
         try:
             from playwright.sync_api import sync_playwright  # noqa: F401
 
@@ -54,66 +49,23 @@ class PDFGenerator:
         except ImportError:
             logger.warning("Playwright 未安装")
 
-        # 检查 WeasyPrint
-        try:
-            import weasyprint  # noqa: F401
-
-            self._weasyprint_available = True
-            logger.info("WeasyPrint 已启用")
-        except (ImportError, OSError) as e:
-            logger.warning(f"WeasyPrint 不可用: {e}")
-
-        # 检查 pdfkit + wkhtmltopdf
-        try:
-            import pdfkit  # noqa: F401
-
-            self._pdfkit_available = True
-            self._wkhtmltopdf_path = self._find_wkhtmltopdf()
-            if self._wkhtmltopdf_path:
-                logger.info(f"pdfkit 已启用, wkhtmltopdf: {self._wkhtmltopdf_path}")
-            else:
-                logger.warning("pdfkit 可用但 wkhtmltopdf 未找到")
-                self._pdfkit_available = False
-        except ImportError:
-            logger.warning("pdfkit 未安装")
-
-    def _find_wkhtmltopdf(self) -> str | None:
-        """查找 wkhtmltopdf 可执行文件."""
-        import shutil
-
-        env_path = os.environ.get("WKHTMLTOPDF_PATH")
-        if env_path and Path(env_path).exists():
-            return env_path
-
-        conda_prefix = os.environ.get("CONDA_PREFIX")
-        if conda_prefix:
-            conda_path = Path(conda_prefix) / "Library" / "bin" / "wkhtmltopdf.exe"
-            if conda_path.exists():
-                return str(conda_path)
-
-        system_path = shutil.which("wkhtmltopdf")
-        if system_path:
-            return system_path
-
-        return None
-
     async def generate_pdf(self, html_content: str) -> bytes:
-        """生成 PDF."""
-        # 优先使用 Playwright
-        if self._playwright_available:
-            return await self._generate_with_playwright(html_content)
+        """生成 PDF.
 
-        # 备选 WeasyPrint
-        if self._weasyprint_available:
-            return await self._generate_with_weasyprint(html_content)
+        Args:
+            html_content: HTML 内容
 
-        # 最后备选 pdfkit
-        if self._pdfkit_available and self._wkhtmltopdf_path:
-            return await self._generate_with_pdfkit(html_content)
+        Returns:
+            PDF 字节数据
 
-        raise RuntimeError(
-            "没有可用的 PDF 生成后端. 请安装 playwright: pip install playwright && playwright install chromium"
-        )
+        Raises:
+            RuntimeError: Playwright 未安装时抛出
+        """
+        if not self._playwright_available:
+            raise RuntimeError(
+                "Playwright 未安装. 请执行: pip install playwright && playwright install chromium"
+            )
+        return await self._generate_with_playwright(html_content)
 
     async def _generate_with_playwright(self, html_content: str) -> bytes:
         """使用 Playwright 生成 PDF.
@@ -216,29 +168,6 @@ class PDFGenerator:
 
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, _generate)
-
-    async def _generate_with_weasyprint(self, html_content: str) -> bytes:
-        """使用 WeasyPrint 生成 PDF."""
-        from weasyprint import HTML
-
-        def _generate():
-            html = HTML(string=html_content)
-            return html.write_pdf()
-
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, _generate)
-
-    async def _generate_with_pdfkit(self, html_content: str) -> bytes:
-        """使用 pdfkit 生成 PDF."""
-        import pdfkit
-
-        def _generate():
-            config = pdfkit.configuration(wkhtmltopdf=self._wkhtmltopdf_path)
-            return pdfkit.from_string(html_content, False, configuration=config)
-
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, _generate)
-
 
 # 全局 PDF 生成器实例
 _pdf_generator = PDFGenerator()
