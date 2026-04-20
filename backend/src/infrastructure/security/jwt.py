@@ -25,7 +25,9 @@ class JWTService:
     def __init__(self) -> None:
         self._secret_key: str = os.getenv("JWT_SECRET_KEY", "")
         if not self._secret_key:
-            logger.warning("JWT_SECRET_KEY 未配置,将使用不安全的默认密钥")
+            raise ValueError("JWT_SECRET_KEY 环境变量未配置, 必须在生产环境中设置")
+        if len(self._secret_key) < 32:
+            logger.warning("JWT_SECRET_KEY 长度小于32字节, 存在安全风险, 建议使用强随机密钥")
 
         self._algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
         self._access_token_expire_minutes: int = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))

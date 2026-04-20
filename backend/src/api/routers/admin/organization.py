@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from application.usecases.organization_sync import SyncOrganizationUseCase
 from core.logger import get_logger
-from infrastructure.database.database import get_session
+from infrastructure.database.database import get_db_session
 from infrastructure.repositories.department_repository import DepartmentRepository
 from infrastructure.repositories.user_repository import UserRepository
 
@@ -29,7 +29,7 @@ class SyncResult(BaseModel):
 
 
 @router.post("/sync", response_model=SyncResult, summary="同步组织架构")
-async def sync_organization(session: Session = Depends(get_session)) -> SyncResult:
+async def sync_organization(session: Session = Depends(get_db_session)) -> SyncResult:
     """从企业微信同步组织架构
 
     Returns:

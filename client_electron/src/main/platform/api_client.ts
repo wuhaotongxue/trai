@@ -10,7 +10,10 @@ import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { config_store } from './config_store'
 
 // 创建共享的 axios 实例
-export const api_client = axios.create()
+export const api_client = axios.create({
+  timeout: 10000, // 10 秒超时
+  timeoutErrorMessage: '请求超时，请检查网络连接或服务器状态'
+})
 
 // 请求拦截器 - 添加 Token
 api_client.interceptors.request.use((config) => {

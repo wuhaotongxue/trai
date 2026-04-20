@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 
 router = APIRouter()
@@ -44,7 +44,7 @@ class MeResponse(BaseModel):
 @router.get("/me", response_model=MeResponse, tags=["认证"])
 async def get_current_user_info(
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> MeResponse:
     """获取当前登录用户信息
 

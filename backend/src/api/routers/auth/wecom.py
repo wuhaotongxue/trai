@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from core.logger import get_logger
 from infrastructure.agent.tools.wecom_contact import WeComContactClient
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 
@@ -65,7 +65,7 @@ class WeComController:
     async def wecom_callback(
         code: Annotated[str, Query(description="企业微信授权码")],
         state: Annotated[str | None, Query(description="防重放状态码")] = None,
-        session: Session = Depends(get_session),
+        session: Session = Depends(get_db_session),
         jwt_service: JWTService = Depends(get_jwt_service),
     ) -> RedirectResponse:
         """企业微信扫码登录回调接口

@@ -38,29 +38,29 @@ class ClientUpdateAPI:
         Raises:
             HTTPException: 无版本记录时报错
         """
-        db = get_session()
         try:
-            # 查询最新激活版本
-            stmt = (
-                select(ClientReleaseModel)
-                .where(ClientReleaseModel.t_is_active)
-                .order_by(desc(ClientReleaseModel.t_created_at))
-                .limit(1)
-            )
-            result = db.execute(stmt)
-            latest_release = result.scalar_one_or_none()
-
-            if not latest_release:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail={"code": 404, "message": "尚未发布任何客户端版本"},
+            with get_session() as db:
+                # 查询最新激活版本
+                stmt = (
+                    select(ClientReleaseModel)
+                    .where(ClientReleaseModel.t_is_active)
+                    .order_by(desc(ClientReleaseModel.t_created_at))
+                    .limit(1)
                 )
+                result = db.execute(stmt)
+                latest_release = result.scalar_one_or_none()
 
-            # 签发 5 分钟有效期的 S3 预签名 URL
-            presigned_url = s3_service.get_presigned_url(latest_release.t_latest_yml_key, expires_in=300)
+                if not latest_release:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail={"code": 404, "message": "尚未发布任何客户端版本"},
+                    )
 
-            # 使用 HTTP 302 临时重定向,避免 electron-updater 缓存
-            return RedirectResponse(url=presigned_url, status_code=status.HTTP_302_FOUND)
+                # 签发 5 分钟有效期的 S3 预签名 URL
+                presigned_url = s3_service.get_presigned_url(latest_release.t_latest_yml_key, expires_in=300)
+
+                # 使用 HTTP 302 临时重定向,避免 electron-updater 缓存
+                return RedirectResponse(url=presigned_url, status_code=status.HTTP_302_FOUND)
 
         except HTTPException:
             raise
@@ -70,8 +70,6 @@ class ClientUpdateAPI:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={"code": 500, "message": "获取更新配置失败"},
             )
-        finally:
-            db.close()
 
     @staticmethod
     @router.get("/update/{filename}", summary="获取安装包文件")
@@ -97,40 +95,40 @@ class ClientUpdateAPI:
                 detail={"code": 400, "message": "仅支持获取 exe 安装包"},
             )
 
-        db = get_session()
         try:
-            # electron-updater 请求 exe 时,通常是在读取 latest.yml 后
-            # 这里为了简化,我们直接查询包含该 filename 的激活版本
-            stmt = (
-                select(ClientReleaseModel)
-                .where(ClientReleaseModel.t_is_active, ClientReleaseModel.t_installer_exe_key.like(f"%/{filename}"))
-                .limit(1)
-            )
-
-            result = db.execute(stmt)
-            target_release = result.scalar_one_or_none()
-
-            if not target_release:
-                # 兼容 fallback: 若找不到对应文件名,返回最新版的 exe
-                stmt_fallback = (
+            with get_session() as db:
+                # electron-updater 请求 exe 时,通常是在读取 latest.yml 后
+                # 这里为了简化,我们直接查询包含该 filename 的激活版本
+                stmt = (
                     select(ClientReleaseModel)
-                    .where(ClientReleaseModel.t_is_active)
-                    .order_by(desc(ClientReleaseModel.t_created_at))
+                    .where(ClientReleaseModel.t_is_active, ClientReleaseModel.t_installer_exe_key.like(f"%/{filename}"))
                     .limit(1)
                 )
-                result_fallback = db.execute(stmt_fallback)
-                target_release = result_fallback.scalar_one_or_none()
+
+                result = db.execute(stmt)
+                target_release = result.scalar_one_or_none()
 
                 if not target_release:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail={"code": 404, "message": "未找到对应的安装包"},
+                    # 兼容 fallback: 若找不到对应文件名,返回最新版的 exe
+                    stmt_fallback = (
+                        select(ClientReleaseModel)
+                        .where(ClientReleaseModel.t_is_active)
+                        .order_by(desc(ClientReleaseModel.t_created_at))
+                        .limit(1)
                     )
+                    result_fallback = db.execute(stmt_fallback)
+                    target_release = result_fallback.scalar_one_or_none()
 
-            # 签发 30 分钟有效期的 S3 预签名 URL,供安装包下载
-            presigned_url = s3_service.get_presigned_url(target_release.t_installer_exe_key, expires_in=1800)
+                    if not target_release:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail={"code": 404, "message": "未找到对应的安装包"},
+                        )
 
-            return RedirectResponse(url=presigned_url, status_code=status.HTTP_302_FOUND)
+                # 签发 30 分钟有效期的 S3 预签名 URL,供安装包下载
+                presigned_url = s3_service.get_presigned_url(target_release.t_installer_exe_key, expires_in=1800)
+
+                return RedirectResponse(url=presigned_url, status_code=status.HTTP_302_FOUND)
 
         except HTTPException:
             raise
@@ -140,5 +138,3 @@ class ClientUpdateAPI:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={"code": 500, "message": "获取安装包失败"},
             )
-        finally:
-            db.close()
