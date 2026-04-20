@@ -12,10 +12,12 @@ import os
 
 def get_db_config():
     """获取数据库配置"""
-    server = os.getenv("POSTGRES_SERVER", "192.168.100.119")
-    port = os.getenv("POSTGRES_PORT", "35433")
-    user = os.getenv("POSTGRES_USER", "itzx")
-    password = os.getenv("POSTGRES_PASSWORD", "Tuoren@2026...")
+    server = os.getenv("POSTGRES_SERVER", "127.0.0.1")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    user = os.getenv("POSTGRES_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD", "")
+    if not password:
+        raise ValueError("POSTGRES_PASSWORD 环境变量未设置")
     database = os.getenv("POSTGRES_DB", "trai")
     return {
         "host": server,

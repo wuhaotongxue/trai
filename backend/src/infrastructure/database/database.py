@@ -160,12 +160,14 @@ class Database:
             password_service = PasswordService()
             now = datetime.now()
 
+            # 优先从环境变量获取初始 admin 密码，若无则使用安全的随机密码或固定初始密码
+            admin_pwd = os.getenv("ADMIN_INIT_PASSWORD", "Admin@123456")
             params: dict[str, object] = {
                 "user_id": str(uuid.uuid4()),
                 "username": "admin",
                 "display_name": "管理员",
                 "email": "admin@example.com",
-                "password_hash": password_service.hash("Tuoren@@2026"),
+                "password_hash": password_service.hash(admin_pwd),
                 "role": "admin",
                 "status": "active",
                 "created_at": now,
