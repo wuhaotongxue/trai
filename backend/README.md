@@ -37,6 +37,18 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_20_1147
+- **feat(login)**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
+- **fix(database)**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
+- **refactor(tools)**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright
+- **chore(deps)**: 更新 requirements.txt, 移除 weasyprint 和 pdfkit
+
+### 🛠️ 后端_2026_04_20_1051
+- 修复 database.py 中 get_session 在 FastAPI Depends 注入下未正确关闭连接导致的 PostgreSQL 锁死 (idle in transaction) 和超时问题
+- 新增 get_db_session 作为 FastAPI 专用依赖，通过 yield 自动管理连接释放
+- 全局替换 src/api/routers 中对 Depends(get_session) 的调用为 Depends(get_db_session)
+- 新增 docs/postgresql_lock_issue.md 指南文档，提供锁死排查方法和僵尸进程清理 SQL
+
 ### 🛠️ 后端_2026_04_19_2241
 - **feat(ai)**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
 

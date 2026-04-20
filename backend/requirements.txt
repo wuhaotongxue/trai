@@ -41,7 +41,6 @@ opentelemetry-semantic-conventions
 opentelemetry-util-http
 packaging
 passlib
-pdfkit
 pillow
 protobuf
 psutil
@@ -73,3 +72,4 @@ win32_setctime
 wrapt
 zipp
 duckduckgo-search
+playwright

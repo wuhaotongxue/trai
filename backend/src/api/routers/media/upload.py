@@ -71,36 +71,36 @@ async def upload_file(
     user_id = current_user.get("user_id", "anonymous") if current_user else "anonymous"
 
     try:
-        db = get_session()
-        repo = UploadTaskRepository(db)
-        storage = S3StorageService()
-        use_case = FileUploadUseCase(storage_service=storage)
+        with get_session() as db:
+            repo = UploadTaskRepository(db)
+            storage = S3StorageService()
+            use_case = FileUploadUseCase(storage_service=storage)
 
-        input_data = UploadInput(file=file, folder=folder)
-        result = await use_case.execute(input_data)
+            input_data = UploadInput(file=file, folder=folder)
+            result = await use_case.execute(input_data)
 
-        if repo:
-            from domain.entities.upload_task import UploadStatus, UploadTask
+            if repo:
+                from domain.entities.upload_task import UploadStatus, UploadTask
 
-            task = UploadTask(
+                task = UploadTask(
+                    filename=result.filename,
+                    file_size=result.file_size,
+                    content_type=result.content_type,
+                    file_type=result.file_type,
+                    user_id=user_id,
+                    status=UploadStatus.COMPLETED,
+                    file_url=result.file_url,
+                )
+                repo.create(task)
+
+            return UploadResponse(
+                task_id=result.task_id,
                 filename=result.filename,
+                file_url=result.file_url,
+                file_type=result.file_type,
                 file_size=result.file_size,
                 content_type=result.content_type,
-                file_type=result.file_type,
-                user_id=user_id,
-                status=UploadStatus.COMPLETED,
-                file_url=result.file_url,
             )
-            repo.create(task)
-
-        return UploadResponse(
-            task_id=result.task_id,
-            filename=result.filename,
-            file_url=result.file_url,
-            file_type=result.file_type,
-            file_size=result.file_size,
-            content_type=result.content_type,
-        )
 
     except Exception as e:
         raise HTTPException(

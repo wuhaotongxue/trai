@@ -195,6 +195,10 @@ docstring 内容必须包含：
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 安全红线 — 任何一条违规直接打回</strong>
   <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>禁止硬编码密码</strong>：所有数据库密码、API 密钥必须通过环境变量读取，禁止写死在代码中</li>
+    <li><strong>禁止使用 eval</strong>：处理用户输入的数学表达式或其他逻辑时，必须使用安全的解析器（如 <code>ast.literal_eval</code>），严禁使用内置 <code>eval()</code> 防范代码注入</li>
+    <li><strong>强制配置强密钥</strong>：AES 加密和 JWT 签名必须配置强随机密钥（>=32字节），未配置必须抛出异常阻断启动，禁止静默使用弱默认密钥</li>
+    <li><strong>数据库连接安全</strong>：手动获取的 Session 必须使用 <code>with</code> 上下文管理器或基于 <code>yield</code> 的依赖注入，确保连接释放，严防 <code>idle in transaction</code> 锁死表</li>
     <li>密码必须使用 <code>passlib</code> + <code>bcrypt</code>/<code>Argon2</code> 哈希，<strong>禁止明文存储或使用 MD5/SHA1</strong></li>
     <li>严禁在日志中记录用户的明文密码、真实 Token 等敏感信息</li>
     <li><strong>严禁 S3 资源 Public Read</strong>，必须通过 Presigned URL 访问</li>

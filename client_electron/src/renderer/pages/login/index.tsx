@@ -388,7 +388,21 @@ const Login: React.FC = () => {
                 </button>
               </div>
             </div>
-            {error_msg && <div style={{ color: '#e51400', fontSize: '12px' }}>{error_msg}</div>}
+            {error_msg && (
+              <div
+                style={{
+                  color: '#e51400',
+                  fontSize: '12px',
+                  whiteSpace: 'pre-line',
+                  lineHeight: '1.5',
+                  padding: '8px',
+                  backgroundColor: 'rgba(229, 20, 0, 0.05)',
+                  borderRadius: '4px'
+                }}
+              >
+                {error_msg}
+              </div>
+            )}
             <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
               登录
             </button>
