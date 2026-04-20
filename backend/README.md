@@ -17,8 +17,8 @@ TRAI 项目后端服务, 基于 FastAPI 框架构建.
 推荐使用清华源加速:
 
 ```bash
-conda create -n trai_31313_20260413 python=3.13.13 -y
-conda activate trai_31313_20260413
+conda create -n trai python=3.13.13 -y
+conda activate trai
 cd backend
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -e .
 ```
@@ -42,6 +42,9 @@ python run.py
 - **refactor(enum)**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
 - **fix(tools)**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
 - **chore(lint)**: 通过 Ruff linter 检查, 修复所有代码风格问题
+
+### 📚 规范(skills)_2026_04_20_1646
+- **chore(skills)**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
 
 ### 🛠️ 后端_2026_04_20_1147
 - **feat(login)**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
