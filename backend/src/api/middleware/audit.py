@@ -11,16 +11,7 @@ import time
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
-
-try:
-    from enum import StrEnum
-except ImportError:
-    from enum import Enum
-
-    class StrEnum(str, Enum):
-        pass
-
-
+from enum import StrEnum
 from typing import Any
 
 from fastapi import Request, Response
