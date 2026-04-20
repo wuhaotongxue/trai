@@ -19,19 +19,43 @@ export const auth_service = {
   async login(params: any) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.auth_login)
+      log.info(`login request to: ${url}`)
       const res = await api_client.post(url, params)
-      
+
       // 登录成功后持久化 token
       if (res.data?.access_token) {
         config_store.set('access_token', res.data.access_token)
       }
-      
+
       return { success: true, data: res.data }
     } catch (error: any) {
       log.error('login failed:', error.response?.data || error.message)
-      return { 
-        success: false, 
-        error: error.response?.data?.detail?.message || '登录失败，请检查网络或服务器配置' 
+
+      // 处理不同类型的错误
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        return {
+          success: false,
+          error: '连接超时，请检查:\n1. 后端服务是否已启动\n2. 服务地址是否正确\n3. 网络连接是否正常'
+        }
+      }
+
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('refused')) {
+        return {
+          success: false,
+          error: '无法连接到服务器，请检查:\n1. 后端服务是否已启动\n2. 服务地址和端口是否正确'
+        }
+      }
+
+      if (error.response?.status === 401) {
+        return {
+          success: false,
+          error: '用户名或密码错误'
+        }
+      }
+
+      return {
+        success: false,
+        error: error.response?.data?.detail?.message || error.message || '登录失败，请检查网络或服务器配置'
       }
     }
   },
