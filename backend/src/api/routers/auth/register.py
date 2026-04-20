@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
@@ -50,7 +50,7 @@ async def register(
     request: RegisterRequest,
     password_service: Annotated[PasswordService, Depends(get_password_service)],
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> RegisterResponse:
     """用户注册
 

@@ -160,12 +160,14 @@ class Database:
             password_service = PasswordService()
             now = datetime.now()
 
+            # 优先从环境变量获取初始 admin 密码，若无则使用安全的随机密码或固定初始密码
+            admin_pwd = os.getenv("ADMIN_INIT_PASSWORD", "Admin@123456")
             params: dict[str, object] = {
                 "user_id": str(uuid.uuid4()),
                 "username": "admin",
                 "display_name": "管理员",
                 "email": "admin@example.com",
-                "password_hash": password_service.hash("Tuoren@@2026"),
+                "password_hash": password_service.hash(admin_pwd),
                 "role": "admin",
                 "status": "active",
                 "created_at": now,
@@ -278,4 +280,13 @@ def get_session() -> Session:
     return get_database().get_session()
 
 
-__all__ = ["Base", "Database", "DatabaseConfig", "get_database", "get_session"]
+def get_db_session():
+    """获取数据库会话生成器(用于 FastAPI Depends)"""
+    session = get_database().get_session()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+__all__ = ["Base", "Database", "DatabaseConfig", "get_database", "get_session", "get_db_session"]

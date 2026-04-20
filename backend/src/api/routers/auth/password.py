@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.password import PasswordService, get_password_service
 
@@ -45,7 +45,7 @@ async def change_password(
     request: ChangePasswordRequest,
     current_user: CurrentUser,
     password_service: Annotated[PasswordService, Depends(get_password_service)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> PasswordResponse:
     """修改当前用户密码
 
@@ -104,7 +104,7 @@ async def reset_password(
     request: ResetPasswordRequest,
     current_user: CurrentUser,
     password_service: Annotated[PasswordService, Depends(get_password_service)],
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> PasswordResponse:
     """重置用户密码(仅管理员)
 

@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from api.deps import CurrentUser
 from core.context_manager import ContextManager, get_context_manager
 from core.policy_engine import PolicyContext, PolicyDecision, get_policy_engine
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
     SessionRepository,
@@ -104,7 +104,7 @@ async def send_message(
     session_id: str,
     request: SendMessageRequest,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> SendMessageResponse:
     """发送消息(联动 AI 对话)
 
@@ -201,7 +201,7 @@ async def send_message(
 async def create_session(
     request: CreateSessionRequest,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> CreateSessionResponse:
     """创建新会话
 
@@ -246,7 +246,7 @@ async def create_session(
 )
 async def list_sessions(
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionListResponse:
@@ -302,7 +302,7 @@ async def list_sessions(
 async def get_session_detail(
     session_id: str,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> SessionDetailResponse:
     """获取会话详情
 
@@ -360,7 +360,7 @@ async def get_session_detail(
 async def delete_session(
     session_id: str,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
     """删除会话
 
@@ -438,7 +438,7 @@ async def send_message_stream(
     session_id: str,
     request: SendMessageRequest,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_db_session)],
 ):
     """发送消息(流式响应,支持 abort 中断)
 
