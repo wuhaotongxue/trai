@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 
 import psycopg2
@@ -166,12 +167,15 @@ def add_comments():
     print("=" * 60, flush=True)
 
     try:
+        password = os.getenv("POSTGRES_PASSWORD", "")
+        if not password:
+            raise ValueError("POSTGRES_PASSWORD 环境变量未设置")
         conn = psycopg2.connect(
-            host="192.168.100.119",
-            port=35433,
-            user="itzx",
-            password="Tuoren@2026...",
-            database="trai",
+            host=os.getenv("POSTGRES_SERVER", "127.0.0.1"),
+            port=int(os.getenv("POSTGRES_PORT", "5432")),
+            user=os.getenv("POSTGRES_USER", "postgres"),
+            password=password,
+            database=os.getenv("POSTGRES_DB", "trai"),
             connect_timeout=10,
         )
         print("数据库连接成功", flush=True)

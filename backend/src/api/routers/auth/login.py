@@ -23,28 +23,48 @@ router = APIRouter()
 
 DEMO_USERNAME = os.getenv("DEMO_USERNAME", "wuhao")
 DEMO_PASSWORD_PLAIN = os.getenv("DEMO_PASSWORD", "Tr@@2026...")
-AES_KEY = os.getenv("AES_KEY", "TraiSecretKey32BytesLong!!").encode().ljust(32, b"0")[:32]
-AES_IV = os.getenv("AES_IV", "TraiInitVector").encode().ljust(16, b"0")[:16]
+AES_KEY_STR = os.getenv("AES_KEY")
+AES_IV_STR = os.getenv("AES_IV")
+
+if not AES_KEY_STR or not AES_IV_STR:
+    # 生产环境中应强制要求配置
+    # raise ValueError("AES_KEY and AES_IV must be set in environment variables")
+    # 为了兼容本地开发，提供一个随机或安全的 fallback
+    import os as _os
+
+    AES_KEY = _os.urandom(32)
+    AES_IV = _os.urandom(16)
+else:
+    AES_KEY = AES_KEY_STR.encode().ljust(32, b"0")[:32]
+    AES_IV = AES_IV_STR.encode().ljust(16, b"0")[:16]
 
 
 def aes_encrypt(plaintext: str) -> str:
-    """AES 加密密码"""
+    """AES-GCM 加密密码"""
+    import os as _os
+
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-    cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
+    iv = _os.urandom(12)
+    cipher = Cipher(algorithms.AES(AES_KEY), modes.GCM(iv))
     encryptor = cipher.encryptor()
-    padded = plaintext.encode().ljust(32, b" ")
-    return base64.b64encode(encryptor.update(padded) + encryptor.finalize()).decode()
+    ciphertext = encryptor.update(plaintext.encode()) + encryptor.finalize()
+    payload = iv + encryptor.tag + ciphertext
+    return base64.b64encode(payload).decode()
 
 
 def aes_decrypt(ciphertext: str) -> str:
-    """AES 解密密码"""
+    """AES-GCM 解密密码"""
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-    cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV))
+    data = base64.b64decode(ciphertext)
+    iv = data[:12]
+    tag = data[12:28]
+    ciphertext_bytes = data[28:]
+    cipher = Cipher(algorithms.AES(AES_KEY), modes.GCM(iv, tag))
     decryptor = cipher.decryptor()
-    padded = decryptor.update(base64.b64decode(ciphertext)) + decryptor.finalize()
-    return padded.decode().strip()
+    plaintext = decryptor.update(ciphertext_bytes) + decryptor.finalize()
+    return plaintext.decode()
 
 
 class LoginRequest(BaseModel):
