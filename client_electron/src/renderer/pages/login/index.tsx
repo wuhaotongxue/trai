@@ -100,7 +100,7 @@ const Login: React.FC = () => {
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const submit_password = is_default_password ? 'Tr@@2026...' : password
+    const submit_password = password
 
     if (!username || !submit_password) {
       set_error_msg('用户名和密码不能为空')

@@ -8,6 +8,11 @@
 from __future__ import annotations
 
 import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from loguru import logger
 
 
 def get_db_config():
@@ -209,7 +214,7 @@ def rename_table(conn, old_name, new_name):
     cur = conn.cursor()
     cur.execute(f'ALTER TABLE "{old_name}" RENAME TO "{new_name}"')
     conn.commit()
-    print(f"  [OK] {old_name} -> {new_name}")
+    logger.info(f"[OK] {old_name} -> {new_name}")
 
 
 def rename_column(conn, table_name, old_name, new_name):
@@ -217,114 +222,110 @@ def rename_column(conn, table_name, old_name, new_name):
     cur = conn.cursor()
     cur.execute(f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}"')
     conn.commit()
-    print(f"    [OK] {old_name} -> {new_name}")
+    logger.info(f"    [OK] {old_name} -> {new_name}")
 
 
 def migrate_rename_all():
     """执行表名和字段名重命名迁移"""
-    print("=" * 60)
-    print("数据库重命名迁移")
-    print("将表名和字段名改为 t_ 前缀")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("数据库重命名迁移")
+    logger.info("将表名和字段名改为 t_ 前缀")
+    logger.info("=" * 60)
 
     try:
         conn = get_db_connection()
-        print("数据库连接成功")
+        logger.info("数据库连接成功")
 
-        # 第一步:重命名表名
-        print("\n=== 第一步:重命名表名 ===")
+        logger.info("\n=== 第一步:重命名表名 ===")
         existing_tables = get_table_names(conn)
         for old_name, new_name in TABLE_RENAMES.items():
             if old_name not in existing_tables:
-                print(f"  [跳过] 表 {old_name} 不存在")
+                logger.info(f"  [跳过] 表 {old_name} 不存在")
                 continue
             if new_name in existing_tables:
-                print(f"  [跳过] 表 {new_name} 已存在")
+                logger.info(f"  [跳过] 表 {new_name} 已存在")
                 continue
             rename_table(conn, old_name, new_name)
 
-        # 第二步:重命名字段名
-        print("\n=== 第二步:重命名字段名 ===")
+        logger.info("\n=== 第二步:重命名字段名 ===")
         for table_name, renames in FIELD_RENAMES.items():
-            print(f"\n处理表: {table_name}")
+            logger.info(f"\n处理表: {table_name}")
             columns = get_table_columns(conn, table_name)
-            print(f"  当前列: {columns}")
+            logger.info(f"  当前列: {columns}")
 
             for old_name, new_name in renames.items():
                 if old_name == new_name:
                     continue
                 if old_name not in columns:
-                    print(f"  [跳过] 列 {old_name} 不存在")
+                    logger.info(f"  [跳过] 列 {old_name} 不存在")
                     continue
                 if new_name in columns:
-                    print(f"  [跳过] 列 {new_name} 已存在")
+                    logger.info(f"  [跳过] 列 {new_name} 已存在")
                     continue
                 rename_column(conn, table_name, old_name, new_name)
 
-            print(f"  完成: {table_name}")
+            logger.info(f"  完成: {table_name}")
 
         conn.close()
 
-        print("\n" + "=" * 60)
-        print("迁移完成!")
-        print("请重启应用以使更改生效")
-        print("=" * 60)
+        logger.info("\n" + "=" * 60)
+        logger.info("迁移完成!")
+        logger.info("请重启应用以使更改生效")
+        logger.info("=" * 60)
 
     except Exception as e:
-        print(f"迁移失败: {str(e)}")
+        logger.error(f"迁移失败: {str(e)}")
         raise
 
 
 def rollback_rename_all():
     """回滚重命名(将 t_ 前缀改回原名)"""
-    print("=" * 60)
-    print("数据库重命名回滚")
-    print("将 t_ 前缀改回原名")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("数据库重命名回滚")
+    logger.info("将 t_ 前缀改回原名")
+    logger.info("=" * 60)
 
     try:
         conn = get_db_connection()
-        print("数据库连接成功")
+        logger.info("数据库连接成功")
 
-        # 第一步:先回滚字段名
-        print("\n=== 第一步:回滚字段名 ===")
+        logger.info("\n=== 第一步:回滚字段名 ===")
         for table_name, renames in FIELD_RENAMES.items():
-            print(f"\n处理表: {table_name}")
+            logger.info(f"\n处理表: {table_name}")
             columns = get_table_columns(conn, table_name)
 
             for old_name, new_name in renames.items():
                 if old_name == new_name:
                     continue
                 if new_name not in columns:
-                    print(f"  [跳过] 列 {new_name} 不存在")
+                    logger.info(f"  [跳过] 列 {new_name} 不存在")
                     continue
                 if old_name in columns:
-                    print(f"  [跳过] 列 {old_name} 已存在")
+                    logger.info(f"  [跳过] 列 {old_name} 已存在")
                     continue
                 rename_column(conn, table_name, new_name, old_name)
 
-            print(f"  完成: {table_name}")
+            logger.info(f"  完成: {table_name}")
 
-        # 第二步:回滚表名
-        print("\n=== 第二步:回滚表名 ===")
+        logger.info("\n=== 第二步:回滚表名 ===")
         existing_tables = get_table_names(conn)
         for old_name, new_name in TABLE_RENAMES.items():
             if new_name not in existing_tables:
-                print(f"  [跳过] 表 {new_name} 不存在")
+                logger.info(f"  [跳过] 表 {new_name} 不存在")
                 continue
             if old_name in existing_tables:
-                print(f"  [跳过] 表 {old_name} 已存在")
+                logger.info(f"  [跳过] 表 {old_name} 已存在")
                 continue
             rename_table(conn, new_name, old_name)
 
         conn.close()
 
-        print("\n" + "=" * 60)
-        print("回滚完成!")
-        print("=" * 60)
+        logger.info("\n" + "=" * 60)
+        logger.info("回滚完成!")
+        logger.info("=" * 60)
 
     except Exception as e:
-        print(f"回滚失败: {str(e)}")
+        logger.error(f"回滚失败: {str(e)}")
         raise
 
 
