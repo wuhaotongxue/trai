@@ -86,17 +86,17 @@ const steps = [
 // ---- 用户评价 ----
 const testimonials = [
   {
-    quote: "TRAI 的工具调用能力远超预期, 我们用它替代了内部 80% 的重复查询工作, 效率提升显著。",
+    quote: "TRAI 的工具调用能力远超预期, 我们用它替代了内部 80% 的重复查询工作, 效率提升显著. ",
     name: "张明", role: "CTO", company: "某科技公司", avatar: "ZM",
     color: "from-blue-600 to-blue-500",
   },
   {
-    quote: "流式响应加上随时中断的设计非常贴心, 配额体系也清晰透明, 用户体验做得很好。",
+    quote: "流式响应加上随时中断的设计非常贴心, 配额体系也清晰透明, 用户体验做得很好. ",
     name: "李华", role: "产品经理", company: "某 SaaS 创业公司", avatar: "LH",
     color: "from-amber-500 to-orange-500",
   },
   {
-    quote: "从注册到接入 API 不到 10 分钟, 文档清晰, SDK 友好, 集成成本极低。",
+    quote: "从注册到接入 API 不到 10 分钟, 文档清晰, SDK 友好, 集成成本极低. ",
     name: "王芳", role: "全栈工程师", company: "某数字化企业", avatar: "WF",
     color: "from-emerald-500 to-teal-500",
   },
@@ -104,16 +104,16 @@ const testimonials = [
 
 // ---- 常见问题 ----
 const faqs = [
-  { q: "如何申请 VIP 账号?", a: "登录后在个人中心点击「升级 VIP」, 支持支付宝和微信支付, 支付成功后即时生效。" },
-  { q: "配额用完了怎么办?", a: "配额按自然月重置, 或升级为 VIP 获得无限配额。配额超限后 API 直接返回错误, 禁止降级。" },
-  { q: "支持私有化部署吗?", a: "支持, 企业版提供完整的私有化部署方案, 可接入内网环境, 支持定制模型接入。" },
+  { q: "如何申请 VIP 账号?", a: "登录后在个人中心点击「升级 VIP」, 支持支付宝和微信支付, 支付成功后即时生效. " },
+  { q: "配额用完了怎么办?", a: "配额按自然月重置, 或升级为 VIP 获得无限配额. 配额超限后 API 直接返回错误, 禁止降级. " },
+  { q: "支持私有化部署吗?", a: "支持, 企业版提供完整的私有化部署方案, 可接入内网环境, 支持定制模型接入. " },
 ];
 
 /**
  * Intersection Observer Hook
- * 检测元素是否进入视口，用于触发滚动动画
- * @param threshold - 可见度阈值，默认 0.15（15% 可见时触发）
- * @returns ref - 引用对象，inView - 是否在视口中
+ * 检测元素是否进入视口, 用于触发滚动动画
+ * @param threshold - 可见度阈值, 默认 0.15（15% 可见时触发）
+ * @returns ref - 引用对象, inView - 是否在视口中
  */
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
@@ -138,9 +138,9 @@ function useInView(threshold = 0.15) {
 
 /**
  * 滚动入场动画组件
- * 当元素进入视口时，显示淡入上移的动画效果
+ * 当元素进入视口时, 显示淡入上移的动画效果
  * @param children - 子元素
- * @param delay - 动画延迟时间（毫秒），默认 0
+ * @param delay - 动画延迟时间（毫秒）, 默认 0
  * @param className - 自定义类名
  * @returns React 组件
  */
@@ -224,8 +224,8 @@ export default function HomePage() {
           <p
             className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.35s_both]"
           >
-            企业级 AI 助手平台, 支持多工具调用、自动纠错、VLM 视觉理解与流式交互。
-            开箱即用, 配额清晰, 企业级安全。
+            企业级 AI 助手平台, 支持多工具调用、自动纠错、VLM 视觉理解与流式交互. 
+            开箱即用, 配额清晰, 企业级安全. 
           </p>
 
           {/* CTA 按钮 */}
@@ -285,12 +285,12 @@ export default function HomePage() {
                       <Bot className="h-4 w-4 text-white" />
                     </div>
                     <div className="bg-slate-100 dark:bg-[#161b22] rounded-2xl rounded-tl-md px-4 py-3 text-sm text-slate-700 dark:text-slate-200 leading-relaxed max-w-sm">
-                      你好! 我是 TRAI Agent。今天天气如何? 我需要为明天的户外活动做准备。
+                      你好! 我是 TRAI Agent. 今天天气如何? 我需要为明天的户外活动做准备. 
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
                     <div className="bg-blue-600 rounded-2xl rounded-tr-md px-4 py-3 text-sm text-white max-w-sm shadow-sm">
-                      明天北京多云转晴, 26~34&deg;C, 适合户外活动。建议上午出行, 午后注意防晒补水。
+                      明天北京多云转晴, 26~34&deg;C, 适合户外活动. 建议上午出行, 午后注意防晒补水. 
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -302,7 +302,7 @@ export default function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot" />
                         <span className="text-green-600 dark:text-green-400 text-xs font-medium">工具调用: weather</span>
                       </div>
-                      已为您查询天气预报并生成出行建议。
+                      已为您查询天气预报并生成出行建议. 
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
@@ -319,7 +319,7 @@ export default function HomePage() {
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot" />
                         <span className="text-green-600 dark:text-green-400 text-xs font-medium">工具调用: translate</span>
                       </div>
-                      未来属于那些相信梦想之美的人。
+                      未来属于那些相信梦想之美的人. 
                     </div>
                   </div>
                 </div>
@@ -427,7 +427,7 @@ export default function HomePage() {
                   现代化技术栈<br /><span className="text-blue-600 dark:text-blue-400">稳定可靠</span>
                 </h2>
                 <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
-                  前端基于 Next.js 15 App Router, 后端遵循 DDD 五层架构。支持 OpenAI、ModelScope、智谱等多模型接入, Redis 缓存加速, SSE 流式输出。
+                  前端基于 Next.js 15 App Router, 后端遵循 DDD 五层架构. 支持 OpenAI、ModelScope、智谱等多模型接入, Redis 缓存加速, SSE 流式输出. 
                 </p>
                 <div className="space-y-3">
                   {[
@@ -596,7 +596,7 @@ export default function HomePage() {
                         </div>
                         <div className="border-t border-emerald-100 dark:border-emerald-500/20 pt-2">
                           <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">日语翻译</p>
-                          <p className="text-sm text-slate-700 dark:text-slate-200 font-ja">明日の北京の天気予報: 晴れ、時々曇り、気温18〜26度、 南東の風3〜4級、外出に適しています。</p>
+                          <p className="text-sm text-slate-700 dark:text-slate-200 font-ja">明日の北京の天気予報: 晴れ、時々曇り、気温18〜26度、 南東の風3〜4級、外出に適しています. </p>
                         </div>
                       </div>
                     </div>
@@ -714,7 +714,7 @@ export default function HomePage() {
           <Reveal>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">准备好开始了吗?</h2>
             <p className="text-blue-100 text-lg max-w-lg mx-auto mb-10">
-              注册即可获得免费配额, 体验完整 Agent 功能。无需信用卡, 立即试用。
+              注册即可获得免费配额, 体验完整 Agent 功能. 无需信用卡, 立即试用. 
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
@@ -746,7 +746,7 @@ export default function HomePage() {
                 <span className="text-lg font-bold text-white">TRAI</span>
               </Link>
               <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
-                新一代 AI Agent 平台, 为企业提供安全、可靠、可扩展的智能助手解决方案。
+                新一代 AI Agent 平台, 为企业提供安全、可靠、可扩展的智能助手解决方案. 
               </p>
             </div>
             {([

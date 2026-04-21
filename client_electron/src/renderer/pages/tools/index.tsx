@@ -2,7 +2,7 @@
  * 文件名: index.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 08:12:51
- * 描述: 客户端工具箱页面，提供文件处理功能
+ * 描述: 客户端工具箱页面, 提供文件处理功能
  */
 import React, { useState } from 'react'
 import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder } from 'lucide-react'
@@ -211,7 +211,7 @@ const Tools: React.FC = () => {
     {
       id: 'image',
       title: '图片压缩',
-      description: '智能压缩图片体积，支持设定目标大小并自动调节质量',
+      description: '智能压缩图片体积, 支持设定目标大小并自动调节质量',
       icon: <ImageIcon size={32} color="#10b981" />,
       action: handle_compress_image,
       bg_color: '#ecfdf5',
@@ -737,8 +737,8 @@ const Tools: React.FC = () => {
                     <div>
                       <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>
                         {result_info?.expires_in && result_info.expires_in > 0
-                          ? '文件已成功生成，请点击下方按钮下载，链接有效期 5 分钟。'
-                          : '文件已成功生成，请点击下方按钮下载。'}
+                          ? '文件已成功生成, 请点击下方按钮下载, 链接有效期 5 分钟. '
+                          : '文件已成功生成, 请点击下方按钮下载. '}
                       </p>
 
                       {result_info?.message && result_info.message !== '处理成功' && (

@@ -25,7 +25,7 @@ description: "Run astral's ruff tool to format and lint Python code in the backe
    ```powershell
    .venv\Scripts\ruff.exe format src/
    # 或如果使用 conda:
-   # conda run -n trai_31313_20260413 ruff format src/
+   # conda run -n trai ruff format src/
    ```
 
 3. **执行代码检查 (Check / Lint)**：
@@ -33,7 +33,7 @@ description: "Run astral's ruff tool to format and lint Python code in the backe
    ```powershell
    .venv\Scripts\ruff.exe check src/ --fix
    # 或使用 conda:
-   # conda run -n trai_31313_20260413 ruff check src/ --fix
+   # conda run -n trai ruff check src/ --fix
    ```
 
 4. **处理报错**：

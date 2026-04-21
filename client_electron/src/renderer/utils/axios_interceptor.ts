@@ -2,7 +2,7 @@
  * 文件名: axios_interceptor.ts
  * 作者: wuhao
  * 日期: 2026-04-19 00:40:00
- * 描述: axios 拦截器，处理 401 认证过期
+ * 描述: axios 拦截器, 处理 401 认证过期
  */
 import axios from 'axios'
 import { use_auth_store } from '@/store/auth'
@@ -25,8 +25,8 @@ export const setup_axios_interceptors = () => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // 401 错误，提示用户重新登录
-        const should_relogin = confirm('登录已过期，请重新登录')
+        // 401 错误, 提示用户重新登录
+        const should_relogin = confirm('登录已过期, 请重新登录')
         if (should_relogin) {
           // 清除认证状态
           use_auth_store.getState().logout()

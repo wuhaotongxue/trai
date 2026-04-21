@@ -140,3 +140,16 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | `作者` | wuhao |
 | `日期` | {YYYY-MM-DD HH:MM:SS} |
 | `描述` | {该文件的用途/功能简述，一句话概括} |
+
+### 13. 安全红线 (CRITICAL)
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 安全红线 — 任何一条违规直接打回</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>沙箱与隔离</strong>：必须在 <code>webPreferences</code> 中强制开启 <code>contextIsolation: true</code> 和 <code>nodeIntegration: false</code>。</li>
+    <li><strong>IPC 通信安全</strong>：IPC 主进程通道必须验证 sender 来源，禁止渲染进程直接传递未经验证的绝对路径给主进程执行读写。</li>
+    <li><strong>敏感数据存储</strong>：密码、Token 等敏感数据在客户端本地存储时，必须调用操作系统的安全密钥链（如 Electron 的 <code>safeStorage</code> API），禁止明文写在 JSON 或 localStorage 中。</li>
+    <li><strong>防止注入与 XSS</strong>：严禁使用 <code>eval()</code>、<code>new Function()</code>，渲染层严禁直接渲染未转义的 HTML (<code>dangerouslySetInnerHTML</code>)。</li>
+    <li><strong>协议与外链</strong>：打开外部链接必须通过 <code>shell.openExternal()</code>，且只能打开 <code>http://</code> 或 <code>https://</code> 协议的链接，拦截一切 <code>file://</code> 跨站跳转。</li>
+  </ul>
+</div>

@@ -28,7 +28,7 @@ export const feedback_service = {
       log.error('feedback submit failed:', error.response?.data || error.message)
       return { 
         success: false, 
-        error: error.response?.data?.detail?.message || error.response?.data?.msg || '反馈提交失败，请检查网络或服务器配置' 
+        error: error.response?.data?.detail?.message || error.response?.data?.msg || '反馈提交失败, 请检查网络或服务器配置' 
       }
     }
   }

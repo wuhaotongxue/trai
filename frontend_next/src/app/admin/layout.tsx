@@ -6,6 +6,7 @@
  */
 
 "use client";
+import Cookies from "js-cookie";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -41,6 +42,14 @@ const menuGroups = [
     ],
   },
   {
+    label: "业务功能",
+    items: [
+      { label: "知识库管理", href: "/admin/knowledge_base", icon: Database, desc: "私有知识库维护" },
+      { label: "组织架构", href: "/admin/organization", icon: Users, desc: "企业部门与成员" },
+      { label: "客户端发布", href: "/admin/client_release", icon: Cpu, desc: "版本更新与下发" },
+    ],
+  },
+  {
     label: "运营管理",
     items: [
       { label: "配额配置", href: "/admin/quotas", icon: Cpu, desc: "额度与套餐管理" },
@@ -68,7 +77,7 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
 
   useEffect(() => {
     const syncAuth = () => {
-      setToken(localStorage.getItem("token"));
+      setToken(Cookies.get("token"));
       setSidebarCollapsed(localStorage.getItem("admin_sidebar_collapsed") === "1");
     };
 
@@ -325,8 +334,8 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
                 <DropdownMenuItem 
                   className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
                   onClick={() => {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("refresh_token");
+                    Cookies.remove("token");
+                    Cookies.remove("refresh_token");
                     window.location.href = "/login";
                   }}
                 >

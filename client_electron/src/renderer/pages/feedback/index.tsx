@@ -128,7 +128,7 @@ const Feedback: React.FC = () => {
       })
       
       if (res.success) {
-        set_message({ type: 'success', text: '反馈提交成功，感谢您的支持！' })
+        set_message({ type: 'success', text: '反馈提交成功, 感谢您的支持! ' })
         set_title('')
         set_content('')
         set_contact('')
@@ -505,7 +505,7 @@ const Feedback: React.FC = () => {
                         <Paperclip size={16} />
                         添加附件
                       </button>
-                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>支持图片、PDF、文档等格式，最多上传 3 个，单文件 5MB 以内</span>
+                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>支持图片、PDF、文档等格式, 最多上传 3 个, 单文件 5MB 以内</span>
                     </div>
                     
                     {attachments.length > 0 && (

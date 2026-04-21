@@ -139,13 +139,13 @@ const roadmap_nodes: RoadmapNode[] = [
 
 function normalize_display_text(value: string): string {
   return value
-    .replaceAll("，", ",")
-    .replaceAll("：", ":")
+    .replaceAll(", ", ",")
+    .replaceAll(": ", ":")
     .replaceAll("（", "(")
     .replaceAll("）", ")")
-    .replaceAll("。", ".")
-    .replaceAll("！", "!")
-    .replaceAll("？", "?");
+    .replaceAll(". ", ".")
+    .replaceAll("! ", "!")
+    .replaceAll("? ", "?");
 }
 
 function infer_area_from_subject(subject: string): ChangeArea | null {

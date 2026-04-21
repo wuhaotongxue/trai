@@ -37,10 +37,10 @@ const AiVideo: React.FC = () => {
   ]
 
   const video_styles: VideoStyle[] = [
-    { id: 'cyberpunk', name: '赛博朋克', prompt: '镜头从高空俯冲穿过赛博朋克城市的街道，霓虹灯闪烁，飞行器穿梭', icon: <Film size={14} />, category: 'city' },
-    { id: 'scifi', name: '科幻场景', prompt: '未来太空站内部，宇航员在失重环境中工作，科幻感', icon: <Tv size={14} />, category: 'city' },
-    { id: 'nature', name: '自然风光', prompt: '航拍壮丽的山川河流，云雾缭绕，阳光穿透云层', icon: <Camera size={14} />, category: 'nature' },
-    { id: 'cinematic', name: '电影质感', prompt: '电影级别的慢动作镜头，戏剧性的光影，史诗感', icon: <Clapperboard size={14} />, category: 'nature' }
+    { id: 'cyberpunk', name: '赛博朋克', prompt: '镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭', icon: <Film size={14} />, category: 'city' },
+    { id: 'scifi', name: '科幻场景', prompt: '未来太空站内部, 宇航员在失重环境中工作, 科幻感', icon: <Tv size={14} />, category: 'city' },
+    { id: 'nature', name: '自然风光', prompt: '航拍壮丽的山川河流, 云雾缭绕, 阳光穿透云层', icon: <Camera size={14} />, category: 'nature' },
+    { id: 'cinematic', name: '电影质感', prompt: '电影级别的慢动作镜头, 戏剧性的光影, 史诗感', icon: <Clapperboard size={14} />, category: 'nature' }
   ]
 
   const filtered_styles = video_styles.filter(s => s.category === active_category)
@@ -56,7 +56,7 @@ const AiVideo: React.FC = () => {
       if (res.success && res.data?.video_url) {
         set_result_url(res.data.video_url)
       } else {
-        set_error(res.error || '生成失败，请重试')
+        set_error(res.error || '生成失败, 请重试')
       }
     } catch (err: any) {
       set_error(err.message || '网络异常')
@@ -180,7 +180,7 @@ const AiVideo: React.FC = () => {
             <textarea
               value={prompt}
               onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 镜头从高空俯冲穿过赛博朋克城市的街道，霓虹灯闪烁，飞行器穿梭..."
+              placeholder="例如: 镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭..."
               style={{
                 width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
                 resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
@@ -218,11 +218,11 @@ const AiVideo: React.FC = () => {
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', fontSize: '14px' }}>
               <Loader2 size={36} className="animate-spin" style={{ marginBottom: '12px' }} />
-              <span>AI 正在渲染视频，请稍候...</span>
+              <span>AI 正在渲染视频, 请稍候...</span>
             </div>
           ) : result_url ? (
             <video controls src={result_url} style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }}>
-              您的浏览器不支持 video 标签。
+              您的浏览器不支持 video 标签. 
             </video>
           ) : (
             <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '14px' }}>

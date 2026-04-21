@@ -521,7 +521,7 @@ class KnowledgeBaseDemoService:
             # 尝试解码 base64
             content_bytes = base64.b64decode(content)
         except (base64.binascii.Error, TypeError):
-            # 如果不是有效的 base64，则按 UTF-8 文本处理
+            # 如果不是有效的 base64, 则按 UTF-8 文本处理
             content_bytes = content.encode("utf-8")
 
         md_5 = hashlib.md5(content_bytes).hexdigest()
@@ -667,7 +667,7 @@ class KnowledgeBaseDemoService:
             # 尝试解码 base64
             content_bytes = base64.b64decode(content)
         except (base64.binascii.Error, TypeError):
-            # 如果不是有效的 base64，则按 UTF-8 文本处理
+            # 如果不是有效的 base64, 则按 UTF-8 文本处理
             content_bytes = content.encode("utf-8")
 
         md_5 = hashlib.md5(content_bytes).hexdigest()
@@ -1087,7 +1087,7 @@ class KnowledgeBaseDemoController:
         if self._is_super_admin(current_user):
             return
 
-        # 暂时简化权限检查，让用户可以正常使用
+        # 暂时简化权限检查, 让用户可以正常使用
         # TODO: 后续完善权限检查逻辑
         return
 
@@ -1174,7 +1174,15 @@ class KnowledgeBaseDemoController:
         effective_filter = owner_prefix
         if index_name:
             effective_filter = f"{owner_prefix}{index_name}"
-        return self._service.list_indices(index_name=effective_filter)
+
+        response = self._service.list_indices(index_name=effective_filter)
+
+        # 百炼 API 的 index_name 可能是模糊匹配, 为确保数据隔离, 必须在内存中做二次严格前缀过滤
+        filtered_items = [
+            item for item in response.items if str(item.get("Name") or item.get("name") or "").startswith(owner_prefix)
+        ]
+        response.items = filtered_items
+        return response
 
     async def list_index_files(
         self,

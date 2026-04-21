@@ -82,7 +82,7 @@ export function ChatPanel() {
             </div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">开始对话</h2>
             <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-              输入消息与 AI 助手对话, 支持上传图片（Vision 多模态）和调用工具。试试发送「北京天气怎么样? 」
+              输入消息与 AI 助手对话, 支持上传图片（Vision 多模态）和调用工具. 试试发送「北京天气怎么样? 」
             </p>
             <div className="flex flex-wrap gap-2 mt-6 justify-center">
               {["北京天气怎么样", "帮我翻译 Hello World", "1+1等于多少", "搜索 AI 发展趋势"].map((tip) => (
