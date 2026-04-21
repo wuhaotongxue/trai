@@ -366,8 +366,8 @@ def register_middlewares(app: FastAPI) -> None:
 
 def register_routers(app: FastAPI) -> None:
     """注册路由"""
-    api_prefix = os.getenv("API_PREFIX", "/api_trai/v1").strip()
-    if not api_prefix:
+    api_prefix = os.getenv("API_PREFIX", "").strip()
+    if not api_prefix.startswith("/api_trai/"):
         api_prefix = "/api_trai/v1"
     if not api_prefix.startswith("/"):
         api_prefix = f"/{api_prefix}"

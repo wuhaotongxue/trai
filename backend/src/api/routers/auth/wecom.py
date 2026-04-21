@@ -45,8 +45,8 @@ class WeComController:
         corp_id = os.getenv("WECOM_CORP_ID")
         agent_id = os.getenv("WECOM_AGENT_ID")
 
-        api_prefix = os.getenv("API_PREFIX", "/api_trai/v1").strip()
-        if not api_prefix:
+        api_prefix = os.getenv("API_PREFIX", "").strip()
+        if not api_prefix.startswith("/api_trai/"):
             api_prefix = "/api_trai/v1"
         if not api_prefix.startswith("/"):
             api_prefix = f"/{api_prefix}"
