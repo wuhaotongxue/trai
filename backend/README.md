@@ -37,6 +37,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_21_1941
+- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+
 ### 🛠️ 后端_2026_04_21_1729
 - **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
 - **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口

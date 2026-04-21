@@ -1,4 +1,4 @@
-# trai
+guojin# trai
 
 一个用于实验与沉淀代码片段的小仓库。
 
@@ -45,6 +45,14 @@ cd trai
 欢迎提交 Issue / PR。
 
 ## 📝 更新日志 (Changelog)
+
+### 🛠️ 后端_2026_04_21_1941
+- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+
+### 🎨 前端_2026_04_21_1941
+- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 🛠️ 后端_2026_04_21_1729
 - **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
@@ -563,6 +571,14 @@ cd trai
 
 ### 🎨 前端_2026_04_13_2015
 - **新增(frontend_next)**: 使用 `kity.svg` 作为默认图标配置
+
+### 🛠️ 后端_2026_04_21_1941
+- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+
+### 🎨 前端_2026_04_21_1941
+- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 📚 规范(skills)_2026_04_13_2015
 - **新增(skills)**: 补充“测试文件应写到测试文件夹下, 临时验证脚本使用后必须立即删除”的项目规范

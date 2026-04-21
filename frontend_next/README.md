@@ -65,6 +65,10 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_21_1941
+- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
+
 ### 🎨 前端_2026_04_21_1649
 - **refactor(api_base)**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
 

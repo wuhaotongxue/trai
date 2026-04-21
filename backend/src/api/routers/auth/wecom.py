@@ -10,7 +10,7 @@ import os
 from typing import Annotated
 from urllib.parse import urlencode, urlparse
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -86,10 +86,11 @@ class WeComController:
         return WeComLoginUrlResponse(url=url)
 
     @staticmethod
-    @router.get("/callback", summary="企业微信授权回调")
+    @router.get("/callback", summary="企业微信授权回调", response_class=RedirectResponse)
     async def wecom_callback(
         code: Annotated[str, Query(description="企业微信授权码")],
         state: Annotated[str | None, Query(description="防重放状态码")] = None,
+        request: Request = None,  # type: ignore # 移除 | None, 让 FastAPI 正确识别 Request 依赖
         session: Session = Depends(get_db_session),
         jwt_service: JWTService = Depends(get_jwt_service),
     ) -> RedirectResponse:
@@ -142,13 +143,13 @@ class WeComController:
             if not user:
                 logger.warning(f"企业微信用户 {wecom_userid} 尚未绑定系统账号")
                 # 重定向到前端的一个绑定页面, 这里演示直接重定向到带有错误参数的登录页
-                frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+                frontend_url = _resolve_frontend_url(request)
                 return RedirectResponse(f"{frontend_url}/login?error=not_bound&userid={wecom_userid}")
 
             # 检查账号状态
             if not user.is_active():
                 logger.warning(f"用户账号被禁用: {user.username}")
-                frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+                frontend_url = _resolve_frontend_url(request)
                 return RedirectResponse(f"{frontend_url}/login?error=account_disabled")
 
             # 3. 生成 JWT Token
@@ -162,7 +163,7 @@ class WeComController:
 
             # 4. 重定向回前端, 将 token 放在 URL 参数中传递给前端
             # 实际生产中可以存在 Cookie 或专门的中间页
-            frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+            frontend_url = _resolve_frontend_url(request)
             redirect_url = (
                 f"{frontend_url}/auth/wecom/callback?access_token={access_token}&refresh_token={refresh_token}"
             )
@@ -172,8 +173,28 @@ class WeComController:
 
         except Exception as e:
             logger.error(f"企业微信回调处理异常: {str(e)}")
-            frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+            frontend_url = _resolve_frontend_url(request)
             return RedirectResponse(f"{frontend_url}/login?error=auth_failed")
+
+
+def _resolve_frontend_url(request: Request | None) -> str:
+    frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if frontend_url:
+        return frontend_url.rstrip("/")
+
+    if request is None:
+        return "http://localhost:3000"
+
+    forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host") or ""
+    forwarded_proto = request.headers.get("x-forwarded-proto") or ""
+
+    host = forwarded_host.strip() or request.url.netloc
+    scheme = forwarded_proto.strip() or request.url.scheme
+
+    if host.startswith("localhost:5666") or host.startswith("127.0.0.1:5666"):
+        return "http://localhost:3000"
+
+    return f"{scheme}://{host}".rstrip("/")
 
 
 __all__ = ["router"]
