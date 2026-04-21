@@ -185,6 +185,19 @@ import { Activity, AlertCircle, ArrowUp, Bot, CheckCircle2 } from "lucide-react"
   </ul>
 </div>
 
+### 11. 安全红线 (CRITICAL)
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 安全红线 — 任何一条违规直接打回</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>密码加密传输</strong>：敏感信息（如密码）必须加密或哈希处理后传输，禁止明文传输（除标准化登录接口）。</li>
+    <li><strong>禁止 localStorage 存 Token</strong>：敏感 Token（如 JWT、Refresh Token）禁止存储在 localStorage 或 sessionStorage，必须使用 <code>js-cookie</code> 或安全的 HttpOnly Cookie。</li>
+    <li><strong>防止 XSS 攻击</strong>：严禁在未经过严格 sanitize 的情况下使用 <code>dangerouslySetInnerHTML</code> 渲染用户输入内容。</li>
+    <li><strong>防止注入攻击</strong>：前端严禁使用 <code>eval()</code>、<code>new Function()</code> 执行动态或外部传入的代码。</li>
+    <li><strong>外链安全</strong>：所有使用 <code>target="_blank"</code> 的第三方外链，必须添加 <code>rel="noopener noreferrer"</code> 属性。</li>
+  </ul>
+</div>
+
 ---
 
 ## 快速参考

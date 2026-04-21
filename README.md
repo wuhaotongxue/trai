@@ -4,18 +4,25 @@
 
 ## 环境要求
 
-- **后端 Python 环境**: `trai_31313_20260413` (Conda) / Python 3.13.13
+- **后端 Python 环境**: `trai` (Conda) / Python 3.13.13
 
 ### 使用 Conda 创建后端环境（推荐使用清华源）
 
 ```bash
 # 1. 创建 conda 虚拟环境
-conda create -n trai_31313_20260413 python=3.13.13 -y
+conda create -n trai python=3.13.13 -y
 
 # 2. 激活环境
-conda activate trai_31313_20260413
+conda activate trai
 
-# 3. 安装依赖（使用清华源加速）
+# 3. 设置默认激活环境 (可选)
+# 如果你希望每次打开终端时自动激活该环境，可以执行以下命令：
+# 对于 PowerShell:
+# Add-Content -Path $PROFILE -Value "`nconda activate trai"
+# 对于 CMD:
+# reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "conda activate trai" /f
+
+# 4. 安装依赖（使用清华源加速）
 cd backend
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -e .
 ```
@@ -39,13 +46,25 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 系统更新_2026_04_21_1013
+- [安全] 修复 AES_KEY 与 AES_IV 缺失导致服务启动失败的问题
+- [安全] 修复 JWT 弱密钥检测策略及数据库会话连接泄露风险
+- [安全] 完善前端 Token 存储方式为 js-cookie 及新增全栈中文标点自动修复
+- [功能] 完善管理后台前端页面 (知识库管理、组织架构、客户端发布)
+- [规范] 升级前后端与客户端 Skills 规范，加入严格安全红线检查
+
+
+
 ### 🛠️ 后端_2026_04_20_1434
 - **security(audit)**: 完成代码安全审核, 修复 scripts 目录中的 print 语句违规问题
 - **refactor(enum)**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
 - **fix(tools)**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
 - **chore(lint)**: 通过 Ruff linter 检查, 修复所有代码风格问题
 
-### 🛠️ 后端_2026_04_20_1147
+### � 规范(skills)_2026_04_20_1646
+- **chore(skills)**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
+
+### �🛠️ 后端_2026_04_20_1147
 - **feat(login)**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
 - **fix(database)**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
 - **refactor(tools)**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright

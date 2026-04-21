@@ -27,9 +27,9 @@ const AiReport: React.FC = () => {
   const file_input_ref = useRef<HTMLInputElement>(null)
 
   const report_templates: ReportTemplate[] = [
-    { id: 'weekly', name: '周报模板', description: '标准周报格式，包含本周总结和下周计划', icon: <Calendar size={14} /> },
-    { id: 'monthly', name: '月报模板', description: '月度总结格式，包含项目进展和数据统计', icon: <FileText size={14} /> },
-    { id: 'project', name: '项目报告', description: '项目专项报告，包含里程碑和风险评估', icon: <ListChecks size={14} /> }
+    { id: 'weekly', name: '周报模板', description: '标准周报格式, 包含本周总结和下周计划', icon: <Calendar size={14} /> },
+    { id: 'monthly', name: '月报模板', description: '月度总结格式, 包含项目进展和数据统计', icon: <FileText size={14} /> },
+    { id: 'project', name: '项目报告', description: '项目专项报告, 包含里程碑和风险评估', icon: <ListChecks size={14} /> }
   ]
 
   const handle_file_change = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -300,7 +300,7 @@ const AiReport: React.FC = () => {
             {!generated_report && !is_generating ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', gap: '10px' }}>
                 <FileEdit size={48} style={{ opacity: 0.5 }} />
-                <span style={{ fontSize: '14px' }}>上传模板并描述工作内容后，AI 将为你生成周报</span>
+                <span style={{ fontSize: '14px' }}>上传模板并描述工作内容后, AI 将为你生成周报</span>
               </div>
             ) : is_generating ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', gap: '10px' }}>

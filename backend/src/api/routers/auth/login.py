@@ -27,13 +27,7 @@ AES_KEY_STR = os.getenv("AES_KEY")
 AES_IV_STR = os.getenv("AES_IV")
 
 if not AES_KEY_STR or not AES_IV_STR:
-    # 生产环境中应强制要求配置
-    # raise ValueError("AES_KEY and AES_IV must be set in environment variables")
-    # 为了兼容本地开发，提供一个随机或安全的 fallback
-    import os as _os
-
-    AES_KEY = _os.urandom(32)
-    AES_IV = _os.urandom(16)
+    raise ValueError("AES_KEY and AES_IV must be set in environment variables")
 else:
     AES_KEY = AES_KEY_STR.encode().ljust(32, b"0")[:32]
     AES_IV = AES_IV_STR.encode().ljust(16, b"0")[:16]

@@ -20,7 +20,7 @@ export default function OemPage() {
           <Construction className="w-10 h-10" />
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-4">页面建设中</h1>
-        <p className="text-slate-500">OEM 合作页面正在开发中，敬请期待...</p>
+        <p className="text-slate-500">OEM 合作页面正在开发中, 敬请期待...</p>
       </div>
       <Footer />
     </>

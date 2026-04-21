@@ -2,7 +2,7 @@
  * 文件名: index.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 13:00:00
- * 描述: Agent 管理页面，支持列表、注册、启停 - 三段式布局
+ * 描述: Agent 管理页面, 支持列表、注册、启停 - 三段式布局
  */
 import React, { useState, useEffect } from 'react'
 import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
@@ -629,7 +629,7 @@ const AgentManagement: React.FC = () => {
                 onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
               />
               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+                提示: 名称不超过4个汉字或字符, 请勿使用标点符号和特殊字符
               </div>
               <div style={{ textAlign: 'right', fontSize: '12px', color: new_agent.name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
                 {new_agent.name.length}/4

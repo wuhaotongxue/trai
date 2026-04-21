@@ -10,7 +10,7 @@ import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
 import { api_client } from '../platform/api_client'
 
-// 保存每个 session_id 对应的 CancelToken，用于中止请求
+// 保存每个 session_id 对应的 CancelToken, 用于中止请求
 const active_requests: Record<string, CancelTokenSource> = {}
 
 export const agent_service = {
@@ -93,7 +93,7 @@ export const agent_service = {
                 }
                 
                 if (event_sender) {
-                  // 将 session_id 注入到 chunk 数据中，便于前端区分
+                  // 将 session_id 注入到 chunk 数据中, 便于前端区分
                   event_sender('agent:chat:chunk', { ...parsed, session_id })
                 }
               } catch (e) {
@@ -131,7 +131,7 @@ export const agent_service = {
   /**
    * 文生图（文本生成图片）
    * @param prompt - 提示词
-   * @param model - 模型名称，默认使用 FLUX.1-dev
+   * @param model - 模型名称, 默认使用 FLUX.1-dev
    * @returns 生成结果
    */
   async generate_image(prompt: string, model: string = "AI-ModelScope/FLUX.1-dev") {
@@ -260,7 +260,7 @@ export const agent_service = {
   /**
    * 启停 Agent（启动或停止）
    * @param agent_id - Agent ID
-   * @param action - 动作类型：'start' 或 'stop'
+   * @param action - 动作类型: 'start' 或 'stop'
    * @returns 操作结果
    */
   async toggle_agent(agent_id: string, action: 'start' | 'stop') {

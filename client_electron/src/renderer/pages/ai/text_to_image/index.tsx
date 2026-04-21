@@ -38,10 +38,10 @@ const TextToImage: React.FC = () => {
   ]
 
   const prompt_templates: PromptTemplate[] = [
-    { id: 'cat_astronaut', name: '宇航员猫', prompt: '一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影', category: 'animal' },
-    { id: 'cyberpunk_city', name: '赛博朋克城市', prompt: '未来赛博朋克城市夜景，霓虹灯，雨夜，反射，科幻风格', category: 'city' },
-    { id: 'fantasy_landscape', name: '奇幻风景', prompt: '奇幻风格的山水风景，漂浮的岛屿，瀑布，魔法光芒，梦幻色彩', category: 'landscape' },
-    { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像，柔和的光线，电影级构图，高分辨率', category: 'portrait' }
+    { id: 'cat_astronaut', name: '宇航员猫', prompt: '一只穿着宇航服的猫, 在火星表面漫步, 高分辨率, 电影级光影', category: 'animal' },
+    { id: 'cyberpunk_city', name: '赛博朋克城市', prompt: '未来赛博朋克城市夜景, 霓虹灯, 雨夜, 反射, 科幻风格', category: 'city' },
+    { id: 'fantasy_landscape', name: '奇幻风景', prompt: '奇幻风格的山水风景, 漂浮的岛屿, 瀑布, 魔法光芒, 梦幻色彩', category: 'landscape' },
+    { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像, 柔和的光线, 电影级构图, 高分辨率', category: 'portrait' }
   ]
 
   const filtered_templates = prompt_templates.filter(t => t.category === active_category)
@@ -57,7 +57,7 @@ const TextToImage: React.FC = () => {
       if (res.success && res.data?.image_url) {
         set_result_url(res.data.image_url)
       } else {
-        set_error(res.error || '生成失败，请重试')
+        set_error(res.error || '生成失败, 请重试')
       }
     } catch (err: any) {
       set_error(err.message || '网络异常')
@@ -181,7 +181,7 @@ const TextToImage: React.FC = () => {
             <textarea
               value={prompt}
               onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 一只穿着宇航服的猫，在火星表面漫步，高分辨率，电影级光影..."
+              placeholder="例如: 一只穿着宇航服的猫, 在火星表面漫步, 高分辨率, 电影级光影..."
               style={{
                 width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
                 resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
@@ -219,7 +219,7 @@ const TextToImage: React.FC = () => {
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '10px' }}>
               <Loader2 size={32} className="animate-spin" />
-              <span style={{ fontSize: '14px' }}>AI 正在努力作画，请稍候...</span>
+              <span style={{ fontSize: '14px' }}>AI 正在努力作画, 请稍候...</span>
             </div>
           ) : result_url ? (
             <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />

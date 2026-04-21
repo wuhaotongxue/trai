@@ -9,6 +9,22 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/video", tags=["ai", "video"])
 
 
-@router.post("/generate")
-async def generate_video():
-    return {"success": True, "message": "视频生成请求已提交"}
+class VideoController:
+    """视频生成控制器."""
+
+    @staticmethod
+    @router.post("/generate")
+    async def generate_video():
+        """
+        生成视频.
+
+        参数:
+            无.
+
+        返回:
+            dict: 成功消息.
+
+        异常:
+            无.
+        """
+        return {"success": True, "message": "视频生成请求已提交"}

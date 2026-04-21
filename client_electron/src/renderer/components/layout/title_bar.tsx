@@ -96,8 +96,8 @@ const TitleBar: React.FC = () => {
           type="button"
           title="刷新"
           onClick={() => {
-            show('正在刷新...', 0) // 不自动隐藏，因为要刷新
-            // 延迟 1500ms 刷新，确保用户能看到通知
+            show('正在刷新...', 0) // 不自动隐藏, 因为要刷新
+            // 延迟 1500ms 刷新, 确保用户能看到通知
             setTimeout(() => {
               window.location.reload()
             }, 1500)

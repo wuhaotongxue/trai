@@ -5,6 +5,7 @@
  */
 
 "use client";
+import Cookies from "js-cookie";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -36,8 +37,8 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       const res = await authApi.login({ username, password });
-      localStorage.setItem("token", res.access_token);
-      localStorage.setItem("refresh_token", res.refresh_token);
+      Cookies.set("token", res.access_token);
+      Cookies.set("refresh_token", res.refresh_token);
       router.replace("/admin");
     } catch (e) {
       const message = e instanceof Error ? e.message : "登录失败";

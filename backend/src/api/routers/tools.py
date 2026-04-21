@@ -62,9 +62,7 @@ class PDFGenerator:
             RuntimeError: Playwright 未安装时抛出
         """
         if not self._playwright_available:
-            raise RuntimeError(
-                "Playwright 未安装. 请执行: pip install playwright && playwright install chromium"
-            )
+            raise RuntimeError("Playwright 未安装. 请执行: pip install playwright && playwright install chromium")
         return await self._generate_with_playwright(html_content)
 
     async def _generate_with_playwright(self, html_content: str) -> bytes:
@@ -168,6 +166,7 @@ class PDFGenerator:
 
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, _generate)
+
 
 # 全局 PDF 生成器实例
 _pdf_generator = PDFGenerator()

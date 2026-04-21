@@ -37,10 +37,10 @@ const AiMusic: React.FC = () => {
   ]
 
   const music_styles: MusicStyle[] = [
-    { id: 'electronic', name: '电子音乐', prompt: '一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
-    { id: 'rock', name: '摇滚音乐', prompt: '一首充满力量的摇滚乐，激昂的吉他独奏，强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
-    { id: 'classical', name: '古典音乐', prompt: '一首优美的古典钢琴曲，柔和的旋律，浪漫的氛围', icon: <Piano size={14} />, category: 'classic' },
-    { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐，适合冥想和放松，自然音效', icon: <Headphones size={14} />, category: 'classic' }
+    { id: 'electronic', name: '电子音乐', prompt: '一首欢快的赛博朋克风格电子乐, 节奏明快, 带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
+    { id: 'rock', name: '摇滚音乐', prompt: '一首充满力量的摇滚乐, 激昂的吉他独奏, 强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
+    { id: 'classical', name: '古典音乐', prompt: '一首优美的古典钢琴曲, 柔和的旋律, 浪漫的氛围', icon: <Piano size={14} />, category: 'classic' },
+    { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐, 适合冥想和放松, 自然音效', icon: <Headphones size={14} />, category: 'classic' }
   ]
 
   const filtered_styles = music_styles.filter(s => s.category === active_category)
@@ -56,7 +56,7 @@ const AiMusic: React.FC = () => {
       if (res.success && res.data?.audio_url) {
         set_result_url(res.data.audio_url)
       } else {
-        set_error(res.error || '生成失败，请重试')
+        set_error(res.error || '生成失败, 请重试')
       }
     } catch (err: any) {
       set_error(err.message || '网络异常')
@@ -180,7 +180,7 @@ const AiMusic: React.FC = () => {
             <textarea
               value={prompt}
               onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 一首欢快的赛博朋克风格电子乐，节奏明快，带有强烈的鼓点..."
+              placeholder="例如: 一首欢快的赛博朋克风格电子乐, 节奏明快, 带有强烈的鼓点..."
               style={{
                 width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
                 resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
@@ -218,13 +218,13 @@ const AiMusic: React.FC = () => {
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '10px' }}>
               <Loader2 size={32} className="animate-spin" />
-              <span style={{ fontSize: '14px' }}>AI 正在创作乐曲，请稍候...</span>
+              <span style={{ fontSize: '14px' }}>AI 正在创作乐曲, 请稍候...</span>
             </div>
           ) : result_url ? (
             <div style={{ width: '100%', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Music size={48} style={{ color: '#0ea5e9', marginBottom: '24px' }} />
               <audio controls src={result_url} style={{ width: '100%', maxWidth: '400px' }}>
-                您的浏览器不支持 audio 标签。
+                您的浏览器不支持 audio 标签. 
               </audio>
             </div>
           ) : (
