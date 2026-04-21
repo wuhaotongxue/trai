@@ -100,7 +100,7 @@ async function refreshToken(): Promise<string | null> {
  * @param options - 请求选项
  * @returns 响应数据
  */
-async function request<T>(
+export async function request<T>(
   path: string,
   options: RequestInit & ApiOptions = {}
 ): Promise<T> {
