@@ -207,9 +207,9 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Code2 className="h-4 w-4 text-blue-500" />
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tool Calls</span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">工具调用</span>
               </div>
-              <span className="text-[10px] text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full font-medium">Ready</span>
+              <span className="text-[10px] text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full font-medium">就绪</span>
             </div>
             <div className="space-y-2">
               <div className="h-2 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
@@ -227,7 +227,7 @@ export default function HomePage() {
           <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-4 rounded-2xl shadow-xl shadow-indigo-500/5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 w-56 text-left">
             <div className="flex items-center gap-2 mb-1">
               <LineChart className="h-4 w-4 text-indigo-500" />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">System Metrics</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">系统状态</span>
             </div>
             <div className="flex items-end gap-2">
               <span className="text-3xl font-bold text-slate-900 dark:text-white leading-none">99.9</span>
@@ -247,8 +247,20 @@ export default function HomePage() {
               <Sparkles className="h-5 w-5 text-emerald-500" />
             </div>
             <div className="text-left">
-              <div className="text-sm font-bold text-slate-900 dark:text-white">Smart Fix</div>
+              <div className="text-sm font-bold text-slate-900 dark:text-white">智能纠错</div>
               <div className="text-xs text-slate-500 dark:text-slate-400">自动纠错率 95%+</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-24 bottom-[20%] hidden xl:block animate-[float_6s_ease-in-out_infinite_1.5s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-3 rounded-2xl shadow-xl shadow-cyan-500/5 border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+              <Database className="h-5 w-5 text-cyan-500" />
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-bold text-slate-900 dark:text-white">高速缓存</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Redis 毫秒级响应</div>
             </div>
           </div>
         </div>

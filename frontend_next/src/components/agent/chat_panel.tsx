@@ -233,8 +233,8 @@ export function ChatPanel() {
                 handleSend();
               }
             }}
-            placeholder="输入消息, Enter 发送, Shift+Enter 换行..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="输入消息..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
             rows={1}
           />
 
