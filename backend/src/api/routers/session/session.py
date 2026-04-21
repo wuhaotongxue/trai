@@ -525,7 +525,7 @@ async def send_message_stream(
         try:
             async for event in client.chat_stream(
                 messages=managed_messages,
-                model=chat_session.model or "gpt-4o",
+                model=chat_session.t_model or "gpt-4o",
                 abort_event=abort_event,
             ):
                 if event.type == "token":
