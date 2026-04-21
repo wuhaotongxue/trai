@@ -37,6 +37,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_21_1729
+- **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
+- **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口
+
 ### 🛠️ 后端_2026_04_21_1649
 - **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
 - **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
