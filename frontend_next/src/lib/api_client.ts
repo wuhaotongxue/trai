@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 /** 默认 API 基础 URL */
-const DEFAULT_API_BASE = "http://localhost:5666/api";
+const DEFAULT_API_BASE = "http://192.168.98.72:5666/api";
 
 /**
  * 获取 API 基础 URL
@@ -18,8 +18,15 @@ function getApiBase(): string {
   if (fromEnv) return fromEnv;
 
   if (typeof window !== "undefined") {
+    // 假设在同一个域名下部署, 但后端跑在 5666 端口
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
+    
+    // 如果是通过 HTTPS 访问，可能是 Nginx 代理，直接用 /api_trai 作为基础路径
+    if (protocol === "https:") {
+      return `${protocol}//${hostname}/api_trai/api`;
+    }
+    
     return `${protocol}//${hostname}:5666/api`;
   }
 

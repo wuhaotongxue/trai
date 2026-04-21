@@ -19,7 +19,7 @@ const Login: React.FC = () => {
   const [password, set_password] = useState('Tr@@2026...')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
+  const [api_url, set_api_url] = useState('http://192.168.98.72:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
   const [show_logs, set_show_logs] = useState(false)
@@ -32,7 +32,7 @@ const Login: React.FC = () => {
     const load_config = async () => {
       try {
         if (window.electron_api?.config_get) {
-          const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
+          const res = await window.electron_api.config_get('api_url', 'http://192.168.98.72:5666')
           if (res.success && typeof res.data === 'string' && res.data.trim()) {
             set_api_url(res.data.trim())
           }
@@ -316,7 +316,7 @@ const Login: React.FC = () => {
                   value={api_url}
                   onChange={(e) => set_api_url(e.target.value)}
                   style={{ flex: 1, padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                  placeholder="http://127.0.0.1:5666"
+                  placeholder="http://192.168.98.72:5666"
                   onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
                   onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
                   disabled={api_loading || api_saving}
