@@ -22,6 +22,7 @@ const Login: React.FC = () => {
   const [api_url, set_api_url] = useState('http://192.168.98.72:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
+  const [remember_me, set_remember_me] = useState(true)
   const [show_logs, set_show_logs] = useState(false)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
@@ -36,6 +37,10 @@ const Login: React.FC = () => {
           const res = await window.electron_api.config_get('api_url', 'http://192.168.98.72:5666')
           if (res.success && typeof res.data === 'string' && res.data.trim()) {
             set_api_url(res.data.trim())
+          }
+          const rm_res = await window.electron_api.config_get('remember_me', true)
+          if (rm_res.success) {
+            set_remember_me(rm_res.data)
           }
         }
       } finally {
@@ -59,6 +64,36 @@ const Login: React.FC = () => {
       document.removeEventListener('mousedown', handle_click_outside)
     }
   }, [])
+
+  const handle_wecom_login = async () => {
+    add_log('开始企业微信扫码登录...')
+    try {
+      if (!api_loading) {
+        await save_api_url()
+      }
+      const res = await window.electron_api.auth_wecom_login()
+      add_log(`扫码登录响应: ${JSON.stringify(res, null, 2)}`)
+      if (res.success && res.data) {
+        await window.electron_api.config_set('remember_me', remember_me)
+        const user_info = res.data.user
+        add_log(`登录成功: ${user_info.username || 'wecom_user'}`)
+        login({
+          username: user_info.username || 'wecom_user',
+          email: user_info.email || 'wecom_user@trai.local',
+          role: user_info.role || 'user'
+        })
+        navigate('/')
+      } else {
+        const raw = String(res.error || '')
+        add_log(`扫码登录失败: ${raw}`)
+        set_error_msg(raw || '扫码登录失败')
+      }
+    } catch (err: any) {
+      const raw = String(err?.message || '')
+      add_log(`扫码登录异常: ${raw}`)
+      set_error_msg(raw || '扫码登录异常')
+    }
+  }
 
   /**
    * 标准化的 API 地址
@@ -129,6 +164,7 @@ const Login: React.FC = () => {
       const res = await window.electron_api.auth_login({ username, password: submit_password })
       add_log(`登录响应: ${JSON.stringify(res, null, 2)}`)
       if (res.success && res.data) {
+        await window.electron_api.config_set('remember_me', remember_me)
         const user_info = res.data.user
         add_log(`登录成功: ${user_info.username || username}`)
         login({
@@ -407,8 +443,23 @@ const Login: React.FC = () => {
                 {error_msg}
               </div>
             )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                id="remember_me"
+                checked={remember_me}
+                onChange={(e) => set_remember_me(e.target.checked)}
+                style={{ cursor: 'pointer' }}
+              />
+              <label htmlFor="remember_me" style={{ color: 'rgba(0, 0, 0, 0.7)', fontSize: '14px', cursor: 'pointer' }}>
+                保存登录状态 (免扫码)
+              </label>
+            </div>
             <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
               登录
+            </button>
+            <button type="button" onClick={handle_wecom_login} style={{ backgroundColor: '#ffffff', color: '#0078d4', padding: '10px', borderRadius: '4px', border: '1px solid #0078d4', cursor: 'pointer', marginTop: '4px', fontWeight: 'normal', fontSize: '14px' }}>
+              企业微信扫码登录
             </button>
             <div style={{ textAlign: 'center', marginTop: '12px' }}>
               <span style={{ color: '#0078d4', fontSize: '14px', cursor: 'pointer' }} onClick={() => navigate('/register')}>

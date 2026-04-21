@@ -46,6 +46,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_21_2001
+- **新增(client_electron)**: 集成企业微信扫码登录功能，打通后端 auth_wecom_url 获取和 Token 拦截回调
+- **新增(client_electron)**: 登录页增加“保存登录状态(免扫码)”功能，并在应用启动时自动检测并恢复用户状态
+
 ### 🛠️ 后端_2026_04_21_1941
 - **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
 - **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题

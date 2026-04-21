@@ -9,6 +9,8 @@ export class ApiEndpoints {
   static readonly api_prefix = '/api_trai/v1'
 
   static readonly auth_login = `${ApiEndpoints.api_prefix}/auth/login`
+  static readonly auth_wecom_url = `${ApiEndpoints.api_prefix}/auth/wecom/url`
+  static readonly auth_me = `${ApiEndpoints.api_prefix}/auth/me`
   static readonly auth_refresh = `${ApiEndpoints.api_prefix}/auth/refresh`
   static readonly auth_register = `${ApiEndpoints.api_prefix}/auth/register`
   static readonly auth_logout = `${ApiEndpoints.api_prefix}/auth/logout`
