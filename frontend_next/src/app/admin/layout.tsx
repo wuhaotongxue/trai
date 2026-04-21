@@ -187,6 +187,9 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
               <Search className="h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
+                id="admin-menu-search"
+                aria-label="搜索菜单"
+                title="搜索菜单"
                 placeholder="搜索菜单... (Ctrl+K)"
                 className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full"
               />

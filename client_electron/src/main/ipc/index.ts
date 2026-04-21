@@ -68,6 +68,14 @@ export const register_ipc_handlers = (): void => {
     return await auth_service.login(params)
   })
 
+  ipcMain.handle('auth:wecom_login', async () => {
+    return await auth_service.wecom_login()
+  })
+
+  ipcMain.handle('auth:me', async () => {
+    return await auth_service.get_current_user()
+  })
+
   ipcMain.handle('auth:register', async (_, params: any) => {
     return await auth_service.register(params)
   })

@@ -7,7 +7,7 @@
 import Cookies from "js-cookie";
 
 import Link from "next/link";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Bot, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,18 @@ function LoginForm() {
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:5666/api`
-      : "http://localhost:5666/api");
+      ? window.location.protocol === "https:"
+        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
+        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`
+      : "http://localhost:5666/api_trai/v1");
 
   useEffect(() => {
     const err = searchParams.get("error");
-    if (err === "not_bound") {
+    const reason = searchParams.get("reason");
+    
+    if (reason === "quota_exceeded") {
+      setErrorMessage("游客免费提问额度(100次)已用完, 请登录后继续使用全部功能");
+    } else if (err === "not_bound") {
       setErrorMessage("当前企业微信未绑定账号, 请先使用密码登录后绑定");
     } else if (err === "account_disabled") {
       setErrorMessage("该企业微信绑定的账号已被禁用");
@@ -40,8 +46,13 @@ function LoginForm() {
     }
   }, [searchParams]);
 
+  const lastSubmitTime = useRef(0);
+
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    const now = Date.now();
+    if (now - lastSubmitTime.current < 1000) return;
+    lastSubmitTime.current = now;
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);

@@ -8,6 +8,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FloatingWidget } from "@/components/website/floating_widget";
+import "katex/dist/katex.min.css"; // 引入 katex 样式以支持公式渲染
 import "./globals.css";
 
 const geistSans = Geist({
