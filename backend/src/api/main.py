@@ -7,8 +7,18 @@
 from __future__ import annotations
 
 import os
+import sys
 from datetime import datetime
 from typing import TYPE_CHECKING
+from pathlib import Path
+
+# 确保环境变量在整个应用启动前被加载 (兼容 uvicorn reload 模式)
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+    from run import EnvFileLoader
+    EnvFileLoader.load_local_envs()
+except ImportError:
+    pass
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
