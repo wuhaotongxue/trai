@@ -12,7 +12,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from api.deps import CurrentUser
+from api.deps import CurrentUser, CurrentUserOptional
 from core.exceptions import ExternalServiceError
 from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
@@ -384,14 +384,14 @@ class UserQuotaResponse(BaseModel):
     description="获取当前用户的智能体配额信息.",
 )
 async def get_user_quota(
-    current_user: CurrentUser,
+    current_user_opt: CurrentUserOptional,
 ) -> UserQuotaResponse:
     """获取当前用户配额状态
 
     返回用户所有类型的月度配额使用情况.
 
     Args:
-        current_user: 当前登录用户
+        current_user_opt: 可选当前登录用户
 
     Returns:
         UserQuotaResponse: 配额状态列表
@@ -400,8 +400,24 @@ async def get_user_quota(
     from infrastructure.quota.quota_service import QuotaService
     from infrastructure.repositories.quota_repository import QuotaRepository
 
-    user_id = current_user.get("user_id", "")
-    role = current_user.get("role", "normal")
+    user_id = current_user_opt.get("user_id", "") if current_user_opt else "guest"
+    role = current_user_opt.get("role", "normal") if current_user_opt else "guest"
+
+    if role == "guest":
+        return UserQuotaResponse(
+            user_id="guest",
+            role="guest",
+            quotas=[
+                QuotaStatusResponse(
+                    quota_type="agent_chat",
+                    used=0,
+                    limit=100,
+                    remaining=100,
+                    unlimited=False,
+                    billing_month="N/A",
+                )
+            ],
+        )
 
     db_session = get_session()
     quota_repo = QuotaRepository(db_session)
