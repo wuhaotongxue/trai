@@ -10,12 +10,12 @@ import asyncio
 import json
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUser, CurrentUserOptional
 from core.context_manager import ContextManager, get_context_manager
 from core.policy_engine import PolicyContext, PolicyDecision, get_policy_engine
 from infrastructure.database import get_db_session
@@ -200,20 +200,20 @@ async def send_message(
 )
 async def create_session(
     request: CreateSessionRequest,
-    current_user: CurrentUser,
+    current_user_opt: CurrentUserOptional,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> CreateSessionResponse:
     """创建新会话
 
     Args:
         request: 创建会话参数
-        current_user: 当前登录用户
+        current_user_opt: 可选当前登录用户
         session: 数据库会话
 
     Returns:
         CreateSessionResponse: 创建的会话信息
     """
-    user_id = current_user.get("user_id")
+    user_id = current_user_opt.get("user_id") if current_user_opt else None
 
     session_repo = SessionRepository(session)
     import uuid
@@ -437,7 +437,8 @@ async def delete_session(
 async def send_message_stream(
     session_id: str,
     request: SendMessageRequest,
-    current_user: CurrentUser,
+    current_user_opt: CurrentUserOptional,
+    req: Request,
     session: Annotated[Session, Depends(get_db_session)],
 ):
     """发送消息(流式响应,支持 abort 中断)
@@ -454,7 +455,8 @@ async def send_message_stream(
     Args:
         session_id: 会话 ID
         request: 消息内容
-        current_user: 当前登录用户
+        current_user_opt: 可选当前登录用户
+        req: FastAPI Request
         session: 数据库会话
 
     Returns:
@@ -462,8 +464,23 @@ async def send_message_stream(
     """
     import asyncio
 
-    user_id = current_user.get("user_id")
-    role = current_user.get("role", "normal")
+    user_id = current_user_opt.get("user_id") if current_user_opt else None
+    role = current_user_opt.get("role", "normal") if current_user_opt else "guest"
+
+    # 游客限制检查 (100 次)
+    if role == "guest":
+        from infrastructure.security.blacklist import get_blacklist_service
+        blacklist = get_blacklist_service()
+        if blacklist._redis_client:
+            client_ip = req.client.host if req.client else "unknown"
+            usage_key = f"guest_usage:{client_ip}"
+            usage_count = blacklist._redis_client.get(usage_key)
+            if usage_count and int(usage_count) >= 100:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail={"code": 401, "message": "免费额度(100次)已用完, 请登录后继续使用"},
+                )
+            blacklist._redis_client.incr(usage_key)
 
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)
@@ -475,7 +492,7 @@ async def send_message_stream(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.t_user_id != user_id:
+    if role != "admin" and role != "guest" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
@@ -581,13 +598,13 @@ _active_abort_events: dict[str, asyncio.Event] = {}
 )
 async def abort_stream(
     session_id: str,
-    current_user: CurrentUser,
+    current_user_opt: CurrentUserOptional,
 ) -> dict[str, str]:
     """中断指定会话的流式请求
 
     Args:
         session_id: 会话 ID
-        current_user: 当前登录用户
+        current_user_opt: 可选当前登录用户
 
     Returns:
         dict: 操作结果
