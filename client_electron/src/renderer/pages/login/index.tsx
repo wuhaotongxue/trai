@@ -16,13 +16,12 @@ import TitleBar from '@/components/layout/title_bar'
  */
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
-  const [password, set_password] = useState('')
+  const [password, set_password] = useState('Tr@@2026...')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
   const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
-  const [is_default_password, set_is_default_password] = useState(true)
   const [show_logs, set_show_logs] = useState(false)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
@@ -32,9 +31,11 @@ const Login: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       try {
-        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
-        if (res.success && typeof res.data === 'string' && res.data.trim()) {
-          set_api_url(res.data.trim())
+        if (window.electron_api?.config_get) {
+          const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
+          if (res.success && typeof res.data === 'string' && res.data.trim()) {
+            set_api_url(res.data.trim())
+          }
         }
       } finally {
         set_api_loading(false)
@@ -350,13 +351,11 @@ const Login: React.FC = () => {
               <div style={{ position: 'relative' }}>
                 <input
                   type={password_visible ? 'text' : 'password'}
-                  value={is_default_password ? '***************' : password}
+                  value={password}
                   onChange={(e) => {
                     set_password(e.target.value)
-                    set_is_default_password(false)
                   }}
                   onFocus={(e) => {
-                    set_is_default_password(false)
                     e.target.style.border = '1px solid #0078d4'
                   }}
                   onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
@@ -366,9 +365,6 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    if (is_default_password) {
-                      set_is_default_password(false)
-                    }
                     set_password_visible((v) => !v)
                   }}
                   title={password_visible ? '隐藏密码' : '显示密码'}

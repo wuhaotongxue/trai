@@ -317,7 +317,7 @@ class OpenAIClient:
                             tc = delta["tool_calls"][0]
                             logger.info(f"[Stream] 收到 tool_call 块: {repr(tc)}")
 
-                            # 只要有 function.name 就更新，不管是哪个块！
+                            # 只要有 function.name 就更新, 不管是哪个块!
                             if tc.get("function", {}).get("name"):
                                 new_name = tc["function"]["name"]
                                 if tool_name != new_name:

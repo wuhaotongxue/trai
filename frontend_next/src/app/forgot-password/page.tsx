@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
                 </Button>
 
                 <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-500">
-                  <strong className="text-slate-700">提示: </strong>重置链接将在 30 分钟内有效。如果未收到邮件, 请检查垃圾邮件文件夹。
+                  <strong className="text-slate-700">提示: </strong>重置链接将在 30 分钟内有效. 如果未收到邮件, 请检查垃圾邮件文件夹. 
                 </div>
               </div>
             </>
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <p className="text-base font-bold text-slate-900 mb-1">重置链接已发送! </p>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  我们已向 <strong className="text-slate-700">{email}</strong> 发送了一封密码重置邮件, 请点击邮件中的链接完成密码重置。
+                  我们已向 <strong className="text-slate-700">{email}</strong> 发送了一封密码重置邮件, 请点击邮件中的链接完成密码重置. 
                 </p>
               </div>
               <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-600">

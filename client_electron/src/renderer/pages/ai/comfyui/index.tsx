@@ -112,7 +112,7 @@ const ComfyUI: React.FC = () => {
             <textarea
               value={prompt}
               onChange={(e) => set_prompt(e.target.value)}
-              placeholder="请输入正向提示词，例如：A beautiful landscape with mountains..."
+              placeholder="请输入正向提示词, 例如: A beautiful landscape with mountains..."
               style={{
                 width: '100%',
                 height: '80px',
@@ -187,7 +187,7 @@ const ComfyUI: React.FC = () => {
           ) : (
             <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <Bot size={48} style={{ opacity: 0.5 }} />
-              <span style={{ fontSize: '14px' }}>选择工作流并提交任务后，结果将在这里展示</span>
+              <span style={{ fontSize: '14px' }}>选择工作流并提交任务后, 结果将在这里展示</span>
             </div>
           )}
         </div>

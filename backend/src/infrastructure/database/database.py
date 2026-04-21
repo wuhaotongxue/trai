@@ -160,7 +160,7 @@ class Database:
             password_service = PasswordService()
             now = datetime.now()
 
-            # 优先从环境变量获取初始 admin 密码，若无则使用安全的随机密码或固定初始密码
+            # 优先从环境变量获取初始 admin 密码, 若无则使用安全的随机密码或固定初始密码
             admin_pwd = os.getenv("ADMIN_INIT_PASSWORD", "Admin@123456")
             params: dict[str, object] = {
                 "user_id": str(uuid.uuid4()),

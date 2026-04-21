@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 /**
  * api_client.ts
  * 作者: wuhao
@@ -44,7 +45,7 @@ async function request<T>(
   path: string,
   options: RequestInit & ApiOptions = {}
 ): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = typeof window !== "undefined" ? Cookies.get("token") : null;
 
   const res = await fetch(`${getApiBase()}${path}`, {
     ...options,

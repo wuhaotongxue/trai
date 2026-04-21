@@ -2,7 +2,7 @@
  * 文件名: api_client.ts
  * 作者: wuhao
  * 日期: 2026-04-19 02:20:00
- * 描述: 共享的 API 客户端，带有完整的请求和响应拦截器
+ * 描述: 共享的 API 客户端, 带有完整的请求和响应拦截器
  */
 import axios from 'axios'
 import log from 'electron-log'
@@ -12,7 +12,7 @@ import { config_store } from './config_store'
 // 创建共享的 axios 实例
 export const api_client = axios.create({
   timeout: 10000, // 10 秒超时
-  timeoutErrorMessage: '请求超时，请检查网络连接或服务器状态'
+  timeoutErrorMessage: '请求超时, 请检查网络连接或服务器状态'
 })
 
 // 请求拦截器 - 添加 Token
@@ -41,8 +41,8 @@ api_client.interceptors.response.use(
         const result = await dialog.showMessageBox(win, {
           type: 'warning',
           title: '登录已过期',
-          message: '您的登录已过期，请重新登录',
-          detail: 'Token 有效期 30 分钟，过期后需要重新登录以继续使用',
+          message: '您的登录已过期, 请重新登录',
+          detail: 'Token 有效期 30 分钟, 过期后需要重新登录以继续使用',
           buttons: ['去登录'],
           defaultId: 0
         })
