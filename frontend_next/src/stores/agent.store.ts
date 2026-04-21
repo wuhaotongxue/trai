@@ -137,7 +137,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   startSession: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.session.create({ model: "deepseek" });
+      const res = await api.session.create({ model: "deepseek-chat" });
       set({ sessionId: res.session_id, messages: [], isLoading: false });
     } catch {
       set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });

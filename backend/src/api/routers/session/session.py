@@ -523,9 +523,13 @@ async def send_message_stream(
         full_content = ""
 
         try:
+            model_to_use = chat_session.t_model or "gpt-4o"
+            if model_to_use == "deepseek":
+                model_to_use = "deepseek-chat"
+
             async for event in client.chat_stream(
                 messages=managed_messages,
-                model=chat_session.t_model or "gpt-4o",
+                model=model_to_use,
                 abort_event=abort_event,
             ):
                 if event.type == "token":
