@@ -67,13 +67,34 @@ class FileUploadUseCase(UseCase[UploadInput, UploadOutput]):
         unique_name = f"{uuid.uuid4().hex}{ext}"
         return f"{folder}/{unique_name}"
 
+    def _validate_file(self, filename: str, content_type: str) -> None:
+        """校验文件类型和扩展名"""
+        # 禁止上传可执行文件
+        forbidden_exts = [".exe", ".sh", ".py", ".js", ".jar", ".dll", ".so", ".bat", ".cmd", ".msi"]
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in forbidden_exts:
+            raise ValueError(f"禁止上传可执行文件: {ext}")
+
+        # 简单的双重校验: 如果声称是图片, 必须有图片扩展名
+        if content_type.startswith("image/"):
+            if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"]:
+                raise ValueError("图片扩展名与 Content-Type 不匹配")
+        elif content_type.startswith("video/"):
+            if ext not in [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv"]:
+                raise ValueError("视频扩展名与 Content-Type 不匹配")
+
     async def execute(self, input_data: UploadInput) -> UploadOutput:
         """执行文件上传"""
+        filename = input_data.file.filename or "unknown"
+        content_type = input_data.file.content_type or "application/octet-stream"
+
+        self._validate_file(filename, content_type)
+
         task = UploadTask(
-            filename=input_data.file.filename or "unknown",
+            filename=filename,
             file_size=0,
-            content_type=input_data.file.content_type or "application/octet-stream",
-            file_type=self._get_file_type(input_data.file.content_type or ""),
+            content_type=content_type,
+            file_type=self._get_file_type(content_type),
         )
 
         try:

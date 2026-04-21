@@ -2,7 +2,7 @@
  * 文件名: index.ts
  * 作者: wuhao
  * 日期: 2026-04-16 09:46:57
- * 描述: Electron 主进程入口点，集成 Tray 托盘与 Win11 Fluent 窗口样式
+ * 描述: Electron 主进程入口点, 集成 Tray 托盘与 Win11 Fluent 窗口样式
  */
 import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron'
 import { existsSync } from 'fs'
@@ -14,7 +14,7 @@ import { UpdateService } from './services/update_service'
 
 log.info('app starting...')
 
-// 提升 tray 变量到外层作用域，防止被 V8 垃圾回收导致托盘消失
+// 提升 tray 变量到外层作用域, 防止被 V8 垃圾回收导致托盘消失
 let tray: Tray | null = null
 let main_window: BrowserWindow | null = null
 // 是否真正退出应用的标记
@@ -24,11 +24,11 @@ let is_quitting = false
 const got_the_lock = app.requestSingleInstanceLock()
 
 if (!got_the_lock) {
-  log.warn('检测到另一个实例正在运行，即将退出并提示用户...')
+  log.warn('检测到另一个实例正在运行, 即将退出并提示用户...')
   app.quit()
 } else {
   app.on('second-instance', () => {
-    // 当运行第二个实例时，如果主窗口存在，则使其获得焦点
+    // 当运行第二个实例时, 如果主窗口存在, 则使其获得焦点
     if (main_window) {
       if (main_window.isMinimized()) main_window.restore()
       main_window.show()
@@ -39,7 +39,7 @@ if (!got_the_lock) {
       type: 'info',
       title: 'TRAI 提示',
       message: '客户端已经在运行中',
-      detail: '请在系统托盘或任务栏中查看已打开的程序。'
+      detail: '请在系统托盘或任务栏中查看已打开的程序. '
     })
   })
 
@@ -75,7 +75,7 @@ if (!got_the_lock) {
     minWidth: 800,
     minHeight: 600,
     icon: window_icon,
-    // 隐藏原生边框，保留系统控制按钮 (Win11 风格)
+    // 隐藏原生边框, 保留系统控制按钮 (Win11 风格)
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#ffffff',
@@ -111,7 +111,7 @@ if (!got_the_lock) {
     log.info('window did-finish-load')
   })
 
-  // 拦截关闭事件，转为隐藏窗口或退出程序
+  // 拦截关闭事件, 转为隐藏窗口或退出程序
   main_window.on('close', (event) => {
     if (is_quitting) return
 
@@ -131,11 +131,11 @@ if (!got_the_lock) {
       dialog.showMessageBox(main_window, {
         type: 'question',
         title: '退出提示',
-        message: '您点击了关闭按钮，请问是要最小化到系统托盘，还是直接退出程序？',
+        message: '您点击了关闭按钮, 请问是要最小化到系统托盘, 还是直接退出程序? ',
         buttons: ['最小化到托盘', '直接退出程序', '取消'],
         defaultId: 0,
         cancelId: 2,
-        checkboxLabel: '记住我的选择，下次不再提示',
+        checkboxLabel: '记住我的选择, 下次不再提示',
         checkboxChecked: false
       }).then((result) => {
         if (result.response === 2) {
@@ -212,7 +212,7 @@ const create_tray = () => {
 // 解决 Windows 下开发环境热重载时 GPU 缓存锁定的报错 (cache_util_win.cc(20) 拒绝访问)
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
 
-// 设置 Windows 任务栏应用 ID，防止显示默认的 Electron 图标 (非常关键)
+// 设置 Windows 任务栏应用 ID, 防止显示默认的 Electron 图标 (非常关键)
 if (process.platform === 'win32') {
   app.setAppUserModelId('com.wuhao.trai')
 }

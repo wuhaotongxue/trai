@@ -2,7 +2,7 @@
 # 文件名: comfyui.py
 # 作者: wuhao
 # 日期: 2026_04_14_15:27:00
-# 描述: ComfyUI 集成路由，提供图像生成工作流转发
+# 描述: ComfyUI 集成路由, 提供图像生成工作流转发
 
 from typing import Any
 

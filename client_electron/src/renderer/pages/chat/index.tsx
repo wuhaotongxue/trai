@@ -329,7 +329,7 @@ const AgentChat: React.FC = () => {
         return new_msgs
       }, current_sid)
     } finally {
-      // 只有当前活动的会话才取消loading状态（如果用户切换了会话，不应该影响）
+      // 只有当前活动的会话才取消loading状态（如果用户切换了会话, 不应该影响）
       if (active_session_id_ref.current === current_sid) {
         set_loading(false)
       }
@@ -827,7 +827,7 @@ const AgentChat: React.FC = () => {
                         )}
                         
                         {(() => {
-                          // 过滤步骤，只保留有意义的
+                          // 过滤步骤, 只保留有意义的
                           const valid_steps = (msg.steps || []).filter(step => {
                             if (!step.tool_name || !step.tool_name.trim()) return false
                             // 过滤掉空内容的结果
@@ -835,7 +835,7 @@ const AgentChat: React.FC = () => {
                             return true
                           })
 
-                          // 去重：只保留每个工具的最后一个结果
+                          // 去重: 只保留每个工具的最后一个结果
                           const unique_steps: ToolStep[] = []
                           const tool_latest: Record<string, ToolStep> = {}
                           
@@ -1190,7 +1190,7 @@ const AgentChat: React.FC = () => {
                 }}
               />
               
-              {/* 工具栏：发送按钮 */}
+              {/* 工具栏: 发送按钮 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={handle_send}

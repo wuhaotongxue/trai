@@ -5,6 +5,7 @@
  */
 
 "use client";
+import Cookies from "js-cookie";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -139,7 +140,7 @@ export default function AdminDashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
+      const token = Cookies.get("token");
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/admin/dashboard`,
         {
@@ -147,8 +148,8 @@ export default function AdminDashboardPage() {
         }
       );
       if (res.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refresh_token");
+        Cookies.remove("token");
+        Cookies.remove("refresh_token");
         router.replace("/admin/login");
         return;
       }

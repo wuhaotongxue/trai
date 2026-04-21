@@ -2,7 +2,7 @@
  * 文件名: config_store.ts
  * 作者: wuhao
  * 日期: 2026-04-13 21:00:00
- * 描述: Platform Layer 层的配置文件存储服务，使用本地 JSON 文件持久化配置
+ * 描述: Platform Layer 层的配置文件存储服务, 使用本地 JSON 文件持久化配置
  */
 import { app } from 'electron'
 import * as fs from 'fs'
@@ -25,10 +25,10 @@ class ConfigStore {
 
   /**
    * 构造函数
-   * 初始化配置存储，加载已保存的配置
+   * 初始化配置存储, 加载已保存的配置
    */
   constructor() {
-    // 配置文件保存在用户数据的漫游目录下，通常在 AppData/Roaming/TRAI
+    // 配置文件保存在用户数据的漫游目录下, 通常在 AppData/Roaming/TRAI
     this.config_path = path.join(app.getPath('userData'), 'config.json')
     this.load()
   }
@@ -43,7 +43,7 @@ class ConfigStore {
         this.data = JSON.parse(file_content)
         log.info(`已加载配置文件: ${this.config_path}`)
       } else {
-        log.info('配置文件不存在，将使用默认配置')
+        log.info('配置文件不存在, 将使用默认配置')
       }
     } catch (error) {
       log.error('读取配置文件失败', error)

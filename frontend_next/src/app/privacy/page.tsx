@@ -42,7 +42,7 @@ export default function PrivacyPage() {
               信息收集
             </h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>我们高度重视你的隐私安全。当你注册 TRAI 账号时, 我们会收集以下信息: </p>
+              <p>我们高度重视你的隐私安全. 当你注册 TRAI 账号时, 我们会收集以下信息: </p>
               <ul className="space-y-2 pl-4 list-disc">
                 <li>账号信息: 邮箱地址、昵称、密码（加密存储）</li>
                 <li>使用数据: 对话记录、Agent 调用次数、功能使用偏好</li>
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
               第三方共享
             </h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>我们不会将你的个人信息出售给任何第三方。以下情况除外: </p>
+              <p>我们不会将你的个人信息出售给任何第三方. 以下情况除外: </p>
               <ul className="space-y-2 pl-4 list-disc">
                 <li>经你明确同意的共享行为</li>
                 <li>为提供服务而必须共享给 AI 模型供应商（OpenAI、ModelScope 等）</li>
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">政策更新</h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>我们会根据法律法规或产品变化更新本政策。任何重大变更都会通过站内通知或邮件提前告知。如你继续使用 TRAI, 即视为同意更新后的政策。</p>
+              <p>我们会根据法律法规或产品变化更新本政策. 任何重大变更都会通过站内通知或邮件提前告知. 如你继续使用 TRAI, 即视为同意更新后的政策. </p>
             </div>
           </section>
         </div>

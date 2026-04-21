@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 /**
  * agent.store.ts
  * 作者: wuhao
@@ -170,7 +171,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }));
 
     // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
-    const token = localStorage.getItem("token");
+    const token = Cookies.get("token");
     const apiBase =
       process.env.NEXT_PUBLIC_API_BASE ||
       `${window.location.protocol}//${window.location.hostname}:5666/api`;

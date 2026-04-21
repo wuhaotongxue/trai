@@ -14,7 +14,7 @@ interface NotificationStore {
   /**
    * 显示通知
    * @param message - 通知消息
-   * @param auto_hide_ms - 自动隐藏的毫秒数，默认为 2000ms，设为 0 不自动隐藏
+   * @param auto_hide_ms - 自动隐藏的毫秒数, 默认为 2000ms, 设为 0 不自动隐藏
    */
   show: (message: string, auto_hide_ms?: number) => void
   /** 隐藏通知 */
