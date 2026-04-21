@@ -163,13 +163,13 @@ export function ChatPanel() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-muted-foreground">Completion:</span>
+                  <span className="text-muted-foreground">输出:</span>
                   <span className="font-medium text-emerald-600 dark:text-emerald-400">{completionTokens}</span>
                 </span>
                 <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
                 <span className="flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  <span className="text-muted-foreground">Prompt:</span>
+                  <span className="text-muted-foreground">提示:</span>
                   <span className="font-medium text-blue-600 dark:text-blue-400">{promptTokens}</span>
                 </span>
                 <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
