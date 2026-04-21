@@ -151,7 +151,7 @@ export function ChatPanel() {
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ className, children, ...props }) {
+                    code({ node, ref, className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || "");
                       const isInline = !match;
                       return !isInline ? (

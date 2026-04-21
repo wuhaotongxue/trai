@@ -12,7 +12,7 @@ import { Search, Database, Plus, RefreshCw, FolderOpen, AlertCircle, FileText } 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api_client } from "@/lib/api_client";
+import { request } from "@/lib/api_client";
 
 interface KnowledgeBase {
   id: string;
@@ -32,8 +32,9 @@ export default function KnowledgeBasePage() {
     setLoading(true);
     setError("");
     try {
-      const res = await api_client.post("/admin/knowledge_base/list", {
-        index_name: searchQuery || undefined,
+      const res = await request<{ code: number; msg?: string; data?: { items: KnowledgeBase[] } }>("/admin/knowledge_base/list", {
+        method: "POST",
+        body: JSON.stringify({ index_name: searchQuery || undefined }),
       });
       if (res.code === 200 && res.data?.items) {
         setIndices(res.data.items);
