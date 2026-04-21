@@ -10,7 +10,7 @@ import asyncio
 import json
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -470,6 +470,7 @@ async def send_message_stream(
     # 游客限制检查 (100 次)
     if role == "guest":
         from infrastructure.security.blacklist import get_blacklist_service
+
         blacklist = get_blacklist_service()
         if blacklist._redis_client:
             client_ip = req.client.host if req.client else "unknown"

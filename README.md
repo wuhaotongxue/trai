@@ -46,6 +46,17 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_21_1649
+- **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
+- **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
+- **refactor(error)**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
+
+### 🎨 前端_2026_04_21_1649
+- **refactor(api_base)**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
+
+### 💻 客户端_2026_04_21_1649
+- **refactor(api)**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
+
 ### 🛠️ 系统更新_2026_04_21_1138
 - [交互] 恢复右下角 AI 助手为当前页弹窗模式，支持右上角一键在新标签页中展开
 - [模型] AI 对话助手默认对接后台 DeepSeek 模型，并默认使用空知识库状态

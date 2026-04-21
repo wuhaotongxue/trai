@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, BotMessageSquare, X, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ChatPanel } from "@/components/agent/chat_panel";
 
 export function FloatingWidget() {
@@ -19,7 +19,6 @@ export function FloatingWidget() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   const isWebsitePage =
     !pathname.startsWith("/admin") &&

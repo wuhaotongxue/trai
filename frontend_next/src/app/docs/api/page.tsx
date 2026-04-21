@@ -63,8 +63,8 @@ const endpoints = [
 ];
 
 export default function ApiDocsPage() {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:5666/api";
-  const backendOrigin = apiBase.replace(/\/api\/?$/, "");
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:5666/api_trai/v1";
+  const backendOrigin = apiBase.replace(/\/api_trai\/v1\/?$/, "").replace(/\/api\/?$/, "");
   const openapiDocsUrl = `${backendOrigin}/docs`;
 
   return (

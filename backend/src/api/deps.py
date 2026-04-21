@@ -11,7 +11,6 @@ from typing import Annotated, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from core.exceptions import AuthenticationError
 from infrastructure.security.blacklist import TokenBlacklistService, get_blacklist_service
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import get_password_service
@@ -123,7 +122,8 @@ __all__ = [
     "get_current_user_optional",
     "CurrentUser",
     "CurrentUserOptional",
-    "AdminUser","require_role",
+    "AdminUser",
+    "require_role",
     "require_admin",
     "require_vip",
     "require_manager",

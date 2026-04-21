@@ -189,7 +189,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     const token = Cookies.get("token");
     const apiBase =
       process.env.NEXT_PUBLIC_API_BASE ||
-      `${window.location.protocol}//${window.location.hostname}:5666/api`;
+      (window.location.protocol === "https:"
+        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
+        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`);
     let aborted = false;
 
     const abortFn = () => {
@@ -293,8 +295,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           totalTokens: lastUsage.total_tokens,
         });
       }
-    } catch (e: any) {
-      set({ error: e.message || "消息发送失败, 请检查网络后重试" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "消息发送失败, 请检查网络后重试";
+      set({ error: message });
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 from typing import Annotated
+from urllib.parse import urlencode, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
@@ -43,7 +44,27 @@ class WeComController:
         """
         corp_id = os.getenv("WECOM_CORP_ID")
         agent_id = os.getenv("WECOM_AGENT_ID")
-        redirect_uri = os.getenv("WECOM_REDIRECT_URI", "http://localhost:3000/auth/wecom/callback")
+
+        api_prefix = os.getenv("API_PREFIX", "/api_trai/v1").strip()
+        if not api_prefix:
+            api_prefix = "/api_trai/v1"
+        if not api_prefix.startswith("/"):
+            api_prefix = f"/{api_prefix}"
+        api_prefix = api_prefix.rstrip("/")
+        callback_path = f"{api_prefix}/auth/wecom/callback"
+
+        redirect_uri = os.getenv("WECOM_REDIRECT_URI", "").strip()
+        if not redirect_uri:
+            redirect_uri = os.getenv("BACKEND_PUBLIC_URL", "http://localhost:5666").rstrip("/") + callback_path
+        # 兼容历史错误配置: 旧值曾指向前端回调页, 导致企业微信回调域名校验失败.
+        backend_public_url = os.getenv("BACKEND_PUBLIC_URL", "http://localhost:5666").rstrip("/")
+        parsed = urlparse(redirect_uri)
+        if parsed.netloc.startswith("localhost:3000"):
+            redirect_uri = f"{backend_public_url}{callback_path}"
+            logger.warning("检测到旧版 WECOM_REDIRECT_URI 配置(3000), 已自动修正为后端回调路径")
+        elif parsed.path in {"/auth/wecom/callback", "/api/auth/wecom/callback", "/api_trai/auth/wecom/callback"}:
+            redirect_uri = redirect_uri.replace(parsed.path, callback_path)
+            logger.warning("检测到旧版 WECOM_REDIRECT_URI 路径, 已自动修正为当前 API_PREFIX")
 
         if not corp_id or not agent_id:
             logger.error("企业微信环境变量 WECOM_CORP_ID 或 WECOM_AGENT_ID 未配置")
@@ -52,11 +73,15 @@ class WeComController:
                 detail={"code": 500, "message": "系统未配置企业微信相关参数"},
             )
 
-        # 构造企业微信扫码登录链接 (snsapi_base)
-        url = (
-            f"https://open.work.weixin.qq.com/wwopen/sso/qrConnect"
-            f"?appid={corp_id}&agentid={agent_id}&redirect_uri={redirect_uri}&state=trai_login"
+        qs = urlencode(
+            {
+                "appid": corp_id,
+                "agentid": agent_id,
+                "redirect_uri": redirect_uri,
+                "state": "trai_login",
+            }
         )
+        url = f"https://open.work.weixin.qq.com/wwopen/sso/qrConnect?{qs}"
 
         return WeComLoginUrlResponse(url=url)
 

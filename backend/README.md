@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_21_1649
+- **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
+- **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
+- **refactor(error)**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
+
 ### 🛠️ 系统更新_2026_04_21_1047
 - [安全] 引入 Redis Token 黑名单机制，拦截登出和刷新后的废弃 Token
 - [功能] 客户端 (client_electron) 增加 Axios 拦截器，实现并发安全的无感知 Token 刷新
