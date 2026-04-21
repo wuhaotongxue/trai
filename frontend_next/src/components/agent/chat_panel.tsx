@@ -12,11 +12,13 @@ import { useEffect, useRef, useState } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function ChatPanel() {
   const {
@@ -34,6 +36,13 @@ export function ChatPanel() {
   const [images, setImages] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,10 +114,10 @@ export function ChatPanel() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex mb-4 group ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[70%] rounded-2xl px-4 py-3 relative ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : msg.role === "tool"
@@ -141,10 +150,70 @@ export function ChatPanel() {
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
+                  components={{
+                    code({ className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const isInline = !match;
+                      return !isInline ? (
+                        <div className="relative group/code rounded-md overflow-hidden my-4">
+                          <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800/80 text-slate-400 text-xs border-b border-slate-700/50">
+                            <span className="font-mono">{match?.[1] || "code"}</span>
+                            <button
+                              type="button"
+                              title="复制代码"
+                              aria-label="复制代码"
+                              onClick={() => {
+                                navigator.clipboard.writeText(String(children).replace(/\n$/, ""));
+                                setCopiedId(`code-${msg.id}-${String(children).substring(0, 10)}`);
+                                setTimeout(() => setCopiedId(null), 2000);
+                              }}
+                              className="flex items-center gap-1.5 hover:text-slate-200 transition-colors"
+                            >
+                              {copiedId === `code-${msg.id}-${String(children).substring(0, 10)}` ? (
+                                <><Check className="h-3.5 w-3.5 text-emerald-400" /> 已复制</>
+                              ) : (
+                                <><Copy className="h-3.5 w-3.5" /> 复制代码</>
+                              )}
+                            </button>
+                          </div>
+                          <SyntaxHighlighter
+                            {...props}
+                            style={vscDarkPlus as any}
+                            language={match?.[1] || "text"}
+                            PreTag="div"
+                            className="!m-0 !rounded-none text-[13px] !bg-slate-900"
+                            showLineNumbers={false}
+                          >
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        </div>
+                      ) : (
+                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5">{children}</code>
+                      );
+                    },
+                  }}
                 >
                   {msg.content}
                 </ReactMarkdown>
               </div>
+
+              {msg.role === "assistant" && !isStreaming && msg.content && (
+                <button
+                  type="button"
+                  title="复制内容"
+                  aria-label="复制内容"
+                  onClick={() => handleCopy(msg.id, msg.content)}
+                  className={`absolute -right-10 top-2 p-1.5 rounded-lg border bg-background/50 backdrop-blur-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                    copiedId === msg.id ? "opacity-100 scale-100" : "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100"
+                  }`}
+                >
+                  {copiedId === msg.id ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
         ))}
