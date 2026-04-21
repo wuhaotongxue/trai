@@ -31,7 +31,11 @@ function LoginForm() {
 
   useEffect(() => {
     const err = searchParams.get("error");
-    if (err === "not_bound") {
+    const reason = searchParams.get("reason");
+    
+    if (reason === "quota_exceeded") {
+      setErrorMessage("游客免费提问额度(100次)已用完, 请登录后继续使用全部功能");
+    } else if (err === "not_bound") {
       setErrorMessage("当前企业微信未绑定账号, 请先使用密码登录后绑定");
     } else if (err === "account_disabled") {
       setErrorMessage("该企业微信绑定的账号已被禁用");

@@ -139,7 +139,16 @@ async function request<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.detail?.message || error.message || "请求失败");
+    const errorMessage = error.detail?.message || error.message || "请求失败";
+
+    // 游客免费额度用完特殊处理
+    if (res.status === 401 && errorMessage.includes("免费额度")) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?reason=quota_exceeded";
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   return res.json();
