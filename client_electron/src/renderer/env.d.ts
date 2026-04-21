@@ -12,6 +12,8 @@ interface Window {
     config_get: (key: string, default_value?: any) => Promise<{ success: boolean; data?: any; error?: string }>;
     config_set: (key: string, value: any) => Promise<{ success: boolean; error?: string }>;
     auth_login: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+    auth_wecom_login: () => Promise<{ success: boolean; data?: any; error?: string }>;
+    auth_me: () => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_register: (params: any) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_change_password: (params: { old_password: string; new_password: string }) => Promise<{ success: boolean; data?: any; error?: string }>;
     auth_logout: () => Promise<{ success: boolean; error?: string }>;
