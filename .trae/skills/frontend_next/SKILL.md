@@ -130,10 +130,16 @@ frontend_next/src/
 ### 6.2 可访问性 (MANDATORY)
 
 - 表单控件必须具备可访问名称, `input/select/textarea` 至少提供一个: `aria-label`, `aria-labelledby`, 或显式 `<label htmlFor=...>`
+- **当 `<input>` 即使是被 `<label>` 包裹且由于 UI 需求被隐藏 (`hidden`) 时，仍必须提供 `aria-label` 与 `title`**，避免 Microsoft Edge Tools / axe 报出 "Form elements must have labels" 错误。
 - 当控件没有可见文本标签时, 必须补 `aria-label` 与 `title`, 避免 Microsoft Edge Tools / axe 报错
 - `button` 必须显式声明 `type`, 默认使用 `type="button"`, 避免 Microsoft Edge Tools 报错
 - 图标按钮必须补 `aria-label` 与 `title`, 不允许只有图标没有文本
 - 尽量避免 JSX 内联 `style`, 优先使用 Tailwind 或 CSS Modules, 减少 Microsoft Edge Tools `no-inline-styles` 告警
+
+### 6.3 AI 聊天界面与 Markdown 支持 (MANDATORY)
+
+- AI 聊天流式输出时，**必须实现乐观 UI (Optimistic UI) 更新**：用户点击发送瞬间立即在界面上新增占位气泡，再在后台异步创建 Session 或发起请求，严禁因阻塞等待网络请求而导致发送按钮卡顿。
+- 聊天输出内容必须支持 Markdown 和 LaTeX 公式渲染，建议集成 `react-markdown`, `remark-math`, `rehype-katex` 以及 `@tailwindcss/typography`。
 
 ### Import 排版规范
 

@@ -229,6 +229,8 @@ export function ChatPanel() {
             multiple
             className="hidden"
             id="image-upload"
+            aria-label="上传图片"
+            title="上传图片"
             onChange={handleImageUpload}
           />
           <label htmlFor="image-upload" className="cursor-pointer">
