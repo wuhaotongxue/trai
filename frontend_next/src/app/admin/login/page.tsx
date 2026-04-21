@@ -127,7 +127,7 @@ export default function AdminLoginPage() {
             </div>
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                <input type="checkbox" className="rounded border-border text-blue-600 focus:ring-blue-500" />
+                <input type="checkbox" id="admin-remember" aria-label="记住我" title="记住我" className="rounded border-border text-blue-600 focus:ring-blue-500" />
                 <span>记住登录状态</span>
               </label>
               <button className="text-xs text-blue-500 hover:underline">忘记密码?</button>
