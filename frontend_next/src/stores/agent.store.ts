@@ -106,6 +106,17 @@ interface AgentState {
   deleteSession: () => Promise<void>;
 }
 
+// 兼容非安全环境的 UUID 生成
+const generateUUID = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 /**
  * Agent 状态管理 Hook
  * @returns Agent 状态管理对象
@@ -143,7 +154,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
 
     const userMsg: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: "user",
       content,
       images,
@@ -160,7 +171,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       promptTokens: 0,
     }));
 
-    const assistantMsgId = crypto.randomUUID();
+    const assistantMsgId = generateUUID();
     let assistantContent = "";
     let lastUsage: StreamUsageEvent["data"] | null = null;
 
@@ -198,6 +209,26 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         }
       );
 
+      if (!res.ok) {
+        const errorText = await res.text();
+        let errorMessage = res.statusText;
+        try {
+          const errJson = JSON.parse(errorText);
+          errorMessage = errJson.detail?.message || errJson.message || errorMessage;
+        } catch {
+          // ignore
+        }
+
+        if (res.status === 401 && errorMessage.includes("免费额度")) {
+          if (typeof window !== "undefined") {
+            window.location.href = "/login?reason=quota_exceeded";
+            return;
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
       const reader = res.body?.getReader();
       if (!reader) throw new Error("无法读取响应流");
 
@@ -229,7 +260,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
               }));
             } else if (parsed.event === "tool_call_end") {
               const toolMsg: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: "tool",
                 content: parsed.data.arguments,
                 toolCallId: parsed.data.tool_call_id,
@@ -259,8 +290,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           totalTokens: lastUsage.total_tokens,
         });
       }
-    } catch {
-      set({ error: "消息发送失败, 请检查网络后重试" });
+    } catch (e: any) {
+      set({ error: e.message || "消息发送失败, 请检查网络后重试" });
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }
