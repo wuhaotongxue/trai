@@ -134,11 +134,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   sendMessage: async (content, images) => {
-    const { sessionId } = get();
+    let { sessionId } = get();
 
     if (!sessionId) {
       await get().startSession();
-      return;
+      sessionId = get().sessionId;
+      if (!sessionId) return; // 创建会话失败
     }
 
     const userMsg: Message = {
