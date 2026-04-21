@@ -8,9 +8,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUp, ArrowDown, BotMessageSquare, X } from "lucide-react";
+import { ArrowUp, ArrowDown, BotMessageSquare, X, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChatPanel } from "@/components/agent/chat_panel";
 
 export function FloatingWidget() {
@@ -18,6 +18,7 @@ export function FloatingWidget() {
   const [showBottom, setShowBottom] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const isWebsitePage =
     !pathname.startsWith("/admin") &&
@@ -105,14 +106,29 @@ export function FloatingWidget() {
                 <p className="text-[10px] text-muted-foreground mt-1">AI 助手, 支持工具调用</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
-              onClick={() => setIsChatOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-blue-600 rounded-full"
+                onClick={() => {
+                  setIsChatOpen(false);
+                  router.push("/agent");
+                }}
+                title="在新页面中打开"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                onClick={() => setIsChatOpen(false)}
+                title="关闭"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div className="flex-1 overflow-hidden relative">
             <ChatPanel />
