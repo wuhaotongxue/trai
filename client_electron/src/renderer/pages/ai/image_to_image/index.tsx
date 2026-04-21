@@ -55,10 +55,10 @@ const ImageToImage: React.FC = () => {
   ]
 
   const style_presets: StylePreset[] = [
-    { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格，霓虹灯，未来感', category: 'scifi' },
-    { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格，色彩鲜艳', category: 'art' },
-    { id: 'watercolor', name: '水彩风格', prompt: '将图片转换为水彩画风格，柔和的色彩', category: 'art' },
-    { id: 'oil_painting', name: '油画风格', prompt: '将图片转换为古典油画风格，厚重的笔触', category: 'art' }
+    { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格, 霓虹灯, 未来感', category: 'scifi' },
+    { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格, 色彩鲜艳', category: 'art' },
+    { id: 'watercolor', name: '水彩风格', prompt: '将图片转换为水彩画风格, 柔和的色彩', category: 'art' },
+    { id: 'oil_painting', name: '油画风格', prompt: '将图片转换为古典油画风格, 厚重的笔触', category: 'art' }
   ]
 
   const filtered_styles = style_presets.filter(s => s.category === active_category)
@@ -74,7 +74,7 @@ const ImageToImage: React.FC = () => {
       if (res.success && res.data?.image_url) {
         set_result_url(res.data.image_url)
       } else {
-        set_error(res.error || '生成失败，请重试')
+        set_error(res.error || '生成失败, 请重试')
       }
     } catch (err: any) {
       set_error(err.message || '网络异常')

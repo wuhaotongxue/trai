@@ -173,8 +173,10 @@ const KnowledgeBasePage: React.FC = () => {
         
         let default_cat = ensured_categories.find(c => c.name === '默认' || c.name === '默认类目')
         if (!default_cat) {
-          default_cat = { id: 'default', name: '默认' }
+          default_cat = { id: 'default', name: '默认类目' }
           ensured_categories.unshift(default_cat)
+        } else {
+          default_cat.name = '默认类目'
         }
 
         // 过滤掉测试期间残留的名为 "trai_demo_cat" 开头的分类
@@ -422,7 +424,7 @@ const KnowledgeBasePage: React.FC = () => {
     set_files_loading(true)
     try {
       for (const file of selected_files) {
-        // 读取文件内容，对于文本文件用 text()，对于二进制文件用 base64 编码
+        // 读取文件内容, 对于文本文件用 text(), 对于二进制文件用 base64 编码
         let content: string
         const ext = file.name.toLowerCase().split('.').pop() || ''
         const text_extensions = ['txt', 'md', 'csv', 'json', 'xml', 'html', 'htm']
@@ -563,20 +565,20 @@ const KnowledgeBasePage: React.FC = () => {
     const kbs_in_cat = kb_list.filter(k => k.category_id === cat_id)
     
     if (kbs_in_cat.length === 0) {
-      // 没有知识库，直接删除
-      show_confirm('删除分类', `确定要删除分类"${cat.name}"吗？`, () => {
+      // 没有知识库, 直接删除
+      show_confirm('删除分类', `确定要删除分类"${cat.name}"吗? `, () => {
         set_categories(prev => prev.filter(c => c.id !== cat_id))
         if (active_cat_id === cat_id) {
           set_active_cat_id('default')
         }
       })
     } else {
-      // 有知识库，提示是否转移
+      // 有知识库, 提示是否转移
       show_confirm(
         '删除分类', 
-        `分类"${cat.name}"下有${kbs_in_cat.length}个知识库，删除分类会同时删除这些知识库。\n\n是否要先将这些知识库转移到默认分类？`,
+        `分类"${cat.name}"下有${kbs_in_cat.length}个知识库, 删除分类会同时删除这些知识库. \n\n是否要先将这些知识库转移到默认分类? `,
         () => {
-          // 用户确认，转移知识库到默认分类，然后删除分类
+          // 用户确认, 转移知识库到默认分类, 然后删除分类
           set_kb_list(prev => prev.map(kb => 
             kb.category_id === cat_id ? { ...kb, category_id: 'default' } : kb
           ))
@@ -591,7 +593,7 @@ const KnowledgeBasePage: React.FC = () => {
 
   // (移除了暂不支持的移动知识库的方法)
 
-  // 辅助函数：所有用户都不显示用户名前缀 (前缀仅用于后台权限区分)
+  // 辅助函数: 所有用户都不显示用户名前缀 (前缀仅用于后台权限区分)
   const get_display_name = (name: string, maxLength: number = 4) => {
     const parts = name.split('__');
     const displayName = parts.length > 1 ? parts.slice(1).join('__') : name;
@@ -732,7 +734,7 @@ const KnowledgeBasePage: React.FC = () => {
                   </div>
                 )}
                 
-                {editing_cat_id !== cat.id && (
+                {editing_cat_id !== cat.id && cat.id !== 'default' && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', opacity: active_cat_id === cat.id ? 1 : 0, transition: 'opacity 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.opacity = '1'} onMouseLeave={(e) => e.currentTarget.style.opacity = active_cat_id === cat.id ? '1' : '0'}>
                     <button
                       type="button"
@@ -910,7 +912,7 @@ const KnowledgeBasePage: React.FC = () => {
                       <span style={{ fontSize: '12px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '12px' }}>
                         {kb.file_count}
                       </span>
-                      {active_cat_id !== 'default' && (
+                      {active_cat?.id !== 'default' && (
                         <>
                           <button
                             type="button"
@@ -1342,7 +1344,7 @@ const KnowledgeBasePage: React.FC = () => {
             <div style={{ marginBottom: '12px' }}>
               <input autoFocus placeholder="请输入目录名称..." aria-label="目录名称" title="目录名称" value={new_cat_name} onChange={e => set_new_cat_name(e.target.value.slice(0, 4))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={4} />
               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+                提示: 名称不超过4个汉字或字符, 请勿使用标点符号和特殊字符
               </div>
               <div style={{ textAlign: 'right', fontSize: '12px', color: new_cat_name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
                 {new_cat_name.length}/4
@@ -1367,7 +1369,7 @@ const KnowledgeBasePage: React.FC = () => {
             <div style={{ marginBottom: '12px' }}>
               <input autoFocus placeholder="请输入知识库名称..." aria-label="知识库名称" title="知识库名称" value={new_kb_name} onChange={e => set_new_kb_name(e.target.value.slice(0, 4))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', boxSizing: 'border-box', fontSize: '14px' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#cbd5e1'} maxLength={4} />
               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-                提示: 名称不超过4个汉字或字符，请勿使用标点符号和特殊字符
+                提示: 名称不超过4个汉字或字符, 请勿使用标点符号和特殊字符
               </div>
               <div style={{ textAlign: 'right', fontSize: '12px', color: new_kb_name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
                 {new_kb_name.length}/4

@@ -50,7 +50,7 @@ export function Footer() {
               <span className="text-lg font-bold text-foreground">TRAI</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
-              新一代 AI Agent 平台, 为企业提供安全、可靠、可扩展的智能助手解决方案。
+              新一代 AI Agent 平台, 为企业提供安全、可靠、可扩展的智能助手解决方案. 
             </p>
             <div className="flex gap-3">
               {[

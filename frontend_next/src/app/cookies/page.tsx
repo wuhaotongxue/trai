@@ -39,7 +39,7 @@ export default function CookiesPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">什么是 Cookie? </h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>Cookie 是由浏览器存储在设备上的小型文本文件, 用于记住你的偏好设置、登录状态和使用习惯。TRAI 使用 Cookie 来确保网站正常运行并提供更好的体验。</p>
+              <p>Cookie 是由浏览器存储在设备上的小型文本文件, 用于记住你的偏好设置、登录状态和使用习惯. TRAI 使用 Cookie 来确保网站正常运行并提供更好的体验. </p>
             </div>
           </section>
 
@@ -52,25 +52,25 @@ export default function CookiesPage() {
               {[
                 {
                   name: "必要 Cookie",
-                  desc: "网站正常运行所必需, 无法关闭。如登录状态、安全验证、会话管理。",
+                  desc: "网站正常运行所必需, 无法关闭. 如登录状态、安全验证、会话管理. ",
                   example: "session_id, auth_token, csrf_token",
                   safe: true,
                 },
                 {
                   name: "功能 Cookie",
-                  desc: "记住你的偏好设置, 如语言选择、主题设置、显示密度等。",
+                  desc: "记住你的偏好设置, 如语言选择、主题设置、显示密度等. ",
                   example: "lang=zh-CN, theme=light, density=comfortable",
                   safe: true,
                 },
                 {
                   name: "分析 Cookie",
-                  desc: "帮助我们了解网站访问量、最受欢迎的功能和使用路径, 用于持续改进产品。",
+                  desc: "帮助我们了解网站访问量、最受欢迎的功能和使用路径, 用于持续改进产品. ",
                   example: "_ga, _gid, _gat",
                   safe: false,
                 },
                 {
                   name: "营销 Cookie",
-                  desc: "用于个性化推荐和广告投放（TRAI 暂不使用第三方营销 Cookie）。",
+                  desc: "用于个性化推荐和广告投放（TRAI 暂不使用第三方营销 Cookie）. ",
                   example: "—",
                   safe: true,
                 },
@@ -100,7 +100,7 @@ export default function CookiesPage() {
                 <li><strong>隐私模式: </strong>使用无痕/隐私模式浏览时, Cookie 不会被保存</li>
                 <li><strong>TRAI 设置: </strong>部分偏好设置可在账号设置中直接修改</li>
               </ul>
-              <p className="mt-3 text-amber-600">注意: 禁用必要 Cookie 将导致网站无法正常登录和使用。</p>
+              <p className="mt-3 text-amber-600">注意: 禁用必要 Cookie 将导致网站无法正常登录和使用. </p>
             </div>
           </section>
 
@@ -119,7 +119,7 @@ export default function CookiesPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">更新说明</h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>我们会定期审查并更新本政策。如有重大变更, 将在 TRAI 官网首页以通知形式告知。</p>
+              <p>我们会定期审查并更新本政策. 如有重大变更, 将在 TRAI 官网首页以通知形式告知. </p>
               <p>问题或建议请联系: <a href="mailto:privacy@trai.ai" className="text-blue-600 hover:underline">privacy@trai.ai</a></p>
             </div>
           </section>

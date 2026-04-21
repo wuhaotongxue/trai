@@ -32,7 +32,7 @@ const Register: React.FC = () => {
     try {
       const res = await window.electron_api.auth_register({ username, email, password })
       if (res.success) {
-        alert('注册成功，请登录')
+        alert('注册成功, 请登录')
         navigate('/login')
       } else {
         set_error_msg(res.error || '注册失败')

@@ -14,7 +14,7 @@ export const auth_service = {
   /**
    * 用户登录
    * @param params - 登录参数（用户名/密码等）
-   * @returns 登录结果，包含 access_token
+   * @returns 登录结果, 包含 access_token
    */
   async login(params: any) {
     try {
@@ -35,14 +35,14 @@ export const auth_service = {
       if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
         return {
           success: false,
-          error: '连接超时，请检查:\n1. 后端服务是否已启动\n2. 服务地址是否正确\n3. 网络连接是否正常'
+          error: '连接超时, 请检查:\n1. 后端服务是否已启动\n2. 服务地址是否正确\n3. 网络连接是否正常'
         }
       }
 
       if (error.code === 'ECONNREFUSED' || error.message?.includes('refused')) {
         return {
           success: false,
-          error: '无法连接到服务器，请检查:\n1. 后端服务是否已启动\n2. 服务地址和端口是否正确'
+          error: '无法连接到服务器, 请检查:\n1. 后端服务是否已启动\n2. 服务地址和端口是否正确'
         }
       }
 
@@ -55,7 +55,7 @@ export const auth_service = {
 
       return {
         success: false,
-        error: error.response?.data?.detail?.message || error.message || '登录失败，请检查网络或服务器配置'
+        error: error.response?.data?.detail?.message || error.message || '登录失败, 请检查网络或服务器配置'
       }
     }
   },
@@ -74,7 +74,7 @@ export const auth_service = {
       log.error('register failed:', error.response?.data || error.message)
       return { 
         success: false, 
-        error: error.response?.data?.detail?.message || '注册失败，请检查网络或服务器配置' 
+        error: error.response?.data?.detail?.message || '注册失败, 请检查网络或服务器配置' 
       }
     }
   },

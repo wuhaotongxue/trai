@@ -2,7 +2,7 @@
 # 文件名: weather.py
 # 作者: wuhao
 # 日期: 2026-04-19 02:30:00
-# 描述: 天气查询工具 - 使用Open-Meteo免费API，支持任意城市
+# 描述: 天气查询工具 - 使用Open-Meteo免费API, 支持任意城市
 
 from __future__ import annotations
 
@@ -91,9 +91,9 @@ class WeatherTool(BaseTool):
 
         logger.info(f"天气工具收到参数: {params}")
 
-        # 如果城市为空，默认使用北京
+        # 如果城市为空, 默认使用北京
         if not city:
-            logger.warning(f"城市参数为空: {params}，默认使用北京")
+            logger.warning(f"城市参数为空: {params}, 默认使用北京")
             city = "北京"
 
         # 清理城市名
@@ -117,7 +117,7 @@ class WeatherTool(BaseTool):
                 logger.info(f"地理编码结果数: {len(results)}")
 
                 if results:
-                    # 找到了结果，优先找城市（administration_level >= 2）
+                    # 找到了结果, 优先找城市（administration_level >= 2）
                     location = None
                     for result in results:
                         # 优先选城市级别的
@@ -125,7 +125,7 @@ class WeatherTool(BaseTool):
                         if admin_level:
                             location = result
                             break
-                    # 如果没找到合适的，用第一个
+                    # 如果没找到合适的, 用第一个
                     if not location:
                         location = results[0]
 
@@ -136,7 +136,7 @@ class WeatherTool(BaseTool):
                     if country:
                         display_name = f"{display_name}, {country}"
                 else:
-                    # 没找到，尝试用预设的城市或默认北京
+                    # 没找到, 尝试用预设的城市或默认北京
                     if city in self.CITY_COORDS:
                         lat, lon = self.CITY_COORDS[city]
                         display_name = city

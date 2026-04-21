@@ -8,7 +8,7 @@ import log from 'electron-log'
 
 /**
  * 初始化业务服务
- * 在应用启动时调用，用于初始化所有业务相关的服务
+ * 在应用启动时调用, 用于初始化所有业务相关的服务
  */
 export const init_services = (): void => {
   log.info('initializing business services')

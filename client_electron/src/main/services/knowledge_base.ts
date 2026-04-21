@@ -28,7 +28,7 @@ export const knowledge_base_service = {
   /**
    * 创建演示知识库
    * @param params - 知识库创建参数
-   * @returns 创建结果，包含索引ID、文件ID等信息
+   * @returns 创建结果, 包含索引ID、文件ID等信息
    */
   async demo_create(params: KnowledgeBaseDemoCreateRequest) {
     try {

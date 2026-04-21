@@ -78,7 +78,7 @@ export default function DatabasePage() {
 
   /**
    * 处理优化表操作
-   * 模拟优化过程，3秒后自动完成
+   * 模拟优化过程, 3秒后自动完成
    */
   const handleOptimize = () => {
     setOptimizing(true);
