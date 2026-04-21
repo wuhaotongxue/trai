@@ -66,7 +66,7 @@ def create_admin_user(
     """创建管理员账户
 
     Args:
-        username: 用户名 (从环境变量 ADMIN_USERNAME 读取，默认 admin)
+        username: 用户名 (从环境变量 ADMIN_USERNAME 读取, 默认 admin)
         password: 密码 (从环境变量 ADMIN_PASSWORD 读取)
         email: 邮箱 (从环境变量 ADMIN_EMAIL 读取)
         display_name: 显示名称
@@ -78,7 +78,7 @@ def create_admin_user(
     email = email or os.getenv("ADMIN_EMAIL", "admin@example.com")
 
     if not password:
-        logger.error("未设置 ADMIN_PASSWORD 环境变量，请先设置管理员密码")
+        logger.error("未设置 ADMIN_PASSWORD 环境变量, 请先设置管理员密码")
         logger.info("示例: ADMIN_PASSWORD=YourSecurePassword python -m scripts.init_db --create-admin")
         return
 

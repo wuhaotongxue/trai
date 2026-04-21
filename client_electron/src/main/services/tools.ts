@@ -2,7 +2,7 @@
  * 文件名: tools.ts
  * 作者: wuhao
  * 日期: 2026-04-14 08:12:51
- * 描述: 客户端工具服务层，提供文件转换和压缩等功能
+ * 描述: 客户端工具服务层, 提供文件转换和压缩等功能
  */
 import log from 'electron-log'
 import fs from 'fs'
@@ -45,7 +45,7 @@ export const tools_service = {
   /**
    * 压缩本地图片
    * @param file_path - 图片文件路径
-   * @param quality - 压缩质量 0-100，默认为 60
+   * @param quality - 压缩质量 0-100, 默认为 60
    * @param target_size_kb - 目标文件大小 KB（可选）
    * @returns 压缩结果
    */

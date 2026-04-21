@@ -311,7 +311,7 @@ class AgentExecutor:
                     # 检查是否已存在同 id 的 tool_call
                     existing_idx = next((i for i, tc in enumerate(tool_calls) if tc["id"] == event.tool_call_id), None)
                     if existing_idx is None:
-                        # 不存在，添加新的
+                        # 不存在, 添加新的
                         logger.info(
                             f"[Stream] 添加 tool_call 到数组: id={event.tool_call_id}, name={event.tool_name}, args={repr(event.content)}"
                         )
@@ -323,7 +323,7 @@ class AgentExecutor:
                             }
                         )
                     else:
-                        # 已存在，检查新 content 是否非空，如果是就替换旧的（避免旧的是空参数！）
+                        # 已存在, 检查新 content 是否非空, 如果是就替换旧的（避免旧的是空参数! ）
                         old_tc = tool_calls[existing_idx]
                         old_args = old_tc["function"]["arguments"]
                         if event.content and (not old_args or len(event.content) > len(old_args)):
@@ -358,7 +358,7 @@ class AgentExecutor:
                 tool_id = func.get("name", "")
                 raw_args = func.get("arguments", "")
 
-                # 过滤无效调用：tool_id 空、tool_call_id 空、raw_args 空
+                # 过滤无效调用: tool_id 空、tool_call_id 空、raw_args 空
                 if not tool_call_id or not tool_id or not raw_args:
                     logger.warning(
                         f"[Stream] 跳过无效的 tool_call: id={tool_call_id}, name={tool_id}, args={repr(raw_args)}"

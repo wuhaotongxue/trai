@@ -4,6 +4,7 @@
  */
 
 "use client";
+import Cookies from "js-cookie";
 
 import Link from "next/link";
 import { useEffect, useState, Suspense } from "react";
@@ -31,11 +32,11 @@ function LoginForm() {
   useEffect(() => {
     const err = searchParams.get("error");
     if (err === "not_bound") {
-      setErrorMessage("当前企业微信未绑定账号，请先使用密码登录后绑定");
+      setErrorMessage("当前企业微信未绑定账号, 请先使用密码登录后绑定");
     } else if (err === "account_disabled") {
       setErrorMessage("该企业微信绑定的账号已被禁用");
     } else if (err === "auth_failed" || err === "wecom_auth_failed") {
-      setErrorMessage("企业微信登录失败，请重试");
+      setErrorMessage("企业微信登录失败, 请重试");
     }
   }, [searchParams]);
 
@@ -46,10 +47,10 @@ function LoginForm() {
     setLoading(true);
     try {
       const res = await authApi.login({ username: email, password });
-      localStorage.setItem("token", res.access_token);
-      localStorage.setItem("refresh_token", res.refresh_token);
+      Cookies.set("token", res.access_token);
+      Cookies.set("refresh_token", res.refresh_token);
       
-      // 使用 window.location.href 强制刷新跳转，根据角色跳转到不同的后台/工作台
+      // 使用 window.location.href 强制刷新跳转, 根据角色跳转到不同的后台/工作台
       if (res.user && res.user.role === "admin") {
         window.location.href = "/admin";
       } else {

@@ -49,26 +49,26 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
 
     async def execute(self, input_data: CreateSessionInput) -> SessionOutput:
         """执行创建会话"""
-        db_session = get_session()
-        repo = SessionRepository(db_session)
+        with get_session() as db_session:
+            repo = SessionRepository(db_session)
 
-        session_id = str(uuid.uuid4())
-        session = repo.create_session(
-            session_id=session_id,
-            user_id=input_data.user_id,
-            title=input_data.title or "新对话",
-            model=input_data.model,
-            metadata=input_data.metadata,
-        )
+            session_id = str(uuid.uuid4())
+            session = repo.create_session(
+                session_id=session_id,
+                user_id=input_data.user_id,
+                title=input_data.title or "新对话",
+                model=input_data.model,
+                metadata=input_data.metadata,
+            )
 
-        return SessionOutput(
-            session_id=session.t_session_id,
-            title=session.t_title,
-            model=session.t_model,
-            messages=session.t_messages,
-            created_at=session.t_created_at.isoformat(),
-            updated_at=session.t_updated_at.isoformat(),
-        )
+            return SessionOutput(
+                session_id=session.t_session_id,
+                title=session.t_title,
+                model=session.t_model,
+                messages=session.t_messages,
+                created_at=session.t_created_at.isoformat(),
+                updated_at=session.t_updated_at.isoformat(),
+            )
 
 
 @dataclass
@@ -97,41 +97,41 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
 
     async def execute(self, input_data: SendMessageInput) -> SendMessageOutput:
         """执行发送消息"""
-        db_session = get_session()
-        session_repo = SessionRepository(db_session)
-        message_repo = MessageRepository(db_session)
+        with get_session() as db_session:
+            session_repo = SessionRepository(db_session)
+            message_repo = MessageRepository(db_session)
 
-        chat_session = session_repo.get_session(input_data.session_id)
-        if not chat_session:
-            raise ValueError(f"会话不存在: {input_data.session_id}")
+            chat_session = session_repo.get_session(input_data.session_id)
+            if not chat_session:
+                raise ValueError(f"会话不存在: {input_data.session_id}")
 
-        message_repo.add_message(
-            session_id=input_data.session_id,
-            role=input_data.role,
-            content=input_data.content,
-        )
+            message_repo.add_message(
+                session_id=input_data.session_id,
+                role=input_data.role,
+                content=input_data.content,
+            )
 
-        messages = message_repo.get_messages(input_data.session_id)
-        messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
+            messages = message_repo.get_messages(input_data.session_id)
+            messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
-        ai_response = await self._ai_client.chat(messages=messages_dict)
+            ai_response = await self._ai_client.chat(messages=messages_dict)
 
-        message_repo.add_message(
-            session_id=input_data.session_id,
-            role="assistant",
-            content=ai_response["content"],
-        )
+            message_repo.add_message(
+                session_id=input_data.session_id,
+                role="assistant",
+                content=ai_response["content"],
+            )
 
-        session_repo.update_session(
-            session_id=input_data.session_id,
-            messages=messages_dict + [{"role": "assistant", "content": ai_response["content"]}],
-        )
+            session_repo.update_session(
+                session_id=input_data.session_id,
+                messages=messages_dict + [{"role": "assistant", "content": ai_response["content"]}],
+            )
 
-        return SendMessageOutput(
-            session_id=input_data.session_id,
-            user_message={"role": input_data.role, "content": input_data.content},
-            assistant_message={"role": "assistant", "content": ai_response["content"]},
-        )
+            return SendMessageOutput(
+                session_id=input_data.session_id,
+                user_message={"role": input_data.role, "content": input_data.content},
+                assistant_message={"role": "assistant", "content": ai_response["content"]},
+            )
 
 
 @dataclass
@@ -156,29 +156,29 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, ListSessionsOutput]):
 
     async def execute(self, input_data: ListSessionsInput) -> ListSessionsOutput:
         """执行获取会话列表"""
-        db_session = get_session()
-        repo = SessionRepository(db_session)
+        with get_session() as db_session:
+            repo = SessionRepository(db_session)
 
-        sessions = repo.list_sessions(
-            user_id=input_data.user_id,
-            limit=input_data.limit,
-            offset=input_data.offset,
-        )
+            sessions = repo.list_sessions(
+                user_id=input_data.user_id,
+                limit=input_data.limit,
+                offset=input_data.offset,
+            )
 
-        return ListSessionsOutput(
-            sessions=[
-                SessionOutput(
-                    session_id=s.t_session_id,
-                    title=s.t_title,
-                    model=s.t_model,
-                    messages=s.t_messages,
-                    created_at=s.t_created_at.isoformat(),
-                    updated_at=s.t_updated_at.isoformat(),
-                )
-                for s in sessions
-            ],
-            total=len(sessions),
-        )
+            return ListSessionsOutput(
+                sessions=[
+                    SessionOutput(
+                        session_id=s.t_session_id,
+                        title=s.t_title,
+                        model=s.t_model,
+                        messages=s.t_messages,
+                        created_at=s.t_created_at.isoformat(),
+                        updated_at=s.t_updated_at.isoformat(),
+                    )
+                    for s in sessions
+                ],
+                total=len(sessions),
+            )
 
 
 @dataclass
@@ -205,25 +205,25 @@ class GetSessionUseCase(UseCase[GetSessionInput, GetSessionOutput]):
 
     async def execute(self, input_data: GetSessionInput) -> GetSessionOutput:
         """执行获取会话"""
-        db_session = get_session()
-        repo = SessionRepository(db_session)
-        message_repo = MessageRepository(db_session)
+        with get_session() as db_session:
+            repo = SessionRepository(db_session)
+            message_repo = MessageRepository(db_session)
 
-        session = repo.get_session(input_data.session_id)
-        if not session:
-            raise ValueError(f"会话不存在: {input_data.session_id}")
+            session = repo.get_session(input_data.session_id)
+            if not session:
+                raise ValueError(f"会话不存在: {input_data.session_id}")
 
-        messages = message_repo.get_messages(input_data.session_id)
-        messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
+            messages = message_repo.get_messages(input_data.session_id)
+            messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
 
-        return GetSessionOutput(
-            session_id=session.t_session_id,
-            title=session.t_title,
-            model=session.t_model,
-            messages=messages_dict,
-            created_at=session.t_created_at.isoformat(),
-            updated_at=session.t_updated_at.isoformat(),
-        )
+            return GetSessionOutput(
+                session_id=session.t_session_id,
+                title=session.t_title,
+                model=session.t_model,
+                messages=messages_dict,
+                created_at=session.t_created_at.isoformat(),
+                updated_at=session.t_updated_at.isoformat(),
+            )
 
 
 @dataclass
@@ -238,12 +238,12 @@ class DeleteSessionUseCase(UseCase[DeleteSessionInput, bool]):
 
     async def execute(self, input_data: DeleteSessionInput) -> bool:
         """执行删除会话"""
-        db_session = get_session()
-        repo = SessionRepository(db_session)
-        message_repo = MessageRepository(db_session)
+        with get_session() as db_session:
+            repo = SessionRepository(db_session)
+            message_repo = MessageRepository(db_session)
 
-        message_repo.delete_messages(input_data.session_id)
-        return repo.delete_session(input_data.session_id)
+            message_repo.delete_messages(input_data.session_id)
+            return repo.delete_session(input_data.session_id)
 
 
 __all__ = [

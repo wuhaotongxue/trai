@@ -39,8 +39,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">一、服务说明</h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>欢迎使用 TRAI（以下简称"本服务"）。在使用本服务前, 请仔细阅读以下服务条款。你访问或使用本服务, 即表示你同意受本条款约束。</p>
-              <p>TRAI 提供基于大模型的 AI 对话与 Agent 执行服务, 包括但不限于: 多轮对话、工具调用、图片理解、流式响应等功能。本服务会持续更新, 具体功能以官网公示为准。</p>
+              <p>欢迎使用 TRAI（以下简称"本服务"）. 在使用本服务前, 请仔细阅读以下服务条款. 你访问或使用本服务, 即表示你同意受本条款约束. </p>
+              <p>TRAI 提供基于大模型的 AI 对话与 Agent 执行服务, 包括但不限于: 多轮对话、工具调用、图片理解、流式响应等功能. 本服务会持续更新, 具体功能以官网公示为准. </p>
             </div>
           </section>
 
@@ -121,7 +121,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">七、知识产权</h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>本服务的所有代码、界面设计、Logo、品牌名称等知识产权归 TRAI 所有, 未经授权不得复制或使用。用户在使用服务过程中输入的内容（Prompt）归用户所有, 但授权 TRAI 出于提供服务之目的进行处理。</p>
+              <p>本服务的所有代码、界面设计、Logo、品牌名称等知识产权归 TRAI 所有, 未经授权不得复制或使用. 用户在使用服务过程中输入的内容（Prompt）归用户所有, 但授权 TRAI 出于提供服务之目的进行处理. </p>
             </div>
           </section>
 

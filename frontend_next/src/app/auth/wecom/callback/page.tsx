@@ -6,6 +6,7 @@
  */
 
 "use client";
+import Cookies from "js-cookie";
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,8 +22,8 @@ export default function WeComCallbackPage() {
 
     if (accessToken && refreshToken) {
       // 保存 Token 到本地
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("refresh_token", refreshToken);
+      Cookies.set("token", accessToken);
+      Cookies.set("refresh_token", refreshToken);
 
       // 简单解析 token 判断角色 (如果是 admin 则去 /admin)
       try {
@@ -44,7 +45,7 @@ export default function WeComCallbackPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#080c1a]">
       <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
-      <p className="text-slate-600 dark:text-slate-400">正在处理登录授权，请稍候...</p>
+      <p className="text-slate-600 dark:text-slate-400">正在处理登录授权, 请稍候...</p>
     </div>
   );
 }
