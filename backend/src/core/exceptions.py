@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class TraiException(Exception):  # noqa: N818
     """TRAI 项目基础异常类"""
@@ -16,12 +18,19 @@ class TraiException(Exception):  # noqa: N818
         code: int = 500,
         status_code: int = 500,
         details: dict | None = None,
+        *,
+        cause: Exception | None = None,
+        log_level: str = "warning",
     ) -> None:
         super().__init__(message)
         self.message: str = message
         self.code: int = code
         self.status_code: int = status_code
         self.details: dict = details or {}
+        self.cause: Exception | None = cause
+        self.log_level: str = log_level
+        if cause is not None and "cause" not in self.details:
+            self.details["cause"] = str(cause)
 
     def __str__(self) -> str:
         return f"[{self.code}] {self.message}"
@@ -37,6 +46,39 @@ class TraiException(Exception):  # noqa: N818
             "message": self.message,
             "details": self.details,
         }
+
+    def to_log_fields(self) -> dict[str, Any]:
+        """转换为日志字段
+
+        Returns:
+            dict[str, Any]: 可用于结构化日志的字段
+        """
+        fields: dict[str, Any] = {
+            "trai_code": self.code,
+            "trai_status_code": self.status_code,
+            "trai_message": self.message,
+        }
+        for k, v in (self.details or {}).items():
+            if isinstance(k, str):
+                fields[k] = v
+        return fields
+
+    def log(self, logger: Any, message: str | None = None, **extra: Any) -> None:
+        """记录异常日志
+
+        Args:
+            logger: loguru logger 或已 bind 的 logger
+            message: 可选的覆盖日志消息
+            **extra: 额外字段
+        """
+        fields = self.to_log_fields()
+        fields.update(extra)
+        bound = logger.bind(**fields) if hasattr(logger, "bind") else logger
+        level = (self.log_level or "warning").upper()
+        if hasattr(bound, "log"):
+            bound.log(level, message or self.message)
+        elif hasattr(bound, level.lower()):
+            getattr(bound, level.lower())(message or self.message)
 
 
 class ValidationError(TraiException):

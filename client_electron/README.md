@@ -49,6 +49,9 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_21_1649
+- **refactor(api)**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
+
 ### 🛠️ 系统更新_2026_04_21_1047
 - [安全] 引入 Redis Token 黑名单机制，拦截登出和刷新后的废弃 Token
 - [功能] 客户端 (client_electron) 增加 Axios 拦截器，实现并发安全的无感知 Token 刷新

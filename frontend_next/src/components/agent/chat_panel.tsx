@@ -8,7 +8,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
@@ -157,7 +157,7 @@ export function ChatPanel() {
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ node, ref, className, children, ...props }) {
+                    code({ className, children }) {
                       const match = /language-(\w+)/.exec(className || "");
                       const isInline = !match;
                       return !isInline ? (
@@ -183,8 +183,7 @@ export function ChatPanel() {
                             </button>
                           </div>
                           <SyntaxHighlighter
-                            {...props}
-                            style={vscDarkPlus as any}
+                            style={vscDarkPlus as unknown as Record<string, CSSProperties>}
                             language={match?.[1] || "text"}
                             PreTag="div"
                             className="!m-0 !rounded-none text-[13px] !bg-slate-900 max-w-full overflow-x-auto"
@@ -194,7 +193,9 @@ export function ChatPanel() {
                           </SyntaxHighlighter>
                         </div>
                       ) : (
-                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5">{children}</code>
+                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5">
+                          {children}
+                        </code>
                       );
                     },
                   }}

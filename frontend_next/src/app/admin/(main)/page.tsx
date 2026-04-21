@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
     try {
       const token = Cookies.get("token");
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api"}/admin/dashboard`,
+        `${process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5666/api_trai/v1"}/admin/dashboard`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         }

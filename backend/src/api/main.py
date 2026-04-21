@@ -366,6 +366,13 @@ def register_middlewares(app: FastAPI) -> None:
 
 def register_routers(app: FastAPI) -> None:
     """注册路由"""
+    api_prefix = os.getenv("API_PREFIX", "/api_trai/v1").strip()
+    if not api_prefix:
+        api_prefix = "/api_trai/v1"
+    if not api_prefix.startswith("/"):
+        api_prefix = f"/{api_prefix}"
+    api_prefix = api_prefix.rstrip("/")
+
     from api.routers import tools
     from api.routers.admin import (
         analytics_router,
@@ -383,35 +390,35 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.session import session
     from api.routers.system import feedback, health, monitor, notify
 
-    app.include_router(health.router, prefix="/api/system", tags=["系统"])
-    app.include_router(monitor.router, prefix="/api/system", tags=["系统"])
-    app.include_router(notify.router, prefix="/api/system", tags=["通知"])
-    app.include_router(feedback.router, prefix="/api/system", tags=["系统"])
-    app.include_router(login.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(register.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(logout.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(refresh.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(me.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(password.router, prefix="/api/auth", tags=["认证"])
-    app.include_router(wecom.router, prefix="/api/auth/wecom", tags=["企业微信"])
-    app.include_router(user_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(dashboard_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(analytics_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(quota_config_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(knowledge_base_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(admin_client_release_router, prefix="/api/admin", tags=["管理"])
-    app.include_router(organization.router, prefix="/api/admin/organization", tags=["管理"])
-    app.include_router(client_update_router, prefix="/api/client", tags=["客户端更新"])
-    app.include_router(chat.router, prefix="/api/ai", tags=["AI"])
-    app.include_router(image.router, prefix="/api/ai", tags=["AI"])
-    app.include_router(music.router, prefix="/api/ai", tags=["AI"])
-    app.include_router(video.router, prefix="/api/ai", tags=["AI"])
-    app.include_router(agent.router, prefix="/api", tags=["Agent"])
-    app.include_router(management.router, prefix="/api", tags=["Agent 管理"])
-    app.include_router(comfyui.router, prefix="/api/ai", tags=["AI"])
-    app.include_router(upload.router, prefix="/api/media", tags=["媒体"])
-    app.include_router(session.router, prefix="/api", tags=["会话"])
-    app.include_router(tools.router, prefix="/api/tools", tags=["工具"])
+    app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
+    app.include_router(monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
+    app.include_router(notify.router, prefix=f"{api_prefix}/system", tags=["通知"])
+    app.include_router(feedback.router, prefix=f"{api_prefix}/system", tags=["系统"])
+    app.include_router(login.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(register.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(logout.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(refresh.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(me.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(password.router, prefix=f"{api_prefix}/auth", tags=["认证"])
+    app.include_router(wecom.router, prefix=f"{api_prefix}/auth/wecom", tags=["企业微信"])
+    app.include_router(user_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(dashboard_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(analytics_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(quota_config_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(knowledge_base_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(admin_client_release_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(organization.router, prefix=f"{api_prefix}/admin/organization", tags=["管理"])
+    app.include_router(client_update_router, prefix=f"{api_prefix}/client", tags=["客户端更新"])
+    app.include_router(chat.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(image.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(music.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(video.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(comfyui.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
+    app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
+    app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
+    app.include_router(session.router, prefix=api_prefix, tags=["会话"])
+    app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
 
     @app.get("/", tags=["首页"])
     async def root() -> dict:
@@ -420,8 +427,8 @@ def register_routers(app: FastAPI) -> None:
             "service": "TRAI API",
             "version": "0.1.0",
             "docs": "/docs",
-            "health": "/api/system/health",
-            "monitor": "/api/system/monitor",
+            "health": f"{api_prefix}/system/health",
+            "monitor": f"{api_prefix}/system/monitor",
             "timestamp": datetime.now().isoformat(),
         }
 

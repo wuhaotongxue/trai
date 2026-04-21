@@ -28,8 +28,10 @@ export default function AdminLoginPage() {
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:5666/api`
-      : "http://localhost:5666/api");
+      ? window.location.protocol === "https:"
+        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
+        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`
+      : "http://localhost:5666/api_trai/v1");
 
   const lastSubmitTime = useRef(0);
 

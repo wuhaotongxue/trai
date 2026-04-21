@@ -7,9 +7,9 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, Database, Plus, RefreshCw, FolderOpen, AlertCircle, FileText } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request } from "@/lib/api_client";
@@ -28,7 +28,7 @@ export default function KnowledgeBasePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
 
-  const fetchIndices = async () => {
+  const fetchIndices = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -41,16 +41,17 @@ export default function KnowledgeBasePage() {
       } else {
         setError(res.msg || "获取知识库列表失败");
       }
-    } catch (err: any) {
-      setError(err.message || "请求失败");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "请求失败";
+      setError(message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchIndices();
-  }, [searchQuery]);
+  }, [fetchIndices]);
 
   return (
     <div className="p-6 space-y-6">
