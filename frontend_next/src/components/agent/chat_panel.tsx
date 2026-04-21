@@ -13,6 +13,10 @@ import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { Bot, Image as ImageIcon, Send, Square, Trash2, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 export function ChatPanel() {
   const {
@@ -133,7 +137,14 @@ export function ChatPanel() {
                 />
               ))}
 
-              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+              <div className="prose dark:prose-invert prose-sm max-w-none break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}
