@@ -8,7 +8,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, Bot, CheckCircle, ChevronRight, Cpu, Database, Globe, Image, MessageSquare, Shield, Sparkles, Star, Workflow, Zap } from "lucide-react";
+import { ArrowRight, BarChart3, Bot, CheckCircle, ChevronRight, Cpu, Database, Globe, Image, MessageSquare, Shield, Sparkles, Star, Workflow, Zap, Puzzle, Code2, LineChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/website/navbar";
@@ -201,6 +201,70 @@ export default function HomePage() {
         {/* 微妙网格 */}
         <div className="absolute inset-0 opacity-[0.04] hero_grid" />
 
+        {/* 左右两侧悬浮装饰元素 (填补空白) */}
+        <div className="absolute left-10 top-[20%] hidden xl:block animate-[float_6s_ease-in-out_infinite]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-4 rounded-2xl shadow-xl shadow-blue-500/5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 w-64 text-left">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Code2 className="h-4 w-4 text-blue-500" />
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">工具调用</span>
+              </div>
+              <span className="text-[10px] text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full font-medium">就绪</span>
+            </div>
+            <div className="space-y-2">
+              <div className="h-2 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-2 w-1/2 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-2 w-5/6 bg-slate-200 dark:bg-slate-700 rounded-full" />
+            </div>
+            <div className="mt-2 font-mono text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-[#0d1220] p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+              <span className="text-blue-500">import</span> {"{ Agent }"} <span className="text-blue-500">from</span> "trai";<br/>
+              <span className="text-indigo-500">const</span> agent = <span className="text-indigo-500">new</span> Agent();
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-10 top-[30%] hidden xl:block animate-[float_7s_ease-in-out_infinite_1s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-4 rounded-2xl shadow-xl shadow-indigo-500/5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 w-56 text-left">
+            <div className="flex items-center gap-2 mb-1">
+              <LineChart className="h-4 w-4 text-indigo-500" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">系统状态</span>
+            </div>
+            <div className="flex items-end gap-2">
+              <span className="text-3xl font-bold text-slate-900 dark:text-white leading-none">99.9</span>
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 pb-1">% SLA</span>
+            </div>
+            <div className="flex gap-1 h-8 mt-2 items-end">
+              {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
+                <div key={i} className="w-full bg-gradient-to-t from-indigo-500 to-blue-400 rounded-sm opacity-80" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute left-20 bottom-[15%] hidden xl:block animate-[float_5s_ease-in-out_infinite_0.5s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-3 rounded-2xl shadow-xl shadow-emerald-500/5 border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-bold text-slate-900 dark:text-white">智能纠错</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">自动纠错率 95%+</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-24 bottom-[20%] hidden xl:block animate-[float_6s_ease-in-out_infinite_1.5s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-3 rounded-2xl shadow-xl shadow-cyan-500/5 border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+              <Database className="h-5 w-5 text-cyan-500" />
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-bold text-slate-900 dark:text-white">高速缓存</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">Redis 毫秒级响应</div>
+            </div>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 pb-20 relative z-10">
           {/* Badge */}
           <div
@@ -248,20 +312,33 @@ export default function HomePage() {
 
           {/* Social Proof */}
           <div
-            className="flex items-center justify-center gap-6 text-sm text-slate-400 dark:text-slate-500 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.65s_both]"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-slate-400 dark:text-slate-500 animate-[slideUpFade_0.6s_cubic-bezier(0,0,0.2,1)_0.65s_both]"
           >
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 bg-white/50 dark:bg-[#0d1220]/50 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-200/50 dark:border-slate-800/50">
               <div className="flex">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <span>4.9 / 5</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">4.9 / 5</span>
+              <span className="text-xs ml-1">来自 500+ 评价</span>
             </div>
-            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <span>10,000+ 企业用户</span>
-            <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <span>99.9% SLA</span>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className={`w-6 h-6 rounded-full border-2 border-white dark:border-[#080c1a] bg-gradient-to-br from-blue-${i}00 to-indigo-${i+1}00 shadow-sm`} />
+                  ))}
+                </div>
+                <span>10,000+ 企业用户</span>
+              </div>
+              <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <span className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                99.9% SLA
+              </span>
+            </div>
           </div>
 
           {/* 产品 Mockup */}
@@ -330,13 +407,107 @@ export default function HomePage() {
       </section>
 
       {/* ===== 信任背书 Marquee ===== */}
-      <section className="py-10 border-y border-slate-200 dark:border-slate-800/50 bg-white dark:bg-[#080c1a] overflow-hidden">
-        <p className="text-center text-xs text-slate-400 dark:text-slate-600 mb-6 tracking-widest uppercase">已服务企业</p>
-        <div className="relative">
-          <div className="flex animate-marquee gap-12 md:gap-20 whitespace-nowrap">
-            {[...trustedBy, ...trustedBy].map((name, i) => (
-              <span key={i} className="text-base md:text-lg font-semibold text-slate-300 dark:text-slate-600 tracking-wide">{name}</span>
-            ))}
+      <section className="py-12 border-y border-slate-200 dark:border-slate-800/50 bg-white dark:bg-[#080c1a] overflow-hidden relative">
+        <div className="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-800/[0.04] bg-[size:20px_20px]" />
+        <div className="container mx-auto px-4 relative z-10">
+          <p className="text-center text-xs font-medium text-slate-400 dark:text-slate-500 mb-8 tracking-widest uppercase">
+            已有超过 <span className="text-blue-600 dark:text-blue-400">10,000+</span> 创新企业选择 TRAI
+          </p>
+          <div className="relative flex overflow-hidden mask-edges">
+            <div className="flex animate-marquee gap-12 md:gap-24 whitespace-nowrap items-center">
+              {[...trustedBy, ...trustedBy].map((name, i) => (
+                <div key={i} className="flex items-center gap-2 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <span className="text-lg font-bold text-slate-400 dark:text-slate-500">{name.charAt(0)}</span>
+                  </div>
+                  <span className="text-lg md:text-xl font-bold text-slate-400 dark:text-slate-600 tracking-tight">{name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 为什么选择我们 ===== */}
+      <section className="py-24 bg-slate-50/50 dark:bg-[#0a0f1c]">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+            <Reveal>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 blur-3xl rounded-full" />
+                <div className="relative grid grid-cols-2 gap-4">
+                  <div className="space-y-4 mt-8">
+                    <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1220] shadow-xl shadow-slate-200/20 dark:shadow-none border border-slate-100 dark:border-slate-800">
+                      <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-4">
+                        <Zap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white mb-2">极速响应</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">毫秒级流式输出，支持大规模高并发请求处理。</p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1220] shadow-xl shadow-slate-200/20 dark:shadow-none border border-slate-100 dark:border-slate-800">
+                      <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-4">
+                        <Shield className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white mb-2">企业级安全</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">数据加密传输，私有化部署选项，全面保护企业隐私。</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="p-6 rounded-2xl bg-white dark:bg-[#0d1220] shadow-xl shadow-slate-200/20 dark:shadow-none border border-slate-100 dark:border-slate-800">
+                      <div className="w-12 h-12 rounded-full bg-cyan-50 dark:bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <Puzzle className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white mb-2">灵活扩展</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">丰富的 API 接口和插件生态，轻松集成现有业务系统。</p>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-xl shadow-blue-500/20 border border-blue-500">
+                      <h3 className="font-bold text-white mb-2 text-xl">准备好体验了吗？</h3>
+                      <p className="text-blue-100 text-sm mb-6">加入上万家企业的行列，开启智能办公新时代。</p>
+                      <Link href="/register">
+                        <Button variant="secondary" className="w-full bg-white text-blue-600 hover:bg-blue-50">
+                          免费开始使用
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+            <Reveal delay={200}>
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-xs font-medium mb-4">
+                  为什么选择 TRAI
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
+                  不仅是工具，更是您的<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                    智能业务增长引擎
+                  </span>
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed mb-8">
+                  在人工智能重塑商业的时代，TRAI 为企业提供了一条从工具尝试到业务落地的最短路径。我们不仅提供强大的模型能力，更关注如何将 AI 真正融入您的工作流。
+                </p>
+                <ul className="space-y-5">
+                  {[
+                    { title: "零门槛接入", desc: "无需复杂的开发配置，可视化界面让业务人员也能轻松构建专属 Agent。" },
+                    { title: "成本可控", desc: "精细化的 Token 计费与团队配额管理，确保每一分投入都产生实际价值。" },
+                    { title: "持续进化", desc: "自动接入最新大模型能力，让您的企业始终保持技术领先优势。" }
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-4">
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs">
+                          {i + 1}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900 dark:text-white">{item.title}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>

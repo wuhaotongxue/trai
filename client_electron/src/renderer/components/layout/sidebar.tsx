@@ -118,7 +118,7 @@ const Sidebar: React.FC = () => {
   return (
     <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'var(--ui_panel_alt)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--ui_border)' }}>
       <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid var(--ui_border)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: collapsed ? '0' : '16px' }}>
           {!collapsed && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Compass size={16} color="var(--ui_text_muted)" />
@@ -128,22 +128,18 @@ const Sidebar: React.FC = () => {
           <Menu size={20} color="var(--ui_text)" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />
         </div>
         
-        {/* 用户名和头像已注释掉
         {!collapsed && (
-          <>
-            <div style={{ color: '#202020', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}>
-              {user?.username === 'admin' ? (
-                <img src="./kity.png" alt="avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex' }}>
-                  <User size={16} color="#ffffff" />
-                </div>
-              )}
-              {user?.username || '未登录'}
-            </div>
-          </>
+          <div style={{ color: '#202020', margin: 0, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}>
+            {user?.username === 'admin' ? (
+              <img src="./kity.png" alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex', width: '32px', height: '32px', alignItems: 'center', justifyContent: 'center' }}>
+                <User size={18} color="#ffffff" />
+              </div>
+            )}
+            {user?.username || '未登录'}
+          </div>
         )}
-        */}
       </div>
       
       <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>

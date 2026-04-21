@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +16,7 @@ from sqlalchemy.orm import Session
 from core.exceptions import AuthenticationError
 from infrastructure.database import get_db_session
 from infrastructure.repositories.user_repository import UserRepository
+from infrastructure.security.blacklist import TokenBlacklistService, get_blacklist_service
 from infrastructure.security.jwt import JWTService, get_jwt_service
 
 router = APIRouter()
@@ -39,6 +41,7 @@ class RefreshResponse(BaseModel):
 async def refresh_token(
     request: RefreshRequest,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_blacklist_service)],
     session: Annotated[Session, Depends(get_db_session)],
 ) -> RefreshResponse:
     """刷新访问令牌
@@ -46,6 +49,7 @@ async def refresh_token(
     Args:
         request: 刷新令牌请求
         jwt_service: JWT 服务实例
+        blacklist_service: 黑名单服务实例
         session: 数据库会话
 
     Returns:
@@ -55,6 +59,10 @@ async def refresh_token(
         HTTPException: 刷新令牌无效或已过期(401)
     """
     try:
+        # 检查是否在黑名单
+        if blacklist_service.is_blacklisted(request.refresh_token):
+            raise AuthenticationError(message="刷新令牌已失效(已在黑名单中)")
+
         # 验证刷新令牌
         payload = jwt_service.verify_token(request.refresh_token, expected_type="refresh")
 
@@ -90,6 +98,16 @@ async def refresh_token(
             tenant_id=user.t_tenant_id,
         )
         new_refresh_token = jwt_service.create_refresh_token(user_id=user.t_user_id)
+
+        # 将旧的 refresh_token 加入黑名单
+        try:
+            exp = payload.get("exp", 0)
+            now = int(datetime.now(UTC).timestamp())
+            expire_seconds = exp - now
+            if expire_seconds > 0:
+                blacklist_service.add(request.refresh_token, expire_seconds)
+        except Exception:
+            pass
 
         return RefreshResponse(
             access_token=new_access_token,
