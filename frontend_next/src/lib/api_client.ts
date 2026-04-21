@@ -33,13 +33,65 @@ function getApiBase(): string {
   return DEFAULT_API_BASE;
 }
 
-/**
- * API 选项接口
+/** API 选项接口
  * @property headers - 自定义请求头
  */
 interface ApiOptions {
   /** 自定义请求头 */
   headers?: Record<string, string>;
+  /** 是否为重试请求 */
+  _retry?: boolean;
+}
+
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * 执行 Token 刷新
+ */
+async function refreshToken(): Promise<string | null> {
+  if (isRefreshing) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const rt = Cookies.get("refresh_token");
+      if (!rt) return null;
+
+      const res = await fetch(`${getApiBase()}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: rt }),
+      });
+
+      if (!res.ok) {
+        Cookies.remove("token");
+        Cookies.remove("refresh_token");
+        window.location.href = "/login";
+        return null;
+      }
+
+      const data = await res.json();
+      if (data && data.access_token) {
+        Cookies.set("token", data.access_token);
+        if (data.refresh_token) {
+          Cookies.set("refresh_token", data.refresh_token);
+        }
+        return data.access_token;
+      }
+      return null;
+    } catch {
+      Cookies.remove("token");
+      Cookies.remove("refresh_token");
+      window.location.href = "/login";
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 /**
@@ -54,7 +106,7 @@ async function request<T>(
 ): Promise<T> {
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
 
-  const res = await fetch(`${getApiBase()}${path}`, {
+  let res = await fetch(`${getApiBase()}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -62,6 +114,28 @@ async function request<T>(
       ...options.headers,
     },
   });
+
+  // 处理 401 无感知刷新
+  if (
+    res.status === 401 &&
+    !options._retry &&
+    !path.includes("/auth/refresh") &&
+    !path.includes("/auth/login") &&
+    typeof window !== "undefined"
+  ) {
+    const newToken = await refreshToken();
+    if (newToken) {
+      options._retry = true;
+      res = await fetch(`${getApiBase()}${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${newToken}`,
+          ...options.headers,
+        },
+      });
+    }
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));

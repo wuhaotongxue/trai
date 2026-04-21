@@ -27,6 +27,7 @@ const Login: React.FC = () => {
   const login = use_auth_store((state) => state.login)
   const { logs, add_log, clear_logs } = use_log_store()
   const log_card_ref = useRef<HTMLDivElement>(null)
+  const last_submit_time = useRef(0)
 
   useEffect(() => {
     const load_config = async () => {
@@ -100,6 +101,13 @@ const Login: React.FC = () => {
    */
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const now = Date.now()
+    if (now - last_submit_time.current < 1000) {
+      add_log('操作过于频繁, 已拦截 (防抖/节流)')
+      return
+    }
+    last_submit_time.current = now
 
     const submit_password = password
 

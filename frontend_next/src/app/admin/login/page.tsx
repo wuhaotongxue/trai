@@ -8,7 +8,7 @@
 import Cookies from "js-cookie";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, Shield, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,12 @@ export default function AdminLoginPage() {
       ? `${window.location.protocol}//${window.location.hostname}:5666/api`
       : "http://localhost:5666/api");
 
+  const lastSubmitTime = useRef(0);
+
   const handleLogin = async () => {
+    const now = Date.now();
+    if (now - lastSubmitTime.current < 1000) return;
+    lastSubmitTime.current = now;
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);
