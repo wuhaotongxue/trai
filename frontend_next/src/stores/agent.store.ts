@@ -144,15 +144,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-  sendMessage: async (content, images) => {
+  sendMessage: async (content: string, images?: string[]) => {
     let { sessionId } = get();
 
-    if (!sessionId) {
-      await get().startSession();
-      sessionId = get().sessionId;
-      if (!sessionId) return; // 创建会话失败
-    }
-
+    // Optimistic UI update: Immediately add user message and placeholder assistant message
     const userMsg: Message = {
       id: generateUUID(),
       role: "user",
@@ -161,8 +156,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       timestamp: Date.now(),
     };
 
+    const assistantMsgId = generateUUID();
+
     set((state) => ({
-      messages: [...state.messages, userMsg],
+      messages: [
+        ...state.messages, 
+        userMsg,
+        { id: assistantMsgId, role: "assistant", content: "", timestamp: Date.now() + 1 }
+      ],
       isStreaming: true,
       isLoading: false,
       error: null,
@@ -171,16 +172,18 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       promptTokens: 0,
     }));
 
-    const assistantMsgId = generateUUID();
+    // Start session if none exists (now happening in background while UI is updated)
+    if (!sessionId) {
+      await get().startSession();
+      sessionId = get().sessionId;
+      if (!sessionId) {
+        set({ isStreaming: false, error: "会话创建失败" });
+        return;
+      }
+    }
+
     let assistantContent = "";
     let lastUsage: StreamUsageEvent["data"] | null = null;
-
-    set((state) => ({
-      messages: [
-        ...state.messages,
-        { id: assistantMsgId, role: "assistant", content: "", timestamp: Date.now() },
-      ],
-    }));
 
     // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
     const token = Cookies.get("token");
