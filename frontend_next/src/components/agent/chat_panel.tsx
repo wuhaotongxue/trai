@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, ArrowDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -35,6 +35,7 @@ export function ChatPanel() {
   const [input, setInput] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -46,6 +47,10 @@ export function ChatPanel() {
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -86,8 +91,9 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       <ScrollArea className="flex-1 px-4 py-6">
+        <div ref={topRef} />
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10">
@@ -155,7 +161,7 @@ export function ChatPanel() {
                       const match = /language-(\w+)/.exec(className || "");
                       const isInline = !match;
                       return !isInline ? (
-                        <div className="relative group/code rounded-md overflow-hidden my-4">
+                        <div className="relative group/code rounded-md overflow-hidden my-4 w-full">
                           <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800/80 text-slate-400 text-xs border-b border-slate-700/50">
                             <span className="font-mono">{match?.[1] || "code"}</span>
                             <button
@@ -181,7 +187,7 @@ export function ChatPanel() {
                             style={vscDarkPlus as any}
                             language={match?.[1] || "text"}
                             PreTag="div"
-                            className="!m-0 !rounded-none text-[13px] !bg-slate-900"
+                            className="!m-0 !rounded-none text-[13px] !bg-slate-900 max-w-full overflow-x-auto"
                             showLineNumbers={false}
                           >
                             {String(children).replace(/\n$/, "")}
@@ -263,6 +269,30 @@ export function ChatPanel() {
 
         <div ref={bottomRef} />
       </ScrollArea>
+
+      {/* 滚动控制按钮 */}
+      {messages.length > 2 && (
+        <div className="absolute right-6 bottom-[100px] flex flex-col gap-2 z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full shadow-md opacity-50 hover:opacity-100 transition-opacity"
+            onClick={scrollToTop}
+            title="回到顶部"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full shadow-md opacity-50 hover:opacity-100 transition-opacity"
+            onClick={scrollToBottom}
+            title="直达底部"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <div className="px-4 py-2 border-t border-border">
         {images.length > 0 && (
