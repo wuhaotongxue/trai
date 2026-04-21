@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld('electron_api', {
   config_get: (key: string, default_value?: any) => ipcRenderer.invoke('config:get', key, default_value),
   config_set: (key: string, value: any) => ipcRenderer.invoke('config:set', key, value),
   auth_login: (params: any) => ipcRenderer.invoke('auth:login', params),
+  auth_wecom_login: () => ipcRenderer.invoke('auth:wecom_login'),
+  auth_me: () => ipcRenderer.invoke('auth:me'),
   auth_register: (params: any) => ipcRenderer.invoke('auth:register', params),
   auth_change_password: (params: { old_password: string, new_password: string }) => ipcRenderer.invoke('auth:change_password', params),
   auth_logout: () => ipcRenderer.invoke('auth:logout'),

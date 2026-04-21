@@ -13,7 +13,7 @@ from typing import Any
 
 import redis
 
-from core.exceptions import AuthorizationError
+from core.exceptions import AuthorizationError, CacheError
 from core.logger import logger
 
 
@@ -74,7 +74,11 @@ class PolicyEngine:
             self._redis_client.ping()
             logger.info("PolicyEngine Redis 连接成功")
         except Exception as e:
-            logger.warning(f"PolicyEngine Redis 连接失败,降级为内存模式: {e}")
+            CacheError(
+                message="PolicyEngine Redis 连接失败, 降级为内存模式",
+                details={"redis_host": redis_host, "redis_port": redis_port, "redis_db": redis_db},
+                cause=e,
+            ).log(logger, action="policy_engine_init_redis")
             self._redis_client = None
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:

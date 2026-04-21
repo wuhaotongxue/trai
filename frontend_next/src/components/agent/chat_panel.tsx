@@ -8,11 +8,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, ArrowDown } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function ChatPanel() {
   const {
@@ -29,10 +35,22 @@ export function ChatPanel() {
   const [input, setInput] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -73,8 +91,9 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       <ScrollArea className="flex-1 px-4 py-6">
+        <div ref={topRef} />
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10">
@@ -101,10 +120,10 @@ export function ChatPanel() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex mb-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex mb-4 group ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[70%] rounded-2xl px-4 py-3 relative ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : msg.role === "tool"
@@ -133,7 +152,75 @@ export function ChatPanel() {
                 />
               ))}
 
-              <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+              <div className="prose dark:prose-invert prose-sm max-w-none break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    code({ className, children }) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const isInline = !match;
+                      return !isInline ? (
+                        <div className="relative group/code rounded-md overflow-hidden my-4 w-full">
+                          <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800/80 text-slate-400 text-xs border-b border-slate-700/50">
+                            <span className="font-mono">{match?.[1] || "code"}</span>
+                            <button
+                              type="button"
+                              title="复制代码"
+                              aria-label="复制代码"
+                              onClick={() => {
+                                navigator.clipboard.writeText(String(children).replace(/\n$/, ""));
+                                setCopiedId(`code-${msg.id}-${String(children).substring(0, 10)}`);
+                                setTimeout(() => setCopiedId(null), 2000);
+                              }}
+                              className="flex items-center gap-1.5 hover:text-slate-200 transition-colors"
+                            >
+                              {copiedId === `code-${msg.id}-${String(children).substring(0, 10)}` ? (
+                                <><Check className="h-3.5 w-3.5 text-emerald-400" /> 已复制</>
+                              ) : (
+                                <><Copy className="h-3.5 w-3.5" /> 复制代码</>
+                              )}
+                            </button>
+                          </div>
+                          <SyntaxHighlighter
+                            style={vscDarkPlus as unknown as Record<string, CSSProperties>}
+                            language={match?.[1] || "text"}
+                            PreTag="div"
+                            className="!m-0 !rounded-none text-[13px] !bg-slate-900 max-w-full overflow-x-auto"
+                            showLineNumbers={false}
+                          >
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        </div>
+                      ) : (
+                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5">
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
+
+              {msg.role === "assistant" && !isStreaming && msg.content && (
+                <button
+                  type="button"
+                  title="复制内容"
+                  aria-label="复制内容"
+                  onClick={() => handleCopy(msg.id, msg.content)}
+                  className={`absolute -right-10 top-2 p-1.5 rounded-lg border bg-background/50 backdrop-blur-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 ${
+                    copiedId === msg.id ? "opacity-100 scale-100" : "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100"
+                  }`}
+                >
+                  {copiedId === msg.id ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -163,13 +250,13 @@ export function ChatPanel() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-muted-foreground">Completion:</span>
+                  <span className="text-muted-foreground">输出:</span>
                   <span className="font-medium text-emerald-600 dark:text-emerald-400">{completionTokens}</span>
                 </span>
                 <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
                 <span className="flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  <span className="text-muted-foreground">Prompt:</span>
+                  <span className="text-muted-foreground">提示:</span>
                   <span className="font-medium text-blue-600 dark:text-blue-400">{promptTokens}</span>
                 </span>
                 <span className="w-px h-3 bg-slate-300 dark:bg-slate-600" />
@@ -183,6 +270,30 @@ export function ChatPanel() {
 
         <div ref={bottomRef} />
       </ScrollArea>
+
+      {/* 滚动控制按钮 */}
+      {messages.length > 2 && (
+        <div className="absolute right-6 bottom-[100px] flex flex-col gap-2 z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full shadow-md opacity-50 hover:opacity-100 transition-opacity"
+            onClick={scrollToTop}
+            title="回到顶部"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full shadow-md opacity-50 hover:opacity-100 transition-opacity"
+            onClick={scrollToBottom}
+            title="直达底部"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <div className="px-4 py-2 border-t border-border">
         {images.length > 0 && (
@@ -198,6 +309,9 @@ export function ChatPanel() {
                   className="h-16 w-16 object-cover rounded-lg border"
                 />
                 <button
+                  type="button"
+                  title="删除图片"
+                  aria-label="删除图片"
                   onClick={() => removeImage(i)}
                   className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
@@ -215,6 +329,8 @@ export function ChatPanel() {
             multiple
             className="hidden"
             id="image-upload"
+            aria-label="上传图片"
+            title="上传图片"
             onChange={handleImageUpload}
           />
           <label htmlFor="image-upload" className="cursor-pointer">
@@ -233,8 +349,8 @@ export function ChatPanel() {
                 handleSend();
               }
             }}
-            placeholder="输入消息, Enter 发送, Shift+Enter 换行..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="输入消息..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
             rows={1}
           />
 

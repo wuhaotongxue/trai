@@ -37,6 +37,24 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_21_1941
+- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+
+### 🛠️ 后端_2026_04_21_1729
+- **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
+- **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口
+
+### 🛠️ 后端_2026_04_21_1649
+- **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
+- **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
+- **refactor(error)**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
+
+### 🛠️ 系统更新_2026_04_21_1047
+- [安全] 引入 Redis Token 黑名单机制，拦截登出和刷新后的废弃 Token
+- [功能] 客户端 (client_electron) 增加 Axios 拦截器，实现并发安全的无感知 Token 刷新
+- [功能] 前端 (frontend_next) 增加 Fetch 拦截器，实现并发安全的无感知 Token 刷新
+
 ### 🛠️ 系统更新_2026_04_21_1013
 - [安全] 修复 AES_KEY 与 AES_IV 缺失导致服务启动失败的问题
 - [安全] 修复 JWT 弱密钥检测策略及数据库会话连接泄露风险

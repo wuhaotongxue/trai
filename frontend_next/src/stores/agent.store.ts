@@ -106,6 +106,17 @@ interface AgentState {
   deleteSession: () => Promise<void>;
 }
 
+// 兼容非安全环境的 UUID 生成
+const generateUUID = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 /**
  * Agent 状态管理 Hook
  * @returns Agent 状态管理对象
@@ -126,31 +137,33 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   startSession: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.session.create({ model: "gpt-4o" });
-      set({ sessionId: res.session_id, messages: [], isLoading: false });
+      const res = await api.session.create({ model: "deepseek-chat" });
+      set({ sessionId: res.session_id, isLoading: false });
     } catch {
       set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });
     }
   },
 
-  sendMessage: async (content, images) => {
-    const { sessionId } = get();
+  sendMessage: async (content: string, images?: string[]) => {
+    let { sessionId } = get();
 
-    if (!sessionId) {
-      await get().startSession();
-      return;
-    }
-
+    // Optimistic UI update: Immediately add user message and placeholder assistant message
     const userMsg: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: "user",
       content,
       images,
       timestamp: Date.now(),
     };
 
+    const assistantMsgId = generateUUID();
+
     set((state) => ({
-      messages: [...state.messages, userMsg],
+      messages: [
+        ...state.messages, 
+        userMsg,
+        { id: assistantMsgId, role: "assistant", content: "", timestamp: Date.now() + 1 }
+      ],
       isStreaming: true,
       isLoading: false,
       error: null,
@@ -159,22 +172,26 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       promptTokens: 0,
     }));
 
-    const assistantMsgId = crypto.randomUUID();
+    // Start session if none exists (now happening in background while UI is updated)
+    if (!sessionId) {
+      await get().startSession();
+      sessionId = get().sessionId;
+      if (!sessionId) {
+        set({ isStreaming: false, error: "会话创建失败" });
+        return;
+      }
+    }
+
     let assistantContent = "";
     let lastUsage: StreamUsageEvent["data"] | null = null;
-
-    set((state) => ({
-      messages: [
-        ...state.messages,
-        { id: assistantMsgId, role: "assistant", content: "", timestamp: Date.now() },
-      ],
-    }));
 
     // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
     const token = Cookies.get("token");
     const apiBase =
       process.env.NEXT_PUBLIC_API_BASE ||
-      `${window.location.protocol}//${window.location.hostname}:5666/api`;
+      (window.location.protocol === "https:"
+        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
+        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`);
     let aborted = false;
 
     const abortFn = () => {
@@ -196,6 +213,26 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           body: JSON.stringify({ content, role: "user", images }),
         }
       );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        let errorMessage = res.statusText;
+        try {
+          const errJson = JSON.parse(errorText);
+          errorMessage = errJson.detail?.message || errJson.message || errorMessage;
+        } catch {
+          // ignore
+        }
+
+        if (res.status === 401 && errorMessage.includes("免费额度")) {
+          if (typeof window !== "undefined") {
+            window.location.href = "/login?reason=quota_exceeded";
+            return;
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
 
       const reader = res.body?.getReader();
       if (!reader) throw new Error("无法读取响应流");
@@ -228,7 +265,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
               }));
             } else if (parsed.event === "tool_call_end") {
               const toolMsg: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: "tool",
                 content: parsed.data.arguments,
                 toolCallId: parsed.data.tool_call_id,
@@ -258,8 +295,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           totalTokens: lastUsage.total_tokens,
         });
       }
-    } catch {
-      set({ error: "消息发送失败, 请检查网络后重试" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "消息发送失败, 请检查网络后重试";
+      set({ error: message });
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }
