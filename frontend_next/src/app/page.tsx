@@ -8,7 +8,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, Bot, CheckCircle, ChevronRight, Cpu, Database, Globe, Image, MessageSquare, Shield, Sparkles, Star, Workflow, Zap, Puzzle } from "lucide-react";
+import { ArrowRight, BarChart3, Bot, CheckCircle, ChevronRight, Cpu, Database, Globe, Image, MessageSquare, Shield, Sparkles, Star, Workflow, Zap, Puzzle, Code2, LineChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/website/navbar";
@@ -200,6 +200,58 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-[600px] h-[600px] hero-glow-warm opacity-60" />
         {/* 微妙网格 */}
         <div className="absolute inset-0 opacity-[0.04] hero_grid" />
+
+        {/* 左右两侧悬浮装饰元素 (填补空白) */}
+        <div className="absolute left-10 top-[20%] hidden xl:block animate-[float_6s_ease-in-out_infinite]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-4 rounded-2xl shadow-xl shadow-blue-500/5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 w-64 text-left">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Code2 className="h-4 w-4 text-blue-500" />
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tool Calls</span>
+              </div>
+              <span className="text-[10px] text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full font-medium">Ready</span>
+            </div>
+            <div className="space-y-2">
+              <div className="h-2 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-2 w-1/2 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              <div className="h-2 w-5/6 bg-slate-200 dark:bg-slate-700 rounded-full" />
+            </div>
+            <div className="mt-2 font-mono text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-[#0d1220] p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+              <span className="text-blue-500">import</span> {"{ Agent }"} <span className="text-blue-500">from</span> "trai";<br/>
+              <span className="text-indigo-500">const</span> agent = <span className="text-indigo-500">new</span> Agent();
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute right-10 top-[30%] hidden xl:block animate-[float_7s_ease-in-out_infinite_1s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-4 rounded-2xl shadow-xl shadow-indigo-500/5 border border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3 w-56 text-left">
+            <div className="flex items-center gap-2 mb-1">
+              <LineChart className="h-4 w-4 text-indigo-500" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">System Metrics</span>
+            </div>
+            <div className="flex items-end gap-2">
+              <span className="text-3xl font-bold text-slate-900 dark:text-white leading-none">99.9</span>
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400 pb-1">% SLA</span>
+            </div>
+            <div className="flex gap-1 h-8 mt-2 items-end">
+              {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
+                <div key={i} className="w-full bg-gradient-to-t from-indigo-500 to-blue-400 rounded-sm opacity-80" style={{ height: `${h}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute left-20 bottom-[15%] hidden xl:block animate-[float_5s_ease-in-out_infinite_0.5s]">
+          <div className="bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-md p-3 rounded-2xl shadow-xl shadow-emerald-500/5 border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-bold text-slate-900 dark:text-white">Smart Fix</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">自动纠错率 95%+</div>
+            </div>
+          </div>
+        </div>
 
         <div className="container mx-auto px-4 pb-20 relative z-10">
           {/* Badge */}
