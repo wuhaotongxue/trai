@@ -31,7 +31,14 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
             return response
 
         except TraiException as e:
-            logger.warning(f"业务异常 | {request.method} {request.url.path} | 错误码: {e.code} | 消息: {e.message}")
+            request_id = getattr(request.state, "request_id", None)
+            e.log(
+                logger,
+                message="业务异常",
+                request_id=request_id,
+                method=request.method,
+                path=request.url.path,
+            )
             return JSONResponse(
                 status_code=e.status_code,
                 content={

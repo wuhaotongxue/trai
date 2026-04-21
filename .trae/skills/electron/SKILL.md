@@ -113,10 +113,16 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 ### 9.2 可访问性 (MANDATORY)
 
 - 表单控件必须具备可访问名称, `input/select/textarea` 至少提供一个: `aria-label`, `aria-labelledby`, 或显式 `<label htmlFor=...>`
+- **当 `<input>` 即使是被 `<label>` 包裹且由于 UI 需求被隐藏 (`hidden` 或 `display: none`) 时，仍必须提供 `aria-label` 与 `title`**，避免 Microsoft Edge Tools / axe 报出 "Form elements must have labels" 错误。
 - 当控件没有可见文本标签时, 必须补 `aria-label` 与 `title`, 避免 Microsoft Edge Tools / axe 报错
 - `button` 必须显式声明 `type`, 默认使用 `type="button"`, 避免 Microsoft Edge Tools 报错
 - 图标按钮必须补 `aria-label` 与 `title`, 不允许只有图标没有文本
 - 尽量避免 JSX 内联 `style`, 优先使用 CSS Modules 或可复用样式类, 减少 Microsoft Edge Tools `no-inline-styles` 告警
+
+### 9.3 交互体验与 UI 渲染 (MANDATORY)
+
+- **乐观 UI 更新 (Optimistic UI)**：涉及长耗时网络请求的交互（如 AI 聊天对话、表单提交等），必须在前端状态中优先且立即地渲染用户输入/占位气泡，再异步发起实际请求，严禁因阻塞等待响应而导致 UI 卡顿。
+- **内容渲染**：所有复杂的 AI 生成内容（包含加粗、列表、表格、代码块）应使用 Markdown 渲染引擎进行渲染，遇到数学公式时需集成 LaTeX 渲染支持。
 
 ### 10. README 与 Changelog (MANDATORY)
 

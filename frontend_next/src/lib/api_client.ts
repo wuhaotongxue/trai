@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 /** 默认 API 基础 URL */
-const DEFAULT_API_BASE = "http://192.168.98.72:5666/api";
+const DEFAULT_API_BASE = "http://192.168.98.72:5666/api_trai/v1";
 
 /**
  * 获取 API 基础 URL
@@ -22,24 +22,76 @@ function getApiBase(): string {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     
-    // 如果是通过 HTTPS 访问，可能是 Nginx 代理，直接用 /api_trai 作为基础路径
+    // 如果是通过 HTTPS 访问，可能是 Nginx 代理，直接用 /api_trai/v1 作为基础路径
     if (protocol === "https:") {
-      return `${protocol}//${hostname}/api_trai/api`;
+      return `${protocol}//${hostname}/api_trai/v1`;
     }
     
-    return `${protocol}//${hostname}:5666/api`;
+    return `${protocol}//${hostname}:5666/api_trai/v1`;
   }
 
   return DEFAULT_API_BASE;
 }
 
-/**
- * API 选项接口
+/** API 选项接口
  * @property headers - 自定义请求头
  */
 interface ApiOptions {
   /** 自定义请求头 */
   headers?: Record<string, string>;
+  /** 是否为重试请求 */
+  _retry?: boolean;
+}
+
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * 执行 Token 刷新
+ */
+async function refreshToken(): Promise<string | null> {
+  if (isRefreshing) return refreshPromise;
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const rt = Cookies.get("refresh_token");
+      if (!rt) return null;
+
+      const res = await fetch(`${getApiBase()}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: rt }),
+      });
+
+      if (!res.ok) {
+        Cookies.remove("token");
+        Cookies.remove("refresh_token");
+        window.location.href = "/login";
+        return null;
+      }
+
+      const data = await res.json();
+      if (data && data.access_token) {
+        Cookies.set("token", data.access_token);
+        if (data.refresh_token) {
+          Cookies.set("refresh_token", data.refresh_token);
+        }
+        return data.access_token;
+      }
+      return null;
+    } catch {
+      Cookies.remove("token");
+      Cookies.remove("refresh_token");
+      window.location.href = "/login";
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 /**
@@ -48,13 +100,13 @@ interface ApiOptions {
  * @param options - 请求选项
  * @returns 响应数据
  */
-async function request<T>(
+export async function request<T>(
   path: string,
   options: RequestInit & ApiOptions = {}
 ): Promise<T> {
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
 
-  const res = await fetch(`${getApiBase()}${path}`, {
+  let res = await fetch(`${getApiBase()}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -63,9 +115,40 @@ async function request<T>(
     },
   });
 
+  // 处理 401 无感知刷新
+  if (
+    res.status === 401 &&
+    !options._retry &&
+    !path.includes("/auth/refresh") &&
+    !path.includes("/auth/login") &&
+    typeof window !== "undefined"
+  ) {
+    const newToken = await refreshToken();
+    if (newToken) {
+      options._retry = true;
+      res = await fetch(`${getApiBase()}${path}`, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${newToken}`,
+          ...options.headers,
+        },
+      });
+    }
+  }
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.detail?.message || error.message || "请求失败");
+    const errorMessage = error.detail?.message || error.message || "请求失败";
+
+    // 游客免费额度用完特殊处理
+    if (res.status === 401 && errorMessage.includes("免费额度")) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?reason=quota_exceeded";
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   return res.json();

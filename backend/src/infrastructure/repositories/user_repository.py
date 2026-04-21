@@ -200,7 +200,7 @@ class UserRepository(IUserRepository):
         return self._session.scalar(stmt)
 
     def update(self, user_id: str, **kwargs: Any) -> User | None:
-        """更��用户信息
+        """更新用户信息
 
         Args:
             user_id: 用户唯一标识
@@ -254,6 +254,73 @@ class UserRepository(IUserRepository):
             return self._to_entity(model)
 
         return None
+
+    def create_or_update_by_wecom(
+        self,
+        *,
+        username: str,
+        display_name: str,
+        email: str,
+        user_id: str,
+        role: UserRole,
+        status: UserStatus,
+        wecom_user_id: str,
+        mobile: str | None = None,
+        position: str | None = None,
+        avatar_url: str | None = None,
+        wecom_data: dict | None = None,
+    ) -> User:
+        """根据企业微信信息创建或更新用户
+
+        Args:
+            username: 用户名
+            display_name: 显示名称
+            email: 邮箱
+            user_id: 用户 ID
+            role: 用户角色
+            status: 用户状态
+            wecom_user_id: 企业微信用户 ID
+            mobile: 手机号
+            position: 职位
+            avatar_url: 头像
+            wecom_data: 企业微信原始数据
+
+        Returns:
+            User: 用户实体
+
+        Raises:
+            RuntimeError: 数据库写入失败
+        """
+        stmt = select(UserModel).where(UserModel.t_wecom_user_id == wecom_user_id)
+        model = self._session.scalar(stmt)
+        if not model:
+            model = UserModel(
+                t_user_id=user_id,
+                t_username=username,
+                t_display_name=display_name,
+                t_email=email,
+                t_password_hash="WECOM_SSO_ONLY",
+                t_role=role.value,
+                t_status=status.value,
+                t_wecom_user_id=wecom_user_id,
+                t_mobile=mobile,
+                t_position=position,
+                t_avatar_url=avatar_url,
+                t_wecom_data=wecom_data,
+            )
+            self._session.add(model)
+        else:
+            model.t_display_name = display_name
+            model.t_email = email
+            model.t_mobile = mobile
+            model.t_position = position
+            model.t_avatar_url = avatar_url
+            model.t_wecom_data = wecom_data
+            model.t_deleted_at = None
+
+        self._session.commit()
+        self._session.refresh(model)
+        return self._to_entity(model)
 
     def soft_delete(self, user_id: str, tenant_id: str | None = None) -> bool:
         """软删除用户

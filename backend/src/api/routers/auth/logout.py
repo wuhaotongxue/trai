@@ -6,10 +6,16 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from datetime import UTC, datetime
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
-from api.deps import CurrentUser
+from api.deps import CurrentUser, security
+from infrastructure.security.blacklist import TokenBlacklistService, get_blacklist_service
+from infrastructure.security.jwt import JWTService, get_jwt_service
 
 router = APIRouter()
 
@@ -24,11 +30,17 @@ class LogoutResponse(BaseModel):
 @router.post("/logout", tags=["认证"])
 async def logout(
     current_user: CurrentUser,
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_blacklist_service)],
 ) -> LogoutResponse:
     """用户登出
 
     Args:
         current_user: 当前登录用户(从 Token 中解析)
+        credentials: HTTP Bearer 凭证
+        jwt_service: JWT 服务实例
+        blacklist_service: 黑名单服务实例
 
     Returns:
         LogoutResponse: 登出成功信息
@@ -39,9 +51,18 @@ async def logout(
         此接口记录登出日志,实际的令牌失效由前端清除本地存储
     """
     user_id = current_user.get("user_id", "unknown")
+    token = credentials.credentials
 
-    # TODO: 如果启用了 Token 黑名单,将令牌加入黑名单
-    # await blacklist_service.add(token)
+    # 获取 Token 剩余有效时间
+    try:
+        payload = jwt_service.get_token_payload(token)
+        exp = payload.get("exp", 0)
+        now = int(datetime.now(UTC).timestamp())
+        expire_seconds = exp - now
+        if expire_seconds > 0:
+            blacklist_service.add(token, expire_seconds)
+    except Exception:
+        pass
 
     return LogoutResponse(
         message="登出成功",

@@ -8,7 +8,7 @@
 import Cookies from "js-cookie";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, Shield, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,10 +28,17 @@ export default function AdminLoginPage() {
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:5666/api`
-      : "http://localhost:5666/api");
+      ? window.location.protocol === "https:"
+        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
+        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`
+      : "http://localhost:5666/api_trai/v1");
+
+  const lastSubmitTime = useRef(0);
 
   const handleLogin = async () => {
+    const now = Date.now();
+    if (now - lastSubmitTime.current < 1000) return;
+    lastSubmitTime.current = now;
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);
@@ -122,7 +129,7 @@ export default function AdminLoginPage() {
             </div>
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                <input type="checkbox" className="rounded border-border text-blue-600 focus:ring-blue-500" />
+                <input type="checkbox" id="admin-remember" aria-label="记住我" title="记住我" className="rounded border-border text-blue-600 focus:ring-blue-500" />
                 <span>记住登录状态</span>
               </label>
               <button className="text-xs text-blue-500 hover:underline">忘记密码?</button>
