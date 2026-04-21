@@ -7,7 +7,7 @@
 import Cookies from "js-cookie";
 
 import Link from "next/link";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Bot, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,8 +40,13 @@ function LoginForm() {
     }
   }, [searchParams]);
 
+  const lastSubmitTime = useRef(0);
+
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    const now = Date.now();
+    if (now - lastSubmitTime.current < 1000) return;
+    lastSubmitTime.current = now;
     if (loading) return;
     setErrorMessage(null);
     setLoading(true);

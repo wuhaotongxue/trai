@@ -26,6 +26,9 @@ export const auth_service = {
       if (res.data?.access_token) {
         config_store.set('access_token', res.data.access_token)
       }
+      if (res.data?.refresh_token) {
+        config_store.set('refresh_token', res.data.refresh_token)
+      }
 
       return { success: true, data: res.data }
     } catch (error: any) {
@@ -114,6 +117,7 @@ export const auth_service = {
     } finally {
       // 清理本地 token
       config_store.set('access_token', '')
+      config_store.set('refresh_token', '')
       return { success: true }
     }
   }

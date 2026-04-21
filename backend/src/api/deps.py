@@ -12,6 +12,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from core.exceptions import AuthenticationError
+from infrastructure.security.blacklist import TokenBlacklistService, get_blacklist_service
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import get_password_service
 
@@ -21,12 +22,14 @@ security = HTTPBearer()
 def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_blacklist_service)],
 ) -> dict[str, Any]:
     """获取当前登录用户
 
     Args:
         credentials: HTTP Bearer 凭证
         jwt_service: JWT 服务实例
+        blacklist_service: 黑名单服务实例
 
     Returns:
         dict: 用户信息字典
@@ -35,7 +38,11 @@ def get_current_user(
         HTTPException: 认证失败
     """
     try:
-        payload = jwt_service.verify_token(credentials.credentials)
+        token = credentials.credentials
+        if blacklist_service.is_blacklisted(token):
+            raise AuthenticationError(message="令牌已失效(已登出或已刷新)")
+
+        payload = jwt_service.verify_token(token)
         return {
             "user_id": payload.get("sub"),
             "username": payload.get("username"),

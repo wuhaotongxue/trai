@@ -49,6 +49,11 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 系统更新_2026_04_21_1047
+- [安全] 引入 Redis Token 黑名单机制，拦截登出和刷新后的废弃 Token
+- [功能] 客户端 (client_electron) 增加 Axios 拦截器，实现并发安全的无感知 Token 刷新
+- [功能] 前端 (frontend_next) 增加 Fetch 拦截器，实现并发安全的无感知 Token 刷新
+
 ### 🛠️ 系统更新_2026_04_21_1013
 - [安全] 修复 AES_KEY 与 AES_IV 缺失导致服务启动失败的问题
 - [安全] 修复 JWT 弱密钥检测策略及数据库会话连接泄露风险
