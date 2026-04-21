@@ -139,15 +139,16 @@ export const auth_service = {
           width: 800,
           height: 600,
           title: '企业微信登录',
+          autoHideMenuBar: true,
           webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
           }
         })
 
-        // 监听重定向, 拦截 token
-        win.webContents.on('will-redirect', (event, navigationUrl) => {
-          log.info(`WeCom window redirected to: ${navigationUrl}`)
+        // 提取处理拦截逻辑
+        const handle_navigation = (event: Electron.Event, navigationUrl: string) => {
+          log.info(`WeCom window navigating/redirecting to: ${navigationUrl}`)
           try {
             const urlObj = new URL(navigationUrl)
             const accessToken = urlObj.searchParams.get('access_token')
@@ -160,7 +161,7 @@ export const auth_service = {
               config_store.set('access_token', accessToken)
               config_store.set('refresh_token', refreshToken)
               
-              // 解析 JWT payload (基础版, 也可以让渲染进程去解析)
+              // 解析 JWT payload
               let username = 'wecom_user'
               let role = 'user'
               try {
@@ -186,9 +187,14 @@ export const auth_service = {
               resolve({ success: false, error: `企业微信登录失败: ${error}` })
             }
           } catch (e) {
-            log.error('Error handling redirect URL', e)
+            log.error('Error handling URL', e)
           }
-        })
+        }
+
+        // 监听多种可能包含 token 的导航事件
+        win.webContents.on('will-redirect', handle_navigation)
+        win.webContents.on('will-navigate', handle_navigation)
+        win.webContents.on('did-navigate', (event, navigationUrl) => handle_navigation(event as any, navigationUrl))
 
         win.on('closed', () => {
           resolve({ success: false, error: '登录窗口已关闭' })
