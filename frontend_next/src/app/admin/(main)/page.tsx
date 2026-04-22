@@ -282,7 +282,11 @@ export default function AdminDashboardPage() {
             <RefreshCw className="h-3.5 w-3.5" />
             刷新数据
           </Button>
-          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm">
+          <Button 
+            size="sm" 
+            className="h-9 gap-2 text-sm shadow-sm"
+            onClick={() => router.push("/admin/analytics")}
+          >
             <TrendingUp className="h-3.5 w-3.5" />
             查看报表
           </Button>
@@ -449,7 +453,7 @@ export default function AdminDashboardPage() {
         <Card className="lg:col-span-3 border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-sm font-semibold text-foreground">每日明细</CardTitle>
-            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-muted-foreground">
+            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => router.push("/admin/analytics")}>
               <Eye className="h-3 w-3" />
               查看全部
             </Button>

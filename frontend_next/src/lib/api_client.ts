@@ -277,17 +277,23 @@ export interface Session {
 
 /**
  * 消息接口
+ * @property id - 消息 ID
  * @property role - 角色
  * @property content - 内容
  * @property tool_call_id - 工具调用 ID
+ * @property timestamp - 时间戳
  */
 export interface Message {
+  /** 消息 ID */
+  id: string;
   /** 角色 */
   role: "user" | "assistant" | "system" | "tool";
   /** 内容 */
   content: string;
   /** 工具调用 ID */
   tool_call_id?: string;
+  /** 时间戳 */
+  timestamp: number;
 }
 
 /**
