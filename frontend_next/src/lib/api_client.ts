@@ -326,6 +326,13 @@ export const sessionApi = {
   delete: (sessionId: string) =>
     request<{ message: string }>(`/sessions/${sessionId}`, { method: "DELETE" }),
 
+  /** 重命名会话 */
+  rename: (sessionId: string, title: string) =>
+    request<Session>(`/sessions/${sessionId}/rename`, {
+      method: "POST",
+      body: JSON.stringify({ title }),
+    }),
+
   /** 发送消息 */
   sendMessage: (sessionId: string, data: SendMessageRequest) =>
     request<{

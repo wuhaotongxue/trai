@@ -87,6 +87,12 @@ class SendMessageResponse(BaseModel):
     assistant_message: dict[str, Any] = Field(description="助手回复")
 
 
+class RenameSessionRequest(BaseModel):
+    """重命名会话请求"""
+
+    title: Annotated[str, Field(min_length=1, max_length=255, description="新标题")]
+
+
 class ActionResponse(BaseModel):
     """操作响应"""
 
@@ -348,6 +354,69 @@ async def get_session_detail(
         messages=messages_dict,
         created_at=chat_session.t_created_at.isoformat() if chat_session.t_created_at else None,
         updated_at=chat_session.t_updated_at.isoformat() if chat_session.t_updated_at else None,
+    )
+
+
+@router.post(
+    "/sessions/{session_id}/rename",
+    response_model=SessionItem,
+    tags=["会话"],
+    summary="重命名会话",
+    description="更新指定会话的标题.",
+)
+async def rename_session(
+    session_id: str,
+    request: RenameSessionRequest,
+    current_user: CurrentUser,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> SessionItem:
+    """重命名会话标题.
+
+    Args:
+        session_id: 会话 ID
+        request: 新标题内容
+        current_user: 当前登录用户
+        session: 数据库会话
+
+    Returns:
+        SessionItem: 更新后的会话信息
+    """
+    user_id = current_user.get("user_id")
+    role = current_user.get("role", "normal")
+
+    session_repo = SessionRepository(session)
+    message_repo = MessageRepository(session)
+
+    chat_session = session_repo.get_session(session_id)
+    if not chat_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": 404, "message": "会话不存在"},
+        )
+
+    # 权限校验
+    if role != "admin" and chat_session.t_user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "无权操作此会话"},
+        )
+
+    updated_session = session_repo.update_session(session_id=session_id, title=request.title)
+    if not updated_session:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"code": 500, "message": "会话更新失败"},
+        )
+
+    messages = message_repo.get_messages(session_id)
+
+    return SessionItem(
+        session_id=updated_session.t_session_id,
+        title=updated_session.t_title,
+        model=updated_session.t_model,
+        message_count=len(messages),
+        created_at=updated_session.t_created_at.isoformat() if updated_session.t_created_at else None,
+        updated_at=updated_session.t_updated_at.isoformat() if updated_session.t_updated_at else None,
     )
 
 

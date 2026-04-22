@@ -90,6 +90,19 @@ export function ChatPanel() {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  /**
+   * 预处理 Markdown 内容, 确保 LaTeX 公式格式正确
+   * 将 \( \) 转换为 $$, 将 \[ \] 转换为 $$$$
+   */
+  const preprocessMarkdown = (content: string) => {
+    if (!content) return "";
+    return content
+      .replace(/\\\[/g, "\n$$\n")
+      .replace(/\\\]/g, "\n$$\n")
+      .replace(/\\\(/g, "$")
+      .replace(/\\\)/g, "$");
+  };
+
   return (
     <div className="flex flex-col h-full relative">
       <ScrollArea className="flex-1 px-4 py-6">
@@ -157,7 +170,7 @@ export function ChatPanel() {
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ className, children }) {
+                    code({ node, inline, className, children, ...props }: any) {
                       const match = /language-(\w+)/.exec(className || "");
                       const isInline = !match;
                       return !isInline ? (
@@ -193,14 +206,14 @@ export function ChatPanel() {
                           </SyntaxHighlighter>
                         </div>
                       ) : (
-                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5">
+                        <code className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded text-xs mx-0.5" {...props}>
                           {children}
                         </code>
                       );
                     },
                   }}
                 >
-                  {msg.content}
+                  {preprocessMarkdown(msg.content)}
                 </ReactMarkdown>
               </div>
 

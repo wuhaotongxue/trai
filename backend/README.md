@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_22_1515
+- **feat(session)**: 新增会话重命名接口 `POST /sessions/{session_id}/rename`
+- **feat(release)**: 客户端发布支持 EXE 文件上传, 并升级飞书通知为 Interactive 卡片格式
+- **fix(storage)**: 优化 S3 访问地址, 支持通过 `S3_PUBLIC_DOMAIN` 进行静态资源代理
+
 ### 🛠️ 后端_2026_04_22_1447
 - **fix(导入)**: 修复 backup_service.py 中的 S3Storage 导入错误，改为 S3StorageService
 - **feat(备份)**: 新增数据库备份服务，支持 pg_dump 备份和 S3 上传

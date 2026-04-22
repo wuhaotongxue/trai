@@ -55,9 +55,22 @@ export interface ToolCallActive {
 }
 
 /**
+ * 会话项接口
+ */
+export interface SessionItem {
+  session_id: string;
+  title: string | null;
+  model: string;
+  message_count: number;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+/**
  * Agent 状态管理接口
  * @property sessionId - 会话 ID
  * @property messages - 消息列表
+ * @property sessions - 会话列表
  * @property isStreaming - 是否正在流式传输
  * @property isLoading - 是否正在加载
  * @property error - 错误信息
@@ -73,6 +86,8 @@ interface AgentState {
   sessionId: string | null;
   /** 消息列表 */
   messages: Message[];
+  /** 会话列表 */
+  sessions: SessionItem[];
   /** 是否正在流式传输 */
   isStreaming: boolean;
   /** 是否正在加载 */
@@ -91,6 +106,8 @@ interface AgentState {
   activeToolCall: ToolCallActive | null;
   /** 流客户端 */
   streamClient: { abort: () => void } | null;
+  /** 悬浮聊天框是否开启 */
+  isFloatingChatOpen: boolean;
 
   /** 开始会话 */
   startSession: () => Promise<void>;
@@ -103,7 +120,15 @@ interface AgentState {
   /** 加载配额 */
   loadQuotas: () => Promise<void>;
   /** 删除会话 */
-  deleteSession: () => Promise<void>;
+  deleteSession: (sessionId?: string) => Promise<void>;
+  /** 设置悬浮聊天框开启状态 */
+  setFloatingChatOpen: (open: boolean) => void;
+  /** 加载会话列表 */
+  loadSessions: () => Promise<void>;
+  /** 切换会话 */
+  switchSession: (sessionId: string) => Promise<void>;
+  /** 重命名会话 */
+  renameSession: (sessionId: string, title: string) => Promise<void>;
 }
 
 // 兼容非安全环境的 UUID 生成
@@ -124,6 +149,7 @@ const generateUUID = () => {
 export const useAgentStore = create<AgentState>((set, get) => ({
   sessionId: null,
   messages: [],
+  sessions: [],
   isStreaming: false,
   isLoading: false,
   error: null,
@@ -133,12 +159,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   quotas: [],
   activeToolCall: null,
   streamClient: null,
+  isFloatingChatOpen: false,
 
   startSession: async () => {
     set({ isLoading: true, error: null });
     try {
       const res = await api.session.create({ model: "deepseek-chat" });
-      set({ sessionId: res.session_id, isLoading: false });
+      set({ sessionId: res.session_id, messages: [], isLoading: false });
+      await get().loadSessions();
     } catch {
       set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });
     }
@@ -301,6 +329,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }
+    await get().loadSessions();
   },
 
   abortStream: () => {
@@ -324,14 +353,53 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-  deleteSession: async () => {
-    const { sessionId } = get();
-    if (!sessionId) return;
+  deleteSession: async (id?: string) => {
+    const targetId = id || get().sessionId;
+    if (!targetId) return;
     try {
-      await api.session.delete(sessionId);
+      await api.session.delete(targetId);
+      if (targetId === get().sessionId) {
+        set({ sessionId: null, messages: [] });
+      }
+      await get().loadSessions();
     } catch {
       // ignore
     }
-    set({ sessionId: null, messages: [] });
+  },
+
+  setFloatingChatOpen: (open: boolean) => {
+    set({ isFloatingChatOpen: open });
+  },
+
+  loadSessions: async () => {
+    try {
+      const res = await api.session.list();
+      set({ sessions: res.sessions });
+    } catch {
+      // ignore
+    }
+  },
+
+  switchSession: async (sessionId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await api.session.get(sessionId);
+      set({
+        sessionId: res.session_id,
+        messages: res.messages,
+        isLoading: false,
+      });
+    } catch {
+      set({ error: "切换会话失败", isLoading: false });
+    }
+  },
+
+  renameSession: async (sessionId: string, title: string) => {
+    try {
+      await api.session.rename(sessionId, title);
+      await get().loadSessions();
+    } catch {
+      // ignore
+    }
   },
 }));
