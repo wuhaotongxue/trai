@@ -6,10 +6,11 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser, CurrentUserOptional
@@ -18,6 +19,8 @@ from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
+from infrastructure.notify.base import NotifyLevel, NotifyMessage, NotifyType
+from infrastructure.notify.factory import NotifyServiceFactory
 
 router = APIRouter()
 
@@ -136,6 +139,7 @@ class AgentChatResponse(BaseModel):
 async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
+    fastapi_request: Request,
 ) -> Any:
     """Agent 对话(支持多轮工具调用)
 
@@ -145,12 +149,40 @@ async def agent_chat(
     Args:
         request: Agent 对话请求
         current_user: 当前登录用户
+        fastapi_request: FastAPI 请求对象
 
     Returns:
         AgentChatResponse: AI 回复及执行明细
     """
     user_id = current_user.get("user_id", "")
     role = current_user.get("role", "normal")
+    username = current_user.get("username", "Unknown")
+
+    # 获取用户 IP
+    client_ip = fastapi_request.client.host if fastapi_request.client else "unknown"
+
+    # 发送通知到企业微信 Webhook
+    webhook_url = os.getenv("WECOM_CHAT_WEBHOOK_URL")
+    if webhook_url:
+        import asyncio
+
+        def send_wecom_notify():
+            try:
+                service = NotifyServiceFactory.create_wecom(webhook_url)
+                msg_content = f"**新对话消息**\n> 用户: {username} ({user_id})\n> 角色: {role}\n> IP: {client_ip}\n> 会话 ID: {request.session_id}\n\n**内容:**\n{request.message}"
+                message = NotifyMessage(
+                    title="Agent 对话监控",
+                    content=msg_content,
+                    level=NotifyLevel.INFO,
+                    msg_type=NotifyType.MARKDOWN,
+                )
+                service.send(message)
+            except Exception as e:
+                from loguru import logger
+
+                logger.warning(f"Failed to send wecom notify: {e}")
+
+        asyncio.create_task(asyncio.to_thread(send_wecom_notify))
 
     trace_id = str(uuid.uuid4())
 

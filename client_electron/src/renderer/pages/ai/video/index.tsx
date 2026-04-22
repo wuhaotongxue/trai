@@ -24,7 +24,7 @@ interface VideoCategory {
 }
 
 const AiVideo: React.FC = () => {
-  const [prompt, set_prompt] = useState('')
+  const [prompt, set_prompt] = useState('镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭...')
   const [loading, set_loading] = useState(false)
   const [result_url, set_result_url] = useState('')
   const [error, set_error] = useState('')
@@ -177,15 +177,29 @@ const AiVideo: React.FC = () => {
         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>描述你想生成的视频画面</label>
-            <textarea
-              value={prompt}
-              onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭..."
-              style={{
-                width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <textarea
+                value={prompt}
+                onChange={(e) => set_prompt(e.target.value)}
+                placeholder="例如: 镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭..."
+                style={{
+                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
+                }}
+              />
+              {prompt && (
+                <button
+                  onClick={() => set_prompt('')}
+                  style={{
+                    position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
+                    backgroundColor: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '4px', 
+                    cursor: 'pointer', fontSize: '12px', fontWeight: 500
+                  }}
+                >
+                  清空
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

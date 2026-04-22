@@ -23,8 +23,8 @@ interface StyleCategory {
 }
 
 const ImageToImage: React.FC = () => {
-  const [prompt, set_prompt] = useState('')
-  const [source_url, set_source_url] = useState('')
+  const [prompt, set_prompt] = useState('将这只可爱的猫咪图片转换为赛博朋克风格, 霓虹灯, 未来感...')
+  const [source_url, set_source_url] = useState('./kity.png')
   const [source_preview_url, set_source_preview_url] = useState('')
   const [source_file_name, set_source_file_name] = useState('')
   const [loading, set_loading] = useState(false)
@@ -282,15 +282,29 @@ const ImageToImage: React.FC = () => {
 
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>修改描述</label>
-            <textarea
-              value={prompt}
-              onChange={(e) => set_prompt(e.target.value)}
-              placeholder="例如: 将图片转换为赛博朋克风格..."
-              style={{
-                width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <textarea
+                value={prompt}
+                onChange={(e) => set_prompt(e.target.value)}
+                placeholder="例如: 将图片转换为赛博朋克风格..."
+                style={{
+                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
+                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
+                }}
+              />
+              {prompt && (
+                <button
+                  onClick={() => set_prompt('')}
+                  style={{
+                    position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
+                    backgroundColor: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '4px', 
+                    cursor: 'pointer', fontSize: '12px', fontWeight: 500
+                  }}
+                >
+                  清空
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

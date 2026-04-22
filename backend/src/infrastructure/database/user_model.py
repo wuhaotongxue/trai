@@ -64,6 +64,12 @@ class UserModel(Base):
     t_wecom_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
     """企业微信用户 ID(用于 SSO)"""
 
+    t_last_login_ip: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """最后登录 IP"""
+
+    t_last_login_location: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    """最后登录地址"""
+
     t_wecom_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     """企业微信原始数据缓存"""
 

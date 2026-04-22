@@ -43,6 +43,8 @@ class User:
     status: UserStatus = UserStatus.ACTIVE
     tenant_id: str | None = None
     wecom_user_id: str | None = None
+    last_login_ip: str | None = None
+    last_login_location: str | None = None
     mobile: str | None = None
     position: str | None = None
     wecom_data: dict[str, Any] | None = None

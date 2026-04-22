@@ -31,7 +31,10 @@ class UserListItem(BaseModel):
     role: str = Field(description="用户角色")
     status: str = Field(description="用户状态")
     tenant_id: str | None = Field(default=None, description="租户 ID")
+    wecom_user_id: str | None = Field(default=None, description="企业微信工号")
     created_at: str | None = Field(default=None, description="创建时间")
+    last_login_ip: str | None = Field(default=None, description="最后登录 IP")
+    last_login_location: str | None = Field(default=None, description="最后登录地址")
 
 
 class UserListResponse(BaseModel):
@@ -122,6 +125,7 @@ async def list_users(
     session: Annotated[Session, Depends(get_db_session)],
     role: Annotated[str | None, Query(description="按角色过滤")] = None,
     status_filter: Annotated[str | None, Query(alias="status", description="按状态过滤")] = None,
+    dept_id: Annotated[int | None, Query(description="按部门过滤")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> UserListResponse:
@@ -132,6 +136,7 @@ async def list_users(
         session: 数据库会话
         role: 角色过滤
         status_filter: 状态过滤
+        dept_id: 部门 ID 过滤
         limit: 每页数量
         offset: 偏移量
 
@@ -143,24 +148,28 @@ async def list_users(
     users = user_repo.list_users(
         role=role,
         status=status_filter,
+        dept_id=dept_id,
         limit=limit,
         offset=offset,
     )
-    total = user_repo.count(role=role, status=status_filter)
+    total = user_repo.count(role=role, status=status_filter, dept_id=dept_id)
 
     return UserListResponse(
         total=total,
         users=[
             UserListItem(
-                user_id=u.t_user_id,
-                username=u.t_username,
-                display_name=u.t_display_name,
-                email=u.t_email,
-                avatar_url=u.t_avatar_url,
-                role=u.t_role.value,
-                status=u.t_status.value,
-                tenant_id=u.t_tenant_id,
-                created_at=u.t_created_at.isoformat() if u.t_created_at else None,
+                user_id=u.user_id,
+                username=u.username,
+                display_name=u.display_name,
+                email=u.email,
+                avatar_url=u.avatar_url,
+                role=u.role.value,
+                status=u.status.value,
+                tenant_id=u.tenant_id,
+                wecom_user_id=u.wecom_user_id,
+                created_at=u.created_at.isoformat() if u.created_at else None,
+                last_login_ip=u.last_login_ip,
+                last_login_location=u.last_login_location,
             )
             for u in users
         ],
@@ -196,15 +205,17 @@ async def get_user(
         )
 
     return UserListItem(
-        user_id=user.t_user_id,
-        username=user.t_username,
-        display_name=user.t_display_name,
-        email=user.t_email,
-        avatar_url=user.t_avatar_url,
-        role=user.t_role.value,
-        status=user.t_status.value,
-        tenant_id=user.t_tenant_id,
-        created_at=user.t_created_at.isoformat() if user.t_created_at else None,
+        user_id=user.user_id,
+        username=user.username,
+        display_name=user.display_name,
+        email=user.email,
+        avatar_url=user.avatar_url,
+        role=user.role.value,
+        status=user.status.value,
+        tenant_id=user.tenant_id,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        last_login_ip=user.last_login_ip,
+        last_login_location=user.last_login_location,
     )
 
 

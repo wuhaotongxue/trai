@@ -74,6 +74,20 @@ class DepartmentRepository(IDepartmentRepository):
         models = self._session.scalars(stmt).all()
         return [self._to_entity(m) for m in models]
 
+    def get_department_stats(self) -> dict[int, int]:
+        """获取各部门人数统计
+
+        Returns:
+            dict[int, int]: {dept_id: count}
+        """
+        from sqlalchemy import func
+
+        stmt = select(UserDepartmentMappingModel.t_dept_id, func.count(UserDepartmentMappingModel.t_user_id)).group_by(
+            UserDepartmentMappingModel.t_dept_id
+        )
+        results = self._session.execute(stmt).all()
+        return {dept_id: count for dept_id, count in results}
+
     def clear_user_mappings(self, user_id: str) -> None:
         """清除指定用户的所有部门关联"""
         stmt = delete(UserDepartmentMappingModel).where(UserDepartmentMappingModel.t_user_id == user_id)

@@ -48,6 +48,8 @@ class UserRepository(IUserRepository):
             status=UserStatus(model.t_status),
             tenant_id=model.t_tenant_id,
             wecom_user_id=model.t_wecom_user_id,
+            last_login_ip=model.t_last_login_ip,
+            last_login_location=model.t_last_login_location,
             mobile=model.t_mobile,
             position=model.t_position,
             wecom_data=model.t_wecom_data,
@@ -76,6 +78,8 @@ class UserRepository(IUserRepository):
             t_status=user.status.value,
             t_tenant_id=user.tenant_id,
             t_wecom_user_id=user.wecom_user_id,
+            t_last_login_ip=user.last_login_ip,
+            t_last_login_location=user.last_login_location,
             t_mobile=user.mobile,
             t_position=user.position,
             t_wecom_data=user.wecom_data,
@@ -223,6 +227,8 @@ class UserRepository(IUserRepository):
             "mobile": "t_mobile",
             "position": "t_position",
             "wecom_data": "t_wecom_data",
+            "last_login_ip": "t_last_login_ip",
+            "last_login_location": "t_last_login_location",
             "created_by": "t_created_by",
             "updated_by": "t_updated_by",
             "deleted_by": "t_deleted_by",
@@ -350,6 +356,7 @@ class UserRepository(IUserRepository):
         tenant_id: str | None = None,
         role: str | None = None,
         status: str | None = None,
+        dept_id: int | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> list[User]:
@@ -359,12 +366,17 @@ class UserRepository(IUserRepository):
             tenant_id: 租户 ID(可选)
             role: 用户角色过滤(可选)
             status: 用户状态过滤(可选)
+            dept_id: 部门 ID 过滤(可选)
             limit: 每页数量(默认 50)
             offset: 偏移量(默认 0)
 
         Returns:
             list[User]: 用户实体列表
         """
+        from sqlalchemy import asc, case
+
+        from infrastructure.database.department_model import UserDepartmentMappingModel
+
         stmt = select(UserModel).where(UserModel.t_deleted_at.is_(None))
 
         if tenant_id:
@@ -373,23 +385,47 @@ class UserRepository(IUserRepository):
             stmt = stmt.where(UserModel.t_role == role)
         if status:
             stmt = stmt.where(UserModel.t_status == status)
+        if dept_id:
+            stmt = stmt.join(
+                UserDepartmentMappingModel,
+                UserDepartmentMappingModel.t_user_id == UserModel.t_user_id,
+            ).where(UserDepartmentMappingModel.t_dept_id == dept_id)
+
+        # 默认排序规则:
+        # 1. 优先 A 开头的工号 (A0001, A02000 等)
+        # 2. 其他工号按字母/数字升序排列
+        stmt = stmt.order_by(
+            case((UserModel.t_wecom_user_id.like("A%"), 0), else_=1),
+            asc(UserModel.t_wecom_user_id),
+        )
 
         stmt = stmt.offset(offset).limit(limit)
         models = self._session.scalars(stmt).all()
         return [self._to_entity(m) for m in models]
 
-    def count(self, tenant_id: str | None = None, role: str | None = None, status: str | None = None) -> int:
-        """统计用户数量
+    def count(
+        self,
+        tenant_id: str | None = None,
+        role: str | None = None,
+        status: str | None = None,
+        dept_id: int | None = None,
+    ) -> int:
+        """统计符合条件的注册用户总数
 
         Args:
             tenant_id: 租户 ID(可选)
             role: 用户角色过滤(可选)
             status: 用户状态过滤(可选)
+            dept_id: 部门 ID 过滤(可选)
 
         Returns:
             int: 用户总数
         """
-        stmt = select(UserModel).where(UserModel.t_deleted_at.is_(None))
+        from sqlalchemy import func
+
+        from infrastructure.database.department_model import UserDepartmentMappingModel
+
+        stmt = select(func.count(UserModel.t_user_id)).where(UserModel.t_deleted_at.is_(None))
 
         if tenant_id:
             stmt = stmt.where(UserModel.t_tenant_id == tenant_id)
@@ -397,8 +433,13 @@ class UserRepository(IUserRepository):
             stmt = stmt.where(UserModel.t_role == role)
         if status:
             stmt = stmt.where(UserModel.t_status == status)
+        if dept_id:
+            stmt = stmt.join(
+                UserDepartmentMappingModel,
+                UserDepartmentMappingModel.t_user_id == UserModel.t_user_id,
+            ).where(UserDepartmentMappingModel.t_dept_id == dept_id)
 
-        return len(self._session.scalars(stmt).all())
+        return self._session.scalar(stmt) or 0
 
 
 __all__ = ["UserRepository"]

@@ -60,9 +60,10 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#2E7D32;">&#x2714; 提交前强制要求</strong> — 每次向 Git 提交 frontend_next 目录的代码前，必须执行格式化与异常检查
   <div style="margin-top:8px;font-size:13px;color:#555;">
-    1. <strong>异常检测与格式化：</strong> 运行 <code>pnpm run lint:fix</code> (即 <code>eslint --fix</code>)，自动修复可修复的格式问题，并暴露潜在的异常（如未使用的变量、错误的 Hooks 依赖等）。<br>
-    2. <strong>零警告要求：</strong> 运行 <code>pnpm run lint -- --max-warnings 0</code>，要求 lint 结果为 0 warning，发现 warning 必须修复后才能提交。<br>
-    3. <strong>类型检查：</strong> 运行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 确保没有 TypeScript 编译报错。
+    1. <strong>异常检测与格式化：</strong> 运行 <code>pnpm run lint:fix</code> (即 <code>eslint --fix</code>)，自动修复可修复的格式问题，并暴露潜在的异常。<br>
+    2. <strong>零警告要求：</strong> 运行 <code>pnpm run lint -- --max-warnings 0</code>，要求 lint 结果为 0 warning。<br>
+    3. <strong>类型检查：</strong> 运行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 确保没有 TypeScript 编译报错。<br>
+    4. <strong>注意 PowerShell 限制：</strong> 在 Windows 默认 PowerShell 5.x 环境下，<strong>禁止使用 <code>&&</code></strong> 拼接命令（如 <code>pnpm run lint:fix && pnpm build</code> 会报错），必须使用 <code>;</code> 拼接。
   </div>
 </div>
 
@@ -72,6 +73,8 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 ||--------|------|
 || TypeScript | 严格模式 (`strict: true`) |
 || 类型 | 必须显式类型注解，禁止 `any` |
+|| 接口请求泛型 | 调用 <code>request()</code> 接口时必须声明返回结构泛型，否则会被推导为 <code>unknown</code> 导致编译失败（如 <code>request&lt;{ users: any[] }&gt;(...)</code>）|
+|| 接口返回值 | 访问 API 返回的对象时，必须确保对象实际包含该字段（如 <code>authApi.me()</code> 返回的对象层级为 <code>res.user.role</code> 而非 <code>res.data.role</code>，严格遵循接口定义）|
 || Next.js | App Router 模式 |
 || 组件 | Server Components 为默认，Client Components 需标注 |
 

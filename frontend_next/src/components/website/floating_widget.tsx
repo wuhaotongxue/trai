@@ -12,6 +12,7 @@ import { ArrowUp, ArrowDown, BotMessageSquare, X, ExternalLink, Maximize2, Minim
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { ChatPanel } from "@/components/agent/chat_panel";
+import { cn } from "@/lib/utils";
 
 export function FloatingWidget() {
   const [showTop, setShowTop] = useState(false);
@@ -21,7 +22,6 @@ export function FloatingWidget() {
   const pathname = usePathname();
 
   const isWebsitePage =
-    !pathname.startsWith("/admin") &&
     !pathname.startsWith("/agent") &&
     !pathname.startsWith("/login") &&
     !pathname.startsWith("/register") &&
@@ -30,8 +30,7 @@ export function FloatingWidget() {
     !pathname.startsWith("/todo");
 
   useEffect(() => {
-    if (!isWebsitePage) return;
-
+    // 即使在管理后台也显示, 但位置调高避免遮挡分页
     const handleScroll = () => {
       setShowTop(window.scrollY > 300);
 
@@ -43,7 +42,7 @@ export function FloatingWidget() {
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isWebsitePage, pathname]);
+  }, [pathname]);
 
   if (!isWebsitePage) return null;
 
@@ -55,9 +54,14 @@ export function FloatingWidget() {
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   };
 
+  const isAdminPage = pathname.startsWith("/admin");
+
   return (
     <>
-      <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
+      <div className={cn(
+        "fixed z-50 flex flex-col gap-3 transition-all duration-300",
+        isAdminPage ? "bottom-24 right-6" : "bottom-8 right-8"
+      )}>
         {showTop && (
           <Button
             size="icon"
