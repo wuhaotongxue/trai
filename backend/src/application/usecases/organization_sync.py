@@ -70,7 +70,40 @@ class SyncOrganizationUseCase:
         # 2. 同步用户 (从根部门递归获取所有用户详细信息)
         root_dept_id = int(os.getenv("WECOM_USER_SYNC_ROOT_DEPT_ID", "1"))
         fetch_child = os.getenv("WECOM_USER_SYNC_FETCH_CHILD", "true").strip().lower() in {"1", "true", "yes"}
-        wecom_users = await self._wecom_client.list_detailed_users_by_department(root_dept_id, fetch_child=fetch_child)
+
+        wecom_users = []
+        try:
+            wecom_users = await self._wecom_client.list_detailed_users_by_department(
+                root_dept_id, fetch_child=fetch_child
+            )
+        except RuntimeError as e:
+            if "60011" in str(e):
+                logger.warning(f"获取根部门(id={root_dept_id})用户失败(权限不足), 将尝试逐个部门获取(可能耗时较长)...")
+                # 降级策略: 逐个获取已同步的部门
+                total_depts = len(wecom_depts)
+                for i, d in enumerate(wecom_depts, 1):
+                    try:
+                        dept_users = await self._wecom_client.list_detailed_users_by_department(d.id, fetch_child=False)
+                        wecom_users.extend(dept_users)
+                        if dept_users:
+                            user_names = [f"{u.name}({u.user_id})" for u in dept_users]
+                            logger.info(
+                                f"[{i}/{total_depts}] 拉取部门 '{d.name}' (ID:{d.id}) 成功: 发现 {len(dept_users)} 名用户 -> {', '.join(user_names)}"
+                            )
+                        else:
+                            logger.info(f"[{i}/{total_depts}] 拉取部门 '{d.name}' (ID:{d.id}) 成功: 部门为空")
+                    except RuntimeError as e2:
+                        if "60020" in str(e2):
+                            logger.error(f"[{i}/{total_depts}] IP 不在白名单(60020), 停止重试: {e2}")
+                            break
+                        # 忽略个别部门的 60011 错误
+                        if "60011" not in str(e2):
+                            logger.error(f"[{i}/{total_depts}] 获取部门 '{d.name}' (ID:{d.id}) 用户异常: {e2}")
+                        else:
+                            logger.debug(f"[{i}/{total_depts}] 跳过部门 '{d.name}' (ID:{d.id}): 无权限(60011)")
+                        continue
+            else:
+                raise
 
         # 去重,因为一个用户可能在多个部门,虽然 list_detailed_users_by_department(1, True) 通常返回去重后的结果
         unique_users = {u.user_id: u for u in wecom_users}
