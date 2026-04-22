@@ -36,3 +36,8 @@ html, body, #root {
   background: var(--ui_bg);
   color: var(--ui_text);
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(-10px); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
