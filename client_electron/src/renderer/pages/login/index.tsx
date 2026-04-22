@@ -19,7 +19,7 @@ const Login: React.FC = () => {
   const [password, set_password] = useState('Tr@@2026...')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('http://192.168.98.72:5666')
+  const [api_url, set_api_url] = useState('https://trai.tuoren.com')
   const [api_loading, set_api_loading] = useState(true)
   const [api_saving, set_api_saving] = useState(false)
   const [remember_me, set_remember_me] = useState(true)
@@ -34,7 +34,7 @@ const Login: React.FC = () => {
     const load_config = async () => {
       try {
         if (window.electron_api?.config_get) {
-          const res = await window.electron_api.config_get('api_url', 'http://192.168.98.72:5666')
+          const res = await window.electron_api.config_get('api_url', 'https://trai.tuoren.com')
           if (res.success && typeof res.data === 'string' && res.data.trim()) {
             set_api_url(res.data.trim())
           }
@@ -352,32 +352,6 @@ const Login: React.FC = () => {
         <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '61.8%', minWidth: '400px', maxWidth: '600px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
           <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>服务地址</label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="text"
-                  value={api_url}
-                  onChange={(e) => set_api_url(e.target.value)}
-                  style={{ flex: 1, padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
-                  placeholder="http://192.168.98.72:5666"
-                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
-                  disabled={api_loading || api_saving}
-                />
-                <button
-                  type="button"
-                  onClick={save_api_url}
-                  disabled={api_loading || api_saving}
-                  style={{ width: '72px', backgroundColor: '#f3f3f3', color: '#202020', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', cursor: (api_loading || api_saving) ? 'not-allowed' : 'pointer', fontWeight: 'normal', fontSize: '14px' }}
-                >
-                  {api_saving ? '保存中' : '保存'}
-                </button>
-              </div>
-              <div style={{ marginTop: '6px', color: 'rgba(0, 0, 0, 0.5)', fontSize: '12px' }}>
-                示例: 127.0.0.1:5666 或 http://192.168.98.72:5666
-              </div>
-            </div>
             <div>
               <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
               <input
