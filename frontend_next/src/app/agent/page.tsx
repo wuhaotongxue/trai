@@ -13,9 +13,19 @@ import { Navbar } from "@/components/website/navbar";
 import { useAgentStore } from "@/stores/agent.store";
 import { useEffect } from "react";
 
+/**
+ * Agent 对话主页面组件
+ * 
+ * 提供 Agent 对话界面，包含侧边栏和聊天面板
+ */
 export default function AgentPage() {
   const { sessionId, startSession } = useAgentStore();
 
+  /**
+   * 初始化会话
+   * 
+   * 如果没有活跃会话，自动创建一个新会话
+   */
   useEffect(() => {
     // 如果没有活跃会话, 自动创建一个
     if (!sessionId) {

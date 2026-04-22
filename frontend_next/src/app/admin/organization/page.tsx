@@ -8,11 +8,18 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, Plus, Building2, Search, RefreshCw, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Users, Plus, Building2, Search, RefreshCw, ChevronLeft, ChevronRight, ChevronDown, Shield, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request, adminApi, type UserInfo, type DepartmentTreeNode } from "@/lib/api_client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/components/toast/use_toast";
 
 /**
  * 部门树项组件
@@ -85,11 +92,11 @@ function DeptTreeItem({
 export default function OrganizationPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ departments: number; users: number; status: string } | null>(null);
-  
+
   // 部门树状态
   const [deptTree, setDeptTree] = useState<DepartmentTreeNode[]>([]);
   const [selectedDeptId, setSelectedDeptId] = useState<number | null>(null);
-  
+
   // 用户列表状态
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [total, setTotal] = useState(0);
@@ -97,6 +104,12 @@ export default function OrganizationPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // 权限管理弹窗状态
+  const [permDialogOpen, setPermDialogOpen] = useState(false);
+  const [permTarget, setPermTarget] = useState<UserInfo | null>(null);
+  const [permRole, setPermRole] = useState("");
+  const { toast } = useToast();
 
   /**
    * 获取部门树
@@ -152,6 +165,27 @@ export default function OrganizationPage() {
       alert("同步失败，请查看控制台日志");
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleOpenPerm = (user: UserInfo) => {
+    setPermTarget(user);
+    setPermRole(user.role || "normal");
+    setPermDialogOpen(true);
+  };
+
+  const handleSavePerm = async () => {
+    if (!permTarget) return;
+    try {
+      await request(`/admin/users/${permTarget.user_id}`, {
+        method: "PUT",
+        body: JSON.stringify({ role: permRole }),
+      });
+      toast({ message: `已将 ${permTarget.display_name} 角色更新为 ${permRole === "admin" ? "管理员" : permRole === "vip" ? "VIP" : "普通用户"}`, variant: "success" });
+      setPermDialogOpen(false);
+      fetchUsers();
+    } catch (e: any) {
+      toast({ message: e.message || "更新角色失败", variant: "error" });
     }
   };
 
@@ -294,7 +328,8 @@ export default function OrganizationPage() {
                           </span>
                         </td>
                         <td className="p-4 text-right">
-                          <Button variant="ghost" size="sm" className="h-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                          <Button variant="ghost" size="sm" className="h-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20" onClick={() => handleOpenPerm(user)}>
+                            <Shield className="h-3.5 w-3.5 mr-1" />
                             管理
                           </Button>
                         </td>
@@ -356,6 +391,66 @@ export default function OrganizationPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 权限管理弹窗 */}
+      <Dialog open={permDialogOpen} onOpenChange={setPermDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              设置用户角色
+            </DialogTitle>
+          </DialogHeader>
+          {permTarget && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
+                  {permTarget.display_name?.[0] || permTarget.username?.[0] || "?"}
+                </div>
+                <div>
+                  <p className="font-medium">{permTarget.display_name || permTarget.username}</p>
+                  <p className="text-sm text-muted-foreground">{permTarget.email}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">选择角色</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: "admin", label: "管理员", desc: "全部权限", color: "bg-blue-500" },
+                    { value: "vip", label: "VIP", desc: "高级用户", color: "bg-amber-500" },
+                    { value: "normal", label: "普通用户", desc: "基础权限", color: "bg-slate-500" },
+                  ].map((role) => (
+                    <button
+                      key={role.value}
+                      type="button"
+                      onClick={() => setPermRole(role.value)}
+                      className={`p-3 rounded-lg border-2 transition-all text-left ${
+                        permRole === role.value
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
+                          : "border-border hover:border-muted-foreground/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className={`w-2 h-2 rounded-full ${role.color}`} />
+                        <span className="font-medium text-sm">{role.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{role.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setPermDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleSavePerm}>
+              保存设置
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
