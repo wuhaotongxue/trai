@@ -5,46 +5,96 @@
 
 "use client";
 
-import { useState } from "react";
-import { Download, Edit2, Mail, Search, Trash2, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Download, Edit2, Mail, Search, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { request } from "@/lib/api_client";
 
-const mockUsers = [
-  { id: 1, name: "张明", email: "zhangming@example.com", plan: "VIP", status: "active", agent_calls: 1284, joined: "2026-01-15", avatar: "张" },
-  { id: 2, name: "李华", email: "lihua@example.com", plan: "免费", status: "active", agent_calls: 42, joined: "2026-02-03", avatar: "李" },
-  { id: 3, name: "王芳", email: "wangfang@example.com", plan: "Pro", status: "active", agent_calls: 3891, joined: "2025-12-20", avatar: "王" },
-  { id: 4, name: "刘强", email: "liuqiang@example.com", plan: "VIP", status: "inactive", agent_calls: 0, joined: "2026-03-01", avatar: "刘" },
-  { id: 5, name: "陈静", email: "chenjing@example.com", plan: "Pro", status: "active", agent_calls: 2108, joined: "2026-01-28", avatar: "陈" },
-  { id: 6, name: "赵伟", email: "zhaowei@example.com", plan: "免费", status: "active", agent_calls: 156, joined: "2026-02-14", avatar: "赵" },
-  { id: 7, name: "孙丽", email: "sunli@example.com", plan: "Pro", status: "banned", agent_calls: 0, joined: "2025-11-05", avatar: "孙" },
-  { id: 8, name: "周杰", email: "zhoujie@example.com", plan: "VIP", status: "active", agent_calls: 4521, joined: "2025-10-18", avatar: "周" },
-];
-
-const planBadge: Record<string, string> = {
-  VIP: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  Pro: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  免费: "bg-muted/40 text-muted-foreground border-border/60",
-};
-
-const statusBadge: Record<string, { cls: string; dot: string; label: string }> = {
-  active: { cls: "bg-emerald-500/15 text-emerald-400", dot: "bg-emerald-500", label: "正常" },
-  inactive: { cls: "bg-muted/40 text-muted-foreground", dot: "bg-muted-foreground/60", label: "未激活" },
-  banned: { cls: "bg-red-500/15 text-red-400", dot: "bg-red-500", label: "已封禁" },
+type UserItem = {
+  user_id: string;
+  username: string;
+  display_name: string;
+  email: string;
+  avatar_url: string;
+  role: string;
+  status: string;
+  tenant_id: string;
+  wecom_user_id: string;
+  created_at: string;
+  last_login_ip: string;
+  last_login_location: string;
 };
 
 export default function UsersPage() {
   const [search, setSearch] = useState("");
-  const [filterPlan, setFilterPlan] = useState("全部");
+  const [filterRole, setFilterRole] = useState("全部");
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
 
-  const filtered = mockUsers.filter((u) => {
-    const matchSearch = u.name.includes(search) || u.email.includes(search);
-    const matchPlan = filterPlan === "全部" || u.plan === filterPlan;
-    return matchSearch && matchPlan;
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const roleQuery = filterRole === "全部" ? "" : `&role=${filterRole === "管理员" ? "admin" : "normal"}`;
+      const res = await request<{ users: UserItem[]; total: number }>(`/admin/users?limit=${pageSize}&offset=${(page - 1) * pageSize}${roleQuery}`);
+      setUsers(res.users || []);
+      setTotal(res.total || 0);
+    } catch (e) {
+      console.error("Failed to fetch users", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [filterRole, page, pageSize]);
+
+  const toggleStatus = async (user: UserItem) => {
+    const newStatus = user.status === "active" ? "disabled" : "active";
+    try {
+      await request(`/admin/users/${user.user_id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: newStatus }),
+      });
+      fetchUsers();
+    } catch (e) {
+      console.error("Toggle status failed", e);
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!confirm("确定要删除该用户吗？")) return;
+    try {
+      await request(`/admin/users/${userId}`, { method: "DELETE" });
+      fetchUsers();
+    } catch (e) {
+      console.error("Delete user failed", e);
+    }
+  };
+
+  const toggleRole = async (user: UserItem) => {
+    const newRole = user.role === "admin" ? "normal" : "admin";
+    if (!confirm(`确定要将该用户设为 ${newRole === "admin" ? "管理员" : "普通用户"} 吗？`)) return;
+    try {
+      await request(`/admin/users/${user.user_id}`, {
+        method: "PUT",
+        body: JSON.stringify({ role: newRole }),
+      });
+      fetchUsers();
+    } catch (e) {
+      console.error("Toggle role failed", e);
+    }
+  };
+
+  const filtered = users.filter((u) => {
+    const matchSearch = (u.display_name || "").includes(search) || (u.email || "").includes(search) || (u.username || "").includes(search);
+    return matchSearch;
   });
-
-  const total = mockUsers.length;
 
   return (
     <div className="space-y-5">
@@ -59,7 +109,7 @@ export default function UsersPage() {
             <Download className="h-3.5 w-3.5" />
             导出
           </Button>
-          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm">
+          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={() => window.location.href = "/admin/users/new"}>
             <UserPlus className="h-3.5 w-3.5" />
             新增用户
           </Button>
@@ -80,12 +130,12 @@ export default function UsersPage() {
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/40 rounded-lg p-1 border border-border/60">
-              {["全部", "VIP", "Pro", "免费"].map((p) => (
+              {["全部", "管理员", "普通用户"].map((p) => (
                 <button
                   key={p}
-                  onClick={() => setFilterPlan(p)}
+                  onClick={() => setFilterRole(p)}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                    filterPlan === p
+                    filterRole === p
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -106,70 +156,126 @@ export default function UsersPage() {
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">用户</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">套餐</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">工号</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">角色</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">状态</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Agent 调用</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">注册时间</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">登录 IP</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">操作</th>
                 </tr>
               </thead>
-              <tbody>
-                {filtered.map((user, i) => {
-                  const st = statusBadge[user.status];
-                  return (
-                    <tr
-                      key={user.id}
-                      className={`border-b border-border/40 hover:bg-muted/25 transition-colors ${i % 2 === 0 ? "bg-card" : "bg-muted/10"}`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
-                            {user.avatar}
+              <tbody className="divide-y divide-border/60">
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">加载中...</td>
+                  </tr>
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">没有找到匹配的用户</td>
+                  </tr>
+                ) : (
+                  filtered.map((user) => {
+                    const st = user.status === "active" ? { label: "正常", cls: "text-emerald-500 bg-emerald-500/10" } : { label: "停用", cls: "text-red-500 bg-red-500/10" };
+                    return (
+                      <tr key={user.user_id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                              {user.display_name ? user.display_name[0].toUpperCase() : "U"}
+                            </div>
+                            <div>
+                              <div className="font-medium text-foreground">{user.display_name || user.username}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5">{user.email || user.username}</div>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground text-sm">{user.name}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                          {user.wecom_user_id || "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button 
+                            onClick={() => toggleRole(user)}
+                            className={`px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-opacity ${user.role === "admin" ? "bg-amber-500/10 text-amber-600" : "bg-blue-500/10 text-blue-600"}`}>
+                            {user.role === "admin" ? "管理员" : "普通用户"}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button 
+                            onClick={() => toggleStatus(user)}
+                            className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                            <span className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500" : "bg-red-500"}`} />
+                            <span className={`text-xs font-medium ${st.cls}`}>{st.label}</span>
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                          <div>{user.last_login_ip || "—"}</div>
+                          <div className="text-xs text-muted-foreground/70">{user.last_login_location || ""}</div>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button 
+                              onClick={() => deleteUser(user.user_id)}
+                              className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors" title="删除">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full border ${planBadge[user.plan]}`}>
-                          {user.plan}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <div className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
-                          <span className={`text-xs font-medium ${st.cls}`}>{st.label}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-foreground/80">
-                        {user.agent_calls > 0 ? user.agent_calls.toLocaleString() : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{user.joined}</td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button className="p-1.5 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors" title="编辑">
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors" title="发送邮件">
-                            <Mail className="h-3.5 w-3.5" />
-                          </button>
-                          <button className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors" title="删除">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="h-8 w-8 mx-auto mb-2 opacity-40" />
-              <p className="text-sm">未找到匹配的用户</p>
+
+          {/* 分页控制 */}
+          {total > 0 && (
+            <div className="p-4 border-t flex items-center justify-between bg-muted/10">
+              <div className="text-xs text-muted-foreground">
+                显示 {(page - 1) * pageSize + 1} 到 {Math.min(page * pageSize, total)} 条，共 {total} 条
+              </div>
+              <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1 || loading}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="text-xs font-medium px-2">
+                    第 {page} / {Math.ceil(total / pageSize)} 页
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2"
+                    onClick={() => setPage(p => Math.min(Math.ceil(total / pageSize), p + 1))}
+                    disabled={page === Math.ceil(total / pageSize) || loading}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-1.5 ml-2 border-l pl-3 border-border/60">
+                    <span className="text-[10px] text-muted-foreground">跳转</span>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={Math.ceil(total / pageSize)}
+                      className="w-12 h-7 px-1 text-center text-xs"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const val = parseInt((e.target as HTMLInputElement).value);
+                          const totalPages = Math.ceil(total / pageSize);
+                          if (val >= 1 && val <= totalPages) {
+                            setPage(val);
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
             </div>
           )}
         </CardContent>

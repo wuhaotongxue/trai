@@ -32,14 +32,13 @@ export default function KnowledgeBasePage() {
     setLoading(true);
     setError("");
     try {
-      const res = await request<{ code: number; msg?: string; data?: { items: KnowledgeBase[] } }>("/admin/knowledge_base/list", {
-        method: "POST",
-        body: JSON.stringify({ index_name: searchQuery || undefined }),
+      const res = await request<{ items: KnowledgeBase[]; total?: number }>("/admin/knowledge_base/indices" + (searchQuery ? `?index_name=${encodeURIComponent(searchQuery)}` : ""), {
+        method: "GET",
       });
-      if (res.code === 200 && res.data?.items) {
-        setIndices(res.data.items);
+      if (res.items) {
+        setIndices(res.items);
       } else {
-        setError(res.msg || "获取知识库列表失败");
+        setError("获取知识库列表失败");
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "请求失败";

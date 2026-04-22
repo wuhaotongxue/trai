@@ -37,7 +37,19 @@ description: "Electron 桌面客户端代码审查主入口。强制执行 TypeS
 <strong>禁止</strong>：在代码和注释中出现中文全角标点符号（`，`、`。`、`！`、`：`）
 </div>
 
-### 3. TypeScript + Node.js 环境规范
+### 3. 代码异常与格式化检测 (Pre-commit Check)
+
+<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#2E7D32;">&#x2714; 提交前强制要求</strong> — 每次向 Git 提交 client_electron 目录的代码前，必须执行格式化与异常检查
+  <div style="margin-top:8px;font-size:13px;color:#555;">
+    1. <strong>异常检测与格式化：</strong> 运行 <code>pnpm run lint:fix</code> (即 <code>eslint --fix</code>)，自动修复可修复的格式问题，并暴露潜在的异常。<br>
+    2. <strong>零警告要求：</strong> 运行 <code>pnpm run lint -- --max-warnings 0</code>，要求 lint 结果为 0 warning。<br>
+    3. <strong>类型检查：</strong> 运行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 确保没有 TypeScript 编译报错。<br>
+    4. <strong>注意 PowerShell 限制：</strong> 在 Windows 默认 PowerShell 5.x 环境下，<strong>禁止使用 <code>&&</code></strong> 拼接命令，必须使用 <code>;</code> 拼接。
+  </div>
+</div>
+
+### 4. TypeScript 5.x 环境
 
 | 配置项 | 值 |
 |--------|-----|
@@ -46,14 +58,8 @@ description: "Electron 桌面客户端代码审查主入口。强制执行 TypeS
 | TypeScript | 严格模式 (`strict: true`) |
 | 类型 | 必须显式类型注解，禁止 `any` |
 | 导入 | `import { foo } from './foo'`，禁止 `import * as foo` |
-
-### 4. 启动与发布前的代码审核 (CRITICAL)
-
-<div style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px; margin: 12px 0;">
-<strong>强制</strong>：每次启动客户端 (`pnpm dev`) 或打包发布客户端 (`pnpm build`) 之前，必须先审核代码并确保没有 TypeScript 语法/类型报错。
-<br/>
-请执行 <code>pnpm run type-check</code> (即 <code>tsc --noEmit</code>) 进行类型检查。如果存在报错，必须先修复所有错误再启动/上传。
-</div>
+| 接口请求泛型 | 调用 <code>request()</code> 接口时必须声明返回结构泛型，否则会被推导为 <code>unknown</code> 导致编译失败 |
+| 接口返回值 | 访问 API 返回的对象时，必须确保对象实际包含该字段，严格遵循接口定义 |
 
 ### 5. 五层架构强制分层 (Layered Architecture)
 

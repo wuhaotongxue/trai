@@ -211,8 +211,19 @@ export interface UserInfo {
   email: string;
   /** 角色 */
   role: string;
+  /** 企业微信 ID */
+  wecom_user_id?: string;
+  /** 最后登录 IP */
+  last_login_ip?: string;
+  /** 最后登录地址 */
+  last_login_location?: string;
   /** 头像 URL */
   avatar_url?: string;
+}
+
+export interface MeResponse {
+  user: UserInfo;
+  permissions: string[];
 }
 
 /** 认证 API */
@@ -226,7 +237,7 @@ export const authApi = {
     request<UserInfo>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
 
   /** 获取当前用户信息 */
-  me: () => request<UserInfo>("/auth/me"),
+  me: () => request<MeResponse>("/auth/me"),
 
   /** 刷新令牌 */
   refresh: (token: string) =>
@@ -799,8 +810,29 @@ export interface AnalyticsData {
   top_users: TopUserItem[];
 }
 
+/** 部门树节点 */
+export interface DepartmentTreeNode {
+  dept_id: number;
+  name: string;
+  parent_id: number;
+  order: number;
+  user_count: number;
+  children: DepartmentTreeNode[];
+}
+
 /** 管理后台 API */
 export const adminApi = {
+  /** 获取用户列表 */
+  listUsers: (params?: { limit?: number; offset?: number; role?: string; status?: string; dept_id?: number }) => {
+    const qs = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<{ total: number; users: UserInfo[] }>(`/admin/users${qs ? `?${qs}` : ""}`);
+  },
+  /** 获取部门树 */
+  getDepartmentTree: () => request<DepartmentTreeNode[]>("/admin/tree"),
   /** 获取仪表板数据 */
   getDashboard: () => request<DashboardData>("/admin/dashboard"),
   /** 获取分析数据 */

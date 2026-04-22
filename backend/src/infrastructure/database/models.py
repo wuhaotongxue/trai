@@ -248,7 +248,7 @@ class UploadTaskModel(Base):
     t_file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     """文件大小(字节)"""
     t_content_type: Mapped[str] = mapped_column(String(64), nullable=False)
-    """MIME 类型"""
+    """Content-Type 头部"""
     t_status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False, index=True)
     """任务状态:pending/uploading/completed/failed"""
     t_file_url: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -293,6 +293,52 @@ class ClientReleaseModel(Base):
     """发布人 user_id"""
 
 
+class AuditLogModel(Base):
+    """审计日志模型"""
+
+    __tablename__ = "t_audit_logs"
+    __comment__ = "审计日志表,存储系统操作审计记录"
+
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    """自增主键 ID"""
+    t_log_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """日志唯一标识 UUID"""
+    t_timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """操作时间"""
+    t_trace_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """链路追踪 ID"""
+    t_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """操作用户 ID"""
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """操作用户名"""
+    t_role: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """操作者角色"""
+    t_action: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    """审计动作类型"""
+    t_level: Mapped[str] = mapped_column(String(20), nullable=False)
+    """审计级别:info/warning/error/critical"""
+    t_method: Mapped[str] = mapped_column(String(10), nullable=False)
+    """HTTP 方法"""
+    t_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    """请求路径"""
+    t_status_code: Mapped[int] = mapped_column(Integer, nullable=False)
+    """HTTP 状态码"""
+    t_duration_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    """响应耗时(毫秒)"""
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """客户端 IP"""
+    t_user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """浏览器 User-Agent"""
+    t_request_body: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    """脱敏后的请求体"""
+    t_response_body: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    """脱敏后的响应体"""
+    t_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """异常堆栈/错误信息"""
+    t_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展元数据"""
+
+
 __all__ = [
     "Base",
     "ChatSessionModel",
@@ -304,6 +350,7 @@ __all__ = [
     "ImageGenerationModel",
     "UploadTaskModel",
     "ClientReleaseModel",
+    "AuditLogModel",
     "DepartmentModel",
     "UserDepartmentMappingModel",
 ]

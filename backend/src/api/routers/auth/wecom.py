@@ -88,9 +88,9 @@ class WeComController:
     @staticmethod
     @router.get("/callback", summary="企业微信授权回调", response_class=RedirectResponse)
     async def wecom_callback(
-        code: Annotated[str, Query(description="企业微信授权码")],
-        state: Annotated[str | None, Query(description="防重放状态码")] = None,
-        request: Request = None,  # type: ignore # 移除 | None, 让 FastAPI 正确识别 Request 依赖
+        request: Request,
+        code: str = Query(..., description="企业微信授权 code"),
+        state: str = Query(None, description="状态参数"),
         session: Session = Depends(get_db_session),
         jwt_service: JWTService = Depends(get_jwt_service),
     ) -> RedirectResponse:
@@ -160,6 +160,10 @@ class WeComController:
                 tenant_id=user.tenant_id,
             )
             refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
+
+            # 记录登录 IP
+            client_ip = request.client.host if request.client else "unknown"
+            user_repo.update(user.user_id, last_login_ip=client_ip)
 
             # 4. 重定向回前端, 将 token 放在 URL 参数中传递给前端
             # 实际生产中可以存在 Cookie 或专门的中间页

@@ -10,8 +10,11 @@ import os
 import uuid
 from typing import Any
 
+import requests
 from loguru import logger
 from sqlalchemy.orm import Session
+
+FEISHU_SYNC_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/1210fc93-997c-475d-bb80-189330d8be8e"
 
 from domain.entities.department import Department, UserDepartmentMapping
 from domain.entities.user import User, UserRole, UserStatus
@@ -135,7 +138,47 @@ class SyncOrganizationUseCase:
 
         logger.info(f"用户同步完成,共 {sync_count} 个用户")
 
-        return {"departments": len(wecom_depts), "users": sync_count, "status": "success"}
+        result = {"departments": len(wecom_depts), "users": sync_count, "status": "success"}
+        self._send_feishu_notification(result)
+        return result
+
+    def _send_feishu_notification(self, result: dict[str, Any]) -> None:
+        """发送飞书机器人通知"""
+        try:
+            content = f"🏢 **组织架构同步完成**\n"
+            content += f"━━━━━━━━━━━━━━━━\n"
+            content += f"✅ 同步状态: {result['status']}\n"
+            content += f"📂 部门总数: {result['departments']}\n"
+            content += f"👥 用户总数: {result['users']}\n"
+
+            if result.get("new_hires"):
+                content += f"\n🆕 **今日入职 ({len(result['new_hires'])}人):**\n"
+                content += "\n".join([f"- {u['name']} ({u['id']})" for u in result['new_hires'][:10]])
+                if len(result['new_hires']) > 10:
+                    content += "\n- ..."
+
+            if result.get("resignations"):
+                content += f"\n🚪 **今日离职 ({len(result['resignations'])}人):**\n"
+                content += "\n".join([f"- {u['name']} ({u['id']})" for u in result['resignations'][:10]])
+                if len(result['resignations']) > 10:
+                    content += "\n- ..."
+
+            payload = {
+                "msg_type": "post",
+                "content": {
+                    "post": {
+                        "zh_cn": {
+                            "title": "组织架构同步报告",
+                            "content": [
+                                [{"tag": "text", "text": content}]
+                            ]
+                        }
+                    }
+                }
+            }
+            requests.post(FEISHU_SYNC_WEBHOOK, json=payload, timeout=10)
+        except Exception as e:
+            logger.error(f"Failed to send Feishu notification: {e}")
 
     def _sync_user_entity(self, wecom_user: Any) -> User:
         """同步单个用户信息到数据库并返回实体
