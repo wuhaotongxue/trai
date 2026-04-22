@@ -8,6 +8,9 @@ import React, { useState, useEffect } from 'react'
 import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
 import { should_ellipsis } from '@/utils/ui_text'
 
+/**
+ * Agent 接口定义
+ */
 interface Agent {
   id: string
   name: string
@@ -19,6 +22,9 @@ interface Agent {
   created_at: string
 }
 
+/**
+ * 图标选项列表
+ */
 const icon_options = [
   { value: 'Bot', label: 'Bot', component: Bot },
   { value: 'Settings', label: 'Settings', component: Settings },
@@ -32,6 +38,9 @@ const icon_options = [
   { value: 'Cloud', label: 'Cloud', component: Cloud },
 ]
 
+/**
+ * 模型选项列表
+ */
 const model_options = [
   { value: 'gpt-4o', label: 'GPT-4o' },
   { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
@@ -40,24 +49,71 @@ const model_options = [
   { value: 'qwen-max', label: 'Qwen Max' },
 ]
 
+/**
+ * Agent 管理页面组件
+ * 
+ * 支持 Agent 列表展示、注册新 Agent、启停操作和状态检测
+ */
 const AgentManagement: React.FC = () => {
+  /**
+   * Agent 列表
+   */
   const [agents, set_agents] = useState<Agent[]>([])
+  /**
+   * 加载状态
+   */
   const [loading, set_loading] = useState(false)
+  /**
+   * 错误信息
+   */
   const [error, set_error] = useState('')
+  /**
+   * 当前正在检测状态的 Agent ID
+   */
   const [checking_id, set_checking_id] = useState<string | null>(null)
 
+  /**
+   * 左侧边栏是否打开
+   */
   const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
+  /**
+   * 中间边栏是否打开
+   */
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
+  /**
+   * 当前选中的 Agent ID
+   */
   const [active_agent_id, set_active_agent_id] = useState<string>('')
 
+  /**
+   * 是否显示注册模态框
+   */
   const [show_register_modal, set_show_register_modal] = useState(false)
+  /**
+   * 是否显示编辑模态框
+   */
   const [show_edit_modal, set_show_edit_modal] = useState(false)
   
+  /**
+   * 新 Agent 表单数据
+   */
   const [new_agent, set_new_agent] = useState({ name: '', description: '', model: 'gpt-4o', system_prompt: '', icon: 'Bot' })
+  /**
+   * 当前编辑的 Agent
+   */
   const [edit_agent, set_edit_agent] = useState<Agent | null>(null)
+  /**
+   * 是否正在注册
+   */
   const [registering, set_registering] = useState(false)
+  /**
+   * 是否正在更新
+   */
   const [updating, set_updating] = useState(false)
 
+  /**
+   * 获取 Agent 列表
+   */
   const fetch_agents = async () => {
     set_loading(true)
     try {
@@ -78,10 +134,18 @@ const AgentManagement: React.FC = () => {
     }
   }
 
+  /**
+   * 组件挂载时获取 Agent 列表
+   */
   useEffect(() => {
     fetch_agents()
   }, [])
 
+  /**
+   * 切换 Agent 状态（启动/停止）
+   * @param id Agent ID
+   * @param current_status 当前状态
+   */
   const handle_toggle = async (id: string, current_status: string) => {
     const action = current_status === 'running' ? 'stop' : 'start'
     try {
@@ -96,6 +160,10 @@ const AgentManagement: React.FC = () => {
     }
   }
 
+  /**
+   * 检测 Agent 状态
+   * @param id Agent ID
+   */
   const handle_check = async (id: string) => {
     set_checking_id(id)
     try {
@@ -115,6 +183,9 @@ const AgentManagement: React.FC = () => {
     }
   }
 
+  /**
+   * 注册新 Agent
+   */
   const handle_register = async () => {
     if (!new_agent.name || !new_agent.description || !new_agent.system_prompt) {
       alert('Please fill in all fields')
@@ -143,6 +214,9 @@ const AgentManagement: React.FC = () => {
     }
   }
 
+  /**
+   * 编辑 Agent
+   */
   const handle_edit = async () => {
     if (!edit_agent) return
     if (!edit_agent.name || !edit_agent.description || !edit_agent.system_prompt) {
@@ -173,18 +247,33 @@ const AgentManagement: React.FC = () => {
     }
   }
 
+  /**
+   * 打开编辑模态框
+   * @param agent 要编辑的 Agent
+   */
   const open_edit_modal = (agent: Agent) => {
     set_edit_agent({ ...agent })
     set_show_edit_modal(true)
   }
 
+  /**
+   * 当前选中的 Agent
+   */
   const active_agent = agents.find(a => a.id === active_agent_id)
 
+  /**
+   * 获取图标组件
+   * @param icon_name 图标名称
+   * @returns 图标组件
+   */
   const get_icon_component = (icon_name: string) => {
     const icon = icon_options.find(opt => opt.value === icon_name)
     return icon ? icon.component : Bot
   }
 
+  /**
+   * 当前活跃 Agent 的图标组件
+   */
   const IconComponent = active_agent ? get_icon_component(active_agent.icon) : Bot
 
   return (
