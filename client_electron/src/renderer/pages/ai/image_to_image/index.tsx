@@ -22,6 +22,11 @@ interface StyleCategory {
   icon: React.ReactNode
 }
 
+/**
+ * 图生图组件
+ * 
+ * 用于通过参考图片和文本描述生成新图像，支持风格分类和预设选择
+ */
 const ImageToImage: React.FC = () => {
   const [prompt, set_prompt] = useState('将这只可爱的猫咪图片转换为赛博朋克风格, 霓虹灯, 未来感...')
   const [source_url, set_source_url] = useState('./kity.png')
@@ -34,12 +39,21 @@ const ImageToImage: React.FC = () => {
   const [active_category, set_active_category] = useState<string>('scifi')
   const file_input_ref = useRef<HTMLInputElement>(null)
 
+  /**
+   * 清理预览 URL
+   */
   useEffect(() => {
     return () => {
       if (source_preview_url) URL.revokeObjectURL(source_preview_url)
     }
   }, [source_preview_url])
 
+  /**
+   * 读取文件为 Data URL
+   * 
+   * @param file 要读取的文件
+   * @returns Promise<string> - 文件的 Data URL
+   */
   const read_as_data_url = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -49,11 +63,17 @@ const ImageToImage: React.FC = () => {
     })
   }
 
+  /**
+   * 风格分类列表
+   */
   const categories: StyleCategory[] = [
     { id: 'scifi', name: '科幻风格', icon: <Rocket size={14} /> },
     { id: 'art', name: '艺术风格', icon: <PaletteIcon size={14} /> }
   ]
 
+  /**
+   * 风格预设列表
+   */
   const style_presets: StylePreset[] = [
     { id: 'cyberpunk', name: '赛博朋克', prompt: '将图片转换为赛博朋克风格, 霓虹灯, 未来感', category: 'scifi' },
     { id: 'anime', name: '动漫风格', prompt: '将图片转换为日本动漫风格, 色彩鲜艳', category: 'art' },
@@ -61,8 +81,16 @@ const ImageToImage: React.FC = () => {
     { id: 'oil_painting', name: '油画风格', prompt: '将图片转换为古典油画风格, 厚重的笔触', category: 'art' }
   ]
 
+  /**
+   * 根据当前选中的分类过滤风格预设
+   */
   const filtered_styles = style_presets.filter(s => s.category === active_category)
 
+  /**
+   * 处理图像生成
+   * 
+   * 调用 Electron API 生成图像，处理加载状态和错误
+   */
   const handle_generate = async () => {
     if (!prompt.trim() || !source_url.trim()) return
     set_loading(true)
@@ -83,6 +111,13 @@ const ImageToImage: React.FC = () => {
     }
   }
 
+  /**
+   * 应用风格预设
+   * 
+   * @param style 选中的风格预设
+   * 
+   * 将预设的提示词应用到输入框
+   */
   const apply_style = (style: StylePreset) => {
     set_prompt(style.prompt)
     set_active_style(style.id)

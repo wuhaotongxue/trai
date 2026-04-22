@@ -23,6 +23,11 @@ interface VideoCategory {
   icon: React.ReactNode
 }
 
+/**
+ * 视频生成组件
+ * 
+ * 用于通过文本描述生成视频，支持风格分类和预设选择
+ */
 const AiVideo: React.FC = () => {
   const [prompt, set_prompt] = useState('镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭...')
   const [loading, set_loading] = useState(false)
@@ -31,11 +36,17 @@ const AiVideo: React.FC = () => {
   const [active_style, set_active_style] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('city')
 
+  /**
+   * 视频分类列表
+   */
   const categories: VideoCategory[] = [
     { id: 'city', name: '城市风格', icon: <Rocket size={14} /> },
     { id: 'nature', name: '自然风格', icon: <TreePine size={14} /> }
   ]
 
+  /**
+   * 视频风格预设列表
+   */
   const video_styles: VideoStyle[] = [
     { id: 'cyberpunk', name: '赛博朋克', prompt: '镜头从高空俯冲穿过赛博朋克城市的街道, 霓虹灯闪烁, 飞行器穿梭', icon: <Film size={14} />, category: 'city' },
     { id: 'scifi', name: '科幻场景', prompt: '未来太空站内部, 宇航员在失重环境中工作, 科幻感', icon: <Tv size={14} />, category: 'city' },
@@ -43,8 +54,16 @@ const AiVideo: React.FC = () => {
     { id: 'cinematic', name: '电影质感', prompt: '电影级别的慢动作镜头, 戏剧性的光影, 史诗感', icon: <Clapperboard size={14} />, category: 'nature' }
   ]
 
+  /**
+   * 根据当前选中的分类过滤视频风格
+   */
   const filtered_styles = video_styles.filter(s => s.category === active_category)
 
+  /**
+   * 处理视频生成
+   * 
+   * 调用 Electron API 生成视频，处理加载状态和错误
+   */
   const handle_generate = async () => {
     if (!prompt.trim()) return
     set_loading(true)
@@ -65,6 +84,13 @@ const AiVideo: React.FC = () => {
     }
   }
 
+  /**
+   * 应用视频风格预设
+   * 
+   * @param style 选中的视频风格
+   * 
+   * 将预设的提示词应用到输入框
+   */
   const apply_style = (style: VideoStyle) => {
     set_prompt(style.prompt)
     set_active_style(style.id)
