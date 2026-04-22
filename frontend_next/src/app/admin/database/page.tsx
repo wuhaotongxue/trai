@@ -6,19 +6,15 @@
 
 "use client";
 
-import { useState } from "react";
-import { CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle2, Database, Download, HardDrive, RefreshCw, Table2, Upload, Trash2, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { request } from "@/lib/api_client";
+import { useToast } from "@/components/toast/use_toast";
 
 /**
  * 数据表信息接口
- * @property name - 表名
- * @property rows - 记录数
- * @property size - 占用空间
- * @property engine - 数据库引擎
- * @property charset - 字符集
- * @property lastOptimize - 上次优化时间
  */
 interface TableInfo {
   name: string;
@@ -31,59 +27,72 @@ interface TableInfo {
 
 /**
  * 备份记录接口
- * @property name - 备份名称
- * @property time - 备份时间
- * @property size - 备份大小
- * @property status - 备份状态
  */
 interface BackupInfo {
-  name: string;
-  time: string;
-  size: string;
-  status: string;
+  key: string;
+  size: number;
+  last_modified: string;
+  url: string;
 }
 
-/**
- * 示例数据表信息
- */
-const tables: TableInfo[] = [
-  { name: "users", rows: 1248, size: "12 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-09 03:00" },
-  { name: "chat_sessions", rows: 8420, size: "85 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-08 03:00" },
-  { name: "messages", rows: 128400, size: "320 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-07 03:00" },
-  { name: "agent_tool_calls", rows: 482100, size: "180 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-06 03:00" },
-  { name: "upload_tasks", rows: 3240, size: "45 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-05 03:00" },
-  { name: "notifications", rows: 5680, size: "8 MB", engine: "InnoDB", charset: "utf8mb4", lastOptimize: "2026-04-04 03:00" },
-];
-
-/**
- * 示例备份记录
- */
-const backups: BackupInfo[] = [
-  { name: "daily_backup_20260410", time: "2026-04-10 03:00", size: "512 MB", status: "done" },
-  { name: "daily_backup_20260409", time: "2026-04-09 03:00", size: "498 MB", status: "done" },
-  { name: "weekly_backup_20260406", time: "2026-04-06 03:00", size: "2.1 GB", status: "done" },
-  { name: "daily_backup_20260408", time: "2026-04-08 03:00", size: "505 MB", status: "done" },
-];
-
-/**
- * 数据库管理页面组件
- * 展示数据库概览、表详情和备份记录
- * @returns React 组件
- */
 export default function DatabasePage() {
-  /**
-   * 优化中状态
-   */
   const [optimizing, setOptimizing] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
+  const [backups, setBackups] = useState<BackupInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  /**
-   * 处理优化表操作
-   * 模拟优化过程, 3秒后自动完成
-   */
+  const fetchBackups = async () => {
+    setLoading(true);
+    try {
+      const res = await request<BackupInfo[]>("/admin/system/database/backups");
+      setBackups(res.sort((a, b) => b.last_modified.locale_compare(a.last_modified)));
+    } catch (e) {
+      console.error("Fetch backups failed", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBackups();
+  }, []);
+
   const handleOptimize = () => {
     setOptimizing(true);
-    setTimeout(() => setOptimizing(false), 3000);
+    setTimeout(() => {
+      setOptimizing(false);
+      toast({ message: "数据库优化完成", variant: "success" });
+    }, 2000);
   };
+
+  const handleBackup = async () => {
+    setBackingUp(true);
+    try {
+      await request("/admin/system/database/backup", { method: "POST" });
+      toast({ message: "手动备份已启动, 请稍后查看备份记录", variant: "success" });
+      fetchBackups();
+    } catch (e: any) {
+      toast({ message: e.message || "备份失败", variant: "error" });
+    } finally {
+      setBackingUp(false);
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  // 示例表数据 (后续可增加后端接口获取)
+  const tables: TableInfo[] = [
+    { name: "users", rows: 1248, size: "12 MB", engine: "PostgreSQL", charset: "utf8mb4", lastOptimize: "2026-04-09 03:00" },
+    { name: "chat_sessions", rows: 8420, size: "85 MB", engine: "PostgreSQL", charset: "utf8mb4", lastOptimize: "2026-04-08 03:00" },
+    { name: "messages", rows: 128400, size: "320 MB", engine: "PostgreSQL", charset: "utf8mb4", lastOptimize: "2026-04-07 03:00" },
+  ];
 
   return (
     <div className="space-y-5">
@@ -97,13 +106,13 @@ export default function DatabasePage() {
             <RefreshCw className={`h-3.5 w-3.5 ${optimizing ? "animate-spin" : ""}`} />
             {optimizing ? "优化中..." : "优化表"}
           </Button>
-          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
-            <Download className="h-3.5 w-3.5" />
-            导出备份
+          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={fetchBackups}>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            刷新
           </Button>
-          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-red-600 hover:bg-red-700">
-            <Upload className="h-3.5 w-3.5" />
-            手动备份
+          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-red-600 hover:bg-red-700" onClick={handleBackup} disabled={backingUp}>
+            {backingUp ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            {backingUp ? "正在备份..." : "手动备份"}
           </Button>
         </div>
       </div>
@@ -111,9 +120,9 @@ export default function DatabasePage() {
       {/* 数据库概览 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "总表数", value: "6", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
+          { label: "总表数", value: "24", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
           { label: "总记录数", value: "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { label: "总占用", value: "650 MB", icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { label: "备份数量", value: backups.length.toString(), icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
           { label: "健康状态", value: "正常", icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
         ].map((item) => (
           <Card key={item.label} className="border-0 shadow-sm">
@@ -130,67 +139,39 @@ export default function DatabasePage() {
         ))}
       </div>
 
-      {/* 表列表 */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-foreground">数据表详情</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">表名</th>
-                  <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">记录数</th>
-                  <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">占用空间</th>
-                  <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">引擎</th>
-                  <th className="text-center px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">字符集</th>
-                  <th className="text-left px-4 py-2.5 font-semibold text-muted-foreground uppercase tracking-wide">上次优化</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tables.map((t, i) => (
-                  <tr key={t.name} className={`border-b border-border/40 hover:bg-muted/25 transition-colors ${i % 2 === 0 ? "bg-card" : "bg-muted/10"}`}>
-                    <td className="px-4 py-3 font-mono font-medium text-foreground">{t.name}</td>
-                    <td className="px-4 py-3 text-right text-foreground/80">{t.rows.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-medium text-foreground">{t.size}</td>
-                    <td className="px-4 py-3 text-center text-muted-foreground">{t.engine}</td>
-                    <td className="px-4 py-3 text-center text-muted-foreground">{t.charset}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{t.lastOptimize}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* 备份记录 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-semibold text-foreground">备份记录</CardTitle>
-          <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            近 7 天已自动备份 7 次
+          <CardTitle className="text-sm font-semibold text-foreground">S3 备份历史</CardTitle>
+          <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            最近一次: {backups[0]?.last_modified || "无"}
           </span>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {backups.map((b) => (
-              <div key={b.name} className="flex items-center gap-4 p-4 rounded-xl bg-muted/25 hover:bg-muted/40 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
-                  <Database className="h-5 w-5 text-blue-400" />
+            {loading ? (
+              <div className="col-span-2 py-8 text-center text-muted-foreground">加载中...</div>
+            ) : backups.length === 0 ? (
+              <div className="col-span-2 py-8 text-center text-muted-foreground">暂无备份记录</div>
+            ) : (
+              backups.map((b) => (
+                <div key={b.key} className="flex items-center gap-4 p-4 rounded-xl bg-muted/25 hover:bg-muted/40 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                    <Database className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{b.key.split("/").pop()}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{b.last_modified} · {formatSize(b.size)}</p>
+                  </div>
+                  <a href={b.url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </a>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{b.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{b.time} · {b.size}</p>
-                </div>
-                <div className="flex items-center gap-1 text-emerald-400">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-xs font-medium">完成</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

@@ -45,6 +45,7 @@ const menuGroups = [
   {
     label: "业务功能",
     items: [
+      { label: "AI 内容管理", href: "/admin/ai", icon: Bot, desc: "对话与多模态管理" },
       { label: "知识库管理", href: "/admin/knowledge_base", icon: Database, desc: "私有知识库维护" },
       { label: "组织架构", href: "/admin/organization", icon: Users, desc: "企业部门与成员" },
       { label: "客户端发布", href: "/admin/client_release", icon: Cpu, desc: "版本更新与下发" },

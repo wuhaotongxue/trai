@@ -315,7 +315,18 @@ export default function OrganizationPage() {
                   ) : (
                     users.map((user) => (
                       <tr key={user.user_id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="p-4 font-medium">{user.display_name}</td>
+                        <td className="p-4 font-medium">
+                          <div className="flex items-center gap-3">
+                            {user.avatar_url ? (
+                              <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-full object-cover border border-border" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                                {user.display_name?.[0] || user.username?.[0]}
+                              </div>
+                            )}
+                            <span>{user.display_name}</span>
+                          </div>
+                        </td>
                         <td className="p-4 text-muted-foreground font-mono">{user.wecom_user_id || "---"}</td>
                         <td className="p-4 text-muted-foreground">{user.email}</td>
                         <td className="p-4">
