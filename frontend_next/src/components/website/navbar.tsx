@@ -15,6 +15,7 @@ import { Bot, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme_toggle";
 import { cn } from "@/lib/utils";
+import { useAgentStore } from "@/stores/agent.store";
 
 const navItems = [
   { label: "首页", href: "/" },
@@ -39,6 +40,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const { setFloatingChatOpen } = useAgentStore();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -110,12 +112,15 @@ export function Navbar() {
           {/* Right: Theme Toggle + AI Assistant + CTA */}
           <div className="hidden lg:flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/agent" target="_blank">
-              <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium gap-1.5">
-                <Bot className="h-4 w-4 text-blue-500" />
-                AI 助手
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-sm text-slate-700 dark:text-slate-200 font-medium gap-1.5"
+              onClick={() => setFloatingChatOpen(true)}
+            >
+              <Bot className="h-4 w-4 text-blue-500" />
+              AI 助手
+            </Button>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
                 登录

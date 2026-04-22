@@ -13,11 +13,12 @@ import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { ChatPanel } from "@/components/agent/chat_panel";
 import { cn } from "@/lib/utils";
+import { useAgentStore } from "@/stores/agent.store";
 
 export function FloatingWidget() {
   const [showTop, setShowTop] = useState(false);
   const [showBottom, setShowBottom] = useState(true);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const { isFloatingChatOpen: isChatOpen, setFloatingChatOpen: setIsChatOpen } = useAgentStore();
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
 

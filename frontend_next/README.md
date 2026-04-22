@@ -65,6 +65,12 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_22_1515
+- **feat(agent)**: Agent 页面重构, 引入 DeepSeek 风格左侧侧边栏, 支持多会话切换与历史管理
+- **feat(agent)**: 对话框支持会话重命名、删除及一键开启新对话
+- **fix(math)**: 修复对话中数学公式 (LaTeX) 渲染问题, 适配 KaTeX
+- **feat(release)**: 客户端发布页支持文件上传及进度展示
+
 ### 🎨 前端_2026_04_21_1941
 - **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
 - **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
