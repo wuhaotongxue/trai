@@ -5,8 +5,8 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Edit2, Mail, Search, Trash2, UserPlus } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Download, Search, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,7 +36,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const roleQuery = filterRole === "全部" ? "" : `&role=${filterRole === "管理员" ? "admin" : "normal"}`;
@@ -48,11 +48,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterRole, page, pageSize]);
 
   useEffect(() => {
     fetchUsers();
-  }, [filterRole, page, pageSize]);
+  }, [fetchUsers]);
 
   const toggleStatus = async (user: UserItem) => {
     const newStatus = user.status === "active" ? "disabled" : "active";

@@ -29,6 +29,61 @@ class ReleaseResponse(BaseModel):
     message: str = Field(description="提示信息")
 
 
+class ReleaseListItem(BaseModel):
+    """发版列表项"""
+
+    id: int = Field(description="ID")
+    version: str = Field(description="版本号")
+    release_notes: str | None = Field(default=None, description="更新日志")
+    created_at: str = Field(description="创建时间")
+    installer_url: str | None = Field(default=None, description="下载链接")
+
+
+@router.get("/client/releases", response_model=list[ReleaseListItem], summary="获取发版历史列表")
+async def list_releases(
+    current_user: CurrentUser,
+    s3_service: S3StorageService = Depends(),
+) -> list[ReleaseListItem]:
+    """获取所有已发布的版本列表
+
+    Args:
+        current_user: 当前管理员
+        s3_service: S3 服务
+
+    Returns:
+        list[ReleaseListItem]: 版本列表
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": 403, "message": "仅管理员可查看发版记录"},
+        )
+
+    db = get_session()
+    try:
+        stmt = select(ClientReleaseModel).order_by(ClientReleaseModel.t_created_at.desc())
+        releases = db.execute(stmt).scalars().all()
+
+        items = []
+        for r in releases:
+            url = None
+            if r.t_installer_exe_key:
+                url = s3_service.generate_presigned_url(r.t_installer_exe_key, expiration=3600)
+
+            items.append(
+                ReleaseListItem(
+                    id=r.t_id,
+                    version=r.t_version,
+                    release_notes=r.t_release_notes,
+                    created_at=r.t_created_at.isoformat(),
+                    installer_url=url,
+                )
+            )
+        return items
+    finally:
+        db.close()
+
+
 class AdminClientReleaseAPI:
     """管理端客户端发布接口类"""
 
@@ -102,6 +157,7 @@ class AdminClientReleaseAPI:
 
             # 4. 发送通知 (飞书 & 企微)
             from application.usecases.release_client import ReleaseClientUseCase
+
             releaser = ReleaseClientUseCase()
             download_url = s3_service.generate_presigned_url(exe_key, expiration=31536000)
             releaser._send_notifications(version, download_url, release_notes or "无更新日志")

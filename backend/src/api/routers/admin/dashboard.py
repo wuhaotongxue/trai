@@ -97,8 +97,8 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
 
     active_today = (
         db.execute(
-            select(func.count(func.distinct(ChatSessionModel.t_user_id))).where(
-                ChatSessionModel.t_updated_at >= datetime.combine(today, datetime.min.time())
+            select(func.count(func.distinct(UserModel.t_user_id))).where(
+                UserModel.t_updated_at >= datetime.combine(today, datetime.min.time())
             )
         ).scalar()
         or 0
@@ -107,19 +107,20 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
     agent_calls = (
         db.execute(
             select(func.count()).where(
-                QuotaTransactionLogModel.t_transaction_type == "deduct",
                 QuotaTransactionLogModel.t_quota_type == "agent_tool_call",
             )
         ).scalar()
         or 0
     )
 
+    from infrastructure.database.models import ImageGenerationModel
+
     stats = DashboardStats(
         total_users=total_users,
         active_users_today=active_today,
         total_sessions=total_sessions,
         total_messages=total_messages,
-        total_image_generations=0,
+        total_image_generations=db.execute(select(func.count()).select_from(ImageGenerationModel)).scalar() or 0,
         total_uploads=db.execute(select(func.count()).select_from(UploadTaskModel)).scalar() or 0,
         total_agent_tool_calls=agent_calls,
         vip_users=vip_users,

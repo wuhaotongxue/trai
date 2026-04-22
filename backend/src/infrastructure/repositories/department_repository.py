@@ -82,9 +82,8 @@ class DepartmentRepository(IDepartmentRepository):
         """
         from sqlalchemy import func
 
-        stmt = (
-            select(UserDepartmentMappingModel.t_dept_id, func.count(UserDepartmentMappingModel.t_user_id))
-            .group_by(UserDepartmentMappingModel.t_dept_id)
+        stmt = select(UserDepartmentMappingModel.t_dept_id, func.count(UserDepartmentMappingModel.t_user_id)).group_by(
+            UserDepartmentMappingModel.t_dept_id
         )
         results = self._session.execute(stmt).all()
         return {dept_id: count for dept_id, count in results}

@@ -11,12 +11,13 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from loguru import logger
 import psycopg2
+from loguru import logger
+
 
 class IPMigrationScript:
     """IP 字段迁移脚本类"""
-    
+
     @staticmethod
     def get_db_config() -> dict[str, str | int]:
         """获取数据库配置"""
@@ -53,7 +54,7 @@ class IPMigrationScript:
             conn = cls.get_db_connection()
             logger.info("数据库连接成功")
             cur = conn.cursor()
-            
+
             # 添加 t_last_login_ip
             try:
                 cur.execute('ALTER TABLE "t_users" ADD COLUMN "t_last_login_ip" VARCHAR(64);')
@@ -62,7 +63,7 @@ class IPMigrationScript:
             except psycopg2.errors.DuplicateColumn:
                 conn.rollback()
                 logger.info("    [SKIP] t_last_login_ip already exists")
-                
+
             # 添加 t_last_login_location
             try:
                 cur.execute('ALTER TABLE "t_users" ADD COLUMN "t_last_login_location" VARCHAR(128);')
@@ -82,9 +83,11 @@ class IPMigrationScript:
             logger.error(f"迁移失败: {str(e)}")
             raise
 
+
 if __name__ == "__main__":
     try:
         from dotenv import load_dotenv
+
         env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
         print("Loading env from:", env_path)
         load_dotenv(env_path)

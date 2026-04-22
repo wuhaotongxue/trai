@@ -362,6 +362,9 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
                 <div className="text-left hidden md:block">
                   <p className="text-xs font-semibold text-foreground leading-none">
                     {user?.display_name || user?.username || "管理员"}
+                    {user?.username && user.username !== user.display_name && (
+                      <span className="ml-1 opacity-50 font-normal">({user.username})</span>
+                    )}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}

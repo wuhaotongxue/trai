@@ -1381,6 +1381,30 @@ async def list_indices(current_user: CurrentUser, index_name: str | None = None)
     return await controller.list_indices(current_user, index_name=index_name)
 
 
+class KnowledgeBaseListRequest(BaseModel):
+    """兼容旧版的知识库列表请求"""
+
+    index_name: str | None = Field(default=None, description="按名称过滤")
+
+
+@router.post(
+    "/list",
+    response_model=KnowledgeBaseListResponse,
+    summary="获取知识库列表 (兼容旧版)",
+    description="提供 POST 方法的知识库列表获取, 兼容之前的请求方式.",
+    tags=["管理后台"],
+)
+async def list_indices_post(
+    current_user: CurrentUser,
+    request: KnowledgeBaseListRequest | None = None,
+) -> KnowledgeBaseListResponse:
+    """
+    获取知识库列表 (POST).
+    """
+    index_name = request.index_name if request else None
+    return await controller.list_indices(current_user, index_name=index_name)
+
+
 @router.get(
     "/indices/{index_id}/files",
     response_model=KnowledgeBaseListResponse,
