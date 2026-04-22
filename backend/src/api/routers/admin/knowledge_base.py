@@ -18,7 +18,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from api.deps import AdminUser
+from api.deps import CurrentUser
 
 router = APIRouter(prefix="/knowledge_base")
 
@@ -1032,7 +1032,7 @@ class KnowledgeBaseDemoController:
         """
         self._service = KnowledgeBaseDemoService()
 
-    def _is_super_admin(self, current_user: AdminUser) -> bool:
+    def _is_super_admin(self, current_user: CurrentUser) -> bool:
         """
         判断是否为超级管理员.
 
@@ -1050,7 +1050,7 @@ class KnowledgeBaseDemoController:
         """
         return str(current_user.get("username") or "") == "admin"
 
-    def _get_owner_prefix(self, current_user: AdminUser) -> str:
+    def _get_owner_prefix(self, current_user: CurrentUser) -> str:
         """
         获取当前用户的知识库名称前缀.
 
@@ -1066,7 +1066,7 @@ class KnowledgeBaseDemoController:
         username = str(current_user.get("username") or "").strip()
         return f"{username}__" if username else ""
 
-    def _ensure_index_access(self, current_user: AdminUser, index_id: str) -> None:
+    def _ensure_index_access(self, current_user: CurrentUser, index_id: str) -> None:
         """
         校验当前用户是否有权限访问指定知识库.
 
@@ -1094,7 +1094,7 @@ class KnowledgeBaseDemoController:
     async def demo_create(
         self,
         request: KnowledgeBaseDemoCreateRequest,
-        current_user: AdminUser,
+        current_user: CurrentUser,
     ) -> KnowledgeBaseDemoCreateResponse:
         """
         创建知识库 Demo.
@@ -1127,7 +1127,7 @@ class KnowledgeBaseDemoController:
         )
         return self._service.demo_create(scoped_request)
 
-    async def list_categories(self, current_user: AdminUser) -> KnowledgeBaseListResponse:
+    async def list_categories(self, current_user: CurrentUser) -> KnowledgeBaseListResponse:
         """
         获取知识库分类列表.
 
@@ -1153,7 +1153,7 @@ class KnowledgeBaseDemoController:
             )
         return self._service.list_categories()
 
-    async def list_indices(self, current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+    async def list_indices(self, current_user: CurrentUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
         """
         获取知识库列表.
 
@@ -1186,7 +1186,7 @@ class KnowledgeBaseDemoController:
 
     async def list_index_files(
         self,
-        current_user: AdminUser,
+        current_user: CurrentUser,
         index_id: str,
         page_number: int | None = None,
         page_size: int | None = None,
@@ -1211,7 +1211,7 @@ class KnowledgeBaseDemoController:
 
     async def upload_text_to_index(
         self,
-        current_user: AdminUser,
+        current_user: CurrentUser,
         index_id: str,
         request: KnowledgeBaseUploadTextRequest,
     ) -> KnowledgeBaseUploadTextResponse:
@@ -1234,7 +1234,7 @@ class KnowledgeBaseDemoController:
 
     async def rename_index(
         self,
-        current_user: AdminUser,
+        current_user: CurrentUser,
         index_id: str,
         request: KnowledgeBaseRenameIndexRequest,
     ) -> KnowledgeBaseRenameIndexResponse:
@@ -1264,7 +1264,7 @@ class KnowledgeBaseDemoController:
         return self._service.rename_index(index_id=index_id, request=scoped_request)
 
     async def delete_index_file(
-        self, current_user: AdminUser, index_id: str, file_id: str
+        self, current_user: CurrentUser, index_id: str, file_id: str
     ) -> KnowledgeBaseDeleteResponse:
         """
         删除知识库文件.
@@ -1283,7 +1283,7 @@ class KnowledgeBaseDemoController:
         self._ensure_index_access(current_user, index_id)
         return self._service.delete_index_file(index_id=index_id, file_id=file_id)
 
-    async def delete_index(self, current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+    async def delete_index(self, current_user: CurrentUser, index_id: str) -> KnowledgeBaseDeleteResponse:
         """
         删除知识库.
 
@@ -1313,7 +1313,7 @@ controller = KnowledgeBaseDemoController()
 )
 async def demo_create(
     request: KnowledgeBaseDemoCreateRequest,
-    current_user: AdminUser,
+    current_user: CurrentUser,
 ) -> KnowledgeBaseDemoCreateResponse:
     """
     创建知识库 Demo.
@@ -1341,7 +1341,7 @@ async def demo_create(
     description="从百炼工作空间读取知识库分类列表.",
     tags=["管理后台"],
 )
-async def list_categories(current_user: AdminUser) -> KnowledgeBaseListResponse:
+async def list_categories(current_user: CurrentUser) -> KnowledgeBaseListResponse:
     """
     获取知识库分类列表.
 
@@ -1364,7 +1364,7 @@ async def list_categories(current_user: AdminUser) -> KnowledgeBaseListResponse:
     description="从百炼工作空间读取知识库列表(索引列表).",
     tags=["管理后台"],
 )
-async def list_indices(current_user: AdminUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
+async def list_indices(current_user: CurrentUser, index_name: str | None = None) -> KnowledgeBaseListResponse:
     """
     获取知识库列表.
 
@@ -1389,7 +1389,7 @@ async def list_indices(current_user: AdminUser, index_name: str | None = None) -
     tags=["管理后台"],
 )
 async def list_index_files(
-    current_user: AdminUser,
+    current_user: CurrentUser,
     index_id: str,
     page_number: int | None = None,
     page_size: int | None = None,
@@ -1422,7 +1422,7 @@ async def list_index_files(
     tags=["管理后台"],
 )
 async def upload_text_to_index(
-    current_user: AdminUser,
+    current_user: CurrentUser,
     index_id: str,
     request: KnowledgeBaseUploadTextRequest,
 ) -> KnowledgeBaseUploadTextResponse:
@@ -1451,7 +1451,7 @@ async def upload_text_to_index(
     tags=["管理后台"],
 )
 async def rename_index(
-    current_user: AdminUser,
+    current_user: CurrentUser,
     index_id: str,
     request: KnowledgeBaseRenameIndexRequest,
 ) -> KnowledgeBaseRenameIndexResponse:
@@ -1479,7 +1479,7 @@ async def rename_index(
     description="从知识库移除文件并删除文件资源.",
     tags=["管理后台"],
 )
-async def delete_index_file(current_user: AdminUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
+async def delete_index_file(current_user: CurrentUser, index_id: str, file_id: str) -> KnowledgeBaseDeleteResponse:
     """
     删除知识库文件.
 
@@ -1504,7 +1504,7 @@ async def delete_index_file(current_user: AdminUser, index_id: str, file_id: str
     description="删除知识库(百炼 Index).",
     tags=["管理后台"],
 )
-async def delete_index(current_user: AdminUser, index_id: str) -> KnowledgeBaseDeleteResponse:
+async def delete_index(current_user: CurrentUser, index_id: str) -> KnowledgeBaseDeleteResponse:
     """
     删除知识库.
 
