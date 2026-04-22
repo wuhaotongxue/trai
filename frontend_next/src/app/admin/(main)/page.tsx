@@ -13,6 +13,18 @@ import { Activity, AlertCircle, ArrowUp, Bot, CheckCircle2, Clock, Cpu, Database
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+/**
+ * 仪表盘核心指标数据结构
+ * @property total_users 总用户数
+ * @property active_users_today 今日活跃用户
+ * @property total_sessions 总会话数
+ * @property total_messages 总消息数
+ * @property total_image_generations 总绘图数
+ * @property total_uploads 总文件上传数
+ * @property total_agent_tool_calls 总 Agent 工具调用
+ * @property vip_users VIP 用户数
+ * @property new_users_this_month 本月新增用户
+ */
 type DashboardStats = {
   total_users: number;
   active_users_today: number;
@@ -34,6 +46,10 @@ type DailyTrend = {
 };
 
 // 多彩紧凑数据卡片
+/**
+ * 仪表盘数据卡片配置列表
+ * 定义了卡片的标签、对应数据的 key、图标、渐变背景色及趋势等属性
+ */
 const statCards = [
   {
     label: "总用户数",
@@ -111,6 +127,11 @@ const services = [
 
 const skeletonChartHeights = [62, 44, 78, 35, 56, 24, 71, 40, 65, 29, 52, 33, 84, 47, 58, 22, 69, 38, 74, 41];
 
+/**
+ * 骨架屏加载卡片组件
+ * 用于在数据加载时展示占位动画, 提升用户感知体验
+ * @returns React 组件
+ */
 function SkeletonCard() {
   return (
     <Card className="overflow-hidden border-0 shadow-sm">
@@ -129,6 +150,11 @@ function SkeletonCard() {
   );
 }
 
+/**
+ * 管理后台仪表盘主页面
+ * 展示全站核心运营数据、用户趋势图表及系统服务状态
+ * @returns React 组件
+ */
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);

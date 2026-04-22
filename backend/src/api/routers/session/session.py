@@ -10,7 +10,7 @@ import asyncio
 import json
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -104,6 +104,7 @@ async def send_message(
     session_id: str,
     request: SendMessageRequest,
     current_user: CurrentUser,
+    fastapi_request: Request,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> SendMessageResponse:
     """发送消息(联动 AI 对话)

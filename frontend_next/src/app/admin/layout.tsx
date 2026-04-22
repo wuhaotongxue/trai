@@ -10,10 +10,11 @@ import Cookies from "js-cookie";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BarChart3, Bell, Bot, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, Database, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Search, Settings, UserPlus, Users, Wifi, User as UserIcon } from "lucide-react";
+import { Activity, AlertCircle, BarChart3, Bell, Bot, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, Database, FileText, LayoutDashboard, LogOut, MessageSquare, RefreshCw, Search, Settings, UserPlus, Users, Wifi, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/website/theme_toggle";
+import { authApi } from "@/lib/api_client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,13 +73,44 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
   const [token, setToken] = useState<string | null | undefined>(undefined);
+  const [isAdmin, setIsAdmin] = useState<boolean | undefined>(undefined);
+  const [user, setUser] = useState<any>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean | undefined>(undefined);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const syncAuth = () => {
-      setToken(Cookies.get("token"));
+    const syncAuth = async () => {
+      const currentToken = Cookies.get("token");
+      setToken(currentToken);
       setSidebarCollapsed(localStorage.getItem("admin_sidebar_collapsed") === "1");
+
+      if (currentToken) {
+        try {
+          const res = await authApi.me();
+          const me = res.user;
+          setUser(me);
+          // 调试日志: 检查管理员权限
+          console.log("Admin check:", {
+            username: me.username,
+            role: me.role,
+            wecom_user_id: me.wecom_user_id,
+            is_admin_role: me.role === "admin",
+            has_wecom: !!me.wecom_user_id,
+            is_internal_admin: me.username === "admin"
+          });
+
+          if (me.role === "admin" && (me.wecom_user_id || me.username === "admin" || me.username === "A28441")) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (e) {
+          console.error("Fetch me error", e);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
     };
 
     syncAuth();
@@ -94,7 +126,7 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     return <>{children}</>;
   }
 
-  if (token === undefined) {
+  if (token === undefined || isAdmin === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
@@ -105,18 +137,29 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     );
   }
 
-  if (token === null) {
+  if (token === null || isAdmin === false) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
-          <div className="text-sm font-semibold text-foreground">未登录</div>
-          <div className="text-xs text-muted-foreground mt-2">即将跳转到登录页...</div>
-          <div className="mt-4">
+        <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center space-y-4">
+          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground">访问受限</h2>
+          <p className="text-sm text-muted-foreground">
+            {token === null ? "您尚未登录，请先登录管理员账号" : "仅限企业微信扫码登录的管理员访问该后台系统"}
+          </p>
+          <div className="pt-4 flex items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors"
+            >
+              返回前台
+            </Link>
             <Link
               href="/admin/login"
               className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              去登录
+              重新登录
             </Link>
           </div>
         </div>
@@ -305,6 +348,7 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
               type="button"
               aria-label="通知"
               title="通知"
+              onClick={() => router.push("/admin/notifications")}
               className="relative p-2 rounded-lg hover:bg-muted/50 transition-colors"
             >
               <Bell className="h-4 w-4 text-muted-foreground" />
@@ -313,11 +357,15 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 pl-3 border-l border-border/60 hover:opacity-80 transition-opacity outline-none">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
-                  A
+                  {user?.display_name?.[0] || user?.username?.[0] || "A"}
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-semibold text-foreground leading-none">管理员</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">admin@trai.ai</p>
+                <div className="text-left hidden md:block">
+                  <p className="text-xs font-semibold text-foreground leading-none">
+                    {user?.display_name || user?.username || "管理员"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}
+                  </p>
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">

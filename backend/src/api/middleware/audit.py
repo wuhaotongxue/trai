@@ -14,10 +14,12 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from fastapi import Request, Response
+from fastapi import BackgroundTasks, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from core.logger import get_logger
+from infrastructure.database.database import get_session
+from infrastructure.database.models import AuditLogModel
 
 logger = get_logger()
 
@@ -126,6 +128,35 @@ class AuditLogger:
             return forwarded.split(",")[0].strip()
         return request.client.host if request.client else None
 
+    def _save_to_db(self, log_dict: dict[str, Any]) -> None:
+        """异步保存到数据库"""
+        try:
+            with get_session() as session:
+                audit_log = AuditLogModel(
+                    t_log_id=log_dict["log_id"],
+                    t_timestamp=datetime.fromisoformat(log_dict["timestamp"]),
+                    t_trace_id=log_dict["trace_id"],
+                    t_user_id=log_dict["user_id"],
+                    t_username=log_dict["username"],
+                    t_role=log_dict["role"],
+                    t_action=log_dict["action"],
+                    t_level=log_dict["level"],
+                    t_method=log_dict["method"],
+                    t_path=log_dict["path"],
+                    t_status_code=log_dict["status_code"],
+                    t_duration_ms=log_dict["duration_ms"],
+                    t_client_ip=log_dict["client_ip"],
+                    t_user_agent=log_dict["user_agent"],
+                    t_request_body=log_dict["request_body"],
+                    t_response_body=log_dict["response_body"],
+                    t_error=log_dict["error"],
+                    t_metadata=log_dict["metadata"],
+                )
+                session.add(audit_log)
+                session.commit()
+        except Exception as e:
+            logger.error(f"Failed to save audit log to DB: {e}")
+
     def log(
         self,
         action: AuditAction,
@@ -139,6 +170,7 @@ class AuditLogger:
         request_body: dict[str, Any] | None = None,
         response_body: dict[str, Any] | None = None,
         error: str | None = None,
+        background_tasks: BackgroundTasks | None = None,
         **metadata: Any,
     ) -> None:
         """记录审计日志"""
@@ -168,12 +200,19 @@ class AuditLogger:
 
         log_dict = log_entry.to_dict()
 
+        # 控制台/文件日志
         if level == AuditLevel.CRITICAL or level == AuditLevel.ERROR:
             logger.error(f"AUDIT: {json.dumps(log_dict, ensure_ascii=False)}")
         elif level == AuditLevel.WARNING:
             logger.warning(f"AUDIT: {json.dumps(log_dict, ensure_ascii=False)}")
         else:
             logger.info(f"AUDIT: {json.dumps(log_dict, ensure_ascii=False)}")
+
+        # 保存到数据库
+        if background_tasks:
+            background_tasks.add_task(self._save_to_db, log_dict)
+        else:
+            self._save_to_db(log_dict)
 
 
 _audit_logger = AuditLogger()
@@ -305,13 +344,17 @@ class AuditMiddleware(BaseHTTPMiddleware):
         action = self._classify_action(request.method, path)
         level = self._classify_level(response.status_code)
 
+        # 获取 background_tasks
+        background_tasks = request.scope.get("background_tasks")
+        if not background_tasks:
+            background_tasks = BackgroundTasks()
+            request.scope["background_tasks"] = background_tasks
+
         response_body: dict[str, Any] | None = None
         if response.status_code >= 400:
             try:
-                if hasattr(response, "body"):
-                    import json
-
-                    response_body = json.loads(response.body)
+                # 注意: 响应体在中间件中读取可能会有问题,这里先尝试
+                pass
             except Exception:
                 pass
 
@@ -326,6 +369,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             role=role,
             request_body=request_body,
             response_body=response_body,
+            background_tasks=background_tasks,
         )
 
         return response

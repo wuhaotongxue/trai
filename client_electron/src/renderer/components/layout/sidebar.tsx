@@ -160,12 +160,12 @@ const Sidebar: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: collapsed ? 'center' : 'space-between',
                     borderRadius: '6px',
-                    color: is_group_active && collapsed ? '#0078d4' : '#64748b',
+                    color: is_group_active && collapsed ? '#0078d4' : 'var(--ui_text_muted)',
                     backgroundColor: is_group_active && collapsed ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
                     transition: 'background-color 0.15s ease'
                   }}
                   onMouseEnter={(e) => {
-                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
+                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
                   }}
                   onMouseLeave={(e) => {
                     if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'transparent'
@@ -185,7 +185,7 @@ const Sidebar: React.FC = () => {
                     {item.children.map(child => {
                       const is_child_active = location.pathname === child.path
                       const child_icon = React.isValidElement<{ color?: string }>(child.icon)
-                        ? React.cloneElement(child.icon as LucideIconElement, { color: is_child_active ? '#0078d4' : '#475569' })
+                        ? React.cloneElement(child.icon as LucideIconElement, { color: is_child_active ? '#0078d4' : 'var(--ui_text_muted)' })
                         : null
 
                       return (
@@ -199,12 +199,12 @@ const Sidebar: React.FC = () => {
                             alignItems: 'center',
                             gap: '12px',
                             borderRadius: '6px',
-                            color: is_child_active ? '#0078d4' : '#475569',
+                            color: is_child_active ? '#0078d4' : 'var(--ui_text_muted)',
                             backgroundColor: is_child_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
                             transition: 'background-color 0.15s ease'
                           }}
                           onMouseEnter={(e) => {
-                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
+                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
                           }}
                           onMouseLeave={(e) => {
                             if (!is_child_active) e.currentTarget.style.backgroundColor = 'transparent'
@@ -236,12 +236,12 @@ const Sidebar: React.FC = () => {
                 justifyContent: collapsed ? 'center' : 'flex-start',
                 gap: collapsed ? '0' : '12px',
                 borderRadius: '6px',
-                color: is_active ? '#0078d4' : '#202020',
+                color: is_active ? '#0078d4' : 'var(--ui_text)',
                 backgroundColor: is_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
                 transition: 'background-color 0.15s ease'
               }}
               onMouseEnter={(e) => {
-                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'
+                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
               }}
               onMouseLeave={(e) => {
                 if (!is_active) e.currentTarget.style.backgroundColor = 'transparent'
@@ -259,13 +259,13 @@ const Sidebar: React.FC = () => {
             display: 'flex', alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'flex-start',
             gap: collapsed ? '0' : '12px',
-            color: '#202020', cursor: 'pointer',
+            color: 'var(--ui_text)', cursor: 'pointer',
             padding: collapsed ? '12px 0' : '10px 16px',
             borderRadius: '6px',
             transition: 'background-color 0.15s ease',
             marginTop: '4px'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)'}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <LogOut size={20} />

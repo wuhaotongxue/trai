@@ -30,6 +30,9 @@ class UserInfo(BaseModel):
     role: str = Field(default="normal", description="用户角色")
     status: str = Field(default="active", description="用户状态")
     tenant_id: str | None = Field(default=None, description="租户 ID")
+    wecom_user_id: str | None = Field(default=None, description="企业微信 User ID")
+    last_login_ip: str | None = Field(default=None, description="最后登录 IP")
+    last_login_location: str | None = Field(default=None, description="最后登录地址")
     created_at: str | None = Field(default=None, description="创建时间")
     updated_at: str | None = Field(default=None, description="更新时间")
 
@@ -76,20 +79,23 @@ async def get_current_user_info(
         )
 
     # 基于角色生成权限列表
-    permissions = _get_permissions_by_role(user.t_role.value)
+    permissions = _get_permissions_by_role(user.role.value)
 
     return MeResponse(
         user=UserInfo(
-            user_id=user.t_user_id,
-            username=user.t_username,
-            email=user.t_email,
-            display_name=user.t_display_name,
-            avatar_url=user.t_avatar_url,
-            role=user.t_role.value,
-            status=user.t_status.value,
-            tenant_id=user.t_tenant_id,
-            created_at=user.t_created_at.isoformat() if user.t_created_at else None,
-            updated_at=user.t_updated_at.isoformat() if user.t_updated_at else None,
+            user_id=user.user_id,
+            username=user.username,
+            email=user.email,
+            display_name=user.display_name,
+            avatar_url=user.avatar_url,
+            role=user.role.value,
+            status=user.status.value,
+            tenant_id=user.tenant_id,
+            wecom_user_id=user.wecom_user_id,
+            last_login_ip=user.last_login_ip,
+            last_login_location=user.last_login_location,
+            created_at=user.created_at.isoformat() if user.created_at else None,
+            updated_at=user.updated_at.isoformat() if user.updated_at else None,
         ),
         permissions=permissions,
     )

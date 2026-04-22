@@ -100,7 +100,13 @@ class AdminClientReleaseAPI:
 
             logger.info(f"用户 {current_user.get('user_id')} 成功发布客户端新版本 {version}")
 
-            return ReleaseResponse(version=version, message="发布成功")
+            # 4. 发送通知 (飞书 & 企微)
+            from application.usecases.release_client import ReleaseClientUseCase
+            releaser = ReleaseClientUseCase()
+            download_url = s3_service.generate_presigned_url(exe_key, expiration=31536000)
+            releaser._send_notifications(version, download_url, release_notes or "无更新日志")
+
+            return ReleaseResponse(version=version, message="发布成功，已通知飞书和企业微信")
 
         except Exception as e:
             logger.error(f"发布客户端失败: {str(e)}")
