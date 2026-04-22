@@ -6,11 +6,11 @@
 
 import os
 import subprocess
-import time
 from datetime import datetime
 from pathlib import Path
 
 import requests
+
 from core.logger import get_logger
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -18,6 +18,7 @@ logger = get_logger()
 
 FEISHU_SYNC_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/1210fc93-997c-475d-bb80-189330d8be8e"
 WECOM_WEBHOOK = os.getenv("WECOM_CHAT_WEBHOOK_URL", "")
+
 
 class BackupService:
     """数据库备份服务"""
@@ -40,7 +41,7 @@ class BackupService:
 
         try:
             logger.info(f"Starting database backup: {filename}")
-            
+
             # 设置环境变量以便 pg_dump 使用密码
             env = os.environ.copy()
             env["PGPASSWORD"] = self._db_password
@@ -48,13 +49,17 @@ class BackupService:
             # 执行 pg_dump
             cmd = [
                 "pg_dump",
-                "-h", self._db_host,
-                "-p", self._db_port,
-                "-U", self._db_user,
-                "-f", str(filepath),
-                self._db_name
+                "-h",
+                self._db_host,
+                "-p",
+                self._db_port,
+                "-U",
+                self._db_user,
+                "-f",
+                str(filepath),
+                self._db_name,
             ]
-            
+
             result = subprocess.run(cmd, env=env, capture_output=True, text=True)
             if result.returncode != 0:
                 raise Exception(f"pg_dump failed: {result.stderr}")
@@ -82,37 +87,32 @@ class BackupService:
     def _send_notifications(self, filename: str, url: str) -> None:
         """发送成功通知"""
         msg = f"🚀 **数据库备份成功**\n文件名: {filename}\n下载地址: [点击下载]({url})\n有效期: 24小时"
-        
+
         # 飞书
         try:
-            requests.post(FEISHU_SYNC_WEBHOOK, json={
-                "msg_type": "post",
-                "content": {
-                    "post": {
-                        "zh_cn": {
-                            "title": "数据库备份报告",
-                            "content": [[{"tag": "text", "text": msg}]]
-                        }
-                    }
-                }
-            })
-        except: pass
+            requests.post(
+                FEISHU_SYNC_WEBHOOK,
+                json={
+                    "msg_type": "post",
+                    "content": {
+                        "post": {"zh_cn": {"title": "数据库备份报告", "content": [[{"tag": "text", "text": msg}]]}}
+                    },
+                },
+            )
+        except Exception:
+            pass
 
         # 企微
         if WECOM_WEBHOOK:
             try:
-                requests.post(WECOM_WEBHOOK, json={
-                    "msg_type": "markdown",
-                    "markdown": {"content": msg}
-                })
-            except: pass
+                requests.post(WECOM_WEBHOOK, json={"msg_type": "markdown", "markdown": {"content": msg}})
+            except Exception:
+                pass
 
     def _send_error_notification(self, error: str) -> None:
         """发送失败通知"""
         msg = f"❌ **数据库备份失败**\n原因: {error}"
         try:
-            requests.post(FEISHU_SYNC_WEBHOOK, json={
-                "msg_type": "text",
-                "text": {"content": msg}
-            })
-        except: pass
+            requests.post(FEISHU_SYNC_WEBHOOK, json={"msg_type": "text", "text": {"content": msg}})
+        except Exception:
+            pass

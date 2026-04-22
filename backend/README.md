@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_22_1447
+- **fix(导入)**: 修复 backup_service.py 中的 S3Storage 导入错误，改为 S3StorageService
+- **feat(备份)**: 新增数据库备份服务，支持 pg_dump 备份和 S3 上传
+- **feat(发布)**: 新增客户端发布管理功能
+
 ### 🛠️ 后端_2026_04_22_0845
 - **feat(权限)**: 移除知识库接口中不必要的管理员限制，允许普通企业微信人员创建个人的私有知识库
 - **feat(同步)**: 增加提升角色的自动化脚本 `elevate_user_role.py`，支持一键将企业微信用户升级为 admin

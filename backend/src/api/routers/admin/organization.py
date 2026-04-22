@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -91,8 +92,7 @@ async def get_department_tree(
 
 @router.post("/sync", response_model=SyncResult, summary="同步组织架构")
 async def sync_organization(
-    current_user: Annotated[dict, Depends(require_admin)],
-    session: Session = Depends(get_db_session)
+    current_user: Annotated[dict, Depends(require_admin)], session: Session = Depends(get_db_session)
 ) -> SyncResult:
     """从企业微信同步组织架构
 

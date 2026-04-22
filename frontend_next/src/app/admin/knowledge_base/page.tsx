@@ -125,25 +125,35 @@ export default function KnowledgeBasePage() {
                     </td>
                   </tr>
                 ) : (
-                  indices.map((idx) => (
-                    <tr key={idx.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-indigo-400" />
-                        {idx.name}
-                      </td>
-                      <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{idx.id}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${idx.status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {idx.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-muted-foreground">{idx.documentCount || 0}</td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <Button variant="ghost" size="sm" className="h-8 text-indigo-600">管理文档</Button>
-                        <Button variant="ghost" size="sm" className="h-8 text-red-600">删除</Button>
-                      </td>
-                    </tr>
-                  ))
+                  indices.map((idx: any) => {
+                    // 兼容多种字段名映射
+                    const id = idx.id || idx.Id || idx.IndexId;
+                    const name = idx.name || idx.Name || idx.IndexName;
+                    const status = idx.status || idx.Status;
+                    const docCount = idx.documentCount || idx.DocumentCount || 0;
+                    
+                    if (!id) return null; // 过滤无效数据
+
+                    return (
+                      <tr key={id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-indigo-400" />
+                          {name}
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{id}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground">{docCount}</td>
+                        <td className="px-6 py-4 text-right space-x-2">
+                          <Button variant="ghost" size="sm" className="h-8 text-indigo-600">管理文档</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-red-600">删除</Button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

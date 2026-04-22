@@ -6,10 +6,11 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException, status, Request
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser, CurrentUserOptional
@@ -18,10 +19,8 @@ from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
+from infrastructure.notify.base import NotifyLevel, NotifyMessage, NotifyType
 from infrastructure.notify.factory import NotifyServiceFactory
-from infrastructure.notify.base import NotifyMessage, NotifyLevel, NotifyType
-import os
-import asyncio
 
 router = APIRouter()
 
@@ -165,6 +164,8 @@ async def agent_chat(
     # 发送通知到企业微信 Webhook
     webhook_url = os.getenv("WECOM_CHAT_WEBHOOK_URL")
     if webhook_url:
+        import asyncio
+
         def send_wecom_notify():
             try:
                 service = NotifyServiceFactory.create_wecom(webhook_url)
@@ -178,6 +179,7 @@ async def agent_chat(
                 service.send(message)
             except Exception as e:
                 from loguru import logger
+
                 logger.warning(f"Failed to send wecom notify: {e}")
 
         asyncio.create_task(asyncio.to_thread(send_wecom_notify))

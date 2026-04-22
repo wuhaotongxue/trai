@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import os
-from typing import Annotated
 from urllib.parse import urlencode, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status

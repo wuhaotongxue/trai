@@ -6,7 +6,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from api.deps import require_admin
@@ -14,12 +14,15 @@ from infrastructure.database.backup_service import BackupService
 
 router = APIRouter(prefix="/system/database", tags=["系统管理"])
 
+
 class BackupResponse(BaseModel):
     """备份响应"""
+
     status: str = Field(description="状态")
     filename: str | None = Field(default=None, description="文件名")
     url: str | None = Field(default=None, description="下载链接")
     error: str | None = Field(default=None, description="错误信息")
+
 
 @router.post("/backup", response_model=BackupResponse, summary="立即备份数据库")
 async def trigger_backup(
@@ -29,6 +32,7 @@ async def trigger_backup(
     service = BackupService()
     result = service.run_backup()
     return BackupResponse(**result)
+
 
 @router.get("/backups", summary="获取备份历史")
 async def list_backups(
