@@ -65,7 +65,7 @@ class S3StorageService:
                 object_key,
                 ExtraArgs={"ContentType": content_type},
             )
-            return self._get_file_url(object_key)
+            return self.get_file_url(object_key)
 
         except ClientError as e:
             logger.error(f"S3 上传失败 | 错误: {str(e)}")
@@ -99,7 +99,7 @@ class S3StorageService:
                 Body=data,
                 ContentType=content_type,
             )
-            return self._get_file_url(object_key)
+            return self.get_file_url(object_key)
 
         except ClientError as e:
             logger.error(f"S3 上传失败 | 错误: {str(e)}")
@@ -150,8 +150,8 @@ class S3StorageService:
             logger.error(f"S3 删除失败 | 错误: {str(e)}")
             return False
 
-    def _get_file_url(self, object_key: str) -> str:
-        """获取文件 URL"""
+    def get_file_url(self, object_key: str) -> str:
+        """获取文件 URL (优先使用公共域名)"""
         if self._public_domain:
             return f"{self._public_domain}/{object_key}"
         return f"{self._endpoint}/{self._bucket}/{object_key}"
