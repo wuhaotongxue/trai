@@ -104,10 +104,10 @@ class WeComUserSyncScript:
         parser = argparse.ArgumentParser(description="企业微信用户同步脚本")
         parser.add_argument("--department-id", type=int, default=1, help="同步起始部门 ID")
         parser.add_argument(
-            "--fetch-child",
-            action="store_true",
-            default=True,
-            help="是否递归同步子部门",
+            "--no-fetch-child",
+            action="store_false",
+            dest="fetch_child",
+            help="是否递归同步子部门(禁用)",
         )
         args = parser.parse_args()
         return cls(department_id=args.department_id, fetch_child=args.fetch_child)
