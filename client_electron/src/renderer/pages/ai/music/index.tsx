@@ -23,6 +23,11 @@ interface MusicCategory {
   icon: React.ReactNode
 }
 
+/**
+ * 音乐生成组件
+ * 
+ * 用于通过文本描述生成音乐，支持风格分类和预设选择
+ */
 const AiMusic: React.FC = () => {
   const [prompt, set_prompt] = useState('一首欢快的赛博朋克风格电子乐, 节奏明快, 带有强烈的鼓点...')
   const [loading, set_loading] = useState(false)
@@ -31,11 +36,17 @@ const AiMusic: React.FC = () => {
   const [active_style, set_active_style] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('modern')
 
+  /**
+   * 音乐分类列表
+   */
   const categories: MusicCategory[] = [
     { id: 'modern', name: '现代风格', icon: <Zap size={14} /> },
     { id: 'classic', name: '古典风格', icon: <Music2 size={14} /> }
   ]
 
+  /**
+   * 音乐风格预设列表
+   */
   const music_styles: MusicStyle[] = [
     { id: 'electronic', name: '电子音乐', prompt: '一首欢快的赛博朋克风格电子乐, 节奏明快, 带有强烈的鼓点', icon: <Radio size={14} />, category: 'modern' },
     { id: 'rock', name: '摇滚音乐', prompt: '一首充满力量的摇滚乐, 激昂的吉他独奏, 强烈的节奏', icon: <Guitar size={14} />, category: 'modern' },
@@ -43,8 +54,16 @@ const AiMusic: React.FC = () => {
     { id: 'ambient', name: '环境音乐', prompt: '一首宁静的环境音乐, 适合冥想和放松, 自然音效', icon: <Headphones size={14} />, category: 'classic' }
   ]
 
+  /**
+   * 根据当前选中的分类过滤音乐风格
+   */
   const filtered_styles = music_styles.filter(s => s.category === active_category)
 
+  /**
+   * 处理音乐生成
+   * 
+   * 调用 Electron API 生成音乐，处理加载状态和错误
+   */
   const handle_generate = async () => {
     if (!prompt.trim()) return
     set_loading(true)
@@ -65,6 +84,13 @@ const AiMusic: React.FC = () => {
     }
   }
 
+  /**
+   * 应用音乐风格预设
+   * 
+   * @param style 选中的音乐风格
+   * 
+   * 将预设的提示词应用到输入框
+   */
   const apply_style = (style: MusicStyle) => {
     set_prompt(style.prompt)
     set_active_style(style.id)

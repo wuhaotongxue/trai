@@ -22,6 +22,11 @@ interface StyleCategory {
   icon: React.ReactNode
 }
 
+/**
+ * 文生图组件
+ * 
+ * 用于通过文本描述生成图像，支持风格分类和模板选择
+ */
 const TextToImage: React.FC = () => {
   const [prompt, set_prompt] = useState('你的一只穿着宇航服的猫, 在火星表面漫步, 高分辨率, 电影级光影...')
   const [loading, set_loading] = useState(false)
@@ -30,6 +35,9 @@ const TextToImage: React.FC = () => {
   const [active_template, set_active_template] = useState<string>('')
   const [active_category, set_active_category] = useState<string>('animal')
 
+  /**
+   * 风格分类列表
+   */
   const categories: StyleCategory[] = [
     { id: 'animal', name: '动物风格', icon: <Cat size={14} /> },
     { id: 'city', name: '城市风格', icon: <Building2 size={14} /> },
@@ -37,6 +45,9 @@ const TextToImage: React.FC = () => {
     { id: 'portrait', name: '人物风格', icon: <User size={14} /> }
   ]
 
+  /**
+   * 提示词模板列表
+   */
   const prompt_templates: PromptTemplate[] = [
     { id: 'cat_astronaut', name: '宇航员猫', prompt: '一只穿着宇航服的猫, 在火星表面漫步, 高分辨率, 电影级光影', category: 'animal' },
     { id: 'cyberpunk_city', name: '赛博朋克城市', prompt: '未来赛博朋克城市夜景, 霓虹灯, 雨夜, 反射, 科幻风格', category: 'city' },
@@ -44,8 +55,16 @@ const TextToImage: React.FC = () => {
     { id: 'portrait', name: '人物肖像', prompt: '精美的女性人物肖像, 柔和的光线, 电影级构图, 高分辨率', category: 'portrait' }
   ]
 
+  /**
+   * 根据当前选中的分类过滤模板
+   */
   const filtered_templates = prompt_templates.filter(t => t.category === active_category)
 
+  /**
+   * 处理图像生成
+   * 
+   * 调用 Electron API 生成图像，处理加载状态和错误
+   */
   const handle_generate = async () => {
     if (!prompt.trim()) return
     set_loading(true)
@@ -66,6 +85,13 @@ const TextToImage: React.FC = () => {
     }
   }
 
+  /**
+   * 应用模板
+   * 
+   * @param template 选中的模板
+   * 
+   * 将模板的提示词应用到输入框
+   */
   const apply_template = (template: PromptTemplate) => {
     set_prompt(template.prompt)
     set_active_template(template.id)
