@@ -11,6 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/**
+ * 趋势图表数据
+ * 
+ * 包含用户数、会话数和 Agent 调用数的月度数据
+ */
 const chartData = [
   { label: "1月", users: 120, sessions: 840, agent: 2300 },
   { label: "2月", users: 198, sessions: 1210, agent: 4100 },
@@ -20,6 +25,11 @@ const chartData = [
   { label: "6月", users: 465, sessions: 3100, agent: 15800 },
 ];
 
+/**
+ * 功能使用分布数据
+ * 
+ * 显示各功能的调用次数和占比
+ */
 const topFeatures = [
   { name: "多工具 Agent", calls: 4821, pct: 38, color: "from-blue-500 to-blue-600" },
   { name: "视觉理解 Vision", calls: 3102, pct: 24, color: "from-emerald-500 to-emerald-600" },
@@ -28,13 +38,26 @@ const topFeatures = [
   { name: "文件上传", calls: 821, pct: 7, color: "from-pink-500 to-pink-600" },
 ];
 
+/**
+ * 设备访问分布数据
+ * 
+ * 显示不同设备的访问占比
+ */
 const deviceData = [
   { label: "桌面端", pct: 62, color: "bg-blue-500" },
   { label: "移动端", pct: 28, color: "bg-emerald-500" },
   { label: "平板", pct: 10, color: "bg-amber-500" },
 ];
 
+/**
+ * 数据分析页面组件
+ * 
+ * 展示多维度业务数据洞察与趋势分析，包括用户增长、活跃会话、Agent 调用等核心指标
+ */
 export default function AnalyticsPage() {
+  /**
+   * 选择的时间周期
+   */
   const [period, setPeriod] = useState("近30天");
 
   return (
