@@ -95,8 +95,10 @@ class WeComContactClient:
     ) -> None:
         self._corp_id = corp_id or os.getenv("WECOM_CORP_ID", "")
         self._agent_id = agent_id or os.getenv("WECOM_AGENT_ID", "")
-        self._app_secret = app_secret or os.getenv("WECOM_APP_SECRET", "")
-        self._contact_secret = contact_secret or os.getenv("WECOM_CONTACT_SECRET", self._app_secret)
+        self._app_secret = app_secret or os.getenv("WECOM_APP_SECRET") or os.getenv("WECOM_SECRET", "")
+        self._contact_secret = (
+            contact_secret or os.getenv("WECOM_CONTACT_SECRET") or os.getenv("WECOM_CORP_SECRET") or self._app_secret
+        )
         self._timeout = timeout
 
         self._token: str | None = None

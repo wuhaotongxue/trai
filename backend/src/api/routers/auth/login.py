@@ -10,7 +10,7 @@ import base64
 import os
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -94,6 +94,7 @@ class LoginResponse(BaseModel):
 @router.post("/login", response_model=LoginResponse, tags=["认证"])
 async def login(
     request: LoginRequest,
+    fastapi_request: Request,
     jwt_service: Annotated[JWTService, Depends(get_jwt_service)],
     password_service: Annotated[PasswordService, Depends(get_password_service)],
     session: Annotated[Session, Depends(get_db_session)],
@@ -102,6 +103,7 @@ async def login(
 
     Args:
         request: 登录请求参数(用户名、密码)
+        fastapi_request: FastAPI 请求对象
         jwt_service: JWT 服务实例
         password_service: 密码服务实例
         session: 数据库会话
@@ -158,6 +160,10 @@ async def login(
         tenant_id=user.tenant_id,
     )
     refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
+
+    # 记录登录 IP
+    client_ip = fastapi_request.client.host if fastapi_request.client else "unknown"
+    user_repo.update(user.user_id, last_login_ip=client_ip)
 
     return LoginResponse(
         access_token=access_token,
