@@ -14,6 +14,8 @@ const TitleBar: React.FC = () => {
   const { is_visible, message, show } = use_notification_store()
   const log_card_ref = useRef<HTMLDivElement>(null)
   const [theme, set_theme] = useState<'light' | 'dark'>('light')
+  const [caps_lock_visible, set_caps_lock_visible] = useState(false)
+  const [caps_lock_enabled, set_caps_lock_enabled] = useState(false)
 
   useEffect(() => {
     window.electron_api
@@ -44,6 +46,30 @@ const TitleBar: React.FC = () => {
       document.removeEventListener('mousedown', handle_click_outside)
     }
   }, [show_logs, toggle_logs])
+
+  useEffect(() => {
+    let hide_timer: ReturnType<typeof setTimeout> | null = null
+
+    const handle_keydown = (e: KeyboardEvent) => {
+      console.log('Key pressed:', e.key)
+      if (e.key === 'CapsLock') {
+        console.log('CapsLock detected, state:', e.getModifierState('CapsLock'))
+        const caps_lock = e.getModifierState('CapsLock')
+        set_caps_lock_enabled(caps_lock)
+        set_caps_lock_visible(true)
+        if (hide_timer) clearTimeout(hide_timer)
+        hide_timer = setTimeout(() => {
+          set_caps_lock_visible(false)
+        }, 2000)
+      }
+    }
+
+    document.addEventListener('keydown', handle_keydown)
+    return () => {
+      document.removeEventListener('keydown', handle_keydown)
+      if (hide_timer) clearTimeout(hide_timer)
+    }
+  }, [])
 
   return (
     <div
@@ -227,6 +253,28 @@ const TitleBar: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Caps Lock 提示 */}
+      {caps_lock_visible && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '16px',
+            transform: 'translateY(-50%)',
+            backgroundColor: caps_lock_enabled ? 'var(--ui_success)' : '#6b7280',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+            zIndex: 1002,
+            animation: 'fadeIn 0.3s ease-out'
+          }}
+        >
+          大写锁定 {caps_lock_enabled ? '已打开' : '已关闭'}
+        </div>
+      )}
 
       {/* 全局通知 */}
       {is_visible && (
