@@ -60,13 +60,13 @@ export function FloatingWidget() {
     <>
       <div className={cn(
         "fixed z-50 flex flex-col gap-3 transition-all duration-300",
-        isAdminPage ? "bottom-24 right-6" : "bottom-8 right-8"
+        "bottom-12 right-6"
       )}>
         {showTop && (
           <Button
             size="icon"
             variant="outline"
-            className="h-12 w-12 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:-translate-y-1"
+            className="h-10 w-10 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:-translate-y-1"
             onClick={scrollToTop}
             title="返回顶部"
           >
@@ -78,7 +78,7 @@ export function FloatingWidget() {
           <Button
             size="icon"
             variant="outline"
-            className="h-12 w-12 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:translate-y-1"
+            className="h-10 w-10 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:translate-y-1"
             onClick={scrollToBottom}
             title="直达底部"
           >
@@ -86,23 +86,14 @@ export function FloatingWidget() {
           </Button>
         )}
 
-        {!isChatOpen && (
-          <Button
-            size="icon"
-            onClick={() => setIsChatOpen(true)}
-            className="h-14 w-14 rounded-full shadow-xl shadow-blue-500/20 bg-gradient-to-br from-blue-600 to-indigo-600 hover:scale-105 transition-all text-white group"
-            title="AI 助手对话"
-          >
-            <BotMessageSquare className="h-6 w-6 group-hover:animate-pulse" />
-          </Button>
-        )}
+        {/* 移除重复的 AI 助手按钮，统一入口 */}
       </div>
 
       {isChatOpen && (
         <div className={`fixed z-50 bg-background border border-border shadow-2xl overflow-hidden flex flex-col animate-in fade-in duration-300 transition-all ${
           isExpanded 
             ? "inset-4 md:inset-10 lg:inset-20 rounded-xl" 
-            : "bottom-24 right-8 w-[400px] h-[600px] rounded-2xl slide-in-from-bottom-10"
+            : "bottom-12 right-6 w-[400px] h-[600px] rounded-2xl slide-in-from-bottom-10"
         }`}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center gap-2">

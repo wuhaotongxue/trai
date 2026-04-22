@@ -44,14 +44,14 @@ async def list_releases(
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
 ) -> list[ReleaseListItem]:
-    """获取所有已发布的版本列表
+    """获取所有已发布的版本列表.
 
     Args:
-        current_user: 当前管理员
-        s3_service: S3 服务
+        current_user: 当前管理员信息
+        s3_service: S3 存储服务实例
 
     Returns:
-        list[ReleaseListItem]: 版本列表
+        list[ReleaseListItem]: 包含版本号、更新日志及下载链接的列表
     """
     if current_user.get("role") != "admin":
         raise HTTPException(
@@ -66,9 +66,8 @@ async def list_releases(
 
         items = []
         for r in releases:
-            url = None
-            if r.t_installer_exe_key:
-                url = s3_service.generate_presigned_url(r.t_installer_exe_key, expiration=3600)
+            # 优先使用静态代理 URL, 确保 EXE 可正常访问
+            url = s3_service.get_file_url(r.t_installer_exe_key) if r.t_installer_exe_key else None
 
             items.append(
                 ReleaseListItem(
@@ -95,24 +94,23 @@ class AdminClientReleaseAPI:
         installer_exe: Annotated[UploadFile, File(..., description="安装包 exe 文件")],
         current_user: CurrentUser,
         s3_service: S3StorageService = Depends(),
-        release_notes: str | None = Form(None, description="更新日志"),
+        release_notes: str | None = Form(None, description="更新日志内容"),
     ) -> ReleaseResponse:
-        """管理员发布新版本的 Electron 客户端
+        """管理员发布新版本的 Electron 客户端并上传至 S3.
 
         Args:
-            version: 版本号
-            latest_yml: electron-builder 生成的 latest.yml
-            installer_exe: 安装包
-            current_user: 当前登录的管理员
-            db: 数据库会话
-            s3_service: S3 服务
-            release_notes: 更新日志
+            version: 版本号 (如 1.0.0)
+            latest_yml: electron-builder 生成的 yml 配置文件
+            installer_exe: 客户端安装包二进制文件
+            current_user: 当前登录的管理员信息
+            s3_service: S3 存储服务实例
+            release_notes: 本次版本的更新日志
 
         Returns:
-            ReleaseResponse: 发布结果
+            ReleaseResponse: 包含版本号和成功提示的消息
 
         Raises:
-            HTTPException: 权限不足或上传失败
+            HTTPException: 权限不足、版本冲突或上传失败
         """
         # 简单权限校验
         if current_user.get("role") != "admin":
@@ -159,7 +157,8 @@ class AdminClientReleaseAPI:
             from application.usecases.release_client import ReleaseClientUseCase
 
             releaser = ReleaseClientUseCase()
-            download_url = s3_service.generate_presigned_url(exe_key, expiration=31536000)
+            # 统一使用静态代理 URL, 配合 Nginx 配置确保 EXE 可直接访问
+            download_url = s3_service.get_file_url(exe_key)
             releaser._send_notifications(version, download_url, release_notes or "无更新日志")
 
             return ReleaseResponse(version=version, message="发布成功，已通知飞书和企业微信")

@@ -107,9 +107,15 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* Right: Theme Toggle + CTA */}
+          {/* Right: Theme Toggle + AI Assistant + CTA */}
           <div className="hidden lg:flex items-center gap-2">
             <ThemeToggle />
+            <Link href="/agent" target="_blank">
+              <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium gap-1.5">
+                <Bot className="h-4 w-4 text-blue-500" />
+                AI 助手
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
                 登录
