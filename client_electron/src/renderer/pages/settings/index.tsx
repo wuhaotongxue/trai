@@ -23,7 +23,7 @@ const Settings: React.FC = () => {
 
   const user = use_auth_store((state) => state.user)
 
-  const [api_url, set_api_url] = useState('http://192.168.98.72:5666')
+  const [api_url, set_api_url] = useState('https://trai.tuoren.com')
   const [saved, set_saved] = useState(false)
   const [update_status, set_update_status] = useState<string>('')
   const [is_checking, set_is_checking] = useState(false)
@@ -50,7 +50,7 @@ const Settings: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       if (window.electron_api?.config_get) {
-        const res = await window.electron_api.config_get('api_url', 'http://192.168.98.72:5666')
+        const res = await window.electron_api.config_get('api_url', 'https://trai.tuoren.com')
         if (res.success) {
           set_api_url(res.data)
         }
