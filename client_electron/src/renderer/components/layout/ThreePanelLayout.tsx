@@ -192,7 +192,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
               <List size={18} />
             </button>
           </div>
-          <div style={{ flex: 1, overflow: 'hidden', padding: contentPadding }}>
+          <div style={{ flex: 1, overflow: 'auto', padding: contentPadding }}>
             {children}
           </div>
         </div>
