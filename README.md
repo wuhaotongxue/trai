@@ -46,27 +46,29 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 系统更新_2026_04_24_0040
-- [客户端] **feat(login)**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
-- [客户端] **feat(ThreePanelLayout)**: 增强面板展开收起动画 — cubic-bezier 过渡、hover 上浮效果
-- [客户端] **feat(chat)**: 快速命令改为 Agent 真实示例（天气/代码/总结/图片识别）
+### 💻 客户端_2026_04_24_0100
+- **feat(login)**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
 
-### 🛠️ 系统更新_2026_04_24_0020
-- [客户端] **feat(chat)**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
-- [客户端] **feat(chat)**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
-- [客户端] **feat(register)**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
+### 💻 客户端_2026_04_24_0040
+- **feat(login)**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
 
-### 🛠️ 系统更新_2026_04_24_0010
-- [客户端] **perf(sidebar)**: 添加导航项活跃指示器条与错落下沉入场动画
-- [客户端] **perf(title_bar)**: 增强按钮悬停效果 — 上浮与阴影过渡
-- [客户端] **perf(app)**: 优化加载页面 — 进度条动画替代圆点指示器
+### 💻 客户端_2026_04_24_0020
+- **feat(chat)**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
+- **feat(chat)**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
+- **feat(register)**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
+- **feat(ThreePanelLayout)**: 增强面板展开收起动画 — cubic-bezier 过渡、hover 上浮效果
 
-### 🛠️ 系统更新_2026_04_23_2355
-- [客户端] **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
-- [客户端] **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
-- [客户端] **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
-- [客户端] **feat(login)**: 美化 login/register 页面过渡动画
-- [客户端] **fix(media)**: 规范 media/processor.tsx 变量命名
+### 💻 客户端_2026_04_24_0010
+- **perf(sidebar)**: 添加导航项活跃指示器条与错落下沉入场动画
+- **perf(title_bar)**: 增强按钮悬停效果 — 上浮与阴影过渡
+- **perf(app)**: 优化加载页面 — 进度条动画替代圆点指示器
+
+### 💻 客户端_2026_04_23_2355
+- **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
+- **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
+- **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
+- **feat(login)**: 美化 login/register 页面过渡动画
+- **fix(media)**: 规范 media/processor.tsx 变量命名
 
 ### 🛠️ 系统更新_2026_04_23_2110
 - [前端] **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
