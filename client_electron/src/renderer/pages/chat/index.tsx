@@ -22,6 +22,7 @@ interface ChatMessage {
   content: string
   reasoning_content?: string
   steps?: ToolStep[]
+  files?: Array<{ name: string; type: string; data: string }>
 }
 
 interface ChatSession {
@@ -82,6 +83,8 @@ const AgentChat: React.FC = () => {
   const [expanded_steps, set_expanded_steps] = useState<Record<string, boolean>>({})
   const [editing_session_id, set_editing_session_id] = useState<string>('')
   const [edit_session_name, set_edit_session_name] = useState('')
+  const [uploaded_files, set_uploaded_files] = useState<Array<{ name: string; type: string; data: string }>>([])
+  const file_input_ref = useRef<HTMLInputElement>(null)
   const messages_end_ref = useRef<HTMLDivElement>(null)
   
   const active_session_id_ref = useRef<string>('')
@@ -197,6 +200,40 @@ const AgentChat: React.FC = () => {
     set_edit_session_name('')
   }
 
+  const handle_file_upload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const new_files: Array<{ name: string; type: string; data: string }> = []
+    let processed = 0
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          new_files.push({
+            name: file.name,
+            type: file.type,
+            data: event.target.result as string
+          })
+        }
+        processed++
+        if (processed === files.length) {
+          set_uploaded_files(prev => [...prev, ...new_files])
+        }
+      }
+      reader.readAsDataURL(file)
+    })
+
+    if (file_input_ref.current) {
+      file_input_ref.current.value = ''
+    }
+  }
+
+  const remove_file = (index: number) => {
+    set_uploaded_files(prev => prev.filter((_, i) => i !== index))
+  }
+
   const update_active_session_messages = (updater: (prev: ChatMessage[]) => ChatMessage[], target_sid: string = active_session_id_ref.current) => {
     set_sessions(prev_sessions => {
       const updated = prev_sessions.map(s => {
@@ -293,7 +330,7 @@ const AgentChat: React.FC = () => {
   }
 
   const handle_send = async () => {
-    if (!input.trim() || !active_session_id) return
+    if (!input.trim() && uploaded_files.length === 0 || !active_session_id) return
     
     const user_msg = input.trim()
     set_input('')
@@ -301,14 +338,16 @@ const AgentChat: React.FC = () => {
     const current_sid = active_session_id
     const current_agent_id = active_session?.agent_id || (available_agents.length > 0 ? available_agents[0].id : undefined)
     const current_kb_id = active_session?.kb_id
+    const files = uploaded_files
+    set_uploaded_files([])
 
-    update_active_session_messages(prev => [...prev, { role: 'user', content: user_msg }], current_sid)
+    update_active_session_messages(prev => [...prev, { role: 'user', content: user_msg, files }], current_sid)
     update_active_session_messages(prev => [...prev, { role: 'assistant', content: '', reasoning_content: '', steps: [] }], current_sid)
     
     set_loading(true)
     
     try {
-      const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id, current_kb_id)
+      const res = await window.electron_api.agent_chat(current_sid, user_msg, current_agent_id, current_kb_id, files)
       if (!res.success && !(res as any).is_canceled) {
         update_active_session_messages(prev => {
           const new_msgs = [...prev]
@@ -757,6 +796,34 @@ const AgentChat: React.FC = () => {
                             }} />
                           )}
                         </div>
+                        {msg.files && msg.files.length > 0 && (
+                          <div style={{
+                            marginTop: '8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px'
+                          }}>
+                            {msg.files.map((file, fileIdx) => (
+                              <div key={fileIdx} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '6px 8px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                borderRadius: '6px',
+                                fontSize: '12px'
+                              }}>
+                                <Paperclip size={14} />
+                                <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {file.name}
+                                </span>
+                                <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                                  {(file.data.length * 0.75 / 1024).toFixed(1)} KB
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {msg.content.length > 300 && (
                           <div 
                             onClick={(e) => {
@@ -1165,6 +1232,44 @@ const AgentChat: React.FC = () => {
               </div>
             )}
 
+            {uploaded_files.length > 0 && (
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                flexWrap: 'wrap'
+              }}>
+                {uploaded_files.map((file, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 10px',
+                    backgroundColor: 'var(--ui_panel_alt)',
+                    border: '1px solid var(--ui_border)',
+                    borderRadius: '16px',
+                    fontSize: '12px'
+                  }}>
+                    <Paperclip size={14} />
+                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {file.name}
+                    </span>
+                    <button
+                      onClick={() => remove_file(index)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--ui_text_muted)',
+                        cursor: 'pointer',
+                        padding: '2px'
+                      }}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
             <div style={{
               display: 'flex',
               gap: '12px',
@@ -1172,10 +1277,35 @@ const AgentChat: React.FC = () => {
               border: '1px solid var(--ui_border)',
               borderRadius: '12px',
               padding: '8px 12px',
-              alignItems: 'flex-end',
+              alignItems: 'center',
               transition: 'border-color 0.2s',
               boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)'
             }}>
+              <input
+                type="file"
+                ref={file_input_ref}
+                style={{ display: 'none' }}
+                multiple
+                onChange={handle_file_upload}
+              />
+              <button
+                onClick={() => file_input_ref.current?.click()}
+                disabled={loading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: loading ? 'var(--ui_text_muted)' : 'var(--ui_text)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <Plus size={20} />
+              </button>
+              
               <textarea
                 value={input}
                 onChange={(e) => set_input(e.target.value)}
@@ -1202,18 +1332,18 @@ const AgentChat: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={handle_send}
-                  disabled={loading || !input.trim()}
+                  disabled={loading || (!input.trim() && uploaded_files.length === 0)}
                   style={{
                     width: '36px',
                     height: '36px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: loading || !input.trim() ? 'var(--ui_border)' : 'var(--ui_accent)',
-                    color: loading || !input.trim() ? 'var(--ui_text_muted)' : 'white',
+                    backgroundColor: loading || (!input.trim() && uploaded_files.length === 0) ? 'var(--ui_border)' : 'var(--ui_accent)',
+                    color: loading || (!input.trim() && uploaded_files.length === 0) ? 'var(--ui_text_muted)' : 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+                    cursor: loading || (!input.trim() && uploaded_files.length === 0) ? 'not-allowed' : 'pointer',
                     transition: 'background-color 0.2s'
                   }}
                 >

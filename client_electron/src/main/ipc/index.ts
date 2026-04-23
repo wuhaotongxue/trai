@@ -199,12 +199,24 @@ export const register_ipc_handlers = (): void => {
     return await tools_service.convert_image(file_path, target_format, sizes, width, height, target_size_kb)
   })
 
-  // ===================== Agent =====================
-  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => {
-    return await agent_service.chat(session_id, message, agent_id, knowledge_base_id, (evt, data) => {
-      event.sender.send(evt, data)
-    })
+  ipcMain.handle('tools:convert_word_to_pdf', async (_, file_path: string) => {
+    return await tools_service.convert_word_to_pdf(file_path)
   })
+
+  ipcMain.handle('tools:convert_pdf_to_word', async (_, file_path: string) => {
+    return await tools_service.convert_pdf_to_word(file_path)
+  })
+
+  ipcMain.handle('tools:convert_excel', async (_, file_path: string, target_format: string) => {
+    return await tools_service.convert_excel(file_path, target_format)
+  })
+
+  // ===================== Agent =====================
+  ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, files?: Array<{ name: string; type: string; data: string }>) => {
+  return await agent_service.chat(session_id, message, agent_id, knowledge_base_id, files, (evt, data) => {
+    event.sender.send(evt, data)
+  })
+})
 
   ipcMain.handle('agent:stop', async (_, session_id: string) => {
     return agent_service.stop_chat(session_id)

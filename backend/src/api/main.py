@@ -386,7 +386,7 @@ def register_routers(app: FastAPI) -> None:
         user_router,
     )
     from api.routers.admin.client_release import router as admin_client_release_router
-    from api.routers.ai import agent, chat, comfyui, image, management, music, video
+    from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
     from api.routers.media import upload
@@ -420,6 +420,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(music.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(video.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(comfyui.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(report.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])

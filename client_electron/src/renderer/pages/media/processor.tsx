@@ -401,36 +401,8 @@ trailer
       {/* 顶部操作栏 */}
       <div style={{
         padding: '16px',
-        borderBottom: '1px solid var(--ui_border)',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center'
+        borderBottom: '1px solid var(--ui_border)'
       }}>
-        <button
-          onClick={() => file_input_ref.current?.click()}
-          style={{
-            padding: '8px 12px',
-            borderRadius: '6px',
-            border: 'none',
-            backgroundColor: 'var(--ui_accent)',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
-          }}
-        >
-          <Plus size={14} />
-          添加
-        </button>
         <input
           ref={file_input_ref}
           type="file"
@@ -557,9 +529,36 @@ trailer
           padding: '12px 16px',
           borderBottom: '1px solid var(--ui_border)',
           display: 'flex',
-          gap: '8px',
+          alignItems: 'center',
+          gap: '12px',
           backgroundColor: 'var(--ui_panel)'
         }}>
+          <button
+            onClick={() => file_input_ref.current?.click()}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: 'var(--ui_accent)',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+          >
+            <Plus size={14} />
+            添加
+          </button>
+          
           <button
             onClick={() => set_active_tab('audio_transcript')}
             style={{
