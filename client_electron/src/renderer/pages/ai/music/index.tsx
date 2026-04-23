@@ -113,12 +113,12 @@ const AiMusic: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_category === category.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_category === category.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_category === category.id ? '#0ea5e9' : '#475569',
+            color: active_category === category.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_category === category.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -152,12 +152,12 @@ const AiMusic: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_style === style.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_style === style.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_style === style.id ? '#0ea5e9' : '#475569',
+            color: active_style === style.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_style === style.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -192,7 +192,7 @@ const AiMusic: React.FC = () => {
   return (
     <ThreePanelLayout
       title="音乐生成"
-      titleIcon={<Music size={20} color="#0ea5e9" />}
+      titleIcon={<Music size={20} color="var(--ui_accent)" />}
       leftPanelTitle="音乐分类"
       leftPanel={leftPanel}
       middlePanelTitle={middle_title}
@@ -200,17 +200,19 @@ const AiMusic: React.FC = () => {
       rightPanelTitle={active_style_name || '音乐生成'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>描述你想生成的音乐</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--ui_text)', fontWeight: 600, fontSize: '14px' }}>描述你想生成的音乐</label>
             <div style={{ position: 'relative' }}>
               <textarea
                 value={prompt}
                 onChange={(e) => set_prompt(e.target.value)}
                 placeholder="例如: 一首欢快的赛博朋克风格电子乐, 节奏明快, 带有强烈的鼓点..."
                 style={{
-                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
+                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid var(--ui_border)', 
+                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box',
+                  backgroundColor: 'var(--ui_panel)',
+                  color: 'var(--ui_text)'
                 }}
               />
               {prompt && (
@@ -218,7 +220,7 @@ const AiMusic: React.FC = () => {
                   onClick={() => set_prompt('')}
                   style={{
                     position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
-                    backgroundColor: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '4px', 
+                    backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text_muted)', border: 'none', borderRadius: '4px', 
                     cursor: 'pointer', fontSize: '12px', fontWeight: 500
                   }}
                 >
@@ -234,7 +236,7 @@ const AiMusic: React.FC = () => {
               disabled={loading || !prompt.trim()}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
-                backgroundColor: loading || !prompt.trim() ? '#94a3b8' : '#0ea5e9', 
+                backgroundColor: loading || !prompt.trim() ? 'var(--ui_text_muted)' : 'var(--ui_accent)', 
                 color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
                 fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
               }}
@@ -245,30 +247,30 @@ const AiMusic: React.FC = () => {
           </div>
 
           {error && (
-            <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginTop: '16px', fontSize: '13px', boxSizing: 'border-box' }}>
+            <div style={{ padding: '12px', backgroundColor: 'var(--ui_danger)', color: 'white', borderRadius: '8px', marginTop: '16px', fontSize: '13px', boxSizing: 'border-box' }}>
               {error}
             </div>
           )}
         </div>
 
         <div style={{ 
-          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1', boxSizing: 'border-box'
+          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
         }}>
           {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '10px' }}>
               <Loader2 size={32} className="animate-spin" />
               <span style={{ fontSize: '14px' }}>AI 正在创作乐曲, 请稍候...</span>
             </div>
           ) : result_url ? (
             <div style={{ width: '100%', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Music size={48} style={{ color: '#0ea5e9', marginBottom: '24px' }} />
+              <Music size={48} style={{ color: 'var(--ui_accent)', marginBottom: '24px' }} />
               <audio controls src={result_url} style={{ width: '100%', maxWidth: '400px' }}>
                 您的浏览器不支持 audio 标签. 
               </audio>
             </div>
           ) : (
-            <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+            <div style={{ color: 'var(--ui_text_muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <Music size={48} style={{ opacity: 0.5 }} />
               <span style={{ fontSize: '14px' }}>生成的音乐将在这里展示</span>
             </div>

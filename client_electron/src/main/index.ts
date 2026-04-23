@@ -15,10 +15,10 @@ import { UpdateService } from './services/update_service'
 log.info('app starting...')
 
 // 提升 tray 变量到外层作用域, 防止被 V8 垃圾回收导致托盘消失
-let tray: Tray | null = null
-let main_window: BrowserWindow | null = null
+export let tray: Tray | null = null
+export let main_window: BrowserWindow | null = null
 // 是否真正退出应用的标记
-let is_quitting = false
+export let is_quitting = false
 
 // 保证应用单例运行 (软件唯一性)
 const got_the_lock = app.requestSingleInstanceLock()
@@ -69,6 +69,10 @@ if (!got_the_lock) {
   log.info(`[icon] window icon: ${icon_path}`)
   const window_icon = nativeImage.createFromPath(icon_path)
 
+  // 获取当前主题配置
+  const current_theme = config_store.get('ui:theme', 'light')
+  const is_dark_theme = current_theme === 'dark'
+
   main_window = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -78,8 +82,8 @@ if (!got_the_lock) {
     // 隐藏原生边框, 保留系统控制按钮 (Win11 风格)
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#ffffff',
-      symbolColor: '#333333',
+      color: is_dark_theme ? '#1e1e1e' : '#ffffff',
+      symbolColor: is_dark_theme ? '#ffffff' : '#333333',
       height: 36
     },
     show: false,

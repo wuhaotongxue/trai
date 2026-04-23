@@ -277,11 +277,11 @@ const AgentManagement: React.FC = () => {
   const IconComponent = active_agent ? get_icon_component(active_agent.icon) : Bot
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Bot size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>Agent 管理</span>
+          <Bot size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>Agent 管理</span>
         </div>
       </div>
 
@@ -290,17 +290,17 @@ const AgentManagement: React.FC = () => {
           width: is_left_sidebar_open ? '12%' : '0px',
           minWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能体</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>智能体</span>
             </div>
             <button
               type="button"
@@ -310,9 +310,9 @@ const AgentManagement: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={18} />
@@ -321,7 +321,7 @@ const AgentManagement: React.FC = () => {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             {agents.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无Agent</div>
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>暂无Agent</div>
             ) : (
               agents.map(agent => {
                 const AgentIcon = get_icon_component(agent.icon)
@@ -332,8 +332,8 @@ const AgentManagement: React.FC = () => {
                     style={{
                       padding: '12px 16px',
                       borderRadius: '6px',
-                      backgroundColor: active_agent_id === agent.id ? '#e0f2fe' : 'transparent',
-                      color: active_agent_id === agent.id ? '#0369a1' : '#475569',
+                      backgroundColor: active_agent_id === agent.id ? 'var(--ui_accent)' : 'transparent',
+                      color: active_agent_id === agent.id ? 'white' : 'var(--ui_text)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -344,7 +344,7 @@ const AgentManagement: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                     onMouseEnter={(e) => {
-                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                     }}
                     onMouseLeave={(e) => {
                       if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -365,8 +365,8 @@ const AgentManagement: React.FC = () => {
                       height: '8px',
                       borderRadius: '50%',
                       backgroundColor:
-                        agent.status === 'running' ? '#10b981' :
-                        agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
+                        agent.status === 'running' ? 'var(--ui_success)' :
+                        agent.status === 'stopped' ? 'var(--ui_text_muted)' : 'var(--ui_danger)'
                     }} />
                   </div>
                 )
@@ -374,17 +374,17 @@ const AgentManagement: React.FC = () => {
             )}
           </div>
 
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid var(--ui_border)', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => set_show_register_modal(true)}
               aria-label="新建 Agent"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                padding: '8px', backgroundColor: 'transparent', color: 'var(--ui_accent)', border: '1px dashed var(--ui_accent)',
                 borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <Plus size={14} /> Agent
@@ -396,16 +396,16 @@ const AgentManagement: React.FC = () => {
           width: is_middle_sidebar_open ? '12%' : '0px',
           minWidth: is_middle_sidebar_open ? '120px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -415,10 +415,10 @@ const AgentManagement: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                     marginRight: '4px'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -434,9 +434,9 @@ const AgentManagement: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
@@ -446,7 +446,7 @@ const AgentManagement: React.FC = () => {
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
             {active_agent ? (
               <div>
-                <div style={{ marginBottom: '12px', padding: '0 4px', fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                <div style={{ marginBottom: '12px', padding: '0 4px', fontSize: '12px', color: 'var(--ui_text_muted)', fontWeight: 500 }}>
                   状态操作
                 </div>
                 <button
@@ -454,12 +454,12 @@ const AgentManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    backgroundColor: active_agent.status === 'running' ? '#fef2f2' : '#ecfdf5',
+                    backgroundColor: active_agent.status === 'running' ? 'var(--ui_danger)' : 'var(--ui_success)',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    color: active_agent.status === 'running' ? '#ef4444' : '#10b981',
+                    color: 'white',
                     fontWeight: 600,
                     textAlign: 'left',
                     display: 'flex',
@@ -479,12 +479,12 @@ const AgentManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    backgroundColor: '#f1f5f9',
-                    border: 'none',
+                    backgroundColor: 'var(--ui_panel_alt)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '6px',
                     cursor: checking_id === active_agent.id ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
-                    color: '#475569',
+                    color: 'var(--ui_text)',
                     fontWeight: 500,
                     textAlign: 'left',
                     display: 'flex',
@@ -503,12 +503,12 @@ const AgentManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    backgroundColor: '#f1f5f9',
-                    border: 'none',
+                    backgroundColor: 'var(--ui_panel_alt)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     fontSize: '14px',
-                    color: '#475569',
+                    color: 'var(--ui_text)',
                     fontWeight: 500,
                     textAlign: 'left',
                     display: 'flex',
@@ -522,25 +522,25 @@ const AgentManagement: React.FC = () => {
                   编辑 Agent
                 </button>
 
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
-                  <div style={{ marginBottom: '8px', padding: '0 4px', fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--ui_border)' }}>
+                  <div style={{ marginBottom: '8px', padding: '0 4px', fontSize: '12px', color: 'var(--ui_text_muted)', fontWeight: 500 }}>
                     基本信息
                   </div>
-                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '6px' }}>
-                    <span style={{ fontWeight: 500, color: '#64748b' }}>名称:</span> {active_agent.name}
+                  <div style={{ fontSize: '13px', color: 'var(--ui_text)', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: 500, color: 'var(--ui_text_muted)' }}>名称:</span> {active_agent.name}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '6px' }}>
-                    <span style={{ fontWeight: 500, color: '#64748b' }}>状态:</span>
+                  <div style={{ fontSize: '13px', color: 'var(--ui_text)', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: 500, color: 'var(--ui_text_muted)' }}>状态:</span>
                     <span style={{
-                      color: active_agent.status === 'running' ? '#10b981' : active_agent.status === 'error' ? '#ef4444' : '#64748b',
+                      color: active_agent.status === 'running' ? 'var(--ui_success)' : active_agent.status === 'error' ? 'var(--ui_danger)' : 'var(--ui_text_muted)',
                       fontWeight: 500,
                       marginLeft: '4px'
                     }}>
                       {active_agent.status === 'running' ? '运行中' : active_agent.status === 'stopped' ? '已停止' : '异常'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '13px', color: '#475569' }}>
-                    <span style={{ fontWeight: 500, color: '#64748b' }}>模型:</span> {active_agent.model}
+                  <div style={{ fontSize: '13px', color: 'var(--ui_text)' }}>
+                    <span style={{ fontWeight: 500, color: 'var(--ui_text_muted)' }}>模型:</span> {active_agent.model}
                   </div>
                 </div>
               </div>
@@ -553,7 +553,7 @@ const AgentManagement: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!is_middle_sidebar_open && (
                 <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
@@ -564,9 +564,9 @@ const AgentManagement: React.FC = () => {
                       style={{
                         background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                        color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <PanelLeftOpen size={18} />
@@ -578,16 +578,16 @@ const AgentManagement: React.FC = () => {
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                      color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <List size={18} />
                   </button>
                 </div>
               )}
-              <h2 style={{ color: '#0f172a', margin: 0, fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+              <h2 style={{ color: 'var(--ui_text)', margin: 0, fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
                 {active_agent ? active_agent.name : 'Agent 详情'}
               </h2>
             </div>
@@ -596,21 +596,21 @@ const AgentManagement: React.FC = () => {
               disabled={loading}
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px',
-                backgroundColor: loading ? '#f1f5f9' : 'transparent',
-                border: '1px solid #e2e8f0', borderRadius: '4px',
-                color: loading ? '#94a3b8' : '#475569', cursor: loading ? 'not-allowed' : 'pointer',
+                backgroundColor: loading ? 'var(--ui_border)' : 'transparent',
+                border: '1px solid var(--ui_border)', borderRadius: '4px',
+                color: loading ? 'var(--ui_text_muted)' : 'var(--ui_text)', cursor: loading ? 'not-allowed' : 'pointer',
                 fontSize: '13px', fontWeight: 500, transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9'
-                  e.currentTarget.style.borderColor = '#cbd5e1'
+                  e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                  e.currentTarget.style.borderColor = 'var(--ui_border)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
                   e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.borderColor = '#e2e8f0'
+                  e.currentTarget.style.borderColor = 'var(--ui_border)'
                 }
               }}
             >
@@ -622,38 +622,38 @@ const AgentManagement: React.FC = () => {
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
             {active_agent ? (
               <div style={{ maxWidth: '100%' }}>
-                <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '12px', border: '1px solid var(--ui_border)', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                     <div style={{
                       width: '36px',
                       height: '36px',
                       minWidth: '36px',
                       borderRadius: '8px',
-                      backgroundColor: '#e0f2fe',
+                      backgroundColor: 'var(--ui_accent)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#0369a1'
+                      color: 'white'
                     }}>
                       <IconComponent size={20} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#64748b', lineHeight: '1.6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text_muted)', lineHeight: '1.6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {active_agent.description.length > 4 ? active_agent.description.slice(0, 4) + '...' : active_agent.description}
                       </p>
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                    <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>模型</div>
-                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_agent.model}</div>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>模型</div>
+                      <div style={{ fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active_agent.model}</div>
                     </div>
-                    <div style={{ padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>状态</div>
-                      <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>状态</div>
+                      <div style={{ fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         <span style={{
-                          color: active_agent.status === 'running' ? '#10b981' : active_agent.status === 'error' ? '#ef4444' : '#64748b'
+                          color: active_agent.status === 'running' ? 'var(--ui_success)' : active_agent.status === 'error' ? 'var(--ui_danger)' : 'var(--ui_text_muted)'
                         }}>
                           {active_agent.status === 'running' ? '运行中' : active_agent.status === 'stopped' ? '已停止' : '异常'}
                         </span>
@@ -662,12 +662,12 @@ const AgentManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '14px', color: '#475569', fontWeight: 500, marginBottom: '8px' }}>
+                    <div style={{ fontSize: '14px', color: 'var(--ui_text_muted)', fontWeight: 500, marginBottom: '8px' }}>
                       系统提示词
                     </div>
                     <div style={{
-                      padding: '12px', backgroundColor: '#f1f5f9', borderRadius: '8px',
-                      fontSize: '13px', color: '#475569', lineHeight: '1.6',
+                      padding: '12px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px',
+                      fontSize: '13px', color: 'var(--ui_text)', lineHeight: '1.6',
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                     }}>
                       {active_agent.system_prompt ? (active_agent.system_prompt.length > 4 ? active_agent.system_prompt.slice(0, 4) + '...' : active_agent.system_prompt) : '暂无...'}
@@ -676,7 +676,7 @@ const AgentManagement: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', color: '#94a3b8', marginTop: '80px', fontSize: '14px' }}>
+              <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)', marginTop: '80px', fontSize: '14px' }}>
                 请从左侧选择一个 Agent 查看详情
               </div>
             )}
@@ -691,16 +691,16 @@ const AgentManagement: React.FC = () => {
           alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px',
+            backgroundColor: 'var(--ui_panel)', borderRadius: '12px', padding: '24px',
             width: '500px', maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             maxHeight: '90vh', overflowY: 'auto'
           }}>
-            <h2 style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#1e293b', fontWeight: 600 }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 600 }}>
               新建 Agent
             </h2>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 Agent 名称
               </label>
               <input
@@ -711,22 +711,23 @@ const AgentManagement: React.FC = () => {
                 maxLength={4}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginTop: '6px' }}>
                 提示: 名称不超过4个汉字或字符, 请勿使用标点符号和特殊字符
               </div>
-              <div style={{ textAlign: 'right', fontSize: '12px', color: new_agent.name.length >= 4 ? '#ef4444' : '#94a3b8', marginTop: '4px' }}>
+              <div style={{ textAlign: 'right', fontSize: '12px', color: new_agent.name.length >= 4 ? 'var(--ui_danger)' : 'var(--ui_text_muted)', marginTop: '4px' }}>
                 {new_agent.name.length}/4
               </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 描述
               </label>
               <input
@@ -736,16 +737,17 @@ const AgentManagement: React.FC = () => {
                 placeholder="请输入 Agent 描述"
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 图标
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -760,25 +762,25 @@ const AgentManagement: React.FC = () => {
                         width: '40px',
                         height: '40px',
                         borderRadius: '8px',
-                        border: new_agent.icon === opt.value ? '2px solid #0ea5e9' : '2px solid #e2e8f0',
-                        backgroundColor: new_agent.icon === opt.value ? '#e0f2fe' : '#f8fafc',
+                        border: new_agent.icon === opt.value ? '2px solid var(--ui_accent)' : '2px solid var(--ui_border)',
+                        backgroundColor: new_agent.icon === opt.value ? 'var(--ui_accent)' : 'var(--ui_panel_alt)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: new_agent.icon === opt.value ? '#0369a1' : '#64748b',
+                        color: new_agent.icon === opt.value ? 'white' : 'var(--ui_text)',
                         transition: 'all 0.2s'
                       }}
                       onMouseEnter={(e) => {
                         if (new_agent.icon !== opt.value) {
-                          e.currentTarget.style.borderColor = '#cbd5e1'
-                          e.currentTarget.style.backgroundColor = '#f1f5f9'
+                          e.currentTarget.style.borderColor = 'var(--ui_border)'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (new_agent.icon !== opt.value) {
-                          e.currentTarget.style.borderColor = '#e2e8f0'
-                          e.currentTarget.style.backgroundColor = '#f8fafc'
+                          e.currentTarget.style.borderColor = 'var(--ui_border)'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
                         }
                       }}
                     >
@@ -790,7 +792,7 @@ const AgentManagement: React.FC = () => {
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 模型
               </label>
               <select
@@ -798,20 +800,21 @@ const AgentManagement: React.FC = () => {
                 onChange={(e) => set_new_agent(prev => ({ ...prev, model: e.target.value }))}
                 style={{
                   width: '100%', padding: '10px 14px', fontSize: '14px', lineHeight: '1.5',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               >
                 {model_options.map(opt => (
-                  <option key={opt.value} value={opt.value} style={{ padding: '10px 14px', fontSize: '14px' }}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value} style={{ padding: '10px 14px', fontSize: '14px', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}>{opt.label}</option>
                 ))}
               </select>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 系统提示词
               </label>
               <textarea
@@ -821,12 +824,13 @@ const AgentManagement: React.FC = () => {
                 rows={6}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s',
-                  resize: 'vertical', minHeight: '120px', fontFamily: 'inherit', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s',
+                  resize: 'vertical', minHeight: '120px', fontFamily: 'inherit', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
             </div>
 
@@ -835,11 +839,11 @@ const AgentManagement: React.FC = () => {
                 onClick={() => set_show_register_modal(false)}
                 style={{
                   padding: '10px 20px', fontSize: '14px', fontWeight: 500,
-                  border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: '#ffffff',
-                  color: '#475569', cursor: 'pointer', transition: 'all 0.2s'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', backgroundColor: 'var(--ui_panel)',
+                  color: 'var(--ui_text)', cursor: 'pointer', transition: 'all 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel)'}
               >
                 取消
               </button>
@@ -849,7 +853,7 @@ const AgentManagement: React.FC = () => {
                 style={{
                   padding: '10px 20px', fontSize: '14px', fontWeight: 500,
                   border: 'none', borderRadius: '6px',
-                  backgroundColor: registering ? '#94a3b8' : '#0ea5e9',
+                  backgroundColor: registering ? 'var(--ui_text_muted)' : 'var(--ui_accent)',
                   color: '#ffffff', cursor: registering ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
                 }}
@@ -875,16 +879,16 @@ const AgentManagement: React.FC = () => {
           alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px',
+            backgroundColor: 'var(--ui_panel)', borderRadius: '12px', padding: '24px',
             width: '500px', maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             maxHeight: '90vh', overflowY: 'auto'
           }}>
-            <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#1e293b', fontWeight: 600 }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', color: 'var(--ui_text)', fontWeight: 600 }}>
               编辑 Agent
             </h2>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 Agent 名称
               </label>
               <input
@@ -894,16 +898,17 @@ const AgentManagement: React.FC = () => {
                 placeholder="请输入 Agent 名称"
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 描述
               </label>
               <input
@@ -913,16 +918,17 @@ const AgentManagement: React.FC = () => {
                 placeholder="请输入 Agent 描述"
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 图标
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -937,25 +943,25 @@ const AgentManagement: React.FC = () => {
                         width: '40px',
                         height: '40px',
                         borderRadius: '8px',
-                        border: edit_agent.icon === opt.value ? '2px solid #0ea5e9' : '2px solid #e2e8f0',
-                        backgroundColor: edit_agent.icon === opt.value ? '#e0f2fe' : '#f8fafc',
+                        border: edit_agent.icon === opt.value ? '2px solid var(--ui_accent)' : '2px solid var(--ui_border)',
+                        backgroundColor: edit_agent.icon === opt.value ? 'var(--ui_accent)' : 'var(--ui_panel_alt)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: edit_agent.icon === opt.value ? '#0369a1' : '#64748b',
+                        color: edit_agent.icon === opt.value ? 'white' : 'var(--ui_text)',
                         transition: 'all 0.2s'
                       }}
                       onMouseEnter={(e) => {
                         if (edit_agent.icon !== opt.value) {
-                          e.currentTarget.style.borderColor = '#cbd5e1'
-                          e.currentTarget.style.backgroundColor = '#f1f5f9'
+                          e.currentTarget.style.borderColor = 'var(--ui_border)'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (edit_agent.icon !== opt.value) {
-                          e.currentTarget.style.borderColor = '#e2e8f0'
-                          e.currentTarget.style.backgroundColor = '#f8fafc'
+                          e.currentTarget.style.borderColor = 'var(--ui_border)'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
                         }
                       }}
                     >
@@ -967,7 +973,7 @@ const AgentManagement: React.FC = () => {
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 模型
               </label>
               <select
@@ -975,20 +981,21 @@ const AgentManagement: React.FC = () => {
                 onChange={(e) => set_edit_agent(prev => prev ? { ...prev, model: e.target.value } : null)}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               >
                 {model_options.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value} style={{ backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}>{opt.label}</option>
                 ))}
               </select>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
                 系统提示词
               </label>
               <textarea
@@ -998,12 +1005,13 @@ const AgentManagement: React.FC = () => {
                 rows={6}
                 style={{
                   width: '100%', padding: '10px 12px', fontSize: '14px',
-                  border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none',
-                  backgroundColor: '#f8fafc', transition: 'border-color 0.2s',
-                  resize: 'vertical', minHeight: '120px', fontFamily: 'inherit', boxSizing: 'border-box'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s',
+                  resize: 'vertical', minHeight: '120px', fontFamily: 'inherit', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               />
             </div>
 
@@ -1015,11 +1023,11 @@ const AgentManagement: React.FC = () => {
                 }}
                 style={{
                   padding: '10px 20px', fontSize: '14px', fontWeight: 500,
-                  border: '1px solid #e2e8f0', borderRadius: '6px', backgroundColor: '#ffffff',
-                  color: '#475569', cursor: 'pointer', transition: 'all 0.2s'
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', backgroundColor: 'var(--ui_panel)',
+                  color: 'var(--ui_text)', cursor: 'pointer', transition: 'all 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel)'}
               >
                 取消
               </button>
@@ -1029,7 +1037,7 @@ const AgentManagement: React.FC = () => {
                 style={{
                   padding: '10px 20px', fontSize: '14px', fontWeight: 500,
                   border: 'none', borderRadius: '6px',
-                  backgroundColor: updating ? '#94a3b8' : '#0ea5e9',
+                  backgroundColor: updating ? 'var(--ui_text_muted)' : 'var(--ui_accent)',
                   color: '#ffffff', cursor: updating ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
                 }}

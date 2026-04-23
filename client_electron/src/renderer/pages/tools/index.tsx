@@ -203,22 +203,22 @@ const Tools: React.FC = () => {
       id: 'md2pdf',
       title: 'MD 转 PDF',
       description: '将 MD 文件渲染并导出为 PDF 文档',
-      icon: <FileText size={32} color="#0ea5e9" />,
+      icon: <FileText size={32} color="var(--ui_accent)" />,
       action: handle_md_to_pdf,
-      bg_color: '#f0f9ff',
-      border_color: '#bae6fd'
+      bg_color: 'var(--ui_panel_alt)',
+      border_color: 'var(--ui_border)'
     },
     {
       id: 'image',
       title: '图片压缩',
       description: '智能压缩图片体积, 支持设定目标大小并自动调节质量',
-      icon: <ImageIcon size={32} color="#10b981" />,
+      icon: <ImageIcon size={32} color="var(--ui_success)" />,
       action: handle_compress_image,
-      bg_color: '#ecfdf5',
-      border_color: '#a7f3d0',
+      bg_color: 'var(--ui_panel_alt)',
+      border_color: 'var(--ui_border)',
       extra_ui: (
         <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
+          <label style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>目标大小 (KB):</label>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <input 
                 type="number" 
@@ -229,10 +229,11 @@ const Tools: React.FC = () => {
                 flex: 1,
                 padding: '8px 12px', 
                 borderRadius: '6px', 
-                border: '1px solid #cbd5e1', 
+                border: '1px solid var(--ui_border)', 
                 fontSize: '13px', 
                 outline: 'none',
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)',
                 width: '100%',
                 minWidth: '0'
               }}
@@ -245,23 +246,23 @@ const Tools: React.FC = () => {
       id: 'zip',
       title: 'ZIP 压缩',
       description: '将多个文件打包压缩成一个 ZIP 文件',
-      icon: <FileArchive size={32} color="#f59e0b" />,
+      icon: <FileArchive size={32} color="var(--ui_accent)" />,
       action: handle_compress_zip,
-      bg_color: '#fffbeb',
-      border_color: '#fde68a'
+      bg_color: 'var(--ui_panel_alt)',
+      border_color: 'var(--ui_border)'
     },
     {
       id: 'convert_image',
       title: '格式转换',
       description: '在常见格式间互转 (如 png, jpeg, ico, webp)',
-      icon: <RefreshCw size={32} color="#0ea5e9" />,
+      icon: <RefreshCw size={32} color="var(--ui_accent)" />,
       action: handle_convert_image,
-      bg_color: '#f0f9ff',
-      border_color: '#bae6fd',
+      bg_color: 'var(--ui_panel_alt)',
+      border_color: 'var(--ui_border)',
       extra_ui: (
         <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label htmlFor="convert_image_target_format" style={{ fontSize: '13px', color: '#475569' }}>目标格式:</label>
+            <label htmlFor="convert_image_target_format" style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>目标格式:</label>
             <select
               id="convert_image_target_format"
               aria-label="目标格式"
@@ -275,10 +276,11 @@ const Tools: React.FC = () => {
               style={{ 
                 padding: '8px 12px', 
                 borderRadius: '6px', 
-                border: '1px solid #cbd5e1', 
+                border: '1px solid var(--ui_border)', 
                 fontSize: '13px',
                 outline: 'none',
-                backgroundColor: '#f8fafc',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)',
                 cursor: 'pointer',
                 width: '100%'
               }}
@@ -293,10 +295,10 @@ const Tools: React.FC = () => {
           
           {target_image_format === 'ico' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '13px', color: '#475569' }}>打包尺寸 (多选):</label>
+              <label style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>打包尺寸 (多选):</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {[16, 32, 48, 64, 128, 256].map(size => (
-                  <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
+                  <label key={size} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_text_muted)', cursor: 'pointer' }}>
                     <input 
                       type="checkbox" 
                       checked={ico_sizes.includes(size)}
@@ -318,7 +320,7 @@ const Tools: React.FC = () => {
           
           {['jpeg', 'webp'].includes(target_image_format) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '13px', color: '#475569' }}>目标大小 (KB):</label>
+              <label style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>目标大小 (KB):</label>
               <div style={{ display: 'flex' }}>
                 <input 
                   type="number" 
@@ -329,10 +331,11 @@ const Tools: React.FC = () => {
                     flex: 1,
                     padding: '8px 12px', 
                     borderRadius: '6px', 
-                    border: '1px solid #cbd5e1', 
+                    border: '1px solid var(--ui_border)', 
                     fontSize: '13px', 
                     outline: 'none',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--ui_panel)',
+                    color: 'var(--ui_text)',
                     width: '100%',
                     minWidth: '0'
                   }}
@@ -343,7 +346,7 @@ const Tools: React.FC = () => {
 
           {target_image_format !== 'ico' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: ['jpeg', 'webp'].includes(target_image_format) ? '8px' : '0' }}>
-              <label style={{ fontSize: '13px', color: '#475569' }}>尺寸 (宽 x 高):</label>
+              <label style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>尺寸 (宽 x 高):</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="number" 
@@ -354,15 +357,16 @@ const Tools: React.FC = () => {
                     flex: 1,
                     padding: '8px 12px', 
                     borderRadius: '6px', 
-                    border: '1px solid #cbd5e1', 
+                    border: '1px solid var(--ui_border)', 
                     fontSize: '13px', 
                     outline: 'none',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--ui_panel)',
+                    color: 'var(--ui_text)',
                     width: '100%',
                     minWidth: '0'
                   }}
                 />
-                <span style={{ color: '#94a3b8' }}>x</span>
+                <span style={{ color: 'var(--ui_text_muted)' }}>x</span>
                 <input 
                   type="number" 
                   placeholder="高"
@@ -372,16 +376,17 @@ const Tools: React.FC = () => {
                     flex: 1,
                     padding: '8px 12px', 
                     borderRadius: '6px', 
-                    border: '1px solid #cbd5e1', 
+                    border: '1px solid var(--ui_border)', 
                     fontSize: '13px', 
                     outline: 'none',
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--ui_panel)',
+                    color: 'var(--ui_text)',
                     width: '100%',
                     minWidth: '0'
                   }}
                 />
               </div>
-              <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>* 留空则保持原图尺寸</span>
+              <span style={{ fontSize: '11px', color: 'var(--ui_text_muted)', marginTop: '2px' }}>* 留空则保持原图尺寸</span>
             </div>
           )}
         </div>
@@ -399,11 +404,11 @@ const Tools: React.FC = () => {
   const active_tool = all_tools.find(t => t.id === active_tool_id)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Wrench size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>工具箱</span>
+          <Wrench size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>工具箱</span>
         </div>
       </div>
       
@@ -412,16 +417,16 @@ const Tools: React.FC = () => {
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)', 
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>工具箱</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>工具箱</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -430,10 +435,10 @@ const Tools: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                 flexShrink: 0
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={18} />
@@ -453,8 +458,8 @@ const Tools: React.FC = () => {
                 style={{
                   padding: '10px 12px',
                   borderRadius: '6px',
-                  backgroundColor: active_cat_id === cat.id ? '#e0f2fe' : 'transparent',
-                  color: active_cat_id === cat.id ? '#0369a1' : '#475569',
+                  backgroundColor: active_cat_id === cat.id ? 'var(--ui_accent)' : 'transparent',
+                  color: active_cat_id === cat.id ? 'white' : 'var(--ui_text)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -465,7 +470,7 @@ const Tools: React.FC = () => {
                   transition: 'background-color 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = '#e2e8f0'
+                  if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                 }}
                 onMouseLeave={(e) => {
                   if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -483,16 +488,16 @@ const Tools: React.FC = () => {
           minWidth: is_middle_sidebar_open ? '80px' : '0px',
           maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)', 
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155', overflow: 'hidden' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)', overflow: 'hidden' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -502,10 +507,10 @@ const Tools: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                     flexShrink: 0
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -529,10 +534,10 @@ const Tools: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                 flexShrink: 0
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
@@ -550,8 +555,8 @@ const Tools: React.FC = () => {
                   style={{
                     padding: '12px 16px',
                     borderRadius: '6px',
-                    backgroundColor: active_tool_id === tool.id ? '#e0f2fe' : 'transparent',
-                    color: active_tool_id === tool.id ? '#0369a1' : '#475569',
+                    backgroundColor: active_tool_id === tool.id ? 'var(--ui_accent)' : 'transparent',
+                    color: active_tool_id === tool.id ? 'white' : 'var(--ui_text)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -562,7 +567,7 @@ const Tools: React.FC = () => {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    if (active_tool_id !== tool.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                    if (active_tool_id !== tool.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                   }}
                   onMouseLeave={(e) => {
                     if (active_tool_id !== tool.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -585,7 +590,7 @@ const Tools: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
                 {!is_left_sidebar_open && (
@@ -595,9 +600,9 @@ const Tools: React.FC = () => {
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                      color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <PanelLeftOpen size={20} />
@@ -609,9 +614,9 @@ const Tools: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <List size={20} />
@@ -623,14 +628,14 @@ const Tools: React.FC = () => {
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
             {!active_tool ? (
-              <div style={{ textAlign: 'center', color: '#64748b', marginTop: '40px', fontSize: '14px' }}>
+              <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)', marginTop: '40px', fontSize: '14px' }}>
                 请从左侧选择一个工具
               </div>
             ) : (
               <div style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: 'var(--ui_panel)',
                 borderRadius: '12px',
-                border: `1px solid #e2e8f0`,
+                border: `1px solid var(--ui_border)`,
                 padding: '24px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -653,8 +658,8 @@ const Tools: React.FC = () => {
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: 0, fontSize: '16px', color: '#1e293b', fontWeight: 600 }}>{active_tool.title}</h3>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{active_tool.description}</p>
+                    <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--ui_text)', fontWeight: 600 }}>{active_tool.title}</h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--ui_text_muted)', lineHeight: '1.4' }}>{active_tool.description}</p>
                   </div>
                 </div>
                 
@@ -664,19 +669,19 @@ const Tools: React.FC = () => {
 
                 {active_tool.id === 'md2pdf' && (
                   <div style={{ marginTop: '14px', marginBottom: '14px' }}>
-                    <div style={{ fontSize: '13px', color: '#475569', marginBottom: '8px', fontWeight: 600 }}>
+                    <div style={{ fontSize: '13px', color: 'var(--ui_text_muted)', marginBottom: '8px', fontWeight: 600 }}>
                       Markdown 预览{md_preview_name ? `: ${md_preview_name}` : ''}
                     </div>
                     {md_preview_error ? (
-                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12px' }}>
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'var(--ui_danger)', border: '1px solid var(--ui_danger)', color: 'white', fontSize: '12px' }}>
                         {md_preview_error}
                       </div>
                     ) : md_preview_text ? (
-                      <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#ffffff', padding: '12px' }}>
+                      <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid var(--ui_border)', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', padding: '12px' }}>
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{md_preview_text}</ReactMarkdown>
                       </div>
                     ) : (
-                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '12px' }}>
+                      <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', border: '1px solid var(--ui_border)', color: 'var(--ui_text_muted)', fontSize: '12px' }}>
                         选择 Markdown 文件后可预览
                       </div>
                     )}
@@ -688,8 +693,8 @@ const Tools: React.FC = () => {
                   disabled={loading_task !== null}
                   style={{ 
                     padding: '10px 16px', 
-                    backgroundColor: loading_task === active_tool.id ? '#f1f5f9' : '#0078d4', 
-                    color: loading_task === active_tool.id ? '#64748b' : '#ffffff', 
+                    backgroundColor: loading_task === active_tool.id ? 'var(--ui_border)' : 'var(--ui_accent)', 
+                    color: loading_task === active_tool.id ? 'var(--ui_text_muted)' : '#ffffff', 
                     border: 'none', 
                     borderRadius: '8px', 
                     cursor: loading_task !== null ? 'not-allowed' : 'pointer',
@@ -716,8 +721,8 @@ const Tools: React.FC = () => {
                 marginTop: '24px',
                 padding: '20px',
                 borderRadius: '12px',
-                backgroundColor: error_msg ? '#fef2f2' : '#f0fdf4',
-                border: `1px solid ${error_msg ? '#fecaca' : '#bbf7d0'}`,
+                backgroundColor: error_msg ? 'var(--ui_danger)' : 'var(--ui_success)',
+                border: `1px solid ${error_msg ? 'var(--ui_danger)' : 'var(--ui_success)'}`,
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '12px',
@@ -727,28 +732,28 @@ const Tools: React.FC = () => {
                 {error_msg ? <AlertCircle size={24} color="#ef4444" /> : <CheckCircle2 size={24} color="#10b981" />}
                 
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 8px 0', color: error_msg ? '#991b1b' : '#166534', fontSize: '16px', fontWeight: 600 }}>
+                  <h4 style={{ margin: '0 0 8px 0', color: 'white', fontSize: '16px', fontWeight: 600 }}>
                     {error_msg ? '处理失败' : '处理成功'}
                   </h4>
                   
                   {error_msg ? (
-                    <p style={{ margin: 0, color: '#b91c1c', fontSize: '14px' }}>{error_msg}</p>
+                    <p style={{ margin: 0, color: 'white', fontSize: '14px' }}>{error_msg}</p>
                   ) : (
                     <div>
-                      <p style={{ margin: '0 0 12px 0', color: '#15803d', fontSize: '14px' }}>
+                      <p style={{ margin: '0 0 12px 0', color: 'white', fontSize: '14px' }}>
                         {result_info?.expires_in && result_info.expires_in > 0
                           ? '文件已成功生成, 请点击下方按钮下载, 链接有效期 5 分钟. '
                           : '文件已成功生成, 请点击下方按钮下载. '}
                       </p>
 
                       {result_info?.message && result_info.message !== '处理成功' && (
-                        <p style={{ margin: '0 0 12px 0', color: '#065f46', fontSize: '13px' }}>
+                        <p style={{ margin: '0 0 12px 0', color: 'white', fontSize: '13px' }}>
                           {result_info.message}
                         </p>
                       )}
                       
                       {result_info && result_info.original_size !== undefined && (
-                        <div style={{ marginBottom: '12px', fontSize: '13px', color: '#047857', display: 'flex', gap: '16px', backgroundColor: '#d1fae5', padding: '8px 12px', borderRadius: '6px' }}>
+                        <div style={{ marginBottom: '12px', fontSize: '13px', color: 'white', display: 'flex', gap: '16px', backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px 12px', borderRadius: '6px' }}>
                           <div>
                             <strong>处理前:</strong> {result_info.original_width && result_info.original_height ? `${result_info.original_width}x${result_info.original_height}, ` : ''}{format_size(result_info.original_size)}
                           </div>
@@ -767,16 +772,16 @@ const Tools: React.FC = () => {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '8px 16px',
-                          backgroundColor: '#10b981',
-                          color: '#ffffff',
+                          backgroundColor: 'white',
+                          color: 'var(--ui_success)',
                           textDecoration: 'none',
                           borderRadius: '6px',
                           fontSize: '14px',
                           fontWeight: 500,
                           transition: 'background-color 0.2s'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.8)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                       >
                         <ArrowDownToLine size={16} />
                         下载文件
@@ -784,16 +789,16 @@ const Tools: React.FC = () => {
 
                       {active_tool?.id === 'md2pdf' && result_url && (
                         <div style={{ marginTop: '14px' }}>
-                          <p style={{ margin: '0 0 8px 0', color: '#166534', fontSize: '13px' }}>转换结果预览</p>
+                          <p style={{ margin: '0 0 8px 0', color: 'white', fontSize: '13px' }}>转换结果预览</p>
                           <iframe
                             src={result_url}
                             title="PDF 预览"
                             style={{
                               width: '100%',
                               height: '360px',
-                              border: '1px solid #bbf7d0',
+                              border: '1px solid rgba(255,255,255,0.3)',
                               borderRadius: '8px',
-                              backgroundColor: '#ffffff'
+                              backgroundColor: 'white'
                             }}
                           />
                         </div>

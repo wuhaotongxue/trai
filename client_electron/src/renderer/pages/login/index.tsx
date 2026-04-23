@@ -194,23 +194,23 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f3f3f3', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
       {/* 自定义标题栏 */}
       <div
         className="drag-region"
         style={{
           height: '36px',
           width: '100%',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--ui_panel)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingLeft: '16px',
           paddingRight: '16px',
           fontSize: '12px',
-          color: '#333333',
+          color: 'var(--ui_text)',
           boxSizing: 'border-box',
-          borderBottom: '1px solid #e0e0e0',
+          borderBottom: '1px solid var(--ui_border)',
           position: 'relative',
           zIndex: 1000,
           boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
@@ -225,15 +225,15 @@ const Login: React.FC = () => {
             title="刷新"
             onClick={() => window.location.reload()}
             style={{
-              background: '#f5f5f5',
-              border: '1px solid #e0e0e0',
+              background: 'var(--ui_panel_alt)',
+              border: '1px solid var(--ui_border)',
               borderRadius: '6px',
               padding: '4px 8px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#333333'
+              color: 'var(--ui_text)'
             }}
           >
             <RotateCw size={14} />
@@ -246,15 +246,15 @@ const Login: React.FC = () => {
               title={show_logs ? '隐藏日志' : '显示日志'}
               onClick={() => set_show_logs(!show_logs)}
               style={{
-                background: '#f5f5f5',
-                border: '1px solid #e0e0e0',
+                background: 'var(--ui_panel_alt)',
+                border: '1px solid var(--ui_border)',
                 borderRadius: '6px',
                 padding: '4px 8px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#333333'
+                color: 'var(--ui_text)'
               }}
             >
               <FileText size={14} />
@@ -271,8 +271,8 @@ const Login: React.FC = () => {
                   width: '400px',
                   maxWidth: '90vw',
                   maxHeight: '300px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e0e0e0',
+                  backgroundColor: 'var(--ui_panel)',
+                  border: '1px solid var(--ui_border)',
                   borderRadius: '8px',
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                   padding: '8px',
@@ -281,7 +281,7 @@ const Login: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '4px 8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '14px', color: '#333' }}>系统日志</h3>
+                  <h3 style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text)' }}>系统日志</h3>
                   <div style={{ display: 'flex', gap: '4px' }}>
                     <button
                       className="no-drag-region"
@@ -349,23 +349,23 @@ const Login: React.FC = () => {
       </div>
       
       <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '8px', width: '61.8%', minWidth: '400px', maxWidth: '600px', border: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
-          <h2 style={{ color: '#202020', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
+        <div style={{ backgroundColor: 'var(--ui_panel)', padding: '40px', borderRadius: '8px', width: '61.8%', minWidth: '400px', maxWidth: '600px', border: '1px solid var(--ui_border)', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}>
+          <h2 style={{ color: 'var(--ui_text)', textAlign: 'center', margin: '0 0 24px 0', fontWeight: '600' }}>TRAI</h2>
           <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
+              <label style={{ color: 'var(--ui_text)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>用户名</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => set_username(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: '1px solid var(--ui_border)', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                 placeholder="请输入用户名"
-                onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                onFocus={(e) => e.target.style.border = '1px solid var(--ui_accent)'}
+                onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
               />
             </div>
             <div>
-              <label style={{ color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
+              <label style={{ color: 'var(--ui_text)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>密码</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={password_visible ? 'text' : 'password'}
@@ -374,10 +374,10 @@ const Login: React.FC = () => {
                     set_password(e.target.value)
                   }}
                   onFocus={(e) => {
-                    e.target.style.border = '1px solid #0078d4'
+                    e.target.style.border = '1px solid var(--ui_accent)'
                   }}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
-                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', color: '#202020', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
+                  onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
+                  style={{ width: '100%', padding: '10px 40px 10px 12px', borderRadius: '4px', border: '1px solid var(--ui_border)', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)', boxSizing: 'border-box', outline: 'none', transition: 'border 0.2s' }}
                   placeholder="请输入密码"
                 />
                 <button
@@ -395,7 +395,7 @@ const Login: React.FC = () => {
                     border: 'none',
                     padding: '4px',
                     cursor: 'pointer',
-                    color: 'rgba(0, 0, 0, 0.55)'
+                    color: 'var(--ui_text_muted)'
                   }}
                 >
                   {password_visible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -405,12 +405,12 @@ const Login: React.FC = () => {
             {error_msg && (
               <div
                 style={{
-                  color: '#e51400',
+                  color: 'var(--ui_danger)',
                   fontSize: '12px',
                   whiteSpace: 'pre-line',
                   lineHeight: '1.5',
                   padding: '8px',
-                  backgroundColor: 'rgba(229, 20, 0, 0.05)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
                   borderRadius: '4px'
                 }}
               >
@@ -425,18 +425,18 @@ const Login: React.FC = () => {
                 onChange={(e) => set_remember_me(e.target.checked)}
                 style={{ cursor: 'pointer' }}
               />
-              <label htmlFor="remember_me" style={{ color: 'rgba(0, 0, 0, 0.7)', fontSize: '14px', cursor: 'pointer' }}>
+              <label htmlFor="remember_me" style={{ color: 'var(--ui_text)', fontSize: '14px', cursor: 'pointer' }}>
                 保存登录状态 (免扫码)
               </label>
             </div>
-            <button type="submit" style={{ backgroundColor: '#0078d4', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
+            <button type="submit" style={{ backgroundColor: 'var(--ui_accent)', color: 'white', padding: '10px', borderRadius: '4px', border: 'none', cursor: 'pointer', marginTop: '8px', fontWeight: 'normal', fontSize: '14px' }}>
               登录
             </button>
-            <button type="button" onClick={handle_wecom_login} style={{ backgroundColor: '#ffffff', color: '#0078d4', padding: '10px', borderRadius: '4px', border: '1px solid #0078d4', cursor: 'pointer', marginTop: '4px', fontWeight: 'normal', fontSize: '14px' }}>
+            <button type="button" onClick={handle_wecom_login} style={{ backgroundColor: 'var(--ui_panel)', color: 'var(--ui_accent)', padding: '10px', borderRadius: '4px', border: '1px solid var(--ui_accent)', cursor: 'pointer', marginTop: '4px', fontWeight: 'normal', fontSize: '14px' }}>
               企业微信扫码登录
             </button>
             <div style={{ textAlign: 'center', marginTop: '12px' }}>
-              <span style={{ color: '#0078d4', fontSize: '14px', cursor: 'pointer' }} onClick={() => navigate('/register')}>
+              <span style={{ color: 'var(--ui_accent)', fontSize: '14px', cursor: 'pointer' }} onClick={() => navigate('/register')}>
                 没有账号? 去注册
               </span>
             </div>

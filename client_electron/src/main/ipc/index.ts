@@ -13,6 +13,7 @@ import { tools_service } from '../services/tools'
 import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
 import { knowledge_base_service } from '../services/knowledge_base'
+import { main_window } from '../index'
 
 /**
  * 注册所有 IPC 处理器
@@ -56,6 +57,17 @@ export const register_ipc_handlers = (): void => {
   ipcMain.handle('config:set', async (_, key: string, value: any) => {
     try {
       config_store.set(key, value)
+      
+      // 如果是主题配置变更，更新窗口标题栏颜色
+      if (key === 'ui:theme' && main_window) {
+        const is_dark_theme = value === 'dark'
+        main_window.setTitleBarOverlay({
+          color: is_dark_theme ? '#1e1e1e' : '#ffffff',
+          symbolColor: is_dark_theme ? '#ffffff' : '#333333',
+          height: 36
+        })
+      }
+      
       return { success: true }
     } catch (error) {
       log.error('failed to set config', error)

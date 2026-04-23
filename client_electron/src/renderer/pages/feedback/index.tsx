@@ -144,30 +144,30 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <MessageSquarePlus size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>用户反馈</span>
+          <MessageSquarePlus size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>用户反馈</span>
         </div>
       </div>
       
-      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
         <div style={{ 
           width: is_left_sidebar_open ? '10%' : '0px', 
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           maxWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)', 
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>反馈类型</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>反馈类型</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -176,10 +176,10 @@ const Feedback: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                 flexShrink: 0
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={18} />
@@ -197,12 +197,12 @@ const Feedback: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  backgroundColor: active_type === type.value ? '#ffffff' : 'transparent',
+                  backgroundColor: active_type === type.value ? 'var(--ui_accent)' : 'transparent',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  color: active_type === type.value ? '#0ea5e9' : '#475569',
+                  color: active_type === type.value ? 'white' : 'var(--ui_text)',
                   fontWeight: active_type === type.value ? '600' : 'normal',
                   textAlign: 'left',
                   display: 'flex',
@@ -224,15 +224,15 @@ const Feedback: React.FC = () => {
           minWidth: is_middle_sidebar_open ? '80px' : '0px',
           maxWidth: is_middle_sidebar_open ? '160px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff', 
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)', 
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {!is_left_sidebar_open && (
                 <button
@@ -243,9 +243,9 @@ const Feedback: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -261,8 +261,8 @@ const Feedback: React.FC = () => {
                   <span
                     style={
                       should_ellipsis(title)
-                        ? { fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
-                        : { fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }
+                        ? { fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+                        : { fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }
                     }
                   >
                     {title}
@@ -278,10 +278,10 @@ const Feedback: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s',
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s',
                 flexShrink: 0
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
@@ -296,8 +296,8 @@ const Feedback: React.FC = () => {
                 style={{
                   padding: '10px 12px',
                   borderRadius: '6px',
-                  backgroundColor: active_sub_category === sub.id ? '#e0f2fe' : 'transparent',
-                  color: active_sub_category === sub.id ? '#0369a1' : '#475569',
+                  backgroundColor: active_sub_category === sub.id ? 'var(--ui_accent)' : 'transparent',
+                  color: active_sub_category === sub.id ? 'white' : 'var(--ui_text)',
                   cursor: 'pointer',
                   marginBottom: '4px',
                   transition: 'all 0.2s',
@@ -305,7 +305,7 @@ const Feedback: React.FC = () => {
                   fontWeight: active_sub_category === sub.id ? 600 : 400
                 }}
                 onMouseEnter={(e) => {
-                  if (active_sub_category !== sub.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                  if (active_sub_category !== sub.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                 }}
                 onMouseLeave={(e) => {
                   if (active_sub_category !== sub.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -318,7 +318,7 @@ const Feedback: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center' }}>
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '16px', gap: '4px' }}>
                 {!is_left_sidebar_open && (
@@ -329,9 +329,9 @@ const Feedback: React.FC = () => {
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                      color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <PanelLeftOpen size={20} />
@@ -344,28 +344,28 @@ const Feedback: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>
               {active_sub_category ? sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name : '提交反馈'}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               {message && (
                 <div style={{ 
                   padding: '12px 16px', 
                   marginBottom: '20px', 
                   borderRadius: '6px', 
-                  backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
-                  color: message.type === 'success' ? '#16a34a' : '#dc2626',
+                  backgroundColor: message.type === 'success' ? 'var(--ui_success)' : 'var(--ui_danger)',
+                  color: 'white',
                   fontSize: '14px'
                 }}>
                   {message.text}
@@ -374,43 +374,43 @@ const Feedback: React.FC = () => {
 
               <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {active_sub_category && (
-                  <div style={{ padding: '12px 16px', backgroundColor: '#f0f9ff', borderRadius: '6px', border: '1px solid #bae6fd' }}>
-                    <p style={{ fontSize: '13px', color: '#0369a1', margin: 0 }}>
+                  <div style={{ padding: '12px 16px', backgroundColor: 'var(--ui_accent)', borderRadius: '6px', border: '1px solid var(--ui_accent)' }}>
+                    <p style={{ fontSize: '13px', color: 'white', margin: 0 }}>
                       当前分类: {sub_categories[active_type]?.find(s => s.id === active_sub_category)?.description}
                     </p>
                   </div>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>标题 <span style={{ color: '#ef4444' }}>*</span></label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>标题 <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
                   <input 
                     type="text" 
                     value={title}
                     onChange={(e) => set_title(e.target.value)}
                     placeholder={active_sub_category ? `请输入${sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name}相关的标题` : '请简要描述反馈内容'}
-                    style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }}
+                    style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)', outline: 'none', fontSize: '14px', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)' }}
                   />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>详细描述 <span style={{ color: '#ef4444' }}>*</span></label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>详细描述 <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
                   <textarea 
                     value={content}
                     onChange={(e) => set_content(e.target.value)}
                     placeholder={active_sub_category ? `请详细描述您关于${sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name}的问题或建议...` : '请详细描述您的问题或建议...'}
                     rows={6}
-                    style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', resize: 'vertical' }}
+                    style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)', outline: 'none', fontSize: '14px', resize: 'vertical', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)' }}
                   />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>联系方式 (选填)</label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>联系方式 (选填)</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <input 
                       type="text" 
                       value={contact}
                       onChange={(e) => set_contact(e.target.value)}
                       placeholder="请输入您的邮箱前缀"
-                      style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }}
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)', outline: 'none', fontSize: '14px', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)' }}
                     />
                     <select
                       value=""
@@ -420,7 +420,7 @@ const Feedback: React.FC = () => {
                           set_contact(prefix + e.target.value)
                         }
                       }}
-                      style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px', backgroundColor: '#fff', cursor: 'pointer', minWidth: '140px' }}
+                      style={{ padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)', outline: 'none', fontSize: '14px', backgroundColor: 'var(--ui_panel_alt)', cursor: 'pointer', minWidth: '140px', color: 'var(--ui_text)' }}
                     >
                       <option value="">选择邮箱后缀</option>
                       <option value="@qq.com">@qq.com</option>
@@ -447,20 +447,20 @@ const Feedback: React.FC = () => {
                         style={{
                           padding: '4px 10px',
                           borderRadius: '4px',
-                          border: '1px solid #e2e8f0',
-                          backgroundColor: '#f8fafc',
-                          color: '#64748b',
+                          border: '1px solid var(--ui_border)',
+                          backgroundColor: 'var(--ui_panel_alt)',
+                          color: 'var(--ui_text)',
                           fontSize: '12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#e2e8f0'
-                          e.currentTarget.style.color = '#334155'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                          e.currentTarget.style.color = 'var(--ui_text)'
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#f8fafc'
-                          e.currentTarget.style.color = '#64748b'
+                          e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
+                          e.currentTarget.style.color = 'var(--ui_text)'
                         }}
                       >
                         {suffix}
@@ -470,7 +470,7 @@ const Feedback: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: '#334155' }}>附件 (选填)</label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>附件 (选填)</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <input 
@@ -491,21 +491,21 @@ const Feedback: React.FC = () => {
                           alignItems: 'center',
                           gap: '6px',
                           padding: '8px 12px',
-                          backgroundColor: '#ffffff',
-                          border: '1px solid #cbd5e1',
+                          backgroundColor: 'var(--ui_panel_alt)',
+                          border: '1px solid var(--ui_border)',
                           borderRadius: '6px',
-                          color: '#475569',
+                          color: 'var(--ui_text)',
                           fontSize: '13px',
                           cursor: 'pointer',
                           transition: 'background-color 0.2s'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                       >
                         <Paperclip size={16} />
                         添加附件
                       </button>
-                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>支持图片、PDF、文档等格式, 最多上传 3 个, 单文件 5MB 以内</span>
+                      <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)' }}>支持图片、PDF、文档等格式, 最多上传 3 个, 单文件 5MB 以内</span>
                     </div>
                     
                     {attachments.length > 0 && (
@@ -518,22 +518,22 @@ const Feedback: React.FC = () => {
                               alignItems: 'center',
                               gap: '8px',
                               padding: '6px 10px',
-                              backgroundColor: '#f1f5f9',
-                              border: '1px solid #e2e8f0',
+                              backgroundColor: 'var(--ui_panel_alt)',
+                              border: '1px solid var(--ui_border)',
                               borderRadius: '4px',
                               fontSize: '13px',
-                              color: '#334155'
+                              color: 'var(--ui_text)'
                             }}
                           >
                             <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {file.name}
                             </span>
-                            <span style={{ color: '#94a3b8', fontSize: '11px' }}>
+                            <span style={{ color: 'var(--ui_text_muted)', fontSize: '11px' }}>
                               ({(file.size / 1024).toFixed(1)}KB)
                             </span>
                             <X 
                               size={14} 
-                              color="#64748b" 
+                              color="var(--ui_text_muted)" 
                               style={{ cursor: 'pointer', marginLeft: '4px' }} 
                               onClick={() => remove_attachment(index)}
                             />
@@ -554,7 +554,7 @@ const Feedback: React.FC = () => {
                     justifyContent: 'center',
                     gap: '8px',
                     padding: '12px',
-                    backgroundColor: '#0078d4',
+                    backgroundColor: 'var(--ui_accent)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '6px',

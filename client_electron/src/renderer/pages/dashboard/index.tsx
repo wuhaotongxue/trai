@@ -183,12 +183,12 @@ const Dashboard: React.FC = () => {
         style={{
           width: '100%',
           padding: '10px 12px',
-          backgroundColor: active_category === 'system' ? '#ffffff' : 'transparent',
+          backgroundColor: active_category === 'system' ? 'var(--ui_panel)' : 'transparent',
           border: 'none',
           borderRadius: '6px',
           cursor: 'pointer',
           fontSize: '14px',
-          color: active_category === 'system' ? '#0ea5e9' : '#475569',
+          color: active_category === 'system' ? 'var(--ui_accent)' : 'var(--ui_text)',
           fontWeight: active_category === 'system' ? '600' : 'normal',
           textAlign: 'left',
           display: 'flex',
@@ -215,12 +215,12 @@ const Dashboard: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_item === item.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_item === item.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_item === item.id ? '#0ea5e9' : '#475569',
+            color: active_item === item.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_item === item.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -254,60 +254,60 @@ const Dashboard: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>系统概览</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>系统概览</h2>
             {sys_info ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Monitor size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>系统平台</div>
+                    <Monitor size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>系统平台</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{sys_info.platform}</div>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{sys_info.platform}</div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Cpu size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>CPU 架构</div>
+                    <Cpu size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>CPU 架构</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{sys_info.arch}</div>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{sys_info.arch}</div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <HardDrive size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>总内存</div>
+                    <HardDrive size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>总内存</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{format_gb(sys_info.total_mem)}</div>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(sys_info.total_mem)}</div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Cpu size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>GPU</div>
+                    <Cpu size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>GPU</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
                     {(metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU')}
                   </div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Activity size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>CPU 使用率</div>
+                    <Activity size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>CPU 使用率</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
                     {metrics ? format_percent(metrics.cpu_usage_percent) : '0.0%'}
                   </div>
                 </div>
-                <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <HardDrive size={16} color="#64748b" />
-                    <div style={{ color: '#64748b', fontSize: '12px' }}>内存使用率</div>
+                    <HardDrive size={16} color="var(--ui_text_muted)" />
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>内存使用率</div>
                   </div>
-                  <div style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>
+                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
                     {metrics ? format_percent(metrics.mem_usage_percent) : '0.0%'}
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
                 加载中...
               </div>
             )}
@@ -317,70 +317,70 @@ const Dashboard: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>性能监控</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>性能监控</h2>
             {metrics ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-                <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Activity size={16} color="#0ea5e9" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>CPU</div>
+                      <Activity size={16} color="var(--ui_accent)" />
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>CPU</div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{format_percent(metrics.cpu_usage_percent)}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', backgroundColor: '#0ea5e9' }} />
+                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_accent)' }} />
                   </div>
-                  <MiniLineChart values={cpu_series} stroke="#0ea5e9" seq={chart_seq} />
+                  <MiniLineChart values={cpu_series} stroke="var(--ui_accent)" seq={chart_seq} />
                 </div>
 
-                <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <HardDrive size={16} color="#10b981" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>内存</div>
+                      <HardDrive size={16} color="var(--ui_success)" />
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>内存</div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{format_percent(metrics.mem_usage_percent)}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.mem_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', backgroundColor: '#10b981' }} />
+                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_success)' }} />
                   </div>
-                  <MiniLineChart values={mem_series} stroke="#10b981" seq={chart_seq} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', color: '#64748b', fontSize: '12px' }}>
+                  <MiniLineChart values={mem_series} stroke="var(--ui_success)" seq={chart_seq} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', color: 'var(--ui_text_muted)', fontSize: '12px' }}>
                     <span>可用 {format_gb(metrics.free_mem)}</span>
                     <span>总计 {format_gb(metrics.total_mem)}</span>
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <LayoutDashboard size={16} color="#64748b" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>进程内存</div>
+                      <LayoutDashboard size={16} color="var(--ui_text_muted)" />
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>进程内存</div>
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
-                    <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>RSS</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{format_bytes(metrics.process_rss)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>RSS</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_rss)}</div>
                     </div>
-                    <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>Heap Used</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{format_bytes(metrics.process_heap_used)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Heap Used</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_used)}</div>
                     </div>
-                    <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>Heap Total</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{format_bytes(metrics.process_heap_total)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Heap Total</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_total)}</div>
                     </div>
-                    <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>Uptime</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{Math.floor(metrics.uptime_sec)} s</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Uptime</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{Math.floor(metrics.uptime_sec)} s</div>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
                 加载中...
               </div>
             )}
@@ -389,28 +389,28 @@ const Dashboard: React.FC = () => {
       case 'hardware':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>硬件信息</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>硬件信息</h2>
             {sys_info ? (
-              <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>系统详情</div>
+              <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>系统详情</div>
                 </div>
                 <div style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>操作系统</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{sys_info.platform}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>操作系统</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.platform}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>CPU 架构</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{sys_info.arch}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>内核版本</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{sys_info.release}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>CPU 架构</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.arch}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>GPU</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 500 }}>{metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU'}</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>内核版本</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.release}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>GPU</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU'}</span>
                   </div>
                 </div>
               </div>
@@ -424,29 +424,29 @@ const Dashboard: React.FC = () => {
       case 'memory':
         return (
           <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: '#202020', fontWeight: '600' }}>内存状态</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>内存状态</h2>
             {sys_info ? (
-              <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '24px' }}>
+              <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '24px' }}>
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>总内存</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.total_mem ?? sys_info.total_mem)}</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>总内存</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.total_mem ?? sys_info.total_mem)}</span>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ width: '100%', height: '100%', backgroundColor: '#0ea5e9', borderRadius: '4px' }}></div>
+                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--ui_accent)', borderRadius: '4px' }}></div>
                   </div>
                 </div>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#64748b', fontSize: '14px' }}>可用内存</span>
-                    <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.free_mem ?? sys_info.free_mem)}</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>可用内存</span>
+                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.free_mem ?? sys_info.free_mem)}</span>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
                     <div
                       style={{
                         width: `${((metrics?.free_mem ?? sys_info.free_mem) / (metrics?.total_mem ?? sys_info.total_mem)) * 100}%`,
                         height: '100%',
-                        backgroundColor: '#10b981',
+                        backgroundColor: 'var(--ui_success)',
                         borderRadius: '4px'
                       }}
                     ></div>
@@ -454,7 +454,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
                 加载中...
               </div>
             )}
@@ -476,7 +476,7 @@ const Dashboard: React.FC = () => {
       rightPanelTitle={filtered_items.find(i => i.id === active_item)?.name || '详情'}
       contentPadding="32px"
     >
-      <div style={{ flex: 1, height: '100%', backgroundColor: '#ffffff', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', overflow: 'auto', minWidth: 0 }}>
+      <div style={{ flex: 1, height: '100%', backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', overflow: 'auto', minWidth: 0 }}>
         {render_content()}
       </div>
     </ThreePanelLayout>

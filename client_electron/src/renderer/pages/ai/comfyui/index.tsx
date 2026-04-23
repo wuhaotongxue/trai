@@ -66,12 +66,12 @@ const ComfyUI: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_workflow === workflow.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_workflow === workflow.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_workflow === workflow.id ? '#0ea5e9' : '#475569',
+            color: active_workflow === workflow.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_workflow === workflow.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -106,9 +106,9 @@ const ComfyUI: React.FC = () => {
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>提交生成任务</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--ui_text)', fontWeight: 600, fontSize: '14px' }}>提交生成任务</label>
             <textarea
               value={prompt}
               onChange={(e) => set_prompt(e.target.value)}
@@ -118,12 +118,14 @@ const ComfyUI: React.FC = () => {
                 height: '80px',
                 padding: '14px',
                 borderRadius: '10px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--ui_border)',
                 outline: 'none',
                 resize: 'none',
                 fontSize: '14px',
                 lineHeight: '1.5',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)'
               }}
             />
           </div>
@@ -137,7 +139,7 @@ const ComfyUI: React.FC = () => {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '10px 24px',
-                backgroundColor: '#0ea5e9',
+                backgroundColor: 'var(--ui_accent)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
@@ -153,39 +155,39 @@ const ComfyUI: React.FC = () => {
           </div>
 
           {error && (
-            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', fontSize: '13px' }}>
+            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'var(--ui_danger)', color: 'white', borderRadius: '8px', fontSize: '13px' }}>
               {error}
             </div>
           )}
         </div>
 
         <div style={{ 
-          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: '#f1f5f9', borderRadius: '12px', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1', boxSizing: 'border-box'
+          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
         }}>
           {loading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '10px' }}>
               <Loader2 size={32} className="animate-spin" />
               <span style={{ fontSize: '14px' }}>ComfyUI 正在处理任务...</span>
             </div>
           ) : result ? (
             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', marginBottom: '16px', flexShrink: 0 }}>
-                <span style={{ color: '#64748b' }}>任务 ID:</span>
-                <span style={{ fontWeight: 500, color: '#0f172a' }}>{result.task_id}</span>
-                <span style={{ padding: '3px 10px', backgroundColor: '#dcfce7', color: '#16a34a', borderRadius: '14px', fontSize: '12px', fontWeight: 600 }}>
+                <span style={{ color: 'var(--ui_text_muted)' }}>任务 ID:</span>
+                <span style={{ fontWeight: 500, color: 'var(--ui_text)' }}>{result.task_id}</span>
+                <span style={{ padding: '3px 10px', backgroundColor: 'var(--ui_success)', color: 'white', borderRadius: '14px', fontSize: '12px', fontWeight: 600 }}>
                   {result.status === 'completed' ? '已完成' : result.status}
                 </span>
               </div>
               
               {result.image_url && (
-                <div style={{ flex: 1, minHeight: 0, borderRadius: '12px', overflow: 'hidden', border: '2px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ flex: 1, minHeight: 0, borderRadius: '12px', overflow: 'hidden', border: '2px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={result.image_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+            <div style={{ color: 'var(--ui_text_muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
               <Bot size={48} style={{ opacity: 0.5 }} />
               <span style={{ fontSize: '14px' }}>选择工作流并提交任务后, 结果将在这里展示</span>
             </div>
