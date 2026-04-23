@@ -9,35 +9,35 @@
 .kb_pagination_select {
   padding: 4px 6px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ui_border);
   outline: none;
-  background-color: #ffffff;
+  background-color: var(--ui_panel);
 }
 
 .kb_pagination_input {
   width: 72px;
   padding: 6px 8px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ui_border);
   outline: none;
-  background-color: #ffffff;
+  background-color: var(--ui_panel);
   font-size: 12px;
-  color: #334155;
+  color: var(--ui_text);
 }
 
 .kb_pagination_button {
   padding: 6px 10px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  background-color: #ffffff;
-  color: #334155;
+  border: 1px solid var(--ui_border);
+  background-color: var(--ui_panel);
+  color: var(--ui_text);
   cursor: pointer;
   font-size: 12px;
   white-space: nowrap;
 }
 
 .kb_pagination_button:disabled {
-  background-color: #f8fafc;
-  color: #cbd5e1;
+  background-color: var(--ui_panel_alt);
+  color: var(--ui_text_muted);
   cursor: not-allowed;
 }

@@ -181,30 +181,31 @@ const Settings: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '400px' }}>
-              <label style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>后端 API 地址</label>
-              <input 
-                type="text" 
+              <label style={{ fontSize: '14px', color: 'var(--ui_text)' }}>后端 API 地址</label>
+              <input
+                type="text"
                 value={api_url}
                 onChange={(e) => set_api_url(e.target.value)}
                 placeholder="例如: http://127.0.0.1:8000"
                 style={{
                   padding: '10px 12px',
                   borderRadius: '6px',
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
+                  border: '1px solid var(--ui_border)',
                   outline: 'none',
                   fontSize: '14px',
-                  color: '#202020',
+                  color: 'var(--ui_text)',
+                  backgroundColor: 'var(--ui_panel)',
                   transition: 'border 0.2s'
                 }}
-                onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                onFocus={(e) => e.target.style.border = '1px solid var(--ui_accent)'}
+                onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
               />
               <button 
                 onClick={handle_save}
                 style={{
                   marginTop: '12px',
                   padding: '10px 16px',
-                  backgroundColor: '#0078d4',
+                  backgroundColor: 'var(--ui_accent)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -215,7 +216,7 @@ const Settings: React.FC = () => {
               >
                 保存配置
               </button>
-              {saved && <span style={{ color: '#107c10', fontSize: '12px', marginTop: '8px' }}>保存成功</span>}
+              {saved && <span style={{ color: 'var(--ui_success)', fontSize: '12px', marginTop: '8px' }}>保存成功</span>}
             </div>
           </div>
         )
@@ -223,8 +224,8 @@ const Settings: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
-              <div style={{ fontSize: '14px', color: 'rgba(0, 0, 0, 0.7)' }}>
-                当前版本: <span style={{ fontWeight: '500', color: '#202020' }}>v{current_version || '未知'}</span>
+              <div style={{ fontSize: '14px', color: 'var(--ui_text)' }}>
+                当前版本: <span style={{ fontWeight: '500', color: 'var(--ui_text)' }}>v{current_version || '未知'}</span>
               </div>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -233,9 +234,9 @@ const Settings: React.FC = () => {
                   disabled={is_checking}
                   style={{
                     padding: '10px 16px',
-                    backgroundColor: is_checking ? '#f3f2f1' : '#ffffff',
-                    color: is_checking ? '#a19f9d' : '#202020',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                    backgroundColor: is_checking ? 'var(--ui_panel_alt)' : 'var(--ui_panel)',
+                    color: is_checking ? 'var(--ui_text_muted)' : 'var(--ui_text)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '6px',
                     cursor: is_checking ? 'not-allowed' : 'pointer',
                     fontWeight: 'normal'
@@ -249,7 +250,7 @@ const Settings: React.FC = () => {
                     onClick={install_update}
                     style={{
                       padding: '10px 16px',
-                      backgroundColor: '#0078d4',
+                      backgroundColor: 'var(--ui_accent)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '6px',
@@ -264,7 +265,7 @@ const Settings: React.FC = () => {
               
               {update_status && (
                 <span style={{ 
-                  color: has_update ? '#0078d4' : 'rgba(0, 0, 0, 0.6)', 
+                  color: has_update ? 'var(--ui_accent)' : 'var(--ui_text_muted)', 
                   fontSize: '13px' 
                 }}>
                   {update_status}
@@ -281,12 +282,12 @@ const Settings: React.FC = () => {
                 width: '80px', 
                 height: '80px', 
                 borderRadius: '50%', 
-                backgroundColor: '#f3f2f1',
+                backgroundColor: 'var(--ui_panel_alt)',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid rgba(0, 0, 0, 0.1)'
+                border: '1px solid var(--ui_border)'
               }}>
                 {avatar_preview ? (
                   <img src={avatar_preview} alt="Avatar Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -294,7 +295,7 @@ const Settings: React.FC = () => {
                   user?.username === 'admin' ? (
                     <img src="./kity.png" alt="admin avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <User size={32} color="#a19f9d" />
+                    <User size={32} color="var(--ui_text_muted)" />
                   )
                 )}
               </div>
@@ -314,20 +315,20 @@ const Settings: React.FC = () => {
                   onClick={trigger_file_select}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: '#ffffff',
-                    color: '#202020',
-                    border: '1px solid rgba(0, 0, 0, 0.15)',
+                    backgroundColor: 'var(--ui_panel)',
+                    color: 'var(--ui_text)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '6px',
                     cursor: 'pointer',
                     fontSize: '13px',
                     transition: 'background 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f2f1'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel)'}
                 >
                   选择新头像
                 </button>
-                <p style={{ fontSize: '12px', color: 'rgba(0, 0, 0, 0.5)', marginTop: '8px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginTop: '8px' }}>
                   支持 JPG、PNG 格式, 大小不超过 2MB
                 </p>
               </div>
@@ -339,53 +340,53 @@ const Settings: React.FC = () => {
           <div style={{ padding: '24px' }}>
             <form onSubmit={handle_change_password} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
               <div>
-                <label style={{ fontSize: '13px', color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '6px' }}>原密码</label>
+                <label style={{ fontSize: '13px', color: 'var(--ui_text)', display: 'block', marginBottom: '6px' }}>原密码</label>
                 <input 
                   type="password" 
                   value={old_password}
                   onChange={(e) => set_old_password(e.target.value)}
                   placeholder="请输入当前密码"
                   style={{
-                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0, 0, 0, 0.1)',
-                    outline: 'none', fontSize: '14px', color: '#202020', transition: 'border 0.2s', boxSizing: 'border-box'
+                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)',
+                    outline: 'none', fontSize: '14px', color: 'var(--ui_text)', transition: 'border 0.2s', boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                  onFocus={(e) => e.target.style.border = '1px solid var(--ui_accent)'}
+                  onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
                 />
               </div>
               <div>
-                <label style={{ fontSize: '13px', color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '6px' }}>新密码</label>
+                <label style={{ fontSize: '13px', color: 'var(--ui_text)', display: 'block', marginBottom: '6px' }}>新密码</label>
                 <input 
                   type="password" 
                   value={new_password}
                   onChange={(e) => set_new_password(e.target.value)}
                   placeholder="请输入新密码 (不少于6位)"
                   style={{
-                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0, 0, 0, 0.1)',
-                    outline: 'none', fontSize: '14px', color: '#202020', transition: 'border 0.2s', boxSizing: 'border-box'
+                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)',
+                    outline: 'none', fontSize: '14px', color: 'var(--ui_text)', transition: 'border 0.2s', boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                  onFocus={(e) => e.target.style.border = '1px solid var(--ui_accent)'}
+                  onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
                 />
               </div>
               <div>
-                <label style={{ fontSize: '13px', color: 'rgba(0, 0, 0, 0.7)', display: 'block', marginBottom: '6px' }}>确认新密码</label>
+                <label style={{ fontSize: '13px', color: 'var(--ui_text)', display: 'block', marginBottom: '6px' }}>确认新密码</label>
                 <input 
                   type="password" 
                   value={confirm_password}
                   onChange={(e) => set_confirm_password(e.target.value)}
                   placeholder="请再次输入新密码"
                   style={{
-                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(0, 0, 0, 0.1)',
-                    outline: 'none', fontSize: '14px', color: '#202020', transition: 'border 0.2s', boxSizing: 'border-box'
+                    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--ui_border)',
+                    outline: 'none', fontSize: '14px', color: 'var(--ui_text)', transition: 'border 0.2s', boxSizing: 'border-box'
                   }}
-                  onFocus={(e) => e.target.style.border = '1px solid #0078d4'}
-                  onBlur={(e) => e.target.style.border = '1px solid rgba(0, 0, 0, 0.1)'}
+                  onFocus={(e) => e.target.style.border = '1px solid var(--ui_accent)'}
+                  onBlur={(e) => e.target.style.border = '1px solid var(--ui_border)'}
                 />
               </div>
               
               {pwd_msg.text && (
-                <span style={{ color: pwd_msg.type === 'error' ? '#e51400' : '#107c10', fontSize: '13px' }}>
+                <span style={{ color: pwd_msg.type === 'error' ? 'var(--ui_danger)' : 'var(--ui_success)', fontSize: '13px' }}>
                   {pwd_msg.text}
                 </span>
               )}
@@ -394,7 +395,7 @@ const Settings: React.FC = () => {
                 type="submit"
                 style={{
                   padding: '10px 16px',
-                  backgroundColor: '#0078d4',
+                  backgroundColor: 'var(--ui_accent)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -418,11 +419,11 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <SettingsIcon size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{active_category === 'system' ? '系统设置' : '账号设置'}</span>
+          <SettingsIcon size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{active_category === 'system' ? '系统设置' : '账号设置'}</span>
         </div>
       </div>
       
@@ -431,17 +432,17 @@ const Settings: React.FC = () => {
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '70px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>设置分类</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>设置分类</span>
             </div>
             <button
               type="button"
@@ -451,9 +452,9 @@ const Settings: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={16} />
@@ -466,12 +467,12 @@ const Settings: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                backgroundColor: active_category === 'system' ? '#ffffff' : 'transparent',
+                backgroundColor: active_category === 'system' ? 'var(--ui_accent)' : 'transparent',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: '14px',
-                color: active_category === 'system' ? '#0ea5e9' : '#475569',
+                color: active_category === 'system' ? 'white' : 'var(--ui_text)',
                 fontWeight: active_category === 'system' ? '600' : 'normal',
                 textAlign: 'left',
                 display: 'flex',
@@ -489,12 +490,12 @@ const Settings: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                backgroundColor: active_category === 'account' ? '#ffffff' : 'transparent',
+                backgroundColor: active_category === 'account' ? 'var(--ui_accent)' : 'transparent',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: '14px',
-                color: active_category === 'account' ? '#0ea5e9' : '#475569',
+                color: active_category === 'account' ? 'white' : 'var(--ui_text)',
                 fontWeight: active_category === 'account' ? '600' : 'normal',
                 textAlign: 'left',
                 display: 'flex',
@@ -514,16 +515,16 @@ const Settings: React.FC = () => {
           width: is_middle_sidebar_open ? '12%' : '0px',
           minWidth: is_middle_sidebar_open ? '70px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -533,15 +534,15 @@ const Settings: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={16} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>
                 {active_category === 'system' ? '系统设置' : '账号设置'}
               </span>
             </div>
@@ -553,9 +554,9 @@ const Settings: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={16} />
@@ -570,12 +571,12 @@ const Settings: React.FC = () => {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  backgroundColor: active_item === item.id ? '#f0f9ff' : 'transparent',
+                  backgroundColor: active_item === item.id ? 'var(--ui_accent)' : 'transparent',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontSize: '13px',
-                  color: active_item === item.id ? '#0ea5e9' : '#475569',
+                  color: active_item === item.id ? 'white' : 'var(--ui_text)',
                   fontWeight: active_item === item.id ? '600' : 'normal',
                   textAlign: 'left',
                   display: 'flex',
@@ -596,8 +597,8 @@ const Settings: React.FC = () => {
         </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', backgroundColor: 'var(--ui_panel)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
               {!is_middle_sidebar_open && (
                 <button
                   type="button"
@@ -607,20 +608,20 @@ const Settings: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <List size={16} />
                 </button>
               )}
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>
                 {setting_items.find(item => item.id === active_item)?.name || '设置详情'}
               </span>
             </div>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#ffffff' }}>
+          <div style={{ flex: 1, overflowY: 'auto', backgroundColor: 'var(--ui_bg)' }}>
             {render_content()}
           </div>
         </div>

@@ -613,11 +613,11 @@ const KnowledgeBasePage: React.FC = () => {
   }, [kb_list, active_cat_id])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Database size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>知识库管理</span>
+          <Database size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>知识库管理</span>
         </div>
       </div>
       
@@ -627,17 +627,17 @@ const KnowledgeBasePage: React.FC = () => {
           width: is_left_sidebar_open ? '10%' : '0px',
           minWidth: is_left_sidebar_open ? '100px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>知识库</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>知识库</span>
             </div>
             <button
               type="button"
@@ -647,9 +647,9 @@ const KnowledgeBasePage: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={18} />
@@ -663,8 +663,8 @@ const KnowledgeBasePage: React.FC = () => {
                 style={{
                   padding: '6px 8px',
                   borderRadius: '6px',
-                  backgroundColor: active_cat_id === cat.id ? '#e0f2fe' : 'transparent',
-                  color: active_cat_id === cat.id ? '#0369a1' : '#475569',
+                  backgroundColor: active_cat_id === cat.id ? 'var(--ui_accent)' : 'transparent',
+                  color: active_cat_id === cat.id ? 'white' : 'var(--ui_text)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -675,7 +675,7 @@ const KnowledgeBasePage: React.FC = () => {
                   transition: 'background-color 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = '#e2e8f0'
+                  if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                 }}
                 onMouseLeave={(e) => {
                   if (active_cat_id !== cat.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -828,15 +828,15 @@ const KnowledgeBasePage: React.FC = () => {
           minWidth: is_middle_sidebar_open ? '100px' : '0px',
           flexShrink: 1,
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden'
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -846,9 +846,9 @@ const KnowledgeBasePage: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -864,9 +864,9 @@ const KnowledgeBasePage: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
@@ -875,7 +875,7 @@ const KnowledgeBasePage: React.FC = () => {
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box', minHeight: 0 }}>
             {current_cat_kbs.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>当前分类暂无子知识库</div>
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>当前分类暂无子知识库</div>
             ) : (
               current_cat_kbs.map(kb => (
                 <div 
@@ -885,8 +885,8 @@ const KnowledgeBasePage: React.FC = () => {
                   style={{
                     padding: '12px 16px',
                     borderRadius: '8px',
-                    backgroundColor: active_kb_id === kb.id ? '#f1f5f9' : 'transparent',
-                    border: `1px solid ${active_kb_id === kb.id ? '#e2e8f0' : 'transparent'}`,
+                    backgroundColor: active_kb_id === kb.id ? 'var(--ui_panel_alt)' : 'transparent',
+                    border: `1px solid ${active_kb_id === kb.id ? 'var(--ui_border)' : 'transparent'}`,
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
@@ -895,7 +895,7 @@ const KnowledgeBasePage: React.FC = () => {
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    if (active_kb_id !== kb.id) e.currentTarget.style.backgroundColor = '#f8fafc'
+                    if (active_kb_id !== kb.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                   }}
                   onMouseLeave={(e) => {
                     if (active_kb_id !== kb.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -903,13 +903,13 @@ const KnowledgeBasePage: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                      <BookOpen size={14} color={active_kb_id === kb.id ? '#0ea5e9' : '#64748b'} />
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: active_kb_id === kb.id ? '#0f172a' : '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <BookOpen size={14} color={active_kb_id === kb.id ? 'var(--ui_accent)' : 'var(--ui_text_muted)'} />
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: active_kb_id === kb.id ? 'var(--ui_text)' : 'var(--ui_text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {get_display_name(kb.name)}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '12px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '12px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)', backgroundColor: 'var(--ui_border)', padding: '2px 6px', borderRadius: '12px' }}>
                         {kb.file_count}
                       </span>
                       {active_cat?.id !== 'default' && (
@@ -1000,7 +1000,7 @@ const KnowledgeBasePage: React.FC = () => {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           {active_kb ? (
             <>
-              <div style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                   {!is_middle_sidebar_open && (
                     <>
@@ -1074,7 +1074,7 @@ const KnowledgeBasePage: React.FC = () => {
                       title="搜索文件"
                       value={search_query}
                       onChange={e => set_search_query(e.target.value)}
-                      style={{ padding: '4px 12px 4px 32px', border: '1px solid #e2e8f0', borderRadius: '4px', outline: 'none', fontSize: '13px', width: '200px', height: '28px', boxSizing: 'border-box' }}
+                      style={{ padding: '4px 12px 4px 32px', border: '1px solid var(--ui_border)', borderRadius: '4px', outline: 'none', fontSize: '13px', width: '200px', height: '28px', boxSizing: 'border-box', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}
                     />
                   </div>
                   <button
@@ -1134,39 +1134,39 @@ const KnowledgeBasePage: React.FC = () => {
                     <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                  <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                     <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'auto' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                       <thead>
-                        <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b' }}>文件名称</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '120px' }}>大小</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '160px' }}>上传时间</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '100px' }}>状态</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: '#64748b', width: '80px', textAlign: 'right' }}>操作</th>
+                        <tr style={{ backgroundColor: 'var(--ui_panel_alt)', borderBottom: '1px solid var(--ui_border)' }}>
+                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)' }}>文件名称</th>
+                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '120px' }}>大小</th>
+                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '160px' }}>上传时间</th>
+                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '100px' }}>状态</th>
+                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '80px', textAlign: 'right' }}>操作</th>
                         </tr>
                       </thead>
                       <tbody>
                         {display_files.map(file => (
-                          <tr key={file.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <tr key={file.id} style={{ borderBottom: '1px solid var(--ui_border)' }}>
                             <td style={{ padding: '12px 16px', width: '100%', minWidth: 0 }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                                <FileText size={16} color="#0ea5e9" style={{ flexShrink: 0 }} />
-                                <span style={{ fontSize: '14px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{file.name}</span>
+                                <FileText size={16} color="var(--ui_accent)" style={{ flexShrink: 0 }} />
+                                <span style={{ fontSize: '14px', color: 'var(--ui_text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{file.name}</span>
                               </div>
                             </td>
-                            <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b' }}>{file.size}</td>
-                            <td style={{ padding: '12px 16px', fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap' }}>{file.upload_time}</td>
+                            <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)' }}>{file.size}</td>
+                            <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)', whiteSpace: 'nowrap' }}>{file.upload_time}</td>
                             <td style={{ padding: '12px 16px' }}>
                               {file.status === 'success' ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_success)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
                               ) : (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_accent)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
                               )}
                             </td>
                             <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                <button type="button" onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '4px', borderRadius: '4px' }} title="删除" aria-label="删除文件" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
+                                <button type="button" onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ui_danger)', padding: '4px', borderRadius: '4px' }} title="删除" aria-label="删除文件" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1175,14 +1175,14 @@ const KnowledgeBasePage: React.FC = () => {
                       </table>
                       {files_loading ? (
                         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: 'var(--ui_panel)', border: '1px solid var(--ui_border)', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
                             <Loader2 size={18} className="animate-spin" />
-                            <div style={{ fontSize: '13px', color: '#334155' }}>正在加载中...</div>
+                            <div style={{ fontSize: '13px', color: 'var(--ui_text)' }}>正在加载中...</div>
                           </div>
                         </div>
                       ) : null}
                     </div>
-                    <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ fontSize: '12px', color: '#64748b', whiteSpace: 'nowrap' }}>
                           共 {file_total} 条

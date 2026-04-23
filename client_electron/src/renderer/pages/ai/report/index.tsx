@@ -122,12 +122,12 @@ const AiReport: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_template === template.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_template === template.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_template === template.id ? '#0ea5e9' : '#475569',
+            color: active_template === template.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_template === template.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -162,16 +162,16 @@ const AiReport: React.FC = () => {
       middlePanel={middlePanel}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '15px', margin: '0 0 8px 0', color: '#334155', fontWeight: '600' }}>1. 上传周报模板</h2>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>支持 Markdown、TXT、DOCX 格式</p>
+            <h2 style={{ fontSize: '15px', margin: '0 0 8px 0', color: 'var(--ui_text)', fontWeight: '600' }}>1. 上传周报模板</h2>
+            <p style={{ fontSize: '13px', color: 'var(--ui_text_muted)', marginBottom: '12px' }}>支持 Markdown、TXT、DOCX 格式</p>
             
             {!template_file ? (
               <div 
                 onClick={() => file_input_ref.current?.click()}
                 style={{
-                  border: '2px dashed #cbd5e1',
+                  border: '2px dashed var(--ui_border)',
                   borderRadius: '12px',
                   padding: '24px',
                   display: 'flex',
@@ -180,27 +180,27 @@ const AiReport: React.FC = () => {
                   justifyContent: 'center',
                   gap: '8px',
                   cursor: 'pointer',
-                  backgroundColor: '#f8fafc',
+                  backgroundColor: 'var(--ui_panel_alt)',
                   transition: 'border-color 0.2s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#0ea5e9'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
               >
-                <UploadCloud size={28} color="#94a3b8" />
-                <span style={{ fontSize: '13px', color: '#475569' }}>点击选择模板文件</span>
+                <UploadCloud size={28} color="var(--ui_text_muted)" />
+                <span style={{ fontSize: '13px', color: 'var(--ui_text)' }}>点击选择模板文件</span>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#f1f5f9', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <File size={18} color="#0ea5e9" />
+                  <File size={18} color="var(--ui_accent)" />
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '13px', color: '#334155', fontWeight: 500 }}>{template_file.name}</span>
-                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{(template_file.size / 1024).toFixed(1)} KB</span>
+                    <span style={{ fontSize: '13px', color: 'var(--ui_text)', fontWeight: 500 }}>{template_file.name}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)' }}>{(template_file.size / 1024).toFixed(1)} KB</span>
                   </div>
                 </div>
                 <X 
                   size={16} 
-                  color="#64748b" 
+                  color="var(--ui_text_muted)" 
                   style={{ cursor: 'pointer' }} 
                   onClick={() => set_template_file(null)}
                 />
@@ -218,7 +218,7 @@ const AiReport: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '15px', margin: '0 0 8px 0', color: '#334155', fontWeight: '600' }}>2. 描述本周工作</h2>
+            <h2 style={{ fontSize: '15px', margin: '0 0 8px 0', color: 'var(--ui_text)', fontWeight: '600' }}>2. 描述本周工作</h2>
             <textarea 
               value={description}
               onChange={(e) => set_description(e.target.value)}
@@ -228,18 +228,20 @@ const AiReport: React.FC = () => {
                 height: '80px',
                 padding: '12px',
                 borderRadius: '10px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--ui_border)',
                 outline: 'none',
                 fontSize: '14px',
                 resize: 'none',
                 fontFamily: 'inherit',
                 lineHeight: 1.5,
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)'
               }}
             />
           </div>
 
-          {error_msg && <div style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px', padding: '10px 14px', backgroundColor: '#fef2f2', borderRadius: '8px' }}>{error_msg}</div>}
+          {error_msg && <div style={{ color: 'white', fontSize: '13px', marginBottom: '12px', padding: '10px 14px', backgroundColor: 'var(--ui_danger)', borderRadius: '8px' }}>{error_msg}</div>}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
@@ -252,7 +254,7 @@ const AiReport: React.FC = () => {
                 justifyContent: 'center',
                 gap: '8px',
                 padding: '10px 24px',
-                backgroundColor: '#0ea5e9',
+                backgroundColor: 'var(--ui_accent)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
@@ -269,11 +271,11 @@ const AiReport: React.FC = () => {
         </div>
 
         <div style={{ 
-          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: '#ffffff', borderRadius: '16px', 
-          display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid #e2e8f0', boxSizing: 'border-box'
+          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: 'var(--ui_panel)', borderRadius: '16px', 
+          display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid var(--ui_border)', boxSizing: 'border-box'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
-            <h2 style={{ fontSize: '15px', margin: 0, color: '#334155', fontWeight: '600' }}>生成结果</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--ui_border)', flexShrink: 0 }}>
+            <h2 style={{ fontSize: '15px', margin: 0, color: 'var(--ui_text)', fontWeight: '600' }}>生成结果</h2>
             {generated_report && (
               <button
                 onClick={handle_download}
@@ -283,8 +285,8 @@ const AiReport: React.FC = () => {
                   gap: '6px',
                   padding: '6px 12px',
                   backgroundColor: 'transparent',
-                  color: '#0ea5e9',
-                  border: '1px solid #0ea5e9',
+                  color: 'var(--ui_accent)',
+                  border: '1px solid var(--ui_accent)',
                   borderRadius: '6px',
                   fontSize: '13px',
                   cursor: 'pointer'
@@ -298,17 +300,17 @@ const AiReport: React.FC = () => {
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
             {!generated_report && !is_generating ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94a3b8', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ui_text_muted)', gap: '10px' }}>
                 <FileEdit size={48} style={{ opacity: 0.5 }} />
                 <span style={{ fontSize: '14px' }}>上传模板并描述工作内容后, AI 将为你生成周报</span>
               </div>
             ) : is_generating ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ui_text_muted)', gap: '10px' }}>
                 <Loader2 size={32} className="animate-spin" />
                 <span style={{ fontSize: '14px' }}>AI 正在智能生成周报...</span>
               </div>
             ) : (
-              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px', lineHeight: 1.6, color: '#334155', margin: 0, fontFamily: 'inherit' }}>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '14px', lineHeight: 1.6, color: 'var(--ui_text)', margin: 0, fontFamily: 'inherit' }}>
                 {generated_report}
               </pre>
             )}

@@ -140,12 +140,12 @@ const ImageToImage: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_category === category.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_category === category.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_category === category.id ? '#0ea5e9' : '#475569',
+            color: active_category === category.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_category === category.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -179,12 +179,12 @@ const ImageToImage: React.FC = () => {
           style={{
             width: '100%',
             padding: '10px 12px',
-            backgroundColor: active_style === style.id ? '#f0f9ff' : 'transparent',
+            backgroundColor: active_style === style.id ? 'var(--ui_accent)' : 'transparent',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '13px',
-            color: active_style === style.id ? '#0ea5e9' : '#475569',
+            color: active_style === style.id ? 'white' : 'var(--ui_text)',
             fontWeight: active_style === style.id ? '600' : 'normal',
             textAlign: 'left',
             display: 'flex',
@@ -220,7 +220,7 @@ const ImageToImage: React.FC = () => {
   return (
     <ThreePanelLayout
       title="图生图像"
-      titleIcon={<ImagePlus size={20} color="#0ea5e9" />}
+      titleIcon={<ImagePlus size={20} color="var(--ui_accent)" />}
       leftPanelTitle="风格分类"
       leftPanel={leftPanel}
       middlePanelTitle={middle_title}
@@ -228,9 +228,9 @@ const ImageToImage: React.FC = () => {
       rightPanelTitle={active_style_name || '图片转换'}
     >
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>参考图片</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--ui_text)', fontWeight: 600, fontSize: '14px' }}>参考图片</label>
             <input
               type="text"
               value={source_url}
@@ -244,8 +244,10 @@ const ImageToImage: React.FC = () => {
               }}
               placeholder="https://example.com/image.jpg 或上传本地图片"
               style={{
-                width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                outline: 'none', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box'
+                width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--ui_border)', 
+                outline: 'none', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)'
               }}
             />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', gap: '10px' }}>
@@ -278,14 +280,14 @@ const ImageToImage: React.FC = () => {
                 onClick={() => file_input_ref.current?.click()}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                  backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px',
-                  cursor: 'pointer', fontSize: '13px', color: '#0f172a'
+                  backgroundColor: 'var(--ui_panel_alt)', border: '1px solid var(--ui_border)', borderRadius: '8px',
+                  cursor: 'pointer', fontSize: '13px', color: 'var(--ui_text)'
                 }}
               >
                 <Upload size={16} />
                 上传图片
               </button>
-              <div style={{ flex: 1, minWidth: 0, color: '#64748b', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ flex: 1, minWidth: 0, color: 'var(--ui_text_muted)', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {source_file_name || (source_url ? '已填写 URL' : '未选择')}
               </div>
               {(source_url || source_preview_url) && (
@@ -301,12 +303,12 @@ const ImageToImage: React.FC = () => {
                   }}
                   style={{
                     padding: '8px 12px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: 'var(--ui_panel)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '8px',
                     cursor: 'pointer',
                     fontSize: '13px',
-                    color: '#475569'
+                    color: 'var(--ui_text)'
                   }}
                 >
                   清除
@@ -316,15 +318,17 @@ const ImageToImage: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', color: '#334155', fontWeight: 600, fontSize: '14px' }}>修改描述</label>
+            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--ui_text)', fontWeight: 600, fontSize: '14px' }}>修改描述</label>
             <div style={{ position: 'relative' }}>
               <textarea
                 value={prompt}
                 onChange={(e) => set_prompt(e.target.value)}
                 placeholder="例如: 将图片转换为赛博朋克风格..."
                 style={{
-                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid #cbd5e1', 
-                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box'
+                  width: '100%', height: '80px', padding: '14px', borderRadius: '10px', border: '1px solid var(--ui_border)', 
+                  resize: 'none', outline: 'none', fontSize: '14px', fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box',
+                  backgroundColor: 'var(--ui_panel)',
+                  color: 'var(--ui_text)'
                 }}
               />
               {prompt && (
@@ -332,7 +336,7 @@ const ImageToImage: React.FC = () => {
                   onClick={() => set_prompt('')}
                   style={{
                     position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
-                    backgroundColor: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '4px', 
+                    backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text_muted)', border: 'none', borderRadius: '4px', 
                     cursor: 'pointer', fontSize: '12px', fontWeight: 500
                   }}
                 >
@@ -348,7 +352,7 @@ const ImageToImage: React.FC = () => {
               disabled={loading || !prompt.trim() || !source_url.trim()}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', 
-                backgroundColor: loading || !prompt.trim() || !source_url.trim() ? '#94a3b8' : '#0ea5e9', 
+                backgroundColor: loading || !prompt.trim() || !source_url.trim() ? 'var(--ui_text_muted)' : 'var(--ui_accent)', 
                 color: '#ffffff', border: 'none', borderRadius: '8px', cursor: loading || !prompt.trim() || !source_url.trim() ? 'not-allowed' : 'pointer',
                 fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
               }}
@@ -359,7 +363,7 @@ const ImageToImage: React.FC = () => {
           </div>
 
           {error && (
-            <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginTop: '16px', fontSize: '13px', boxSizing: 'border-box' }}>
+            <div style={{ padding: '12px', backgroundColor: 'var(--ui_danger)', color: 'white', borderRadius: '8px', marginTop: '16px', fontSize: '13px', boxSizing: 'border-box' }}>
               {error}
             </div>
           )}
@@ -367,13 +371,13 @@ const ImageToImage: React.FC = () => {
 
         <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0, marginTop: '16px' }}>
           <div style={{ 
-            flex: 1, backgroundColor: '#f1f5f9', borderRadius: '12px', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1', boxSizing: 'border-box'
+            flex: 1, backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
           }}>
             {source_display_url ? (
               <img src={source_display_url} alt="Source" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
             ) : (
-              <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div style={{ color: 'var(--ui_text_muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <Upload size={36} style={{ opacity: 0.5 }} />
                 <span style={{ fontSize: '14px' }}>参考图预览</span>
               </div>
@@ -381,18 +385,18 @@ const ImageToImage: React.FC = () => {
           </div>
 
           <div style={{ 
-            flex: 1, backgroundColor: '#f1f5f9', borderRadius: '12px', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed #cbd5e1', boxSizing: 'border-box'
+            flex: 1, backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
           }}>
             {loading ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '8px' }}>
                 <Loader2 size={28} className="animate-spin" />
                 <span style={{ fontSize: '14px' }}>生成中...</span>
               </div>
             ) : result_url ? (
               <img src={result_url} alt="Generated" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
             ) : (
-              <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+              <div style={{ color: 'var(--ui_text_muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <ImagePlus size={36} style={{ opacity: 0.5 }} />
                 <span style={{ fontSize: '14px' }}>结果图预览</span>
               </div>

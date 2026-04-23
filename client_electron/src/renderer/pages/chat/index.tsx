@@ -361,11 +361,11 @@ const AgentChat: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#f8fafc', position: 'relative' }}>
-      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+      <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <MessageSquare size={20} color="#0ea5e9" />
-          <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>智能对话</span>
+          <MessageSquare size={20} color="var(--ui_accent)" />
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>智能对话</span>
         </div>
       </div>
       
@@ -374,16 +374,16 @@ const AgentChat: React.FC = () => {
           width: is_left_sidebar_open ? '12%' : '0px',
           minWidth: is_left_sidebar_open ? '120px' : '0px',
           opacity: is_left_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_left_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155', whiteSpace: 'nowrap' }}>智能助手</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>智能助手</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -392,9 +392,9 @@ const AgentChat: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <PanelLeftClose size={18} />
@@ -403,7 +403,7 @@ const AgentChat: React.FC = () => {
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px', minWidth: '180px', boxSizing: 'border-box' }}>
             {available_agents.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无可用 Agent</div>
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>暂无可用 Agent</div>
             ) : (
               available_agents.map(agent => (
                 <div 
@@ -415,8 +415,8 @@ const AgentChat: React.FC = () => {
                   style={{
                     padding: '10px 12px',
                     borderRadius: '6px',
-                    backgroundColor: active_agent_id === agent.id ? '#e0f2fe' : 'transparent',
-                    color: active_agent_id === agent.id ? '#0369a1' : '#475569',
+                    backgroundColor: active_agent_id === agent.id ? 'var(--ui_accent)' : 'transparent',
+                    color: active_agent_id === agent.id ? '#ffffff' : 'var(--ui_text)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -428,7 +428,7 @@ const AgentChat: React.FC = () => {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = '#e2e8f0'
+                    if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                   }}
                   onMouseLeave={(e) => {
                     if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -451,8 +451,8 @@ const AgentChat: React.FC = () => {
                     height: '8px',
                     borderRadius: '50%',
                     backgroundColor: 
-                      agent.status === 'running' ? '#10b981' : 
-                      agent.status === 'stopped' ? '#94a3b8' : '#ef4444'
+                      agent.status === 'running' ? 'var(--ui_success)' : 
+                      agent.status === 'stopped' ? 'var(--ui_text_muted)' : 'var(--ui_danger)'
                   }} />
                 </div>
               ))
@@ -464,16 +464,16 @@ const AgentChat: React.FC = () => {
           width: is_middle_sidebar_open ? '12%' : '0px',
           minWidth: is_middle_sidebar_open ? '120px' : '0px',
           opacity: is_middle_sidebar_open ? 1 : 0,
-          backgroundColor: '#ffffff',
-          borderRight: is_middle_sidebar_open ? '1px solid #e2e8f0' : 'none',
+          backgroundColor: 'var(--ui_panel)',
+          borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s ease',
           overflow: 'hidden',
           flexShrink: 1
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
               {!is_left_sidebar_open && (
                 <button
                   type="button"
@@ -483,9 +483,9 @@ const AgentChat: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <PanelLeftOpen size={18} />
@@ -501,27 +501,33 @@ const AgentChat: React.FC = () => {
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#64748b', borderRadius: '4px', transition: 'background-color 0.2s'
+                color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <List size={18} />
             </button>
           </div>
           
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid var(--ui_border)', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={create_new_session}
               aria-label="新建会话"
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                padding: '8px', backgroundColor: 'transparent', color: '#0ea5e9', border: '1px dashed #0ea5e9',
+                padding: '8px', backgroundColor: 'transparent', color: 'var(--ui_accent)', border: '1px dashed var(--ui_accent)',
                 borderRadius: '6px', cursor: 'pointer', fontWeight: 500, fontSize: '13px', transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--ui_accent)'
+                e.currentTarget.style.color = '#ffffff'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = 'var(--ui_accent)'
+              }}
             >
               <Plus size={14} /> 会话
             </button>
@@ -529,7 +535,7 @@ const AgentChat: React.FC = () => {
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
             {sessions.length === 0 ? (
-              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无会话</div>
+              <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>暂无会话</div>
             ) : (
               sessions.map(s => (
                 <div 
@@ -538,8 +544,8 @@ const AgentChat: React.FC = () => {
                   style={{
                     padding: '12px 16px',
                     borderRadius: '6px',
-                    backgroundColor: active_session_id === s.id ? '#e0f2fe' : 'transparent',
-                    color: active_session_id === s.id ? '#0369a1' : '#475569',
+                    backgroundColor: active_session_id === s.id ? 'var(--ui_accent)' : 'transparent',
+                    color: active_session_id === s.id ? '#ffffff' : 'var(--ui_text)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -550,7 +556,7 @@ const AgentChat: React.FC = () => {
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = '#f1f5f9'
+                    if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
                   }}
                   onMouseLeave={(e) => {
                     if (active_session_id !== s.id) e.currentTarget.style.backgroundColor = 'transparent'
@@ -572,14 +578,16 @@ const AgentChat: React.FC = () => {
                         style={{
                           width: '100%',
                           padding: '4px 8px',
-                          border: '1px solid #0ea5e9',
+                          border: '1px solid var(--ui_accent)',
                           borderRadius: '4px',
                           fontSize: '13px',
                           outline: 'none',
-                          boxSizing: 'border-box'
+                          boxSizing: 'border-box',
+                          backgroundColor: 'var(--ui_panel)',
+                          color: 'var(--ui_text)'
                         }}
                       />
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)' }}>
                         不超过4个字符,勿用标点符号
                       </div>
                     </div>
@@ -594,19 +602,19 @@ const AgentChat: React.FC = () => {
                           style={{ 
                             padding: '4px', 
                             borderRadius: '4px', 
-                            color: '#94a3b8',
+                            color: 'var(--ui_text_muted)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#e0f2fe'
-                            e.currentTarget.style.color = '#0ea5e9'
+                            e.currentTarget.style.backgroundColor = 'var(--ui_accent)'
+                            e.currentTarget.style.color = '#ffffff'
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = '#94a3b8'
+                            e.currentTarget.style.color = 'var(--ui_text_muted)'
                           }}
                         >
                           <Edit2 size={14} />
@@ -616,19 +624,19 @@ const AgentChat: React.FC = () => {
                           style={{ 
                             padding: '4px', 
                             borderRadius: '4px', 
-                            color: '#94a3b8',
+                            color: 'var(--ui_text_muted)',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#fef2f2'
-                            e.currentTarget.style.color = '#ef4444'
+                            e.currentTarget.style.backgroundColor = 'var(--ui_danger)'
+                            e.currentTarget.style.color = '#ffffff'
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = '#94a3b8'
+                            e.currentTarget.style.color = 'var(--ui_text_muted)'
                           }}
                         >
                           <Trash2 size={14} />
@@ -643,7 +651,7 @@ const AgentChat: React.FC = () => {
         </div>
 
         <div className="no-drag-region" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="drag-region" style={{ padding: '12px 16px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {!is_middle_sidebar_open && (
               <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', marginRight: '12px', gap: '4px' }}>
                 {!is_left_sidebar_open && (
@@ -653,9 +661,9 @@ const AgentChat: React.FC = () => {
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                      color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <PanelLeftOpen size={20} />
@@ -667,17 +675,17 @@ const AgentChat: React.FC = () => {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#64748b', borderRadius: '6px', transition: 'background-color 0.2s'
+                    color: 'var(--ui_text_muted)', borderRadius: '6px', transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <List size={20} />
                 </button>
               </div>
             )}
-            <span style={{ color: '#0f172a', fontSize: '14px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</span>
-            <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
+            <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{active_session?.title || 'AI 助手'}</span>
+            <span className="no-drag-region" style={{ marginLeft: '12px', padding: '4px 8px', backgroundColor: 'var(--ui_accent)', color: '#ffffff', borderRadius: '4px', fontSize: '12px' }}>思维链测试</span>
             
             <div className="no-drag-region" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
               {available_kbs.length > 0 && (
@@ -685,15 +693,15 @@ const AgentChat: React.FC = () => {
                   value={active_session?.kb_id || 'none'}
                   onChange={(e) => update_session_kb(e.target.value)}
                   style={{
-                    padding: '4px 8px', borderRadius: '6px', border: '1px solid #e2e8f0',
-                    backgroundColor: '#f8fafc', color: '#475569', fontSize: '14px', lineHeight: '1.5',
+                    padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--ui_border)',
+                    backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)', fontSize: '14px', lineHeight: '1.5',
                     outline: 'none', cursor: 'pointer', fontWeight: 500, maxWidth: '300px', minWidth: '200px', textOverflow: 'ellipsis'
                   }}
                   title="选择知识库(可选)"
                 >
                   <option value="none">无知识库</option>
                   {available_kbs.map(k => (
-                    <option key={k.id} value={k.id} style={{ padding: '10px 14px', fontSize: '14px' }}>{k.name}</option>
+                    <option key={k.id} value={k.id} style={{ padding: '10px 14px', fontSize: '14px', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}>{k.name}</option>
                   ))}
                 </select>
               )}
@@ -701,9 +709,9 @@ const AgentChat: React.FC = () => {
           </div>
           
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0, backgroundColor: 'var(--ui_bg)' }}>
             {messages.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#64748b', marginTop: '40px', fontSize: '14px' }}>
+              <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)', marginTop: '40px', fontSize: '14px' }}>
                 尝试询问:"今天北京天气怎么样?" 来测试天气工具和思维链.
               </div>
             ) : (
@@ -723,7 +731,7 @@ const AgentChat: React.FC = () => {
                       <div style={{
                         padding: '12px 16px',
                         borderRadius: '12px 12px 0 12px',
-                        backgroundColor: '#0ea5e9',
+                        backgroundColor: 'var(--ui_accent)',
                         color: '#ffffff',
                         lineHeight: '1.6',
                         fontSize: '14px',
@@ -745,7 +753,7 @@ const AgentChat: React.FC = () => {
                               left: 0,
                               right: 0,
                               height: '40px',
-                              background: 'linear-gradient(to bottom, transparent, #0ea5e9)'
+                              background: 'linear-gradient(to bottom, transparent, var(--ui_accent))'
                             }} />
                           )}
                         </div>
@@ -783,9 +791,9 @@ const AgentChat: React.FC = () => {
                       <>
                         {msg.reasoning_content && (
                           <div style={{ 
-                            backgroundColor: '#f1f5f9', 
+                            backgroundColor: 'var(--ui_panel_alt)', 
                             borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
+                            border: '1px solid var(--ui_border)',
                             overflow: 'hidden'
                           }}>
                             <div 
@@ -795,17 +803,17 @@ const AgentChat: React.FC = () => {
                                 display: 'flex', 
                                 alignItems: 'center', 
                                 cursor: 'pointer',
-                                backgroundColor: '#f8fafc',
-                                color: '#475569',
+                                backgroundColor: 'var(--ui_panel)',
+                                color: 'var(--ui_text)',
                                 fontSize: '13px',
                                 userSelect: 'none'
                               }}
                             >
-                              <MessageSquare size={14} style={{ marginRight: '8px', color: '#64748b' }} />
+                              <MessageSquare size={14} style={{ marginRight: '8px', color: 'var(--ui_text_muted)' }} />
                               <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 思考过程
                                 {loading && idx === messages.length - 1 && !msg.content && (
-                                  <Loader2 size={14} className="animate-spin" style={{ color: '#0ea5e9' }} />
+                                  <Loader2 size={14} className="animate-spin" style={{ color: 'var(--ui_accent)' }} />
                                 )}
                               </span>
                               {expanded_steps[`reasoning_${idx}`] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -814,10 +822,10 @@ const AgentChat: React.FC = () => {
                               <div style={{ 
                                 padding: '12px 14px', 
                                 whiteSpace: 'pre-wrap', 
-                                color: '#334155',
+                                color: 'var(--ui_text)',
                                 fontSize: '13px',
-                                borderTop: '1px solid #e2e8f0',
-                                backgroundColor: '#ffffff',
+                                borderTop: '1px solid var(--ui_border)',
+                                backgroundColor: 'var(--ui_panel)',
                                 lineHeight: '1.6'
                               }}>
                                 {msg.reasoning_content}
@@ -857,9 +865,9 @@ const AgentChat: React.FC = () => {
                           return (
                             <div style={{ 
                               borderRadius: '8px',
-                              border: '1px solid #e2e8f0',
+                              border: '1px solid var(--ui_border)',
                               overflow: 'hidden',
-                              backgroundColor: '#ffffff'
+                              backgroundColor: 'var(--ui_panel)'
                             }}>
                               <div 
                                 onClick={() => toggle_step(`all_steps_${idx}`)}
@@ -868,22 +876,22 @@ const AgentChat: React.FC = () => {
                                   display: 'flex',
                                   alignItems: 'center',
                                   cursor: 'pointer',
-                                  backgroundColor: '#f8fafc',
+                                  backgroundColor: 'var(--ui_panel_alt)',
                                   fontSize: '13px',
                                   userSelect: 'none'
                                 }}
                               >
-                                <Wrench size={14} style={{ marginRight: '8px', color: has_any_success ? '#16a34a' : '#64748b' }} />
-                                <span style={{ color: '#475569', fontWeight: 500 }}>
+                                <Wrench size={14} style={{ marginRight: '8px', color: has_any_success ? 'var(--ui_success)' : 'var(--ui_text_muted)' }} />
+                                <span style={{ color: 'var(--ui_text)', fontWeight: 500 }}>
                                   工具调用 {has_any_success ? '✅' : ''}
                                 </span>
-                                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', color: '#94a3b8' }}>
+                                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--ui_text_muted)' }}>
                                   {expanded_steps[`all_steps_${idx}`] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                 </div>
                               </div>
                               
                               {expanded_steps[`all_steps_${idx}`] && (
-                                <div style={{ borderTop: '1px solid #e2e8f0' }}>
+                                <div style={{ borderTop: '1px solid var(--ui_border)' }}>
                                   {unique_steps.map((step, s_idx) => {
                                     const step_id = `step_${idx}_${s_idx}`
                                     const is_start = step.type === 'tool_start'
@@ -898,48 +906,48 @@ const AgentChat: React.FC = () => {
                                       s.type === 'tool_result' && s.tool_name === step.tool_name && s.success === false
                                     )
 
-                                    let border_color = '#e2e8f0'
-                                    let header_bg = '#ffffff'
-                                    let icon_color = '#64748b'
-                                    let text_color = '#475569'
+                                    let border_color = 'var(--ui_border)'
+                                    let header_bg = 'var(--ui_panel)'
+                                    let icon_color = 'var(--ui_text_muted)'
+                                    let text_color = 'var(--ui_text)'
                                     let status_text = '执行中...'
 
                                     if (is_start && has_success_result) {
                                       // tool_start 且对应的 tool_result 成功
-                                      border_color = '#bbf7d0'
-                                      header_bg = '#f0fdf4'
-                                      icon_color = '#16a34a'
-                                      text_color = '#15803d'
+                                      border_color = 'var(--ui_success)'
+                                      header_bg = 'var(--ui_panel)'
+                                      icon_color = 'var(--ui_success)'
+                                      text_color = 'var(--ui_text)'
                                       status_text = '已完成'
                                     } else if (is_start && has_fail_result) {
                                       // tool_start 且对应的 tool_result 失败
-                                      border_color = '#fecaca'
-                                      header_bg = '#fef2f2'
-                                      icon_color = '#dc2626'
-                                      text_color = '#b91c1c'
+                                      border_color = 'var(--ui_danger)'
+                                      header_bg = 'var(--ui_panel)'
+                                      icon_color = 'var(--ui_danger)'
+                                      text_color = 'var(--ui_text)'
                                       status_text = '失败'
                                     } else if (is_start) {
-                                      border_color = '#bae6fd'
-                                      header_bg = '#f0f9ff'
-                                      icon_color = '#0284c7'
-                                      text_color = '#0369a1'
+                                      border_color = 'var(--ui_accent)'
+                                      header_bg = 'var(--ui_panel)'
+                                      icon_color = 'var(--ui_accent)'
+                                      text_color = 'var(--ui_text)'
                                     } else if (is_success) {
-                                      border_color = '#bbf7d0'
-                                      header_bg = '#f0fdf4'
-                                      icon_color = '#16a34a'
-                                      text_color = '#15803d'
+                                      border_color = 'var(--ui_success)'
+                                      header_bg = 'var(--ui_panel)'
+                                      icon_color = 'var(--ui_success)'
+                                      text_color = 'var(--ui_text)'
                                       status_text = '已完成'
                                     } else if (is_fail) {
-                                      border_color = '#fecaca'
-                                      header_bg = '#fef2f2'
-                                      icon_color = '#dc2626'
-                                      text_color = '#b91c1c'
+                                      border_color = 'var(--ui_danger)'
+                                      header_bg = 'var(--ui_panel)'
+                                      icon_color = 'var(--ui_danger)'
+                                      text_color = 'var(--ui_text)'
                                       status_text = '失败'
                                     }
 
                                     return (
                                       <div key={s_idx} style={{
-                                        borderBottom: s_idx < unique_steps.length - 1 ? '1px solid #e2e8f0' : 'none'
+                                        borderBottom: s_idx < unique_steps.length - 1 ? '1px solid var(--ui_border)' : 'none'
                                       }}>
                                         <div 
                                           onClick={() => toggle_step(step_id)}
@@ -956,7 +964,7 @@ const AgentChat: React.FC = () => {
                                           <span style={{ color: text_color, fontWeight: 500, marginRight: '8px' }}>
                                             {step.tool_name}
                                           </span>
-                                          <span style={{ flex: 1, color: '#94a3b8', fontSize: '12px' }}>
+                                          <span style={{ flex: 1, color: 'var(--ui_text_muted)', fontSize: '12px' }}>
                                             {is_start ? '调用工具' : '返回结果'}
                                           </span>
                                           
@@ -967,7 +975,7 @@ const AgentChat: React.FC = () => {
                                             <span>{status_text}</span>
                                           </div>
                                           
-                                          <div style={{ color: '#94a3b8' }}>
+                                          <div style={{ color: 'var(--ui_text_muted)' }}>
                                             {expanded_steps[step_id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                           </div>
                                         </div>
@@ -977,10 +985,10 @@ const AgentChat: React.FC = () => {
                                             padding: '12px 14px', 
                                             whiteSpace: 'pre-wrap', 
                                             wordBreak: 'break-all',
-                                            color: '#334155',
+                                            color: 'var(--ui_text)',
                                             fontSize: '13px',
                                             borderTop: `1px solid ${border_color}`,
-                                            backgroundColor: '#ffffff',
+                                            backgroundColor: 'var(--ui_panel)',
                                             fontFamily: 'monospace',
                                             lineHeight: '1.5'
                                           }}>
@@ -1000,12 +1008,12 @@ const AgentChat: React.FC = () => {
                           <div style={{
                             padding: '12px 16px',
                             borderRadius: '0 12px 12px 12px',
-                            backgroundColor: '#ffffff',
-                            color: '#1e293b',
+                            backgroundColor: 'var(--ui_panel)',
+                            color: 'var(--ui_text)',
                             lineHeight: '1.6',
                             fontSize: '14px',
                             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                            border: '1px solid #e2e8f0',
+                            border: '1px solid var(--ui_border)',
                             overflowX: 'auto',
                             position: 'relative'
                           }}>
@@ -1017,30 +1025,30 @@ const AgentChat: React.FC = () => {
                               <ReactMarkdown 
                                 remarkPlugins={[remarkGfm]}
                                 components={{
-                                  h1: ({node, ...props}) => <h1 style={{fontSize: '1.5em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
-                                  h2: ({node, ...props}) => <h2 style={{fontSize: '1.3em', fontWeight: 'bold', margin: '12px 0 8px'}} {...props} />,
-                                  h3: ({node, ...props}) => <h3 style={{fontSize: '1.1em', fontWeight: 'bold', margin: '10px 0 6px'}} {...props} />,
-                                  p: ({node, ...props}) => <p style={{margin: '0 0 10px 0'}} {...props} />,
-                                  ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
-                                  ol: ({node, ...props}) => <ol style={{margin: '0 0 10px 0', paddingLeft: '24px'}} {...props} />,
-                                  li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
-                                  a: ({node, ...props}) => <a style={{color: '#0ea5e9', textDecoration: 'none'}} {...props} />,
-                                  blockquote: ({node, ...props}) => <blockquote style={{margin: '0 0 10px 0', padding: '8px 16px', borderLeft: '4px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#64748b'}} {...props} />,
+                                  h1: ({node, ...props}) => <h1 style={{fontSize: '1.5em', fontWeight: 'bold', margin: '12px 0 8px', color: 'var(--ui_text)'}} {...props} />,
+                                  h2: ({node, ...props}) => <h2 style={{fontSize: '1.3em', fontWeight: 'bold', margin: '12px 0 8px', color: 'var(--ui_text)'}} {...props} />,
+                                  h3: ({node, ...props}) => <h3 style={{fontSize: '1.1em', fontWeight: 'bold', margin: '10px 0 6px', color: 'var(--ui_text)'}} {...props} />,
+                                  p: ({node, ...props}) => <p style={{margin: '0 0 10px 0', color: 'var(--ui_text)'}} {...props} />,
+                                  ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 0', paddingLeft: '24px', color: 'var(--ui_text)'}} {...props} />,
+                                  ol: ({node, ...props}) => <ol style={{margin: '0 0 10px 0', paddingLeft: '24px', color: 'var(--ui_text)'}} {...props} />,
+                                  li: ({node, ...props}) => <li style={{marginBottom: '4px', color: 'var(--ui_text)'}} {...props} />,
+                                  a: ({node, ...props}) => <a style={{color: 'var(--ui_accent)', textDecoration: 'none'}} {...props} />,
+                                  blockquote: ({node, ...props}) => <blockquote style={{margin: '0 0 10px 0', padding: '8px 16px', borderLeft: '4px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text_muted)'}} {...props} />,
                                   code: ({node, className, children, ...props}) => {
                                     const match = /language-(\w+)/.exec(className || '')
                                     return match ? (
-                                      <pre style={{margin: '12px 0', padding: '16px', backgroundColor: '#0f172a', color: '#f8fafc', borderRadius: '8px', overflowX: 'auto'}}>
+                                      <pre style={{margin: '12px 0', padding: '16px', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)', borderRadius: '8px', overflowX: 'auto'}}>
                                         <code className={className} {...props}>{children}</code>
                                       </pre>
                                     ) : (
-                                      <code style={{backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: '#0ea5e9'}} {...props}>
+                                      <code style={{backgroundColor: 'var(--ui_panel_alt)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: 'var(--ui_accent)'}} {...props}>
                                         {children}
                                       </code>
                                     )
                                   },
                                   table: ({node, ...props}) => <table style={{width: '100%', marginBottom: '16px', borderCollapse: 'collapse'}} {...props} />,
-                                  th: ({node, ...props}) => <th style={{borderBottom: '2px solid #e2e8f0', padding: '8px', textAlign: 'left', fontWeight: 'bold'}} {...props} />,
-                                  td: ({node, ...props}) => <td style={{borderBottom: '1px solid #e2e8f0', padding: '8px'}} {...props} />
+                                  th: ({node, ...props}) => <th style={{borderBottom: '2px solid var(--ui_border)', padding: '8px', textAlign: 'left', fontWeight: 'bold', color: 'var(--ui_text)'}} {...props} />,
+                                  td: ({node, ...props}) => <td style={{borderBottom: '1px solid var(--ui_border)', padding: '8px', color: 'var(--ui_text)'}} {...props} />
                                 }}
                               >
                                 {msg.content}
@@ -1052,7 +1060,7 @@ const AgentChat: React.FC = () => {
                                   left: 0,
                                   right: 0,
                                   height: '60px',
-                                  background: 'linear-gradient(to bottom, transparent, #ffffff)'
+                                  background: 'linear-gradient(to bottom, transparent, var(--ui_panel))'
                                 }} />
                               )}
                             </div>
@@ -1069,14 +1077,14 @@ const AgentChat: React.FC = () => {
                                   justifyContent: 'center',
                                   gap: '4px',
                                   fontSize: '12px',
-                                  color: '#94a3b8',
+                                  color: 'var(--ui_text_muted)',
                                   cursor: 'pointer',
-                                  borderTop: '1px dashed #e2e8f0',
+                                  borderTop: '1px dashed var(--ui_border)',
                                   paddingTop: '8px',
                                   userSelect: 'none'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#0ea5e9'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--ui_accent)'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--ui_text_muted)'}
                               >
                                 {expanded_steps[`assistant_msg_${idx}`] ? (
                                   <><ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} /> 收起</>
@@ -1098,10 +1106,10 @@ const AgentChat: React.FC = () => {
                 <div style={{ 
                   padding: '12px 16px', 
                   borderRadius: '0 12px 12px 12px', 
-                  backgroundColor: '#ffffff', 
-                  color: '#64748b',
+                  backgroundColor: 'var(--ui_panel)', 
+                  color: 'var(--ui_text_muted)',
                   fontSize: '14px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid var(--ui_border)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px'
@@ -1116,9 +1124,9 @@ const AgentChat: React.FC = () => {
           
           <div style={{ 
             padding: '16px 24px', 
-            backgroundColor: '#ffffff',
-            borderTop: '1px solid #e2e8f0',
-            borderBottom: '1px solid #e2e8f0',
+            backgroundColor: 'var(--ui_panel)',
+            borderTop: '1px solid var(--ui_border)',
+            borderBottom: '1px solid var(--ui_border)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
@@ -1133,22 +1141,22 @@ const AgentChat: React.FC = () => {
                     alignItems: 'center',
                     gap: '6px',
                     padding: '6px 16px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: 'var(--ui_panel)',
+                    border: '1px solid var(--ui_border)',
                     borderRadius: '16px',
-                    color: '#64748b',
+                    color: 'var(--ui_text_muted)',
                     fontSize: '13px',
                     cursor: 'pointer',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#ef4444'
-                    e.currentTarget.style.borderColor = '#fecaca'
+                    e.currentTarget.style.color = 'var(--ui_danger)'
+                    e.currentTarget.style.borderColor = 'var(--ui_danger)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#64748b'
-                    e.currentTarget.style.borderColor = '#e2e8f0'
+                    e.currentTarget.style.color = 'var(--ui_text_muted)'
+                    e.currentTarget.style.borderColor = 'var(--ui_border)'
                   }}
                 >
                   <SquareSquare size={14} />
@@ -1160,8 +1168,8 @@ const AgentChat: React.FC = () => {
             <div style={{
               display: 'flex',
               gap: '12px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'var(--ui_panel_alt)',
+              border: '1px solid var(--ui_border)',
               borderRadius: '12px',
               padding: '8px 12px',
               alignItems: 'flex-end',
@@ -1185,7 +1193,7 @@ const AgentChat: React.FC = () => {
                   outline: 'none',
                   fontFamily: 'inherit',
                   fontSize: '14px',
-                  color: '#1e293b',
+                  color: 'var(--ui_text)',
                   lineHeight: '1.5'
                 }}
               />
@@ -1201,8 +1209,8 @@ const AgentChat: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: loading || !input.trim() ? '#e2e8f0' : '#0ea5e9',
-                    color: loading || !input.trim() ? '#94a3b8' : 'white',
+                    backgroundColor: loading || !input.trim() ? 'var(--ui_border)' : 'var(--ui_accent)',
+                    color: loading || !input.trim() ? 'var(--ui_text_muted)' : 'white',
                     border: 'none',
                     borderRadius: '8px',
                     cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
