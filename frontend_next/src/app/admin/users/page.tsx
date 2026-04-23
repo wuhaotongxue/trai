@@ -6,11 +6,19 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Download, Search, Trash2, UserPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search, Trash2, UserPlus, FileText, FileSpreadsheet, FileJson } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown_menu";
 import { request } from "@/lib/api_client";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 type UserItem = {
   user_id: string;
@@ -91,9 +99,86 @@ export default function UsersPage() {
     }
   };
 
+  const handleExportUsers = async (format: "csv" | "excel" | "json" = "csv") => {
+    try {
+      // 获取所有用户数据
+      const res = await request<{ users: UserItem[]; total: number }>("/admin/users?limit=10000");
+      const allUsers = res.users || [];
+      
+      // 准备数据
+      const headers = ["用户ID", "用户名", "显示名", "邮箱", "角色", "状态", "企业微信ID", "创建时间"];
+      const data = allUsers.map(user => ({
+        "用户ID": user.user_id,
+        "用户名": user.username || "",
+        "显示名": user.display_name || "",
+        "邮箱": user.email || "",
+        "角色": user.role === "admin" ? "管理员" : "普通用户",
+        "状态": user.status === "active" ? "正常" : "停用",
+        "企业微信ID": user.wecom_user_id || "",
+        "创建时间": user.created_at || ""
+      }));
+      
+      const filename = `用户列表_${new Date().toISOString().split('T')[0]}`;
+      
+      switch (format) {
+        case "csv":
+          // CSV 格式
+          const csvRows = [headers.join(",")];
+          data.forEach(user => {
+            const row = [
+              `"${user["用户ID"]}"`,
+              `"${user["用户名"]}"`,
+              `"${user["显示名"]}"`,
+              `"${user["邮箱"]}"`,
+              `"${user["角色"]}"`,
+              `"${user["状态"]}"`,
+              `"${user["企业微信ID"]}"`,
+              `"${user["创建时间"]}"`
+            ];
+            csvRows.push(row.join(","));
+          });
+          const csvContent = csvRows.join("\n");
+          const csvBlob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+          saveAs(csvBlob, `${filename}.csv`);
+          break;
+          
+        case "excel":
+          // Excel 格式
+          const ws = XLSX.utils.json_to_sheet(data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "用户列表");
+          const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+          const excelBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          saveAs(excelBlob, `${filename}.xlsx`);
+          break;
+          
+        case "json":
+          // JSON 格式
+          const jsonContent = JSON.stringify(data, null, 2);
+          const jsonBlob = new Blob([jsonContent], { type: "application/json" });
+          saveAs(jsonBlob, `${filename}.json`);
+          break;
+      }
+    } catch (e) {
+      console.error("导出用户列表失败", e);
+      alert("导出失败，请稍后重试");
+    }
+  };
+
   const filtered = users.filter((u) => {
     const matchSearch = (u.display_name || "").includes(search) || (u.email || "").includes(search) || (u.username || "").includes(search);
-    return matchSearch;
+    
+    // 角色筛选逻辑
+    let matchRole = true;
+    if (filterRole === "管理员") {
+      matchRole = u.role === "admin";
+    } else if (filterRole === "VIP") {
+      matchRole = u.role === "vip";
+    } else if (filterRole === "普通用户") {
+      matchRole = u.role === "normal";
+    }
+    
+    return matchSearch && matchRole;
   });
 
   return (
@@ -105,10 +190,28 @@ export default function UsersPage() {
           <p className="text-sm text-muted-foreground mt-0.5">共 {total} 位注册用户</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
-            <Download className="h-3.5 w-3.5" />
-            导出
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
+                <Download className="h-3.5 w-3.5" />
+                导出
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => handleExportUsers("csv")} className="flex items-center gap-2 cursor-pointer">
+                <FileText className="h-4 w-4" />
+                CSV 格式
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExportUsers("excel")} className="flex items-center gap-2 cursor-pointer">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel 格式
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExportUsers("json")} className="flex items-center gap-2 cursor-pointer">
+                <FileJson className="h-4 w-4" />
+                JSON 格式
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={() => window.location.href = "/admin/users/new"}>
             <UserPlus className="h-3.5 w-3.5" />
             新增用户
@@ -130,7 +233,7 @@ export default function UsersPage() {
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/40 rounded-lg p-1 border border-border/60">
-              {["全部", "管理员", "普通用户"].map((p) => (
+              {["全部", "管理员", "VIP", "普通用户"].map((p) => (
                 <button
                   key={p}
                   onClick={() => setFilterRole(p)}
@@ -181,7 +284,7 @@ export default function UsersPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {user.avatar_url ? (
-                              <img src={user.avatar_url} alt={user.display_name} className="h-8 w-8 rounded-full object-cover flex-shrink-0 border border-border" referrerpolicy="no-referrer" />
+                              <img src={user.avatar_url} alt={user.display_name} className="h-8 w-8 rounded-full object-cover flex-shrink-0 border border-border" referrerPolicy="no-referrer" />
                             ) : (
                               <div className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
                                 {user.display_name ? user.display_name[0].toUpperCase() : "U"}
