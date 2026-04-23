@@ -73,7 +73,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground/80">API 地址</Label>
-                <Input className="h-9 rounded-lg" defaultValue="http://localhost:5666" />
+                <Input className="h-9 rounded-lg" defaultValue="trai.tuoren.com" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground/80">环境模式</Label>

@@ -318,7 +318,7 @@ export default function OrganizationPage() {
                         <td className="p-4 font-medium">
                           <div className="flex items-center gap-3">
                             {user.avatar_url ? (
-                              <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-full object-cover border border-border" referrerpolicy="no-referrer" />
+                              <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-full object-cover border border-border" referrerPolicy="no-referrer" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium">
                                 {user.display_name?.[0] || user.username?.[0]}

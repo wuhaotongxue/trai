@@ -243,7 +243,16 @@ class UserRepository(IUserRepository):
 
             mapped = field_map.get(k)
             if mapped:
-                values[mapped] = v
+                # 特殊处理角色字段，确保传入的是有效的角色值
+                if k == "role" and isinstance(v, str):
+                    try:
+                        # 验证角色值是否有效
+                        UserRole(v)
+                        values[mapped] = v
+                    except ValueError:
+                        raise ValueError(f"无效的用户角色: {v}")
+                else:
+                    values[mapped] = v
 
         stmt = select(UserModel).where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
         model = self._session.scalar(stmt)

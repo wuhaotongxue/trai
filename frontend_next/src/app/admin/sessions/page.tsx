@@ -42,7 +42,7 @@ export default function SessionsPage() {
   const fetchSessions = async () => {
     setLoading(true);
     try {
-      const res = await request<SessionStatsResponse>("/admin/sessions/grouped", {
+      const res = await request<SessionStatsResponse>(`/admin/sessions/grouped?limit=${pageSize}&offset=${(page - 1) * pageSize}`, {
         method: "GET",
       });
       setSessions(res.sessions);
