@@ -469,7 +469,7 @@ ${transcript}
     <ThreePanelLayout
       title="媒体处理"
       titleIcon={<FileText size={20} />}
-      leftPanelTitle="处理任务"
+      leftPanelTitle="任务列表"
       leftPanel={left_panel}
       leftPanelDefaultOpen={true}
       contentPadding={0}
