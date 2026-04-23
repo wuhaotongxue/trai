@@ -45,6 +45,17 @@ const MediaPlayerPage: React.FC = () => {
     ? selected_files[current_file_index] 
     : null
   
+  // 当文件变化时，处理播放逻辑
+  useEffect(() => {
+    if (current_file && is_playing) {
+      if (current_file.type === 'audio' && audio_ref.current) {
+        audio_ref.current.play().catch(err => console.error('音频播放失败:', err))
+      } else if (current_file.type === 'video' && video_ref.current) {
+        video_ref.current.play().catch(err => console.error('视频播放失败:', err))
+      }
+    }
+  }, [current_file, is_playing])
+  
   // 处理文件选择
   const handle_select_files = async () => {
     try {
