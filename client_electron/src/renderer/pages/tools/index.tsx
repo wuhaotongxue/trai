@@ -5,7 +5,7 @@
  * 描述: 客户端工具箱页面, 提供文件处理功能
  */
 import React, { useState } from 'react'
-import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder } from 'lucide-react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder, Code as FileCode } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { should_ellipsis } from '@/utils/ui_text'
@@ -54,6 +54,9 @@ const Tools: React.FC = () => {
   const [md_preview_text, set_md_preview_text] = useState('')
   const [md_preview_name, set_md_preview_name] = useState('')
   const [md_preview_error, set_md_preview_error] = useState('')
+  const [json_input, set_json_input] = useState('')
+  const [json_result, set_json_result] = useState('')
+  const [json_error, set_json_error] = useState('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
@@ -198,6 +201,37 @@ const Tools: React.FC = () => {
     input.click()
   }
 
+  const handle_json_tool = () => {
+    set_json_error('')
+    set_json_result('')
+    
+    try {
+      if (!json_input.trim()) {
+        throw new Error('请输入JSON内容')
+      }
+      
+      const parsed = JSON.parse(json_input)
+      const formatted = JSON.stringify(parsed, null, 2)
+      set_json_result(formatted)
+      set_json_error('')
+    } catch (error: any) {
+      set_json_error(`JSON格式错误: ${error.message}`)
+      set_json_result('')
+    }
+  }
+
+  const handle_json_file_upload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      set_json_input(content)
+    }
+    reader.readAsText(file)
+  }
+
   const all_tools: ToolItem[] = [
     {
       id: 'md2pdf',
@@ -207,6 +241,116 @@ const Tools: React.FC = () => {
       action: handle_md_to_pdf,
       bg_color: 'var(--ui_panel_alt)',
       border_color: 'var(--ui_border)'
+    },
+    {
+      id: 'json',
+      title: 'JSON 检测',
+      description: '检测和格式化 JSON 数据',
+      icon: <FileCode size={32} color="var(--ui_accent)" />,
+      action: () => {},
+      bg_color: 'var(--ui_panel_alt)',
+      border_color: 'var(--ui_border)',
+      extra_ui: (
+        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', color: 'var(--ui_text_muted)', marginBottom: '8px' }}>
+              JSON 输入
+            </label>
+            <textarea
+              value={json_input}
+              onChange={(e) => set_json_input(e.target.value)}
+              placeholder='请输入JSON内容或上传JSON文件'
+              style={{
+                width: '100%',
+                minHeight: '200px',
+                padding: '12px',
+                borderRadius: '6px',
+                border: '1px solid var(--ui_border)',
+                backgroundColor: 'var(--ui_panel)',
+                color: 'var(--ui_text)',
+                fontSize: '13px',
+                fontFamily: 'var(--font-mono)',
+                resize: 'vertical',
+                outline: 'none'
+              }}
+            />
+            <input
+              type="file"
+              accept=".json"
+              onChange={handle_json_file_upload}
+              style={{ marginTop: '8px', fontSize: '12px' }}
+            />
+          </div>
+          <button
+            onClick={handle_json_tool}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: 'var(--ui_accent)',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 500
+            }}
+          >
+            检测并格式化
+          </button>
+          {json_error && (
+            <div style={{
+              padding: '12px',
+              borderRadius: '6px',
+              backgroundColor: 'var(--ui_danger)',
+              color: 'white',
+              fontSize: '13px'
+            }}>
+              {json_error}
+            </div>
+          )}
+          {json_result && (
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', color: 'var(--ui_text_muted)', marginBottom: '8px' }}>
+                格式化结果
+              </label>
+              <textarea
+                value={json_result}
+                readOnly
+                style={{
+                  width: '100%',
+                  minHeight: '200px',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--ui_border)',
+                  backgroundColor: 'var(--ui_panel_alt)',
+                  color: 'var(--ui_text)',
+                  fontSize: '13px',
+                  fontFamily: 'var(--font-mono)',
+                  resize: 'vertical',
+                  outline: 'none'
+                }}
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(json_result)
+                  alert('已复制到剪贴板')
+                }}
+                style={{
+                  marginTop: '8px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--ui_border)',
+                  backgroundColor: 'transparent',
+                  color: 'var(--ui_text)',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                复制结果
+              </button>
+            </div>
+          )}
+        </div>
+      )
     },
     {
       id: 'image',

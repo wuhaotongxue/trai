@@ -12,6 +12,8 @@ import { register_ipc_handlers } from './ipc/index'
 import { config_store } from './platform/config_store'
 import { UpdateService } from './services/update_service'
 
+log.transports.console.level = 'info'
+log.transports.file.level = 'info'
 log.info('app starting...')
 
 // 提升 tray 变量到外层作用域, 防止被 V8 垃圾回收导致托盘消失
@@ -114,10 +116,6 @@ if (!got_the_lock) {
 
   main_window.webContents.on('did-finish-load', () => {
     log.info('window did-finish-load')
-    // 延迟初始化更新服务，提高启动速度
-    setTimeout(() => {
-      new UpdateService()
-    }, 1000)
   })
 
   // 拦截关闭事件, 转为隐藏窗口或退出程序
@@ -230,6 +228,7 @@ app.whenReady().then(() => {
   register_ipc_handlers()
   create_window()
   create_tray()
+  new UpdateService()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

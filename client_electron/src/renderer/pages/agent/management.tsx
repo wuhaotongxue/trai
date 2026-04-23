@@ -143,7 +143,58 @@ const AgentManagement: React.FC = () => {
     try {
       const res = await window.electron_api.agent_management_list()
       if (res.success) {
-        const agent_list = res.data || []
+        let agent_list = res.data || []
+        
+        // 如果没有Agent数据，添加默认Agent
+        if (agent_list.length === 0) {
+          agent_list = [
+            {
+              id: '1',
+              name: '通用助手',
+              description: '一个全能型AI助手，可以处理各种问题',
+              model: 'gpt-4o',
+              system_prompt: '你是一个友好、专业的全能型AI助手，你可以回答各种问题，帮助用户解决困难，请用清晰、简洁、有帮助的方式回复。',
+              icon: 'Bot',
+              status: 'running' as const,
+              category: 'general',
+              created_at: new Date().toISOString()
+            },
+            {
+              id: '2',
+              name: '编程助手',
+              description: '专业的编程助手，可以帮助解决代码问题',
+              model: 'gpt-4-turbo',
+              system_prompt: '你是一个专业的编程助手，精通各种编程语言和框架，能够帮助用户解决代码问题，提供最佳实践建议。',
+              icon: 'Code',
+              status: 'stopped' as const,
+              category: 'coding',
+              created_at: new Date().toISOString()
+            },
+            {
+              id: '3',
+              name: '研究助手',
+              description: '专注于研究领域的AI助手',
+              model: 'claude-3-opus',
+              system_prompt: '你是一个专业的研究助手，能够帮助用户进行文献分析、研究设计和数据解读，提供深入的研究见解。',
+              icon: 'BrainCircuit',
+              status: 'running' as const,
+              category: 'research',
+              created_at: new Date().toISOString()
+            },
+            {
+              id: '4',
+              name: '写作助手',
+              description: '帮助用户提升写作能力的AI助手',
+              model: 'gpt-3.5-turbo',
+              system_prompt: '你是一个专业的写作助手，能够帮助用户提升写作质量，提供修改建议和创意灵感。',
+              icon: 'MessageSquare',
+              status: 'stopped' as const,
+              category: 'writing',
+              created_at: new Date().toISOString()
+            }
+          ] as Agent[]
+        }
+        
         set_agents(agent_list)
         if (agent_list.length > 0 && !active_agent_id) {
           set_active_agent_id(agent_list[0].id)
@@ -152,7 +203,58 @@ const AgentManagement: React.FC = () => {
         set_error(res.error || 'Failed to fetch agents')
       }
     } catch (err: any) {
-      set_error(err.message || 'Failed to fetch agents')
+      // 如果API调用失败，使用默认Agent数据
+      const default_agents: Agent[] = [
+        {
+          id: '1',
+          name: '通用助手',
+          description: '一个全能型AI助手，可以处理各种问题',
+          model: 'gpt-4o',
+          system_prompt: '你是一个友好、专业的全能型AI助手，你可以回答各种问题，帮助用户解决困难，请用清晰、简洁、有帮助的方式回复。',
+          icon: 'Bot',
+          status: 'running' as const,
+          category: 'general',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          name: '编程助手',
+          description: '专业的编程助手，可以帮助解决代码问题',
+          model: 'gpt-4-turbo',
+          system_prompt: '你是一个专业的编程助手，精通各种编程语言和框架，能够帮助用户解决代码问题，提供最佳实践建议。',
+          icon: 'Code',
+          status: 'stopped' as const,
+          category: 'coding',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '3',
+          name: '研究助手',
+          description: '专注于研究领域的AI助手',
+          model: 'claude-3-opus',
+          system_prompt: '你是一个专业的研究助手，能够帮助用户进行文献分析、研究设计和数据解读，提供深入的研究见解。',
+          icon: 'BrainCircuit',
+          status: 'running' as const,
+          category: 'research',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: '4',
+          name: '写作助手',
+          description: '帮助用户提升写作能力的AI助手',
+          model: 'gpt-3.5-turbo',
+          system_prompt: '你是一个专业的写作助手，能够帮助用户提升写作质量，提供修改建议和创意灵感。',
+          icon: 'MessageSquare',
+          status: 'stopped' as const,
+          category: 'writing',
+          created_at: new Date().toISOString()
+        }
+      ]
+      set_agents(default_agents)
+      if (default_agents.length > 0 && !active_agent_id) {
+        set_active_agent_id(default_agents[0].id)
+      }
+      set_error(err.message || 'Failed to fetch agents, using default data')
     } finally {
       set_loading(false)
     }
@@ -298,6 +400,22 @@ const AgentManagement: React.FC = () => {
         agent.model.toLowerCase().includes(query)
       )
     })
+
+  /**
+   * 当筛选条件变化时，更新活跃 Agent ID
+   */
+  useEffect(() => {
+    if (filtered_agents.length > 0) {
+      // 如果当前活跃的 Agent 不在筛选列表中，选择第一个
+      const current_agent_in_filtered = filtered_agents.find(a => a.id === active_agent_id)
+      if (!current_agent_in_filtered) {
+        set_active_agent_id(filtered_agents[0].id)
+      }
+    } else {
+      // 如果筛选列表为空，清空活跃 Agent ID
+      set_active_agent_id('')
+    }
+  }, [filtered_agents, active_agent_id])
 
   /**
    * 当前选中的 Agent
@@ -456,13 +574,8 @@ const AgentManagement: React.FC = () => {
             {filtered_agents.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>暂无Agent</div>
             ) : (
-              <List
-                rowCount={filtered_agents.length}
-                rowHeight={44}
-                style={{ height: '100%' }}
-                rowProps={{}}
-                rowComponent={({ index, style }: any) => {
-                  const agent = filtered_agents[index]
+              <div style={{ height: '100%', overflow: 'auto' }}>
+                {filtered_agents.map((agent, index) => {
                   const AgentIcon = get_icon_component(agent.icon)
                   const is_active = active_agent_id === agent.id
                   
@@ -480,8 +593,8 @@ const AgentManagement: React.FC = () => {
                   
                   return (
                     <div
+                      key={agent.id}
                       style={{
-                        ...style,
                         padding: '12px 16px',
                         borderRadius: '6px',
                         backgroundColor: is_active ? 'var(--ui_accent)' : 'transparent',
@@ -531,8 +644,8 @@ const AgentManagement: React.FC = () => {
                       }} />
                     </div>
                   )
-                }}
-              />
+                })}
+              </div>
             )}
           </div>
 
