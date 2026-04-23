@@ -21,6 +21,8 @@ import ComfyUI from '@/pages/ai/comfyui'
 import AgentManagement from '@/pages/agent/management'
 import Feedback from '@/pages/feedback'
 import KnowledgeBasePage from '@/pages/knowledge_base'
+import MediaPlayerPage from '@/pages/media'
+import MediaProcessorPage from '@/pages/media/processor'
 import UnderDevelopment from '@/pages/under_development'
 import { use_auth_store } from '@/store/auth'
 
@@ -112,6 +114,14 @@ export const router = createHashRouter([
       {
         path: '/settings',
         element: <Settings />
+      },
+      {
+        path: '/media',
+        element: <MediaPlayerPage />
+      },
+      {
+        path: '/media/processor',
+        element: <MediaProcessorPage />
       }
     ]
   }

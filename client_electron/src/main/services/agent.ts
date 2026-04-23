@@ -220,13 +220,15 @@ export const agent_service = {
    * @param model - 使用的模型
    * @param system_prompt - 系统提示词
    * @param icon - Agent 图标（可选）
+   * @param category - Agent 分类（可选）
    * @returns 注册结果
    */
-  async register_agent(name: string, description: string, model: string, system_prompt: string, icon?: string) {
+  async register_agent(name: string, description: string, model: string, system_prompt: string, icon?: string, category?: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_register)
       const payload: any = { name, description, model, system_prompt }
       if (icon) payload.icon = icon
+      if (category) payload.category = category
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
     } catch (error: any) {
@@ -243,12 +245,14 @@ export const agent_service = {
    * @param model - 使用的模型
    * @param system_prompt - 系统提示词
    * @param icon - Agent 图标
+   * @param category - Agent 分类（可选）
    * @returns 更新结果
    */
-  async update_agent(agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) {
+  async update_agent(agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string, category?: string) {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.agent_management_update)
-      const payload = { agent_id, name, description, model, system_prompt, icon }
+      const payload: any = { agent_id, name, description, model, system_prompt, icon }
+      if (category) payload.category = category
       const res = await api_client.post(url, payload)
       return { success: true, data: res.data.data }
     } catch (error: any) {

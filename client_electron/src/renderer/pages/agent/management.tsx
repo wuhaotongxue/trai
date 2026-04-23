@@ -4,8 +4,9 @@
  * 日期: 2026-04-14 13:00:00
  * 描述: Agent 管理页面, 支持列表、注册、启停 - 三段式布局
  */
-import React, { useState, useEffect } from 'react'
-import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Bot, Plus, Play, Square, Loader2, RefreshCw, Activity, PanelLeftOpen, PanelLeftClose, List as ListIcon, Settings, Edit, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud, Code, Search } from 'lucide-react'
+import { List } from 'react-window'
 import { should_ellipsis } from '@/utils/ui_text'
 
 /**
@@ -19,6 +20,7 @@ interface Agent {
   system_prompt: string
   icon: string
   status: 'running' | 'stopped' | 'error'
+  category?: string
   created_at: string
 }
 
@@ -39,6 +41,18 @@ const icon_options = [
 ]
 
 /**
+ * 分类选项列表
+ */
+const category_options = [
+  { value: 'general', label: '通用助手' },
+  { value: 'coding', label: '编程助手' },
+  { value: 'writing', label: '写作助手' },
+  { value: 'research', label: '研究助手' },
+  { value: 'customer', label: '客户服务' },
+  { value: 'other', label: '其他' },
+]
+
+/**
  * 模型选项列表
  */
 const model_options = [
@@ -48,6 +62,8 @@ const model_options = [
   { value: 'claude-3-opus', label: 'Claude 3 Opus' },
   { value: 'qwen-max', label: 'Qwen Max' },
 ]
+
+
 
 /**
  * Agent 管理页面组件
@@ -84,6 +100,14 @@ const AgentManagement: React.FC = () => {
    * 当前选中的 Agent ID
    */
   const [active_agent_id, set_active_agent_id] = useState<string>('')
+  /**
+   * 当前选中的分类
+   */
+  const [active_category, set_active_category] = useState<string>('all')
+  /**
+   * 搜索关键词
+   */
+  const [search_query, set_search_query] = useState<string>('')
 
   /**
    * 是否显示注册模态框
@@ -97,7 +121,7 @@ const AgentManagement: React.FC = () => {
   /**
    * 新 Agent 表单数据
    */
-  const [new_agent, set_new_agent] = useState({ name: '', description: '', model: 'gpt-4o', system_prompt: '', icon: 'Bot' })
+  const [new_agent, set_new_agent] = useState({ name: '', description: '', model: 'gpt-4o', system_prompt: '', icon: 'Bot', category: 'general' })
   /**
    * 当前编辑的 Agent
    */
@@ -198,11 +222,12 @@ const AgentManagement: React.FC = () => {
         new_agent.description,
         new_agent.model,
         new_agent.system_prompt,
-        new_agent.icon
+        new_agent.icon,
+        new_agent.category
       )
       if (res.success) {
         set_show_register_modal(false)
-        set_new_agent({ name: '', description: '', model: 'gpt-4o', system_prompt: '', icon: 'Bot' })
+        set_new_agent({ name: '', description: '', model: 'gpt-4o', system_prompt: '', icon: 'Bot', category: 'general' })
         fetch_agents()
       } else {
         alert(res.error || 'Register failed')
@@ -231,7 +256,8 @@ const AgentManagement: React.FC = () => {
         edit_agent.description,
         edit_agent.model,
         edit_agent.system_prompt,
-        edit_agent.icon
+        edit_agent.icon,
+        edit_agent.category
       )
       if (res.success) {
         set_show_edit_modal(false)
@@ -255,6 +281,23 @@ const AgentManagement: React.FC = () => {
     set_edit_agent({ ...agent })
     set_show_edit_modal(true)
   }
+
+  /**
+   * 过滤后的 Agent 列表
+   */
+  const filtered_agents = agents
+    .filter(agent => 
+      active_category === 'all' || agent.category === active_category
+    )
+    .filter(agent => {
+      if (!search_query) return true
+      const query = search_query.toLowerCase()
+      return (
+        agent.name.toLowerCase().includes(query) ||
+        agent.description.toLowerCase().includes(query) ||
+        agent.model.toLowerCase().includes(query)
+      )
+    })
 
   /**
    * 当前选中的 Agent
@@ -294,9 +337,10 @@ const AgentManagement: React.FC = () => {
           borderRight: is_left_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
-          flexShrink: 1
+          flexShrink: 1,
+          boxShadow: is_left_sidebar_open ? '2px 0 8px rgba(0,0,0,0.05)' : 'none'
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -319,58 +363,176 @@ const AgentManagement: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', boxSizing: 'border-box' }}>
-            {agents.length === 0 ? (
+          <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--ui_border)' }}>
+            <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>分类</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <button
+                type="button"
+                onClick={() => set_active_category('all')}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  backgroundColor: active_category === 'all' ? 'var(--ui_accent)' : 'transparent',
+                  color: active_category === 'all' ? 'white' : 'var(--ui_text)',
+                  border: '1px solid var(--ui_border)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (active_category !== 'all') {
+                    e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (active_category !== 'all') {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }
+                }}
+              >
+                全部
+              </button>
+              {category_options.map(category => (
+                <button
+                  key={category.value}
+                  type="button"
+                  onClick={() => set_active_category(category.value)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    backgroundColor: active_category === category.value ? 'var(--ui_accent)' : 'transparent',
+                    color: active_category === category.value ? 'white' : 'var(--ui_text)',
+                    border: '1px solid var(--ui_border)',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    textAlign: 'left',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (active_category !== category.value) {
+                      e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (active_category !== category.value) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
+                  }}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--ui_border)' }}>
+            <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>搜索</div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="搜索智能体..."
+                value={search_query}
+                onChange={(e) => set_search_query(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '6px 12px 6px 32px',
+                  fontSize: '12px',
+                  border: '1px solid var(--ui_border)',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--ui_panel_alt)',
+                  color: 'var(--ui_text)',
+                  outline: 'none',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
+              />
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ui_text_muted)' }} />
+            </div>
+          </div>
+
+          <div style={{ flex: 1, overflow: 'hidden', padding: '12px', boxSizing: 'border-box' }}>
+            {filtered_agents.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>暂无Agent</div>
             ) : (
-              agents.map(agent => {
-                const AgentIcon = get_icon_component(agent.icon)
-                return (
-                  <div
-                    key={agent.id}
-                    onClick={() => set_active_agent_id(agent.id)}
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '6px',
-                      backgroundColor: active_agent_id === agent.id ? 'var(--ui_accent)' : 'transparent',
-                      color: active_agent_id === agent.id ? 'white' : 'var(--ui_text)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginBottom: '4px',
-                      fontSize: '13px',
-                      fontWeight: active_agent_id === agent.id ? 600 : 400,
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'var(--ui_border)'
-                    }}
-                    onMouseLeave={(e) => {
-                      if (active_agent_id !== agent.id) e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <AgentIcon size={16} />
+              <List
+                rowCount={filtered_agents.length}
+                rowHeight={44}
+                style={{ height: '100%' }}
+                rowProps={{}}
+                rowComponent={({ index, style }: any) => {
+                  const agent = filtered_agents[index]
+                  const AgentIcon = get_icon_component(agent.icon)
+                  const is_active = active_agent_id === agent.id
+                  
+                  const handle_click = () => set_active_agent_id(agent.id)
+                  const handle_mouse_enter = (e: React.MouseEvent<HTMLDivElement>) => {
+                    if (!is_active) {
+                      e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                    }
+                  }
+                  const handle_mouse_leave = (e: React.MouseEvent<HTMLDivElement>) => {
+                    if (!is_active) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
+                  }
+                  
+                  return (
                     <div
-                      style={
-                        should_ellipsis(agent.name)
-                          ? { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
-                          : { flex: 1, whiteSpace: 'nowrap' }
-                      }
+                      style={{
+                        ...style,
+                        padding: '12px 16px',
+                        borderRadius: '6px',
+                        backgroundColor: is_active ? 'var(--ui_accent)' : 'transparent',
+                        color: is_active ? 'white' : 'var(--ui_text)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px',
+                        fontSize: '13px',
+                        fontWeight: is_active ? 600 : 400,
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxSizing: 'border-box',
+                        transform: 'translateY(0)',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                      }}
+                      onClick={handle_click}
+                      onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                        handle_mouse_enter(e)
+                        e.currentTarget.style.transform = 'translateY(-1px)'
+                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                        handle_mouse_leave(e)
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'
+                      }}
                     >
-                      {agent.name}
+                      <AgentIcon size={16} />
+                      <div
+                        style={{
+                          flex: 1,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {agent.name}
+                      </div>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor:
+                          agent.status === 'running' ? 'var(--ui_success)' :
+                          agent.status === 'stopped' ? 'var(--ui_text_muted)' : 'var(--ui_danger)'
+                      }} />
                     </div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor:
-                        agent.status === 'running' ? 'var(--ui_success)' :
-                        agent.status === 'stopped' ? 'var(--ui_text_muted)' : 'var(--ui_danger)'
-                    }} />
-                  </div>
-                )
-              })
+                  )
+                }}
+              />
             )}
           </div>
 
@@ -400,9 +562,10 @@ const AgentManagement: React.FC = () => {
           borderRight: is_middle_sidebar_open ? '1px solid var(--ui_border)' : 'none',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
-          flexShrink: 1
+          flexShrink: 1,
+          boxShadow: is_middle_sidebar_open ? '2px 0 8px rgba(0,0,0,0.05)' : 'none'
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)' }}>
@@ -439,7 +602,7 @@ const AgentManagement: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <List size={18} />
+              <ListIcon size={18} />
             </button>
           </div>
 
@@ -466,7 +629,17 @@ const AgentManagement: React.FC = () => {
                     alignItems: 'center',
                     gap: '8px',
                     marginBottom: '8px',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: 'translateY(0)',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
                   }}
                 >
                   {active_agent.status === 'running' ? <Square size={16} /> : <Play size={16} />}
@@ -491,7 +664,20 @@ const AgentManagement: React.FC = () => {
                     alignItems: 'center',
                     gap: '8px',
                     marginBottom: '8px',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: 'translateY(0)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (checking_id !== active_agent.id) {
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (checking_id !== active_agent.id) {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
+                    }
                   }}
                 >
                   {checking_id === active_agent.id ? <Loader2 size={16} className="animate-spin" /> : <Activity size={16} />}
@@ -515,7 +701,16 @@ const AgentManagement: React.FC = () => {
                     alignItems: 'center',
                     gap: '8px',
                     marginBottom: '8px',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: 'translateY(0)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
                   }}
                 >
                   <Edit size={16} />
@@ -573,18 +768,18 @@ const AgentManagement: React.FC = () => {
                     </button>
                   )}
                   <button
-                    onClick={() => set_is_middle_sidebar_open(true)}
-                    title="Expand"
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <List size={18} />
-                  </button>
+                      onClick={() => set_is_middle_sidebar_open(true)}
+                      title="Expand"
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'var(--ui_text_muted)', borderRadius: '4px', transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <ListIcon size={18} />
+                    </button>
                 </div>
               )}
               <h2 style={{ color: 'var(--ui_text)', margin: 0, fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
@@ -638,8 +833,8 @@ const AgentManagement: React.FC = () => {
                       <IconComponent size={20} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                      <p style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text_muted)', lineHeight: '1.6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {active_agent.description.length > 4 ? active_agent.description.slice(0, 4) + '...' : active_agent.description}
+                      <p style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text_muted)', lineHeight: '1.6', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {active_agent.description || '暂无描述'}
                       </p>
                     </div>
                   </div>
@@ -659,6 +854,12 @@ const AgentManagement: React.FC = () => {
                         </span>
                       </div>
                     </div>
+                    <div style={{ padding: '12px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>分类</div>
+                      <div style={{ fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {category_options.find(c => c.value === active_agent.category)?.label || '未分类'}
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -668,9 +869,9 @@ const AgentManagement: React.FC = () => {
                     <div style={{
                       padding: '12px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px',
                       fontSize: '13px', color: 'var(--ui_text)', lineHeight: '1.6',
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                      overflow: 'auto', maxHeight: '120px'
                     }}>
-                      {active_agent.system_prompt ? (active_agent.system_prompt.length > 4 ? active_agent.system_prompt.slice(0, 4) + '...' : active_agent.system_prompt) : '暂无...'}
+                      {active_agent.system_prompt || '暂无系统提示词'}
                     </div>
                   </div>
                 </div>
@@ -789,6 +990,28 @@ const AgentManagement: React.FC = () => {
                   )
                 })}
               </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
+                分类
+              </label>
+              <select
+                value={new_agent.category}
+                onChange={(e) => set_new_agent(prev => ({ ...prev, category: e.target.value }))}
+                style={{
+                  width: '100%', padding: '10px 14px', fontSize: '14px', lineHeight: '1.5',
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
+              >
+                {category_options.map(opt => (
+                  <option key={opt.value} value={opt.value} style={{ padding: '10px 14px', fontSize: '14px', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}>{opt.label}</option>
+                ))}
+              </select>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
@@ -970,6 +1193,28 @@ const AgentManagement: React.FC = () => {
                   )
                 })}
               </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>
+                分类
+              </label>
+              <select
+                value={edit_agent.category || 'general'}
+                onChange={(e) => set_edit_agent(prev => prev ? { ...prev, category: e.target.value } : null)}
+                style={{
+                  width: '100%', padding: '10px 12px', fontSize: '14px',
+                  border: '1px solid var(--ui_border)', borderRadius: '6px', outline: 'none',
+                  backgroundColor: 'var(--ui_panel_alt)', transition: 'border-color 0.2s', cursor: 'pointer', boxSizing: 'border-box',
+                  color: 'var(--ui_text)'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = 'var(--ui_accent)'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'var(--ui_border)'}
+              >
+                {category_options.map(opt => (
+                  <option key={opt.value} value={opt.value} style={{ backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text)' }}>{opt.label}</option>
+                ))}
+              </select>
             </div>
 
             <div style={{ marginBottom: '16px' }}>

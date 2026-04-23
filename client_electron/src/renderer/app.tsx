@@ -22,6 +22,13 @@ const App: React.FC = () => {
 
     const check_auto_login = async () => {
       try {
+        // 检查是否在 Electron 环境中
+        if (!window.electron_api) {
+          console.warn('Not in Electron environment, skipping auto login')
+          set_initializing(false)
+          return
+        }
+        
         const res = await window.electron_api.config_get('remember_me', true)
         const remember_me = res.data !== false
         

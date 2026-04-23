@@ -29,10 +29,10 @@ interface Window {
     ai_generate_video: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_comfyui: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_list: () => Promise<{ success: boolean; data?: any; error?: string }>;
-    agent_management_register: (name: string, description: string, model: string, system_prompt: string, icon?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_management_register: (name: string, description: string, model: string, system_prompt: string, icon?: string, category?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    agent_management_update: (agent_id: string, name: string, description: string, model: string, system_prompt: string, icon?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_management_update: (agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string, category?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     feedback_submit: (data: { type: string; title: string; content: string; contact?: string; attachments?: any[] }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_demo_create?: (params: { content?: string | null; file_name?: string | null; index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_categories: () => Promise<{ success: boolean; data?: any; error?: string }>;
@@ -42,6 +42,14 @@ interface Window {
     kb_delete_index: (index_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_delete_index_file: (index_id: string, file_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_upload_text?: (index_id: string, file_name: string, content: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    // 媒体播放相关
+    media_select_files: () => Promise<{ success: boolean; files?: Array<{ path: string; name: string }>; error?: string }>;
+    media_select_folder: () => Promise<{ success: boolean; files?: Array<{ path: string; name: string }>; error?: string }>;
+    
+    // 媒体处理相关
+    media_transcribe_audio: (file_path: string, language?: string) => Promise<{ success: boolean; data?: { transcript: string; language: string; duration: number }; error?: string }>;
+    media_generate_subtitles: (file_path: string, language?: string, orientation?: 'vertical' | 'horizontal') => Promise<{ success: boolean; data?: { subtitles: Array<{ start: number; end: number; text: string }>; orientation: string }; error?: string }>;
+    media_translate_subtitles: (subtitles: Array<{ start: number; end: number; text: string }>, source_lang: string, target_lang: string) => Promise<{ success: boolean; data?: { translated_subtitles: Array<{ start: number; end: number; text: string; translated_text: string }> }; error?: string }>;
     on_agent_chat_chunk?: (callback: (event: any, chunk: any) => void) => (() => void);
     ai_generate_report?: (file_data: any, filename: string, description: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     app_get_version?: () => Promise<string>;

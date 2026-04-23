@@ -109,6 +109,15 @@ const Sidebar: React.FC = () => {
         { path: '/tools', label: '工具', icon: <FileText size={18} /> }
       ]
     },
+    {
+      id: 'media',
+      label: '媒体中心',
+      icon: <Music size={20} />,
+      children: [
+        { path: '/media', label: '播放器', icon: <Video size={18} /> },
+        { path: '/media/processor', label: '媒体处理', icon: <FileText size={18} /> }
+      ]
+    },
     { path: '/feedback', label: '反馈', icon: <MessageSquarePlus size={20} /> },
     { path: '/settings', label: '设置', icon: <Settings size={20} /> }
   ]
