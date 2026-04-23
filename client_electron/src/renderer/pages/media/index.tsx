@@ -5,7 +5,7 @@
  * 描述: 媒体播放页面, 支持音乐和视频播放 - 三段式布局
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, FolderOpen, Music, Film, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, FolderOpen, Music, Film, ChevronLeft, ChevronRight, Search, X, ChevronDown, ChevronRight as ChevronRightIcon, Folder } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
 
 /**
@@ -21,11 +21,22 @@ interface MediaFile {
 }
 
 /**
+ * 文件夹接口定义
+ */
+interface FolderItem {
+  id: string
+  name: string
+  path: string
+  type: 'folder'
+  children?: (MediaFile | FolderItem)[]
+}
+
+/**
  * 媒体播放页面组件
  */
 const MediaPlayerPage: React.FC = () => {
   // 状态管理
-  const [selected_files, set_selected_files] = useState<MediaFile[]>([])
+  const [selected_files, set_selected_files] = useState<(MediaFile | FolderItem)[]>([])
   const [current_file_index, set_current_file_index] = useState<number>(-1)
   const [is_playing, set_is_playing] = useState<boolean>(false)
   const [current_time, set_current_time] = useState<number>(0)
@@ -34,6 +45,7 @@ const MediaPlayerPage: React.FC = () => {
   const [is_muted, set_is_muted] = useState<boolean>(false)
   const [is_fullscreen, set_is_fullscreen] = useState<boolean>(false)
   const [search_query, set_search_query] = useState<string>('')
+  const [expanded_folders, set_expanded_folders] = useState<Set<string>>(new Set())
   
   // 引用
   const audio_ref = useRef<HTMLAudioElement>(null)
@@ -47,7 +59,7 @@ const MediaPlayerPage: React.FC = () => {
   
   // 当文件变化时，处理播放逻辑
   useEffect(() => {
-    if (current_file && is_playing) {
+    if (current_file && current_file.type !== 'folder' && is_playing) {
       if (current_file.type === 'audio' && audio_ref.current) {
         audio_ref.current.play().catch(err => console.error('音频播放失败:', err))
       } else if (current_file.type === 'video' && video_ref.current) {
@@ -92,25 +104,66 @@ const MediaPlayerPage: React.FC = () => {
     try {
       const result = await window.electron_api.media_select_folder()
       if (result.success && result.files) {
-        const media_files: MediaFile[] = result.files.map((file: any, index: number) => {
-          const is_audio = file.path.match(/\.(mp3|wav|flac|ogg|m4a)$/i)
-          const is_video = file.path.match(/\.(mp4|avi|mov|wmv|mkv)$/i)
-          
-          if (is_audio || is_video) {
-            return {
-              id: `file_${index}_${Date.now()}`,
-              name: file.name,
-              path: file.path,
-              type: is_audio ? 'audio' : 'video'
-            }
+        // 构建文件夹结构
+        const build_folder_structure = (files: any[]) => {
+          const root: FolderItem = {
+            id: 'root',
+            name: '根文件夹',
+            path: '',
+            type: 'folder',
+            children: []
           }
-          return null
-        }).filter((file): file is MediaFile => file !== null)
+          
+          files.forEach((file, index) => {
+            const parts = file.path.split('\\')
+            let current = root
+            
+            for (let i = 0; i < parts.length - 1; i++) {
+              const folder_name = parts[i]
+              const folder_path = parts.slice(0, i + 1).join('\\')
+              
+              let folder = current.children?.find((item): item is FolderItem => 
+                item.type === 'folder' && item.path === folder_path
+              )
+              
+              if (!folder) {
+                folder = {
+                  id: `folder_${folder_path}_${Date.now()}`,
+                  name: folder_name,
+                  path: folder_path,
+                  type: 'folder',
+                  children: []
+                }
+                current.children?.push(folder)
+              }
+              
+              current = folder
+            }
+            
+            // 添加文件
+            const is_audio = file.path.match(/\.(mp3|wav|flac|ogg|m4a)$/i)
+            const is_video = file.path.match(/\.(mp4|avi|mov|wmv|mkv)$/i)
+            
+            if (is_audio || is_video) {
+              const media_file: MediaFile = {
+                id: `file_${index}_${Date.now()}`,
+                name: file.name,
+                path: file.path,
+                type: is_audio ? 'audio' : 'video'
+              }
+              current.children?.push(media_file)
+            }
+          })
+          
+          return root.children || []
+        }
         
-        set_selected_files(media_files)
-        if (media_files.length > 0) {
-          set_current_file_index(0)
-          set_is_playing(true)
+        const folder_structure = build_folder_structure(result.files)
+        set_selected_files(folder_structure)
+        
+        // 展开第一个文件夹
+        if (folder_structure.length > 0 && folder_structure[0].type === 'folder') {
+          set_expanded_folders(new Set([folder_structure[0].id]))
         }
       }
     } catch (error) {
@@ -120,7 +173,7 @@ const MediaPlayerPage: React.FC = () => {
   
   // 播放/暂停切换
   const handle_play_pause = () => {
-    if (current_file) {
+    if (current_file && current_file.type !== 'folder') {
       if (current_file.type === 'audio' && audio_ref.current) {
         if (is_playing) {
           audio_ref.current.pause()
@@ -140,21 +193,97 @@ const MediaPlayerPage: React.FC = () => {
   
   // 上一曲
   const handle_previous = () => {
-    if (selected_files.length > 0) {
-      const new_index = (current_file_index - 1 + selected_files.length) % selected_files.length
-      set_current_file_index(new_index)
-      set_is_playing(true)
-      set_current_time(0)
+    // 收集所有媒体文件
+    const collect_media_files = (items: (MediaFile | FolderItem)[]): MediaFile[] => {
+      let media_files: MediaFile[] = []
+      for (const item of items) {
+        if (item.type === 'folder' && item.children) {
+          media_files = media_files.concat(collect_media_files(item.children))
+        } else if (item.type !== 'folder') {
+          media_files.push(item)
+        }
+      }
+      return media_files
+    }
+    
+    const media_files = collect_media_files(selected_files)
+    if (media_files.length > 0) {
+      // 找到当前文件在媒体文件列表中的索引
+      const current_media_index = media_files.findIndex(file => file.id === current_file?.id)
+      const new_index = (current_media_index - 1 + media_files.length) % media_files.length
+      const new_file = media_files[new_index]
+      
+      // 找到新文件在原始列表中的索引
+      const find_file_index = (items: (MediaFile | FolderItem)[], target_id: string): number => {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i]
+          if (item.id === target_id) {
+            return i
+          }
+          if (item.type === 'folder' && item.children) {
+            const child_index = find_file_index(item.children, target_id)
+            if (child_index !== -1) {
+              return i
+            }
+          }
+        }
+        return -1
+      }
+      
+      const original_index = find_file_index(selected_files, new_file.id)
+      if (original_index !== -1) {
+        set_current_file_index(original_index)
+        set_is_playing(true)
+        set_current_time(0)
+      }
     }
   }
   
   // 下一曲
   const handle_next = () => {
-    if (selected_files.length > 0) {
-      const new_index = (current_file_index + 1) % selected_files.length
-      set_current_file_index(new_index)
-      set_is_playing(true)
-      set_current_time(0)
+    // 收集所有媒体文件
+    const collect_media_files = (items: (MediaFile | FolderItem)[]): MediaFile[] => {
+      let media_files: MediaFile[] = []
+      for (const item of items) {
+        if (item.type === 'folder' && item.children) {
+          media_files = media_files.concat(collect_media_files(item.children))
+        } else if (item.type !== 'folder') {
+          media_files.push(item)
+        }
+      }
+      return media_files
+    }
+    
+    const media_files = collect_media_files(selected_files)
+    if (media_files.length > 0) {
+      // 找到当前文件在媒体文件列表中的索引
+      const current_media_index = media_files.findIndex(file => file.id === current_file?.id)
+      const new_index = (current_media_index + 1) % media_files.length
+      const new_file = media_files[new_index]
+      
+      // 找到新文件在原始列表中的索引
+      const find_file_index = (items: (MediaFile | FolderItem)[], target_id: string): number => {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i]
+          if (item.id === target_id) {
+            return i
+          }
+          if (item.type === 'folder' && item.children) {
+            const child_index = find_file_index(item.children, target_id)
+            if (child_index !== -1) {
+              return i
+            }
+          }
+        }
+        return -1
+      }
+      
+      const original_index = find_file_index(selected_files, new_file.id)
+      if (original_index !== -1) {
+        set_current_file_index(original_index)
+        set_is_playing(true)
+        set_current_time(0)
+      }
     }
   }
   
@@ -163,7 +292,7 @@ const MediaPlayerPage: React.FC = () => {
     const new_time = parseFloat(e.target.value)
     set_current_time(new_time)
     
-    if (current_file) {
+    if (current_file && current_file.type !== 'folder') {
       if (current_file.type === 'audio' && audio_ref.current) {
         audio_ref.current.currentTime = new_time
       } else if (current_file.type === 'video' && video_ref.current) {
@@ -178,7 +307,7 @@ const MediaPlayerPage: React.FC = () => {
     set_volume(new_volume)
     set_is_muted(new_volume === 0)
     
-    if (current_file) {
+    if (current_file && current_file.type !== 'folder') {
       if (current_file.type === 'audio' && audio_ref.current) {
         audio_ref.current.volume = new_volume
       } else if (current_file.type === 'video' && video_ref.current) {
@@ -192,7 +321,7 @@ const MediaPlayerPage: React.FC = () => {
     const new_muted = !is_muted
     set_is_muted(new_muted)
     
-    if (current_file) {
+    if (current_file && current_file.type !== 'folder') {
       if (current_file.type === 'audio' && audio_ref.current) {
         audio_ref.current.muted = new_muted
       } else if (current_file.type === 'video' && video_ref.current) {
@@ -260,6 +389,102 @@ const MediaPlayerPage: React.FC = () => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  // 切换文件夹展开状态
+  const toggle_folder = (folder_id: string) => {
+    const new_expanded = new Set(expanded_folders)
+    if (new_expanded.has(folder_id)) {
+      new_expanded.delete(folder_id)
+    } else {
+      new_expanded.add(folder_id)
+    }
+    set_expanded_folders(new_expanded)
+  }
+  
+  // 渲染文件列表项
+  const render_file_item = (item: MediaFile | FolderItem, level: number = 0) => {
+    if (item.type === 'folder') {
+      const is_expanded = expanded_folders.has(item.id)
+      return (
+        <div key={item.id} style={{ paddingLeft: `${level * 16}px` }}>
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '8px 12px',
+              cursor: 'pointer',
+              borderRadius: '6px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
+            onClick={() => toggle_folder(item.id)}
+          >
+            <div style={{ marginRight: '8px' }}>
+              {is_expanded ? <ChevronDown size={16} /> : <ChevronRightIcon size={16} />}
+            </div>
+            <Folder size={16} style={{ marginRight: '8px', color: 'var(--ui_accent)' }} />
+            <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.name}
+            </div>
+          </div>
+          {is_expanded && item.children && item.children.map(child => render_file_item(child, level + 1))}
+        </div>
+      )
+    } else {
+      const is_current = current_file?.id === item.id
+      return (
+        <div 
+          key={item.id} 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            borderRadius: '6px',
+            backgroundColor: is_current ? 'var(--ui_accent)' : 'transparent',
+            color: is_current ? 'white' : 'var(--ui_text)',
+            transition: 'all 0.2s',
+            paddingLeft: `${level * 16}px`
+          }}
+          onMouseEnter={(e) => {
+            if (!is_current) {
+              e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!is_current) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }}
+          onClick={() => {
+            const index = selected_files.findIndex(file => file.id === item.id)
+            set_current_file_index(index)
+            set_is_playing(true)
+            set_current_time(0)
+          }}
+        >
+          {item.type === 'audio' ? (
+            <Music size={16} style={{ marginRight: '8px' }}
+          ) : (
+            <Film size={16} style={{ marginRight: '8px' }}
+          )}
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ fontSize: '13px', fontWeight: is_current ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.name}
+            </div>
+            <div style={{ fontSize: '11px', color: is_current ? 'rgba(255,255,255,0.7)' : 'var(--ui_text_muted)', marginTop: '2px' }}>
+              {item.type === 'audio' ? '音频' : '视频'}
+            </div>
+          </div>
+        </div>
+      )
+    }
   }
   
   // 过滤文件列表
@@ -383,52 +608,7 @@ const MediaPlayerPage: React.FC = () => {
             暂无媒体文件
           </div>
         ) : (
-          filtered_files.map((file, index) => (
-            <div
-              key={file.id}
-              onClick={() => {
-                set_current_file_index(index)
-                set_is_playing(true)
-                set_current_time(0)
-              }}
-              style={{
-                padding: '12px',
-                borderRadius: '6px',
-                backgroundColor: current_file_index === index ? 'var(--ui_accent)' : 'transparent',
-                color: current_file_index === index ? 'white' : 'var(--ui_text)',
-                cursor: 'pointer',
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                if (current_file_index !== index) {
-                  e.currentTarget.style.backgroundColor = 'var(--ui_border)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (current_file_index !== index) {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }
-              }}
-            >
-              {file.type === 'audio' ? (
-                <Music size={16} />
-              ) : (
-                <Film size={16} />
-              )}
-              <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: '13px', fontWeight: current_file_index === index ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {file.name}
-                </div>
-                <div style={{ fontSize: '11px', color: current_file_index === index ? 'rgba(255,255,255,0.7)' : 'var(--ui_text_muted)', marginTop: '2px' }}>
-                  {file.type === 'audio' ? '音频' : '视频'}
-                </div>
-              </div>
-            </div>
-          ))
+          filtered_files.map(item => render_file_item(item))
         )}
       </div>
     </div>
@@ -453,7 +633,13 @@ const MediaPlayerPage: React.FC = () => {
           onDoubleClick={handle_fullscreen_toggle}
         >
           {current_file ? (
-            current_file.type === 'audio' ? (
+            current_file.type === 'folder' ? (
+              <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)' }}>
+                <Folder size={80} style={{ marginBottom: '20px', opacity: 0.5, color: 'var(--ui_accent)' }} />
+                <h3 style={{ margin: 0, color: 'var(--ui_text)' }}>请选择媒体文件</h3>
+                <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: 'var(--ui_text_muted)' }}>当前选择的是文件夹，请从左侧列表中选择具体的媒体文件</p>
+              </div>
+            ) : current_file.type === 'audio' ? (
               <div style={{ textAlign: 'center', color: 'var(--ui_text)', padding: '40px' }}>
                 <Music size={80} style={{ marginBottom: '20px', color: 'var(--ui_accent)' }} />
                 <h2 style={{ margin: '0 0 10px 0', color: 'var(--ui_text)' }}>{current_file.name}</h2>
