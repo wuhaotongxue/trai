@@ -35,10 +35,11 @@ export const agent_service = {
    * @param message - 用户消息内容
    * @param agent_id - Agent ID（可选）
    * @param knowledge_base_id - 知识库 ID（可选）
+   * @param files - 上传的文件（可选）
    * @param event_sender - 事件发送回调函数（可选）
    * @returns 对话响应结果
    */
-  async chat(session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, event_sender?: (event: string, data: any) => void) {
+  async chat(session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, files?: Array<{ name: string; type: string; data: string }>, event_sender?: (event: string, data: any) => void) {
     try {
       // 停止上一个同一 session 的请求（如果存在）
       if (active_requests[session_id]) {
@@ -57,6 +58,7 @@ export const agent_service = {
       }
       if (agent_id) payload.agent_id = agent_id
       if (knowledge_base_id) payload.knowledge_base_id = knowledge_base_id
+      if (files && files.length > 0) payload.files = files
 
       log.info('Agent Chat Payload:', payload)
       

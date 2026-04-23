@@ -21,7 +21,10 @@ interface Window {
     tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_files_to_zip: (file_paths: string[]) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
-    agent_chat: (session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    tools_convert_word_to_pdf: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    tools_convert_pdf_to_word: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    tools_convert_excel: (file_path: string, target_format: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_chat: (session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, files?: Array<{ name: string; type: string; data: string }>) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_stop: (session_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_image: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_image_to_image: (prompt: string, image_url: string) => Promise<{ success: boolean; data?: any; error?: string }>;
