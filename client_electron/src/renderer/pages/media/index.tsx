@@ -325,7 +325,7 @@ const MediaPlayerPage: React.FC = () => {
           <Search size={16} style={{ position: 'absolute', left: '10px', color: 'var(--ui_text_muted)' }} />
           <input
             type="text"
-            placeholder="搜索媒体文件..."
+            placeholder="搜索"
             value={search_query}
             onChange={(e) => set_search_query(e.target.value)}
             style={{
