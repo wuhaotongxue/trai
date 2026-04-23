@@ -5,7 +5,7 @@
  * 描述: 媒体播放页面, 支持音乐和视频播放 - 三段式布局
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, FolderOpen, Music, Film, ChevronLeft, ChevronRight, Search, X, ChevronDown, ChevronRight as ChevronRightIcon, Folder } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, FolderOpen, Music, Film, ChevronLeft, ChevronRight, Search, X, ChevronDown, ChevronRight as ChevronRightIcon, Folder, Rewind, FastForward } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
 
 /**
@@ -290,6 +290,34 @@ const MediaPlayerPage: React.FC = () => {
   // 快进
   const handle_seek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const new_time = parseFloat(e.target.value)
+    set_current_time(new_time)
+    
+    if (current_file && current_file.type !== 'folder') {
+      if (current_file.type === 'audio' && audio_ref.current) {
+        audio_ref.current.currentTime = new_time
+      } else if (current_file.type === 'video' && video_ref.current) {
+        video_ref.current.currentTime = new_time
+      }
+    }
+  }
+  
+  // 快退10秒
+  const handle_backward = () => {
+    const new_time = Math.max(0, current_time - 10)
+    set_current_time(new_time)
+    
+    if (current_file && current_file.type !== 'folder') {
+      if (current_file.type === 'audio' && audio_ref.current) {
+        audio_ref.current.currentTime = new_time
+      } else if (current_file.type === 'video' && video_ref.current) {
+        video_ref.current.currentTime = new_time
+      }
+    }
+  }
+  
+  // 快进10秒
+  const handle_forward = () => {
+    const new_time = Math.min(duration, current_time + 10)
     set_current_time(new_time)
     
     if (current_file && current_file.type !== 'folder') {
@@ -709,7 +737,7 @@ const MediaPlayerPage: React.FC = () => {
           </div>
           
           {/* 控制按钮 */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
             <button
               onClick={handle_previous}
               style={{
@@ -729,6 +757,27 @@ const MediaPlayerPage: React.FC = () => {
               }}
             >
               <SkipBack size={20} />
+            </button>
+            
+            <button
+              onClick={handle_backward}
+              style={{
+                padding: '8px',
+                borderRadius: '50%',
+                border: '1px solid var(--ui_border)',
+                backgroundColor: 'transparent',
+                color: 'var(--ui_text)',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <Rewind size={20} />
             </button>
             
             <button
@@ -753,6 +802,27 @@ const MediaPlayerPage: React.FC = () => {
               }}
             >
               {is_playing ? <Pause size={24} /> : <Play size={24} />}
+            </button>
+            
+            <button
+              onClick={handle_forward}
+              style={{
+                padding: '8px',
+                borderRadius: '50%',
+                border: '1px solid var(--ui_border)',
+                backgroundColor: 'transparent',
+                color: 'var(--ui_text)',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <FastForward size={20} />
             </button>
             
             <button
