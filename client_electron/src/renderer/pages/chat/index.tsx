@@ -5,7 +5,7 @@
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageSquare, Loader2, PanelLeftOpen, List } from 'lucide-react'
+import { MessageSquare, Loader2, PanelLeftOpen, List, ChevronDown, ChevronRight } from 'lucide-react'
 import { STORAGE_KEY, type ChatSession, type Agent, type KnowledgeBase } from './types'
 import AgentSidebar from './components/agent_sidebar'
 import SessionSidebar from './components/session_sidebar'

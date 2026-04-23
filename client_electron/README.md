@@ -49,6 +49,13 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_23_2355
+- **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
+- **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
+- **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
+- **feat(login)**: 美化 login/register 页面过渡动画
+- **fix(media)**: 规范 media/processor.tsx 变量命名 (camelCase)
+
 ### 💻 客户端_2026_04_23_2018
 - **feat(tools)**: 工具分类完善，重新组织工具分类，格式转换分类包含MD转PDF、Word转PDF、PDF转Word、Excel转换、图片格式转换；新增其他工具分类包含JSON检测
 - **feat(media)**: 媒体处理页面将添加按钮从右侧移动到左侧，优化用户体验
