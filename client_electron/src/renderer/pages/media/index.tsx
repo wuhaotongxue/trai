@@ -653,11 +653,11 @@ const MediaPlayerPage: React.FC = () => {
     >
       <div 
         ref={player_ref} 
-        style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}
       >
         {/* 播放区域 */}
         <div 
-          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ui_panel_alt)' }}
+          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ui_panel_alt)', minHeight: 0 }}
           onDoubleClick={handle_fullscreen_toggle}
         >
           {current_file ? (
@@ -710,7 +710,8 @@ const MediaPlayerPage: React.FC = () => {
           borderTop: '1px solid var(--ui_border)',
           backgroundColor: 'var(--ui_panel)',
           zIndex: 10,
-          position: 'relative'
+          position: 'relative',
+          minHeight: '100px'
         }}>
           {/* 进度条 */}
           <div style={{ marginBottom: '16px' }}>
