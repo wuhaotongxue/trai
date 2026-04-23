@@ -241,6 +241,13 @@ html[data-theme='dark'] {
   to { filter: blur(0); opacity: 1; transform: scale(1); }
 }
 
+/* Loading progress bar */
+@keyframes loadingProgress {
+  0% { width: 0%; margin-left: 0%; }
+  50% { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
 /* ===== 通用 entrance 动画类 ===== */
 .anim-fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-fade-in-up { animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }

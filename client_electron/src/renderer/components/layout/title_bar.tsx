@@ -1,7 +1,7 @@
 /**
  * 文件名: title_bar.tsx
  * 作者: wuhao
- * 日期: 2026-04-23 22:00:00
+ * 日期: 2026-04-24 00:10:00
  * 描述: TRAI 桌面客户端 Win11 风格自定义标题栏，支持主题切换、日志查看与国际化
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react'
@@ -133,8 +133,8 @@ const TitleBar: React.FC = () => {
             color: 'var(--ui_text_muted)',
             transition: 'all var(--ui_transition_fast)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
@@ -161,8 +161,8 @@ const TitleBar: React.FC = () => {
               fontSize: '12px',
               fontWeight: 500,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
           >
             <Globe size={13} />
             <span style={{ fontSize: '11px' }}>{locale === 'zh' ? '中文' : 'EN'}</span>
@@ -243,8 +243,8 @@ const TitleBar: React.FC = () => {
             color: 'var(--ui_text_muted)',
             transition: 'all var(--ui_transition_fast)',
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           <RotateCw size={14} />
         </button>
@@ -268,8 +268,8 @@ const TitleBar: React.FC = () => {
               color: show_logs ? 'var(--ui_accent)' : 'var(--ui_text_muted)',
               transition: 'all var(--ui_transition_fast)',
             }}
-            onMouseEnter={(e) => { if (!show_logs) { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' } }}
-            onMouseLeave={(e) => { if (!show_logs) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' } }}
+            onMouseEnter={(e) => { if (!show_logs) { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' } }}
+            onMouseLeave={(e) => { if (!show_logs) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' } }}
           >
             <FileText size={14} />
             {logs.length > 0 && (

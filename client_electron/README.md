@@ -49,6 +49,12 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_24_0010
+- **perf(sidebar)**: 添加导航项活跃指示器条与错落下沉入场动画
+- **perf(title_bar)**: 增强按钮悬停效果 — 上浮与阴影过渡
+- **perf(app)**: 优化加载页面 — 进度条动画替代圆点指示器
+- **perf(animation)**: 新增 loadingProgress 动画帧
+
 ### 💻 客户端_2026_04_23_2355
 - **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
 - **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入

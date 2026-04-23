@@ -1,7 +1,7 @@
 /**
  * 文件名: app.tsx
  * 作者: wuhao
- * 日期: 2026-04-23 22:05:00
+ * 日期: 2026-04-24 00:10:00
  * 描述: TRAI 桌面客户端根组件，负责初始化配置与自动登录
  */
 import React, { useEffect, useState } from 'react'
@@ -19,7 +19,7 @@ const LoadingScreen: React.FC = () => (
     justifyContent: 'center',
     height: '100vh',
     backgroundColor: 'var(--ui_bg)',
-    gap: '16px',
+    gap: '20px',
   }}>
     {/* Logo */}
     <div style={{
@@ -31,38 +31,35 @@ const LoadingScreen: React.FC = () => (
       alignItems: 'center',
       justifyContent: 'center',
       boxShadow: '0 8px 24px rgba(14, 165, 233, 0.3)',
-      animation: 'fadeInScale 0.4s ease',
+      animation: 'fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
     }}>
       <img src="./kity.png" alt="TRAI" style={{ width: '36px', height: '36px' }} />
     </div>
-    {/* 品牌名 */}
-    <div style={{ animation: 'fadeIn 0.4s ease 0.1s both' }}>
-      <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--ui_text)', letterSpacing: '0.1em' }}>TRAI</span>
+    {/* Brand */}
+    <div style={{ animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both' }}>
+      <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--ui_text)', letterSpacing: '0.15em' }}>TRAI</span>
     </div>
-    {/* 加载指示器 */}
+    {/* Progress bar */}
     <div style={{
-      display: 'flex',
-      gap: '6px',
-      animation: 'fadeIn 0.4s ease 0.2s both',
+      width: '120px',
+      height: '3px',
+      backgroundColor: 'var(--ui_border)',
+      borderRadius: '2px',
+      overflow: 'hidden',
+      animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both',
     }}>
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--ui_accent)',
-            animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }}
-        />
-      ))}
+      <div style={{
+        height: '100%',
+        backgroundColor: 'var(--ui_accent)',
+        borderRadius: '2px',
+        animation: 'loadingProgress 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+      }} />
     </div>
-    {/* 加载文字 */}
+    {/* Loading text */}
     <div style={{
       fontSize: '13px',
       color: 'var(--ui_text_muted)',
-      animation: 'fadeIn 0.4s ease 0.3s both',
+      animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both',
     }}>
       {t('loading')}
     </div>
