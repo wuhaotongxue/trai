@@ -65,6 +65,10 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 前端_2026_04_23_2110
+- **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
+- **规范(skill)**: 修复 admin 仪表盘 page.tsx 缺少规范文件头的问题
+
 ### 🎨 前端_2026_04_22_1515
 - **feat(agent)**: Agent 页面重构, 引入 DeepSeek 风格左侧侧边栏, 支持多会话切换与历史管理
 - **feat(agent)**: 对话框支持会话重命名、删除及一键开启新对话

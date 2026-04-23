@@ -2,7 +2,7 @@
  * 文件名: dialog.tsx
  * 作者: wuhao
  * 日期: 2026-04-14 09:00:53
- * 描述: dialog.tsx 的页面或组件实现
+ * 描述: 基于 Base UI 的可访问对话框组件，封装 Dialog 常见子组件
  */
 "use client"
 
