@@ -470,9 +470,9 @@ const MediaPlayerPage: React.FC = () => {
           }}
         >
           {item.type === 'audio' ? (
-            <Music size={16} style={{ marginRight: '8px' }}
+            <Music size={16} style={{ marginRight: '8px' }} />
           ) : (
-            <Film size={16} style={{ marginRight: '8px' }}
+            <Film size={16} style={{ marginRight: '8px' }} />
           )}
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <div style={{ fontSize: '13px', fontWeight: is_current ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
