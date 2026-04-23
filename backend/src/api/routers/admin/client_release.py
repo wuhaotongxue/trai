@@ -13,9 +13,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import AdminUser, CurrentUser
 from core.logger import get_logger
-from infrastructure.database import get_session
+from infrastructure.database import get_db_session, get_session
 from infrastructure.database.models import ClientReleaseModel
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -199,7 +199,7 @@ async def release_client(
         db.close()
 
 
-@router.post(
+@router.get(
     "/sessions/grouped",
     response_model=SessionGroupedResponse,
     tags=["管理后台"],
@@ -207,7 +207,7 @@ async def release_client(
     description="获取所有用户的会话统计信息, 用于管理后台会话记录页面.",
 )
 async def get_sessions_grouped_by_user(
-    current_user: CurrentUser,
+    current_user: AdminUser,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> SessionGroupedResponse:
     """获取所有用户的会话统计信息

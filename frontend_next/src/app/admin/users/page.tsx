@@ -180,9 +180,13 @@ export default function UsersPage() {
                       <tr key={user.user_id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                              {user.display_name ? user.display_name[0].toUpperCase() : "U"}
-                            </div>
+                            {user.avatar_url ? (
+                              <img src={user.avatar_url} alt={user.display_name} className="h-8 w-8 rounded-full object-cover flex-shrink-0 border border-border" referrerpolicy="no-referrer" />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                {user.display_name ? user.display_name[0].toUpperCase() : "U"}
+                              </div>
+                            )}
                             <div>
                               <div className="font-medium text-foreground">{user.display_name || user.username}</div>
                               <div className="text-xs text-muted-foreground mt-0.5">{user.email || user.username}</div>

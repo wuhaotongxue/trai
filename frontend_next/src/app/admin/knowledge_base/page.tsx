@@ -8,11 +8,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, Database, Plus, RefreshCw, FolderOpen, AlertCircle, FileText } from "lucide-react";
+import { Search, Database, Plus, RefreshCw, FolderOpen, AlertCircle, FileText, X, Trash2, Upload, FileUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request } from "@/lib/api_client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface KnowledgeBase {
   id: string;
@@ -22,11 +23,31 @@ interface KnowledgeBase {
   createdAt?: string;
 }
 
+interface KBFile {
+  id: string;
+  name: string;
+  status: string;
+  size?: number;
+  createdAt?: string;
+}
+
 export default function KnowledgeBasePage() {
   const [indices, setIndices] = useState<KnowledgeBase[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
+
+  // 文档管理弹窗状态
+  const [manageDialogOpen, setManageDialogOpen] = useState(false);
+  const [selectedKB, setSelectedKB] = useState<KnowledgeBase | null>(null);
+  const [files, setFiles] = useState<KBFile[]>([]);
+  const [filesLoading, setFilesLoading] = useState(false);
+
+  // 上传状态
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadContent, setUploadContent] = useState("");
+  const [uploadFileName, setUploadFileName] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const fetchIndices = useCallback(async () => {
     setLoading(true);
@@ -52,6 +73,79 @@ export default function KnowledgeBasePage() {
     fetchIndices();
   }, [fetchIndices]);
 
+  const fetchFiles = async (kbId: string) => {
+    setFilesLoading(true);
+    try {
+      const res = await request<{ items: any[] }>(`/admin/knowledge_base/indices/${kbId}/files`, {
+        method: "GET",
+      });
+      const formattedFiles = (res.items || []).map(item => ({
+        id: item.Id || item.id || item.FileId,
+        name: item.Name || item.name || item.FileName,
+        status: item.Status || item.status,
+        size: item.Size || item.size,
+        createdAt: item.CreatedAt || item.createdAt
+      }));
+      setFiles(formattedFiles);
+    } catch (err) {
+      console.error("Fetch files failed", err);
+    } finally {
+      setFilesLoading(false);
+    }
+  };
+
+  const handleManageDocs = (kb: KnowledgeBase) => {
+    setSelectedKB(kb);
+    setManageDialogOpen(true);
+    fetchFiles(kb.id);
+  };
+
+  const handleDeleteFile = async (fileId: string) => {
+    if (!selectedKB || !confirm("确定要删除该文档吗？")) return;
+    try {
+      await request(`/admin/knowledge_base/indices/${selectedKB.id}/files/${fileId}`, {
+        method: "DELETE"
+      });
+      fetchFiles(selectedKB.id);
+    } catch (err) {
+      alert("删除失败");
+    }
+  };
+
+  const handleUploadText = async () => {
+    if (!selectedKB || !uploadContent || !uploadFileName) return;
+    setUploading(true);
+    try {
+      await request(`/admin/knowledge_base/indices/${selectedKB.id}/files/upload_text`, {
+        method: "POST",
+        body: JSON.stringify({
+          content: uploadContent,
+          file_name: uploadFileName.endsWith(".md") ? uploadFileName : `${uploadFileName}.md`
+        })
+      });
+      setUploadDialogOpen(false);
+      setUploadContent("");
+      setUploadFileName("");
+      fetchFiles(selectedKB.id);
+    } catch (err) {
+      alert("上传失败");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteIndex = async (kbId: string) => {
+    if (!confirm("确定要删除整个知识库吗？此操作不可撤销。")) return;
+    try {
+      await request(`/admin/knowledge_base/indices/${kbId}`, {
+        method: "DELETE"
+      });
+      fetchIndices();
+    } catch (err) {
+      alert("删除知识库失败");
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -64,7 +158,7 @@ export default function KnowledgeBasePage() {
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             刷新
           </Button>
-          <Button className="h-9 gap-2 shadow-sm">
+          <Button className="h-9 gap-2 shadow-sm" onClick={() => alert("功能开发中...")}>
             <Plus className="h-4 w-4" />
             新建知识库
           </Button>
@@ -133,6 +227,7 @@ export default function KnowledgeBasePage() {
                     const docCount = idx.documentCount || idx.DocumentCount || 0;
                     
                     if (!id) return null; // 过滤无效数据
+                    const kb: KnowledgeBase = { id, name, status, documentCount: docCount };
 
                     return (
                       <tr key={id} className="hover:bg-muted/30 transition-colors">
@@ -148,8 +243,8 @@ export default function KnowledgeBasePage() {
                         </td>
                         <td className="px-6 py-4 text-muted-foreground">{docCount}</td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <Button variant="ghost" size="sm" className="h-8 text-indigo-600">管理文档</Button>
-                          <Button variant="ghost" size="sm" className="h-8 text-red-600">删除</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-indigo-600" onClick={() => handleManageDocs(kb)}>管理文档</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteIndex(id)}>删除</Button>
                         </td>
                       </tr>
                     );
@@ -160,6 +255,103 @@ export default function KnowledgeBasePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 文档管理弹窗 */}
+      <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-indigo-500" />
+              文档管理 - {selectedKB?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">管理该知识库下的所有已同步文档</p>
+              <Button size="sm" className="gap-2" onClick={() => setUploadDialogOpen(true)}>
+                <Upload className="h-4 w-4" />
+                上传文本
+              </Button>
+            </div>
+            
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">文件名</th>
+                    <th className="px-4 py-3 font-medium">状态</th>
+                    <th className="px-4 py-3 font-medium text-right">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {filesLoading ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">加载中...</td>
+                    </tr>
+                  ) : files.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">暂无文档</td>
+                    </tr>
+                  ) : (
+                    files.map(file => (
+                      <tr key={file.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3 font-medium truncate max-w-[300px]">{file.name}</td>
+                        <td className="px-4 py-3">
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${file.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {file.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button variant="ghost" size="sm" className="h-7 text-red-500" onClick={() => handleDeleteFile(file.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 上传文本弹窗 */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileUp className="h-5 w-5 text-indigo-500" />
+              上传 Markdown 文本
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">文件名</label>
+              <Input 
+                placeholder="例如: 产品手册.md" 
+                value={uploadFileName}
+                onChange={(e) => setUploadFileName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">文本内容 (Markdown)</label>
+              <textarea
+                className="w-full h-64 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="请输入要上传的 Markdown 内容..."
+                value={uploadContent}
+                onChange={(e) => setUploadContent(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>取消</Button>
+            <Button onClick={handleUploadText} disabled={uploading || !uploadContent || !uploadFileName}>
+              {uploading ? "上传中..." : "开始上传"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

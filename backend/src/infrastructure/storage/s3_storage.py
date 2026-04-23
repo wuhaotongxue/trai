@@ -156,5 +156,32 @@ class S3StorageService:
             return f"{self._public_domain}/{object_key}"
         return f"{self._endpoint}/{self._bucket}/{object_key}"
 
+    def list_objects(self, prefix: str = "") -> list[dict[str, Any]]:
+        """获取对象列表
+
+        Args:
+            prefix: 前缀过滤
+
+        Returns:
+            list[dict]: 对象信息列表
+        """
+        try:
+            response = self._client.list_objects_v2(Bucket=self._bucket, Prefix=prefix)
+            if "Contents" not in response:
+                return []
+            
+            return [
+                {
+                    "key": item["Key"],
+                    "size": item["Size"],
+                    "last_modified": item["LastModified"].isoformat(),
+                    "url": self.get_presigned_url(item["Key"], 3600)
+                }
+                for item in response["Contents"]
+            ]
+        except ClientError as e:
+            logger.error(f"S3 列表获取失败 | 错误: {str(e)}")
+            return []
+
 
 __all__ = ["S3StorageService"]
