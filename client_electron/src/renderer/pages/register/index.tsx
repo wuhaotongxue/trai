@@ -1,12 +1,12 @@
 /**
  * 文件名: index.tsx
  * 作者: wuhao
- * 日期: 2026-04-23 21:50:00
+ * 日期: 2026-04-24 00:15:00
  * 描述: TRAI 桌面客户端注册页面，支持多语言、国际风格与深色主题
  */
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Eye, EyeOff } from 'lucide-react'
 import TitleBar from '@/components/layout/title_bar'
 import { t } from '@/i18n'
 
@@ -17,7 +17,13 @@ const Register: React.FC = () => {
   const [confirm_password, set_confirm_password] = useState('')
   const [error_msg, set_error_msg] = useState('')
   const [is_registering, set_is_registering] = useState(false)
+  const [pwd_visible, set_pwd_visible] = useState(false)
+  const [confirm_pwd_visible, set_confirm_pwd_visible] = useState(false)
   const navigate = useNavigate()
+
+  const pwd_strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
+  const strength_labels = ['', '弱', '中等', '强']
+  const strength_colors = ['', '#ef4444', '#f59e0b', '#22c55e']
 
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -234,54 +240,107 @@ const Register: React.FC = () => {
                 <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500 }}>
                   {t('password')}
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => set_password(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 14px',
-                    borderRadius: 'var(--ui_radius_md)',
-                    border: '1px solid var(--ui_border)',
-                    backgroundColor: 'var(--ui_panel)',
-                    color: 'var(--ui_text)',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    fontSize: '14px',
-                    transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                  onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)'; e.target.style.transform = 'translateY(-1px)' }}
-                  onBlur={(e) => { e.target.style.borderColor = 'var(--ui_border)'; e.target.style.boxShadow = 'none'; e.target.style.transform = 'translateY(0)' }}
-                  placeholder={t('enter_password')}
-                  autoComplete="new-password"
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={pwd_visible ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => set_password(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 42px 11px 14px',
+                      borderRadius: 'var(--ui_radius_md)',
+                      border: '1px solid var(--ui_border)',
+                      backgroundColor: 'var(--ui_panel)',
+                      color: 'var(--ui_text)',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                      fontSize: '14px',
+                      transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)'; e.target.style.transform = 'translateY(-1px)' }}
+                    onBlur={(e) => { e.target.style.borderColor = 'var(--ui_border)'; e.target.style.boxShadow = 'none'; e.target.style.transform = 'translateY(0)' }}
+                    placeholder={t('enter_password')}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => set_pwd_visible((v) => !v)}
+                    style={{
+                      position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)',
+                      background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
+                      color: 'var(--ui_text_muted)', display: 'flex', alignItems: 'center',
+                      transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ui_accent)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+                  >
+                    {pwd_visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {password.length > 0 && (
+                  <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+                      {[1, 2, 3].map(level => (
+                        <div key={level} style={{
+                          flex: 1, height: '3px', borderRadius: '2px',
+                          backgroundColor: level <= pwd_strength ? strength_colors[pwd_strength] : 'var(--ui_border)',
+                          transition: 'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }} />
+                      ))}
+                    </div>
+                    <span style={{ fontSize: '12px', color: strength_colors[pwd_strength], fontWeight: 500 }}>
+                      {strength_labels[pwd_strength]}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div style={{ animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
                 <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500 }}>
                   {t('confirm_password')}
                 </label>
-                <input
-                  type="password"
-                  value={confirm_password}
-                  onChange={(e) => set_confirm_password(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 14px',
-                    borderRadius: 'var(--ui_radius_md)',
-                    border: '1px solid var(--ui_border)',
-                    backgroundColor: 'var(--ui_panel)',
-                    color: 'var(--ui_text)',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    fontSize: '14px',
-                    transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                  onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)'; e.target.style.transform = 'translateY(-1px)' }}
-                  onBlur={(e) => { e.target.style.borderColor = 'var(--ui_border)'; e.target.style.boxShadow = 'none'; e.target.style.transform = 'translateY(0)' }}
-                  placeholder={t('reenter_password')}
-                  autoComplete="new-password"
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={confirm_pwd_visible ? 'text' : 'password'}
+                    value={confirm_password}
+                    onChange={(e) => set_confirm_password(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '11px 42px 11px 14px',
+                      borderRadius: 'var(--ui_radius_md)',
+                      border: `1px solid ${confirm_password && password !== confirm_password ? 'var(--ui_danger)' : 'var(--ui_border)'}`,
+                      backgroundColor: 'var(--ui_panel)',
+                      color: 'var(--ui_text)',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                      fontSize: '14px',
+                      transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)'; e.target.style.transform = 'translateY(-1px)' }}
+                    onBlur={(e) => { e.target.style.borderColor = confirm_password && password !== confirm_password ? 'var(--ui_danger)' : 'var(--ui_border)'; e.target.style.boxShadow = 'none'; e.target.style.transform = 'translateY(0)' }}
+                    placeholder={t('reenter_password')}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => set_confirm_pwd_visible((v) => !v)}
+                    style={{
+                      position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)',
+                      background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
+                      color: 'var(--ui_text_muted)', display: 'flex', alignItems: 'center',
+                      transition: 'color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ui_accent)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}
+                  >
+                    {confirm_pwd_visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {confirm_password && password !== confirm_password && (
+                  <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--ui_danger)', animation: 'fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                    两次密码不一致
+                  </div>
+                )}
               </div>
 
               {error_msg && (

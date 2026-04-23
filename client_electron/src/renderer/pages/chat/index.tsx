@@ -1,7 +1,7 @@
 /**
  * 文件名: index.tsx
  * 作者: wuhao
- * 日期: 2026-04-23 23:55:00
+ * 日期: 2026-04-24 00:15:00
  * 描述: 客户端 Agent 对话测试页面(支持展示思维链)
  */
 import React, { useState, useRef, useEffect } from 'react'
@@ -350,8 +350,64 @@ const AgentChat: React.FC = () => {
               minWidth: 0, backgroundColor: 'var(--ui_bg)',
             }}>
               {messages.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)', marginTop: '40px', fontSize: '14px' }}>
-                  尝试询问:"今天北京天气怎么样?" 来测试天气工具和思维链.
+                <div style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: '24px', marginTop: '48px', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}>
+                  <div style={{
+                    width: '64px', height: '64px', borderRadius: '16px',
+                    background: 'linear-gradient(135deg, var(--ui_accent), #0284c7)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 8px 24px rgba(14, 165, 233, 0.25)',
+                    animation: 'subtleBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both',
+                  }}>
+                    <MessageSquare size={28} color="white" />
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ color: 'var(--ui_text)', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+                      开始与 AI 对话
+                    </div>
+                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '13px', lineHeight: 1.6 }}>
+                      试试这样问：<span style={{ color: 'var(--ui_accent)', fontWeight: 500 }}>今天北京天气怎么样？</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
+                    {[
+                      '帮我写一段 Python 代码',
+                      '解释一下什么是机器学习',
+                      '推荐几本好书',
+                    ].map((tip, ti) => (
+                      <button
+                        key={ti}
+                        type="button"
+                        onClick={() => set_input(tip)}
+                        style={{
+                          padding: '6px 14px',
+                          backgroundColor: 'var(--ui_panel)',
+                          border: '1px solid var(--ui_border)',
+                          borderRadius: '20px',
+                          color: 'var(--ui_text_secondary)',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--ui_accent_light)'
+                          e.currentTarget.style.borderColor = 'var(--ui_accent)'
+                          e.currentTarget.style.color = 'var(--ui_accent)'
+                          e.currentTarget.style.transform = 'translateY(-2px)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--ui_panel)'
+                          e.currentTarget.style.borderColor = 'var(--ui_border)'
+                          e.currentTarget.style.color = 'var(--ui_text_secondary)'
+                          e.currentTarget.style.transform = 'translateY(0)'
+                        }}
+                      >
+                        {tip}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 messages.map((msg, idx) => (
