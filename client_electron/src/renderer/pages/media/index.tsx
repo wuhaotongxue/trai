@@ -443,10 +443,12 @@ const MediaPlayerPage: React.FC = () => {
       leftPanelDefaultOpen={true}
       contentPadding={0}
     >
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div 
+        ref={player_ref} 
+        style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      >
         {/* 播放区域 */}
         <div 
-          ref={player_ref} 
           style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--ui_panel_alt)' }}
           onDoubleClick={handle_fullscreen_toggle}
         >
@@ -474,7 +476,7 @@ const MediaPlayerPage: React.FC = () => {
                 onTimeUpdate={(e) => handle_time_update(e.currentTarget.currentTime)}
                 onEnded={handle_ended}
                 onLoadedMetadata={(e) => handle_metadata_loaded(e.currentTarget.duration)}
-                style={{ maxWidth: '100%', maxHeight: '100%' }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
               />
             )
           ) : (
@@ -490,7 +492,9 @@ const MediaPlayerPage: React.FC = () => {
         <div style={{
           padding: '16px',
           borderTop: '1px solid var(--ui_border)',
-          backgroundColor: 'var(--ui_panel)'
+          backgroundColor: 'var(--ui_panel)',
+          zIndex: 10,
+          position: 'relative'
         }}>
           {/* 进度条 */}
           <div style={{ marginBottom: '16px' }}>
