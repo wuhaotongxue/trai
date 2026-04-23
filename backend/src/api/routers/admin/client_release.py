@@ -209,6 +209,8 @@ async def release_client(
 async def get_sessions_grouped_by_user(
     current_user: AdminUser,
     session: Annotated[Session, Depends(get_db_session)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionGroupedResponse:
     """获取所有用户的会话统计信息
 
@@ -270,4 +272,10 @@ async def get_sessions_grouped_by_user(
         for uid, stats in user_stats.items()
     ]
 
-    return SessionGroupedResponse(total=len(items), sessions=items)
+    # 应用分页
+    total_items = len(items)
+    start_idx = offset
+    end_idx = offset + limit
+    paginated_items = items[start_idx:end_idx]
+
+    return SessionGroupedResponse(total=total_items, sessions=paginated_items)
