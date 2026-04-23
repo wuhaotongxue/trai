@@ -4,8 +4,9 @@
  * 日期: 2026-04-14 15:30:00
  * 描述: 专属知识库管理页面, 支持新建知识库与上传文件 (三段式折叠布局)
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeftOpen, List, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { Database, Plus, UploadCloud, FileText, X, Search, Loader2, Trash2, Folder, PanelLeftClose, PanelLeftOpen, List as ListIcon, Edit2, FolderInput, BookOpen, RotateCw } from 'lucide-react'
+import { List } from 'react-window'
 import { use_auth_store } from '@/store/auth'
 import '../../styles/knowledge_base.css'
 
@@ -83,23 +84,25 @@ const KnowledgeBasePage: React.FC = () => {
   const [edit_cat_name, set_edit_cat_name] = useState('')
 
   const file_input_ref = useRef<HTMLInputElement>(null)
+  const list_container_ref = useRef<HTMLDivElement>(null)
+  const [list_height, set_list_height] = useState(300)
   
   // 自定义弹框辅助函数
-  const show_alert = (title: string, message: string) => {
+  const show_alert = useCallback((title: string, message: string) => {
     set_custom_modal_title(title)
     set_custom_modal_message(message)
     set_custom_modal_type('alert')
     set_custom_modal_callback(null)
     set_show_custom_modal(true)
-  }
+  }, [])
   
-  const show_confirm = (title: string, message: string, callback: () => void) => {
+  const show_confirm = useCallback((title: string, message: string, callback: () => void) => {
     set_custom_modal_title(title)
     set_custom_modal_message(message)
     set_custom_modal_type('confirm')
     set_custom_modal_callback(() => callback)
     set_show_custom_modal(true)
-  }
+  }, [])
 
   const display_files = useMemo(() => {
     const q = search_query.trim().toLowerCase()
@@ -228,7 +231,7 @@ const KnowledgeBasePage: React.FC = () => {
    * 异常:
    * - 不抛出异常到调用方, 统一转为 files_error 与 debug 输出
    */
-  const fetch_files_page = async (target_page: number, page_size_override?: number) => {
+  const fetch_files_page = useCallback(async (target_page: number, page_size_override?: number) => {
     if (!active_kb_id) return
     if (!window.electron_api?.kb_list_index_files) return
 
@@ -316,7 +319,7 @@ const KnowledgeBasePage: React.FC = () => {
     } finally {
       set_files_loading(false)
     }
-  }
+  }, [active_kb_id, file_page_size, file_total, kb_list])
 
   /**
    * 发起分页动作请求并维护加载态.
@@ -333,7 +336,7 @@ const KnowledgeBasePage: React.FC = () => {
    * 返回:
    * - Promise<void>
    */
-  const request_files_page = async (
+  const request_files_page = useCallback(async (
     target_page: number,
     action: 'prev' | 'next' | 'jump' | 'refresh' | 'init',
     page_size_override?: number
@@ -345,11 +348,38 @@ const KnowledgeBasePage: React.FC = () => {
     } finally {
       set_page_action(null)
     }
-  }
+  }, [fetch_files_page, files_loading])
 
   useEffect(() => {
     void request_files_page(1, 'init')
   }, [active_kb_id, file_page_size])
+
+  // 监听容器高度变化，动态设置列表高度
+  useEffect(() => {
+    const updateListHeight = () => {
+      if (list_container_ref.current) {
+        const container = list_container_ref.current
+        const rect = container.getBoundingClientRect()
+        // 减去分页栏的高度（约60px）
+        const height = Math.max(200, rect.height - 60)
+        set_list_height(height)
+      }
+    }
+
+    // 初始设置高度
+    updateListHeight()
+
+    // 使用ResizeObserver监听容器大小变化
+    const observer = new ResizeObserver(updateListHeight)
+    if (list_container_ref.current) {
+      observer.observe(list_container_ref.current)
+    }
+
+    // 清理函数
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   /**
    * 刷新当前页文件列表.
@@ -357,12 +387,12 @@ const KnowledgeBasePage: React.FC = () => {
    * 返回:
    * - Promise<void>
    */
-  const refresh_files = async () => {
+  const refresh_files = useCallback(async () => {
     await request_files_page(file_current_page, 'refresh')
-  }
+  }, [file_current_page, request_files_page])
 
   // -- Handlers --
-  const handle_create_cat = () => {
+  const handle_create_cat = useCallback(() => {
     if (!new_cat_name.trim()) return
     const new_cat: KbCategory = {
       id: `cat_${Date.now()}`,
@@ -372,9 +402,9 @@ const KnowledgeBasePage: React.FC = () => {
     set_active_cat_id(new_cat.id)
     set_show_cat_modal(false)
     set_new_cat_name('')
-  }
+  }, [new_cat_name])
 
-  const handle_create_kb = async () => {
+  const handle_create_kb = useCallback(async () => {
     const name = new_kb_name.trim()
     const create_cat_id = active_cat_id || categories[0]?.id || 'default'
     if (!name || !create_cat_id) return
@@ -411,9 +441,9 @@ const KnowledgeBasePage: React.FC = () => {
     } finally {
       set_creating_kb(false)
     }
-  }
+  }, [new_kb_name, active_cat_id, categories])
 
-  const handle_file_upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handle_file_upload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected_files = Array.from(e.target.files || [])
     if (selected_files.length === 0 || !active_kb_id) return
     if (!window.electron_api?.kb_upload_text) {
@@ -452,9 +482,9 @@ const KnowledgeBasePage: React.FC = () => {
     }
     
     if (e.target) e.target.value = ''
-  }
+  }, [active_kb_id, show_alert, fetch_files_page])
 
-  const handle_delete_file = async (file_id: string) => {
+  const handle_delete_file = useCallback(async (file_id: string) => {
     if (!active_kb_id || !window.electron_api?.kb_delete_index_file) return
     show_confirm('确认删除', '确定要删除该文件吗?', async () => {
       try {
@@ -472,11 +502,11 @@ const KnowledgeBasePage: React.FC = () => {
         show_alert('删除失败', `删除异常: ${e.message}`)
       }
     })
-  }
+  }, [active_kb_id, file_total, file_page_size, file_current_page, show_confirm, show_alert, fetch_files_page])
 
   // (移除了暂不支持的重命名文件和移动文件的方法)
 
-  const handle_rename_kb = async (kb_id: string) => {
+  const handle_rename_kb = useCallback(async (kb_id: string) => {
     if (!edit_kb_name.trim()) return
     if (!window.electron_api?.kb_rename_index) return
     show_confirm('确认重命名', `确认将知识库重命名为 "${edit_kb_name.trim()}" 吗?`, async () => {
@@ -495,9 +525,9 @@ const KnowledgeBasePage: React.FC = () => {
         show_alert('重命名失败', `重命名异常: ${e.message}`)
       }
     })
-  }
+  }, [edit_kb_name, show_confirm, show_alert])
 
-  const handle_delete_kb = async (kb_id: string) => {
+  const handle_delete_kb = useCallback(async (kb_id: string) => {
     if (!window.electron_api?.kb_delete_index) return
     show_confirm('确认删除', '确认要删除该知识库吗? 此操作不可恢复!', async () => {
       try {
@@ -512,35 +542,35 @@ const KnowledgeBasePage: React.FC = () => {
         show_alert('删除失败', `删除异常: ${e.message}`)
       }
     })
-  }
+  }, [active_kb_id, show_confirm, show_alert])
 
-  const handle_move_kb = (kb_id: string) => {
+  const handle_move_kb = useCallback((kb_id: string) => {
     set_moving_kb_id(kb_id)
     const kb = kb_list.find(k => k.id === kb_id)
     if (kb) {
       set_target_cat_id(kb.category_id)
     }
-  }
+  }, [kb_list])
 
-  const confirm_move_kb = () => {
+  const confirm_move_kb = useCallback(() => {
     if (!moving_kb_id || !target_cat_id) return
     set_kb_list(prev => prev.map(kb => 
       kb.id === moving_kb_id ? { ...kb, category_id: target_cat_id } : kb
     ))
     set_moving_kb_id(null)
     set_target_cat_id('')
-  }
+  }, [moving_kb_id, target_cat_id])
 
   // 分类操作
-  const handle_rename_cat = (cat_id: string) => {
+  const handle_rename_cat = useCallback((cat_id: string) => {
     const cat = categories.find(c => c.id === cat_id)
     if (cat) {
       set_editing_cat_id(cat_id)
       set_edit_cat_name(cat.name)
     }
-  }
+  }, [categories])
 
-  const confirm_rename_cat = () => {
+  const confirm_rename_cat = useCallback(() => {
     if (!editing_cat_id || !edit_cat_name.trim()) {
       set_editing_cat_id(null)
       return
@@ -550,9 +580,9 @@ const KnowledgeBasePage: React.FC = () => {
     ))
     set_editing_cat_id(null)
     set_edit_cat_name('')
-  }
+  }, [editing_cat_id, edit_cat_name])
 
-  const handle_delete_cat = (cat_id: string) => {
+  const handle_delete_cat = useCallback((cat_id: string) => {
     // 检查是否是默认分类
     if (cat_id === 'default') {
       show_alert('无法删除', '默认分类不能删除')
@@ -589,7 +619,7 @@ const KnowledgeBasePage: React.FC = () => {
         }
       )
     }
-  }
+  }, [categories, kb_list, active_cat_id, show_alert, show_confirm])
 
   // (移除了暂不支持的移动知识库的方法)
 
@@ -869,7 +899,7 @@ const KnowledgeBasePage: React.FC = () => {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
-              <List size={18} />
+              <ListIcon size={18} />
             </button>
           </div>
           
@@ -1035,7 +1065,7 @@ const KnowledgeBasePage: React.FC = () => {
                       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <List size={18} />
+                      <ListIcon size={18} />
                     </button>
                     </>
                   )}
@@ -1134,45 +1164,17 @@ const KnowledgeBasePage: React.FC = () => {
                     <p style={{ fontSize: '13px', color: '#cbd5e1' }}>点击右上角上传文件, 支持 PDF, Word, TXT 等格式</p>
                   </div>
                 ) : (
-                  <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                    <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: 'var(--ui_panel_alt)', borderBottom: '1px solid var(--ui_border)' }}>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)' }}>文件名称</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '120px' }}>大小</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '160px' }}>上传时间</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '100px' }}>状态</th>
-                          <th style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '80px', textAlign: 'right' }}>操作</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {display_files.map(file => (
-                          <tr key={file.id} style={{ borderBottom: '1px solid var(--ui_border)' }}>
-                            <td style={{ padding: '12px 16px', width: '100%', minWidth: 0 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                                <FileText size={16} color="var(--ui_accent)" style={{ flexShrink: 0 }} />
-                                <span style={{ fontSize: '14px', color: 'var(--ui_text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{file.name}</span>
-                              </div>
-                            </td>
-                            <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)' }}>{file.size}</td>
-                            <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)', whiteSpace: 'nowrap' }}>{file.upload_time}</td>
-                            <td style={{ padding: '12px 16px' }}>
-                              {file.status === 'success' ? (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_success)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
-                              ) : (
-                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_accent)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
-                              )}
-                            </td>
-                            <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                <button type="button" onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ui_danger)', padding: '4px', borderRadius: '4px' }} title="删除" aria-label="删除文件" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      </table>
+                  <div ref={list_container_ref} style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderBottom: '1px solid var(--ui_border)' }}>
+                      <div style={{ display: 'flex', width: '100%' }}>
+                        <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', flex: 1 }}>文件名称</div>
+                        <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '120px' }}>大小</div>
+                        <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '160px' }}>上传时间</div>
+                        <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '100px' }}>状态</div>
+                        <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: 500, color: 'var(--ui_text_muted)', width: '80px', textAlign: 'right' }}>操作</div>
+                      </div>
+                    </div>
+                    <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
                       {files_loading ? (
                         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: 'var(--ui_panel)', border: '1px solid var(--ui_border)', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
@@ -1181,6 +1183,47 @@ const KnowledgeBasePage: React.FC = () => {
                           </div>
                         </div>
                       ) : null}
+                      <List
+                        rowCount={display_files.length}
+                        rowHeight={50}
+                        rowProps={{}}
+                        style={{ height: list_height }}
+                        rowComponent={({ index, style }) => {
+                          const file = display_files[index]
+                          return (
+                            <div
+                              key={file.id}
+                              style={{
+                                ...style,
+                                borderBottom: '1px solid var(--ui_border)',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <div style={{ padding: '12px 16px', width: '100%', minWidth: 0, flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                  <FileText size={16} color="var(--ui_accent)" style={{ flexShrink: 0 }} />
+                                  <span style={{ fontSize: '14px', color: 'var(--ui_text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{file.name}</span>
+                                </div>
+                              </div>
+                              <div style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)', width: '120px' }}>{file.size}</div>
+                              <div style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--ui_text_muted)', whiteSpace: 'nowrap', width: '160px' }}>{file.upload_time}</div>
+                              <div style={{ padding: '12px 16px', width: '100px' }}>
+                                {file.status === 'success' ? (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_success)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
+                                ) : (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_accent)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
+                                )}
+                              </div>
+                              <div style={{ padding: '12px 16px', textAlign: 'right', width: '80px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                  <button type="button" onClick={() => handle_delete_file(file.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ui_danger)', padding: '4px', borderRadius: '4px' }} title="删除" aria-label="删除文件" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_border)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}><Trash2 size={16} /></button>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }}
+                      />
                     </div>
                     <div style={{ padding: '12px 16px', borderTop: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

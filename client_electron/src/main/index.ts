@@ -113,6 +113,10 @@ if (!got_the_lock) {
 
   main_window.webContents.on('did-finish-load', () => {
     log.info('window did-finish-load')
+    // 延迟初始化更新服务，提高启动速度
+    setTimeout(() => {
+      new UpdateService()
+    }, 1000)
   })
 
   // 拦截关闭事件, 转为隐藏窗口或退出程序
@@ -225,9 +229,6 @@ app.whenReady().then(() => {
   register_ipc_handlers()
   create_window()
   create_tray()
-
-  // 初始化更新服务
-  new UpdateService()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
