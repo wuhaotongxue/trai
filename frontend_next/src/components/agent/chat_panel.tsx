@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, ArrowDown } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, ArrowDown, Sparkles, Video, Music } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -21,6 +21,9 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function ChatPanel() {
+  const [activeTab, setActiveTab] = useState<"chat" | "image" | "video" | "music">("chat");
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const {
     messages,
     isStreaming,
@@ -105,6 +108,25 @@ export function ChatPanel() {
 
   return (
     <div className="flex flex-col h-full relative">
+      <div className="flex items-center gap-1 p-1 bg-muted/30 border-b overflow-x-auto no-scrollbar">
+        {[
+          { id: "chat", label: "对话", icon: Bot, color: "text-blue-500" },
+          { id: "image", label: "绘图", icon: ImageIcon, color: "text-emerald-500" },
+          { id: "video", label: "视频", icon: Video, color: "text-orange-500" },
+          { id: "music", label: "音乐", icon: Music, color: "text-purple-500" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              activeTab === tab.id ? "bg-white dark:bg-slate-800 shadow-sm text-foreground" : "text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            <tab.icon className={`h-3.5 w-3.5 ${tab.color}`} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
       <ScrollArea className="flex-1 px-4 py-6">
         <div ref={topRef} />
         {messages.length === 0 && (
@@ -112,12 +134,25 @@ export function ChatPanel() {
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10">
               <Bot className="h-10 w-10 text-blue-500 dark:text-blue-400" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">开始对话</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">
+              {activeTab === "chat" ? "开始对话" : 
+               activeTab === "image" ? "AI 创意绘图" : 
+               activeTab === "video" ? "AI 视频合成" : "AI 音乐创作"}
+            </h2>
             <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-              输入消息与 AI 助手对话, 支持上传图片（Vision 多模态）和调用工具. 试试发送「北京天气怎么样? 」
+              {activeTab === "chat" ? "输入消息与 AI 助手对话, 支持上传图片（Vision 多模态）和调用工具. " : 
+               activeTab === "image" ? "描述你想要的画面, AI 将为你生成精美的图像. 支持 Stable Diffusion 和 Flux 模型. " : 
+               activeTab === "video" ? "提供视频描述或参考图, 开启电影级 AI 视频创作. " : "输入歌词或风格描述, 创作属于你的 AI 音乐. "}
             </p>
             <div className="flex flex-wrap gap-2 mt-6 justify-center">
-              {["北京天气怎么样", "帮我翻译 Hello World", "1+1等于多少", "搜索 AI 发展趋势"].map((tip) => (
+              {(activeTab === "chat" 
+                ? ["北京天气怎么样", "帮我翻译 Hello World", "1+1等于多少", "搜索 AI 发展趋势"] 
+                : activeTab === "image" 
+                ? ["赛博朋克风格的猫", "写实风格的山水画", "未来城市的设计图"] 
+                : activeTab === "video" 
+                ? ["波涛汹涌的大海", "宇航员在火星漫步"] 
+                : ["轻快的爵士乐", "抒情的钢琴曲"]
+              ).map((tip) => (
                 <button
                   key={tip}
                   onClick={() => setInput(tip)}

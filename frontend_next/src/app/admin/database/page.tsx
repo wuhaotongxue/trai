@@ -46,7 +46,7 @@ export default function DatabasePage() {
     setLoading(true);
     try {
       const res = await request<BackupInfo[]>("/admin/system/database/backups");
-      setBackups(res.sort((a, b) => b.last_modified.locale_compare(a.last_modified)));
+      setBackups(res.sort((a, b) => b.last_modified.localeCompare(a.last_modified)));
     } catch (e) {
       console.error("Fetch backups failed", e);
     } finally {

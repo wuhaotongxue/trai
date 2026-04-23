@@ -138,6 +138,11 @@ export async function request<T>(
   }
 
   if (!res.ok) {
+    // 处理 4008 请求限流
+    if (res.status === 429 || res.status === 4008) {
+      throw new Error("请求太频繁, 请稍后再试 (4008)");
+    }
+
     const error = await res.json().catch(() => ({ message: res.statusText }));
     const errorMessage = error.detail?.message || error.message || "请求失败";
 

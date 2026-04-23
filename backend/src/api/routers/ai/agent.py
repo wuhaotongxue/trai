@@ -16,6 +16,8 @@ from pydantic import BaseModel, Field
 from api.deps import CurrentUser, CurrentUserOptional
 from core.exceptions import ExternalServiceError
 from infrastructure.agent.executor import AgentExecutor
+from infrastructure.agent.orchestrator.router import Orchestrator
+from api.routers.ai.management import _MOCK_AGENTS
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
@@ -186,11 +188,19 @@ async def agent_chat(
 
     trace_id = str(uuid.uuid4())
 
+    # == Agent 路由分发 ==
+    agent_id = request.agent_id
+    if not agent_id:
+        orchestrator = Orchestrator(_MOCK_AGENTS)
+        agent_id = await orchestrator.dispatch(request.message)
+        from loguru import logger
+        logger.info(f"Agent 自动路由: '{request.message[:20]}...' -> {agent_id}")
+
     context = ExecutionContext(
         user_id=user_id,
         user_role=role,
         session_id=request.session_id,
-        agent_id=request.agent_id,
+        agent_id=agent_id,
         knowledge_base_id=request.knowledge_base_id,
         trace_id=trace_id,
     )

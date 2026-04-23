@@ -375,10 +375,12 @@ def register_routers(app: FastAPI) -> None:
 
     from api.routers import tools
     from api.routers.admin import (
+        ai_mgmt,
         analytics_router,
         backup,
         dashboard_router,
         knowledge_base_router,
+        monitor as admin_monitor,
         organization,
         quota_config_router,
         user_router,
@@ -389,10 +391,10 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.client.update import router as client_update_router
     from api.routers.media import upload
     from api.routers.session import session
-    from api.routers.system import feedback, health, monitor, notify
+    from api.routers.system import feedback, health, monitor as system_monitor, notify
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
-    app.include_router(monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
+    app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(notify.router, prefix=f"{api_prefix}/system", tags=["通知"])
     app.include_router(feedback.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(login.router, prefix=f"{api_prefix}/auth", tags=["认证"])
@@ -409,7 +411,9 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(knowledge_base_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(admin_client_release_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(organization.router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(ai_mgmt.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(backup.router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
+    app.include_router(admin_monitor.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(client_update_router, prefix=f"{api_prefix}/client", tags=["客户端更新"])
     app.include_router(chat.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(image.router, prefix=f"{api_prefix}/ai", tags=["AI"])

@@ -245,15 +245,13 @@ class UserRepository(IUserRepository):
             if mapped:
                 values[mapped] = v
 
-        stmt = (
-            update(UserModel)
-            .where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
-            .values(**values, t_updated_at=datetime.now())
-            .returning(UserModel)
-        )
+        stmt = select(UserModel).where(UserModel.t_user_id == user_id, UserModel.t_deleted_at.is_(None))
         model = self._session.scalar(stmt)
 
         if model:
+            for k, v in values.items():
+                setattr(model, k, v)
+            model.t_updated_at = datetime.now()
             self._session.commit()
             self._session.refresh(model)
             logger.info(f"用户更新成功: {user_id}")
@@ -379,13 +377,13 @@ class UserRepository(IUserRepository):
 
         stmt = select(UserModel).where(UserModel.t_deleted_at.is_(None))
 
-        if tenant_id:
+        if tenant_id is not None:
             stmt = stmt.where(UserModel.t_tenant_id == tenant_id)
-        if role:
+        if role is not None:
             stmt = stmt.where(UserModel.t_role == role)
-        if status:
+        if status is not None:
             stmt = stmt.where(UserModel.t_status == status)
-        if dept_id:
+        if dept_id is not None:
             stmt = stmt.join(
                 UserDepartmentMappingModel,
                 UserDepartmentMappingModel.t_user_id == UserModel.t_user_id,
@@ -427,13 +425,13 @@ class UserRepository(IUserRepository):
 
         stmt = select(func.count(UserModel.t_user_id)).where(UserModel.t_deleted_at.is_(None))
 
-        if tenant_id:
+        if tenant_id is not None:
             stmt = stmt.where(UserModel.t_tenant_id == tenant_id)
-        if role:
+        if role is not None:
             stmt = stmt.where(UserModel.t_role == role)
-        if status:
+        if status is not None:
             stmt = stmt.where(UserModel.t_status == status)
-        if dept_id:
+        if dept_id is not None:
             stmt = stmt.join(
                 UserDepartmentMappingModel,
                 UserDepartmentMappingModel.t_user_id == UserModel.t_user_id,

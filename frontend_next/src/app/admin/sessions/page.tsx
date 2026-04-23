@@ -43,7 +43,7 @@ export default function SessionsPage() {
     setLoading(true);
     try {
       const res = await request<SessionStatsResponse>("/admin/sessions/grouped", {
-        method: "POST",
+        method: "GET",
       });
       setSessions(res.sessions);
       setTotal(res.total);
