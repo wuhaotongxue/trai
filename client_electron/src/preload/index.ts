@@ -48,6 +48,13 @@ contextBridge.exposeInMainWorld('electron_api', {
   app_check_update: () => ipcRenderer.invoke('app:check_update'),
   app_install_update: () => ipcRenderer.invoke('app:install_update'),
   app_get_version: () => ipcRenderer.invoke('app:get_version'),
+  // 媒体播放相关
+  media_select_files: () => ipcRenderer.invoke('media:select-files'),
+  media_select_folder: () => ipcRenderer.invoke('media:select-folder'),
+  // 媒体处理相关
+  media_transcribe_audio: (file_path: string, language?: string) => ipcRenderer.invoke('media:transcribe-audio', file_path, language),
+  media_generate_subtitles: (file_path: string, language?: string, orientation?: 'vertical' | 'horizontal') => ipcRenderer.invoke('media:generate-subtitles', file_path, language, orientation),
+  media_translate_subtitles: (subtitles: any[], source_lang: string, target_lang: string) => ipcRenderer.invoke('media:translate-subtitles', subtitles, source_lang, target_lang),
   on_agent_chat_chunk: (callback: (event: any, chunk: any) => void) => {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }
