@@ -6,11 +6,11 @@
  */
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, FileText, RotateCw, Sparkles } from 'lucide-react'
+import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
-import { t, current_locale_store } from '@/i18n'
+import { t, current_locale_store, type Locale } from '@/i18n'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
@@ -22,6 +22,13 @@ const Login: React.FC = () => {
   const [remember_me, set_remember_me] = useState(true)
   const [show_logs, set_show_logs] = useState(false)
   const [is_logging_in, set_is_logging_in] = useState(false)
+  const [logo_spinning, set_logo_spinning] = useState(false)
+  const [spin_direction, set_spin_direction] = useState<'cw' | 'ccw'>('cw')
+  const [active_input, set_active_input] = useState<string | null>(null)
+  const [password_shake, set_password_shake] = useState(false)
+  const [locale, set_locale] = useState<Locale>('zh')
+  const [show_lang_menu, set_show_lang_menu] = useState(false)
+  const lang_menu_ref = useRef<HTMLDivElement>(null)
   const [, force_update] = useState(0)
   const navigate = useNavigate()
   const login = use_auth_store((state) => state.login)
@@ -60,6 +67,39 @@ const Login: React.FC = () => {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  // 同步语言状态
+  useEffect(() => {
+    const unsubscribe = current_locale_store.subscribe(() => {
+      force_update((n) => n + 1)
+      set_locale(current_locale_store.get())
+    })
+    return unsubscribe
+  }, [])
+
+  // 语言菜单点击外部关闭
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (lang_menu_ref.current && !lang_menu_ref.current.contains(e.target as Node)) set_show_lang_menu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // 全局点击切换旋转
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      // 忽略标题栏按钮和表单元素
+      if (target.closest('.no-drag-region')) return
+      if (target.closest('input') || target.closest('form') || target.closest('button')) return
+      // 随机选择旋转方向（真正随机）
+      set_spin_direction(() => Math.random() > 0.5 ? 'cw' : 'ccw')
+      set_logo_spinning((v) => !v)
+    }
+    document.addEventListener('click', handleGlobalClick)
+    return () => document.removeEventListener('click', handleGlobalClick)
+  }, [])
+
   const normalized_api_url = useMemo(() => {
     const raw = api_url.trim()
     if (!raw) return ''
@@ -88,7 +128,11 @@ const Login: React.FC = () => {
       navigate('/')
     } else {
       const raw = String(res.error || '')
-      if (raw.includes('401') || raw.includes('密码错误')) set_error_msg(t('password_error'))
+      if (raw.includes('401') || raw.includes('密码错误')) {
+        set_error_msg(t('password_error'))
+        set_password_shake(true)
+        setTimeout(() => set_password_shake(false), 600)
+      }
       else set_error_msg(raw || t('login_error'))
     }
   }, [api_loading, normalized_api_url, remember_me, save_api_url, add_log, login, navigate])
@@ -134,13 +178,96 @@ const Login: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* 语言切换 */}
+          <div style={{ position: 'relative' }} ref={lang_menu_ref}>
+            <button
+              className="no-drag-region"
+              type="button"
+              title={locale === 'zh' ? 'Switch to English' : '切换到中文'}
+              onClick={() => set_show_lang_menu(!show_lang_menu)}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--ui_border)',
+                borderRadius: 'var(--ui_radius_sm)',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                color: 'var(--ui_text_secondary)',
+                transition: 'all 0.2s',
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}
+            >
+              <Globe size={13} />
+              <span style={{ fontSize: '11px' }}>{locale === 'zh' ? '中文' : 'EN'}</span>
+              <ChevronDown size={12} />
+            </button>
+
+            {show_lang_menu && (
+              <div
+                className="no-drag-region"
+                style={{
+                  position: 'absolute',
+                  top: '34px',
+                  left: '0',
+                  backgroundColor: 'var(--ui_panel)',
+                  border: '1px solid var(--ui_border)',
+                  borderRadius: 'var(--ui_radius_md)',
+                  boxShadow: 'var(--ui_shadow_md)',
+                  padding: '4px',
+                  zIndex: 1001,
+                  minWidth: '120px',
+                  animation: 'fadeInUp 0.15s ease',
+                }}
+              >
+                {([
+                  { locale: 'zh' as Locale, label: '中文', flag: 'CN' },
+                  { locale: 'en' as Locale, label: 'English', flag: 'US' },
+                ]).map(({ locale: l, label, flag }) => (
+                  <button
+                    key={l}
+                    className="no-drag-region"
+                    type="button"
+                    onClick={() => { current_locale_store.set(l); set_locale(l); window.electron_api.config_set('ui:locale', l).catch(() => {}); set_show_lang_menu(false) }}
+                    style={{
+                      width: '100%',
+                      background: locale === l ? 'var(--ui_accent_light)' : 'transparent',
+                      border: 'none',
+                      borderRadius: 'var(--ui_radius_sm)',
+                      padding: '7px 12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: locale === l ? 'var(--ui_accent)' : 'var(--ui_text)',
+                      fontSize: '13px',
+                      fontWeight: locale === l ? 600 : 400,
+                      transition: 'all 0.15s',
+                      textAlign: 'left' as const,
+                    }}
+                    onMouseEnter={(e) => { if (locale !== l) e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)' }}
+                    onMouseLeave={(e) => { if (locale !== l) e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    <span style={{ fontSize: '14px' }}>{flag === 'CN' ? '\uD83C\uDDE8\uD83C\uDDF3' : '\uD83C\uDDFA\uD83C\uDDF8'}</span>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 登录主体 - 全屏两栏 */}
+      {/* 登录主体 - 左右比例调整为 1:1.2，左略小右略大 */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-        {/* 左侧品牌区 - 精简优雅，留白充足 */}
+        {/* 左侧品牌区 */}
         <div style={{
           flex: 1,
           background: 'linear-gradient(160deg, #0c4a6e 0%, #0369a1 40%, #0284c7 70%, #0ea5e9 100%)',
@@ -151,25 +278,61 @@ const Login: React.FC = () => {
           <div style={{ position: 'absolute', top: '20%', left: '10%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(14,165,233,0.3) 0%, transparent 70%)', animation: 'pulse 4s ease-in-out infinite' }} />
           <div style={{ position: 'absolute', bottom: '15%', right: '5%', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56,189,248,0.2) 0%, transparent 70%)', animation: 'pulse 6s ease-in-out infinite 1s' }} />
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%)' }} />
+          <div style={{ position: 'absolute', top: '60%', left: '15%', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%)', animation: 'pulse 5s ease-in-out infinite 0.5s' }} />
+          <div style={{ position: 'absolute', bottom: '25%', left: '60%', width: '80px', height: '80px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)', animation: 'float 6s ease-in-out infinite' }} />
+
+          {/* 左侧装饰线条 */}
+          <div style={{ position: 'absolute', top: '30%', left: '8%', display: 'flex', flexDirection: 'column', gap: '12px', animation: 'fadeInLeft 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
+            <div style={{ width: '40px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.2)' }} />
+            <div style={{ width: '24px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)' }} />
+            <div style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.1)' }} />
+          </div>
+
+          {/* 右侧装饰线条 */}
+          <div style={{ position: 'absolute', top: '30%', right: '8%', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-end', animation: 'fadeInRight 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
+            <div style={{ width: '40px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.2)' }} />
+            <div style={{ width: '24px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)' }} />
+            <div style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.1)' }} />
+          </div>
 
           {/* 品牌核心 */}
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', animation: 'fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             {/* Logo */}
-            <div style={{ width: '88px', height: '88px', borderRadius: '22px', background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 16px 48px rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.2)' }}>
-              <img src="./kity.png" alt="TRAI" style={{ width: '52px', height: '52px' }} />
+            <div style={{
+              width: '88px', height: '88px', borderRadius: '22px',
+              background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(20px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.25)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              animation: logo_spinning ? (spin_direction === 'cw' ? 'logoSpinCW 3s linear infinite' : 'logoSpinCCW 3s linear infinite') : 'none',
+              transition: 'box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
+              <img src="./kity.png" alt="TRAI" style={{ width: '52px', height: '52px', borderRadius: '8px' }} />
             </div>
+
+            {/* 旋转状态指示 */}
+            <div style={{
+              fontSize: '11px', color: 'rgba(255,255,255,0.6)',
+              marginTop: '4px', padding: '4px 12px',
+              borderRadius: '12px',
+              background: logo_spinning ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.1)',
+              border: `1px solid ${logo_spinning ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.15)'}`,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}>
+              {logo_spinning ? `旋转中 ${spin_direction === 'cw' ? '>' : '<'}` : '点击任意位置旋转'}
+            </div>
+
             {/* 品牌名 */}
             <div style={{ fontSize: '36px', fontWeight: 800, color: 'white', letterSpacing: '0.15em', textShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>TRAI</div>
-            {/* 标语 */}
             <div style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', letterSpacing: '0.02em' }}>{t('your_ai_platform')}</div>
           </div>
 
-          {/* 底部装饰线 */}
+          {/* 底部标签 */}
           <div style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px', animation: 'fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both' }}>
             {['DeepSeek', 'Claude', 'GPT-4'].map((m, i) => (
-              <div key={m} style={{ padding: '5px 14px', borderRadius: '20px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '12px', fontWeight: 500, border: '1px solid rgba(255,255,255,0.15)', animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${0.6 + i * 0.1}s both`, transition: 'transform 0.2s' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.12)' }}
+              <div key={m} style={{ padding: '5px 14px', borderRadius: '20px', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '12px', fontWeight: 500, border: '1px solid rgba(255,255,255,0.15)', animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${0.6 + i * 0.1}s both`, transition: 'transform 0.2s, background 0.2s, box-shadow 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none' }}
               >
                 {m}
               </div>
@@ -177,12 +340,11 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        {/* 右侧表单区 - 居中卡片，有视觉重量 */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px', backgroundColor: 'var(--ui_bg)', overflow: 'auto' }}>
+        {/* 右侧表单区 - 更宽更大 */}
+        <div style={{ flex: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--ui_bg)', overflow: 'auto' }}>
 
-          {/* 表单卡片 */}
           <div style={{
-            width: '100%', maxWidth: '400px',
+            width: '100%', maxWidth: '480px',
             backgroundColor: 'var(--ui_panel)',
             borderRadius: '20px',
             border: '1px solid var(--ui_border)',
@@ -190,11 +352,9 @@ const Login: React.FC = () => {
             overflow: 'hidden',
             animation: 'fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both',
           }}>
-            {/* 卡片顶部强调条 */}
             <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--ui_accent), #0ea5e9, #38bdf8)' }} />
 
-            <div style={{ padding: '32px 28px' }}>
-              {/* 标题 */}
+            <div style={{ padding: '36px 32px' }}>
               <div style={{ marginBottom: '28px', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both' }}>
                 <h2 style={{ color: 'var(--ui_text)', margin: '0 0 6px 0', fontSize: '22px', fontWeight: 700 }}>{t('login_welcome')}</h2>
                 <p style={{ color: 'var(--ui_text_muted)', margin: 0, fontSize: '13px' }}>{t('login_subtitle')}</p>
@@ -204,11 +364,24 @@ const Login: React.FC = () => {
                 {/* 用户名 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both' }}>
                   <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('username')}</label>
-                  <input type="text" value={username} onChange={(e) => set_username(e.target.value)} autoComplete="username"
-                    style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)', boxSizing: 'border-box', outline: 'none', fontSize: '14px', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)' }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--ui_border)'; e.target.style.boxShadow = 'none' }}
-                    placeholder={t('enter_username')} />
+                  <div style={{ position: 'relative' }}>
+                    <input type="text" value={username} onChange={(e) => set_username(e.target.value)} autoComplete="username"
+                      onFocus={() => set_active_input('username')}
+                      onBlur={() => set_active_input(null)}
+                      style={{
+                        width: '100%', padding: '12px 14px', borderRadius: '10px',
+                        border: `1.5px solid ${active_input === 'username' ? 'var(--ui_accent)' : 'var(--ui_border)'}`,
+                        backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)',
+                        boxSizing: 'border-box', outline: 'none', fontSize: '14px',
+                        transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
+                        boxShadow: active_input === 'username' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
+                        transform: active_input === 'username' ? 'translateY(-1px)' : 'translateY(0)',
+                      }}
+                      placeholder={t('enter_username')} />
+                    {active_input === 'username' && (
+                      <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                    )}
+                  </div>
                 </div>
 
                 {/* 密码 */}
@@ -216,13 +389,31 @@ const Login: React.FC = () => {
                   <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('password')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={password_visible ? 'text' : 'password'} value={password} onChange={(e) => set_password(e.target.value)} autoComplete="current-password"
-                      style={{ width: '100%', padding: '12px 44px 12px 14px', borderRadius: '10px', border: '1.5px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)', boxSizing: 'border-box', outline: 'none', fontSize: '14px', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--ui_accent)'; e.target.style.boxShadow = '0 0 0 3px var(--ui_accent_light)' }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--ui_border)'; e.target.style.boxShadow = 'none' }}
+                      onFocus={() => set_active_input('password')}
+                      onBlur={() => set_active_input(null)}
+                      style={{
+                        width: '100%', padding: '12px 44px 12px 14px', borderRadius: '10px',
+                        border: `1.5px solid ${active_input === 'password' ? 'var(--ui_accent)' : password_shake ? 'var(--ui_danger)' : 'var(--ui_border)'}`,
+                        backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)',
+                        boxSizing: 'border-box', outline: 'none', fontSize: '14px',
+                        transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
+                        boxShadow: active_input === 'password' ? '0 0 0 3px var(--ui_accent_light)' : password_shake ? '0 0 0 3px var(--ui_danger_light)' : 'none',
+                        transform: active_input === 'password' ? 'translateY(-1px)' : 'translateY(0)',
+                        animation: password_shake ? 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both' : 'none',
+                      }}
                       placeholder={t('enter_password')} />
-                    <button type="button" onClick={() => set_password_visible((v) => !v)} style={{ position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)', background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer', color: 'var(--ui_text_muted)', display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ui_accent)' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--ui_text_muted)' }}>
+                    {active_input === 'password' && (
+                      <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                    )}
+                    <button type="button" onClick={() => set_password_visible((v) => !v)} style={{
+                      position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)',
+                      background: 'transparent', border: 'none', padding: '4px', cursor: 'pointer',
+                      color: password_visible ? 'var(--ui_accent)' : 'var(--ui_text_muted)',
+                      display: 'flex', alignItems: 'center',
+                      transition: 'color 0.15s, transform 0.15s',
+                    }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--ui_accent)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = password_visible ? 'var(--ui_accent)' : 'var(--ui_text_muted)'; e.currentTarget.style.transform = 'translateY(-50%) scale(1)' }}>
                       {password_visible ? <EyeOff size={17} /> : <Eye size={17} />}
                     </button>
                   </div>
@@ -230,27 +421,94 @@ const Login: React.FC = () => {
 
                 {/* 错误提示 */}
                 {error_msg && (
-                  <div style={{ color: 'var(--ui_danger)', fontSize: '12px', padding: '10px 12px', backgroundColor: 'var(--ui_danger_light)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)', animation: 'fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '14px' }}>!</span>
+                  <div style={{
+                    color: 'var(--ui_danger)', fontSize: '12px', padding: '10px 12px',
+                    backgroundColor: 'var(--ui_danger_light)', borderRadius: '8px',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    animation: 'fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                  }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'var(--ui_danger)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flexShrink: 0 }}>
+                      !
+                    </div>
                     {error_msg}
                   </div>
                 )}
 
                 {/* 记住我 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
-                  <input type="checkbox" id="remember_me" checked={remember_me} onChange={(e) => set_remember_me(e.target.checked)}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--ui_accent)' }} />
-                  <label htmlFor="remember_me" style={{ color: 'var(--ui_text_secondary)', fontSize: '12px', cursor: 'pointer' }}>{t('save_login_state')}</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+                    <div
+                      onClick={() => set_remember_me((v) => !v)}
+                      style={{
+                        width: '36px', height: '20px', borderRadius: '10px',
+                        backgroundColor: remember_me ? 'var(--ui_accent)' : 'var(--ui_border)',
+                        position: 'relative', cursor: 'pointer',
+                        transition: 'background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: remember_me ? '0 2px 8px rgba(14,165,233,0.3)' : 'none',
+                      }}
+                    >
+                      <div style={{
+                        position: 'absolute', top: '2px',
+                        left: remember_me ? '18px' : '2px',
+                        width: '16px', height: '16px', borderRadius: '50%',
+                        backgroundColor: 'white',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                        transition: 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      }} />
+                    </div>
+                    <span style={{ color: 'var(--ui_text_secondary)', fontSize: '12px' }}>{t('save_login_state')}</span>
+                  </label>
                 </div>
 
                 {/* 登录按钮 */}
                 <button type="submit" disabled={is_logging_in}
-                  style={{ background: is_logging_in ? 'var(--ui_text_muted)' : 'var(--ui_accent)', color: 'white', padding: '13px', borderRadius: '10px', border: 'none', cursor: is_logging_in ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: is_logging_in ? 'none' : '0 4px 16px rgba(14,165,233,0.35)', transition: 'all 0.25s', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both', transform: is_logging_in ? 'scale(1)' : 'scale(1)' }}
-                  onMouseEnter={(e) => { if (!is_logging_in) { e.currentTarget.style.backgroundColor = 'var(--ui_accent_hover)'; e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(14,165,233,0.45)' } }}
-                  onMouseLeave={(e) => { if (!is_logging_in) { e.currentTarget.style.backgroundColor = 'var(--ui_accent)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(14,165,233,0.35)' } }}
-                  onMouseDown={(e) => { if (!is_logging_in) e.currentTarget.style.transform = 'scale(0.98)' }}
-                  onMouseUp={(e) => { if (!is_logging_in) e.currentTarget.style.transform = 'scale(1.02)' }}
+                  style={{
+                    background: is_logging_in ? 'var(--ui_text_muted)' : 'var(--ui_accent)',
+                    color: 'white', padding: '13px', borderRadius: '10px', border: 'none',
+                    cursor: is_logging_in ? 'not-allowed' : 'pointer',
+                    fontSize: '14px', fontWeight: 600,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    boxShadow: is_logging_in ? 'none' : '0 4px 16px rgba(14,165,233,0.35)',
+                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                    animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both',
+                    position: 'relative', overflow: 'hidden',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!is_logging_in) {
+                      e.currentTarget.style.backgroundColor = 'var(--ui_accent_hover)'
+                      e.currentTarget.style.transform = 'scale(1.02) translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 8px 28px rgba(14,165,233,0.45)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!is_logging_in) {
+                      e.currentTarget.style.backgroundColor = 'var(--ui_accent)'
+                      e.currentTarget.style.transform = 'scale(1) translateY(0)'
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(14,165,233,0.35)'
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    if (!is_logging_in) {
+                      e.currentTarget.style.transform = 'scale(0.98) translateY(0)'
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(14,165,233,0.25)'
+                    }
+                  }}
+                  onMouseUp={(e) => {
+                    if (!is_logging_in) {
+                      e.currentTarget.style.transform = 'scale(1.02) translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 8px 28px rgba(14,165,233,0.45)'
+                    }
+                  }}
                 >
+                  {!is_logging_in && (
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                      backgroundSize: '200% 200%',
+                      animation: 'gradientShift 3s ease infinite',
+                    }} />
+                  )}
                   {is_logging_in ? <><div className="typing-dots"><span /><span /><span /></div>{t('signing_in')}</> : <><Sparkles size={15} />{t('login')}</>}
                 </button>
 
@@ -263,11 +521,28 @@ const Login: React.FC = () => {
 
                 {/* 企业微信登录 */}
                 <button type="button"
-                  style={{ background: 'var(--ui_panel_alt)', color: 'var(--ui_accent)', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--ui_border)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.45s both' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ui_accent)'; e.currentTarget.style.backgroundColor = 'var(--ui_accent_light)'; e.currentTarget.style.transform = 'scale(1.01)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--ui_border)'; e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'; e.currentTarget.style.transform = 'scale(1)' }}
-                  onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.99)' }}
-                  onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1.01)' }}
+                  style={{
+                    background: 'var(--ui_panel_alt)', color: 'var(--ui_accent)', padding: '12px',
+                    borderRadius: '10px', border: '1.5px solid var(--ui_border)',
+                    cursor: 'pointer', fontSize: '14px', fontWeight: 600,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.45s both',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--ui_accent)'
+                    e.currentTarget.style.backgroundColor = 'var(--ui_accent_light)'
+                    e.currentTarget.style.transform = 'scale(1.01) translateY(-1px)'
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(14,165,233,0.15)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--ui_border)'
+                    e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'
+                    e.currentTarget.style.transform = 'scale(1) translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                  onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.99) translateY(0)' }}
+                  onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1.01) translateY(-1px)' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" /></svg>
                   {t('wecom_login')}
@@ -276,9 +551,21 @@ const Login: React.FC = () => {
                 {/* 注册链接 */}
                 <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both' }}>
                   <span style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>{t('no_account')}{' '}</span>
-                  <span onClick={() => navigate('/register')} style={{ color: 'var(--ui_accent)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none' }}
+                  <span onClick={() => navigate('/register')} style={{
+                    color: 'var(--ui_accent)', fontSize: '12px', fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    paddingBottom: '2px',
+                  }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.textDecoration = 'none'
+                      e.currentTarget.style.color = 'var(--ui_accent_hover)'
+                      e.currentTarget.style.letterSpacing = '0.5px'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.textDecoration = 'none'
+                      e.currentTarget.style.color = 'var(--ui_accent)'
+                      e.currentTarget.style.letterSpacing = 'normal'
+                    }}
                   >{t('register_here')}</span>
                 </div>
               </form>
