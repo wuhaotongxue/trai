@@ -47,6 +47,7 @@ const get_gpu_name = (): string => {
       const output = execSync('wmic path win32_VideoController get name', {
         encoding: 'utf-8',
         windowsHide: true,
+        stdio: ['pipe', 'pipe', 'pipe'],
       })
       const lines = output
         .split(/\r?\n/)

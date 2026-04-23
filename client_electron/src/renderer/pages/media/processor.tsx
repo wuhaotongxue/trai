@@ -246,7 +246,7 @@ ${transcript}
   }
   
   // 下载文件
-  const handle_download = (task: AudioTask, type: 'transcript' | 'md' | 'subtitles' | 'bilingual') => {
+  const handle_download = (task: AudioTask, type: 'transcript' | 'md' | 'pdf' | 'subtitles' | 'bilingual') => {
     let content = ''
     let mime_type = 'text/plain'
     let extension = 'txt'
@@ -260,6 +260,11 @@ ${transcript}
         content = task.transcript_md || ''
         mime_type = 'text/markdown'
         extension = 'md'
+        break
+      case 'pdf':
+        content = generate_pdf_content(task)
+        mime_type = 'application/pdf'
+        extension = 'pdf'
         break
       case 'subtitles':
         content = generate_srt(task.subtitles || [])
@@ -280,6 +285,79 @@ ${transcript}
     a.download = `${task.file_name.split('.')[0]}.${extension}`
     a.click()
     URL.revokeObjectURL(url)
+  }
+  
+  // 生成PDF内容
+  const generate_pdf_content = (task: AudioTask): string => {
+    const now = new Date().toLocaleString('zh-CN')
+    return `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 5 0 R >>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Audio Transcript: ${task.file_name}) Tj
+ET
+BT
+/F1 10 Tf
+100 680 Td
+(Generated: ${now}) Tj
+ET
+BT
+/F1 10 Tf
+100 650 Td
+(Transcript Content:) Tj
+ET
+BT
+/F1 10 Tf
+100 630 Td
+(${task.transcript || 'No transcript available'}) Tj
+ET
+endstream
+endobj
+5 0 obj
+${new TextEncoder().encode(`BT
+/F1 12 Tf
+100 700 Td
+(Audio Transcript: ${task.file_name}) Tj
+ET
+BT
+/F1 10 Tf
+100 680 Td
+(Generated: ${now}) Tj
+ET
+BT
+/F1 10 Tf
+100 650 Td
+(Transcript Content:) Tj
+ET
+BT
+/F1 10 Tf
+100 630 Td
+(${task.transcript || 'No transcript available'}) Tj
+ET`).length}
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000010 00000 n 
+0000000053 00000 n 
+0000000101 00000 n 
+0000000176 00000 n 
+0000000450 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+%%EOF`
   }
   
   // 生成 SRT 字幕格式
@@ -582,6 +660,7 @@ ${transcript}
             <AudioTranscriptTab
               tasks={audio_tasks}
               on_generate_md={handle_download}
+              on_download={handle_download}
               is_processing={is_processing}
             />
           )}
@@ -623,8 +702,9 @@ ${transcript}
 const AudioTranscriptTab: React.FC<{
   tasks: AudioTask[]
   on_generate_md: (task: AudioTask, type: 'transcript' | 'md') => void
+  on_download: (task: AudioTask, type: 'transcript' | 'md' | 'pdf' | 'subtitles' | 'bilingual') => void
   is_processing: boolean
-}> = ({ tasks, on_generate_md, is_processing }) => {
+}> = ({ tasks, on_generate_md, on_download, is_processing }) => {
   const completed_tasks = tasks.filter(t => t.status === 'completed')
   
   return (
@@ -701,6 +781,24 @@ const AudioTranscriptTab: React.FC<{
                   >
                     <FileCode size={14} />
                     下载 MD
+                  </button>
+                  <button
+                    onClick={() => on_download(task, 'pdf')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--ui_border)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--ui_text)',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <FileText size={14} />
+                    下载 PDF
                   </button>
                 </div>
               </div>

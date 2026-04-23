@@ -32,6 +32,9 @@ export class UpdateService {
     // 配置更新参数
     autoUpdater.autoDownload = true
     autoUpdater.autoInstallOnAppQuit = true
+
+    // 初始化并注册 IPC 处理器
+    this.init()
   }
 
   public init() {
