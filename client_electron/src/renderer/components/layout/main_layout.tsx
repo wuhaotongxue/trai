@@ -49,7 +49,7 @@ const MainLayout: React.FC = () => {
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)', borderBottom: '1px solid var(--ui_border)' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: 'var(--ui_bg)', borderBottom: '1px solid var(--ui_border)', minHeight: 0 }}>
           <Outlet />
         </div>
       </div>
