@@ -325,10 +325,9 @@ ${transcript}
         padding: '16px',
         borderBottom: '1px solid var(--ui_border)',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center'
       }}>
-        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--ui_text)' }}>媒体处理任务</h3>
         <button
           onClick={() => file_input_ref.current?.click()}
           style={{
