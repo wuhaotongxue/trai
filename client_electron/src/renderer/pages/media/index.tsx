@@ -260,12 +260,11 @@ const MediaPlayerPage: React.FC = () => {
   const left_panel = (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* 操作按钮 */}
-      <div style={{ padding: '12px', borderBottom: '1px solid var(--ui_border)', display: 'flex', gap: '8px' }}>
+      <div style={{ padding: '12px', borderBottom: '1px solid var(--ui_border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <button
           onClick={handle_select_files}
           style={{
-            flex: 1,
-            padding: '6px 12px',
+            padding: '8px 12px',
             borderRadius: '6px',
             border: '1px solid var(--ui_border)',
             backgroundColor: 'transparent',
@@ -291,8 +290,7 @@ const MediaPlayerPage: React.FC = () => {
         <button
           onClick={handle_select_folder}
           style={{
-            flex: 1,
-            padding: '6px 12px',
+            padding: '8px 12px',
             borderRadius: '6px',
             border: '1px solid var(--ui_border)',
             backgroundColor: 'transparent',
@@ -427,7 +425,7 @@ const MediaPlayerPage: React.FC = () => {
   
   return (
     <ThreePanelLayout
-      title={current_file ? current_file.name : '媒体播放器'}
+      title={current_file ? current_file.name : '播放器'}
       titleIcon={<Music size={20} />}
       leftPanelTitle="媒体文件"
       leftPanel={left_panel}
