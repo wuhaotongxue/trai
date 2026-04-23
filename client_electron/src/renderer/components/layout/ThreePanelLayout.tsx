@@ -1,10 +1,8 @@
 /**
  * 文件名: ThreePanelLayout.tsx
  * 作者: wuhao
- * 日期: 2026-04-19
- * 描述: 通用三段式布局组件 - 自适应布局
- *       左侧面板(可选) + 中间面板(可选) + 右侧内容区
- *       全局 Sidebar 由 MainLayout 提供, 此组件不再重复
+ * 日期: 2026-04-24 00:25:00
+ * 描述: 通用三段式布局组件 - 自适应布局，支持平滑展开收起动画
  */
 import React, { useState } from 'react'
 import { PanelLeftOpen, PanelLeftClose, List } from 'lucide-react'
@@ -42,24 +40,16 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   const [is_left_open, set_is_left_open] = useState(leftPanelDefaultOpen)
   const [is_middle_open, set_is_middle_open] = useState(middlePanelDefaultOpen)
 
-  const hover_btn_style = {
-    background: 'none' as const, border: 'none', cursor: 'pointer', padding: '4px',
-    display: 'flex' as const, alignItems: 'center' as const, justifyContent: 'center' as const,
-    color: 'var(--ui_text_muted)', borderRadius: '4px',
-    transition: 'background-color var(--ui_transition_fast), color var(--ui_transition_fast)',
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)', minHeight: 0 }}>
-      {/* 顶部标题栏 - 横跨整个宽度 */}
+      {/* 顶部标题栏 */}
       <div className="drag-region" style={{
-        padding: '20px 24px',
+        padding: '16px 24px',
         backgroundColor: 'var(--ui_panel)',
         borderBottom: '1px solid var(--ui_border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        transition: 'background-color var(--ui_transition_normal), border-color var(--ui_transition_normal)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        transition: 'background-color var(--ui_transition_normal)',
+        animation: 'fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {titleIcon}
@@ -72,25 +62,16 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
       <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
         {leftPanel && (
           <div style={{
-            width: is_left_open ? '10%' : '0px',
-            minWidth: is_left_open ? '140px' : '0px',
+            width: is_left_open ? '180px' : '0px',
+            minWidth: is_left_open ? '180px' : '0px',
             opacity: is_left_open ? 1 : 0,
             backgroundColor: 'var(--ui_panel)',
             borderRight: is_left_open ? '1px solid var(--ui_border)' : 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'all var(--ui_transition_normal)',
-            overflow: 'hidden',
-            flexShrink: 1
+            display: 'flex', flexDirection: 'column',
+            transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, border-color 0.3s ease',
+            overflow: 'hidden', flexShrink: 1,
           }}>
-            <div style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--ui_border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              transition: 'border-color var(--ui_transition_normal)',
-            }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {leftPanelTitle && (
                 <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
               )}
@@ -98,8 +79,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 type="button"
                 onClick={() => set_is_left_open(false)}
                 title={t('collapse')}
-                aria-label={t('collapse')}
-                style={{ ...hover_btn_style, marginLeft: 'auto' }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--ui_text_muted)', borderRadius: '6px',
+                  transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
               >
@@ -114,33 +99,28 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
 
         {middlePanel && (
           <div style={{
-            width: is_middle_open ? '12%' : '0px',
-            minWidth: is_middle_open ? '140px' : '0px',
+            width: is_middle_open ? '180px' : '0px',
+            minWidth: is_middle_open ? '180px' : '0px',
             opacity: is_middle_open ? 1 : 0,
             backgroundColor: 'var(--ui_panel)',
             borderRight: is_middle_open ? '1px solid var(--ui_border)' : 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'all var(--ui_transition_normal)',
-            overflow: 'hidden',
-            flexShrink: 1
+            display: 'flex', flexDirection: 'column',
+            transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, border-color 0.3s ease',
+            overflow: 'hidden', flexShrink: 1,
           }}>
-            <div style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--ui_border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              transition: 'border-color var(--ui_transition_normal)',
-            }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {leftPanel && !is_left_open && (
                   <button
                     type="button"
                     onClick={() => set_is_left_open(true)}
                     title={t('expand')}
-                    aria-label={t('expand')}
-                    style={{ ...hover_btn_style }}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--ui_text_muted)', borderRadius: '6px',
+                      transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
                   >
@@ -155,8 +135,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 type="button"
                 onClick={() => set_is_middle_open(false)}
                 title={t('collapse')}
-                aria-label={t('collapse')}
-                style={{ ...hover_btn_style }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--ui_text_muted)', borderRadius: '6px',
+                  transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
               >
@@ -175,10 +159,8 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             padding: '12px 16px',
             backgroundColor: 'var(--ui_panel)',
             borderBottom: '1px solid var(--ui_border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            transition: 'background-color var(--ui_transition_normal), border-color var(--ui_transition_normal)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            transition: 'background-color var(--ui_transition_normal)',
           }}>
             <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {leftPanel && !is_left_open && (
@@ -186,8 +168,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   type="button"
                   onClick={() => set_is_left_open(true)}
                   title={t('expand')}
-                  aria-label={t('expand')}
-                  style={{ ...hover_btn_style }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--ui_text_muted)', borderRadius: '6px',
+                    transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
                 >
@@ -199,8 +185,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   type="button"
                   onClick={() => set_is_middle_open(true)}
                   title={t('expand')}
-                  aria-label={t('expand')}
-                  style={{ ...hover_btn_style }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--ui_text_muted)', borderRadius: '6px',
+                    transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_muted)' }}
                 >
@@ -211,23 +201,20 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{rightPanelTitle}</span>
               )}
             </div>
-            <button
-              type="button"
-              style={{ ...hover_btn_style, visibility: 'hidden' }}
-            >
-              <List size={18} />
-            </button>
           </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: contentPadding, minHeight: 0 }}>
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            padding: contentPadding,
+            minHeight: 0,
+            animation: 'fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.08s both',
+          }}>
             <div style={{
               flex: 1,
               backgroundColor: 'var(--ui_panel)',
               borderRadius: 'var(--ui_radius_lg)',
               boxShadow: 'var(--ui_shadow_card)',
               border: '1px solid var(--ui_border)',
-              overflow: 'auto',
-              minWidth: 0,
-              animation: 'fadeInUp 0.3s ease-out both',
+              overflow: 'auto', minWidth: 0,
             }}>
               {children}
             </div>

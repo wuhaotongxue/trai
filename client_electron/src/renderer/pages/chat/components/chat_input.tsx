@@ -1,7 +1,7 @@
 /**
  * 文件名: chat_input.tsx
  * 作者: wuhao
- * 日期: 2026-04-24 00:15:00
+ * 日期: 2026-04-24 00:25:00
  * 描述: 聊天输入框组件，支持快速命令、字符统计与多模态文件上传
  */
 import React, { useRef, useState, useCallback } from 'react'
@@ -20,9 +20,10 @@ interface ChatInputProps {
 }
 
 const QUICK_COMMANDS = [
-  { label: '解释一下', insert: '请解释一下' },
-  { label: '写代码', insert: '帮我写一段' },
-  { label: '总结', insert: '请帮我总结一下' },
+  { label: '天气查询', insert: '今天北京天气怎么样？' },
+  { label: '写代码', insert: '帮我写一段 Python 代码，实现' },
+  { label: '总结内容', insert: '请帮我总结一下这段内容：' },
+  { label: '图片识别', insert: '请描述这张图片的内容' },
 ]
 
 const ChatInput: React.FC<ChatInputProps> = ({
