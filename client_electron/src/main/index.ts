@@ -91,6 +91,7 @@ if (!got_the_lock) {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false, // 允许加载本地文件
     },
   })
 
