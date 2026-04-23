@@ -653,7 +653,7 @@ const MediaPlayerPage: React.FC = () => {
     >
       <div 
         ref={player_ref} 
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'auto' }}
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', minHeight: 0 }}
       >
         {/* 播放区域 */}
         <div 

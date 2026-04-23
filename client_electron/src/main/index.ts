@@ -118,21 +118,6 @@ if (!got_the_lock) {
       log.info('window did-finish-load')
     })
 
-    // 监听窗口大小变化事件
-    main_window.on('resize', () => {
-      log.info('window resized:', main_window?.getSize())
-    })
-
-    // 监听窗口最大化事件
-    main_window.on('maximize', () => {
-      log.info('window maximized')
-    })
-
-    // 监听窗口恢复事件
-    main_window.on('unmaximize', () => {
-      log.info('window unmaximized')
-    })
-
     // 拦截关闭事件, 转为隐藏窗口或退出程序
     main_window.on('close', (event) => {
       if (is_quitting) return

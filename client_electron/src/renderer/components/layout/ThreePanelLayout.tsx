@@ -54,7 +54,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)', minHeight: 0 }}>
       {/* 顶部标题栏 - 横跨整个宽度 */}
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -192,7 +192,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
               <List size={18} />
             </button>
           </div>
-          <div style={{ flex: 1, overflow: 'auto', padding: contentPadding }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: contentPadding, minHeight: 0 }}>
             {children}
           </div>
         </div>
