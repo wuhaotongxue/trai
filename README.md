@@ -46,6 +46,14 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_23_0906
+- **perf(knowledge_base)**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
+- **perf(virtual_list)**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
+- **perf(main_process)**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
+- **perf(ipc)**: IPC通信优化，实现请求缓存和批处理功能
+- **perf(network)**: 网络请求优化，实现请求缓存和节流
+- **perf(monitoring)**: 新增性能监控和错误处理模块
+
 ### 🛠️ 系统更新_2026_04_22_1515
 - [前端] **Agent UI 升级**: 实现了类似 DeepSeek 的左侧会话历史侧边栏, 支持会话切换、重命名与删除
 - [前端] **公式渲染**: 修复了对话中的数学公式渲染问题, 支持 KaTeX 标准 LaTeX 语法

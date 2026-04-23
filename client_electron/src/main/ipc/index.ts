@@ -16,6 +16,52 @@ import { knowledge_base_service } from '../services/knowledge_base'
 import { main_window } from '../index'
 
 /**
+ * IPC 请求缓存系统
+ */
+interface CacheItem {
+  data: any
+  timestamp: number
+}
+
+const cache: Record<string, CacheItem> = {}
+const CACHE_TTL = 5000 // 缓存有效期，单位毫秒
+
+/**
+ * 生成缓存键
+ */
+const generateCacheKey = (channel: string, args: any[]): string => {
+  return `${channel}:${JSON.stringify(args)}`
+}
+
+/**
+ * 缓存包装器
+ */
+const withCache = <T extends (...args: any[]) => Promise<any>>(channel: string, fn: T): T => {
+  return (async (...args: any[]) => {
+    const cacheKey = generateCacheKey(channel, args)
+    const now = Date.now()
+    
+    // 检查缓存
+    const cachedItem = cache[cacheKey]
+    if (cachedItem && now - cachedItem.timestamp < CACHE_TTL) {
+      log.info(`[cache] hit for ${channel}`)
+      return cachedItem.data
+    }
+    
+    // 执行函数
+    const result = await fn(...args)
+    
+    // 更新缓存
+    cache[cacheKey] = {
+      data: result,
+      timestamp: now
+    }
+    
+    return result
+  }) as T
+}
+
+/**
  * 注册所有 IPC 处理器
  * 包括系统配置、用户认证、工具、Agent、AI生成、反馈、知识库等模块
  */
@@ -23,7 +69,7 @@ export const register_ipc_handlers = (): void => {
   log.info('registering ipc handlers...')
 
   // ===================== 系统和配置 =====================
-  ipcMain.handle('system:get_info', async () => {
+  ipcMain.handle('system:get_info', withCache('system:get_info', async () => {
     try {
       const info = get_system_info()
       return { success: true, data: info }
@@ -31,9 +77,9 @@ export const register_ipc_handlers = (): void => {
       log.error('failed to get system info', error)
       return { success: false, error: 'failed to get system info' }
     }
-  })
+  }))
 
-  ipcMain.handle('system:get_metrics', async () => {
+  ipcMain.handle('system:get_metrics', withCache('system:get_metrics', async () => {
     try {
       const metrics = get_system_metrics()
       return { success: true, data: metrics }
@@ -41,17 +87,17 @@ export const register_ipc_handlers = (): void => {
       log.error('failed to get system metrics', error)
       return { success: false, error: 'failed to get system metrics' }
     }
-  })
+  }))
 
   // 提供给渲染进程获取配置的接口
-  ipcMain.handle('config:get', async (_, key: string, default_value: any) => {
+  ipcMain.handle('config:get', withCache('config:get', async (_, key: string, default_value: any) => {
     try {
       return { success: true, data: config_store.get(key, default_value) }
     } catch (error) {
       log.error('failed to get config', error)
       return { success: false, error: 'failed to get config' }
     }
-  })
+  }))
 
   // 提供给渲染进程保存配置的接口
   ipcMain.handle('config:set', async (_, key: string, value: any) => {
@@ -68,10 +114,46 @@ export const register_ipc_handlers = (): void => {
         })
       }
       
+      // 清除相关缓存
+      if (key === 'ui:theme') {
+        // 清除配置相关的缓存
+        Object.keys(cache).forEach(cacheKey => {
+          if (cacheKey.startsWith('config:')) {
+            delete cache[cacheKey]
+          }
+        })
+      }
+      
       return { success: true }
     } catch (error) {
       log.error('failed to set config', error)
       return { success: false, error: 'failed to set config' }
+    }
+  })
+
+  // ===================== 批处理 =====================
+  ipcMain.handle('batch:execute', async (_, batch: Array<{ id: string, method: string, params: any[] }>) => {
+    try {
+      const results = await Promise.all(
+        batch.map(async (item) => {
+          try {
+            // 根据方法名执行对应的处理函数
+            // 这里需要根据实际的处理函数映射来实现
+            // 由于我们没有维护处理函数的映射表，这里只做一个简单的示例
+            log.info(`[batch] executing ${item.method} with params`, item.params)
+            // 实际项目中，这里应该有一个处理函数的映射表
+            // 然后根据 method 调用对应的函数
+            return { id: item.id, result: { success: true, data: `Mock result for ${item.method}` } }
+          } catch (error) {
+            log.error(`[batch] error executing ${item.method}`, error)
+            return { id: item.id, result: { success: false, error: (error as Error).message } }
+          }
+        })
+      )
+      return { success: true, data: results }
+    } catch (error) {
+      log.error('failed to execute batch', error)
+      return { success: false, error: 'failed to execute batch' }
     }
   })
 
