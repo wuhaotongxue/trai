@@ -683,7 +683,7 @@ const MediaPlayerPage: React.FC = () => {
                 />
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
                 <video
                   ref={video_ref}
                   src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
