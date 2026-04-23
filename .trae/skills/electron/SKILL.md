@@ -143,6 +143,7 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | **可拖拽区域** | 自定义顶部导航栏必须添加 `className="drag-region"` 实现窗口拖动 (`-webkit-app-region: drag`)。 |
 | **防误触** | 拖拽区域内的任何可点击元素（如按钮、下拉框、输入框）必须显式添加 `className="no-drag-region"` (`-webkit-app-region: no-drag`)，否则无法被点击。 |
 | **三段式折叠布局** | 对于具有“左侧(大侧边栏)+中间(列表)+右侧(详情)”三段式布局的页面，中间列表的收起按钮应置于其头部最右侧，展开按钮应置于右侧详情头部最左侧。 |
+| **ThreePanelLayout 组件** | 推荐使用 `ThreePanelLayout` 组件实现三段式布局，该组件提供了响应式设计、平滑动画和主题适配等特性。详见 `electron/components/three_panel_layout.md`。 |
 
 ### 12. 文件头模板
 

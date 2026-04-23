@@ -241,12 +241,12 @@ export const register_ipc_handlers = (): void => {
     return agent_service.get_agents()
   })
 
-  ipcMain.handle('agent:management:register', async (_, name: string, description: string, model: string, system_prompt: string, icon?: string) => {
-    return agent_service.register_agent(name, description, model, system_prompt, icon)
+  ipcMain.handle('agent:management:register', async (_, name: string, description: string, model: string, system_prompt: string, icon?: string, category?: string) => {
+    return agent_service.register_agent(name, description, model, system_prompt, icon, category)
   })
 
-  ipcMain.handle('agent:management:update', async (_, agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) => {
-    return agent_service.update_agent(agent_id, name, description, model, system_prompt, icon)
+  ipcMain.handle('agent:management:update', async (_, agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string, category?: string) => {
+    return agent_service.update_agent(agent_id, name, description, model, system_prompt, icon, category)
   })
 
   ipcMain.handle('agent:management:toggle', async (_, agent_id: string, action: 'start' | 'stop') => {
@@ -293,5 +293,163 @@ export const register_ipc_handlers = (): void => {
 
   ipcMain.handle('kb:upload_text', async (_, index_id: string, file_name: string, content: string) => {
     return await knowledge_base_service.upload_text(index_id, file_name, content)
+  })
+
+  // ===================== 媒体播放 =====================
+  ipcMain.handle('media:select-files', async () => {
+    const { dialog } = require('electron')
+
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile', 'multiSelections'],
+      filters: [
+        { name: '媒体文件', extensions: ['mp3', 'wav', 'flac', 'ogg', 'm4a', 'mp4', 'avi', 'mov', 'wmv', 'mkv'] },
+        { name: '音频文件', extensions: ['mp3', 'wav', 'flac', 'ogg', 'm4a'] },
+        { name: '视频文件', extensions: ['mp4', 'avi', 'mov', 'wmv', 'mkv'] }
+      ]
+    })
+
+    if (result.canceled) {
+      return { success: false, files: [] }
+    }
+
+    const files = result.filePaths.map(path => ({
+      path,
+      name: path.split('\\').pop() || ''
+    }))
+
+    return { success: true, files }
+  })
+
+  ipcMain.handle('media:select-folder', async () => {
+    const { dialog } = require('electron')
+    const { readdirSync, statSync } = require('fs')
+    const { join } = require('path')
+
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    })
+
+    if (result.canceled) {
+      return { success: false, files: [] }
+    }
+
+    const folder_path = result.filePaths[0]
+    const files = []
+
+    // 递归遍历文件夹
+    const traverse_folder = (dir: string) => {
+      const items = readdirSync(dir)
+      for (const item of items) {
+        const item_path = join(dir, item)
+        const stat = statSync(item_path)
+        if (stat.isDirectory()) {
+          traverse_folder(item_path)
+        } else if (stat.isFile()) {
+          // 检查文件扩展名
+          const ext = item.toLowerCase().split('.').pop()
+          if (['mp3', 'wav', 'flac', 'ogg', 'm4a', 'mp4', 'avi', 'mov', 'wmv', 'mkv'].includes(ext || '')) {
+            files.push({
+              path: item_path,
+              name: item
+            })
+          }
+        }
+      }
+    }
+
+    traverse_folder(folder_path)
+    return { success: true, files }
+  })
+
+  // ===================== 媒体处理 =====================
+  ipcMain.handle('media:transcribe-audio', async (_, file_path: string, language: string = 'zh') => {
+    try {
+      const { read_file } = require('fs/promises')
+      
+      // TODO: 调用后端语音识别 API
+      // 这里可以集成 Whisper、Azure Speech 等语音识别服务
+      log.info('transcribing audio:', file_path, 'language:', language)
+      
+      // 模拟处理延迟
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // 返回模拟结果
+      return {
+        success: true,
+        data: {
+          transcript: `这是音频文件 "${file_path.split('\\').pop()}" 的语音识别结果。\n\n在实际应用中，这里会显示真实的语音识别文本。支持中文、英文、日文、韩文等多种语言。`,
+          language: language,
+          duration: 120000
+        }
+      }
+    } catch (error) {
+      log.error('transcribe audio failed:', error)
+      return {
+        success: false,
+        error: (error as Error).message
+      }
+    }
+  })
+
+  ipcMain.handle('media:generate-subtitles', async (_, file_path: string, language: string = 'zh', orientation: 'vertical' | 'horizontal' = 'horizontal') => {
+    try {
+      log.info('generating subtitles:', file_path, 'language:', language, 'orientation:', orientation)
+      
+      // TODO: 调用字幕生成 API
+      // 可以根据视频格式（竖屏/横屏）调整字幕样式和位置
+      
+      // 模拟处理延迟
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // 返回模拟字幕
+      const subtitles = [
+        { start: 0, end: 3000, text: '欢迎观看这个视频' },
+        { start: 3000, end: 6000, text: '这是一个字幕生成的示例' },
+        { start: 6000, end: 9000, text: `支持${orientation === 'vertical' ? '竖屏' : '横屏'}格式` },
+        { start: 9000, end: 12000, text: '可以自动生成时间轴' }
+      ]
+      
+      return {
+        success: true,
+        data: {
+          subtitles,
+          orientation
+        }
+      }
+    } catch (error) {
+      log.error('generate subtitles failed:', error)
+      return {
+        success: false,
+        error: (error as Error).message
+      }
+    }
+  })
+
+  ipcMain.handle('media:translate-subtitles', async (_, subtitles: any[], source_lang: string, target_lang: string) => {
+    try {
+      log.info('translating subtitles:', `from ${source_lang} to ${target_lang}`)
+      
+      // TODO: 调用翻译 API
+      // 可以使用 DeepL、Google Translate、百度翻译等服务
+      
+      // 模拟翻译
+      const translations = subtitles.map(sub => ({
+        ...sub,
+        translated_text: `[${target_lang}] ${sub.text}`
+      }))
+      
+      return {
+        success: true,
+        data: {
+          translated_subtitles: translations
+        }
+      }
+    } catch (error) {
+      log.error('translate subtitles failed:', error)
+      return {
+        success: false,
+        error: (error as Error).message
+      }
+    }
   })
 }
