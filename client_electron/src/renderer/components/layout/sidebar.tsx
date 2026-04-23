@@ -1,25 +1,160 @@
 /**
  * 文件名: sidebar.tsx
  * 作者: wuhao
- * 日期: 2026-04-13 18:15:00
- * 描述: 左侧侧边栏导航组件
+ * 日期: 2026-04-23 21:40:00
+ * 描述: TRAI 桌面客户端左侧侧边栏导航组件，支持折叠、国际化与深色主题
  */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Settings, LogOut, User, Menu, Wrench, MessageSquare, Image as ImageIcon, Music, Video, ImagePlus as ImagePlusIcon, ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus, Database, LayoutDashboard, FileText, FolderOpen, Compass } from 'lucide-react'
+import {
+  Home, Settings, LogOut, User, Menu, Wrench, MessageSquare,
+  Image as ImageIcon, Music, Video, ImagePlus as ImagePlusIcon,
+  ChevronDown, ChevronRight, Bot, Cpu, MessageSquarePlus,
+  Database, LayoutDashboard, FileText, FolderOpen, Compass,
+  Sparkles, Wand2
+} from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
+import { t, current_locale_store, type Locale } from '@/i18n'
 
-/**
- * 侧边栏组件
- */
+type NavChild = {
+  path: string
+  label_key: string
+  icon: React.ReactNode
+}
+
+type NavItem = {
+  id: string
+  label_key: string
+  icon: React.ReactNode
+  children?: NavChild[]
+  path?: string
+}
+
+const NAV_ITEMS: NavItem[] = [
+  {
+    id: 'dashboard',
+    label_key: 'dashboard',
+    icon: <Home size={20} />,
+    children: [{ path: '/dashboard', label_key: 'overview', icon: <LayoutDashboard size={18} /> }]
+  },
+  {
+    id: 'agent',
+    label_key: 'agent',
+    icon: <Cpu size={20} />,
+    children: [{ path: '/agent/management', label_key: 'management', icon: <Bot size={18} /> }]
+  },
+  {
+    id: 'knowledge',
+    label_key: 'knowledge_base',
+    icon: <Database size={20} />,
+    children: [{ path: '/knowledge_base', label_key: 'files', icon: <FolderOpen size={18} /> }]
+  },
+  {
+    id: 'ai',
+    label_key: 'ai_creation',
+    icon: <Sparkles size={20} />,
+    children: [
+      { path: '/chat', label_key: 'chat', icon: <MessageSquare size={18} /> },
+      { path: '/ai/text_to_image', label_key: 'text_to_image', icon: <Wand2 size={18} /> },
+      { path: '/ai/image_to_image', label_key: 'image_to_image', icon: <ImagePlusIcon size={18} /> },
+      { path: '/ai/music', label_key: 'music_generation', icon: <Music size={18} /> },
+      { path: '/ai/video', label_key: 'video_generation', icon: <Video size={18} /> }
+    ]
+  },
+  {
+    id: 'tools',
+    label_key: 'tools',
+    icon: <Wrench size={20} />,
+    children: [{ path: '/tools', label_key: 'tool', icon: <FileText size={18} /> }]
+  },
+  {
+    id: 'media',
+    label_key: 'media_center',
+    icon: <Video size={20} />,
+    children: [
+      { path: '/media', label_key: 'player', icon: <Music size={18} /> },
+      { path: '/media/processor', label_key: 'media_processing', icon: <Wrench size={18} /> }
+    ]
+  },
+  { id: 'feedback', label_key: 'feedback', icon: <MessageSquarePlus size={20} />, path: '/feedback' },
+  { id: 'settings', label_key: 'settings', icon: <Settings size={20} />, path: '/settings' }
+]
+
+const SIDEBAR_STYLES = {
+  container: {
+    width: 'var(--sidebar_width)',
+    minWidth: 'var(--sidebar_width)',
+    maxWidth: 'var(--sidebar_width)',
+    flexShrink: 0,
+    backgroundColor: 'var(--ui_panel)',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    borderRight: '1px solid var(--ui_border)',
+    transition: 'width var(--ui_transition_normal)',
+    overflow: 'hidden',
+  },
+  containerCollapsed: {
+    width: 'var(--sidebar_collapsed)',
+    minWidth: 'var(--sidebar_collapsed)',
+    maxWidth: 'var(--sidebar_collapsed)',
+  },
+  header: {
+    padding: '20px 16px',
+    borderBottom: '1px solid var(--ui_border)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '12px',
+  },
+  headerCollapsed: {
+    padding: '20px 0',
+    alignItems: 'center' as const,
+  },
+  navSection: {
+    flex: 1,
+    padding: '12px 8px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '2px',
+    overflowY: 'auto' as const,
+    overflowX: 'hidden' as const,
+  },
+  footer: {
+    padding: '12px 16px',
+    borderTop: '1px solid var(--ui_border)',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  footerCollapsed: {
+    padding: '12px 0',
+    justifyContent: 'center' as const,
+  },
+  logoText: {
+    fontSize: '13px',
+    fontWeight: 700,
+    color: 'var(--ui_sidebar_accent)',
+    letterSpacing: '0.05em',
+  },
+  versionText: {
+    fontSize: '11px',
+    color: 'var(--ui_text_muted)',
+  },
+}
+
 const Sidebar: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const logout = use_auth_store((state) => state.logout)
   const user = use_auth_store((state) => state.user)
   const [collapsed, set_collapsed] = useState(false)
-  const [expanded_groups, set_expanded_groups] = useState<Record<string, boolean>>({ ai: true, tools: true })
+  const [expanded_groups, set_expanded_groups] = useState<Record<string, boolean>>({ dashboard: true, ai: true, tools: true, knowledge: true, agent: true, media: true })
   const [version, set_version] = useState('1.0.0')
+  const [, force_update] = useState(0)
+
+  useEffect(() => {
+    const unsubscribe = current_locale_store.subscribe(() => force_update((n) => n + 1))
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     const load_version = async () => {
@@ -27,18 +162,15 @@ const Sidebar: React.FC = () => {
         try {
           const v = await window.electron_api.app_get_version()
           set_version(v)
-        } catch (e) {
-          console.error('Failed to get app version', e)
+        } catch {
+          // version remains default
         }
       }
     }
-    load_version()
+    void load_version()
   }, [])
 
-  /**
-   * 处理登出
-   */
-  const handle_logout = async () => {
+  const handle_logout = useCallback(async () => {
     try {
       if (window.electron_api?.auth_logout) {
         await window.electron_api.auth_logout()
@@ -49,178 +181,190 @@ const Sidebar: React.FC = () => {
       logout()
       navigate('/login')
     }
-  }
+  }, [logout, navigate])
 
-  /**
-   * 切换分组展开状态
-   * @param id 分组ID
-   */
-  const toggle_group = (id: string) => {
+  const toggle_group = useCallback((id: string) => {
     if (collapsed) {
       set_collapsed(false)
-      set_expanded_groups(prev => ({ ...prev, [id]: true }))
+      set_expanded_groups((prev) => ({ ...prev, [id]: true }))
     } else {
-      set_expanded_groups(prev => ({ ...prev, [id]: !prev[id] }))
+      set_expanded_groups((prev) => ({ ...prev, [id]: !prev[id] }))
     }
-  }
+  }, [collapsed])
 
-  const nav_items = [
-    {
-      id: 'dashboard',
-      label: '仪表盘',
-      icon: <Home size={20} />,
-      children: [
-        { path: '/dashboard', label: '概览', icon: <LayoutDashboard size={18} /> }
-      ]
-    },
-    {
-      id: 'agent',
-      label: '智能体',
-      icon: <Cpu size={20} />,
-      children: [
-        { path: '/agent/management', label: '管理', icon: <Bot size={18} /> }
-      ]
-    },
-    {
-      id: 'knowledge',
-      label: '知识库',
-      icon: <Database size={20} />,
-      children: [
-        { path: '/knowledge_base', label: '文件', icon: <FolderOpen size={18} /> }
-      ]
-    },
-    {
-      id: 'ai',
-      label: 'AI 创作',
-      icon: <Bot size={20} />,
-      children: [
-        { path: '/chat', label: '智能对话', icon: <MessageSquare size={18} /> },
-        { path: '/ai/text_to_image', label: '文生图像', icon: <ImageIcon size={18} /> },
-        { path: '/ai/image_to_image', label: '图生图像', icon: <ImagePlusIcon size={18} /> },
-        { path: '/ai/music', label: '音乐生成', icon: <Music size={18} /> },
-        { path: '/ai/video', label: '视频生成', icon: <Video size={18} /> }
-      ]
-    },
-    {
-      id: 'tools',
-      label: '工具箱',
-      icon: <Wrench size={20} />,
-      children: [
-        { path: '/tools', label: '工具', icon: <FileText size={18} /> }
-      ]
-    },
-    {
-      id: 'media',
-      label: '媒体中心',
-      icon: <Music size={20} />,
-      children: [
-        { path: '/media', label: '播放器', icon: <Video size={18} /> },
-        { path: '/media/processor', label: '媒体处理', icon: <FileText size={18} /> }
-      ]
-    },
-    { path: '/feedback', label: '反馈', icon: <MessageSquarePlus size={20} /> },
-    { path: '/settings', label: '设置', icon: <Settings size={20} /> }
-  ]
-
-  type LucideIconElement = React.ReactElement<{ color?: string }>
+  const is_collapsed = collapsed
 
   return (
-    <div className="no-drag-region" style={{ width: collapsed ? '56px' : '12%', minWidth: collapsed ? '56px' : '160px', maxWidth: collapsed ? '56px' : '220px', flexShrink: 1, transition: 'width 0.2s ease', backgroundColor: 'var(--ui_panel_alt)', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--ui_border)' }}>
-      <div style={{ padding: collapsed ? '20px 0' : '20px 24px', borderBottom: '1px solid var(--ui_border)', display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: collapsed ? '0' : '16px' }}>
-          {!collapsed && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Compass size={16} color="var(--ui_text_muted)" />
-              <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)', fontWeight: '600' }}>导航菜单</span>
+    <div
+      className="no-drag-region"
+      style={{
+        ...SIDEBAR_STYLES.container,
+        ...(is_collapsed ? SIDEBAR_STYLES.containerCollapsed : {}),
+      }}
+    >
+      {/* 顶部区域 */}
+      <div style={{ ...SIDEBAR_STYLES.header, ...(is_collapsed ? SIDEBAR_STYLES.headerCollapsed : {}) }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: is_collapsed ? 'center' : 'space-between' }}>
+          {!is_collapsed && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Compass size={14} color="var(--ui_sidebar_accent)" />
+              <span style={{ fontSize: '11px', color: 'var(--ui_text_muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {t('navigation')}
+              </span>
             </div>
           )}
-          <Menu size={20} color="var(--ui_text)" style={{ cursor: 'pointer' }} onClick={() => set_collapsed(!collapsed)} />
+          <button
+            className="no-drag-region"
+            type="button"
+            title={is_collapsed ? 'Expand' : 'Collapse'}
+            onClick={() => set_collapsed(!collapsed)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '4px',
+              borderRadius: 'var(--ui_radius_sm)',
+              color: 'var(--ui_text_muted)',
+              transition: 'background-color var(--ui_transition_fast)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+          >
+            <Menu size={18} />
+          </button>
         </div>
-        
-        {!collapsed && (
-          <div style={{ color: '#202020', margin: 0, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 'bold' }}>
+
+        {!is_collapsed && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', backgroundColor: 'var(--ui_panel_hover)', borderRadius: 'var(--ui_radius_md)' }}>
             {user?.username === 'admin' ? (
-              <img src="./kity.png" alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+              <img
+                src="./kity.png"
+                alt="avatar"
+                style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--ui_sidebar_accent_light)' }}
+              />
             ) : (
-              <div style={{ backgroundColor: '#0078d4', borderRadius: '50%', padding: '6px', display: 'flex', width: '32px', height: '32px', alignItems: 'center', justifyContent: 'center' }}>
-                <User size={18} color="#ffffff" />
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--ui_accent), var(--ui_sidebar_accent))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <User size={16} color="white" />
               </div>
             )}
-            {user?.username || '未登录'}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.username || t('not_logged_in')}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.role === 'admin' ? 'Administrator' : 'User'}
+              </div>
+            </div>
           </div>
         )}
       </div>
-      
-      <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
-        {nav_items.map(item => {
+
+      {/* 导航列表 */}
+      <div style={SIDEBAR_STYLES.navSection}>
+        {NAV_ITEMS.map((item) => {
           if (item.children) {
-            const is_group_active = item.children.some(child => location.pathname === child.path)
+            const is_group_active = item.children.some((child) => location.pathname === child.path)
             const is_expanded = expanded_groups[item.id]
 
             return (
-              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                {/* 分组标题 */}
                 <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggle_group(item.id)}
-                  title={collapsed ? item.label : undefined}
+                  onKeyDown={(e) => { if (e.key === 'Enter') toggle_group(item.id) }}
+                  title={is_collapsed ? t(item.label_key as any) : undefined}
                   style={{
-                    padding: collapsed ? '12px 0' : '10px 16px',
+                    padding: is_collapsed ? '10px 0' : '8px 12px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: collapsed ? 'center' : 'space-between',
-                    borderRadius: '6px',
-                    color: is_group_active && collapsed ? '#0078d4' : 'var(--ui_text_muted)',
-                    backgroundColor: is_group_active && collapsed ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-                    transition: 'background-color 0.15s ease'
+                    justifyContent: is_collapsed ? 'center' : 'space-between',
+                    borderRadius: 'var(--ui_radius_sm)',
+                    color: is_group_active ? 'var(--ui_sidebar_accent)' : 'var(--ui_text_secondary)',
+                    backgroundColor: is_group_active ? 'var(--ui_sidebar_accent_light)' : 'transparent',
+                    transition: 'background-color var(--ui_transition_fast), color var(--ui_transition_fast)',
+                    marginBottom: is_collapsed ? '0' : '2px',
+                    fontWeight: is_group_active ? 600 : 500,
+                    fontSize: '13px',
+                    userSelect: 'none' as const,
                   }}
                   onMouseEnter={(e) => {
-                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+                    if (!is_group_active) {
+                      e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'
+                      e.currentTarget.style.color = 'var(--ui_text)'
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    if (!(is_group_active && collapsed)) e.currentTarget.style.backgroundColor = 'transparent'
+                    if (!is_group_active) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.color = 'var(--ui_text_secondary)'
+                    }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: collapsed ? '0' : '12px' }}>
-                    {item.icon}
-                    {!collapsed && <span style={{ fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap' }}>{item.label}</span>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: is_collapsed ? '0' : '10px' }}>
+                    <span style={{ opacity: is_group_active ? 1 : 0.8 }}>{item.icon}</span>
+                    {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
                   </div>
-                  {!collapsed && (
-                    is_expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                  {!is_collapsed && (
+                    is_expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />
                   )}
                 </div>
 
-                {!collapsed && is_expanded && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
-                    {item.children.map(child => {
+                {/* 子菜单 */}
+                {!is_collapsed && is_expanded && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', paddingLeft: '8px', animation: 'fadeInUp 0.2s ease' }}>
+                    {item.children.map((child) => {
                       const is_child_active = location.pathname === child.path
-                      const child_icon = React.isValidElement<{ color?: string }>(child.icon)
-                        ? React.cloneElement(child.icon as LucideIconElement, { color: is_child_active ? '#0078d4' : 'var(--ui_text_muted)' })
-                        : null
-
                       return (
                         <div
                           key={child.path}
+                          role="button"
+                          tabIndex={0}
                           onClick={() => navigate(child.path)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') navigate(child.path) }}
                           style={{
-                            padding: '8px 16px 8px 48px',
+                            padding: '7px 12px 7px 36px',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '12px',
-                            borderRadius: '6px',
-                            color: is_child_active ? '#0078d4' : 'var(--ui_text_muted)',
-                            backgroundColor: is_child_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-                            transition: 'background-color 0.15s ease'
+                            gap: '10px',
+                            borderRadius: 'var(--ui_radius_sm)',
+                            color: is_child_active ? 'var(--ui_sidebar_accent)' : 'var(--ui_text_secondary)',
+                            backgroundColor: is_child_active ? 'var(--ui_sidebar_accent_light)' : 'transparent',
+                            transition: 'background-color var(--ui_transition_fast), color var(--ui_transition_fast)',
+                            fontWeight: is_child_active ? 600 : 400,
+                            fontSize: '13px',
+                            userSelect: 'none' as const,
                           }}
                           onMouseEnter={(e) => {
-                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+                            if (!is_child_active) {
+                              e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'
+                              e.currentTarget.style.color = 'var(--ui_text)'
+                            }
                           }}
                           onMouseLeave={(e) => {
-                            if (!is_child_active) e.currentTarget.style.backgroundColor = 'transparent'
+                            if (!is_child_active) {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                              e.currentTarget.style.color = 'var(--ui_text_secondary)'
+                            }
                           }}
                         >
-                          {child_icon}
-                          <span style={{ fontSize: '13px', fontWeight: is_child_active ? '600' : 'normal', whiteSpace: 'nowrap' }}>{child.label}</span>
+                          <span style={{ opacity: is_child_active ? 1 : 0.75 }}>{child.icon}</span>
+                          <span style={{ whiteSpace: 'nowrap' }}>{t(child.label_key as any)}</span>
                         </div>
                       )
                     })}
@@ -230,73 +374,91 @@ const Sidebar: React.FC = () => {
             )
           }
 
-          // Single item
+          // 单项菜单
           const is_active = location.pathname === item.path
           return (
             <div
               key={item.path}
-              onClick={() => navigate(item.path)}
-              title={collapsed ? item.label : undefined}
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(item.path as string)}
+              onKeyDown={(e) => { if (e.key === 'Enter') navigate(item.path as string) }}
+              title={is_collapsed ? t(item.label_key as any) : undefined}
               style={{
-                padding: collapsed ? '12px 0' : '10px 16px',
+                padding: is_collapsed ? '10px 0' : '8px 12px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                gap: collapsed ? '0' : '12px',
-                borderRadius: '6px',
-                color: is_active ? '#0078d4' : 'var(--ui_text)',
-                backgroundColor: is_active ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-                transition: 'background-color 0.15s ease'
+                justifyContent: is_collapsed ? 'center' : 'flex-start',
+                gap: is_collapsed ? '0' : '10px',
+                borderRadius: 'var(--ui_radius_sm)',
+                color: is_active ? 'var(--ui_sidebar_accent)' : 'var(--ui_text_secondary)',
+                backgroundColor: is_active ? 'var(--ui_sidebar_accent_light)' : 'transparent',
+                transition: 'background-color var(--ui_transition_fast), color var(--ui_transition_fast)',
+                fontWeight: is_active ? 600 : 400,
+                fontSize: '13px',
+                userSelect: 'none' as const,
               }}
               onMouseEnter={(e) => {
-                if (!is_active) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+                if (!is_active) {
+                  e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'
+                  e.currentTarget.style.color = 'var(--ui_text)'
+                }
               }}
               onMouseLeave={(e) => {
-                if (!is_active) e.currentTarget.style.backgroundColor = 'transparent'
+                if (!is_active) {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = 'var(--ui_text_secondary)'
+                }
               }}
             >
-              {item.icon}
-              {!collapsed && <span style={{ fontSize: '13px', fontWeight: is_active ? '600' : 'normal', whiteSpace: 'nowrap' }}>{item.label}</span>}
+              <span style={{ opacity: is_active ? 1 : 0.8 }}>{item.icon}</span>
+              {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
             </div>
           )
         })}
+
+        {/* 退出登录 */}
         <div
+          role="button"
+          tabIndex={0}
           onClick={handle_logout}
-          title={collapsed ? '退出' : undefined}
+          onKeyDown={(e) => { if (e.key === 'Enter') handle_logout() }}
+          title={is_collapsed ? t('logout') : undefined}
           style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            gap: collapsed ? '0' : '12px',
-            color: 'var(--ui_text)', cursor: 'pointer',
-            padding: collapsed ? '12px 0' : '10px 16px',
-            borderRadius: '6px',
-            transition: 'background-color 0.15s ease',
-            marginTop: '4px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: is_collapsed ? 'center' : 'flex-start',
+            gap: is_collapsed ? '0' : '10px',
+            color: 'var(--ui_text_muted)',
+            cursor: 'pointer',
+            padding: is_collapsed ? '10px 0' : '8px 12px',
+            borderRadius: 'var(--ui_radius_sm)',
+            transition: 'background-color var(--ui_transition_fast), color var(--ui_transition_fast)',
+            fontSize: '13px',
+            marginTop: '4px',
+            userSelect: 'none' as const,
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--ui_danger_light)'
+            e.currentTarget.style.color = 'var(--ui_danger)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = 'var(--ui_text_muted)'
+          }}
         >
-          <LogOut size={20} />
-          {!collapsed && <span style={{ fontSize: '13px' }}>退出</span>}
+          <LogOut size={18} />
+          {!is_collapsed && <span>{t('logout')}</span>}
         </div>
       </div>
 
       {/* 版本号 */}
-      <div style={{
-        padding: collapsed ? '12px 0' : '12px 16px',
-        borderTop: '1px solid #e2e8f0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'flex-start'
-      }}>
-        {!collapsed ? (
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>v{version}</span>
-        ) : (
-          <span style={{ fontSize: '10px', color: '#94a3b8' }}>v1</span>
-        )}
+      <div style={{ ...SIDEBAR_STYLES.footer, ...(is_collapsed ? SIDEBAR_STYLES.footerCollapsed : {}) }}>
+        <span style={SIDEBAR_STYLES.versionText}>
+          {t('app_name')} v{version}
+        </span>
       </div>
-
     </div>
   )
 }

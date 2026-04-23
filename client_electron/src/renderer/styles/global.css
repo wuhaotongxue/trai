@@ -1,43 +1,673 @@
-/* Global Layout Fixes */
+/**
+ * 文件名: global.css
+ * 作者: wuhao
+ * 日期: 2026-04-23 22:30:00
+ * 描述: TRAI 桌面客户端全局样式与设计系统，包含 CSS 变量、动画与通用布局修复
+ */
+
+/* ===== 全局布局修复 ===== */
 * {
   box-sizing: border-box;
-}
-
-:root {
-  --ui_bg: #f3f3f3;
-  --ui_panel: #ffffff;
-  --ui_panel_alt: #f8fafc;
-  --ui_border: rgba(0, 0, 0, 0.08);
-  --ui_text: rgba(0, 0, 0, 0.75);
-  --ui_text_muted: rgba(0, 0, 0, 0.55);
-  --ui_accent: #0ea5e9;
-  --ui_success: #10b981;
-  --ui_danger: #ef4444;
-}
-
-html[data-theme='dark'] {
-  --ui_bg: #0f172a;
-  --ui_panel: #0b1220;
-  --ui_panel_alt: #0f1b2e;
-  --ui_border: rgba(148, 163, 184, 0.18);
-  --ui_text: rgba(248, 250, 252, 0.86);
-  --ui_text_muted: rgba(226, 232, 240, 0.7);
-  --ui_accent: #38bdf8;
-  --ui_success: #10b981;
-  --ui_danger: #fb7185;
+  margin: 0;
+  padding: 0;
 }
 
 html, body, #root {
-  margin: 0;
-  padding: 0;
   height: 100%;
   width: 100%;
   overflow: hidden;
   background: var(--ui_bg);
   color: var(--ui_text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ===== Design Tokens: 浅色主题 ===== */
+:root {
+  /* 背景层 */
+  --ui_bg: #f0f2f5;
+  --ui_panel: #ffffff;
+  --ui_panel_alt: #f7f9fc;
+  --ui_panel_hover: rgba(0, 0, 0, 0.04);
+  --ui_panel_active: rgba(0, 0, 0, 0.06);
+
+  /* 边框 */
+  --ui_border: rgba(0, 0, 0, 0.08);
+  --ui_border_focus: rgba(14, 165, 233, 0.4);
+
+  /* 文字 */
+  --ui_text: rgba(15, 23, 42, 0.9);
+  --ui_text_secondary: rgba(15, 23, 42, 0.65);
+  --ui_text_muted: rgba(15, 23, 42, 0.45);
+
+  /* 主色调 */
+  --ui_accent: #0ea5e9;
+  --ui_accent_hover: #0284c7;
+  --ui_accent_light: rgba(14, 165, 233, 0.12);
+  --ui_accent_text: #ffffff;
+
+  /* 状态色 */
+  --ui_success: #10b981;
+  --ui_success_light: rgba(16, 185, 129, 0.12);
+  --ui_warning: #f59e0b;
+  --ui_warning_light: rgba(245, 158, 11, 0.12);
+  --ui_danger: #ef4444;
+  --ui_danger_light: rgba(239, 68, 68, 0.1);
+
+  /* 侧边栏品牌色 */
+  --ui_sidebar_accent: #0ea5e9;
+  --ui_sidebar_accent_light: rgba(14, 165, 233, 0.1);
+
+  /* 阴影 */
+  --ui_shadow_sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ui_shadow_md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --ui_shadow_lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --ui_shadow_card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* 圆角 */
+  --ui_radius_sm: 6px;
+  --ui_radius_md: 8px;
+  --ui_radius_lg: 12px;
+  --ui_radius_xl: 16px;
+
+  /* 过渡 */
+  --ui_transition_fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --ui_transition_normal: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --ui_transition_slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 侧边栏宽度 */
+  --sidebar_width: 220px;
+  --sidebar_collapsed: 56px;
+  --titlebar_height: 36px;
+  --footer_height: 32px;
+}
+
+/* ===== Design Tokens: 深色主题 ===== */
+html[data-theme='dark'] {
+  --ui_bg: #0b1120;
+  --ui_panel: #111827;
+  --ui_panel_alt: #0f172a;
+  --ui_panel_hover: rgba(255, 255, 255, 0.06);
+  --ui_panel_active: rgba(255, 255, 255, 0.08);
+
+  --ui_border: rgba(148, 163, 184, 0.12);
+  --ui_border_focus: rgba(56, 189, 248, 0.4);
+
+  --ui_text: rgba(241, 245, 249, 0.9);
+  --ui_text_secondary: rgba(226, 232, 240, 0.7);
+  --ui_text_muted: rgba(203, 213, 225, 0.5);
+
+  --ui_accent: #38bdf8;
+  --ui_accent_hover: #7dd3fc;
+  --ui_accent_light: rgba(56, 189, 248, 0.15);
+  --ui_accent_text: #0f172a;
+
+  --ui_success: #34d399;
+  --ui_success_light: rgba(52, 211, 153, 0.15);
+  --ui_warning: #fbbf24;
+  --ui_warning_light: rgba(251, 191, 36, 0.15);
+  --ui_danger: #fb7185;
+  --ui_danger_light: rgba(251, 113, 133, 0.15);
+
+  --ui_sidebar_accent: #38bdf8;
+  --ui_sidebar_accent_light: rgba(56, 189, 248, 0.12);
+
+  --ui_shadow_sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ui_shadow_md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --ui_shadow_lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --ui_shadow_card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== 动画关键帧 ===== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-50%) translateX(-10px); }
-  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pageLoadIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Google Material Design inspired subtle bounce */
+@keyframes subtleBounce {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.03); }
+  30% { transform: scale(0.97); }
+  45% { transform: scale(1.01); }
+  60% { transform: scale(0.995); }
+  75% { transform: scale(1.005); }
+  100% { transform: scale(1); }
+}
+
+/* Ripple effect for buttons */
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Gradient shimmer for loading states */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Smooth expand/collapse */
+@keyframes expandDown {
+  from { max-height: 0; opacity: 0; }
+  to { max-height: 500px; opacity: 1; }
+}
+
+@keyframes collapseUp {
+  from { max-height: 500px; opacity: 1; }
+  to { max-height: 0; opacity: 0; }
+}
+
+/* Slide up from bottom (for toasts, bottom sheets) */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Dot typing indicator (chat loading) */
+@keyframes dotBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+
+/* Subtle glow pulse for active elements */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.15); }
+  50% { box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.08); }
+}
+
+/* Smooth blur in */
+@keyframes blurIn {
+  from { filter: blur(8px); opacity: 0; transform: scale(1.02); }
+  to { filter: blur(0); opacity: 1; transform: scale(1); }
+}
+
+/* ===== 通用 entrance 动画类 ===== */
+.anim-fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-fade-in-up { animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-fade-in-scale { animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-slide-right { animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-slide-left { animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-page-in { animation: pageLoadIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-scale-in { animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-float { animation: float 4s ease-in-out infinite; }
+.anim-breathe { animation: breathe 2.5s ease-in-out infinite; }
+.anim-subtle-bounce { animation: subtleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-blur-in { animation: blurIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ===== 延迟动画类（用于列表项依次入场）===== */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+.delay-7 { animation-delay: 0.35s; }
+.delay-8 { animation-delay: 0.4s; }
+
+/* Staggered children animation - add class to container, children inherit via CSS */
+.stagger-children > * {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.36s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.42s; }
+.stagger-children > *:nth-child(n+9) { animation-delay: 0.48s; }
+
+/* ===== 加载骨架屏 ===== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--ui_panel_hover) 25%,
+    var(--ui_panel_active) 50%,
+    var(--ui_panel_hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--ui_radius_sm);
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--ui_panel) 0%,
+    var(--ui_panel_alt) 40%,
+    var(--ui_panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--ui_radius_md);
+}
+
+/* ===== 通用按钮样式 ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--ui_radius_sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.btn:active::after {
+  opacity: 0.08;
+}
+
+.btn-primary {
+  background: var(--ui_accent);
+  color: var(--ui_accent_text);
+  border-color: var(--ui_accent);
+}
+.btn-primary:hover {
+  background: var(--ui_accent_hover);
+  border-color: var(--ui_accent_hover);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ui_text_secondary);
+  border-color: var(--ui_border);
+}
+.btn-ghost:hover {
+  background: var(--ui_panel_hover);
+  border-color: var(--ui_text_muted);
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-danger {
+  background: var(--ui_danger);
+  color: #fff;
+  border-color: var(--ui_danger);
+}
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+}
+.btn-danger:active {
+  transform: translateY(0);
+}
+
+/* ===== 通用卡片样式 ===== */
+.ui-card {
+  background-color: var(--ui_panel);
+  border: 1px solid var(--ui_border);
+  border-radius: var(--ui_radius_lg);
+  padding: 20px;
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ui-card:hover {
+  box-shadow: var(--ui_shadow_md);
+  border-color: rgba(14, 165, 233, 0.25);
+  transform: translateY(-2px);
+}
+.ui-card-flat {
+  background-color: var(--ui_panel);
+  border: 1px solid var(--ui_border);
+  border-radius: var(--ui_radius_lg);
+}
+
+/* ===== 通用面板过渡 ===== */
+.ui-panel-transition {
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 通用 hover 效果 ===== */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ui_shadow_md);
+}
+
+/* Smooth scale on hover for interactive cards */
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: var(--ui_shadow_md);
+}
+
+/* ===== 深色主题 hover 增强 ===== */
+html[data-theme='dark'] .ui-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+html[data-theme='dark'] .btn-primary {
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+}
+html[data-theme='dark'] .btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+  transform: translateY(-1px);
+}
+html[data-theme='dark'] .btn-danger {
+  box-shadow: 0 2px 8px rgba(251, 113, 133, 0.2);
+}
+html[data-theme='dark'] .btn-danger:hover {
+  box-shadow: 0 6px 20px rgba(251, 113, 133, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ===== 滚动条美化 ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 选中文字样式 ===== */
+::selection {
+  background: var(--ui_accent_light);
+  color: var(--ui_text);
+}
+
+/* ===== 输入框样式 ===== */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+textarea,
+select {
+  background: var(--ui_panel);
+  color: var(--ui_text);
+  border: 1px solid var(--ui_border);
+  border-radius: var(--ui_radius_sm);
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: border-color var(--ui_transition_fast), box-shadow var(--ui_transition_fast);
+  outline: none;
+  font-family: inherit;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--ui_accent);
+  box-shadow: 0 0 0 3px var(--ui_accent_light);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--ui_text_muted);
+}
+
+/* ===== 链接样式 ===== */
+a {
+  color: var(--ui_accent);
+  text-decoration: none;
+  transition: color var(--ui_transition_fast);
+}
+a:hover {
+  color: var(--ui_accent_hover);
+  text-decoration: underline;
+}
+
+/* ===== 通用模态框遮罩 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-content {
+  background: var(--ui_panel);
+  border: 1px solid var(--ui_border);
+  border-radius: var(--ui_radius_xl);
+  box-shadow: var(--ui_shadow_lg);
+  animation: fadeInScale 0.25s ease-out;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow: auto;
+}
+html[data-theme='dark'] .modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* ===== 分割线样式 ===== */
+.divider {
+  height: 1px;
+  background: var(--ui_border);
+  margin: 16px 0;
+}
+
+/* ===== 标签徽章 ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 4px;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.badge:hover {
+  transform: scale(1.05);
+}
+.badge-primary {
+  background: var(--ui_accent_light);
+  color: var(--ui_accent);
+}
+.badge-success {
+  background: var(--ui_success_light);
+  color: var(--ui_success);
+}
+.badge-warning {
+  background: var(--ui_warning_light);
+  color: var(--ui_warning);
+}
+.badge-danger {
+  background: var(--ui_danger_light);
+  color: var(--ui_danger);
+}
+
+/* ===== Focus visible 样式 ===== */
+:focus-visible {
+  outline: 2px solid var(--ui_accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ===== Smooth scroll ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== Smooth cursor pointer for interactive elements ===== */
+button, [role="button"], a, select, [tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+/* ===== Chat bubble entrance animation ===== */
+.chat-bubble-enter {
+  animation: fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ===== Active indicator pulse ===== */
+.active-pulse {
+  position: relative;
+}
+.active-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--ui_accent);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* ===== Typing dots ===== */
+.typing-dots {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--ui_text_muted);
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ===== Glass morphism effect ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+html[data-theme='dark'] .glass {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Progress bar animation ===== */
+.progress-bar-fill {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Toggle switch ===== */
+.toggle-track {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background-color: var(--ui_border);
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+.toggle-track.active {
+  background-color: var(--ui_accent);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: white;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle-track.active .toggle-thumb {
+  transform: translateX(18px);
+}
+
+/* ===== Theme transition ===== */
+html {
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
