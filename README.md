@@ -46,6 +46,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 系统更新_2026_04_23_2355
+- [客户端] **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
+- [客户端] **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
+- [客户端] **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
+- [客户端] **feat(login)**: 美化 login/register 页面过渡动画
+- [客户端] **fix(media)**: 规范 media/processor.tsx 变量命名
+
 ### 🛠️ 系统更新_2026_04_23_2110
 - [前端] **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
 - [前端] **规范(skill)**: 修复 admin 仪表盘 page.tsx 缺少规范文件头的问题

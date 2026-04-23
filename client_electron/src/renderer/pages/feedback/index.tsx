@@ -7,6 +7,7 @@
 import React, { useState, useRef } from 'react'
 import { MessageSquarePlus, Send, Loader2, Paperclip, X, Lightbulb, Bug, HelpCircle, ChevronRight, History, PanelLeftClose, PanelLeftOpen, List } from 'lucide-react'
 import { should_ellipsis } from '@/utils/ui_text'
+import { t } from '@/i18n'
 
 interface FeedbackType {
   id: string
@@ -37,29 +38,29 @@ const Feedback: React.FC = () => {
   const file_input_ref = useRef<HTMLInputElement>(null)
 
   const feedback_types: FeedbackType[] = [
-    { id: 'suggestion', name: '产品建议', icon: <Lightbulb size={16} />, value: 'suggestion' },
-    { id: 'bug', name: '问题报告', icon: <Bug size={16} />, value: 'bug' },
-    { id: 'other', name: '其他反馈', icon: <HelpCircle size={16} />, value: 'other' }
+    { id: 'suggestion', name: t('product_suggestion'), icon: <Lightbulb size={16} />, value: 'suggestion' },
+    { id: 'bug', name: t('bug_report'), icon: <Bug size={16} />, value: 'bug' },
+    { id: 'other', name: t('other_feedback'), icon: <HelpCircle size={16} />, value: 'other' }
   ]
 
   const sub_categories: Record<string, FeedbackSubCategory[]> = {
     suggestion: [
-      { id: 'performance', name: '性能优化', description: '提升软件运行速度和响应效率' },
-      { id: 'feature', name: '功能建议', description: '新增功能或改进现有功能' },
-      { id: 'ui', name: '界面优化', description: '改进用户界面和交互体验' },
-      { id: 'update', name: '更新建议', description: '版本更新相关的建议' }
+      { id: 'performance', name: t('performance_opt'), description: '提升软件运行速度和响应效率' },
+      { id: 'feature', name: t('feature_suggest'), description: '新增功能或改进现有功能' },
+      { id: 'ui', name: t('ui_opt'), description: '改进用户界面和交互体验' },
+      { id: 'update', name: t('update_suggest'), description: '版本更新相关的建议' }
     ],
     bug: [
-      { id: 'crash', name: '崩溃闪退', description: '软件意外关闭或无法启动' },
-      { id: 'function', name: '功能异常', description: '功能无法正常使用' },
-      { id: 'display', name: '显示问题', description: '界面显示异常或错位' },
-      { id: 'performance_bug', name: '性能问题', description: '运行缓慢或卡顿' }
+      { id: 'crash', name: t('crash'), description: '软件意外关闭或无法启动' },
+      { id: 'function', name: t('function_error'), description: '功能无法正常使用' },
+      { id: 'display', name: t('display_issue'), description: '界面显示异常或错位' },
+      { id: 'performance_bug', name: t('performance_bug'), description: '运行缓慢或卡顿' }
     ],
     other: [
-      { id: 'consult', name: '使用咨询', description: '产品使用相关问题' },
-      { id: 'cooperation', name: '合作意向', description: '商务合作或定制需求' },
-      { id: 'complaint', name: '投诉建议', description: '服务质量相关反馈' },
-      { id: 'other_type', name: '其他类型', description: '不属于以上分类的反馈' }
+      { id: 'consult', name: t('usage_consult'), description: '产品使用相关问题' },
+      { id: 'cooperation', name: t('cooperation'), description: '商务合作或定制需求' },
+      { id: 'complaint', name: t('complaint'), description: '服务质量相关反馈' },
+      { id: 'other_type', name: t('other_type'), description: '不属于以上分类的反馈' }
     ]
   }
 
@@ -103,10 +104,10 @@ const Feedback: React.FC = () => {
 
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !content.trim()) {
-      set_message({ type: 'error', text: '标题和内容不能为空' })
-      return
-    }
+      if (!title.trim() || !content.trim()) {
+        set_message({ type: 'error', text: t('title_content_required') })
+        return
+      }
 
     set_loading(true)
     set_message(null)
@@ -128,16 +129,16 @@ const Feedback: React.FC = () => {
       })
       
       if (res.success) {
-        set_message({ type: 'success', text: '反馈提交成功, 感谢您的支持! ' })
+        set_message({ type: 'success', text: t('feedback_success') })
         set_title('')
         set_content('')
         set_contact('')
         set_attachments([])
       } else {
-        set_message({ type: 'error', text: res.error || '提交失败' })
+        set_message({ type: 'error', text: res.error || t('submit_failed') })
       }
     } catch (err: any) {
-      set_message({ type: 'error', text: err.message || '系统错误' })
+      set_message({ type: 'error', text: err.message || t('system_error') })
     } finally {
       set_loading(false)
     }
@@ -148,7 +149,7 @@ const Feedback: React.FC = () => {
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquarePlus size={20} color="var(--ui_accent)" />
-          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>用户反馈</span>
+          <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{t('feedback')}</span>
         </div>
       </div>
       
@@ -167,7 +168,7 @@ const Feedback: React.FC = () => {
           flexShrink: 1
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>反馈类型</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{t('feedback_type')}</span>
             <button
               type="button"
               onClick={() => set_is_left_sidebar_open(false)}
@@ -253,9 +254,9 @@ const Feedback: React.FC = () => {
               )}
               {(() => {
                 const title =
-                  (active_type === 'suggestion' && '产品建议') ||
-                  (active_type === 'bug' && '问题报告') ||
-                  (active_type === 'other' && '其他反馈') ||
+                  (active_type === 'suggestion' && t('product_suggestion')) ||
+                  (active_type === 'bug' && t('bug_report')) ||
+                  (active_type === 'other' && t('other_feedback')) ||
                   ''
                 return (
                   <span
@@ -354,7 +355,7 @@ const Feedback: React.FC = () => {
               </div>
             )}
             <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>
-              {active_sub_category ? sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name : '提交反馈'}
+              {active_sub_category ? sub_categories[active_type]?.find(s => s.id === active_sub_category)?.name : t('submit_feedback')}
             </span>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
@@ -381,7 +382,7 @@ const Feedback: React.FC = () => {
                   </div>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>标题 <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>{t('title_field')} <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
                   <input 
                     type="text" 
                     value={title}
@@ -392,7 +393,7 @@ const Feedback: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>详细描述 <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>{t('detail_desc')} <span style={{ color: 'var(--ui_danger)' }}>*</span></label>
                   <textarea 
                     value={content}
                     onChange={(e) => set_content(e.target.value)}
@@ -403,7 +404,7 @@ const Feedback: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>联系方式 (选填)</label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>{t('contact_info')} ({t('optional')})</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <input 
                       type="text" 
@@ -470,7 +471,7 @@ const Feedback: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>附件 (选填)</label>
+                  <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ui_text)' }}>{t('attachment')} ({t('optional')})</label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <input 
@@ -503,9 +504,9 @@ const Feedback: React.FC = () => {
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_alt)'}
                       >
                         <Paperclip size={16} />
-                        添加附件
+                        {t('attachment')}
                       </button>
-                      <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)' }}>支持图片、PDF、文档等格式, 最多上传 3 个, 单文件 5MB 以内</span>
+                      <span style={{ fontSize: '12px', color: 'var(--ui_text_muted)' }}>{t('file_limit_hint')}</span>
                     </div>
                     
                     {attachments.length > 0 && (
@@ -565,7 +566,7 @@ const Feedback: React.FC = () => {
                   }}
                 >
                   {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                  提交反馈
+                  {t('submit_feedback')}
                 </button>
               </form>
             </div>

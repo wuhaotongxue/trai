@@ -1,13 +1,14 @@
 /**
  * 文件名: index.tsx
  * 作者: wuhao
- * 日期: 2026-04-13 18:15:00
+ * 日期: 2026-04-23 22:30:00
  * 描述: 仪表盘页面组件 - 自适应三段式布局
  */
 import React, { useState, useEffect } from 'react'
 import { Monitor, Cpu, HardDrive, ChevronRight, LayoutDashboard, Activity } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
 import { should_ellipsis } from '@/utils/ui_text'
+import { t } from '@/i18n'
 
 interface SystemInfo {
   platform: string
@@ -131,10 +132,10 @@ const Dashboard: React.FC = () => {
   const [chart_seq, set_chart_seq] = useState<number>(0)
 
   const dashboard_items: DashboardItem[] = [
-    { id: 'overview', name: '系统概览', icon: <Monitor size={16} />, category: 'system' },
-    { id: 'performance', name: '性能监控', icon: <Activity size={16} />, category: 'system' },
-    { id: 'hardware', name: '硬件信息', icon: <Cpu size={16} />, category: 'system' },
-    { id: 'memory', name: '内存状态', icon: <HardDrive size={16} />, category: 'system' }
+    { id: 'overview', name: t('system_overview'), icon: <Monitor size={16} />, category: 'system' },
+    { id: 'performance', name: t('performance_monitor'), icon: <Activity size={16} />, category: 'system' },
+    { id: 'hardware', name: t('hardware_info'), icon: <Cpu size={16} />, category: 'system' },
+    { id: 'memory', name: t('memory_status'), icon: <HardDrive size={16} />, category: 'system' }
   ]
 
   const filtered_items = dashboard_items.filter(item => item.category === active_category)
@@ -197,7 +198,7 @@ const Dashboard: React.FC = () => {
           whiteSpace: 'nowrap',
           gap: '8px',
           marginBottom: '4px',
-          transition: 'all 0.2s'
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
         <Monitor size={16} />
@@ -254,73 +255,48 @@ const Dashboard: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>系统概览</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('system_overview')}</h2>
             {sys_info ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Monitor size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>系统平台</div>
+                {[
+                  { icon: <Monitor size={16} color="var(--ui_text_muted)" />, label: t('platform'), value: sys_info.platform, delay: 0 },
+                  { icon: <Cpu size={16} color="var(--ui_text_muted)" />, label: t('cpu_arch'), value: sys_info.arch, delay: 1 },
+                  { icon: <HardDrive size={16} color="var(--ui_text_muted)" />, label: t('total_memory'), value: format_gb(sys_info.total_mem), delay: 2 },
+                  { icon: <Cpu size={16} color="var(--ui_text_muted)" />, label: t('gpu'), value: metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU', delay: 3 },
+                  { icon: <Activity size={16} color="var(--ui_text_muted)" />, label: t('cpu_usage'), value: metrics ? format_percent(metrics.cpu_usage_percent) : '0.0%', delay: 4 },
+                  { icon: <HardDrive size={16} color="var(--ui_text_muted)" />, label: t('memory_usage'), value: metrics ? format_percent(metrics.mem_usage_percent) : '0.0%', delay: 5 },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="ui-card"
+                    style={{
+                      padding: '20px',
+                      animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${item.delay * 0.06}s both`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      {item.icon}
+                      <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>{item.label}</div>
+                    </div>
+                    <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{item.value}</div>
                   </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{sys_info.platform}</div>
-                </div>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Cpu size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>CPU 架构</div>
-                  </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{sys_info.arch}</div>
-                </div>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <HardDrive size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>总内存</div>
-                  </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(sys_info.total_mem)}</div>
-                </div>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Cpu size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>GPU</div>
-                  </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
-                    {(metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU')}
-                  </div>
-                </div>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <Activity size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>CPU 使用率</div>
-                  </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
-                    {metrics ? format_percent(metrics.cpu_usage_percent) : '0.0%'}
-                  </div>
-                </div>
-                <div style={{ backgroundColor: 'var(--ui_panel_alt)', padding: '20px', borderRadius: '8px', border: '1px solid var(--ui_border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                    <HardDrive size={16} color="var(--ui_text_muted)" />
-                    <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>内存使用率</div>
-                  </div>
-                  <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>
-                    {metrics ? format_percent(metrics.mem_usage_percent) : '0.0%'}
-                  </div>
-                </div>
+                ))}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                加载中...
+                {t('loading_data')}
               </div>
             )}
           </div>
         )
       case 'performance':
         return (
-          <div style={{ padding: '24px' }}>
+          <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>性能监控</h2>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('performance_monitor')}</h2>
             {metrics ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Activity size={16} color="var(--ui_accent)" />
@@ -329,12 +305,12 @@ const Dashboard: React.FC = () => {
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
                   </div>
                   <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_accent)' }} />
+                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_accent)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={cpu_series} stroke="var(--ui_accent)" seq={chart_seq} />
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <HardDrive size={16} color="var(--ui_success)" />
@@ -343,7 +319,7 @@ const Dashboard: React.FC = () => {
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.mem_usage_percent)}</div>
                   </div>
                   <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_success)' }} />
+                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_success)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={mem_series} stroke="var(--ui_success)" seq={chart_seq} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', color: 'var(--ui_text_muted)', fontSize: '12px' }}>
@@ -352,7 +328,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <LayoutDashboard size={16} color="var(--ui_text_muted)" />
@@ -381,55 +357,55 @@ const Dashboard: React.FC = () => {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                加载中...
+                {t('loading_data')}
               </div>
             )}
           </div>
         )
       case 'hardware':
         return (
-          <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>硬件信息</h2>
+          <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('hardware_info')}</h2>
             {sys_info ? (
               <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden' }}>
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>系统详情</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{t('system_details')}</div>
                 </div>
                 <div style={{ padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>操作系统</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('os')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.platform}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>CPU 架构</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('cpu_arch')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.arch}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>内核版本</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('kernel')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.release}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>GPU</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('gpu')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU'}</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                加载中...
+                {t('loading_data')}
               </div>
             )}
           </div>
         )
       case 'memory':
         return (
-          <div style={{ padding: '24px' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>内存状态</h2>
+          <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('memory_status')}</h2>
             {sys_info ? (
               <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '24px' }}>
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>总内存</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('total_memory')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.total_mem ?? sys_info.total_mem)}</span>
                   </div>
                   <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -438,7 +414,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>可用内存</span>
+                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('available')}</span>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.free_mem ?? sys_info.free_mem)}</span>
                   </div>
                   <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -455,7 +431,7 @@ const Dashboard: React.FC = () => {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                加载中...
+                {t('loading_data')}
               </div>
             )}
           </div>
@@ -467,11 +443,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <ThreePanelLayout
-      title="概览"
+      title={t('overview')}
       titleIcon={<LayoutDashboard size={20} color="#0ea5e9" />}
-      leftPanelTitle="功能"
+      leftPanelTitle={t('feature')}
       leftPanel={left_panel}
-      middlePanelTitle={active_category === 'system' ? '系统信息' : '项目'}
+      middlePanelTitle={active_category === 'system' ? t('system_info') : t('project')}
       middlePanel={middle_panel}
       rightPanelTitle={filtered_items.find(i => i.id === active_item)?.name || '详情'}
       contentPadding="32px"

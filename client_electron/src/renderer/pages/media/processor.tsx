@@ -42,10 +42,10 @@ const MediaProcessorPage: React.FC = () => {
   // 状态管理
   const [active_tab, set_active_tab] = useState<'audio_transcript' | 'subtitle_generator' | 'bilingual_subtitles'>('audio_transcript')
   const [audio_tasks, set_audio_tasks] = useState<AudioTask[]>([])
-  const [selected_video_orientation, setSelected_video_orientation] = useState<'vertical' | 'horizontal'>('horizontal')
+  const [selected_video_orientation, set_selected_video_orientation] = useState<'vertical' | 'horizontal'>('horizontal')
   const [source_language, set_source_language] = useState<string>('zh')
   const [target_language, set_target_language] = useState<string>('en')
-  const [is_processing, setIsProcessing] = useState<boolean>(false)
+  const [is_processing, set_is_processing] = useState<boolean>(false)
   
   // 引用
   const file_input_ref = useRef<HTMLInputElement>(null)
@@ -73,7 +73,7 @@ const MediaProcessorPage: React.FC = () => {
   // 处理音频任务
   const process_audio_task = async (task: AudioTask) => {
     try {
-      setIsProcessing(true)
+      set_is_processing(true)
       
       // 更新状态为处理中
       set_audio_tasks(prev => prev.map(t => 
@@ -144,7 +144,7 @@ const MediaProcessorPage: React.FC = () => {
         } : t
       ))
     } finally {
-      setIsProcessing(false)
+      set_is_processing(false)
     }
   }
   
@@ -169,7 +169,7 @@ ${transcript}
   // 生成字幕
   const handle_generate_subtitles = async (task: AudioTask) => {
     try {
-      setIsProcessing(true)
+      set_is_processing(true)
       
       if (window.electron_api && window.electron_api.media_generate_subtitles) {
         const result = await window.electron_api.media_generate_subtitles(
@@ -202,14 +202,14 @@ ${transcript}
     } catch (error) {
       console.error('生成字幕失败:', error)
     } finally {
-      setIsProcessing(false)
+      set_is_processing(false)
     }
   }
   
   // 翻译字幕
   const handle_translate_subtitles = async (task: AudioTask) => {
     try {
-      setIsProcessing(true)
+      set_is_processing(true)
       
       if (window.electron_api && window.electron_api.media_translate_subtitles) {
         const result = await window.electron_api.media_translate_subtitles(
@@ -241,7 +241,7 @@ ${transcript}
     } catch (error) {
       console.error('翻译字幕失败:', error)
     } finally {
-      setIsProcessing(false)
+      set_is_processing(false)
     }
   }
   
@@ -670,7 +670,7 @@ trailer
               on_generate_subtitles={handle_generate_subtitles}
               on_download={handle_download}
               video_orientation={selected_video_orientation}
-              on_orientation_change={setSelected_video_orientation}
+              on_orientation_change={set_selected_video_orientation}
               source_language={source_language}
               on_language_change={set_source_language}
               is_processing={is_processing}
