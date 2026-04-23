@@ -458,7 +458,7 @@ const MediaPlayerPage: React.FC = () => {
                 <p style={{ margin: 0, color: 'var(--ui_text_muted)' }}>音频播放中</p>
                 <audio
                   ref={audio_ref}
-                  src={`file://${current_file.path}`}
+                  src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
                   autoPlay={is_playing}
                   onTimeUpdate={(e) => handle_time_update(e.currentTarget.currentTime)}
                   onEnded={handle_ended}
@@ -469,7 +469,7 @@ const MediaPlayerPage: React.FC = () => {
             ) : (
               <video
                 ref={video_ref}
-                src={`file://${current_file.path}`}
+                src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
                 autoPlay={is_playing}
                 onTimeUpdate={(e) => handle_time_update(e.currentTarget.currentTime)}
                 onEnded={handle_ended}
