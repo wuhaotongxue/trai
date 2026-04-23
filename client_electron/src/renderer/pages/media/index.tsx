@@ -469,15 +469,17 @@ const MediaPlayerPage: React.FC = () => {
                 />
               </div>
             ) : (
-              <video
-                ref={video_ref}
-                src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
-                autoPlay={is_playing}
-                onTimeUpdate={(e) => handle_time_update(e.currentTarget.currentTime)}
-                onEnded={handle_ended}
-                onLoadedMetadata={(e) => handle_metadata_loaded(e.currentTarget.duration)}
-                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                <video
+                  ref={video_ref}
+                  src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
+                  autoPlay={is_playing}
+                  onTimeUpdate={(e) => handle_time_update(e.currentTarget.currentTime)}
+                  onEnded={handle_ended}
+                  onLoadedMetadata={(e) => handle_metadata_loaded(e.currentTarget.duration)}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              </div>
             )
           ) : (
             <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)' }}>
