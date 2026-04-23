@@ -49,6 +49,12 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 💻 客户端_2026_04_23_2018
+- **feat(tools)**: 工具分类完善，重新组织工具分类，格式转换分类包含MD转PDF、Word转PDF、PDF转Word、Excel转换、图片格式转换；新增其他工具分类包含JSON检测
+- **feat(media)**: 媒体处理页面将添加按钮从右侧移动到左侧，优化用户体验
+- **feat(tools)**: 工具页面调整右侧内容区域宽度，避免内容溢出
+- **feat(ai)**: AI对话添加多模态支持，支持文件上传
+
 ### 💻 客户端_2026_04_23_0906
 - **perf(knowledge_base)**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
 - **perf(virtual_list)**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
