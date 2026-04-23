@@ -1,7 +1,7 @@
 /**
  * 文件名: sidebar.tsx
  * 作者: wuhao
- * 日期: 2026-04-23 21:40:00
+ * 日期: 2026-04-24 00:10:00
  * 描述: TRAI 桌面客户端左侧侧边栏导航组件，支持折叠、国际化与深色主题
  */
 import React, { useState, useEffect, useCallback } from 'react'
@@ -273,13 +273,13 @@ const Sidebar: React.FC = () => {
 
       {/* 导航列表 */}
       <div style={SIDEBAR_STYLES.navSection}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, nav_idx) => {
           if (item.children) {
             const is_group_active = item.children.some((child) => location.pathname === child.path)
             const is_expanded = expanded_groups[item.id]
 
             return (
-              <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div key={item.id} style={{ display: 'flex', flexDirection: 'column', animation: `fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) ${nav_idx * 0.04}s both` }}>
                 {/* 分组标题 */}
                 <div
                   role="button"
@@ -301,6 +301,7 @@ const Sidebar: React.FC = () => {
                     fontWeight: is_group_active ? 600 : 500,
                     fontSize: '13px',
                     userSelect: 'none' as const,
+                    position: 'relative',
                   }}
                   onMouseEnter={(e) => {
                     if (!is_group_active) {
@@ -315,6 +316,13 @@ const Sidebar: React.FC = () => {
                     }
                   }}
                 >
+                  {is_group_active && !is_collapsed && (
+                    <div style={{
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      width: '3px', height: '16px', borderRadius: '0 2px 2px 0',
+                      backgroundColor: 'var(--ui_accent)',
+                    }} />
+                  )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: is_collapsed ? '0' : '10px' }}>
                     <span style={{ opacity: is_group_active ? 1 : 0.8 }}>{item.icon}</span>
                     {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
@@ -398,6 +406,8 @@ const Sidebar: React.FC = () => {
                 fontWeight: is_active ? 600 : 400,
                 fontSize: '13px',
                 userSelect: 'none' as const,
+                position: 'relative',
+                animation: `fadeInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) ${NAV_ITEMS.indexOf(item) * 0.04}s both`,
               }}
               onMouseEnter={(e) => {
                 if (!is_active) {
@@ -412,6 +422,13 @@ const Sidebar: React.FC = () => {
                 }
               }}
             >
+              {is_active && !is_collapsed && (
+                <div style={{
+                  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                  width: '3px', height: '16px', borderRadius: '0 2px 2px 0',
+                  backgroundColor: 'var(--ui_accent)',
+                }} />
+              )}
               <span style={{ opacity: is_active ? 1 : 0.8 }}>{item.icon}</span>
               {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
             </div>
