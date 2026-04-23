@@ -1,18 +1,17 @@
 /**
  * 文件名: main_layout.tsx
  * 作者: wuhao
- * 日期: 2026-04-13 18:15:00
- * 描述: 客户端主页面布局
+ * 日期: 2026-04-23 22:05:00
+ * 描述: TRAI 桌面客户端主布局组件，整合标题栏、侧边栏与内容区域
  */
 import React, { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from './sidebar'
 import TitleBar from './title_bar'
+import PageTransition from './page_transition'
 import { use_auth_store } from '@/store/auth'
+import { t } from '@/i18n'
 
-/**
- * 主布局组件
- */
 const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
   const logout = use_auth_store((state) => state.logout)
@@ -25,16 +24,11 @@ const MainLayout: React.FC = () => {
   }, [is_authenticated, navigate])
 
   useEffect(() => {
-    // 监听 Token 过期事件
     const handle_need_login = () => {
       logout()
       navigate('/login')
     }
-
-    // 添加 IPC 监听器
     window.electron_api.on('auth:need-login', handle_need_login)
-
-    // 清理监听器
     return () => {
       window.electron_api.off('auth:need-login', handle_need_login)
     }
@@ -49,23 +43,56 @@ const MainLayout: React.FC = () => {
       <TitleBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: 'var(--ui_bg)', borderBottom: '1px solid var(--ui_border)', minHeight: 0 }}>
-          <Outlet />
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          backgroundColor: 'var(--ui_bg)',
+          minHeight: 0,
+        }}>
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </div>
       </div>
-      <div style={{ display: 'flex', backgroundColor: 'var(--ui_panel_alt)', borderTop: '1px solid var(--ui_border)' }}>
-        <div style={{ width: '12%', minWidth: '160px', maxWidth: '220px', flexShrink: 1, borderRight: '1px solid var(--ui_border)' }}></div>
-        <div style={{ flex: 1, padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: 'var(--ui_text_muted)' }}>
-          <span>TRAI</span>
-          <span>|</span>
-          <span>开发联系: wuhaotongxue@gmail.com</span>
+      {/* 底部状态栏 */}
+      <div style={{
+        display: 'flex',
+        backgroundColor: 'var(--ui_panel)',
+        borderTop: '1px solid var(--ui_border)',
+        height: 'var(--footer_height)',
+        alignItems: 'center',
+        transition: 'background-color var(--ui_transition_normal), border-color var(--ui_transition_normal)',
+      }}>
+        {/* 侧边栏占位保持对齐 */}
+        <div style={{ width: 'var(--sidebar_width)', minWidth: 'var(--sidebar_width)', maxWidth: 'var(--sidebar_width)', flexShrink: 0, height: '100%' }} />
+        {/* 状态栏内容 */}
+        <div style={{
+          flex: 1,
+          padding: '0 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '11px',
+          color: 'var(--ui_text_muted)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--ui_success)', display: 'inline-block', boxShadow: '0 0 4px var(--ui_success)' }} />
+              {t('app_name')}
+            </span>
+            <span style={{ color: 'var(--ui_border)' }}>|</span>
+            <span>{t('footer_contact')}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontWeight: 600, color: 'var(--ui_accent)' }}>TRAI</span>
+            <span style={{ fontWeight: 400, color: 'var(--ui_text_muted)' }}>Desktop Client</span>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-/**
- * 主布局组件导出
- */
 export default MainLayout
