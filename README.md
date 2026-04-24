@@ -46,6 +46,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_24_2215
+- **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
+- **feat(i18n)**: 新增国际化翻译管理接口和公开接口, 拆分前端和客户端翻译初始化脚本
+
+### 🎨 前端_2026_04_24_2215
+- **fix(i18n)**: 修复 admin_i18n_context 直接使用 item.key 匹配翻译键, 与后端 API 返回格式一致
+
 ### 🛠️ 客户端_2026_04_24_2127
 - **fix(i18n)**: 修复 axios 拦截器，添加 API 请求/响应日志调试
 - **fix(css)**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
