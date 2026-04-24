@@ -371,7 +371,7 @@ const ImageToImage: React.FC = () => {
 
         <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0, marginTop: '16px' }}>
           <div style={{ 
-            flex: 1, backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+            flex: 1, backgroundColor: 'var(--ui_panel)', borderRadius: '12px', 
             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
           }}>
             {source_display_url ? (
@@ -385,7 +385,7 @@ const ImageToImage: React.FC = () => {
           </div>
 
           <div style={{ 
-            flex: 1, backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+            flex: 1, backgroundColor: 'var(--ui_panel)', borderRadius: '12px', 
             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
           }}>
             {loading ? (

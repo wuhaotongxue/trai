@@ -10,7 +10,7 @@ import { t } from '@/i18n'
 
 const UnderDevelopment: React.FC = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px', boxSizing: 'border-box', backgroundColor: 'var(--ui_bg)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px', boxSizing: 'border-box', backgroundColor: 'var(--ui_panel)' }}>
       <div className="drag-region" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
         <Wrench size={22} color="var(--ui_accent)" />
         <h1 style={{ margin: 0, fontSize: '18px', color: 'var(--ui_text)', fontWeight: 600 }}>{t('under_development')}</h1>

@@ -48,6 +48,11 @@ contextBridge.exposeInMainWorld('electron_api', {
   app_check_update: () => ipcRenderer.invoke('app:check_update'),
   app_install_update: () => ipcRenderer.invoke('app:install_update'),
   app_get_version: () => ipcRenderer.invoke('app:get_version'),
+  // 窗口控制
+  window_minimize: () => ipcRenderer.invoke('window:minimize'),
+  window_maximize: () => ipcRenderer.invoke('window:maximize'),
+  window_close: () => ipcRenderer.invoke('window:close'),
+  window_is_maximized: () => ipcRenderer.invoke('window:is_maximized'),
   // 媒体播放相关
   media_select_files: () => ipcRenderer.invoke('media:select-files'),
   media_select_folder: () => ipcRenderer.invoke('media:select-folder'),
