@@ -241,6 +241,37 @@ html[data-theme='dark'] {
   to { filter: blur(0); opacity: 1; transform: scale(1); }
 }
 
+/* Logo spin animation - clockwise */
+@keyframes logoSpinCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Logo spin animation - counter-clockwise */
+@keyframes logoSpinCCW {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+/* Fade in from left */
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Fade in from right */
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Shake animation for error feedback */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
 /* Loading progress bar */
 @keyframes loadingProgress {
   0% { width: 0%; margin-left: 0%; }
@@ -254,12 +285,16 @@ html[data-theme='dark'] {
 .anim-fade-in-scale { animation: fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-slide-right { animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-slide-left { animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-fade-in-left { animation: fadeInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-fade-in-right { animation: fadeInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-page-in { animation: pageLoadIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-scale-in { animation: scaleIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both; }
 .anim-float { animation: float 4s ease-in-out infinite; }
 .anim-breathe { animation: breathe 2.5s ease-in-out infinite; }
 .anim-subtle-bounce { animation: subtleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .anim-blur-in { animation: blurIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.anim-spin { animation: logoSpinCW 3s linear infinite; }
+.anim-shake { animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 
 /* ===== 延迟动画类（用于列表项依次入场）===== */
 .delay-1 { animation-delay: 0.05s; }
