@@ -19,71 +19,73 @@ styles/markdown.css
 
 ## 可用样式类
 
+所有类名使用 **snake_case** 命名。
+
 ### 基础块
 
 | 类名 | 用途 | 颜色 |
 |------|------|------|
-| `.doc-lead` | 开篇高亮 | 蓝色渐变 |
-| `.doc-tip` | 提示块 | 蓝色 |
-| `.doc-info` | 信息块 | 青色 |
-| `.doc-warn` | 警告块 | 红色 |
-| `.doc-ok` | 成功块 | 绿色 |
+| `.doc_lead` | 开篇高亮 | 蓝色渐变 |
+| `.doc_tip` | 提示块 | 蓝色 |
+| `.doc_info` | 信息块 | 青色 |
+| `.doc_warn` | 警告块 | 红色 |
+| `.doc_ok` | 成功块 | 绿色 |
 
 ### 组件
 
 | 类名 | 用途 |
 |------|------|
-| `.doc-cards` / `.doc-card` | 卡片栅格 |
-| `.doc-table-wrap` | 表格包装 |
-| `.doc-tag` | 小节标签 |
-| `.doc-badge--*` | 徽章（red/blue/green/yellow/purple） |
-| `.doc-progress` | 进度条 |
-| `.doc-steps` / `.doc-step` | 步骤指示器 |
-| `.doc-details` | 折叠块 |
-| `.doc-toc` | 目录导航 |
-| `.doc-stats` / `.doc-stat` | 统计数据 |
-| `.doc-quote` | 引用块 |
+| `.doc_cards` / `.doc_card` | 卡片栅格 |
+| `.doc_table_wrap` | 表格包装 |
+| `.doc_tag` | 小节标签 |
+| `.doc_badge_*` | 徽章（red/blue/green/yellow/purple） |
+| `.doc_progress` | 进度条 |
+| `.doc_steps` / `.doc_step` | 步骤指示器 |
+| `.doc_details` | 折叠块 |
+| `.doc_toc` | 目录导航 |
+| `.doc_stats` / `.doc_stat` | 统计数据 |
+| `.doc_quote` | 引用块 |
 
 ### 文字样式
 
 | 类名 | 用途 |
 |------|------|
-| `.doc-highlight` | 高亮文字 |
-| `.doc-del` | 删除线 |
+| `.doc_highlight` | 高亮文字 |
+| `.doc_del` | 删除线 |
 
 ## 使用示例
 
 ```html
-<div class="doc-tip">
+<div class="doc_tip">
   <strong>提示：</strong>这是一个提示信息
 </div>
 
-<div class="doc-ok">
+<div class="doc_ok">
   操作成功！
 </div>
 
-<div class="doc-cards">
-  <div class="doc-card">
-    <div class="doc-card-title">功能一</div>
+<div class="doc_cards">
+  <div class="doc_card">
+    <div class="doc_card_title">功能一</div>
     <p>描述内容</p>
   </div>
 </div>
 
-<div class="doc-stats">
-  <div class="doc-stat">
-    <div class="doc-stat-value">42</div>
-    <div class="doc-stat-label">完成数</div>
+<div class="doc_stats">
+  <div class="doc_stat">
+    <div class="doc_stat_value">42</div>
+    <div class="doc_stat_label">完成数</div>
   </div>
 </div>
 
-<div class="doc-steps">
-  <div class="doc-step">
-    <div class="doc-step-title">第一步</div>
-    <div class="doc-step-content">执行操作</div>
+<div class="doc_steps">
+  <div class="doc_step">
+    <div class="doc_step_title">第一步</div>
+    <div class="doc_step_content">执行操作</div>
   </div>
 </div>
 
-<div class="doc-badge doc-badge--green">已完成</div>
+<div class="doc_badge doc_badge_green">已完成</div>
 ```
 
 ## 注意事项
