@@ -53,45 +53,58 @@ cd trai
 - **技能（项目）**: 新增 error_logs 技能规范，记录格式要求
 
 ### 🛠️ 系统更新_2026_04_24_2355
-### 🛠️ 系统更新_2026_04_24_2355
-- **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
+- **技能（项目）**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
 
 ### 🛠️ 客户端_2026_04_24_2356
-- **fix(login)**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
-- **fix(auth)**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
-- **fix(logout)**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
+- **修复（客户端）**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
+- **修复（客户端）**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
+- **样式（客户端）**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
 
+<<<<<<< HEAD
 ### 🛠️ 后端_2026_04_24_1525
-- **feat(i18n)**: 新增国际化字符串和系统配置数据库模型与仓储 (I18nRepository)
-- **feat(i18n)**: 新增 Admin i18n 管理接口，支持翻译字符串的增删改查
-- **feat(i18n)**: 新增公开翻译查询接口，支持 namespace 批量拉取
-- **feat(notify)**: 新增飞书 AI 事件通知服务，支持文生图和 AI 对话富文本卡片
-- **feat(image)**: 新增图片生成配置接口和客户端工厂，统一管理多模型
-- **feat(system)**: 新增系统配置和 Schema 文档管理接口
+- **新增（后端）**: 新增国际化字符串和系统配置数据库模型与仓储 (I18nRepository)
+- **新增（后端）**: 新增 Admin i18n 管理接口，支持翻译字符串的增删改查
+- **新增（后端）**: 新增公开翻译查询接口，支持 namespace 批量拉取
+- **新增（后端）**: 新增飞书 AI 事件通知服务，支持文生图和 AI 对话富文本卡片
+- **新增（后端）**: 新增图片生成配置接口和客户端工厂，统一管理多模型
+- **新增（后端）**: 新增系统配置和 Schema 文档管理接口
+=======
+### 🛠️ 后端_2026_04_24_2215
+- **修复（后端）**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
+- **新增（后端）**: 新增国际化翻译管理接口和公开接口, 拆分前端和客户端翻译初始化脚本
+
+### 🎨 前端_2026_04_24_2215
+- **修复（前端）**: 修复 admin_i18n_context 直接使用 item.key 匹配翻译键, 与后端 API 返回格式一致
+
+### 🛠️ 客户端_2026_04_24_2127
+- **修复（客户端）**: 修复 axios 拦截器，添加 API 请求/响应日志调试
+- **修复（客户端）**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
+- **修复（客户端）**: 修复 `current_locale_store` 引用，统一使用 `use_locale`
+>>>>>>> develop
 
 ### 💻 客户端_2026_04_24_0100
-- **feat(login)**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
+- **新增（客户端）**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
 
 ### 💻 客户端_2026_04_24_0040
-- **feat(login)**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
+- **新增（客户端）**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
 
 ### 💻 客户端_2026_04_24_0020
-- **feat(chat)**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
-- **feat(chat)**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
-- **feat(register)**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
+- **新增（客户端）**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
+- **样式（客户端）**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
+- **新增（客户端）**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
 - **feat(ThreePanelLayout)**: 增强面板展开收起动画 — cubic-bezier 过渡、hover 上浮效果
 
 ### 💻 客户端_2026_04_24_0010
-- **perf(sidebar)**: 添加导航项活跃指示器条与错落下沉入场动画
-- **perf(title_bar)**: 增强按钮悬停效果 — 上浮与阴影过渡
-- **perf(app)**: 优化加载页面 — 进度条动画替代圆点指示器
+- **优化（客户端）**: 添加导航项活跃指示器条与错落下沉入场动画
+- **优化（客户端）**: 增强按钮悬停效果 — 上浮与阴影过渡
+- **优化（客户端）**: 优化加载页面 — 进度条动画替代圆点指示器
 
 ### 💻 客户端_2026_04_23_2355
-- **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
+- **重构（客户端）**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
 - **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
-- **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
-- **feat(login)**: 美化 login/register 页面过渡动画
-- **fix(media)**: 规范 media/processor.tsx 变量命名
+- **样式（客户端）**: 增强 global.css 动画系统，Google Material Design 风格
+- **样式（客户端）**: 美化 login/register 页面过渡动画
+- **修复（客户端）**: 规范 media/processor.tsx 变量命名
 
 ### 🛠️ 系统更新_2026_04_23_2110
 - [前端] **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
@@ -106,17 +119,17 @@ cd trai
 - [后端] **周报功能**: 实现AI周报生成功能
 
 ### �� 客户端_2026_04_23_0906
-- **perf(knowledge_base)**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
-- **perf(virtual_list)**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
-- **perf(main_process)**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
-- **perf(ipc)**: IPC通信优化，实现请求缓存和批处理功能
-- **perf(network)**: 网络请求优化，实现请求缓存和节流
-- **perf(monitoring)**: 新增性能监控和错误处理模块
+- **优化（客户端）**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
+- **优化（客户端）**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
+- **优化（客户端）**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
+- **优化（客户端）**: IPC通信优化，实现请求缓存和批处理功能
+- **优化（后端）**: 网络请求优化，实现请求缓存和节流
+- **新增（客户端）**: 新增性能监控和错误处理模块
 
 ### 💻 客户端_2026_04_23_1200
-- **feat(media_player)**: 媒体播放器支持文件夹结构显示，实现文件夹展开/折叠功能
-- **feat(media_player)**: 优化媒体文件选择逻辑，支持按文件夹层级展示媒体文件
-- **feat(media_player)**: 改进播放控制逻辑，支持在文件夹结构中切换媒体文件
+- **新增（客户端）**: 媒体播放器支持文件夹结构显示，实现文件夹展开/折叠功能
+- **优化（客户端）**: 优化媒体文件选择逻辑，支持按文件夹层级展示媒体文件
+- **优化（客户端）**: 改进播放控制逻辑，支持在文件夹结构中切换媒体文件
 
 ### 🛠️ 系统更新_2026_04_22_1515
 - [前端] **Agent UI 升级**: 实现了类似 DeepSeek 的左侧会话历史侧边栏, 支持会话切换、重命名与删除
@@ -147,27 +160,27 @@ cd trai
 - **新增(client_electron)**: 登录页增加“保存登录状态(免扫码)”功能，并在应用启动时自动检测并恢复用户状态
 
 ### 🛠️ 后端_2026_04_21_1941
-- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
-- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+- **修复（后端）**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增（后端）**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
 
 ### 🎨 前端_2026_04_21_1941
-- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
-- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
+- **构建（前端）**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复（前端）**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 🛠️ 后端_2026_04_21_1729
-- **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
-- **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口
+- **新增（后端）**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
+- **重构（后端）**: 增加企业微信用户创建或更新方法, 统一落库入口
 
 ### 🛠️ 后端_2026_04_21_1649
-- **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
-- **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
-- **refactor(error)**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
+- **重构（后端）**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
+- **修复（后端）**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
+- **重构（后端）**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
 
 ### 🎨 前端_2026_04_21_1649
-- **refactor(api_base)**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
+- **重构（前端）**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
 
 ### 💻 客户端_2026_04_21_1649
-- **refactor(api)**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
+- **重构（客户端）**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
 
 ### 🛠️ 系统更新_2026_04_21_1138
 - [交互] 恢复右下角 AI 助手为当前页弹窗模式，支持右上角一键在新标签页中展开
@@ -188,67 +201,66 @@ cd trai
 
 
 ### 🛠️ 后端_2026_04_20_1434
-- **security(audit)**: 完成代码安全审核, 修复 scripts 目录中的 print 语句违规问题
-- **refactor(enum)**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
-- **fix(tools)**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
-- **chore(lint)**: 通过 Ruff linter 检查, 修复所有代码风格问题
+- **安全（后端）**: 完成代码安全审核, 修复 scripts 目录中的 print 语句违规问题
+- **重构（后端）**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
+- **重构（后端）**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
+- **构建（后端）**: 通过 Ruff linter 检查, 修复所有代码风格问题
 
 ### � 规范(skills)_2026_04_20_1646
-- **chore(skills)**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
+- **技能（项目）**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
 
 ### �🛠️ 后端_2026_04_20_1147
-- **feat(login)**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
-- **fix(database)**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
-- **refactor(tools)**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright
-- **chore(deps)**: 更新 requirements.txt, 移除 weasyprint 和 pdfkit
+- **修复（后端）**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
+- **修复（后端）**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
+- **重构（后端）**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright
+- **构建（后端）**: 更新 requirements.txt, 移除 weasyprint 和 pdfkit
 - 全局替换 src/api/routers 中对 Depends(get_session) 的调用为 Depends(get_db_session)
 - 新增 docs/postgresql_lock_issue.md 指南文档，提供锁死排查方法和僵尸进程清理 SQL
 
 ### 💻 客户端_2026_04_19_2241
-- **feat(theme)**: 顶栏新增浅色/深色切换(太阳/月亮), 并持久化保存
-- **feat(tools)**: MD 转 PDF 支持 Markdown 预览与转换结果 PDF 预览
-- **feat(ai)**: 图生图支持本地图片上传, 自动转 data URL 并预览
-- **feat(dashboard)**: 性能折线图刷新间隔调整为 2s, 新增 GPU 名称展示
-- **refactor(ui)**: 抽取 should_ellipsis/to_fixed_chars 工具并统一四字风格文案
+- **新增（客户端）**: 顶栏新增浅色/深色切换(太阳/月亮), 并持久化保存
+- **新增（客户端）**: MD 转 PDF 支持 Markdown 预览与转换结果 PDF 预览
+- **新增（客户端）**: 图生图支持本地图片上传, 自动转 data URL 并预览
+- **新增（客户端）**: 性能折线图刷新间隔调整为 2s, 新增 GPU 名称展示
+- **重构（客户端）**: 抽取 should_ellipsis/to_fixed_chars 工具并统一四字风格文案
 
 ### 🛠️ 后端_2026_04_19_2241
-- **feat(ai)**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
+- **新增（后端）**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
 
 ### 💻 客户端_2026_04_19_2159
-- **feat(platform)**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
-- **feat(ipc)**: 注册 system:get_info 和 system:get_metrics IPC 处理器
-- **feat(tools)**: 工具箱页面支持 Markdown 转 PDF 功能
-- **优化(layout)**: 优化三栏布局组件和侧边栏组件
-- **优化(ui)**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
-- **优化(dashboard)**: 优化仪表盘页面布局
-- **优化(feedback)**: 优化反馈页面布局
+- **新增（客户端）**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
+- **新增（客户端）**: 注册 system:get_info 和 system:get_metrics IPC 处理器
+- **新增（客户端）**: 工具箱页面支持 Markdown 转 PDF 功能
+- **优化（客户端）**: 优化三栏布局组件和侧边栏组件
+- **优化（客户端）**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
+- **优化（客户端）**: 优化仪表盘页面布局
+- **优化（客户端）**: 优化反馈页面布局
 
 ### 🛠️ 后端_2026_04_19_2132
-- **fix(ruff)**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
-- **fix(ruff)**: 修复 weather.py 未使用变量 lang，添加 noqa 标记
+- **修复（后端）**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
+- **修复（后端）**: 修复 weather.py 未使用变量 lang，添加 noqa 标记
 
 ### 💻 客户端_2026_04_19_1109
-- **fix(layout)**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
-- **fix(layout)**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
-- **fix(settings)**: 修复设置页面右侧标题栏高度问题，移除justifyContent: 'space-between'
-- **fix(agent)**: 添加PanelLeftClose导入，修复未定义错误
-- **fix(tools)**: 添加PanelLeftClose导入，修复未定义错误
+- **修复（客户端）**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
+- **修复（客户端）**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
+- **修复（客户端）**: 修复设置页面右侧标题栏高度问题，移除justifyContent: 'space-between'
+- **修复（客户端）**: 添加PanelLeftClose导入，修复未定义错误
 
 ### 💻 客户端_2026_04_19_1019
-- **feat(text_to_image)**: 添加左侧风格分类栏（动物/城市/风景/人物），使用不同图标
-- **feat(image_to_image)**: 添加左侧风格分类栏（科幻/艺术），使用不同图标
-- **feat(music)**: 添加左侧音乐分类栏（现代/古典），使用不同图标
-- **feat(video)**: 添加左侧视频分类栏（城市/自然），使用不同图标
-- **优化(ai)**: 所有AI页面点击左侧分类时自动填充该分类的第一个模板到右侧输入框
-- **优化(ai)**: 所有AI页面添加右侧标题栏标题
+- **新增（客户端）**: 添加左侧风格分类栏（动物/城市/风景/人物），使用不同图标
+- **新增（客户端）**: 添加左侧风格分类栏（科幻/艺术），使用不同图标
+- **新增（客户端）**: 添加左侧音乐分类栏（现代/古典），使用不同图标
+- **新增（客户端）**: 添加左侧视频分类栏（城市/自然），使用不同图标
+- **优化（客户端）**: 所有AI页面点击左侧分类时自动填充该分类的第一个模板到右侧输入框
+- **优化（客户端）**: 所有AI页面添加右侧标题栏标题
 
 ### 💻 客户端_2026_04_19_0940
-- **优化(knowledge)**: 统一知识库三个标题栏按钮样式、padding和图标大小
-- **优化(knowledge)**: 调整搜索框高度至28px，与按钮高度一致
-- **优化(knowledge)**: 调整上传文件按钮padding，适配标题栏高度
-- **优化(knowledge)**: 统一底部按钮区域padding，与右侧分页区域对齐
-- **fix(chat)**: 修复工具调用步骤状态显示，当tool_result返回后更新tool_start状态为已完成
-- **fix(chat)**: 修复工具调用图标显示逻辑，已完成状态不再显示转圈
+- **优化（客户端）**: 统一知识库三个标题栏按钮样式、padding和图标大小
+- **优化（客户端）**: 调整搜索框高度至28px，与按钮高度一致
+- **优化（客户端）**: 调整上传文件按钮padding，适配标题栏高度
+- **优化（客户端）**: 统一底部按钮区域padding，与右侧分页区域对齐
+- **修复（客户端）**: 修复工具调用步骤状态显示，当tool_result返回后更新tool_start状态为已完成
+- **修复（客户端）**: 修复工具调用图标显示逻辑，已完成状态不再显示转圈
 
 ### 💻 客户端_2026_04_19_0812
 - **优化(agent)**: Agent管理页面新建按钮样式改为虚线边框，与AI对话页面保持一致
@@ -471,34 +483,34 @@ cd trai
 
 ### 💻 客户端_2026_04_14_1653
 - **新增(client_electron)**: `Settings` 系统设置页面新增“检查更新”与“立即重启并安装”按钮，用户可直观地查看当前应用版本并手动触发 OTA 自动更新流程
-- **优化(client_electron)**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
+- **优化（客户端）**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
 
 ### 💻 客户端_2026_04_14_1650
-- **新增(client_electron)**: `main` 进程中接入 `electron-updater` 模块，配置自动更新 `UpdateService` 服务并指向后端重定向 API
-- **优化(client_electron)**: `package.json` 中的 `electron-updater` 依赖和打包配置已完善，自动更新可绕过 S3 预签名时效性问题
+- **新增（客户端）**: `main` 进程中接入 `electron-updater` 模块，配置自动更新 `UpdateService` 服务并指向后端重定向 API
+- **优化（客户端）**: `package.json` 中的 `electron-updater` 依赖和打包配置已完善，自动更新可绕过 S3 预签名时效性问题
 
 ### 🛠️ 后端_2026_04_14_1650
-- **新增(backend)**: 新增 `ClientReleaseModel` (PostgreSQL `t_client_releases`)，持久化存储发布的客户端版本及 S3 Key 信息
-- **新增(backend)**: `api.routers.admin.client_release` 中新增 POST `/api/admin/client/release` 接口，支持管理员上传 `latest.yml` 与 `exe` 安装包并保存至 S3
-- **新增(backend)**: `api.routers.client.update` 中新增 GET `/api/client/update/latest.yml` 和 `/api/client/update/{filename}` 接口，利用后端重定向发放 S3 短期预签名 URL，完美解决时间过期限制问题
+- **新增（后端）**: 新增 `ClientReleaseModel` (PostgreSQL `t_client_releases`)，持久化存储发布的客户端版本及 S3 Key 信息
+- **新增（后端）**: `api.routers.admin.client_release` 中新增 POST `/api/admin/client/release` 接口，支持管理员上传 `latest.yml` 与 `exe` 安装包并保存至 S3
+- **新增（后端）**: `api.routers.client.update` 中新增 GET `/api/client/update/latest.yml` 和 `/api/client/update/{filename}` 接口，利用后端重定向发放 S3 短期预签名 URL，完美解决时间过期限制问题
 
-### 📚 规范(skills)_2026_04_14_1645
-- **新增(docs)**: 补充《TRAI 版本更新与发布指南》(`version_update_guide.md`)，详细说明如何解决 S3 预签名链接时间限制问题并确保客户端稳定获取更新
-- **优化(skills)**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
-- **清理(docs)**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
+### 📚 技能（项目）_2026_04_14_1645
+- **新增（文档）**: 补充《TRAI 版本更新与发布指南》(`version_update_guide.md`)，详细说明如何解决 S3 预签名链接时间限制问题并确保客户端稳定获取更新
+- **优化（技能）**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
+- **清理（文档）**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
 
-### 📚 项目(docs)_2026_04_14_1634
-- **新增(md)**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
+### 📚 项目_2026_04_14_1634
+- **新增（文档）**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
 
 ### 💻 客户端_2026_04_14_1630
-- **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
+- **重构（客户端）**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
 
 ### 🎨 前端_2026_04_14_1610
-- **新增(roadmap)**: 增加基于 Git 历史的路线图页面, 支持线性时间轴, 关系图谱, 按前端/后端/客户端分组展示当日变更
-- **新增(docs)**: 补齐文档中心与子页面路由, 包含 /docs, /docs/api, /docs/sdk, /docs/quickstart, /docs/faq
-- **优化(layout)**: 官网多页面统一为更接近全屏的 max-w-7xl 布局, 减少内容区过窄的问题
-- **优化(交互)**: 页脚链接统一新标签页打开, 避免打断当前页面操作流
-- **规范(rename)**: 前端文件名与导入命名统一 snake_case, 替换 kebab-case 命名
+- **新增（前端）**: 增加基于 Git 历史的路线图页面, 支持线性时间轴, 关系图谱, 按前端/后端/客户端分组展示当日变更
+- **新增（前端）**: 补齐文档中心与子页面路由, 包含 /docs, /docs/api, /docs/sdk, /docs/quickstart, /docs/faq
+- **优化（前端）**: 官网多页面统一为更接近全屏的 max-w-7xl 布局, 减少内容区过窄的问题
+- **优化（前端）**: 页脚链接统一新标签页打开, 避免打断当前页面操作流
+- **规范（前端）**: 前端文件名与导入命名统一 snake_case, 替换 kebab-case 命名
 
 ### 📚 规范(skills)_2026_04_14_1610
 - **新增(frontend_next)**: 补充页面布局全宽规范, 推荐使用 container + max-w-7xl, 避免过窄 max-w 限制
@@ -507,14 +519,14 @@ cd trai
 - **新增(client_electron)**: Agent 管理页面新增“状态检测”按钮，支持调用后端检测接口验证 Agent 当前的运行状态是否正常，并在 UI 上展示异常 (Error) 状态标签
 
 ### 🛠️ 后端_2026_04_14_1501
-- **新增(backend)**: `management.py` 中新增 `/api/agent/management/check` 接口，支持检测指定 Agent 的运行状态是否正常（模拟了网络延迟和运行中 20% 概率抛出异常的情况）
+- **新增（后端）**: `management.py` 中新增 `/api/agent/management/check` 接口，支持检测指定 Agent 的运行状态是否正常（模拟了网络延迟和运行中 20% 概率抛出异常的情况）
 
 ### 🛠️ 后端_2026_04_14_1446
-- **修复(backend)**: 修复 `main.py` 中遗漏注册 `management`、`music`、`video` 路由，导致 `/api/agent/management/list` 接口报 404 的问题
+- **修复（后端）**: 修复 `main.py` 中遗漏注册 `management`、`music`、`video` 路由，导致 `/api/agent/management/list` 接口报 404 的问题
 
 ### 🛠️ 后端_2026_04_14_1444
-- **修复(deps)**: 清理 `requirements.txt` 中由于 `pip freeze` 意外导出的本地项目可编辑依赖
-- **修复(ruff)**: 修复 `domain` 模块中由于冗余导入导致无法通过 Ruff 检查的语法警告
+- **构建（后端）**: 清理 `requirements.txt` 中由于 `pip freeze` 意外导出的本地项目可编辑依赖
+- **修复（后端）**: 修复 `domain` 模块中由于冗余导入导致无法通过 Ruff 检查的语法警告
 
 ### 💻 客户端_2026_04_14_1500
 - **重构(client_electron)**: 重构工具箱卡片头部 UI，将图标、标题和描述从垂直居中堆叠改为水平流式布局（图标居左，标题与描述在右侧堆叠），有效节省卡片垂直空间并提升横向阅读体验
@@ -673,12 +685,12 @@ cd trai
 - **新增(frontend_next)**: 使用 `kity.svg` 作为默认图标配置
 
 ### 🛠️ 后端_2026_04_21_1941
-- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
-- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+- **修复（后端）**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增（后端）**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
 
 ### 🎨 前端_2026_04_21_1941
-- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
-- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
+- **构建（前端）**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复（前端）**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 📚 规范(skills)_2026_04_13_2015
 - **新增(skills)**: 补充“测试文件应写到测试文件夹下, 临时验证脚本使用后必须立即删除”的项目规范

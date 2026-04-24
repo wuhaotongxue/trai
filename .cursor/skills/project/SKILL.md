@@ -17,6 +17,7 @@ TRAI项目管理相关规范的统一入口。
 | README更新 | `readme_update/SKILL.md` | 更新文档时 |
 | 周报生成 | `report_generation/SKILL.md` | 生成工作周报/月报时 |
 | 期数文档 | `issue_index/SKILL.md` | 撰写md/issue_NN/index.md |
+| Markdown样式 | `markdown_style/SKILL.md` | 编写文档时使用增强样式 |
 | 编码修复 | `fix_encoding/SKILL.md` | 代码文件出现中文乱码时 |
 
 ## 统一规则
