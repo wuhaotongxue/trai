@@ -37,6 +37,11 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_24_2215
+- **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
+- **feat(i18n)**: 新增国际化翻译管理接口 (admin/i18n) 和公开接口 (i18n/{locale})
+- **feat(i18n)**: 拆分前端和客户端翻译初始化脚本, 分离 FRONTEND_TRANSLATIONS 和 CLIENT_TRANSLATIONS
+
 ### 🛠️ 后端_2026_04_22_1515
 - **feat(session)**: 新增会话重命名接口 `POST /sessions/{session_id}/rename`
 - **feat(release)**: 客户端发布支持 EXE 文件上传, 并升级飞书通知为 Interactive 卡片格式
