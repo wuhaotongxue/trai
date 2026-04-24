@@ -61,6 +61,9 @@ interface Window {
     // 通用 IPC 事件监听
     on: (channel: string, callback: (...args: any[]) => void) => void;
     off: (channel: string, callback: (...args: any[]) => void) => void;
+    // 国际化相关
+    i18n_get_translations?: (locale: 'zh' | 'en') => Promise<{ success: boolean; data?: Record<string, string>; error?: string }>;
+    i18n_get_all_translations?: () => Promise<{ success: boolean; data?: { zh: Record<string, string>; en: Record<string, string> }; error?: string }>;
   }
 }
 
