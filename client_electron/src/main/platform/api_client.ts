@@ -108,13 +108,39 @@ api_client.interceptors.response.use(
   }
 )
 
+/**
+ * 是否正在处理登出重定向中（防止重复触发弹框）
+ */
+let is_handling_logout = false
+
 async function handle_logout_redirect(error: any) {
-  log.warn('Token expired or invalid, showing re-login prompt')
-  
+  // 防止重复触发
+  if (is_handling_logout) {
+    return Promise.reject(error)
+  }
+  is_handling_logout = true
+
+  log.warn('Token expired or invalid, handling logout redirect')
+
+  // 检查 token 是否已经为空（可能是用户主动登出）
+  const current_token = config_store.get('access_token')
+  const current_refresh_token = config_store.get('refresh_token')
+
+  // 如果 token 已经被清空（用户主动登出），不显示弹框，直接通知跳转
+  if (!current_token && !current_refresh_token) {
+    log.info('Tokens already cleared (user logged out), sending need-login event directly')
+    const win = BrowserWindow.getFocusedWindow()
+    if (win) {
+      win.webContents.send('auth:need-login')
+    }
+    is_handling_logout = false
+    return Promise.reject(error)
+  }
+
   // 清理无效 token
   config_store.set('access_token', '')
   config_store.set('refresh_token', '')
-  
+
   // 获取当前窗口
   const win = BrowserWindow.getFocusedWindow()
   if (win) {
@@ -127,11 +153,12 @@ async function handle_logout_redirect(error: any) {
       buttons: ['去登录'],
       defaultId: 0
     })
-    
+
     if (result.response === 0) {
       // 通知渲染进程跳转到登录页面
       win.webContents.send('auth:need-login')
     }
   }
+  is_handling_logout = false
   return Promise.reject(error)
 }

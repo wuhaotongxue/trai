@@ -10,7 +10,9 @@ import App from './app'
 import './styles/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  // 注意: 暂时禁用 StrictMode 以诊断白屏问题
+  // <React.StrictMode>
+  //   <App />
+  // </React.StrictMode>
+  <App />
 )

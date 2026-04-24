@@ -49,6 +49,11 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 客户端_2026_04_24_2356
+- **fix(login)**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
+- **fix(auth)**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
+- **fix(logout)**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
+
 ### 🛠️ 客户端_2026_04_24_2127
 - **fix(i18n)**: 修复 axios 拦截器，添加 API 请求/响应日志调试
 - **fix(css)**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范

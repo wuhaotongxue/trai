@@ -37,7 +37,30 @@ description: "Electron 桌面客户端代码审查主入口。强制执行 TypeS
 <strong>禁止</strong>：在代码和注释中出现中文全角标点符号（`，`、`。`、`！`、`：`）
 </div>
 
-### 3. TypeScript + Node.js 环境规范
+### 3. 导入规范 (CRITICAL)
+
+<div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 12px; margin: 12px 0;">
+<strong>&#x274C; 绝对禁止重复导入</strong> — 同一个模块禁止出现两个相同的 import 语句，这会导致编译错误和白屏
+<br/><br/>
+<span style="color:#D32F2F;">错误示例：</span>
+<pre style="background:#fff5f5;padding:8px;border-radius:4px;margin:8px 0;">
+import { use_locale_store } from '@/store/locale'
+import { use_locale_store } from '@/store/locale'  // 重复导入！
+</pre>
+<span style="color:#2E7D32;">正确做法：</span>
+<pre style="background:#f0fff0;padding:8px;border-radius:4px;margin:8px 0;">
+// 合并到一行
+import { use_locale_store } from '@/store/locale'
+</pre>
+<strong>审查时必须检查：</strong>
+<ul style="margin:8px 0 0 0;padding-left:20px;">
+  <li>每个 import 语句唯一性</li>
+  <li>同一模块只导入一次</li>
+  <li>使用 ESLint no-duplicate-imports 规则</li>
+</ul>
+</div>
+
+### 4. TypeScript + Node.js 环境规范
 
 | 配置项 | 值 |
 |--------|-----|
@@ -46,7 +69,16 @@ description: "Electron 桌面客户端代码审查主入口。强制执行 TypeS
 | 类型 | 必须显式类型注解，禁止 `any` |
 | 导入 | `import { foo } from './foo'`，禁止 `import * as foo` |
 
-### 4. 五层架构强制分层 (Layered Architecture)
+### 4. TypeScript + Node.js 环境规范
+
+|| 配置项 | 值 |
+||--------|-----|
+|| Node.js | 20 LTS |
+|| TypeScript | 严格模式 (`strict: true`) |
+|| 类型 | 必须显式类型注解，禁止 `any` |
+|| 导入 | `import { foo } from './foo'`，禁止 `import * as foo` |
+
+### 5. 五层架构强制分层 (Layered Architecture)
 
 Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 

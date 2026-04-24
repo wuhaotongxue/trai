@@ -14,7 +14,8 @@ import {
   Sparkles, Wand2
 } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
-import { t, use_locale, type Locale } from '@/i18n'
+import { t, type Locale } from '@/i18n'
+import { use_locale_store } from '@/store/locale'
 
 type NavChild = {
   path: string
@@ -152,7 +153,7 @@ const Sidebar: React.FC = () => {
   const [, force_update] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = use_locale.subscribe(() => force_update((n) => n + 1))
+    const unsubscribe = use_locale_store.subscribe(() => force_update((n) => n + 1))
     return unsubscribe
   }, [])
 
@@ -172,14 +173,25 @@ const Sidebar: React.FC = () => {
 
   const handle_logout = useCallback(async () => {
     try {
+      // 添加退出动画效果
+      const content = document.querySelector('.main-content')
+      if (content) {
+        (content as HTMLElement).style.opacity = '0'
+        (content as HTMLElement).style.transform = 'scale(0.98)'
+        ;(content as HTMLElement).style.transition = 'opacity 0.3s ease, transform 0.3s ease'
+      }
+
       if (window.electron_api?.auth_logout) {
         await window.electron_api.auth_logout()
       }
     } catch (error) {
       console.error('logout error:', error)
     } finally {
-      logout()
-      navigate('/login')
+      // 延迟跳转，等待动画完成
+      setTimeout(() => {
+        logout()
+        navigate('/login')
+      }, 300)
     }
   }, [logout, navigate])
 

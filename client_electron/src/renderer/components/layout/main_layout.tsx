@@ -52,7 +52,9 @@ const MainLayout: React.FC = () => {
           minHeight: 0,
         }}>
           <PageTransition>
-            <Outlet />
+            <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <Outlet />
+            </div>
           </PageTransition>
         </div>
       </div>
