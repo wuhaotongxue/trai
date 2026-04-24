@@ -53,13 +53,12 @@ cd trai
 - **技能（项目）**: 新增 error_logs 技能规范，记录格式要求
 
 ### 🛠️ 系统更新_2026_04_24_2355
-### 🛠️ 系统更新_2026_04_24_2355
-- **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
+- **技能（项目）**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
 
 ### 🛠️ 客户端_2026_04_24_2356
-- **fix(login)**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
-- **fix(auth)**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
-- **fix(logout)**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
+- **修复（客户端）**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
+- **修复（客户端）**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
+- **样式（客户端）**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
 
 ### 🛠️ 后端_2026_04_24_2215
 - **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
@@ -69,33 +68,33 @@ cd trai
 - **fix(i18n)**: 修复 admin_i18n_context 直接使用 item.key 匹配翻译键, 与后端 API 返回格式一致
 
 ### 🛠️ 客户端_2026_04_24_2127
-- **fix(i18n)**: 修复 axios 拦截器，添加 API 请求/响应日志调试
-- **fix(css)**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
-- **fix(i18n)**: 修复 `current_locale_store` 引用，统一使用 `use_locale`
+- **修复（客户端）**: 修复 axios 拦截器，添加 API 请求/响应日志调试
+- **修复（客户端）**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
+- **修复（客户端）**: 修复 `current_locale_store` 引用，统一使用 `use_locale`
 
 ### 💻 客户端_2026_04_24_0100
-- **feat(login)**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
+- **新增（客户端）**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
 
 ### 💻 客户端_2026_04_24_0040
-- **feat(login)**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
+- **新增（客户端）**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
 
 ### 💻 客户端_2026_04_24_0020
-- **feat(chat)**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
-- **feat(chat)**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
-- **feat(register)**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
+- **新增（客户端）**: 增强聊天输入框 — 快速命令建议、字符统计、输入框自适应高度
+- **样式（客户端）**: 美化空状态引导卡片 — 品牌图标 + 快捷按钮引导
+- **新增（客户端）**: 密码可见切换、强度指示器（三色条）、确认密码实时验证
 - **feat(ThreePanelLayout)**: 增强面板展开收起动画 — cubic-bezier 过渡、hover 上浮效果
 
 ### 💻 客户端_2026_04_24_0010
-- **perf(sidebar)**: 添加导航项活跃指示器条与错落下沉入场动画
-- **perf(title_bar)**: 增强按钮悬停效果 — 上浮与阴影过渡
-- **perf(app)**: 优化加载页面 — 进度条动画替代圆点指示器
+- **优化（客户端）**: 添加导航项活跃指示器条与错落下沉入场动画
+- **优化（客户端）**: 增强按钮悬停效果 — 上浮与阴影过渡
+- **优化（客户端）**: 优化加载页面 — 进度条动画替代圆点指示器
 
 ### 💻 客户端_2026_04_23_2355
-- **refactor(chat)**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
+- **重构（客户端）**: 重构 AgentChat 页面 — 1362 行为 5 个子组件，修复 JSX 嵌套错误
 - **feat(i18n)**: 新增 i18n.ts 国际化模块，dashboard/feedback/media 等页面全面接入
-- **feat(animation)**: 增强 global.css 动画系统，Google Material Design 风格
-- **feat(login)**: 美化 login/register 页面过渡动画
-- **fix(media)**: 规范 media/processor.tsx 变量命名
+- **样式（客户端）**: 增强 global.css 动画系统，Google Material Design 风格
+- **样式（客户端）**: 美化 login/register 页面过渡动画
+- **修复（客户端）**: 规范 media/processor.tsx 变量命名
 
 ### 🛠️ 系统更新_2026_04_23_2110
 - [前端] **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
@@ -113,9 +112,9 @@ cd trai
 - **perf(knowledge_base)**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
 - **perf(virtual_list)**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
 - **perf(main_process)**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
-- **perf(ipc)**: IPC通信优化，实现请求缓存和批处理功能
-- **perf(network)**: 网络请求优化，实现请求缓存和节流
-- **perf(monitoring)**: 新增性能监控和错误处理模块
+- **优化（客户端）**: IPC通信优化，实现请求缓存和批处理功能
+- **优化（后端）**: 网络请求优化，实现请求缓存和节流
+- **新增（客户端）**: 新增性能监控和错误处理模块
 
 ### 💻 客户端_2026_04_23_1200
 - **feat(media_player)**: 媒体播放器支持文件夹结构显示，实现文件夹展开/折叠功能
@@ -163,15 +162,15 @@ cd trai
 - **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口
 
 ### 🛠️ 后端_2026_04_21_1649
-- **refactor(api)**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
-- **fix(wecom)**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
-- **refactor(error)**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
+- **重构（后端）**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
+- **修复（后端）**: 企业微信回调地址跟随 API_PREFIX 生成, 避免回调路径不一致
+- **重构（后端）**: TraiException 增加结构化日志字段, 全局异常处理中间件统一输出
 
 ### 🎨 前端_2026_04_21_1649
-- **refactor(api_base)**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
+- **重构（前端）**: 默认 API Base 切换为 /api_trai/v1, 登录页与 SSE 流式请求同步更新
 
 ### 💻 客户端_2026_04_21_1649
-- **refactor(api)**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
+- **重构（客户端）**: 桌面端接口路径表统一切换为 /api_trai/v1 前缀
 
 ### 🛠️ 系统更新_2026_04_21_1138
 - [交互] 恢复右下角 AI 助手为当前页弹窗模式，支持右上角一键在新标签页中展开
@@ -192,67 +191,66 @@ cd trai
 
 
 ### 🛠️ 后端_2026_04_20_1434
-- **security(audit)**: 完成代码安全审核, 修复 scripts 目录中的 print 语句违规问题
-- **refactor(enum)**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
-- **fix(tools)**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
-- **chore(lint)**: 通过 Ruff linter 检查, 修复所有代码风格问题
+- **安全（后端）**: 完成代码安全审核, 修复 scripts 目录中的 print 语句违规问题
+- **重构（后端）**: 统一使用 Python 3.11+ 内置 StrEnum, 替换自定义兼容实现
+- **重构（后端）**: 清理 PDFGenerator 冗余代码, 仅保留 Playwright 后端
+- **构建（后端）**: 通过 Ruff linter 检查, 修复所有代码风格问题
 
 ### � 规范(skills)_2026_04_20_1646
-- **chore(skills)**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
+- **技能（项目）**: 更新后端开发规范, 完善 Python 文件头模板与 Docstring 要求
 
 ### �🛠️ 后端_2026_04_20_1147
-- **feat(login)**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
-- **fix(database)**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
-- **refactor(tools)**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright
-- **chore(deps)**: 更新 requirements.txt, 移除 weasyprint 和 pdfkit
+- **修复（后端）**: 优化登录接口错误处理, 添加详细的超时和连接错误提示
+- **修复（后端）**: 修复数据库连接配置, 支持 PostgreSQL 和 SQLite 自动回退
+- **重构（后端）**: 简化 PDF 生成器, 移除 WeasyPrint 和 pdfkit 依赖, 仅保留 Playwright
+- **构建（后端）**: 更新 requirements.txt, 移除 weasyprint 和 pdfkit
 - 全局替换 src/api/routers 中对 Depends(get_session) 的调用为 Depends(get_db_session)
 - 新增 docs/postgresql_lock_issue.md 指南文档，提供锁死排查方法和僵尸进程清理 SQL
 
 ### 💻 客户端_2026_04_19_2241
-- **feat(theme)**: 顶栏新增浅色/深色切换(太阳/月亮), 并持久化保存
-- **feat(tools)**: MD 转 PDF 支持 Markdown 预览与转换结果 PDF 预览
-- **feat(ai)**: 图生图支持本地图片上传, 自动转 data URL 并预览
-- **feat(dashboard)**: 性能折线图刷新间隔调整为 2s, 新增 GPU 名称展示
-- **refactor(ui)**: 抽取 should_ellipsis/to_fixed_chars 工具并统一四字风格文案
+- **新增（客户端）**: 顶栏新增浅色/深色切换(太阳/月亮), 并持久化保存
+- **新增（客户端）**: MD 转 PDF 支持 Markdown 预览与转换结果 PDF 预览
+- **新增（客户端）**: 图生图支持本地图片上传, 自动转 data URL 并预览
+- **新增（客户端）**: 性能折线图刷新间隔调整为 2s, 新增 GPU 名称展示
+- **重构（客户端）**: 抽取 should_ellipsis/to_fixed_chars 工具并统一四字风格文案
 
 ### 🛠️ 后端_2026_04_19_2241
-- **feat(ai)**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
+- **新增（后端）**: 新增 /api/ai/image_to_image 图生图接口, 支持接收 image_url 或 data URL
 
 ### 💻 客户端_2026_04_19_2159
-- **feat(platform)**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
-- **feat(ipc)**: 注册 system:get_info 和 system:get_metrics IPC 处理器
-- **feat(tools)**: 工具箱页面支持 Markdown 转 PDF 功能
-- **优化(layout)**: 优化三栏布局组件和侧边栏组件
-- **优化(ui)**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
-- **优化(dashboard)**: 优化仪表盘页面布局
-- **优化(feedback)**: 优化反馈页面布局
+- **新增（客户端）**: 新增系统信息获取接口 get_system_info 和系统指标监控 get_system_metrics
+- **新增（客户端）**: 注册 system:get_info 和 system:get_metrics IPC 处理器
+- **新增（客户端）**: 工具箱页面支持 Markdown 转 PDF 功能
+- **优化（客户端）**: 优化三栏布局组件和侧边栏组件
+- **优化（客户端）**: 优化 AI 创作页面布局（文生图、图生图、音乐、视频）
+- **优化（客户端）**: 优化仪表盘页面布局
+- **优化（客户端）**: 优化反馈页面布局
 
 ### 🛠️ 后端_2026_04_19_2132
-- **fix(ruff)**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
-- **fix(ruff)**: 修复 weather.py 未使用变量 lang，添加 noqa 标记
+- **修复（后端）**: 修复 tools.py 条件导入 Playwright/WeasyPrint/pdfkit 的未使用警告，添加 noqa 标记
+- **修复（后端）**: 修复 weather.py 未使用变量 lang，添加 noqa 标记
 
 ### 💻 客户端_2026_04_19_1109
-- **fix(layout)**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
-- **fix(layout)**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
-- **fix(settings)**: 修复设置页面右侧标题栏高度问题，移除justifyContent: 'space-between'
-- **fix(agent)**: 添加PanelLeftClose导入，修复未定义错误
-- **fix(tools)**: 添加PanelLeftClose导入，修复未定义错误
+- **修复（客户端）**: 统一所有页面左侧栏折叠按钮图标为PanelLeftClose
+- **修复（客户端）**: 在中间栏标题栏添加左侧栏展开按钮，保持三个标题栏高度一致
+- **修复（客户端）**: 修复设置页面右侧标题栏高度问题，移除justifyContent: 'space-between'
+- **修复（客户端）**: 添加PanelLeftClose导入，修复未定义错误
 
 ### 💻 客户端_2026_04_19_1019
-- **feat(text_to_image)**: 添加左侧风格分类栏（动物/城市/风景/人物），使用不同图标
-- **feat(image_to_image)**: 添加左侧风格分类栏（科幻/艺术），使用不同图标
-- **feat(music)**: 添加左侧音乐分类栏（现代/古典），使用不同图标
-- **feat(video)**: 添加左侧视频分类栏（城市/自然），使用不同图标
-- **优化(ai)**: 所有AI页面点击左侧分类时自动填充该分类的第一个模板到右侧输入框
-- **优化(ai)**: 所有AI页面添加右侧标题栏标题
+- **新增（客户端）**: 添加左侧风格分类栏（动物/城市/风景/人物），使用不同图标
+- **新增（客户端）**: 添加左侧风格分类栏（科幻/艺术），使用不同图标
+- **新增（客户端）**: 添加左侧音乐分类栏（现代/古典），使用不同图标
+- **新增（客户端）**: 添加左侧视频分类栏（城市/自然），使用不同图标
+- **优化（客户端）**: 所有AI页面点击左侧分类时自动填充该分类的第一个模板到右侧输入框
+- **优化（客户端）**: 所有AI页面添加右侧标题栏标题
 
 ### 💻 客户端_2026_04_19_0940
-- **优化(knowledge)**: 统一知识库三个标题栏按钮样式、padding和图标大小
-- **优化(knowledge)**: 调整搜索框高度至28px，与按钮高度一致
-- **优化(knowledge)**: 调整上传文件按钮padding，适配标题栏高度
-- **优化(knowledge)**: 统一底部按钮区域padding，与右侧分页区域对齐
-- **fix(chat)**: 修复工具调用步骤状态显示，当tool_result返回后更新tool_start状态为已完成
-- **fix(chat)**: 修复工具调用图标显示逻辑，已完成状态不再显示转圈
+- **优化（客户端）**: 统一知识库三个标题栏按钮样式、padding和图标大小
+- **优化（客户端）**: 调整搜索框高度至28px，与按钮高度一致
+- **优化（客户端）**: 调整上传文件按钮padding，适配标题栏高度
+- **优化（客户端）**: 统一底部按钮区域padding，与右侧分页区域对齐
+- **修复（客户端）**: 修复工具调用步骤状态显示，当tool_result返回后更新tool_start状态为已完成
+- **修复（客户端）**: 修复工具调用图标显示逻辑，已完成状态不再显示转圈
 
 ### 💻 客户端_2026_04_19_0812
 - **优化(agent)**: Agent管理页面新建按钮样式改为虚线边框，与AI对话页面保持一致
