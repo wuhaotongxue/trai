@@ -1131,7 +1131,7 @@ const KnowledgeBasePage: React.FC = () => {
                       e.currentTarget.style.backgroundColor = 'transparent'
                     }}
                   >
-                    <RotateCw size={18} className={files_loading ? 'animate-spin' : ''} />
+                    <RotateCw size={18} className={files_loading ? 'anim_spin' : ''} />
                   </button>
                   <input type="file" multiple ref={file_input_ref} onChange={handle_file_upload} title="上传文件" aria-label="上传文件" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md" style={{ display: 'none' }} />
                   <button
@@ -1152,7 +1152,7 @@ const KnowledgeBasePage: React.FC = () => {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '24px', minHeight: 0 }}>
                 {files_loading && display_files.length === 0 ? (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-                    <Loader2 size={28} className="animate-spin" />
+                    <Loader2 size={28} className="anim_spin" />
                     <div style={{ marginTop: '12px', fontSize: '13px' }}>正在加载中...</div>
                   </div>
                 ) : display_files.length === 0 ? (
@@ -1178,7 +1178,7 @@ const KnowledgeBasePage: React.FC = () => {
                       {files_loading ? (
                         <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', backgroundColor: 'var(--ui_panel)', border: '1px solid var(--ui_border)', borderRadius: '10px', boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={18} className="anim_spin" />
                             <div style={{ fontSize: '13px', color: 'var(--ui_text)' }}>正在加载中...</div>
                           </div>
                         </div>
@@ -1212,7 +1212,7 @@ const KnowledgeBasePage: React.FC = () => {
                                 {file.status === 'success' ? (
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_success)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}>已解析</span>
                                 ) : (
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_accent)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="animate-spin" />上传中</span>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--ui_accent)', backgroundColor: 'var(--ui_border)', padding: '2px 8px', borderRadius: '12px', whiteSpace: 'nowrap' }}><Loader2 size={12} className="anim_spin" />上传中</span>
                                 )}
                               </div>
                               <div style={{ padding: '12px 16px', textAlign: 'right', width: '80px' }}>
@@ -1318,7 +1318,7 @@ const KnowledgeBasePage: React.FC = () => {
                             disabled={files_loading}
                             className="kb_pagination_button"
                           >
-                            {files_loading && page_action === 'jump' ? <Loader2 size={12} className="animate-spin" /> : null}
+                            {files_loading && page_action === 'jump' ? <Loader2 size={12} className="anim_spin" /> : null}
                             跳转
                           </button>
                         </div>
@@ -1421,7 +1421,7 @@ const KnowledgeBasePage: React.FC = () => {
             {create_kb_error && <div style={{ color: '#e51400', fontSize: '12px', marginBottom: '12px' }}>{create_kb_error}</div>}
             {creating_kb && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
-                <Loader2 size={14} className="animate-spin" />
+                <Loader2 size={14} className="anim_spin" />
                 正在创建中...
               </div>
             )}
@@ -1440,7 +1440,7 @@ const KnowledgeBasePage: React.FC = () => {
                 disabled={creating_kb}
                 style={{ padding: '8px 16px', backgroundColor: '#0ea5e9', color: '#ffffff', border: 'none', borderRadius: '6px', cursor: creating_kb ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                {creating_kb && <Loader2 size={14} className="animate-spin" />}
+                {creating_kb && <Loader2 size={14} className="anim_spin" />}
                 确认创建
               </button>
             </div>

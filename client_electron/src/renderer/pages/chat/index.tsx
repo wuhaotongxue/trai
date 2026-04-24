@@ -433,7 +433,7 @@ const AgentChat: React.FC = () => {
                           <MessageSquare size={14} style={{ marginRight: '8px', color: 'var(--ui_text_muted)' }} />
                           <span style={{ flex: 1 }}>思考过程</span>
                           {loading && idx === messages.length - 1 && !msg.content && (
-                            <Loader2 size={14} className="animate-spin" style={{ color: 'var(--ui_accent)' }} />
+                            <Loader2 size={14} className="anim_spin" style={{ color: 'var(--ui_accent)' }} />
                           )}
                           {expanded_steps[`reasoning_${idx}`]
                             ? <ChevronDown size={14} />
@@ -484,7 +484,7 @@ const AgentChat: React.FC = () => {
                     fontSize: '14px', border: '1px solid var(--ui_border)',
                     display: 'flex', alignItems: 'center', gap: '8px',
                   }}>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={16} className="anim_spin" />
                     <span>AI 正在思考中...</span>
                   </div>
                 </div>

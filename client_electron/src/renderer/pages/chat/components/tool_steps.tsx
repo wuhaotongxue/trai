@@ -127,7 +127,7 @@ const ToolSteps: React.FC<ToolStepsProps> = ({ steps, idx, expanded_steps, toggl
                     {is_start ? '调用工具' : '返回结果'}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ui_text)', fontSize: '12px', marginRight: '8px' }}>
-                    {is_start && !has_success_result && !has_fail_result && <Loader2 size={12} className="animate-spin" />}
+                    {is_start && !has_success_result && !has_fail_result && <Loader2 size={12} className="anim_spin" />}
                     {(is_success || (is_start && has_success_result)) && <CheckCircle2 size={12} />}
                     {(is_fail || (is_start && has_fail_result)) && <XCircle size={12} />}
                     <span>{status_text}</span>

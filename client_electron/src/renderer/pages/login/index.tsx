@@ -10,7 +10,7 @@ import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown } from 'l
 import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
-import { t, current_locale_store, type Locale } from '@/i18n'
+import { t, use_locale, type Locale } from '@/i18n'
 
 const Login: React.FC = () => {
   const [username, set_username] = useState('wuhao')
@@ -37,7 +37,10 @@ const Login: React.FC = () => {
   const last_submit_time = useRef(0)
 
   useEffect(() => {
-    const unsubscribe = current_locale_store.subscribe(() => force_update((n) => n + 1))
+    const unsubscribe = use_locale.subscribe((state) => {
+      force_update((n) => n + 1)
+      set_locale(state.locale)
+    })
     return unsubscribe
   }, [])
 
@@ -69,9 +72,9 @@ const Login: React.FC = () => {
 
   // 同步语言状态
   useEffect(() => {
-    const unsubscribe = current_locale_store.subscribe(() => {
+    const unsubscribe = use_locale.subscribe((state) => {
       force_update((n) => n + 1)
-      set_locale(current_locale_store.get())
+      set_locale(state.locale)
     })
     return unsubscribe
   }, [])
@@ -234,7 +237,7 @@ const Login: React.FC = () => {
                     key={l}
                     className="no-drag-region"
                     type="button"
-                    onClick={() => { current_locale_store.set(l); set_locale(l); window.electron_api.config_set('ui:locale', l).catch(() => {}); set_show_lang_menu(false) }}
+                    onClick={() => { set_locale(l); window.electron_api.config_set('ui:locale', l).catch(() => {}); set_show_lang_menu(false) }}
                     style={{
                       width: '100%',
                       background: locale === l ? 'var(--ui_accent_light)' : 'transparent',

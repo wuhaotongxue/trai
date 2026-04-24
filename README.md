@@ -46,6 +46,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 客户端_2026_04_24_2127
+- **fix(i18n)**: 修复 axios 拦截器，添加 API 请求/响应日志调试
+- **fix(css)**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
+- **fix(i18n)**: 修复 `current_locale_store` 引用，统一使用 `use_locale`
+
 ### 💻 客户端_2026_04_24_0100
 - **feat(login)**: 重构登录页面 — 左侧精简品牌区（动态光晕+品牌核心），右侧悬浮表单卡片居中，全方位交互反馈（点击缩放/focus 阴影）
 

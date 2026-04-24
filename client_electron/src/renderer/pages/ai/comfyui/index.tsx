@@ -149,7 +149,7 @@ const ComfyUI: React.FC = () => {
                 opacity: loading ? 0.7 : 1
               }}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Bot size={18} />}
+              {loading ? <Loader2 size={18} className="anim_spin" /> : <Bot size={18} />}
               {loading ? '生成中...' : '提交任务'}
             </button>
           </div>
@@ -167,7 +167,7 @@ const ComfyUI: React.FC = () => {
         }}>
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '10px' }}>
-              <Loader2 size={32} className="animate-spin" />
+              <Loader2 size={32} className="anim_spin" />
               <span style={{ fontSize: '14px' }}>ComfyUI 正在处理任务...</span>
             </div>
           ) : result ? (
