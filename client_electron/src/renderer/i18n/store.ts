@@ -1,50 +1,51 @@
 /**
  * 文件名: store.ts
  * 作者: wuhao
- * 日期: 2026-04-24 18:38:00
- * 描述: TRAI 桌面客户端国际化状态管理模块
+ * 日期: 2026-04-25 03:12:00
+ * 描述: TRAI 桌面客户端国际化状态管理模块，翻译数据从后端 API 获取
  */
-
 import type { Locale } from './types'
-import { zh } from './zh'
-import { en } from './en'
 import { use_locale_store } from '@/store/locale'
 
-export const translations = {
-  zh,
-  en,
-} as const
+// 运行时翻译缓存（从后端 API 获取）
+let runtime_translations: { zh: Record<string, string>; en: Record<string, string> } | null = null
 
-type ZhKeys = keyof typeof zh
-type EnKeys = keyof typeof en
-export type TranslationKey = ZhKeys | EnKeys
+/**
+ * 设置运行时翻译数据（由主进程 IPC 调用后传入）
+ */
+export function set_runtime_translations(data: { zh: Record<string, string>; en: Record<string, string> } | null) {
+  runtime_translations = data
+}
+
+/**
+ * 翻译函数
+ */
+function do_translate(locale: Locale, key: string): string {
+  if (runtime_translations) {
+    const translations_obj = runtime_translations[locale]
+    if (translations_obj && translations_obj[key]) {
+      return translations_obj[key]
+    }
+    // 尝试简单 key
+    const simple_key = key.split('.').pop()
+    if (simple_key && translations_obj[simple_key]) {
+      return translations_obj[simple_key]
+    }
+  }
+  // 没有翻译时返回原始 key
+  return key
+}
 
 // 响应式翻译 Hook - 在组件中使用
 export function use_t(): (key: string) => string {
   const locale = use_locale_store((state) => state.locale)
-  return (key: string) => {
-    const translations_obj = translations[locale]
-    return (translations_obj as Record<string, string>)[key] ?? key
-  }
+  return (key: string) => do_translate(locale, key)
 }
 
-// 延迟初始化的 t 函数，用于非组件上下文
-let t_impl: ((key: string) => string) | null = null
-
-function get_t(): (key: string) => string {
-  if (!t_impl) {
-    t_impl = (key: string) => {
-      const locale = use_locale_store.getState().locale
-      const translations_obj = translations[locale]
-      return (translations_obj as Record<string, string>)[key] ?? key
-    }
-  }
-  return t_impl
-}
-
-// 获取翻译文本 - 延迟初始化确保 store 已就绪
+// 获取翻译文本
 export function t(key: string): string {
-  return get_t()(key)
+  const locale = use_locale_store.getState().locale
+  return do_translate(locale, key)
 }
 
 // 获取当前语言
