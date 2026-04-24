@@ -7,11 +7,29 @@
 export type Locale = 'zh' | 'en'
 
 /**
- * 默认翻译 key 列表（后端未配置时的回退）
+ * 默认翻译 key（后端未配置时的回退）
  */
 const fallback_keys: Record<Locale, Record<string, string>> = {
   zh: {
-    app_name: 'TRAI',
+    'client.loading': '正在加载...',
+    'client.confirm': '确认',
+    'client.cancel': '取消',
+    'client.save': '保存',
+    'client.close': '关闭',
+    'client.logout': '退出',
+    'client.search': '搜索',
+    'client.dashboard': '仪表盘',
+    'client.settings': '设置',
+    'client.chat': '智能对话',
+    'client.knowledge_base': '知识库',
+    'client.tools': '工具箱',
+    'client.feedback': '反馈',
+    'client.login': '登录',
+    'client.register': '注册',
+    'client.username': '用户名',
+    'client.password': '密码',
+    'client.email': '邮箱',
+    // 简单 key 兼容
     loading: '正在加载...',
     confirm: '确认',
     cancel: '取消',
@@ -19,16 +37,6 @@ const fallback_keys: Record<Locale, Record<string, string>> = {
     close: '关闭',
     logout: '退出',
     search: '搜索',
-    upload: '上传',
-    download: '下载',
-    delete: '删除',
-    edit: '编辑',
-    create: '创建',
-    rename: '重命名',
-    success: '成功',
-    error: '错误',
-    loading_data: '加载中...',
-    no_data: '暂无数据',
     dashboard: '仪表盘',
     settings: '设置',
     chat: '智能对话',
@@ -42,7 +50,25 @@ const fallback_keys: Record<Locale, Record<string, string>> = {
     email: '邮箱',
   },
   en: {
-    app_name: 'TRAI',
+    'client.loading': 'Loading...',
+    'client.confirm': 'Confirm',
+    'client.cancel': 'Cancel',
+    'client.save': 'Save',
+    'client.close': 'Close',
+    'client.logout': 'Logout',
+    'client.search': 'Search',
+    'client.dashboard': 'Dashboard',
+    'client.settings': 'Settings',
+    'client.chat': 'Chat',
+    'client.knowledge_base': 'Knowledge Base',
+    'client.tools': 'Tools',
+    'client.feedback': 'Feedback',
+    'client.login': 'Sign In',
+    'client.register': 'Register',
+    'client.username': 'Username',
+    'client.password': 'Password',
+    'client.email': 'Email',
+    // 简单 key 兼容
     loading: 'Loading...',
     confirm: 'Confirm',
     cancel: 'Cancel',
@@ -50,16 +76,6 @@ const fallback_keys: Record<Locale, Record<string, string>> = {
     close: 'Close',
     logout: 'Logout',
     search: 'Search',
-    upload: 'Upload',
-    download: 'Download',
-    delete: 'Delete',
-    edit: 'Edit',
-    create: 'Create',
-    rename: 'Rename',
-    success: 'Success',
-    error: 'Error',
-    loading_data: 'Loading...',
-    no_data: 'No data',
     dashboard: 'Dashboard',
     settings: 'Settings',
     chat: 'Chat',
@@ -129,12 +145,25 @@ export function t(key: string): string {
 
   if (runtime_translations) {
     const translations = locale === 'zh' ? runtime_translations.zh : runtime_translations.en
-    if (translations && translations[key]) {
-      return translations[key]
+    if (translations) {
+      // 优先尝试原格式（如 client.login）
+      if (translations[key]) {
+        return translations[key]
+      }
+      // 尝试简单 key 格式（如 login）
+      const simple_key = key.split('.').pop()
+      if (simple_key && translations[simple_key]) {
+        return translations[simple_key]
+      }
     }
   }
 
-  return fallback_keys[locale][key] || key
+  // 回退到本地默认值
+  const fallbacks = fallback_keys[locale]
+  if (fallbacks[key]) return fallbacks[key]
+  const simple_key = key.split('.').pop()
+  if (simple_key && fallbacks[simple_key]) return fallbacks[simple_key]
+  return key
 }
 
 export function use_locale(): [Locale, (l: Locale) => void] {
