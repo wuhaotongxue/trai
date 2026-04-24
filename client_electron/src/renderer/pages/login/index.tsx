@@ -6,18 +6,311 @@
  */
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown } from 'lucide-react'
+import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown, Server, X, Check, Loader2 } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
-import { t, use_locale, type Locale } from '@/i18n'
+import { use_locale_store } from '@/store/locale'
+import { t, type Locale } from '@/i18n'
+
+console.info('[login] Login component rendering...')
+
+// 预定义服务器列表
+const PREDEFINED_SERVERS = [
+  { id: 'local', label_key: 'server_local', desc_key: 'server_local_desc', url: 'http://127.0.0.1:5666' },
+  { id: 'remote', label_key: 'server_remote', desc_key: 'server_remote_desc', url: 'https://trai.tuoren.com:5666' },
+  { id: 'production', label_key: 'server_production', desc_key: 'server_production_desc', url: 'https://trai.tuoren.com' },
+]
+
+// 服务器配置弹窗组件
+interface ServerConfigModalProps {
+  current_url: string
+  on_select: (url: string) => void
+  on_close: () => void
+  locale: Locale
+}
+
+const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_select, on_close, locale }) => {
+  const [custom_url, set_custom_url] = useState('')
+  const [selected_id, set_selected_id] = useState<string>('')
+  const [testing_url, set_testing_url] = useState<string | null>(null)
+  const [test_result, set_test_result] = useState<{ url: string; success: boolean } | null>(null)
+  const modal_ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // 找到当前URL对应的预定义服务器
+    const matched = PREDEFINED_SERVERS.find((s) => s.url === current_url)
+    if (matched) {
+      set_selected_id(matched.id)
+    } else {
+      set_selected_id('')
+      set_custom_url(current_url)
+    }
+  }, [current_url])
+
+  // 点击外部关闭
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (modal_ref.current && !modal_ref.current.contains(e.target as Node)) {
+        on_close()
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [on_close])
+
+  const handle_select_preset = (server: typeof PREDEFINED_SERVERS[0]) => {
+    set_selected_id(server.id)
+    set_custom_url('')
+  }
+
+  const handle_custom_change = (value: string) => {
+    set_custom_url(value)
+    set_selected_id('')
+  }
+
+  const test_connection = async (url: string) => {
+    set_testing_url(url)
+    set_test_result(null)
+    try {
+      // 使用 fetch 测试连接（只检查响应头）
+      const controller = new AbortController()
+      const timeout_id = setTimeout(() => controller.abort(), 5000)
+      const res = await fetch(url, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal,
+      })
+      clearTimeout(timeout_id)
+      set_test_result({ url, success: true })
+    } catch {
+      set_test_result({ url, success: false })
+    }
+    set_testing_url(null)
+  }
+
+  const get_final_url = () => {
+    if (selected_id) {
+      const server = PREDEFINED_SERVERS.find((s) => s.id === selected_id)
+      return server?.url || ''
+    }
+    const normalized = custom_url.trim()
+    if (!normalized) return ''
+    return normalized.startsWith('http://') || normalized.startsWith('https://') ? normalized : `http://${normalized}`
+  }
+
+  const handle_save = () => {
+    const url = get_final_url()
+    if (url) {
+      on_select(url)
+    }
+  }
+
+  const current_display = selected_id
+    ? PREDEFINED_SERVERS.find((s) => s.id === selected_id)?.url || ''
+    : custom_url || current_url
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+      animation: 'fadeIn 0.15s ease',
+    }}>
+      <div
+        ref={modal_ref}
+        style={{
+          backgroundColor: 'var(--ui_panel)',
+          borderRadius: 'var(--ui_radius_lg)',
+          border: '1px solid var(--ui_border)',
+          boxShadow: 'var(--ui_shadow_lg)',
+          width: '440px',
+          maxWidth: '90vw',
+          maxHeight: '85vh',
+          overflow: 'hidden',
+          animation: 'fadeInScale 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        {/* 标题栏 */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px 20px', borderBottom: '1px solid var(--ui_border)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Server size={18} color="var(--ui_accent)" />
+            <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ui_text)' }}>
+              {t('server_config_title')}
+            </span>
+          </div>
+          <button
+            className="no-drag-region"
+            type="button"
+            onClick={on_close}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'var(--ui_text_secondary)', padding: '4px', borderRadius: 'var(--ui_radius_sm)',
+              display: 'flex', alignItems: 'center', transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* 内容区 */}
+        <div style={{ padding: '20px', maxHeight: 'calc(85vh - 140px)', overflow: 'auto' }}>
+          {/* 当前服务器 */}
+          <div style={{
+            padding: '12px 16px', backgroundColor: 'var(--ui_accent_light)',
+            borderRadius: 'var(--ui_radius_md)', marginBottom: '16px',
+            border: '1px solid rgba(14,165,233,0.2)',
+          }}>
+            <div style={{ fontSize: '11px', color: 'var(--ui_accent)', marginBottom: '4px', fontWeight: 500 }}>
+              {t('server_current')}
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--ui_text)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+              {current_display || current_url}
+            </div>
+          </div>
+
+          {/* 预定义服务器列表 */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--ui_text_secondary)', marginBottom: '10px', fontWeight: 500 }}>
+              {t('server_select_or_input')}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {PREDEFINED_SERVERS.map((server) => {
+                const is_selected = selected_id === server.id
+                const is_testing = testing_url === server.url
+                const test_res = test_result?.url === server.url ? test_result : null
+                return (
+                  <div
+                    key={server.id}
+                    onClick={() => handle_select_preset(server)}
+                    style={{
+                      padding: '12px 14px',
+                      backgroundColor: is_selected ? 'var(--ui_accent_light)' : 'var(--ui_panel_alt)',
+                      border: `1.5px solid ${is_selected ? 'var(--ui_accent)' : 'var(--ui_border)'}`,
+                      borderRadius: 'var(--ui_radius_md)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}
+                    onMouseEnter={(e) => { if (!is_selected) e.currentTarget.style.borderColor = 'var(--ui_accent)' }}
+                    onMouseLeave={(e) => { if (!is_selected) e.currentTarget.style.borderColor = 'var(--ui_border)' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{
+                        width: '18px', height: '18px', borderRadius: '50%',
+                        border: `2px solid ${is_selected ? 'var(--ui_accent)' : 'var(--ui_border)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all 0.2s',
+                      }}>
+                        {is_selected && <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--ui_accent)' }} />}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', color: 'var(--ui_text)', fontWeight: 500 }}>
+                          {t(server.label_key)}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)', fontFamily: 'monospace' }}>
+                          {t(server.desc_key)}
+                        </div>
+                      </div>
+                    </div>
+                    {is_selected && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); void test_connection(server.url) }}
+                        disabled={is_testing}
+                        style={{
+                          background: 'var(--ui_panel_hover)', border: '1px solid var(--ui_border)',
+                          borderRadius: 'var(--ui_radius_sm)', padding: '4px 8px', cursor: is_testing ? 'not-allowed' : 'pointer',
+                          fontSize: '11px', color: test_res ? (test_res.success ? 'var(--ui_success)' : 'var(--ui_danger)') : 'var(--ui_text_secondary)',
+                          display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.15s',
+                        }}
+                      >
+                        {is_testing ? <Loader2 size={12} className="animate-spin" /> : test_res ? (test_res.success ? <Check size={12} /> : <X size={12} />) : null}
+                        {is_testing ? '...' : test_res ? (test_res.success ? 'OK' : 'FAIL') : 'Test'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* 自定义输入 */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', color: 'var(--ui_text_secondary)', fontWeight: 500 }}>
+              {t('server_address')}
+            </label>
+            <input
+              type="text"
+              value={custom_url}
+              onChange={(e) => handle_custom_change(e.target.value)}
+              placeholder={t('server_address_hint')}
+              style={{
+                width: '100%', padding: '10px 12px',
+                borderRadius: 'var(--ui_radius_md)',
+                border: `1.5px solid ${!selected_id && custom_url ? 'var(--ui_accent)' : 'var(--ui_border)'}`,
+                backgroundColor: 'var(--ui_panel_alt)', color: 'var(--ui_text)',
+                boxSizing: 'border-box', outline: 'none', fontSize: '13px',
+                fontFamily: 'monospace',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                boxShadow: !selected_id && custom_url ? '0 0 0 3px var(--ui_accent_light)' : 'none',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 底部按钮 */}
+        <div style={{
+          display: 'flex', gap: '10px', padding: '16px 20px',
+          borderTop: '1px solid var(--ui_border)',
+          justifyContent: 'flex-end',
+        }}>
+          <button
+            type="button"
+            onClick={on_close}
+            style={{
+              padding: '8px 16px', borderRadius: 'var(--ui_radius_md)',
+              border: '1px solid var(--ui_border)', backgroundColor: 'transparent',
+              color: 'var(--ui_text_secondary)', fontSize: '13px', cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}
+          >
+            {t('server_cancel')}
+          </button>
+          <button
+            type="button"
+            onClick={handle_save}
+            disabled={!get_final_url()}
+            style={{
+              padding: '8px 20px', borderRadius: 'var(--ui_radius_md)',
+              border: 'none', backgroundColor: get_final_url() ? 'var(--ui_accent)' : 'var(--ui_text_muted)',
+              color: 'white', fontSize: '13px', fontWeight: 500, cursor: get_final_url() ? 'pointer' : 'not-allowed',
+              transition: 'all 0.15s',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            <Check size={14} />
+            {t('server_save')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const Login: React.FC = () => {
+  console.info('[login] Login function called')
   const [username, set_username] = useState('wuhao')
   const [password, set_password] = useState('Tr@@2026...')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('https://trai.tuoren.com')
+  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [remember_me, set_remember_me] = useState(true)
   const [show_logs, set_show_logs] = useState(false)
@@ -28,6 +321,7 @@ const Login: React.FC = () => {
   const [password_shake, set_password_shake] = useState(false)
   const [locale, set_locale] = useState<Locale>('zh')
   const [show_lang_menu, set_show_lang_menu] = useState(false)
+  const [show_server_config, set_show_server_config] = useState(false)
   const lang_menu_ref = useRef<HTMLDivElement>(null)
   const [, force_update] = useState(0)
   const navigate = useNavigate()
@@ -37,7 +331,7 @@ const Login: React.FC = () => {
   const last_submit_time = useRef(0)
 
   useEffect(() => {
-    const unsubscribe = use_locale.subscribe((state) => {
+    const unsubscribe = use_locale_store.subscribe((state) => {
       force_update((n) => n + 1)
       set_locale(state.locale)
     })
@@ -48,19 +342,24 @@ const Login: React.FC = () => {
     const load_config = async () => {
       try {
         if (window.electron_api?.config_get) {
-          const res = await window.electron_api.config_get('api_url', 'https://trai.tuoren.com')
+          const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
           if (res.success && typeof res.data === 'string' && res.data.trim()) {
             set_api_url(res.data.trim())
+            add_log(`服务器配置已加载: ${res.data.trim()}`)
+          } else {
+            add_log(`使用默认服务器: http://127.0.0.1:5666`)
           }
           const rm_res = await window.electron_api.config_get('remember_me', true)
           if (rm_res.success) set_remember_me(rm_res.data)
         }
+      } catch (err: unknown) {
+        add_log(`加载配置失败: ${String((err as Error)?.message || 'unknown')}`)
       } finally {
         set_api_loading(false)
       }
     }
     void load_config()
-  }, [])
+  }, [add_log])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -72,7 +371,7 @@ const Login: React.FC = () => {
 
   // 同步语言状态
   useEffect(() => {
-    const unsubscribe = use_locale.subscribe((state) => {
+    const unsubscribe = use_locale_store.subscribe((state) => {
       force_update((n) => n + 1)
       set_locale(state.locale)
     })
@@ -120,17 +419,35 @@ const Login: React.FC = () => {
     }
   }, [normalized_api_url])
 
+  // 处理服务器选择
+  const handle_server_select = useCallback(async (url: string) => {
+    try {
+      const res = await window.electron_api.config_set('api_url', url)
+      if (res.success) {
+        set_api_url(url)
+        add_log(`服务器已切换: ${url}`)
+        set_show_server_config(false)
+      } else {
+        add_log(`服务器切换失败: ${res.error}`)
+      }
+    } catch (err: unknown) {
+      add_log(`服务器切换异常: ${String((err as Error)?.message || 'unknown')}`)
+    }
+  }, [add_log])
+
   const do_login = useCallback(async (u: string, p: string) => {
-    add_log(`Login: ${u} @ ${normalized_api_url}`)
+    add_log(`登录尝试: ${u} @ ${normalized_api_url}`)
     if (!api_loading) await save_api_url()
     const res = await window.electron_api.auth_login({ username: u, password: p })
     if (res.success && res.data) {
       await window.electron_api.config_set('remember_me', remember_me)
       const user_info = res.data.user
       login({ username: user_info.username || u, email: user_info.email || `${u}@trai.local`, role: user_info.role || 'user' })
+      add_log(`登录成功: ${u}`)
       navigate('/')
     } else {
       const raw = String(res.error || '')
+      add_log(`登录失败: ${raw}`)
       if (raw.includes('401') || raw.includes('密码错误')) {
         set_error_msg(t('password_error'))
         set_password_shake(true)
@@ -151,6 +468,7 @@ const Login: React.FC = () => {
     finally { set_is_logging_in(false) }
   }, [username, password, do_login])
 
+  console.info('[login] About to return JSX, username:', username, 'locale:', locale)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
       {/* 标题栏 */}
@@ -160,6 +478,29 @@ const Login: React.FC = () => {
           <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--ui_text)' }}>TRAI</span>
           <button className="no-drag-region" type="button" onClick={() => window.location.reload()} style={{ background: 'transparent', border: '1px solid var(--ui_border)', borderRadius: 'var(--ui_radius_sm)', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--ui_text_secondary)', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}>
             <RotateCw size={14} />
+          </button>
+
+          {/* 服务器配置按钮 */}
+          <button
+            className="no-drag-region"
+            type="button"
+            onClick={() => set_show_server_config(true)}
+            title={t('server_config')}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--ui_border)',
+              borderRadius: 'var(--ui_radius_sm)',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              color: 'var(--ui_text_secondary)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_accent)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}
+          >
+            <Server size={14} />
           </button>
           <div style={{ position: 'relative' }}>
             <button className="no-drag-region" type="button" onClick={() => set_show_logs(!show_logs)} style={{ background: show_logs ? 'var(--ui_accent_light)' : 'transparent', border: '1px solid var(--ui_border)', borderRadius: 'var(--ui_radius_sm)', padding: '4px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: show_logs ? 'var(--ui_accent)' : 'var(--ui_text_secondary)', transition: 'all 0.2s' }}>
@@ -571,11 +912,47 @@ const Login: React.FC = () => {
                     }}
                   >{t('register_here')}</span>
                 </div>
+
+                {/* 服务器配置链接 */}
+                <div style={{
+                  textAlign: 'center',
+                  paddingTop: '12px',
+                  borderTop: '1px solid var(--ui_border)',
+                  animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.55s both',
+                }}>
+                  <span
+                    onClick={() => set_show_server_config(true)}
+                    style={{
+                      color: 'var(--ui_text_muted)', fontSize: '11px',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--ui_accent)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--ui_text_muted)'
+                    }}
+                  >
+                    <Server size={12} />
+                    {t('server_config')}: <span style={{ fontFamily: 'monospace', fontSize: '10px' }}>{api_url}</span>
+                  </span>
+                </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 服务器配置弹窗 */}
+      {show_server_config && (
+        <ServerConfigModal
+          current_url={api_url}
+          on_select={handle_server_select}
+          on_close={() => set_show_server_config(false)}
+          locale={locale}
+        />
+      )}
     </div>
   )
 }

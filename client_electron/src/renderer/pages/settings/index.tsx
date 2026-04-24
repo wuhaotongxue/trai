@@ -23,8 +23,14 @@ const Settings: React.FC = () => {
 
   const user = use_auth_store((state) => state.user)
 
-  const [api_url, set_api_url] = useState('https://trai.tuoren.com')
+  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
   const [saved, set_saved] = useState(false)
+
+  // 预设 API 地址选项
+  const preset_urls = [
+    { label: '本地开发', value: 'http://127.0.0.1:5666' },
+    { label: '远程生产', value: 'https://trai.tuoren.com' },
+  ]
   const [update_status, set_update_status] = useState<string>('')
   const [is_checking, set_is_checking] = useState(false)
   const [has_update, set_has_update] = useState(false)
@@ -50,7 +56,7 @@ const Settings: React.FC = () => {
   useEffect(() => {
     const load_config = async () => {
       if (window.electron_api?.config_get) {
-        const res = await window.electron_api.config_get('api_url', 'https://trai.tuoren.com')
+        const res = await window.electron_api.config_get('api_url', 'http://127.0.0.1:5666')
         if (res.success) {
           set_api_url(res.data)
         }
@@ -180,13 +186,38 @@ const Settings: React.FC = () => {
       case 'api_config':
         return (
           <div style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '400px' }}>
-              <label style={{ fontSize: '14px', color: 'var(--ui_text)' }}>后端 API 地址</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '500px' }}>
+              <label style={{ fontSize: '14px', color: 'var(--ui_text)', fontWeight: 500 }}>后端 API 地址</label>
+              
+              {/* 预设快捷选项 */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {preset_urls.map((preset) => (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => set_api_url(preset.value)}
+                    style={{
+                      padding: '6px 12px',
+                      backgroundColor: api_url === preset.value ? 'var(--ui_accent)' : 'var(--ui_panel)',
+                      color: api_url === preset.value ? 'white' : 'var(--ui_text)',
+                      border: api_url === preset.value ? '1px solid var(--ui_accent)' : '1px solid var(--ui_border)',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              
+              {/* 自定义输入框 */}
               <input
                 type="text"
                 value={api_url}
                 onChange={(e) => set_api_url(e.target.value)}
-                placeholder="例如: http://127.0.0.1:8000"
+                placeholder="例如: http://127.0.0.1:5666"
                 style={{
                   padding: '10px 12px',
                   borderRadius: '6px',
@@ -203,7 +234,6 @@ const Settings: React.FC = () => {
               <button 
                 onClick={handle_save}
                 style={{
-                  marginTop: '12px',
                   padding: '10px 16px',
                   backgroundColor: 'var(--ui_accent)',
                   color: 'white',
@@ -211,12 +241,15 @@ const Settings: React.FC = () => {
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontWeight: 'normal',
-                  alignSelf: 'flex-start'
+                  alignSelf: 'flex-start',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
               >
                 保存配置
               </button>
-              {saved && <span style={{ color: 'var(--ui_success)', fontSize: '12px', marginTop: '8px' }}>保存成功</span>}
+              {saved && <span style={{ color: 'var(--ui_success)', fontSize: '12px' }}>保存成功，刷新页面后生效</span>}
             </div>
           </div>
         )

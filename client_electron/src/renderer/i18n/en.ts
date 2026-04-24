@@ -142,6 +142,23 @@ export const en = {
   login_welcome: 'Welcome Back',
   login_subtitle: 'Sign in to continue to your account',
   register_here: 'Create Account',
+  // Server Config
+  server_config: 'Server Config',
+  server_config_title: 'Server Configuration',
+  server_local: 'Local Server',
+  server_local_desc: '127.0.0.1:5666',
+  server_remote: 'Remote Server',
+  server_remote_desc: 'https://trai.tuoren.com:5666',
+  server_production: 'Production',
+  server_production_desc: 'https://trai.tuoren.com',
+  server_current: 'Current Server',
+  server_save: 'Save',
+  server_cancel: 'Cancel',
+  server_address: 'Server Address',
+  server_address_hint: 'Enter full server address',
+  server_select_or_input: 'Select or enter server address',
+  server_connection_failed: 'Failed to connect to server',
+  server_connection_success: 'Server switched to: ',
 
   // Register Page
   register: 'Register',

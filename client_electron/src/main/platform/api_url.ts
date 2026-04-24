@@ -16,8 +16,8 @@ export class ApiUrl {
    * @returns API 基础地址
    */
   static get_api_base_url(): string {
-    const raw = String(config_store.get('api_url', 'https://trai.tuoren.com')).trim()
-    if (!raw) return 'https://trai.tuoren.com'
+    const raw = String(config_store.get('api_url', 'http://127.0.0.1:5666')).trim()
+    if (!raw) return 'http://127.0.0.1:5666'
     return raw.replace(/\/+$/, '')
   }
 
