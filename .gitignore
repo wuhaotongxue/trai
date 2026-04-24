@@ -105,8 +105,7 @@ temp/
 # 未使用的旧项目
 client_pyqt6/
 
-# Markdown 样式目录
-styles/
+# misc
 .DS_Store
 *.pem
 接口说明.md
