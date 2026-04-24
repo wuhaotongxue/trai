@@ -142,6 +142,23 @@ export const zh = {
   login_subtitle: '请登录您的账号以继续',
   no_account: '还没有账号？立即注册',
   register_here: '立即注册',
+  // 服务器配置
+  server_config: '服务器配置',
+  server_config_title: '服务器配置',
+  server_local: '本地服务器',
+  server_local_desc: '127.0.0.1:5666',
+  server_remote: '远程服务器',
+  server_remote_desc: 'https://trai.tuoren.com:5666',
+  server_production: '正式环境',
+  server_production_desc: 'https://trai.tuoren.com',
+  server_current: '当前服务器',
+  server_save: '保存',
+  server_cancel: '取消',
+  server_address: '服务器地址',
+  server_address_hint: '输入完整的服务器地址',
+  server_select_or_input: '选择或输入服务器地址',
+  server_connection_failed: '连接服务器失败',
+  server_connection_success: '已切换服务器: ',
 
   // 注册页
   register: '注册',

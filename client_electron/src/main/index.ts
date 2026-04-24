@@ -173,6 +173,7 @@ if (!got_the_lock) {
         try {
           if (main_window) {
             await main_window.webContents.session.clearCache()
+            log.info('dev server cache cleared')
           }
           const dev_url = new URL(process.env.VITE_DEV_SERVER_URL)
           dev_url.searchParams.set('t', Date.now().toString())
