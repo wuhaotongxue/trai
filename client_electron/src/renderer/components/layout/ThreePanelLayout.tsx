@@ -41,7 +41,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
   const [is_middle_open, set_is_middle_open] = useState(middlePanelDefaultOpen)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)', minHeight: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_panel)', minHeight: 0, flexShrink: 0 }}>
       {/* 顶部标题栏 */}
       <div className="drag-region" style={{
         padding: '16px 24px',
@@ -50,6 +50,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         transition: 'background-color var(--ui_transition_normal)',
         animation: 'fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {titleIcon}
@@ -59,7 +60,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
       </div>
 
       {/* 内容区域 */}
-      <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
+      <div className="no-drag-region" style={{ display: 'flex', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ui_panel)' }}>
         {leftPanel && (
           <div style={{
             width: is_left_open ? '180px' : '0px',

@@ -68,7 +68,7 @@ const Register: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_panel)', overflow: 'hidden' }}>
       <TitleBar />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
@@ -146,7 +146,7 @@ const Register: React.FC = () => {
         </div>
 
         {/* 右侧表单区 - 更宽更大 */}
-        <div style={{ flex: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--ui_bg)', overflow: 'auto' }}>
+        <div style={{ flex: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--ui_panel)', overflow: 'auto' }}>
           <div style={{
             width: '100%', maxWidth: '480px',
             backgroundColor: 'var(--ui_panel)',

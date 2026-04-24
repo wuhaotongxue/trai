@@ -100,9 +100,9 @@ const MiniLineChart: React.FC<{ values: number[]; stroke: string; seq: number }>
       <path d={`M ${plot_left} ${y_50} L ${plot_right} ${y_50}`} stroke="#f1f5f9" strokeWidth="1" />
       <path d={`M ${plot_left} ${plot_top} L ${plot_right} ${plot_top}`} stroke="#f8fafc" strokeWidth="1" />
 
-      <text x="2" y={y_100 + 4} fontSize="10" fill="#64748b">100</text>
-      <text x="6" y={y_50 + 4} fontSize="10" fill="#64748b">50</text>
-      <text x="12" y={y_0 + 4} fontSize="10" fill="#64748b">0</text>
+      <text x="2" y={y_100 + 4} fontSize="10" fill="var(--ui_text_muted)">100</text>
+      <text x="6" y={y_50 + 4} fontSize="10" fill="var(--ui_text_muted)">50</text>
+      <text x="12" y={y_0 + 4} fontSize="10" fill="var(--ui_text_muted)">0</text>
 
       <path
         key={seq}
@@ -255,36 +255,48 @@ const Dashboard: React.FC = () => {
         return (
           <div style={{ padding: '24px' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('system_overview')}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>{t('system_overview')}</h2>
             {sys_info ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                 {[
-                  { icon: <Monitor size={16} color="var(--ui_text_muted)" />, label: t('platform'), value: sys_info.platform, delay: 0 },
-                  { icon: <Cpu size={16} color="var(--ui_text_muted)" />, label: t('cpu_arch'), value: sys_info.arch, delay: 1 },
-                  { icon: <HardDrive size={16} color="var(--ui_text_muted)" />, label: t('total_memory'), value: format_gb(sys_info.total_mem), delay: 2 },
-                  { icon: <Cpu size={16} color="var(--ui_text_muted)" />, label: t('gpu'), value: metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU', delay: 3 },
-                  { icon: <Activity size={16} color="var(--ui_text_muted)" />, label: t('cpu_usage'), value: metrics ? format_percent(metrics.cpu_usage_percent) : '0.0%', delay: 4 },
-                  { icon: <HardDrive size={16} color="var(--ui_text_muted)" />, label: t('memory_usage'), value: metrics ? format_percent(metrics.mem_usage_percent) : '0.0%', delay: 5 },
+                  { icon: <Monitor size={20} color="var(--ui_accent)" />, label: t('platform'), value: sys_info.platform, bgColor: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.05))' },
+                  { icon: <Cpu size={20} color="var(--ui_accent)" />, label: t('cpu_arch'), value: sys_info.arch, bgColor: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05))' },
+                  { icon: <HardDrive size={20} color="var(--ui_success)" />, label: t('total_memory'), value: format_gb(sys_info.total_mem), bgColor: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05))' },
+                  { icon: <Cpu size={20} color="var(--ui_accent)" />, label: t('gpu'), value: metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU', bgColor: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05))' },
+                  { icon: <Activity size={20} color="var(--ui_danger)" />, label: t('cpu_usage'), value: metrics ? format_percent(metrics.cpu_usage_percent) : '0.0%', bgColor: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05))' },
+                  { icon: <HardDrive size={20} color="var(--ui_accent)" />, label: t('memory_usage'), value: metrics ? format_percent(metrics.mem_usage_percent) : '0.0%', bgColor: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.05))' },
                 ].map((item, idx) => (
                   <div
                     key={idx}
                     className="ui-card"
                     style={{
                       padding: '20px',
-                      animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${item.delay * 0.06}s both`,
+                      background: item.bgColor,
+                      border: '1px solid var(--ui_border)',
+                      borderRadius: '12px',
+                      animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.06}s both`,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      {item.icon}
-                      <div style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>{item.label}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <div style={{
+                        width: '40px', height: '40px', borderRadius: '10px',
+                        backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                      }}>
+                        {item.icon}
+                      </div>
+                      <div style={{ color: 'var(--ui_text_muted)', fontSize: '13px', fontWeight: 500 }}>{item.label}</div>
                     </div>
-                    <div style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{item.value}</div>
+                    <div style={{ color: 'var(--ui_text)', fontSize: '15px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.value}</div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                {t('loading_data')}
+              <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--ui_text_muted)' }}>
+                <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Monitor size={32} color="var(--ui_text_muted)" />
+                </div>
+                <p style={{ fontSize: '15px', margin: '0 0 8px 0' }}>{t('loading_data')}</p>
               </div>
             )}
           </div>
@@ -293,71 +305,78 @@ const Dashboard: React.FC = () => {
         return (
           <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
             <style>{`@keyframes dash { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }`}</style>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('performance_monitor')}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>{t('performance_monitor')}</h2>
             {metrics ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Activity size={16} color="var(--ui_accent)" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>CPU</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Activity size={22} color="var(--ui_accent)" />
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>CPU</div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_accent)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_accent)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ height: '10px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', background: 'linear-gradient(90deg, var(--ui_accent), var(--ui_accent_hover))', borderRadius: '999px', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={cpu_series} stroke="var(--ui_accent)" seq={chart_seq} />
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <HardDrive size={16} color="var(--ui_success)" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>内存</div>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <HardDrive size={22} color="var(--ui_success)" />
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>内存</div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_percent(metrics.mem_usage_percent)}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_success)' }}>{format_percent(metrics.mem_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', backgroundColor: 'var(--ui_success)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ height: '10px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', background: 'linear-gradient(90deg, var(--ui_success), var(--ui_success))', borderRadius: '999px', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={mem_series} stroke="var(--ui_success)" seq={chart_seq} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', color: 'var(--ui_text_muted)', fontSize: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', color: 'var(--ui_text_muted)', fontSize: '13px' }}>
                     <span>可用 {format_gb(metrics.free_mem)}</span>
                     <span>总计 {format_gb(metrics.total_mem)}</span>
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '16px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <LayoutDashboard size={16} color="var(--ui_text_muted)" />
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>进程内存</div>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <LayoutDashboard size={22} color="var(--ui_accent)" />
                     </div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>进程内存</div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>RSS</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_rss)}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>RSS</div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_rss)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Heap Used</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_used)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Heap Used</div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_used)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Heap Total</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_total)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Heap Total</div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_total)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '12px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>Uptime</div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ui_text)' }}>{Math.floor(metrics.uptime_sec)} s</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Uptime</div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{Math.floor(metrics.uptime_sec)} s</div>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                {t('loading_data')}
+              <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--ui_text_muted)' }}>
+                <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Activity size={32} color="var(--ui_text_muted)" />
+                </div>
+                <p style={{ fontSize: '15px', margin: '0 0 8px 0' }}>{t('loading_data')}</p>
               </div>
             )}
           </div>
@@ -365,34 +384,74 @@ const Dashboard: React.FC = () => {
       case 'hardware':
         return (
           <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('hardware_info')}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>{t('hardware_info')}</h2>
             {sys_info ? (
-              <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ui_border)', backgroundColor: 'var(--ui_panel_alt)' }}>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{t('system_details')}</div>
+              <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ui_border)', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.02))' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                      <Cpu size={20} color="var(--ui_accent)" />
+                    </div>
+                    <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ui_text)' }}>{t('system_details')}</div>
+                  </div>
                 </div>
-                <div style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('os')}</span>
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--ui_border)', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Monitor size={16} color="var(--ui_text_muted)" />
+                      </div>
+                      <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('os')}</span>
+                    </div>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.platform}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ui_border)' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('cpu_arch')}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--ui_border)', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Cpu size={16} color="var(--ui_text_muted)" />
+                      </div>
+                      <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('cpu_arch')}</span>
+                    </div>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.arch}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('kernel')}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--ui_border)', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <HardDrive size={16} color="var(--ui_text_muted)" />
+                      </div>
+                      <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('kernel')}</span>
+                    </div>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{sys_info.release}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('gpu')}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', transition: 'background-color 0.2s' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'var(--ui_panel_alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Activity size={16} color="var(--ui_text_muted)" />
+                      </div>
+                      <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('gpu')}</span>
+                    </div>
                     <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 500 }}>{metrics?.gpu_name || sys_info.gpu_name || 'Unknown GPU'}</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                {t('loading_data')}
+              <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--ui_text_muted)' }}>
+                <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Cpu size={32} color="var(--ui_text_muted)" />
+                </div>
+                <p style={{ fontSize: '15px', margin: '0 0 8px 0' }}>{t('loading_data')}</p>
               </div>
             )}
           </div>
@@ -400,38 +459,53 @@ const Dashboard: React.FC = () => {
       case 'memory':
         return (
           <div style={{ padding: '24px', animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-            <h2 style={{ fontSize: '14px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: '600' }}>{t('memory_status')}</h2>
+            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>{t('memory_status')}</h2>
             {sys_info ? (
-              <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '8px', border: '1px solid var(--ui_border)', padding: '24px' }}>
-                <div style={{ marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('total_memory')}</span>
-                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.total_mem ?? sys_info.total_mem)}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <HardDrive size={24} color="var(--ui_accent)" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>{t('total_memory')}</div>
+                      <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_gb(metrics?.total_mem ?? sys_info.total_mem)}</div>
+                    </div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--ui_accent)', borderRadius: '4px' }}></div>
+                  <div style={{ height: '12px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, var(--ui_accent), var(--ui_accent_hover))', borderRadius: '999px' }} />
                   </div>
                 </div>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--ui_text_muted)', fontSize: '14px' }}>{t('available')}</span>
-                    <span style={{ color: 'var(--ui_text)', fontSize: '14px', fontWeight: 600 }}>{format_gb(metrics?.free_mem ?? sys_info.free_mem)}</span>
+
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <HardDrive size={24} color="var(--ui_success)" />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>{t('available')}</div>
+                      <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_gb(metrics?.free_mem ?? sys_info.free_mem)}</div>
+                    </div>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: 'var(--ui_border)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ height: '12px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden' }}>
                     <div
                       style={{
                         width: `${((metrics?.free_mem ?? sys_info.free_mem) / (metrics?.total_mem ?? sys_info.total_mem)) * 100}%`,
                         height: '100%',
-                        backgroundColor: 'var(--ui_success)',
-                        borderRadius: '4px'
+                        background: 'linear-gradient(90deg, var(--ui_success), var(--ui_success))',
+                        borderRadius: '999px',
+                        transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
-                    ></div>
+                    />
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ui_text_muted)' }}>
-                {t('loading_data')}
+              <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--ui_text_muted)' }}>
+                <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <HardDrive size={32} color="var(--ui_text_muted)" />
+                </div>
+                <p style={{ fontSize: '15px', margin: '0 0 8px 0' }}>{t('loading_data')}</p>
               </div>
             )}
           </div>
@@ -444,7 +518,7 @@ const Dashboard: React.FC = () => {
   return (
     <ThreePanelLayout
       title={t('overview')}
-      titleIcon={<LayoutDashboard size={20} color="#0ea5e9" />}
+      titleIcon={<LayoutDashboard size={20} color="var(--ui_accent)" />}
       leftPanelTitle={t('feature')}
       leftPanel={left_panel}
       middlePanelTitle={active_category === 'system' ? t('system_info') : t('project')}
@@ -452,7 +526,7 @@ const Dashboard: React.FC = () => {
       rightPanelTitle={filtered_items.find(i => i.id === active_item)?.name || '详情'}
       contentPadding="32px"
     >
-      <div style={{ flex: 1, height: '100%', backgroundColor: 'var(--ui_panel)', borderRadius: '16px', padding: '36px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', boxSizing: 'border-box', overflow: 'auto', minWidth: 0 }}>
+      <div style={{ flex: 1, backgroundColor: 'var(--ui_panel)', borderRadius: 'var(--ui_radius_lg)', padding: '36px', boxShadow: 'var(--ui_shadow_card)', border: '1px solid var(--ui_border)', overflow: 'auto', minWidth: 0, boxSizing: 'border-box' }}>
         {render_content()}
       </div>
     </ThreePanelLayout>

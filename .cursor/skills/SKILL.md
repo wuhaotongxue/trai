@@ -17,6 +17,7 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
 | **Electron** | `electron/` | `electron/SKILL.md` | 开发 Electron 桌面客户端时 |
 | **Agent** | `agent/` | `agent/SKILL.md` | 开发 Agent 智能体系统时 |
 | **Project** | `project/` | `project/SKILL.md` | 项目管理、Git 提交时 |
+| **Error Logs** | `error_logs/` | `error_logs/SKILL.md` | 记录错误、复盘分析 |
 
 ---
 
@@ -145,10 +146,15 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
     ├── git_submit/SKILL.md         # Git 提交
     ├── readme_update/SKILL.md      # README 更新
     ├── report_generation/SKILL.md  # 周报生成
-    └── fix_encoding/               # 文件编码修复
-        ├── SKILL.md             # 编码修复指南
-        ├── check_utf8.py        # 检查 UTF-8 编码
-        └── write_utf8.py        # 写入 UTF-8 文件
+    ├── fix_encoding/               # 文件编码修复
+    │   ├── SKILL.md             # 编码修复指南
+    │   ├── check_utf8.py        # 检查 UTF-8 编码
+    │   └── write_utf8.py        # 写入 UTF-8 文件
+    └── error_logs/                # 错误日志
+        ├── SKILL.md             # 错误日志索引
+        └── 2026_W17/            # 2026年第17周
+            ├── README.md
+            └── 2026-04-25.md
 ```
 
 ---

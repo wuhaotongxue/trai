@@ -6,8 +6,8 @@
   "author": "wuhao",
   "license": "ISC",
   "scripts": {
-    "dev": "pnpm type-check && vite",
-    "build": "pnpm type-check && vite build && electron-builder",
+    "dev": "vite",
+    "build": "vite build && electron-builder",
     "preview": "electron .",
     "type-check": "tsc --noEmit"
   },

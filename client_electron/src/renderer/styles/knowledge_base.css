@@ -37,7 +37,7 @@
 }
 
 .kb_pagination_button:disabled {
-  background-color: var(--ui_panel_alt);
+  background-color: var(--ui_panel_hover);
   color: var(--ui_text_muted);
   cursor: not-allowed;
 }
