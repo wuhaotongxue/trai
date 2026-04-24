@@ -6,7 +6,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Download, Search, Trash2, UserPlus, FileText, FileSpreadsheet, FileJson } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search, Trash2, UserPlus, FileText, FileSpreadsheet, FileJson, CheckCircle2, XCircle, Clock, Shield, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,234 +16,317 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown_menu";
-import { request } from "@/lib/api_client";
+import { adminApi, type UserInfo } from "@/lib/api_client";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
+import { useAdminToast } from "@/contexts/admin_toast_context";
 
-type UserItem = {
-  user_id: string;
-  username: string;
-  display_name: string;
-  email: string;
-  avatar_url: string;
-  role: string;
-  status: string;
-  tenant_id: string;
-  wecom_user_id: string;
-  created_at: string;
-  last_login_ip: string;
-  last_login_location: string;
+const STATUS_TABS = [
+  { key: "admin.users.all", api: undefined as string | undefined, filterKey: "全部" },
+  { key: "admin.users.pending", api: "pending" as const, filterKey: "待审核" },
+  { key: "admin.users.normal", api: "active" as const, filterKey: "正常" },
+  { key: "admin.users.disabled", api: "disabled" as const, filterKey: "已禁用" },
+];
+
+const STATUS_CONFIG = {
+  pending: { labelKey: "admin.users.table.pending", cls: "text-amber-600 bg-amber-500/10", dot: "bg-amber-500", icon: Clock },
+  active: { labelKey: "admin.users.table.normal", cls: "text-emerald-600 bg-emerald-500/10", dot: "bg-emerald-500", icon: CheckCircle2 },
+  disabled: { labelKey: "admin.users.table.disabled", cls: "text-red-600 bg-red-500/10", dot: "bg-red-500", icon: XCircle },
 };
 
+const ROLE_CONFIG = {
+  admin: { labelKey: "admin.users.admin", cls: "text-amber-600 bg-amber-500/10" },
+  vip: { labelKey: "admin.users.vip", cls: "text-purple-600 bg-purple-500/10" },
+  normal: { labelKey: "admin.users.normal_user", cls: "text-blue-600 bg-blue-500/10" },
+};
+
+const ROLE_FILTER_TABS = [
+  { labelKey: "admin.users.all", api: undefined as string | undefined },
+  { labelKey: "admin.users.admin", api: "admin" as const },
+  { labelKey: "admin.users.vip", api: "vip" as const },
+  { labelKey: "admin.users.normal_user", api: "normal" as const },
+];
+
 export default function UsersPage() {
+  const { t, locale } = useAdminI18n();
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState("全部");
-  const [users, setUsers] = useState<UserItem[]>([]);
+  const [activeTab, setActiveTab] = useState(0);
+  const [activeRoleTab, setActiveRoleTab] = useState(0);
+  const [users, setUsers] = useState<UserInfo[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
+  const { toast } = useAdminToast();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const roleQuery = filterRole === "全部" ? "" : `&role=${filterRole === "管理员" ? "admin" : "normal"}`;
-      const res = await request<{ users: UserItem[]; total: number }>(`/admin/users?limit=${pageSize}&offset=${(page - 1) * pageSize}${roleQuery}`);
+      const params: Record<string, string> = {
+        limit: String(pageSize),
+        offset: String((page - 1) * pageSize),
+      };
+      const statusVal = STATUS_TABS[activeTab].api;
+      if (statusVal) params.status = statusVal;
+      const roleVal = ROLE_FILTER_TABS[activeRoleTab].api;
+      if (roleVal) params.role = roleVal;
+      const res = await adminApi.listUsers(params as any);
       setUsers(res.users || []);
       setTotal(res.total || 0);
-    } catch (e) {
-      console.error("Failed to fetch users", e);
+    } catch {
+      console.error("Failed to fetch users");
     } finally {
       setLoading(false);
     }
-  }, [filterRole, page, pageSize]);
+  }, [activeTab, activeRoleTab, page, pageSize]);
 
   useEffect(() => {
-    fetchUsers();
+    void fetchUsers();
   }, [fetchUsers]);
 
-  const toggleStatus = async (user: UserItem) => {
+  const handleApprove = async (user: UserInfo) => {
+    try {
+      await adminApi.approveUser(user.user_id);
+      toast({ message: `${user.display_name || user.username} ${t("admin.users.approved")}`, variant: "success" });
+      void fetchUsers();
+    } catch (e: any) {
+      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+    }
+  };
+
+  const handleReject = async (user: UserInfo) => {
+    try {
+      await adminApi.rejectUser(user.user_id);
+      toast({ message: `${user.display_name || user.username} ${t("admin.users.rejected")}`, variant: "success" });
+      void fetchUsers();
+    } catch (e: any) {
+      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+    }
+  };
+
+  const toggleStatus = async (user: UserInfo) => {
     const newStatus = user.status === "active" ? "disabled" : "active";
     try {
-      await request(`/admin/users/${user.user_id}`, {
-        method: "PUT",
-        body: JSON.stringify({ status: newStatus }),
-      });
-      fetchUsers();
-    } catch (e) {
-      console.error("Toggle status failed", e);
+      await adminApi.updateUserStatus(user.user_id, newStatus);
+      toast({ message: t("admin.users.status_updated"), variant: "success" });
+      void fetchUsers();
+    } catch (e: any) {
+      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm("确定要删除该用户吗？")) return;
+    if (!confirm(t("admin.users.confirm_delete"))) return;
     try {
-      await request(`/admin/users/${userId}`, { method: "DELETE" });
-      fetchUsers();
-    } catch (e) {
-      console.error("Delete user failed", e);
-    }
-  };
-
-  const toggleRole = async (user: UserItem) => {
-    const newRole = user.role === "admin" ? "normal" : "admin";
-    if (!confirm(`确定要将该用户设为 ${newRole === "admin" ? "管理员" : "普通用户"} 吗？`)) return;
-    try {
-      await request(`/admin/users/${user.user_id}`, {
-        method: "PUT",
-        body: JSON.stringify({ role: newRole }),
-      });
-      fetchUsers();
-    } catch (e) {
-      console.error("Toggle role failed", e);
+      await adminApi.deleteUser(userId);
+      toast({ message: t("admin.users.deleted"), variant: "success" });
+      void fetchUsers();
+    } catch (e: any) {
+      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
   const handleExportUsers = async (format: "csv" | "excel" | "json" = "csv") => {
     try {
-      // 获取所有用户数据
-      const res = await request<{ users: UserItem[]; total: number }>("/admin/users?limit=10000");
+      const res = await adminApi.listUsers({ limit: 10000 } as any);
       const allUsers = res.users || [];
-      
-      // 准备数据
-      const headers = ["用户ID", "用户名", "显示名", "邮箱", "角色", "状态", "企业微信ID", "创建时间"];
-      const data = allUsers.map(user => ({
-        "用户ID": user.user_id,
-        "用户名": user.username || "",
-        "显示名": user.display_name || "",
-        "邮箱": user.email || "",
-        "角色": user.role === "admin" ? "管理员" : "普通用户",
-        "状态": user.status === "active" ? "正常" : "停用",
-        "企业微信ID": user.wecom_user_id || "",
-        "创建时间": user.created_at || ""
+      const headers = [
+        t("admin.users.employee_id_col"),
+        t("admin.users.username_col"),
+        t("admin.users.display_name_col"),
+        t("admin.users.email_col"),
+        t("admin.users.role_col"),
+        t("admin.users.status_col"),
+        t("admin.users.wecom_col"),
+        t("admin.users.created_col"),
+      ];
+      const roleMap: Record<string, string> = {
+        admin: t("admin.users.admin"),
+        vip: t("admin.users.vip"),
+        normal: t("admin.users.normal_user"),
+      };
+      const statusMap: Record<string, string> = {
+        active: t("admin.users.normal"),
+        pending: t("admin.users.pending"),
+        disabled: t("admin.users.disabled"),
+      };
+      const data: Record<string, string>[] = allUsers.map((user) => ({
+        [t("admin.users.employee_id_col")]: user.user_id,
+        [t("admin.users.username_col")]: user.username || "",
+        [t("admin.users.display_name_col")]: user.display_name || "",
+        [t("admin.users.email_col")]: user.email || "",
+        [t("admin.users.role_col")]: roleMap[user.role] || user.role,
+        [t("admin.users.status_col")]: statusMap[user.status ?? ""] || user.status || "",
+        [t("admin.users.wecom_col")]: user.wecom_user_id || "",
+        [t("admin.users.created_col")]: user.created_at || "",
       }));
-      
-      const filename = `用户列表_${new Date().toISOString().split('T')[0]}`;
-      
-      switch (format) {
-        case "csv":
-          // CSV 格式
-          const csvRows = [headers.join(",")];
-          data.forEach(user => {
-            const row = [
-              `"${user["用户ID"]}"`,
-              `"${user["用户名"]}"`,
-              `"${user["显示名"]}"`,
-              `"${user["邮箱"]}"`,
-              `"${user["角色"]}"`,
-              `"${user["状态"]}"`,
-              `"${user["企业微信ID"]}"`,
-              `"${user["创建时间"]}"`
-            ];
-            csvRows.push(row.join(","));
-          });
-          const csvContent = csvRows.join("\n");
-          const csvBlob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-          saveAs(csvBlob, `${filename}.csv`);
-          break;
-          
-        case "excel":
-          // Excel 格式
-          const ws = XLSX.utils.json_to_sheet(data);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "用户列表");
-          const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-          const excelBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-          saveAs(excelBlob, `${filename}.xlsx`);
-          break;
-          
-        case "json":
-          // JSON 格式
-          const jsonContent = JSON.stringify(data, null, 2);
-          const jsonBlob = new Blob([jsonContent], { type: "application/json" });
-          saveAs(jsonBlob, `${filename}.json`);
-          break;
+      const date = new Date().toISOString().split("T")[0];
+      const filename = locale === "zh"
+        ? `用户列表_${date}`
+        : `users_${date}`;
+      if (format === "csv") {
+        const csvRows = [headers.join(",")];
+        data.forEach((row) => {
+          csvRows.push(Object.values(row as Record<string, string>).map((v) => `"${v}"`).join(","));
+        });
+        const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        saveAs(blob, `${filename}.csv`);
+      } else if (format === "excel") {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, locale === "zh" ? "用户列表" : "Users");
+        const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `${filename}.xlsx`);
+      } else {
+        saveAs(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }), `${filename}.json`);
       }
     } catch (e) {
-      console.error("导出用户列表失败", e);
-      alert("导出失败，请稍后重试");
+      console.error("Export users failed", e);
     }
   };
 
   const filtered = users.filter((u) => {
-    const matchSearch = (u.display_name || "").includes(search) || (u.email || "").includes(search) || (u.username || "").includes(search);
-    
-    // 角色筛选逻辑
-    let matchRole = true;
-    if (filterRole === "管理员") {
-      matchRole = u.role === "admin";
-    } else if (filterRole === "VIP") {
-      matchRole = u.role === "vip";
-    } else if (filterRole === "普通用户") {
-      matchRole = u.role === "normal";
-    }
-    
-    return matchSearch && matchRole;
+    const q = search.toLowerCase();
+    return (
+      (u.display_name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.username || "").toLowerCase().includes(q)
+    );
   });
+
+  const pendingCount = users.filter((u) => u.status === "pending").length;
+  const pendingTab = STATUS_TABS.find((s) => s.api === "pending");
+  const pendingTabIndex = STATUS_TABS.indexOf(pendingTab!);
 
   return (
     <div className="space-y-5">
-      {/* 顶部操作栏 */}
+      {/* 顶部标题栏 */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">用户管理</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">共 {total} 位注册用户</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+            <Shield className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground">{t("admin.users.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {t("admin.users.total")} {total} {t("admin.users.registered")}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
-                <Download className="h-3.5 w-3.5" />
-                导出
-              </Button>
+            <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 h-9 px-4 text-sm rounded-lg border border-border bg-background hover:bg-slate-100 cursor-pointer transition-colors">
+              <Download className="h-3.5 w-3.5" />
+              {t("admin.users.export")}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleExportUsers("csv")} className="flex items-center gap-2 cursor-pointer">
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={() => void handleExportUsers("csv")} className="flex items-center gap-2 cursor-pointer">
                 <FileText className="h-4 w-4" />
-                CSV 格式
+                {t("admin.users.csv")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExportUsers("excel")} className="flex items-center gap-2 cursor-pointer">
+              <DropdownMenuItem onClick={() => void handleExportUsers("excel")} className="flex items-center gap-2 cursor-pointer">
                 <FileSpreadsheet className="h-4 w-4" />
-                Excel 格式
+                {t("admin.users.excel")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExportUsers("json")} className="flex items-center gap-2 cursor-pointer">
+              <DropdownMenuItem onClick={() => void handleExportUsers("json")} className="flex items-center gap-2 cursor-pointer">
                 <FileJson className="h-4 w-4" />
-                JSON 格式
+                {t("admin.users.json")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={() => window.location.href = "/admin/users/new"}>
             <UserPlus className="h-3.5 w-3.5" />
-            新增用户
+            {t("admin.users.new_user")}
           </Button>
         </div>
       </div>
 
+      {/* 待审核提醒横幅 */}
+      {activeTab === 0 && pendingCount > 0 && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+            <AlertCircle className="h-5 w-5 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">
+              {t("admin.users.pending_count")} <span className="text-amber-600 font-bold">{pendingCount}</span> {t("admin.users.pending_wait")}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t("admin.users.pending_desc")}</p>
+          </div>
+          <Button
+            size="sm"
+            className="h-8 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium"
+            onClick={() => { setActiveTab(pendingTabIndex); setPage(1); }}
+          >
+            {t("admin.users.go_review")}
+          </Button>
+        </div>
+      )}
+
       {/* 筛选工具栏 */}
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <CardContent className="p-4 space-y-4">
           <div className="flex items-center gap-3 flex-wrap">
+            {/* 搜索框 */}
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="搜索用户名或邮箱..."
-                className="h-9 pl-9 rounded-lg border-border text-sm"
+                placeholder={t("admin.users.search")}
+                className="h-9 pl-9 pr-4 rounded-lg border-border text-sm"
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/40 rounded-lg p-1 border border-border/60">
-              {["全部", "管理员", "VIP", "普通用户"].map((p) => (
+              {STATUS_TABS.map((tab, i) => {
+                const count = i === 0 ? total :
+                  i === 1 ? users.filter((u) => u.status === "pending").length :
+                  i === 2 ? users.filter((u) => u.status === "active").length :
+                  users.filter((u) => u.status === "disabled").length;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => { setActiveTab(i); setPage(1); }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      activeTab === i
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t(tab.key)}
+                    {count > 0 && (
+                      <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
+                        activeTab === i
+                          ? "bg-blue-500 text-white"
+                          : i === 1
+                          ? "bg-amber-500 text-white"
+                          : "bg-muted text-muted-foreground"
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 角色筛选 */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{t("admin.users.role")}</span>
+            <div className="flex items-center gap-1.5">
+              {ROLE_FILTER_TABS.map((tab, i) => (
                 <button
-                  key={p}
-                  onClick={() => setFilterRole(p)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                    filterRole === p
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                  key={tab.labelKey}
+                  onClick={() => { setActiveRoleTab(i); setPage(1); }}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                    activeRoleTab === i
+                      ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                      : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border/60"
                   }`}
                 >
-                  {p}
+                  {t(tab.labelKey)}
                 </button>
               ))}
             </div>
@@ -251,79 +334,130 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      {/* 用户表格 */}
-      <Card className="border-0 shadow-sm">
+      {/* 用户列表 */}
+      <Card className="border-0 shadow-sm overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">用户</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">工号</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">角色</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">状态</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">注册时间</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">登录 IP</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">操作</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.user")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.employee_id")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.role")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.status")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.reg_time")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.login_ip")}</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">加载中...</td>
+                    <td colSpan={7} className="px-5 py-12 text-center">
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                        <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                        <span className="text-sm">{t("admin.users.loading")}</span>
+                      </div>
+                    </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">没有找到匹配的用户</td>
+                    <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">{t("admin.users.no_result")}</td>
                   </tr>
                 ) : (
                   filtered.map((user) => {
-                    const st = user.status === "active" ? { label: "正常", cls: "text-emerald-500 bg-emerald-500/10" } : { label: "停用", cls: "text-red-500 bg-red-500/10" };
+                    const stCfg = STATUS_CONFIG[user.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.disabled;
+                    const roleCfg = ROLE_CONFIG[user.role as keyof typeof ROLE_CONFIG] || ROLE_CONFIG.normal;
                     return (
-                      <tr key={user.user_id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3">
+                      <tr key={user.user_id} className="hover:bg-muted/20 transition-colors group">
+                        <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3">
                             {user.avatar_url ? (
-                              <img src={user.avatar_url} alt={user.display_name} className="h-8 w-8 rounded-full object-cover flex-shrink-0 border border-border" referrerPolicy="no-referrer" />
+                              <img src={user.avatar_url} alt={user.display_name} className="h-9 w-9 rounded-full object-cover border border-border shrink-0" referrerPolicy="no-referrer" />
                             ) : (
-                              <div className="h-8 w-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                                {user.display_name ? user.display_name[0].toUpperCase() : "U"}
+                              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center font-bold text-sm text-blue-600 shrink-0 border border-blue-500/20">
+                                {(user.display_name || user.username || "U")[0].toUpperCase()}
                               </div>
                             )}
-                            <div>
+                            <div className="min-w-0">
                               <div className="font-medium text-foreground">{user.display_name || user.username}</div>
-                              <div className="text-xs text-muted-foreground mt-0.5">{user.email || user.username}</div>
+                              <div className="text-xs text-muted-foreground truncate max-w-[180px]">{user.email || user.username}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                        <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
                           {user.wecom_user_id || "—"}
                         </td>
-                        <td className="px-4 py-3">
-                          <button 
-                            onClick={() => toggleRole(user)}
-                            className={`px-2 py-0.5 rounded text-xs font-medium hover:opacity-80 transition-opacity ${user.role === "admin" ? "bg-amber-500/10 text-amber-600" : "bg-blue-500/10 text-blue-600"}`}>
-                            {user.role === "admin" ? "管理员" : "普通用户"}
-                          </button>
+                        <td className="px-4 py-3.5">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${roleCfg.cls}`}>
+                            {t(roleCfg.labelKey)}
+                          </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <button 
-                            onClick={() => toggleStatus(user)}
-                            className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                            <span className={`w-1.5 h-1.5 rounded-full ${user.status === "active" ? "bg-emerald-500" : "bg-red-500"}`} />
-                            <span className={`text-xs font-medium ${st.cls}`}>{st.label}</span>
-                          </button>
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} ${user.status === "pending" ? "animate-pulse" : ""}`} />
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${stCfg.cls}`}>
+                              {t(stCfg.labelKey)}
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">{user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3.5 text-xs text-muted-foreground">
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "2-digit", day: "2-digit" }) : "—"}
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-muted-foreground">
                           <div>{user.last_login_ip || "—"}</div>
-                          <div className="text-xs text-muted-foreground/70">{user.last_login_location || ""}</div>
+                          <div className="truncate max-w-[120px]">{user.last_login_location || ""}</div>
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button 
-                              onClick={() => deleteUser(user.user_id)}
-                              className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors" title="删除">
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                            {/* 待审核操作 */}
+                            {user.status === "pending" && (
+                              <>
+                                <button
+                                  onClick={() => void handleApprove(user)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                  title={t("admin.users.approve")}
+                                >
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  {t("admin.users.approve")}
+                                </button>
+                                <button
+                                  onClick={() => void handleReject(user)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-medium transition-colors"
+                                  title={t("admin.users.reject")}
+                                >
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  {t("admin.users.reject")}
+                                </button>
+                              </>
+                            )}
+                            {/* 正常用户操作 */}
+                            {user.status === "active" && (
+                              <button
+                                onClick={() => void toggleStatus(user)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-red-500/10 text-muted-foreground hover:text-red-500 text-xs font-medium transition-colors"
+                                title={t("admin.users.disable")}
+                              >
+                                <XCircle className="h-3.5 w-3.5" />
+                                {t("admin.users.disable")}
+                              </button>
+                            )}
+                            {/* 已禁用用户 */}
+                            {user.status === "disabled" && (
+                              <button
+                                onClick={() => void toggleStatus(user)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                title={t("admin.users.enable")}
+                              >
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                {t("admin.users.enable")}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => void deleteUser(user.user_id)}
+                              className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"
+                              title={t("admin.users.delete")}
+                            >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
@@ -336,53 +470,23 @@ export default function UsersPage() {
             </table>
           </div>
 
-          {/* 分页控制 */}
+          {/* 分页 */}
           {total > 0 && (
-            <div className="p-4 border-t flex items-center justify-between bg-muted/10">
+            <div className="p-4 border-t border-border/60 flex items-center justify-between bg-muted/10">
               <div className="text-xs text-muted-foreground">
-                显示 {(page - 1) * pageSize + 1} 到 {Math.min(page * pageSize, total)} 条，共 {total} 条
+                {t("admin.users.pagination.show")} {(page - 1) * pageSize + 1} {t("admin.users.pagination.to")} {Math.min(page * pageSize, total)} {t("admin.users.pagination.total")} {total}
               </div>
               <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2"
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1 || loading}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="text-xs font-medium px-2">
-                    第 {page} / {Math.ceil(total / pageSize)} 页
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2"
-                    onClick={() => setPage(p => Math.min(Math.ceil(total / pageSize), p + 1))}
-                    disabled={page === Math.ceil(total / pageSize) || loading}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <div className="flex items-center gap-1.5 ml-2 border-l pl-3 border-border/60">
-                    <span className="text-[10px] text-muted-foreground">跳转</span>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={Math.ceil(total / pageSize)}
-                      className="w-12 h-7 px-1 text-center text-xs"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          const val = parseInt((e.target as HTMLInputElement).value);
-                          const totalPages = Math.ceil(total / pageSize);
-                          if (val >= 1 && val <= totalPages) {
-                            setPage(val);
-                          }
-                        }
-                      }}
-                    />
-                  </div>
+                <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1 || loading}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="text-xs font-medium px-2">
+                  {t("admin.users.pagination.page")} {page} / {Math.ceil(total / pageSize)} {t("admin.users.pagination.pages")}
                 </div>
+                <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setPage((p) => Math.min(Math.ceil(total / pageSize), p + 1))} disabled={page === Math.ceil(total / pageSize) || loading}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

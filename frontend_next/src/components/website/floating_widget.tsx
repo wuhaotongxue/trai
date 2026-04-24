@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, BotMessageSquare, X, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
-import { ChatPanel } from "@/components/agent/chat_panel";
 import { cn } from "@/lib/utils";
 import { useAgentStore } from "@/stores/agent.store";
 
@@ -26,7 +25,7 @@ export function FloatingWidget() {
     !pathname.startsWith("/agent") &&
     !pathname.startsWith("/login") &&
     !pathname.startsWith("/register") &&
-    !pathname.startsWith("/forgot-password") &&
+    !pathname.startsWith("/forgot_password") &&
     !pathname.startsWith("/docs") &&
     !pathname.startsWith("/todo");
 
@@ -61,8 +60,32 @@ export function FloatingWidget() {
     <>
       <div className={cn(
         "fixed z-50 flex flex-col gap-3 transition-all duration-300",
-        "bottom-12 right-6"
+        isAdminPage ? "bottom-24 right-6" : "bottom-12 right-6"
       )}>
+        <Button
+          size="icon"
+          variant="outline"
+          className={cn(
+            "h-12 w-12 rounded-full shadow-xl border-blue-200/50 dark:border-blue-500/30 transition-all hover:scale-110 active:scale-95 group relative overflow-hidden",
+            isChatOpen 
+              ? "bg-blue-600 text-white hover:bg-blue-700" 
+              : "bg-white/90 dark:bg-[#0d1220]/90 text-blue-600 hover:text-blue-700"
+          )}
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          title={isChatOpen ? "关闭助手" : "打开 AI 助手"}
+        >
+          {!isChatOpen && (
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 animate-pulse" />
+          )}
+          <BotMessageSquare className={cn("h-6 w-6 relative z-10", isChatOpen && "animate-bounce")} />
+          {!isChatOpen && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+            </span>
+          )}
+        </Button>
+
         {showTop && (
           <Button
             size="icon"
@@ -140,7 +163,11 @@ export function FloatingWidget() {
             </div>
           </div>
           <div className="flex-1 overflow-hidden relative">
-            <ChatPanel />
+            <iframe 
+              src="/agent?mode=widget" 
+              className="w-full h-full border-0"
+              title="TRAI AI Assistant"
+            />
           </div>
         </div>
       )}

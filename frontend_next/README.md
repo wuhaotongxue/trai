@@ -65,9 +65,15 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 前端_2026_04_23_2110
-- **规范(skill)**: 执行 frontend_next SKILL 代码审查，修复 dialog.tsx 文件头描述泛化问题
-- **规范(skill)**: 修复 admin 仪表盘 page.tsx 缺少规范文件头的问题
+### 🎨 前端_2026_04_24_1525
+- **feat(i18n)**: 新增国际化系统 (i18n/) — 配置、上下文、语言切换器组件
+- **feat(i18n)**: 新增 Admin i18n 管理页面，支持多语言翻译配置
+- **feat(i18n)**: Admin 布局支持中英文切换，上下文注入翻译数据
+- **feat(ai)**: 新增 Admin AI 助手页面
+- **feat(auth)**: 新增忘记密码页面 (forgot_password/)
+- **feat(agent)**: 对话面板增强状态管理和流式响应优化
+- **feat(style)**: 增强全局 CSS 动画系统，Material Design 风格
+- **chore(deps)**: 更新 pnpm-lock.yaml 依赖锁定文件
 
 ### 🎨 前端_2026_04_22_1515
 - **feat(agent)**: Agent 页面重构, 引入 DeepSeek 风格左侧侧边栏, 支持多会话切换与历史管理

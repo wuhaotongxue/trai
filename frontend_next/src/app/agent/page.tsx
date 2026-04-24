@@ -11,15 +11,13 @@ import { ChatPanel } from "@/components/agent/chat_panel";
 import { Sidebar } from "@/components/agent/sidebar";
 import { Navbar } from "@/components/website/navbar";
 import { useAgentStore } from "@/stores/agent.store";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-/**
- * Agent 对话主页面组件
- * 
- * 提供 Agent 对话界面，包含侧边栏和聊天面板
- */
-export default function AgentPage() {
+function AgentContent() {
   const { sessionId, startSession } = useAgentStore();
+  const searchParams = useSearchParams();
+  const isWidget = searchParams.get("mode") === "widget";
 
   /**
    * 初始化会话
@@ -33,6 +31,14 @@ export default function AgentPage() {
     }
   }, [sessionId, startSession]);
 
+  if (isWidget) {
+    return (
+      <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <ChatPanel />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Navbar />
@@ -45,5 +51,18 @@ export default function AgentPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+/**
+ * Agent 对话主页面组件
+ * 
+ * 提供 Agent 对话界面，包含侧边栏和聊天面板
+ */
+export default function AgentPage() {
+  return (
+    <Suspense fallback={null}>
+      <AgentContent />
+    </Suspense>
   );
 }

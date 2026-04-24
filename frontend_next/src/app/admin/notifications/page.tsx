@@ -5,57 +5,93 @@
 
 "use client";
 
+import { useState } from "react";
 import { Edit2, Eye, Plus, Send, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const notifications = [
-  { id: 1, title: "系统将于 4 月 12 日维护", time: "2026-04-09 10:00", sent: 1284, read: 891, status: "已发送" },
-  { id: 2, title: "新功能上线: Agent 工具市场", time: "2026-04-07 14:30", sent: 2156, read: 1802, status: "已发送" },
-  { id: 3, title: "积分系统升级公告", time: "2026-04-05 09:15", sent: 980, read: 654, status: "草稿" },
-  { id: 4, title: "VIP 用户专属福利通知", time: "2026-04-03 16:00", sent: 312, read: 298, status: "已发送" },
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
+import { useAdminToast } from "@/contexts/admin_toast_context";
+const mockNotifications = [
+  { id: 1, title: "系统将于 4 月 12 日维护", time: "2026-04-09 10:00", sent: 1284, read: 891, status: "sent" },
+  { id: 2, title: "新功能上线: Agent 工具市场", time: "2026-04-07 14:30", sent: 2156, read: 1802, status: "sent" },
+  { id: 3, title: "积分系统升级公告", time: "2026-04-05 09:15", sent: 980, read: 654, status: "draft" },
+  { id: 4, title: "VIP 用户专属福利通知", time: "2026-04-03 16:00", sent: 312, read: 298, status: "sent" },
 ];
 
 export default function NotificationsPage() {
+  const { t } = useAdminI18n();
+  const { toast } = useAdminToast();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
+  const handleSendAll = () => {
+    if (!title.trim() || !content.trim()) {
+      toast({ message: t("admin.notifications.fill_required"), variant: "error" });
+      return;
+    }
+    toast({ message: t("admin.notifications.send_success"), variant: "success" });
+    setTitle("");
+    setContent("");
+  };
+
+  const handleSaveDraft = () => {
+    if (!title.trim()) {
+      toast({ message: t("admin.notifications.fill_title"), variant: "error" });
+      return;
+    }
+    toast({ message: t("admin.notifications.draft_saved"), variant: "success" });
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground">消息通知</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">向用户推送系统公告与运营通知</p>
+          <h1 className="text-xl font-bold text-foreground">{t("admin.notifications.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("admin.notifications.subtitle")}</p>
         </div>
-        <Button size="sm" className="h-9 gap-2 text-sm shadow-sm">
+        <Button
+          size="sm"
+          className="h-9 gap-2 text-sm shadow-sm"
+          onClick={() => toast({ message: t("admin.notifications.coming_soon"), variant: "info" })}
+        >
           <Plus className="h-3.5 w-3.5" />
-          新建通知
+          {t("admin.notifications.new_btn")}
         </Button>
       </div>
 
       {/* 发送通知表单 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-foreground">快速发送通知</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{t("admin.notifications.quick_send")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground/80">通知标题</Label>
-            <Input className="h-9 rounded-lg" placeholder="输入通知标题..." />
+            <Label className="text-sm font-medium text-foreground/80">{t("admin.notifications.send_title")}</Label>
+            <Input
+              className="h-9 rounded-lg"
+              placeholder={t("admin.notifications.send_title_placeholder")}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground/80">通知内容</Label>
+            <Label className="text-sm font-medium text-foreground/80">{t("admin.notifications.send_content")}</Label>
             <textarea
               className="w-full min-h-[100px] rounded-lg border border-border p-3 text-sm resize-none bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500/60 transition-all"
-              placeholder="输入通知内容..."
+              placeholder={t("admin.notifications.send_content_placeholder")}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-sm">
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSendAll}>
               <Send className="h-3.5 w-3.5" />
-              发送给所有用户
+              {t("admin.notifications.send_all")}
             </Button>
-            <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
-              保存草稿
+            <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={handleSaveDraft}>
+              {t("admin.notifications.save_draft")}
             </Button>
           </div>
         </CardContent>
@@ -64,23 +100,23 @@ export default function NotificationsPage() {
       {/* 发送历史 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-foreground">发送历史</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{t("admin.notifications.history")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">标题</th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">发送时间</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">发送量</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">已读</th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">状态</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">操作</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_title")}</th>
+                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_time")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_sent")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_read")}</th>
+                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_status")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.notifications.th_action")}</th>
                 </tr>
               </thead>
               <tbody>
-                {notifications.map((n) => (
+                {mockNotifications.map((n) => (
                   <tr key={n.id} className="border-b border-border/40 hover:bg-muted/25 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground text-sm">{n.title}</p>
@@ -90,16 +126,40 @@ export default function NotificationsPage() {
                     <td className="px-4 py-3 text-right text-foreground/80">{n.read.toLocaleString()}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        n.status === "已发送" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-muted-foreground"
+                        n.status === "sent" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-muted-foreground"
                       }`}>
-                        {n.status}
+                        {t(n.status === "sent" ? "admin.notifications.status_sent" : "admin.notifications.status_draft")}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button type="button" aria-label="查看通知" title="查看通知" className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors"><Eye className="h-3.5 w-3.5" /></button>
-                        <button type="button" aria-label="编辑通知" title="编辑通知" className="p-1.5 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"><Edit2 className="h-3.5 w-3.5" /></button>
-                        <button type="button" aria-label="删除通知" title="删除通知" className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                        <button
+                          type="button"
+                          aria-label={t("admin.notifications.action_view")}
+                          title={t("admin.notifications.action_view")}
+                          className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors"
+                          onClick={() => toast({ message: t("admin.notifications.coming_soon"), variant: "info" })}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={t("admin.notifications.action_edit")}
+                          title={t("admin.notifications.action_edit")}
+                          className="p-1.5 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
+                          onClick={() => toast({ message: t("admin.notifications.coming_soon"), variant: "info" })}
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={t("admin.notifications.action_delete")}
+                          title={t("admin.notifications.action_delete")}
+                          className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"
+                          onClick={() => toast({ message: t("admin.notifications.coming_soon"), variant: "info" })}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>

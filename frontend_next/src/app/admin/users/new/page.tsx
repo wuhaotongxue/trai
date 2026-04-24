@@ -12,42 +12,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const planOptions = [
-  { value: "free", label: "免费版", desc: "50 次 Agent 调用/月" },
-  { value: "pro", label: "Pro", desc: "500 次 Agent 调用/月" },
-  { value: "vip", label: "VIP", desc: "无限 Agent 调用" },
-];
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
+import { useAdminToast } from "@/contexts/admin_toast_context";
+import { adminApi } from "@/lib/api_client";
 
 export default function NewUserPage() {
+  const { t } = useAdminI18n();
+  const { toast } = useAdminToast();
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     plan: "free",
   });
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!form.name.trim()) newErrors.name = "请输入用户姓名";
-    if (!form.email.trim()) newErrors.email = "请输入邮箱";
-    else if (!form.email.includes("@")) newErrors.email = "邮箱格式不正确";
-    if (!form.password) newErrors.password = "请输入初始密码";
-    else if (form.password.length < 6) newErrors.password = "密码至少 6 位";
+    if (!form.name.trim()) newErrors.name = t("admin.users.new.name_required");
+    if (!form.email.trim()) newErrors.email = t("admin.users.new.email_required");
+    else if (!form.email.includes("@")) newErrors.email = t("admin.users.new.email_invalid");
+    if (!form.password) newErrors.password = t("admin.users.new.password_required");
+    else if (form.password.length < 6) newErrors.password = t("admin.users.new.password_min");
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-      window.location.href = "/admin/users";
-    }, 1200);
+    setSaving(true);
+    try {
+      await adminApi.createUser({ name: form.name, email: form.email, password: form.password, plan: form.plan });
+      toast({ message: t("admin.users.new.saved"), variant: "success" });
+      setTimeout(() => { window.location.href = "/admin/users"; }, 800);
+    } catch (e: any) {
+      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+      setSaving(false);
+    }
   };
+
+  const quickActions = [
+    { labelKey: "admin.users.new.batch_import", icon: UserPlus, action: () => toast({ message: t("admin.users.new.coming_soon"), variant: "info" }) },
+    { labelKey: "admin.users.new.invite_link", icon: Mail, action: () => navigator.clipboard?.writeText(window.location.origin).then(() => toast({ message: t("admin.users.new.link_copied"), variant: "success" })).catch(() => toast({ message: t("admin.users.error.operation_failed"), variant: "error" })) },
+    { labelKey: "admin.users.new.import_csv", icon: UserPlus, action: () => toast({ message: t("admin.users.new.coming_soon"), variant: "info" }) },
+  ];
+
+  const planOptions = [
+    { value: "free", labelKey: "admin.users.new.plan_free", descKey: "admin.users.new.plan_free_desc" },
+    { value: "pro", labelKey: "admin.users.new.plan_pro", descKey: "admin.users.new.plan_pro_desc" },
+    { value: "vip", labelKey: "admin.users.new.plan_vip", descKey: "admin.users.new.plan_vip_desc" },
+  ];
 
   return (
     <div className="space-y-5">
@@ -55,16 +70,16 @@ export default function NewUserPage() {
       <div className="flex items-center gap-3">
         <Link href="/admin/users" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
-          返回用户列表
+          {t("admin.users.new.back")}
         </Link>
         <span className="text-muted-foreground/50">/</span>
-        <span className="text-sm text-foreground font-medium">新增用户</span>
+        <span className="text-sm text-foreground font-medium">{t("admin.users.new.title")}</span>
       </div>
 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground">新增用户</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">手动添加新用户账号</p>
+          <h1 className="text-xl font-bold text-foreground">{t("admin.users.new.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("admin.users.new.subtitle")}</p>
         </div>
       </div>
 
@@ -74,17 +89,17 @@ export default function NewUserPage() {
           {/* 基本信息 */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-foreground">基本信息</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">{t("admin.users.new.basic_info")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-foreground/80">
-                    用户姓名 <span className="text-red-500">*</span>
+                    {t("admin.users.new.name_label")} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     className={`h-10 rounded-lg ${errors.name ? "border-red-400 focus:ring-red-100" : ""}`}
-                    placeholder="请输入用户姓名"
+                    placeholder={t("admin.users.new.name_required")}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
@@ -92,7 +107,7 @@ export default function NewUserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-foreground/80">
-                    邮箱地址 <span className="text-red-500">*</span>
+                    {t("admin.users.new.email_label")} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     type="email"
@@ -106,19 +121,19 @@ export default function NewUserPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-foreground/80">
-                  初始密码 <span className="text-red-500">*</span>
+                  {t("admin.users.new.password_label")} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   type="password"
                   className={`h-10 rounded-lg ${errors.password ? "border-red-400 focus:ring-red-100" : ""}`}
-                  placeholder="至少 6 位密码"
+                  placeholder={t("admin.users.new.password_min")}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                 />
                 {errors.password ? (
                   <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{errors.password}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground">密码将加密存储, 首次登录后建议用户立即修改</p>
+                  <p className="text-xs text-muted-foreground">{t("admin.users.new.password_hint")}</p>
                 )}
               </div>
             </CardContent>
@@ -127,7 +142,7 @@ export default function NewUserPage() {
           {/* 套餐配置 */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-foreground">套餐配置</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">{t("admin.users.new.plan_config")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -150,10 +165,10 @@ export default function NewUserPage() {
                         form.plan === plan.value
                           ? plan.value === "free" ? "text-foreground/80" : plan.value === "pro" ? "text-blue-400" : "text-amber-400"
                           : "text-muted-foreground"
-                      }`}>{plan.label}</p>
+                      }`}>{t(plan.labelKey)}</p>
                       {form.plan === plan.value && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
                     </div>
-                    <p className="text-xs text-muted-foreground">{plan.desc}</p>
+                    <p className="text-xs text-muted-foreground">{t(plan.descKey)}</p>
                   </button>
                 ))}
               </div>
@@ -167,18 +182,17 @@ export default function NewUserPage() {
               className="h-10 px-6 font-semibold rounded-lg shadow-md shadow-blue-500/20 gap-2"
               onClick={handleSave}
             >
-              {saved ? (
-                <><CheckCircle2 className="h-4 w-4 text-emerald-400" />正在创建...</>
+              {saving ? (
+                <><CheckCircle2 className="h-4 w-4 text-emerald-400 animate-spin" />{t("admin.users.new.creating")}</>
               ) : (
-                <><Save className="h-4 w-4" />创建用户</>
+                <><Save className="h-4 w-4" />{t("admin.users.new.create_btn")}</>
               )}
             </Button>
             <Link href="/admin/users">
               <Button variant="outline" size="sm" className="h-10 px-6 rounded-lg border-border">
-                取消
+                {t("admin.users.new.cancel")}
               </Button>
             </Link>
-            {saved && <span className="text-xs text-emerald-400">刚刚保存, 已同步至云端</span>}
           </div>
         </div>
 
@@ -186,39 +200,36 @@ export default function NewUserPage() {
         <div className="space-y-4">
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">创建说明</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">{t("admin.users.new.instructions_title")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-xs text-muted-foreground leading-relaxed">
               <div className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">1</div>
-                <p>用户创建后会收到一封激活邮件, 需点击链接激活账号</p>
+                <p>{t("admin.users.new.instruction1")}</p>
               </div>
               <div className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">2</div>
-                <p>初始密码由管理员设定, 建议用户在首次登录后立即修改</p>
+                <p>{t("admin.users.new.instruction2")}</p>
               </div>
               <div className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">3</div>
-                <p>套餐配额按自然月统计, 月末重置</p>
+                <p>{t("admin.users.new.instruction3")}</p>
               </div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">快捷操作</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">{t("admin.users.new.quick_actions")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {[
-                { label: "批量导入用户", icon: UserPlus },
-                { label: "邀请链接注册", icon: Mail },
-                { label: "导入 CSV 用户", icon: UserPlus },
-              ].map((item) => (
+              {quickActions.map((item) => (
                 <button
-                  key={item.label}
+                  key={item.labelKey}
+                  onClick={item.action}
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg bg-muted/25 hover:bg-muted/40 text-xs font-medium text-foreground/80 transition-colors text-left"
                 >
                   <item.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </button>
               ))}
             </CardContent>

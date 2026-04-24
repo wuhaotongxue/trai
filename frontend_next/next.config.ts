@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  allowedDevOrigins: ["192.168.98.183", "localhost", "192.168.98.72"],
+  // 移除 output: "export" 以启用热重载和 WebSocket 功能
+  allowedDevOrigins: ["192.168.100.119", "localhost", "192.168.98.72", "192.168.98.183"],
 };
 
 export default nextConfig;

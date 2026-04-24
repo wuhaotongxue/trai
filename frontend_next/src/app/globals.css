@@ -229,6 +229,12 @@
   50% { transform: translateY(-8px); }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
 .animate-slide-up {
   animation: slideUpFade 0.5s var(--ease-google) both;
 }
@@ -247,6 +253,10 @@
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }
 
 /* ================================================
@@ -342,6 +352,278 @@ button:not(:disabled):active {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ================================================
+   打字机光标动画
+   ================================================ */
+@keyframes typing-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: currentColor;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: typing-cursor 1s step-end infinite;
+}
+
+/* ================================================
+   流光渐变边框效果
+   ================================================ */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gradient-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4, #3b82f6);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ================================================
+   流光扫过效果 (Shimmer / Glint)
+   ================================================ */
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(250%) skewX(-15deg); }
+}
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: translateX(-100%) skewX(-15deg);
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* ================================================
+   脉冲波纹效果
+   ================================================ */
+@keyframes ripple-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.ripple-container {
+  position: relative;
+}
+.ripple-item {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: ripple-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.ripple-item:nth-child(2) { animation-delay: 0.5s; }
+.ripple-item:nth-child(3) { animation-delay: 1s; }
+
+/* ================================================
+   背景网格点阵效果
+   ================================================ */
+.bg-dotted-grid {
+  background-image: radial-gradient(circle, rgba(59,130,246,0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ================================================
+   噪点纹理叠加层
+   ================================================ */
+.grain-overlay {
+  position: relative;
+}
+.grain-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ================================================
+   链接 Hover 下划线动画
+   ================================================ */
+.animated-link {
+  position: relative;
+  text-decoration: none;
+}
+.animated-link::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: currentColor;
+  transition: width 0.3s var(--ease-google);
+}
+.animated-link:hover::after {
+  width: 100%;
+}
+
+/* ================================================
+   渐变文本动画
+   ================================================ */
+@keyframes gradient-text-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-text {
+  background-size: 200% auto;
+  animation: gradient-text-flow 3s ease infinite;
+}
+
+/* ================================================
+   骨架屏加载效果
+   ================================================ */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.skeleton {
+  background: linear-gradient(90deg, transparent 0%, rgba(128,128,128,0.08) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* ================================================
+   页面过渡动画
+   ================================================ */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-enter 0.4s var(--ease-enter) both;
+}
+
+/* ================================================
+   选中文字样式
+   ================================================ */
+::selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* ================================================
+   数字滚动计数动画（需要 JS 配合）
+   ================================================ */
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================
+   柔和阴影层级
+   ================================================ */
+.shadow-soft-sm {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+}
+.shadow-soft {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+}
+.shadow-soft-lg {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* ================================================
+   强调背景条纹
+   ================================================ */
+.striped-bg {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    rgba(59,130,246,0.02) 10px,
+    rgba(59,130,246,0.02) 20px
+  );
+}
+
+/* ================================================
+   弹性缩放 Hover 效果
+   ================================================ */
+.hover-lift {
+  transition: transform 0.25s var(--ease-google), box-shadow 0.25s var(--ease-google);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+.hover-scale {
+  transition: transform 0.2s var(--ease-google);
+}
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+.hover-scale:active {
+  transform: scale(0.98);
+}
+
+/* ================================================
+   旋转加载环
+   ================================================ */
+@keyframes spin-ring {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-ring {
+  animation: spin-ring 1s linear infinite;
+}
+
+/* ================================================
+   闪烁通知点
+   ================================================ */
+@keyframes notification-ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+.notification-dot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+}
+.notification-dot::before {
+  animation: notification-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* ================================================
