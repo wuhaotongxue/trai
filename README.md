@@ -46,6 +46,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 客户端_2026_04_24_2356
+- **fix(login)**: 修复路由配置，app.tsx 正确导入完整路由（router/index.tsx）
+- **fix(auth)**: 退出登录时检测 token 是否已清空，避免重复弹出"登录已过期"弹框
+- **fix(logout)**: 添加退出动画效果，内容区域淡出缩小后跳转登录页
+
 ### 🛠️ 后端_2026_04_24_2215
 - **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
 - **feat(i18n)**: 新增国际化翻译管理接口和公开接口, 拆分前端和客户端翻译初始化脚本

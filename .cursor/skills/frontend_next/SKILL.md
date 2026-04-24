@@ -55,7 +55,33 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
   </div>
 </div>
 
-### 3. TypeScript 5.x + Next.js 15 环境
+### 3. 导入规范 (CRITICAL)
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止重复导入</strong> — 同一个模块禁止出现两个相同的 import 语句，这会导致编译错误和白屏
+  <div style="margin-top:12px;background:#fff5f5;padding:12px;border-radius:6px;">
+    <strong style="color:#D32F2F;">错误示例：</strong>
+    <pre style="background:#fff;padding:8px;border-radius:4px;margin:8px 0 0 0;font-size:12px;overflow-x:auto;">
+import { use_locale_store } from '@/store/locale'
+import { use_locale_store } from '@/store/locale'  // 重复导入！</pre>
+  </div>
+  <div style="margin-top:12px;background:#f0fff0;padding:12px;border-radius:6px;">
+    <strong style="color:#2E7D32;">正确做法：</strong>
+    <pre style="background:#fff;padding:8px;border-radius:4px;margin:8px 0 0 0;font-size:12px;overflow-x:auto;">
+// 每个模块只导入一次
+import { use_locale_store } from '@/store/locale'</pre>
+  </div>
+  <div style="margin-top:12px;">
+    <strong>审查时必须检查：</strong>
+    <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+      <li>每个 import 语句唯一性</li>
+      <li>同一模块只导入一次</li>
+      <li>使用 ESLint <code>no-duplicate-imports</code> 规则</li>
+    </ul>
+  </div>
+</div>
+
+### 4. TypeScript 5.x + Next.js 15 环境
 
 ||| 设置项 | 值 |
 ||--------|------|
@@ -64,7 +90,7 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 || Next.js | App Router 模式 |
 || 组件 | Server Components 为默认，Client Components 需标注 |
 
-### 4. 目录结构规范
+### 5. 目录结构规范
 
 ```
 frontend_next/src/

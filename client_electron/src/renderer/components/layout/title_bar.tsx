@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
-import { t, use_locale, type Locale } from '@/i18n'
+import { t, type Locale } from '@/i18n'
 import { use_locale_store } from '@/store/locale'
 
 const TitleBar: React.FC = () => {
@@ -24,7 +24,7 @@ const TitleBar: React.FC = () => {
   const [, force_update] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = use_locale.subscribe((state) => {
+    const unsubscribe = use_locale_store.subscribe((state) => {
       force_update((n) => n + 1)
       set_locale(state.locale)
     })

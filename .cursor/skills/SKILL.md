@@ -144,7 +144,11 @@ TRAI 项目代码审查和规范文档，按领域解耦为六个子目录。
     ├── naming_convention/SKILL.md  # 命名规范
     ├── git_submit/SKILL.md         # Git 提交
     ├── readme_update/SKILL.md      # README 更新
-    └── report_generation/SKILL.md  # 周报生成
+    ├── report_generation/SKILL.md  # 周报生成
+    └── fix_encoding/               # 文件编码修复
+        ├── SKILL.md             # 编码修复指南
+        ├── check_utf8.py        # 检查 UTF-8 编码
+        └── write_utf8.py        # 写入 UTF-8 文件
 ```
 
 ---
