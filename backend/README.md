@@ -42,6 +42,14 @@ python run.py
 - **feat(i18n)**: 新增国际化翻译管理接口 (admin/i18n) 和公开接口 (i18n/{locale})
 - **feat(i18n)**: 拆分前端和客户端翻译初始化脚本, 分离 FRONTEND_TRANSLATIONS 和 CLIENT_TRANSLATIONS
 
+### 🛠️ 后端_2026_04_24_1525
+- **feat(i18n)**: 新增国际化字符串和系统配置数据库模型与仓储 (I18nRepository)
+- **feat(i18n)**: 新增 Admin i18n 管理接口，支持翻译字符串的增删改查
+- **feat(i18n)**: 新增公开翻译查询接口，支持 namespace 批量拉取
+- **feat(notify)**: 新增飞书 AI 事件通知服务，支持文生图和 AI 对话富文本卡片
+- **feat(image)**: 新增图片生成配置接口和客户端工厂，统一管理多模型
+- **feat(system)**: 新增系统配置和 Schema 文档管理接口
+
 ### 🛠️ 后端_2026_04_22_1515
 - **feat(session)**: 新增会话重命名接口 `POST /sessions/{session_id}/rename`
 - **feat(release)**: 客户端发布支持 EXE 文件上传, 并升级飞书通知为 Interactive 卡片格式
