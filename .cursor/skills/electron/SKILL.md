@@ -134,3 +134,43 @@ Electron 应用所有 TypeScript 代码必须严格遵循五层架构：
 | `作者` | wuhao |
 | `日期` | {YYYY-MM-DD HH:MM:SS} |
 | `描述` | {该文件的用途/功能简述，一句话概括} |
+
+### 10. 编译与打包流程 (CRITICAL)
+
+<div style="background: #fff7ed; border-left: 4px solid #f97316; padding: 12px; margin: 12px 0;">
+<strong style="color:#C2410C;">&#x26A0; 提交代码前的强制流程</strong>
+</div>
+
+**编译流程：**
+
+```bash
+# 1. TypeScript 类型检查
+cd client_electron && npm run type-check
+
+# 2. 如果有端口占用或客户端占用，执行以下命令后重试
+# Windows 查找占用端口的进程
+netstat -ano | findstr :端口号
+# 杀死进程
+taskkill /PID 进程ID /F
+
+# 3. 前端编译
+cd frontend_next && npm run build
+
+# 4. Electron 编译通过后，再进行打包
+cd client_electron && npm run build
+```
+
+**强制顺序：**
+
+| 步骤 | 命令 | 说明 |
+|------|------|------|
+| 1 | `npm run type-check` | TypeScript 类型检查 |
+| 2 | `npm run build` (frontend_next) | 前端编译 |
+| 3 | `npm run build` (client_electron) | Electron 打包 |
+| 4 | Git 提交推送 | 仅在打包成功后才执行 |
+
+**注意事项：**
+
+- 每次提交代码前，必须先运行编译和打包
+- 如果打包失败，禁止推送代码
+- 端口占用时，先 kill 进程再重试

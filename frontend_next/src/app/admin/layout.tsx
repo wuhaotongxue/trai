@@ -294,7 +294,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 const next = locale === "zh" ? "en" : "zh";
                 setLocale(next);
                 await refreshTranslations();
-                toast({ message: t("admin.topbar.lang_switched", { lang: next === "zh" ? "中文" : "English" }), variant: "success", duration: 2000 });
+                toast({ message: t("admin.topbar.lang_switched"), variant: "success", duration: 2000 });
               }}
               className="flex items-center gap-1.5 px-3 py-2 bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-xl border border-violet-500/20 hover:border-violet-500/40 hover:bg-violet-500/15 transition-all text-xs font-medium disabled:opacity-60"
               title={t("admin.topbar.switch_lang")}
