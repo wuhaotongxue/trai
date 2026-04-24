@@ -62,4 +62,6 @@ export class ApiEndpoints {
   }
 
   static readonly client_update = `${ApiEndpoints.api_prefix}/client/update`
+
+  static readonly i18n_public = `${ApiEndpoints.api_prefix}/i18n/{locale}`
 }
