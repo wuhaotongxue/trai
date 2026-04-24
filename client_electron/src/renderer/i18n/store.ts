@@ -19,13 +19,6 @@ type ZhKeys = keyof typeof zh
 type EnKeys = keyof typeof en
 export type TranslationKey = ZhKeys | EnKeys
 
-// 获取翻译文本
-export function t(key: string): string {
-  const locale = use_locale_store.getState().locale
-  const translations_obj = translations[locale]
-  return (translations_obj as Record<string, string>)[key] ?? key
-}
-
 // 响应式翻译 Hook - 在组件中使用
 export function use_t(): (key: string) => string {
   const locale = use_locale_store((state) => state.locale)
@@ -33,6 +26,25 @@ export function use_t(): (key: string) => string {
     const translations_obj = translations[locale]
     return (translations_obj as Record<string, string>)[key] ?? key
   }
+}
+
+// 延迟初始化的 t 函数，用于非组件上下文
+let t_impl: ((key: string) => string) | null = null
+
+function get_t(): (key: string) => string {
+  if (!t_impl) {
+    t_impl = (key: string) => {
+      const locale = use_locale_store.getState().locale
+      const translations_obj = translations[locale]
+      return (translations_obj as Record<string, string>)[key] ?? key
+    }
+  }
+  return t_impl
+}
+
+// 获取翻译文本 - 延迟初始化确保 store 已就绪
+export function t(key: string): string {
+  return get_t()(key)
 }
 
 // 获取当前语言
