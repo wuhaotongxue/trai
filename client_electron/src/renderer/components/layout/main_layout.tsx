@@ -39,35 +39,36 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_panel)', overflow: 'hidden' }}>
       <TitleBar />
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         <Sidebar />
         <div style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          backgroundColor: 'var(--ui_bg)',
+          backgroundColor: 'var(--ui_panel)',
           minHeight: 0,
         }}>
           <PageTransition>
-            <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
               <Outlet />
             </div>
           </PageTransition>
         </div>
       </div>
-      {/* 底部状态栏 */}
+      {/* 底部状态栏 - 在整个页面最下方，左侧占位与侧边栏对齐 */}
       <div style={{
         display: 'flex',
         backgroundColor: 'var(--ui_panel)',
         borderTop: '1px solid var(--ui_border)',
         height: 'var(--footer_height)',
-        alignItems: 'center',
+        minHeight: 'var(--footer_height)',
+        flexShrink: 0,
         transition: 'background-color var(--ui_transition_normal), border-color var(--ui_transition_normal)',
       }}>
-        {/* 侧边栏占位保持对齐 */}
+        {/* 左侧占位 - 与侧边栏宽度对齐 */}
         <div style={{ width: 'var(--sidebar_width)', minWidth: 'var(--sidebar_width)', maxWidth: 'var(--sidebar_width)', flexShrink: 0, height: '100%' }} />
         {/* 状态栏内容 */}
         <div style={{

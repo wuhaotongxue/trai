@@ -5,7 +5,7 @@
  * 描述: TRAI 桌面客户端 Win11 风格自定义标题栏，支持主题切换、日志查看与国际化
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown } from 'lucide-react'
+import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown, Minus, Square, X, Maximize2 } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
 import { t, type Locale } from '@/i18n'

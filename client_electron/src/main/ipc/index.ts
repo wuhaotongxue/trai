@@ -131,6 +131,42 @@ export const register_ipc_handlers = (): void => {
     }
   })
 
+  // ===================== 窗口控制 =====================
+  ipcMain.handle('window:minimize', async () => {
+    if (main_window) {
+      main_window.minimize()
+      return { success: true }
+    }
+    return { success: false, error: 'window not found' }
+  })
+
+  ipcMain.handle('window:maximize', async () => {
+    if (main_window) {
+      if (main_window.isMaximized()) {
+        main_window.unmaximize()
+      } else {
+        main_window.maximize()
+      }
+      return { success: true, is_maximized: main_window.isMaximized() }
+    }
+    return { success: false, error: 'window not found' }
+  })
+
+  ipcMain.handle('window:close', async () => {
+    if (main_window) {
+      main_window.close()
+      return { success: true }
+    }
+    return { success: false, error: 'window not found' }
+  })
+
+  ipcMain.handle('window:is_maximized', async () => {
+    if (main_window) {
+      return { success: true, is_maximized: main_window.isMaximized() }
+    }
+    return { success: false, error: 'window not found' }
+  })
+
   // ===================== 批处理 =====================
   ipcMain.handle('batch:execute', async (_, batch: Array<{ id: string, method: string, params: any[] }>) => {
     try {

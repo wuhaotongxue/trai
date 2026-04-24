@@ -16,7 +16,7 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background: var(--ui_bg);
+  background: var(--ui_panel);
   color: var(--ui_text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable', 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -28,9 +28,7 @@ html, body, #root {
 /* ===== Design Tokens: 浅色主题 ===== */
 :root {
   /* 背景层 */
-  --ui_bg: #f0f2f5;
   --ui_panel: #ffffff;
-  --ui_panel_alt: #f7f9fc;
   --ui_panel_hover: rgba(0, 0, 0, 0.04);
   --ui_panel_active: rgba(0, 0, 0, 0.06);
 
@@ -87,9 +85,7 @@ html, body, #root {
 
 /* ===== Design Tokens: 深色主题 ===== */
 html[data-theme='dark'] {
-  --ui_bg: #0b1120;
   --ui_panel: #111827;
-  --ui_panel_alt: #0f172a;
   --ui_panel_hover: rgba(255, 255, 255, 0.06);
   --ui_panel_active: rgba(255, 255, 255, 0.08);
 
@@ -337,7 +333,7 @@ html[data-theme='dark'] {
   background: linear-gradient(
     90deg,
     var(--ui_panel) 0%,
-    var(--ui_panel_alt) 40%,
+    var(--ui_border) 40%,
     var(--ui_panel) 100%
   );
   background-size: 200% 100%;
