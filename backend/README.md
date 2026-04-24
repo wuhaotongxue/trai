@@ -37,8 +37,8 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 系统更新_2026_04_25_0005
-- **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支
+### 🛠️ 系统更新_2026_04_24_2355
+- **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
 
 ### 🛠️ 后端_2026_04_24_2215
 - **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
