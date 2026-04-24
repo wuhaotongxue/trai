@@ -37,16 +37,13 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 后端_2026_04_24_1525
-- **feat(i18n)**: 新增国际化字符串和系统配置数据库模型与仓储 (I18nRepository)
-- **feat(i18n)**: 新增 Admin i18n 管理接口，支持翻译字符串的增删改查
-- **feat(i18n)**: 新增公开翻译查询接口 (i18n_public)，支持 namespace 批量拉取
-- **feat(i18n)**: 新增 Admin 翻译数据初始化脚本 (seed_i18n.py)
-- **feat(notify)**: 新增飞书 AI 事件通知服务（文生图 + AI 对话），支持富文本卡片
-- **feat(image)**: 新增图片生成配置接口，支持模型列表和管理
-- **feat(image)**: 新增图片客户端工厂 (ImageClientFactory)，统一管理多模型
-- **feat(system)**: 新增系统配置和 Schema 文档管理接口
-- **feat(geo)**: 新增 IP 地理位置服务
+### 🛠️ 系统更新_2026_04_25_0005
+- **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支
+
+### 🛠️ 后端_2026_04_24_2215
+- **fix(i18n)**: 修复前后端翻译键不匹配问题, get_translations_by_locale 直接返回 key 而非 namespace.key
+- **feat(i18n)**: 新增国际化翻译管理接口 (admin/i18n) 和公开接口 (i18n/{locale})
+- **feat(i18n)**: 拆分前端和客户端翻译初始化脚本, 分离 FRONTEND_TRANSLATIONS 和 CLIENT_TRANSLATIONS
 
 ### 🛠️ 后端_2026_04_24_1525
 - **feat(i18n)**: 新增国际化字符串和系统配置数据库模型与仓储 (I18nRepository)
