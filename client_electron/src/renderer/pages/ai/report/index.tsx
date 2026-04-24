@@ -264,7 +264,7 @@ const AiReport: React.FC = () => {
                 opacity: is_generating ? 0.7 : 1
               }}
             >
-              {is_generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {is_generating ? <Loader2 size={18} className="anim_spin" /> : <Sparkles size={18} />}
               {is_generating ? '正在智能生成中...' : '生成周报'}
             </button>
           </div>
@@ -306,7 +306,7 @@ const AiReport: React.FC = () => {
               </div>
             ) : is_generating ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ui_text_muted)', gap: '10px' }}>
-                <Loader2 size={32} className="animate-spin" />
+                <Loader2 size={32} className="anim_spin" />
                 <span style={{ fontSize: '14px' }}>AI 正在智能生成周报...</span>
               </div>
             ) : (

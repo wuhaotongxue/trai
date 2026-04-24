@@ -14,7 +14,7 @@ import {
   Sparkles, Wand2
 } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
-import { t, current_locale_store, type Locale } from '@/i18n'
+import { t, use_locale, type Locale } from '@/i18n'
 
 type NavChild = {
   path: string
@@ -152,7 +152,7 @@ const Sidebar: React.FC = () => {
   const [, force_update] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = current_locale_store.subscribe(() => force_update((n) => n + 1))
+    const unsubscribe = use_locale.subscribe(() => force_update((n) => n + 1))
     return unsubscribe
   }, [])
 

@@ -5,8 +5,23 @@
  * 描述: Agent 详情视图组件
  */
 import React from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
-import { Agent, icon_options } from './types'
+import { Loader2, RefreshCw, Bot, Settings, Code, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud } from 'lucide-react'
+
+interface Agent {
+  id: string
+  name: string
+  description: string
+  model: string
+  system_prompt: string
+  icon: string
+  status: 'running' | 'stopped' | 'error'
+  category?: string
+  created_at: string
+}
+
+const icon_map: Record<string, React.ComponentType<{ size?: number | string }>> = {
+  Bot, Settings, Code, Wrench, Sparkles, Cpu, MessageSquare, BrainCircuit, Calculator, Cloud,
+}
 
 interface AgentDetailViewProps {
   active_agent: Agent | undefined
@@ -82,7 +97,7 @@ export const AgentDetailView: React.FC<AgentDetailViewProps> = ({
             }
           }}
         >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+          {loading ? <Loader2 size={16} className="anim_spin" /> : <RefreshCw size={16} />}
           {loading ? '刷新中...' : '刷新列表'}
         </button>
       </div>

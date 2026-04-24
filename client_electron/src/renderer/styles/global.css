@@ -710,6 +710,10 @@ html[data-theme='dark'] .glass {
 }
 
 /* ===== 语言切换翻译动画 ===== */
+.anim_spin {
+  animation: logoSpinCW 1s linear infinite;
+}
+
 .i18n_text {
   transition: opacity 0.15s ease-out;
 }

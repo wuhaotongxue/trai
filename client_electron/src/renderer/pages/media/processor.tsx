@@ -465,7 +465,7 @@ trailer
                     )}
                     {task.status === 'processing' && (
                       <>
-                        <Loader2 size={12} className="animate-spin" color="var(--ui_accent)" />
+                        <Loader2 size={12} className="anim_spin" color="var(--ui_accent)" />
                         <span style={{ color: 'var(--ui_accent)' }}>处理中</span>
                       </>
                     )}
@@ -986,7 +986,7 @@ const SubtitleGeneratorTab: React.FC<{
                         opacity: is_processing ? 0.6 : 1
                       }}
                     >
-                      {is_processing ? <Loader2 size={16} className="animate-spin" /> : <Type size={16} />}
+                      {is_processing ? <Loader2 size={16} className="anim_spin" /> : <Type size={16} />}
                       生成字幕
                     </button>
                   ) : (
@@ -1174,7 +1174,7 @@ const BilingualSubtitlesTab: React.FC<{
                         opacity: is_processing ? 0.6 : 1
                       }}
                     >
-                      {is_processing ? <Loader2 size={16} className="animate-spin" /> : <Languages size={16} />}
+                      {is_processing ? <Loader2 size={16} className="anim_spin" /> : <Languages size={16} />}
                       翻译字幕
                     </button>
                   ) : (

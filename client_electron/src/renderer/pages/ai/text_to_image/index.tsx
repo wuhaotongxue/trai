@@ -242,7 +242,7 @@ const TextToImage: React.FC = () => {
                 fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
               }}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+              {loading ? <Loader2 size={18} className="anim_spin" /> : <ImageIcon size={18} />}
               {loading ? '生成中...' : '开始生成'}
             </button>
           </div>
@@ -260,7 +260,7 @@ const TextToImage: React.FC = () => {
         }}>
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '10px' }}>
-              <Loader2 size={32} className="animate-spin" />
+              <Loader2 size={32} className="anim_spin" />
               <span style={{ fontSize: '14px' }}>AI 正在努力作画, 请稍候...</span>
             </div>
           ) : result_url ? (

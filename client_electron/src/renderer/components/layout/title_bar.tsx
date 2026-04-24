@@ -8,7 +8,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
-import { t, current_locale_store, type Locale } from '@/i18n'
+import { t, use_locale, type Locale } from '@/i18n'
+import { use_locale_store } from '@/store/locale'
 
 const TitleBar: React.FC = () => {
   const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
@@ -23,9 +24,9 @@ const TitleBar: React.FC = () => {
   const [, force_update] = useState(0)
 
   useEffect(() => {
-    const unsubscribe = current_locale_store.subscribe(() => {
+    const unsubscribe = use_locale.subscribe((state) => {
       force_update((n) => n + 1)
-      set_locale(current_locale_store.get())
+      set_locale(state.locale)
     })
     return unsubscribe
   }, [])
@@ -83,7 +84,7 @@ const TitleBar: React.FC = () => {
   }, [theme])
 
   const switch_locale = useCallback((l: Locale) => {
-    current_locale_store.set(l)
+    use_locale_store.getState().set_locale(l)
     set_locale(l)
     window.electron_api.config_set('ui:locale', l).catch(() => {})
     set_show_lang_menu(false)

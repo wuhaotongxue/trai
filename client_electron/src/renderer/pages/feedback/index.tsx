@@ -565,7 +565,7 @@ const Feedback: React.FC = () => {
                     opacity: loading ? 0.7 : 1
                   }}
                 >
-                  {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {loading ? <Loader2 size={18} className="anim_spin" /> : <Send size={18} />}
                   {t('submit_feedback')}
                 </button>
               </form>
