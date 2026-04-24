@@ -75,6 +75,10 @@ description: >-
 - 根据用户输入中的关键词（如"推送到 wuhao"）提取目标分支
 - 如果用户未指定，则推送到当前所在的活动分支
 
+**自动切换到 wuhao 分支**：
+- ⚠️ **重要**：无论用户指定推送到哪个分支，推送完成后必须切换回 `wuhao` 分支
+- 例如：用户说"推送到 develop 和 main"，执行完后必须 `git checkout wuhao`
+
 **网络问题重试策略**：
 - ⚠️ 推送时如遇网络错误（Connection reset / Timeout / Failed to connect）
 - 🔄 **最少重试 3 次**，每次间隔 2-3 秒
