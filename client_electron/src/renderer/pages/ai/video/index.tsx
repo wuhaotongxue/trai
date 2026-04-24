@@ -241,7 +241,7 @@ const AiVideo: React.FC = () => {
                 fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
               }}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <Video size={18} />}
+              {loading ? <Loader2 size={18} className="anim_spin" /> : <Video size={18} />}
               {loading ? '生成中...' : '开始生成'}
             </button>
           </div>
@@ -259,7 +259,7 @@ const AiVideo: React.FC = () => {
         }}>
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', fontSize: '14px' }}>
-              <Loader2 size={36} className="animate-spin" style={{ marginBottom: '12px' }} />
+              <Loader2 size={36} className="anim_spin" style={{ marginBottom: '12px' }} />
               <span>AI 正在渲染视频, 请稍候...</span>
             </div>
           ) : result_url ? (

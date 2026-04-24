@@ -58,8 +58,7 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
           const res = await adminApi.listI18n({ locale: loc, limit: 1000 });
           if (res.items && res.items.length > 0) {
             for (const item of res.items) {
-              const fullKey = `${item.namespace}.${item.key}`;
-              results[loc][fullKey] = item.value;
+              results[loc][item.key] = item.value;
             }
           }
         })

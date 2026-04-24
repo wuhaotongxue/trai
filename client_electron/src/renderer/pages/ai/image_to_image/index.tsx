@@ -357,7 +357,7 @@ const ImageToImage: React.FC = () => {
                 fontWeight: 600, fontSize: '14px', transition: 'background-color 0.2s'
               }}
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
+              {loading ? <Loader2 size={18} className="anim_spin" /> : <ImagePlus size={18} />}
               {loading ? '生成中...' : '开始生成'}
             </button>
           </div>
@@ -390,7 +390,7 @@ const ImageToImage: React.FC = () => {
           }}>
             {loading ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--ui_text_muted)', gap: '8px' }}>
-                <Loader2 size={28} className="animate-spin" />
+                <Loader2 size={28} className="anim_spin" />
                 <span style={{ fontSize: '14px' }}>生成中...</span>
               </div>
             ) : result_url ? (

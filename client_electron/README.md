@@ -49,6 +49,11 @@ pnpm build
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 客户端_2026_04_24_2127
+- **fix(i18n)**: 修复 axios 拦截器，添加 API 请求/响应日志调试
+- **fix(css)**: 将 `animate-spin` 替换为 `anim_spin`，符合 snake_case 命名规范
+- **fix(i18n)**: 修复 `current_locale_store` 引用，统一使用 `use_locale`
+
 ### 💻 客户端_2026_04_24_0040
 - **feat(login)**: 重构登录页面 — 左侧功能特性卡片（6大功能+图标+描述+hover动效），右侧紧凑表单，国际化中英双语
 - **feat(ThreePanelLayout)**: 增强面板展开收起动画 — cubic-bezier 过渡、hover 上浮效果
