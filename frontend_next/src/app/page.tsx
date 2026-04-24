@@ -54,9 +54,9 @@ const steps = [
 ];
 
 const testimonials = [
-  { nameKey: "name1", roleKey: "role1", companyKey: "company1", avatar: "ZM", color: "blue" },
-  { nameKey: "name2", roleKey: "role2", companyKey: "company2", avatar: "SL", color: "amber" },
-  { nameKey: "name3", roleKey: "role3", companyKey: "company3", avatar: "DW", color: "emerald" },
+  { nameKey: "name1", roleKey: "role1", companyKey: "company1", avatar: "ZM", color: "blue", name: "张明" },
+  { nameKey: "name2", roleKey: "role2", companyKey: "company2", avatar: "SL", color: "amber", name: "李四" },
+  { nameKey: "name3", roleKey: "role3", companyKey: "company3", avatar: "DW", color: "emerald", name: "王五" },
 ];
 
 const faqs = [
