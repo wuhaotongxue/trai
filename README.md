@@ -109,17 +109,17 @@ cd trai
 - [后端] **周报功能**: 实现AI周报生成功能
 
 ### �� 客户端_2026_04_23_0906
-- **perf(knowledge_base)**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
-- **perf(virtual_list)**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
-- **perf(main_process)**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
+- **优化（客户端）**: 知识库页面组件优化，使用React.memo和useCallback减少重渲染
+- **优化（客户端）**: 文件列表实现虚拟滚动，使用react-window库优化长列表渲染性能
+- **优化（客户端）**: 主进程启动优化，延迟初始化UpdateService到窗口加载完成后
 - **优化（客户端）**: IPC通信优化，实现请求缓存和批处理功能
 - **优化（后端）**: 网络请求优化，实现请求缓存和节流
 - **新增（客户端）**: 新增性能监控和错误处理模块
 
 ### 💻 客户端_2026_04_23_1200
-- **feat(media_player)**: 媒体播放器支持文件夹结构显示，实现文件夹展开/折叠功能
-- **feat(media_player)**: 优化媒体文件选择逻辑，支持按文件夹层级展示媒体文件
-- **feat(media_player)**: 改进播放控制逻辑，支持在文件夹结构中切换媒体文件
+- **新增（客户端）**: 媒体播放器支持文件夹结构显示，实现文件夹展开/折叠功能
+- **优化（客户端）**: 优化媒体文件选择逻辑，支持按文件夹层级展示媒体文件
+- **优化（客户端）**: 改进播放控制逻辑，支持在文件夹结构中切换媒体文件
 
 ### 🛠️ 系统更新_2026_04_22_1515
 - [前端] **Agent UI 升级**: 实现了类似 DeepSeek 的左侧会话历史侧边栏, 支持会话切换、重命名与删除
@@ -150,16 +150,16 @@ cd trai
 - **新增(client_electron)**: 登录页增加“保存登录状态(免扫码)”功能，并在应用启动时自动检测并恢复用户状态
 
 ### 🛠️ 后端_2026_04_21_1941
-- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
-- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+- **修复（后端）**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增（后端）**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
 
 ### 🎨 前端_2026_04_21_1941
-- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
-- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
+- **构建（前端）**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复（前端）**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 🛠️ 后端_2026_04_21_1729
-- **feat(wecom_sync)**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
-- **refactor(user_repo)**: 增加企业微信用户创建或更新方法, 统一落库入口
+- **新增（后端）**: 新增企业微信用户同步脚本, 支持从根部门同步并落库
+- **重构（后端）**: 增加企业微信用户创建或更新方法, 统一落库入口
 
 ### 🛠️ 后端_2026_04_21_1649
 - **重构（后端）**: 后端路由前缀切换为 /api_trai/v1, 通过 API_PREFIX 统一挂载
@@ -473,34 +473,34 @@ cd trai
 
 ### 💻 客户端_2026_04_14_1653
 - **新增(client_electron)**: `Settings` 系统设置页面新增“检查更新”与“立即重启并安装”按钮，用户可直观地查看当前应用版本并手动触发 OTA 自动更新流程
-- **优化(client_electron)**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
+- **优化（客户端）**: 暴露 `app_check_update`、`app_install_update`、`app_get_version` IPC 通道以供渲染进程调用自动更新模块
 
 ### 💻 客户端_2026_04_14_1650
-- **新增(client_electron)**: `main` 进程中接入 `electron-updater` 模块，配置自动更新 `UpdateService` 服务并指向后端重定向 API
-- **优化(client_electron)**: `package.json` 中的 `electron-updater` 依赖和打包配置已完善，自动更新可绕过 S3 预签名时效性问题
+- **新增（客户端）**: `main` 进程中接入 `electron-updater` 模块，配置自动更新 `UpdateService` 服务并指向后端重定向 API
+- **优化（客户端）**: `package.json` 中的 `electron-updater` 依赖和打包配置已完善，自动更新可绕过 S3 预签名时效性问题
 
 ### 🛠️ 后端_2026_04_14_1650
-- **新增(backend)**: 新增 `ClientReleaseModel` (PostgreSQL `t_client_releases`)，持久化存储发布的客户端版本及 S3 Key 信息
-- **新增(backend)**: `api.routers.admin.client_release` 中新增 POST `/api/admin/client/release` 接口，支持管理员上传 `latest.yml` 与 `exe` 安装包并保存至 S3
-- **新增(backend)**: `api.routers.client.update` 中新增 GET `/api/client/update/latest.yml` 和 `/api/client/update/{filename}` 接口，利用后端重定向发放 S3 短期预签名 URL，完美解决时间过期限制问题
+- **新增（后端）**: 新增 `ClientReleaseModel` (PostgreSQL `t_client_releases`)，持久化存储发布的客户端版本及 S3 Key 信息
+- **新增（后端）**: `api.routers.admin.client_release` 中新增 POST `/api/admin/client/release` 接口，支持管理员上传 `latest.yml` 与 `exe` 安装包并保存至 S3
+- **新增（后端）**: `api.routers.client.update` 中新增 GET `/api/client/update/latest.yml` 和 `/api/client/update/{filename}` 接口，利用后端重定向发放 S3 短期预签名 URL，完美解决时间过期限制问题
 
-### 📚 规范(skills)_2026_04_14_1645
-- **新增(docs)**: 补充《TRAI 版本更新与发布指南》(`version_update_guide.md`)，详细说明如何解决 S3 预签名链接时间限制问题并确保客户端稳定获取更新
-- **优化(skills)**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
-- **清理(docs)**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
+### 📚 技能（项目）_2026_04_14_1645
+- **新增（文档）**: 补充《TRAI 版本更新与发布指南》(`version_update_guide.md`)，详细说明如何解决 S3 预签名链接时间限制问题并确保客户端稳定获取更新
+- **优化（技能）**: 明确 `git_submit` 的根目录与 `md/` 目录清理规范，强调只删除散落的 `.md`，严格保留 `issue_*` 子文件夹及其内容
+- **清理（文档）**: 删除 `md/` 目录下散落的旧版文档 (`client_architecture.md`、`electron_architecture.md`、`postgresql_identity.md`)
 
-### 📚 项目(docs)_2026_04_14_1634
-- **新增(md)**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
+### 📚 项目_2026_04_14_1634
+- **新增（文档）**: 新增 `md/issue_04/index.md`，总结本期 Electron 架构重生、思维链落地、官网全宽重构与后台动态关系图谱等核心内容
 
 ### 💻 客户端_2026_04_14_1630
-- **重构(client_electron)**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
+- **重构（客户端）**: 全局移除 "TRAI Desktop" 及 "客户端" 等冗余称呼，统一应用名称为 "TRAI"，包括包名、窗口标题、系统托盘和各 UI 页面显示
 
 ### 🎨 前端_2026_04_14_1610
-- **新增(roadmap)**: 增加基于 Git 历史的路线图页面, 支持线性时间轴, 关系图谱, 按前端/后端/客户端分组展示当日变更
-- **新增(docs)**: 补齐文档中心与子页面路由, 包含 /docs, /docs/api, /docs/sdk, /docs/quickstart, /docs/faq
-- **优化(layout)**: 官网多页面统一为更接近全屏的 max-w-7xl 布局, 减少内容区过窄的问题
-- **优化(交互)**: 页脚链接统一新标签页打开, 避免打断当前页面操作流
-- **规范(rename)**: 前端文件名与导入命名统一 snake_case, 替换 kebab-case 命名
+- **新增（前端）**: 增加基于 Git 历史的路线图页面, 支持线性时间轴, 关系图谱, 按前端/后端/客户端分组展示当日变更
+- **新增（前端）**: 补齐文档中心与子页面路由, 包含 /docs, /docs/api, /docs/sdk, /docs/quickstart, /docs/faq
+- **优化（前端）**: 官网多页面统一为更接近全屏的 max-w-7xl 布局, 减少内容区过窄的问题
+- **优化（前端）**: 页脚链接统一新标签页打开, 避免打断当前页面操作流
+- **规范（前端）**: 前端文件名与导入命名统一 snake_case, 替换 kebab-case 命名
 
 ### 📚 规范(skills)_2026_04_14_1610
 - **新增(frontend_next)**: 补充页面布局全宽规范, 推荐使用 container + max-w-7xl, 避免过窄 max-w 限制
@@ -509,14 +509,14 @@ cd trai
 - **新增(client_electron)**: Agent 管理页面新增“状态检测”按钮，支持调用后端检测接口验证 Agent 当前的运行状态是否正常，并在 UI 上展示异常 (Error) 状态标签
 
 ### 🛠️ 后端_2026_04_14_1501
-- **新增(backend)**: `management.py` 中新增 `/api/agent/management/check` 接口，支持检测指定 Agent 的运行状态是否正常（模拟了网络延迟和运行中 20% 概率抛出异常的情况）
+- **新增（后端）**: `management.py` 中新增 `/api/agent/management/check` 接口，支持检测指定 Agent 的运行状态是否正常（模拟了网络延迟和运行中 20% 概率抛出异常的情况）
 
 ### 🛠️ 后端_2026_04_14_1446
-- **修复(backend)**: 修复 `main.py` 中遗漏注册 `management`、`music`、`video` 路由，导致 `/api/agent/management/list` 接口报 404 的问题
+- **修复（后端）**: 修复 `main.py` 中遗漏注册 `management`、`music`、`video` 路由，导致 `/api/agent/management/list` 接口报 404 的问题
 
 ### 🛠️ 后端_2026_04_14_1444
-- **修复(deps)**: 清理 `requirements.txt` 中由于 `pip freeze` 意外导出的本地项目可编辑依赖
-- **修复(ruff)**: 修复 `domain` 模块中由于冗余导入导致无法通过 Ruff 检查的语法警告
+- **构建（后端）**: 清理 `requirements.txt` 中由于 `pip freeze` 意外导出的本地项目可编辑依赖
+- **修复（后端）**: 修复 `domain` 模块中由于冗余导入导致无法通过 Ruff 检查的语法警告
 
 ### 💻 客户端_2026_04_14_1500
 - **重构(client_electron)**: 重构工具箱卡片头部 UI，将图标、标题和描述从垂直居中堆叠改为水平流式布局（图标居左，标题与描述在右侧堆叠），有效节省卡片垂直空间并提升横向阅读体验
@@ -675,12 +675,12 @@ cd trai
 - **新增(frontend_next)**: 使用 `kity.svg` 作为默认图标配置
 
 ### 🛠️ 后端_2026_04_21_1941
-- **修复(auth)**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
-- **新增(auth)**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
+- **修复（后端）**: 修复 FastAPI 启动时因 wecom_callback 路由参数 Request | None 导致的 Pydantic 解析崩溃
+- **新增（后端）**: 新增 sys_users 表数据同步至 t_users 表的脚本，解决企业微信登录未绑定账号问题
 
 ### 🎨 前端_2026_04_21_1941
-- **配置(build)**: Next.js 开启 output: 'export' 以支持纯静态部署
-- **修复(nginx)**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
+- **构建（前端）**: Next.js 开启 output: 'export' 以支持纯静态部署
+- **修复（前端）**: 重写 Nginx 配置文件以支持纯静态托管并修复 try_files 循环重定向及 404 问题
 
 ### 📚 规范(skills)_2026_04_13_2015
 - **新增(skills)**: 补充“测试文件应写到测试文件夹下, 临时验证脚本使用后必须立即删除”的项目规范
