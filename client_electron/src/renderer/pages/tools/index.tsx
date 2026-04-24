@@ -1009,7 +1009,7 @@ const Tools: React.FC = () => {
                   }}
                 >
                   {loading_task === active_tool.id ? (
-                    <><Loader2 size={16} className="animate-spin" /> 处理中...</>
+                    <><Loader2 size={16} className="anim_spin" /> 处理中...</>
                   ) : (
                     '选择文件'
                   )}

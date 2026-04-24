@@ -709,6 +709,18 @@ html[data-theme='dark'] .glass {
   transform: translateX(18px);
 }
 
+/* ===== 语言切换翻译动画 ===== */
+.anim_spin {
+  animation: logoSpinCW 1s linear infinite;
+}
+
+.i18n_text {
+  transition: opacity 0.15s ease-out;
+}
+.i18n_text_switching {
+  opacity: 0;
+}
+
 /* ===== Theme transition ===== */
 html {
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);

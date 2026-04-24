@@ -47,6 +47,7 @@ export default function AdminLoginPage() {
       const res = await authApi.login({ username, password });
       Cookies.set("token", res.access_token);
       Cookies.set("refresh_token", res.refresh_token);
+      localStorage.setItem("trai-admin-locale", "zh");
       window.location.href = "/admin";
     } catch (e: any) {
       const message = e?.message || t("admin.login.error.failed");
