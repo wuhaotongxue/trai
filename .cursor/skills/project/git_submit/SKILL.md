@@ -40,6 +40,12 @@ description: >-
 **如果未更新**，必须调用 `readme-update` 技能：
 - 追加到两处 README 顶部，按时间倒序
 
+### 4. Markdown 样式规范（新建 md 文件时）
+
+新建 Markdown 文件时，推荐使用 `styles/markdown.css` 中的样式类：
+- 类名使用 **snake_case** 命名（如 `.doc_tip`、`.doc_card`）
+- 参考 `.cursor/skills/project/markdown_style/SKILL.md` 获取完整样式列表
+
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x26A0; 强制要求获取当前时间 (CRITICAL)</strong>
   <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
@@ -107,7 +113,7 @@ description: >-
 |------|------|--------|
 | `（后端）` | Python 后端代码 | backend/ 目录 |
 | `（前端）` | Next.js 前端代码 | frontend_next/ 目录 |
-| `（Electron）` | Electron 客户端 | client_electron/ 目录 |
+| `（客户端）` | Electron 桌面客户端 | client_electron/ 目录 |
 | `（桌面）` | PyQt6 桌面客户端 | desktop_client/ 目录 |
 | `（技能）` | Cursor Skills 规范 | .cursor/skills/ 目录 |
 | `（文档）` | 纯文档更新 | md/ 目录、README.md |
