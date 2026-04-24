@@ -38,8 +38,19 @@ description: >-
 检查是否更新了对应模块的 `README.md` 与根 `README.md` 的 `## 📝 更新日志 (Changelog)` 顶部。
 
 **如果未更新**，必须调用 `readme-update` 技能：
-- 自动生成真实时间戳标题（如 `### 🛠️ 后端_2026_04_08_1430`）
 - 追加到两处 README 顶部，按时间倒序
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x26A0; 强制要求获取当前时间 (CRITICAL)</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>第一步：必须先执行 Shell 命令获取当前时间</strong></li>
+    <li>Windows: <code>Get-Date -Format "yyyy_MM_dd_HHmm"</code></li>
+    <li>Linux/Mac: <code>date +%Y_%m_%d_%H%M</code></li>
+    <li><strong>第二步：使用获取到的真实时间生成时间戳标题</strong></li>
+    <li><strong>禁止估算、禁止使用预估值、禁止使用 AI 训练数据中的时间</strong></li>
+    <li>格式示例：<code>### 🛠️ 后端_2026_04_24_2355</code></li>
+  </ul>
+</div>
 
 ### 4. 暂存文件
 运行 `git add .` 将所有修改添加到暂存区。
