@@ -470,7 +470,7 @@ const Login: React.FC = () => {
 
   console.info('[login] About to return JSX, username:', username, 'locale:', locale)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_bg)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--ui_panel)', overflow: 'hidden' }}>
       {/* 标题栏 */}
       <div className="drag-region" style={{ height: 'var(--titlebar_height)', width: '100%', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px', paddingRight: '8px', borderBottom: '1px solid var(--ui_border)', position: 'relative', zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -685,7 +685,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* 右侧表单区 - 更宽更大 */}
-        <div style={{ flex: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--ui_bg)', overflow: 'auto' }}>
+        <div style={{ flex: 1.4, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--ui_panel)', overflow: 'auto' }}>
 
           <div style={{
             width: '100%', maxWidth: '480px',

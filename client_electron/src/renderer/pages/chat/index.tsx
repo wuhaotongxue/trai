@@ -236,11 +236,12 @@ const AgentChat: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_panel)', position: 'relative', minHeight: 0 }}>
       <div className="drag-region" style={{
         padding: '20px 24px', backgroundColor: 'var(--ui_panel)',
         borderBottom: '1px solid var(--ui_border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquare size={20} color="var(--ui_accent)" />
@@ -248,7 +249,7 @@ const AgentChat: React.FC = () => {
         </div>
       </div>
 
-      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <AgentSidebar
           agents={available_agents}
           active_agent_id={active_agent_id}
@@ -278,11 +279,12 @@ const AgentChat: React.FC = () => {
           }}
         />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
           <div className="drag-region" style={{
             padding: '12px 16px', backgroundColor: 'var(--ui_panel)',
             borderBottom: '1px solid var(--ui_border)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexShrink: 0,
           }}>
             <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {!is_middle_open && (
@@ -343,11 +345,11 @@ const AgentChat: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
             <div style={{
               flex: 1, overflowY: 'auto', padding: '24px',
               display: 'flex', flexDirection: 'column', gap: '24px',
-              minWidth: 0, backgroundColor: 'var(--ui_bg)',
+              minWidth: 0, backgroundColor: 'var(--ui_panel)', minHeight: 0,
             }}>
               {messages.length === 0 ? (
                 <div style={{

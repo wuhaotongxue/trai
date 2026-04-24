@@ -255,7 +255,7 @@ const TextToImage: React.FC = () => {
         </div>
 
         <div style={{ 
-          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: 'var(--ui_panel_alt)', borderRadius: '12px', 
+          flex: 1, minHeight: 0, marginTop: '16px', backgroundColor: 'var(--ui_panel)', borderRadius: '12px', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px dashed var(--ui_border)', boxSizing: 'border-box'
         }}>
           {loading ? (

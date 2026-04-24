@@ -28,7 +28,10 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children, class_name = 
     <div
       className={`anim-page-in ${class_name}`}
       style={{
-        height: '100%',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
         opacity: is_visible ? 1 : 0,
       }}
     >

@@ -145,7 +145,7 @@ const Feedback: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_bg)', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ui_panel)', position: 'relative' }}>
       <div className="drag-region" style={{ padding: '20px 24px', backgroundColor: 'var(--ui_panel)', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MessageSquarePlus size={20} color="var(--ui_accent)" />
@@ -153,7 +153,7 @@ const Feedback: React.FC = () => {
         </div>
       </div>
       
-      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ui_bg)' }}>
+      <div className="no-drag-region" style={{ flex: 1, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ui_panel)' }}>
         <div style={{ 
           width: is_left_sidebar_open ? '10%' : '0px', 
           minWidth: is_left_sidebar_open ? '70px' : '0px',

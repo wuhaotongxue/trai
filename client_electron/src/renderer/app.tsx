@@ -29,7 +29,7 @@ const GlobalTransition: React.FC<{ is_transitioning: boolean }> = ({ is_transiti
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'var(--ui_bg)',
+        backgroundColor: 'var(--ui_panel)',
         opacity,
         pointerEvents: is_transitioning ? 'all' : 'none',
         transition: 'opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -146,7 +146,7 @@ const LoadingScreen: React.FC = () => (
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    backgroundColor: 'var(--ui_bg)',
+    backgroundColor: 'var(--ui_panel)',
     gap: '20px',
   }}>
     <div style={{
