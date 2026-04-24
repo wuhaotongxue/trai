@@ -380,18 +380,23 @@ def register_routers(app: FastAPI) -> None:
         backup,
         dashboard_router,
         knowledge_base_router,
-        monitor as admin_monitor,
         organization,
         quota_config_router,
         user_router,
     )
+    from api.routers.admin import (
+        monitor as admin_monitor,
+    )
     from api.routers.admin.client_release import router as admin_client_release_router
+    from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
+    from api.routers.i18n_public import router as i18n_public_router
     from api.routers.media import upload
     from api.routers.session import session
-    from api.routers.system import feedback, health, monitor as system_monitor, notify
+    from api.routers.system import feedback, health, notify
+    from api.routers.system import monitor as system_monitor
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
@@ -426,6 +431,8 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
+    app.include_router(i18n_public_router, tags=["国际化"])
+    app.include_router(admin_i18n_router, prefix=f"{api_prefix}/admin", tags=["国际化管理"])
 
     @app.get("/", tags=["首页"])
     async def root() -> dict:
