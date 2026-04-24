@@ -40,7 +40,25 @@ description: >-
 **如果未更新**，必须调用 `readme-update` 技能：
 - 追加到两处 README 顶部，按时间倒序
 
-### 4. Markdown 样式规范（新建 md 文件时）
+### 4. 编码检查 (CRITICAL - 每次提交前必须执行)
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 提交前必须检查文件编码</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li>使用 Read 工具读取文件，检查是否有乱码（<code>???</code>、<code>?</code>、<code>�</code>）</li>
+    <li>如果有乱码，<strong>必须修复后再提交</strong></li>
+    <li>参考 <code>fix_encoding/SKILL.md</code> 使用 Python 脚本修复编码</li>
+    <li><strong>禁止提交包含乱码的文件</strong></li>
+  </ul>
+</div>
+
+**编码检查清单**：
+1. 读取所有修改的 .md 文件
+2. 检查是否有 `???`、`?`、`�` 等乱码字符
+3. 如果有乱码，使用 Python 脚本修复
+4. 修复后再次验证，确保无乱码
+
+### 5. Markdown 样式规范（新建 md 文件时）
 
 新建 Markdown 文件时，推荐使用 `styles/markdown.css` 中的样式类：
 - 类名使用 **snake_case** 命名（如 `.doc_tip`、`.doc_card`）
@@ -58,10 +76,10 @@ description: >-
   </ul>
 </div>
 
-### 4. 暂存文件
+### 6. 暂存文件
 运行 `git add .` 将所有修改添加到暂存区。
 
-### 5. 生成提交信息并 Commit
+### 7. 生成提交信息并 Commit
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
   <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:12px;">
@@ -131,7 +149,7 @@ description: >-
 - ✅ Linux/Mac 可使用 heredoc 多行提交信息
 - ❌ Windows 必须使用单行 `-m "提交信息"` 格式
 
-### 6. 拉取与推送
+### 8. 拉取与推送
 
 **目标推送分支**：
 - 根据用户输入中的关键词（如"推送到 wuhao"）提取目标分支
@@ -159,7 +177,7 @@ description: >-
   </ul>
 </div>
 
-### 7. 反馈
+### 9. 反馈
 告知用户提交成功，并简述提交的内容以及拉取/推送的分支详情。
 
 ---

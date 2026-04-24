@@ -5,7 +5,8 @@
  * 描述: 客户端国际化服务，调用后端 API 获取翻译
  */
 import log from 'electron-log'
-import { ApiEndpoints, ApiUrl } from '../platform/api_endpoints'
+import { ApiEndpoints } from '../platform/api_endpoints'
+import { ApiUrl } from '../platform/api_url'
 import { api_client } from '../platform/api_client'
 
 export type Locale = 'zh' | 'en'
