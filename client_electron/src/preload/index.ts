@@ -60,6 +60,9 @@ contextBridge.exposeInMainWorld('electron_api', {
   media_transcribe_audio: (file_path: string, language?: string) => ipcRenderer.invoke('media:transcribe-audio', file_path, language),
   media_generate_subtitles: (file_path: string, language?: string, orientation?: 'vertical' | 'horizontal') => ipcRenderer.invoke('media:generate-subtitles', file_path, language, orientation),
   media_translate_subtitles: (subtitles: any[], source_lang: string, target_lang: string) => ipcRenderer.invoke('media:translate-subtitles', subtitles, source_lang, target_lang),
+  // 国际化相关
+  i18n_get_translations: (locale: 'zh' | 'en') => ipcRenderer.invoke('i18n:get_translations', locale),
+  i18n_get_all_translations: () => ipcRenderer.invoke('i18n:get_all_translations'),
   on_agent_chat_chunk: (callback: (event: any, chunk: any) => void) => {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }

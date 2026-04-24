@@ -13,6 +13,7 @@ import { tools_service } from '../services/tools'
 import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
 import { knowledge_base_service } from '../services/knowledge_base'
+import { i18n_service } from '../services/i18n'
 import { main_window } from '../index'
 
 /**
@@ -500,4 +501,28 @@ export const register_ipc_handlers = (): void => {
       }
     }
   })
+
+  // ===================== 国际化 =====================
+  ipcMain.handle('i18n:get_translations', withCache('i18n:get_translations', async (_, locale: 'zh' | 'en') => {
+    try {
+      const translations = await i18n_service.get_translations(locale)
+      if (translations) {
+        return { success: true, data: translations }
+      }
+      return { success: false, error: 'Failed to fetch translations' }
+    } catch (error) {
+      log.error('i18n:get_translations failed:', error)
+      return { success: false, error: 'Failed to fetch translations' }
+    }
+  }))
+
+  ipcMain.handle('i18n:get_all_translations', withCache('i18n:get_all_translations', async () => {
+    try {
+      const translations = await i18n_service.get_all_translations()
+      return { success: true, data: translations }
+    } catch (error) {
+      log.error('i18n:get_all_translations failed:', error)
+      return { success: false, error: 'Failed to fetch translations' }
+    }
+  }))
 }

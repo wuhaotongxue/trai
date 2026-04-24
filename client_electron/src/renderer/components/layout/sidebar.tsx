@@ -1,4 +1,4 @@
-﻿﻿/**
+﻿/**
  * 文件名: sidebar.tsx
  * 作者: wuhao
  * 日期: 2026-04-24 00:10:00
@@ -174,15 +174,20 @@ const Sidebar: React.FC = () => {
   const handle_logout = useCallback(async () => {
     try {
       // 添加退出动画效果
-      const content = document.querySelector('.main-content')
-      if (content) {
-        (content as HTMLElement).style.opacity = '0'
-        (content as HTMLElement).style.transform = 'scale(0.98)'
-        ;(content as HTMLElement).style.transition = 'opacity 0.3s ease, transform 0.3s ease'
+      const content = document.querySelector('.main-content') as HTMLElement | null
+      if (content && typeof content.style !== 'undefined') {
+        content.style.opacity = '0'
+        content.style.transform = 'scale(0.98)'
+        content.style.transition = 'opacity 0.3s ease, transform 0.3s ease'
       }
 
+      // 调用服务端登出接口（如果后端服务不可用则静默处理）
       if (window.electron_api?.auth_logout) {
-        await window.electron_api.auth_logout()
+        try {
+          await window.electron_api.auth_logout()
+        } catch {
+          // 忽略登出接口错误
+        }
       }
     } catch (error) {
       console.error('logout error:', error)
