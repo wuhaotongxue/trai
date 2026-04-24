@@ -1,0 +1,382 @@
+/**
+ * TRAI Markdown 增强样式
+ * 用于 Cursor / VS Code: 设置 markdown.styles 添加 styles/markdown.css（相对工作区根）。
+ * 注意: 若用 class 而非内联 style，<div class="..."> 与内部内容之间请勿插入空行。
+ * GitHub 网页不加载本文件。
+ */
+
+/* ========== 开篇高亮 ========== */
+.doc_lead {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #2563eb;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 1em 0;
+  color: #1e3a5f;
+  font-size: 0.98em;
+  line-height: 1.65;
+}
+
+/* ========== 提示块（蓝） ========== */
+.doc_tip {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #1e40af;
+}
+.doc_tip strong {
+  color: #1d4ed8;
+}
+
+/* ========== 信息块（青） ========== */
+.doc_info {
+  background: #ecfeff;
+  border: 1px solid #67e8f9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #0e7490;
+}
+.doc_info strong {
+  color: #0e7490;
+}
+
+/* ========== 警告 / 禁止（红） ========== */
+.doc_warn {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-left: 4px solid #e11d48;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #881337;
+}
+.doc_warn .doc_warn_title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #be123c;
+  margin-bottom: 8px;
+}
+
+/* ========== 成功 / 要点（绿） ========== */
+.doc_ok {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  color: #065f46;
+}
+.doc_ok strong {
+  color: #047857;
+}
+
+/* ========== 时间锚点条 ========== */
+.doc_anchor {
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.88em;
+  color: #475569;
+}
+.doc_anchor code {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #0f172a;
+}
+
+/* ========== 卡片栅格 ========== */
+.doc_cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.doc_card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.doc_card_title {
+  font-weight: 700;
+  font-size: 0.9em;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.doc_card_red .doc_card_title {
+  color: #be123c;
+  border-bottom-color: #fecdd3;
+}
+.doc_card_blue .doc_card_title {
+  color: #1d4ed8;
+  border-bottom-color: #bfdbfe;
+}
+.doc_card_teal .doc_card_title {
+  color: #0d9488;
+  border-bottom-color: #99f6e4;
+}
+.doc_card p,
+.doc_card ul {
+  margin: 0;
+  font-size: 0.88em;
+  line-height: 1.55;
+  color: #334155;
+}
+.doc_card ul {
+  padding-left: 1.1em;
+}
+
+/* ========== 表格包装 ========== */
+.doc_table_wrap {
+  overflow-x: auto;
+  margin: 14px 0;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.doc_table_wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.doc_table_wrap th {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid #cbd5e1;
+}
+.doc_table_wrap td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+.doc_table_wrap tr:last-child td {
+  border-bottom: none;
+}
+
+/* ========== 小节标签 ========== */
+.doc_tag {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.75em;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ========== 新增样式 ========== */
+
+/* 进度条 */
+.doc_progress {
+  background: #f1f5f9;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.doc_progress_bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* 徽章 */
+.doc_badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+.doc_badge_red { background: #fee2e2; color: #dc2626; }
+.doc_badge_blue { background: #dbeafe; color: #2563eb; }
+.doc_badge_green { background: #dcfce7; color: #16a34a; }
+.doc_badge_yellow { background: #fef9c3; color: #ca8a04; }
+.doc_badge_purple { background: #f3e8ff; color: #9333ea; }
+
+/* 代码块标题 */
+.doc_code_block {
+  position: relative;
+  margin: 14px 0;
+}
+.doc_code_title {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 8px 8px 0 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+/* 折叠块 */
+.doc_details {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin: 14px 0;
+}
+.doc_details summary {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #334155;
+  border-radius: 8px;
+}
+.doc_details summary:hover {
+  background: #f1f5f9;
+}
+.doc_details[open] summary {
+  border-bottom: 1px solid #e2e8f0;
+}
+.doc_details_content {
+  padding: 12px 14px;
+}
+
+/* 引用块样式 */
+.doc_quote {
+  border-left: 4px solid #94a3b8;
+  background: #f8fafc;
+  padding: 10px 16px;
+  margin: 14px 0;
+  border-radius: 0 8px 8px 0;
+  color: #475569;
+  font-style: italic;
+}
+.doc_quote cite {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85em;
+  font-style: normal;
+  color: #64748b;
+}
+
+/* 统计数据 */
+.doc_stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.doc_stat {
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+.doc_stat_value {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #0f172a;
+}
+.doc_stat_label {
+  font-size: 0.8em;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* 步骤指示器 */
+.doc_steps {
+  counter-reset: step;
+}
+.doc_step {
+  position: relative;
+  padding-left: 40px;
+  margin: 14px 0;
+}
+.doc_step::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 28px;
+  height: 28px;
+  background: #2563eb;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+.doc_step_title {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+.doc_step_content {
+  color: #475569;
+  font-size: 0.95em;
+}
+
+/* 分隔线样式 */
+.doc_divider {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  margin: 24px 0;
+}
+
+/* 目录导航 */
+.doc_toc {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 14px 0;
+}
+.doc_toc_title {
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.doc_toc ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style: none;
+}
+.doc_toc li {
+  padding: 4px 0;
+}
+.doc_toc a {
+  color: #2563eb;
+  text-decoration: none;
+}
+.doc_toc a:hover {
+  text-decoration: underline;
+}
+
+/* 高亮文字 */
+.doc_highlight {
+  background: linear-gradient(120deg, #fef08a 0%, #fde047 100%);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* 删除线强调 */
+.doc_del {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
