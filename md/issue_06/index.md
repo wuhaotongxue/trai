@@ -31,6 +31,10 @@
     <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:8px;">工具 JSON 检测</div>
     <img src="issue_06_05.png" alt="工具JSON检测" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
   </div>
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:8px;">组织架构</div>
+    <img src="issue_06_06.png" alt="组织架构" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
+  </div>
 </div>
 
 <div style="border:1px solid #fecdd3;border-radius:10px;padding:12px 14px;margin:0 0 10px 0;background:#fff;">
