@@ -330,6 +330,23 @@ const Login: React.FC = () => {
   const log_card_ref = useRef<HTMLDivElement>(null)
   const last_submit_time = useRef(0)
 
+  // 初始化语言配置：从配置读取或使用默认中文
+  useEffect(() => {
+    const init_locale = async () => {
+      try {
+        const res = await window.electron_api?.config_get('ui:locale', 'zh')
+        const saved_locale = res?.success && res.data ? (res.data as Locale) : 'zh'
+        use_locale_store.getState().set_locale(saved_locale)
+        set_locale(saved_locale)
+      } catch {
+        use_locale_store.getState().set_locale('zh')
+        set_locale('zh')
+      }
+    }
+    void init_locale()
+  }, [])
+
+  // 监听语言状态变化并同步到本地 state
   useEffect(() => {
     const unsubscribe = use_locale_store.subscribe((state) => {
       force_update((n) => n + 1)
@@ -367,15 +384,6 @@ const Login: React.FC = () => {
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  // 同步语言状态
-  useEffect(() => {
-    const unsubscribe = use_locale_store.subscribe((state) => {
-      force_update((n) => n + 1)
-      set_locale(state.locale)
-    })
-    return unsubscribe
   }, [])
 
   // 语言菜单点击外部关闭
@@ -578,7 +586,12 @@ const Login: React.FC = () => {
                     key={l}
                     className="no-drag-region"
                     type="button"
-                    onClick={() => { set_locale(l); window.electron_api.config_set('ui:locale', l).catch(() => {}); set_show_lang_menu(false) }}
+                    onClick={() => {
+                      set_locale(l)
+                      use_locale_store.getState().set_locale(l)
+                      window.electron_api.config_set('ui:locale', l).catch(() => {})
+                      set_show_lang_menu(false)
+                    }}
                     style={{
                       width: '100%',
                       background: locale === l ? 'var(--ui_accent_light)' : 'transparent',
