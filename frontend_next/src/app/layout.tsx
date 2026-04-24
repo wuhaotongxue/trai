@@ -3,11 +3,13 @@
  * 根布局
  * - 全局样式 + shadcn
  * - 无障碍: lang=zh-CN, aria-live 动态播报
+ * - 国际化支持
  */
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FloatingWidget } from "@/components/website/floating_widget";
+import { I18nProviderWrapper } from "@/components/i18n_provider";
 import "katex/dist/katex.min.css"; // 引入 katex 样式以支持公式渲染
 import "./globals.css";
 
@@ -46,7 +48,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full">
-        {children}
+        <I18nProviderWrapper>
+          {children}
+        </I18nProviderWrapper>
 
         {/* aria-live 动态播报区域 (A11y 规范)
             当 SPA 异步数据刷新、表单提交成功或系统级错误时,

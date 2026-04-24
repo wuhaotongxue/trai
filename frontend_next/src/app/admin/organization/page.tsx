@@ -69,9 +69,9 @@ function DeptTreeItem({
       </div>
       {hasChildren && expanded && (
         <div className="mt-1">
-          {node.children.map(child => (
+          {node.children.map((child, idx) => (
             <DeptTreeItem 
-              key={child.dept_id} 
+              key={`${child.dept_id}-${idx}`} 
               node={child} 
               level={level + 1} 
               selectedId={selectedId} 
@@ -256,9 +256,9 @@ export default function OrganizationPage() {
                 {total}
               </span>
             </div>
-            {deptTree.map(node => (
+            {deptTree.map((node, idx) => (
               <DeptTreeItem 
-                key={node.dept_id} 
+                key={`${node.dept_id}-${idx}`} 
                 node={node} 
                 selectedId={selectedDeptId} 
                 onSelect={setSelectedDeptId} 

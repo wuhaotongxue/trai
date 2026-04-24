@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 /** 默认 API 基础 URL */
-const DEFAULT_API_BASE = "http://192.168.98.72:5666/api_trai/v1";
+const DEFAULT_API_BASE = "http://192.168.100.119:5666/api_trai/v1";
 
 /**
  * 获取 API 基础 URL
@@ -216,6 +216,12 @@ export interface UserInfo {
   email: string;
   /** 角色 */
   role: string;
+  /** 用户状态 */
+  status?: string;
+  /** 租户 ID */
+  tenant_id?: string;
+  /** 创建时间 */
+  created_at?: string;
   /** 企业微信 ID */
   wecom_user_id?: string;
   /** 最后登录 IP */
@@ -475,6 +481,18 @@ export const agentApi = {
 
   /** 获取配额信息 */
   getQuota: () => request<{ user_id: string; role: string; quotas: QuotaStatus[] }>("/agent/quota"),
+
+  /** 文生图 */
+  generateImage: (data: { prompt: string; model?: string; width?: number; height?: number; steps?: number; seed?: number }) =>
+    request<{ task_id: string; status: string; image_url?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
+
+  /** 文生视频 */
+  generateVideo: (data: { prompt: string; model?: string; duration?: number; resolution?: string }) =>
+    request<{ task_id: string; status: string; video_url?: string; error?: string }>("/ai/video", { method: "POST", body: JSON.stringify(data) }),
+
+  /** 文生音乐 */
+  generateMusic: (data: { prompt: string; model?: string; duration?: number; style?: string }) =>
+    request<{ task_id: string; status: string; music_url?: string; error?: string }>("/ai/music", { method: "POST", body: JSON.stringify(data) }),
 };
 
 // ============================================================
@@ -856,15 +874,127 @@ export const adminApi = {
   /** 获取分析数据 */
   getAnalytics: () => request<AnalyticsData>("/admin/analytics"),
   /** 获取配额计划列表 */
-  listQuotaPlans: () => request<QuotaPlanItem[]>("/admin/quota-plans"),
+  listQuotaPlans: () => request<QuotaPlanItem[]>("/admin/quota_plans"),
   /** 更新配额计划 */
   updateQuotaPlan: (role: string, data: Partial<QuotaPlanItem>) =>
-    request<QuotaPlanItem>(`/admin/quota-plans/${role}`, { method: "PUT", body: JSON.stringify(data) }),
+    request<QuotaPlanItem>(`/admin/quota_plans/${role}`, { method: "PUT", body: JSON.stringify(data) }),
   /** 创建配额计划 */
   createQuotaPlan: (data: QuotaPlanItem) =>
-    request<QuotaPlanItem>("/admin/quota-plans", { method: "POST", body: JSON.stringify(data) }),
+    request<QuotaPlanItem>("/admin/quota_plans", { method: "POST", body: JSON.stringify(data) }),
+  /** 审核通过用户 */
+  approveUser: (userId: string) =>
+    request<{ message: string; user_id: string }>(`/admin/users/${userId}/approve`, { method: "POST" }),
+  /** 审核拒绝用户 */
+  rejectUser: (userId: string) =>
+    request<{ message: string; user_id: string }>(`/admin/users/${userId}/reject`, { method: "POST" }),
+  /** 更新用户状态（启用/禁用） */
+  updateUserStatus: (userId: string, status: "active" | "disabled") =>
+    request<{ message: string; user_id: string }>(`/admin/users/${userId}`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    }),
+  /** 删除用户 */
+  deleteUser: (userId: string) =>
+    request<{ message: string; user_id: string }>(`/admin/users/${userId}`, { method: "DELETE" }),
+  /** 创建用户 */
+  createUser: (data: { name: string; email: string; password: string; plan?: string }) =>
+    request<{ user_id: string; message: string }>("/admin/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** 获取翻译列表 */
+  listI18n: (params?: { locale?: string; namespace?: string; limit?: number; offset?: number }) => {
+    const qs = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<{
+      total: number;
+      items: { locale: string; namespace: string; key: string; value: string; updated_at: string | null }[];
+      namespaces: string[];
+    }>(`/admin/i18n${qs ? `?${qs}` : ""}`);
+  },
+  /** Upsert 单条翻译 */
+  upsertI18n: (data: { locale: string; namespace: string; key: string; value: string }) =>
+    request<{ locale: string; namespace: string; key: string; value: string }>("/admin/i18n", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** 批量导入翻译 */
+  importI18n: (translations: Record<string, Record<string, string>>, overwrite = true) =>
+    request<{ message: string; count: number }>("/admin/i18n/import", {
+      method: "POST",
+      body: JSON.stringify({ translations, overwrite }),
+    }),
+  /** 删除翻译 */
+  deleteI18n: (locale: string, namespace: string, key: string) =>
+    request<{ message: string; count: number }>(
+      `/admin/i18n?locale=${encodeURIComponent(locale)}&namespace=${encodeURIComponent(namespace)}&key=${encodeURIComponent(key)}`,
+      { method: "DELETE" }
+    ),
+  /** 获取配置列表 */
+  listSettings: (category?: string) => {
+    const qs = category ? `?category=${encodeURIComponent(category)}` : "";
+    return request<{ items: Array<{
+      key: string;
+      value: string;
+      type: string;
+      label: string | null;
+      description: string | null;
+      category: string;
+      is_public: boolean;
+      sort_order: number;
+      updated_at: string | null;
+    }> }>(`/admin/settings${qs}`);
+  },
+  /** 获取单个配置 */
+  getSetting: (key: string) =>
+    request<{
+      key: string;
+      value: string;
+      type: string;
+      label: string | null;
+      description: string | null;
+      category: string;
+      is_public: boolean;
+      sort_order: number;
+      updated_at: string | null;
+    }>(`/admin/settings/${encodeURIComponent(key)}`),
+  /** Upsert 配置 */
+  upsertSetting: (data: {
+    key: string;
+    value: string;
+    type?: string;
+    label?: string;
+    description?: string;
+    category?: string;
+    is_public?: boolean;
+    sort_order?: number;
+  }) =>
+    request<{ message: string; key: string }>("/admin/settings", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** 删除配置 */
+  deleteSetting: (key: string) =>
+    request<{ message: string; key: string }>(`/admin/settings/${encodeURIComponent(key)}`, {
+      method: "DELETE",
+    }),
 };
 
-/** API 客户端 */
-export const api = { auth: authApi, session: sessionApi, agent: agentApi, admin: adminApi };
-export default api;
+/** 公开 API(无需认证) */
+export const publicApi = {
+  /** 获取指定语言的翻译(用于前端 i18n 初始化) */
+  getTranslations: (locale: string) =>
+    request<{ translations: Record<string, string>; locale: string }>(`/i18n/${locale}`),
+  /** 获取所有公开配置(用于前端配置读取) */
+  getPublicSettings: () =>
+    request<{ settings: Record<string, string> }>("/settings/public"),
+};
+
+/** 统一导出(兼容旧版调用方式 api.session/agent) */
+export const api = {
+  session: sessionApi,
+  agent: agentApi,
+};
