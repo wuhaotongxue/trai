@@ -96,6 +96,41 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 | 变量名 | camelCase | `isLoading` |
 | Import | 绝对路径 | `@/components/...` |
 
+### 变量命名语义化规范 (CRITICAL)
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止单字母变量名和命名冲突</strong>
+</div>
+
+| 场景 | ❌ 禁止 | ✅ 正确 |
+|------|---------|---------|
+| 表单事件 | `handleSubmit={(e) => ...}` | `handleSubmit={(event) => ...}` |
+| 点击事件 | `onClick={(e) => ...}` | `onClick={(click_event) => ...}` |
+| 当前时间 | `const now = Date.now()` | `const current_timestamp = Date.now()` |
+| 翻译函数 | `const t = useI18n()` | `const translate = useI18n()` |
+| 循环变量 | `arr.map(i => ...)` | `arr.map(item => ...)` |
+| 错误回调 | `.catch(e => ...)` | `.catch(error => ...)` |
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 禁止与关键字冲突的变量名</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><code>now</code> → 使用 <code>current_timestamp</code></li>
+    <li><code>Date</code> → 使用 <code>current_date</code> 或 <code>date_object</code></li>
+    <li><code>time</code> → 使用 <code>current_time</code> 或 <code>elapsed_time</code></li>
+  </ul>
+</div>
+
+### 字符串替换安全规范 (CRITICAL)
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止 replace_all 替换单字母</strong>
+  <div style="margin-top:8px;font-size:13px;color:#555;">
+    使用 StrReplace 时严禁对单字母使用 replace_all，会导致意外替换（如 <code>talk</code> → <code>transformalk</code>）
+  </div>
+</div>
+
+**正确做法**：使用完整上下文匹配，替换前用 Grep 确认目标唯一，分批次替换。
+
 ## 审查清单
 
 编辑/创建 `frontend_next` 文件时，检查：
@@ -108,3 +143,7 @@ description: "用于检查和审查 frontend_next 目录下的 Next.js 前端代
 6. ✅ 是否有 `any` 类型
 7. ✅ 响应式设计是否完整
 8. ✅ **是否使用紫色及相关色系**（严格禁止）
+9. ✅ **变量名是否语义化**（禁止 e, t, i 等单字母）
+10. ✅ **变量名是否与关键字冲突**（禁止 now, Date, time）
+9. ✅ **变量名是否语义化**（禁止 e, t, i 等单字母）
+10. ✅ **变量名是否与关键字冲突**（禁止 now, Date, time）

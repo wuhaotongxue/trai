@@ -1,16 +1,12 @@
 /**
  * 文件名: index.ts
  * 作者: wuhao
- * 日期: 2026-04-24 18:38:00
+ * 日期: 2026-04-25 03:16:00
  * 描述: TRAI 桌面客户端国际化模块主入口
  */
 
 // Re-export types
 export type { Locale } from './types'
-export type { TranslationKey } from './store'
-
-// Re-export translations
-export { translations } from './store'
 
 // Re-export functions
 export { t, use_t, get_locale, set_locale } from './store'

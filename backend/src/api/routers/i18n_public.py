@@ -1,39 +1,50 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # 文件名: i18n_public.py
 # 作者: wuhao
-# 日期: 2026_04_24
-# 描述: 公开国际化接口
+# 日期: 2026_04_24_16:00:00
+# 描述: 公开的翻译获取接口(无需认证)
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from application.usecases.i18n_usecases import I18nUseCase
-from infrastructure.database import get_session
-from infrastructure.repositories.i18n_repository import I18nRepositoryImpl
+from infrastructure.database import get_db_session
+from infrastructure.repositories.i18n_repository import I18nRepository
 
 router = APIRouter()
 
 
-def get_i18n_use_case(db: Session = Depends(get_session)) -> I18nUseCase:
-    """获取国际化用例"""
-    repo = I18nRepositoryImpl(db)
-    return I18nUseCase(repo)
+class PublicTranslationsResponse(BaseModel):
+    """公开翻译响应(供前端非管理员使用)"""
+
+    translations: dict[str, str] = Field(description="翻译字典, key 为 namespace.key")
+    locale: str = Field(description="语言代码")
 
 
-@router.get("/i18n/{locale}")
-async def get_translations(locale: str, i18n_use_case: I18nUseCase = Depends(get_i18n_use_case)):
-    """获取指定语言的翻译
+@router.get("/i18n/{locale}", response_model=PublicTranslationsResponse, tags=["翻译"])
+async def get_public_translations(
+    locale: str,
+    session: Annotated[Session, Depends(get_db_session)],
+) -> PublicTranslationsResponse:
+    """获取指定语言的翻译(无需认证)
+
+    供前端页面在初始化时从数据库拉取翻译文本
 
     Args:
-        locale: 语言代码，如 zh, en
+        locale: 语言代码,如 zh/en
+        session: 数据库会话
 
     Returns:
-        Dict: 翻译数据
+        PublicTranslationsResponse: 翻译字典
     """
-    try:
-        translations = await i18n_use_case.get_translations_by_locale(locale)
-        return {"translations": translations, "locale": locale}
-    except Exception:
-        raise HTTPException(status_code=500, detail="获取翻译失败")
+    repo = I18nRepository(session)
+    translations = repo.get_by_locale(locale)
+    return PublicTranslationsResponse(translations=translations, locale=locale)
+
+
+__all__ = ["router"]

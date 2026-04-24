@@ -105,7 +105,7 @@ from typing import List  # 合并到一行</pre>
 | 查询红线 | 禁止 `SELECT *`、禁止 N+1 (必须 joinedload)、禁止裸 SQL 拼接 |
 | 迁移规范 | **禁止在生产环境执行 DDL**，必须使用 Alembic |
 
-### 6. 异常处理与日志 (CRITICAL)
+### 9. 禁止事项
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 严禁事项</strong>
@@ -113,10 +113,39 @@ from typing import List  # 合并到一行</pre>
     <li><strong>禁止 `print()`</strong>，必须使用 `loguru` 或项目封装的 `logger`</li>
     <li><strong>禁止裸 `except:`</strong>，必须指明异常类型</li>
     <li><strong>禁止静默 `pass`</strong>，捕获异常后必须 `logger.error(...)` 记录</li>
+    <li><strong>禁止使用单字母变量名（如 e, t, i, n, r）</strong></li>
+    <li><strong>禁止使用与关键字冲突的变量名（如 now, Date, time, type）</strong></li>
   </ul>
 </div>
 
-### 7. 文件头模板 (MANDATORY)
+### 10. 变量命名语义化规范
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止单字母变量名和命名冲突</strong>
+</div>
+
+| 场景 | ❌ 禁止 | ✅ 正确 |
+|------|---------|---------|
+| 异常捕获 | `except Exception as e:` | `except Exception as error:` |
+| 循环变量 | `for i in range(n):` | `for index in range(count):` |
+| 当前时间 | `now = datetime.now()` | `current_time = datetime.now()` |
+| 定时器 | `t = Timer(...)` | `timer = Timer(...)` |
+| 数组遍历 | `for r in results:` | `for record in results:` |
+| 文件对象 | `f = open(...)` | `file_handle = open(...)` |
+| 类型检查 | `type = type(obj)` | `obj_type = type(obj)` |</div>
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 禁止与关键字冲突的变量名</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><code>now</code> → 使用 <code>current_time</code></li>
+    <li><code>Date</code> → 使用 <code>current_date</code> 或 <code>date_obj</code></li>
+    <li><code>time</code> → 使用 <code>current_time</code> 或 <code>elapsed_time</code></li>
+    <li><code>type</code> → 使用 <code>obj_type</code> 或 <code>item_type</code></li>
+    <li><code>file</code> → 使用 <code>file_path</code> 或 <code>file_handle</code></li>
+  </ul>
+</div>
+
+### 11. 文件头模板 (MANDATORY)
 
 #### Python 文件模板
 
@@ -167,14 +196,14 @@ from typing import List  # 合并到一行</pre>
 # 日期: 2026_04_09_10:45:00    # ✅ 使用真实获取的时间
 ```
 
-### 8. Docstring 全覆盖 (MANDATORY)
+### 12. Docstring 全覆盖 (MANDATORY)
 
 文件中出现的**每一个** `class` 及**每一个** `def`/`async def`，**都必须**具备中文 docstring，**禁止留空**。包括私有方法、`__init__`、`@staticmethod`、`@classmethod` 同等强制。
 
 docstring 内容必须包含：
 - **用途或流程概述** + **参数**（含类型与含义）+ **返回值**（含类型与含义）+ **异常** 四段
 
-### 9. 安全红线 (CRITICAL)
+### 13. 安全红线 (CRITICAL)
 
 <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#C62828;">&#x274C; 安全红线 — 任何一条违规直接打回</strong>

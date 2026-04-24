@@ -162,6 +162,35 @@ frontend_next/src/
     <li>不使用 shadcn/ui 直接写 HTML</li>
     <li>Token 存储在 localStorage</li>
     <li><strong>使用紫色及相关色系 (purple/violet/indigo)</strong></li>
+    <li><strong>使用单字母变量名（如 e, t, i, n, r）</strong></li>
+    <li><strong>使用与关键字/全局对象冲突的变量名（如 now, Date, time）</strong></li>
+  </ul>
+</div>
+
+### 10. 变量命名语义化规范
+
+<div style="background:#FFF4F4;border:1px solid #FFB4B4;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#D32F2F;">&#x274C; 绝对禁止单字母变量名和命名冲突</strong>
+</div>
+
+| 场景 | ❌ 禁止 | ✅ 正确 |
+|------|---------|---------|
+| 表单事件 | `handleSubmit={(e) => ...}` | `handleSubmit={(event) => ...}` |
+| 点击事件 | `onClick={(e) => ...}` | `onClick={(click_event) => ...}` |
+| 键盘事件 | `onKeyDown={(e) => ...}` | `onKeyDown={(keyboard_event) => ...}` |
+| 当前时间 | `const now = Date.now()` | `const current_timestamp = Date.now()` |
+| 翻译函数 | `const t = useI18n()` | `const translate = useI18n()` |
+| 定时器 | `const t = setTimeout(...)` | `const login_timer = setTimeout(...)` |
+| 循环变量 | `arr.map(i => ...)` | `arr.map(item => ...)` |
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 禁止与关键字冲突的变量名</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><code>now</code> → 使用 <code>current_timestamp</code></li>
+    <li><code>Date</code> → 使用 <code>current_date</code> 或 <code>date_object</code></li>
+    <li><code>time</code> → 使用 <code>current_time</code> 或 <code>elapsed_time</code></li>
+    <li><code>store</code> → 使用 <code>auth_store</code> 或 <code>user_store</code></li>
+    <li><code>utils</code> → 使用 <code>date_utils</code> 或 <code>string_utils</code></li>
   </ul>
 </div>
 
