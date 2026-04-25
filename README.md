@@ -46,6 +46,10 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 更新_2026_04_25_1737
+- **修复（前端）**: 确认翻译脚本 init_i18n_frontend.py 包含所有 key（admin.dashboard.greeting.afternoon、admin.dashboard.admin 等），数据库已同步 564 条翻译记录
+- **优化（项目）**: 优化后台启动脚本 start_backend.py，添加实时日志输出到终端和日志文件，便于排查卡住问题
+
 ### 更新_2026_04_25_1717
 - **修复（前端）**: 修复管理后台中英文切换无效问题，admin_i18n_context.tsx 中 loadNamespace 存储 key 格式从 `key` 改为 `namespace.key` 与 translate 调用格式对齐
 
