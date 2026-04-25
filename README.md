@@ -52,6 +52,7 @@ cd trai
 ### 更新_2026_04_25_1721
 - **修复（前端）**: 修复 admin_i18n_context.tsx 中 loadNamespace 存储 key 格式从 key 改为 namespace.key，与 translate 调用格式对齐
 - **修复（后端）**: FrontendI18nInit 和 ClientI18nInit 初始化脚本修复 namespace 解析逻辑，从 key 中正确提取 namespace 存储到数据库，解决中英文翻译不对应的问题
+- **修复（前端）**: 为所有管理后台页面添加 loadNamespace('admin') 调用，确保每个页面都能正确加载翻译数据
 
 ### 更新_2026_04_25_0409
 - **docs(git_submit)**: 新增编码检查规范，提交前必须检查文件是否乱码

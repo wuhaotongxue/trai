@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, CheckCircle2, Database, Save, Settings, Shield, Lock, KeyRound, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useAdminToast } from "@/contexts/admin_toast_context";
 type Tab = "general" | "security" | "notifications" | "advanced";
 
 export default function SettingsPage() {
-  const { t } = useAdminI18n();
+  const { translate, loadNamespace } = useAdminI18n();
   const { toast } = useAdminToast();
   const [tab, setTab] = useState<Tab>("general");
   const [saved, setSaved] = useState(false);
@@ -27,6 +27,11 @@ export default function SettingsPage() {
     "notification_daily": false,
   });
 
+  // 初始化时加载翻译
+  useEffect(() => {
+    void loadNamespace('admin');
+  }, []);
+
   const tabs = [
     { id: "general" as Tab, labelKey: "admin.settings.general", icon: Settings },
     { id: "security" as Tab, labelKey: "admin.settings.security", icon: Shield },
@@ -35,7 +40,7 @@ export default function SettingsPage() {
   ];
 
   const handleSave = () => {
-    toast({ message: t("admin.settings.saved"), variant: "success" });
+    toast({ message: translate("admin.settings.saved"), variant: "success" });
   };
 
   const toggleNotification = (key: string) => {
@@ -81,13 +86,13 @@ export default function SettingsPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
               <Settings className="h-5 w-5 text-blue-500" />
             </div>
-            {t("admin.settings.title")}
+            {translate("admin.settings.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("admin.settings.subtitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">{translate("admin.settings.subtitle")}</p>
         </div>
         <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500" onClick={handleSave}>
           {saved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {saved ? t("admin.settings.saved") : t("admin.settings.save_all")}
+          {saved ? translate("admin.settings.saved") : translate("admin.settings.save_all")}
         </Button>
       </div>
 
@@ -104,7 +109,7 @@ export default function SettingsPage() {
             }`}
           >
             <t_item.icon className={`h-4 w-4 ${tab === t_item.id ? "text-blue-500" : ""}`} />
-            {t(t_item.labelKey)}
+            {translate(t_item.labelKey)}
           </button>
         ))}
       </div>
@@ -114,14 +119,14 @@ export default function SettingsPage() {
         <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-              {t("admin.settings.general")}
+              {translate("admin.settings.general")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {generalFields.map((field) => (
                 <div key={field.labelKey} className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground/80">{t(field.labelKey)}</Label>
+                  <Label className="text-sm font-medium text-foreground/80">{translate(field.labelKey)}</Label>
                   <Input
                     className="h-10 rounded-lg border-border/60 bg-background/50"
                     defaultValue={field.value}
@@ -133,12 +138,12 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSave}>
                 {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
-                {saved ? t("admin.settings.saved") : t("admin.settings.save_config")}
+                {saved ? translate("admin.settings.saved") : translate("admin.settings.save_config")}
               </Button>
               {saved && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {t("admin.settings.saved_cloud")}
+                  {translate("admin.settings.saved_cloud")}
                 </span>
               )}
             </div>
@@ -152,19 +157,19 @@ export default function SettingsPage() {
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Shield className="h-4 w-4 text-emerald-500" />
-              {t("admin.settings.security")}
+              {translate("admin.settings.security")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {securityFields.map((field) => (
                 <div key={field.labelKey} className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground/80">{t(field.labelKey)}</Label>
+                  <Label className="text-sm font-medium text-foreground/80">{translate(field.labelKey)}</Label>
                   <Input
                     className="h-10 rounded-lg border-border/60 bg-background/50"
                     type={field.type}
                     defaultValue={field.value}
-                    placeholder={field.placeholder ? t(field.placeholder) : ""}
+                    placeholder={field.placeholder ? translate(field.placeholder) : ""}
                   />
                 </div>
               ))}
@@ -176,20 +181,20 @@ export default function SettingsPage() {
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground/90">{t("admin.settings.security_advice")}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t("admin.settings.security_advice_desc")}</p>
+                <p className="text-sm font-medium text-foreground/90">{translate("admin.settings.security_advice")}</p>
+                <p className="text-xs text-muted-foreground mt-1">{translate("admin.settings.security_advice_desc")}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSave}>
                 {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
-                {saved ? t("admin.settings.saved") : t("admin.settings.save_security")}
+                {saved ? translate("admin.settings.saved") : translate("admin.settings.save_security")}
               </Button>
               {saved && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {t("admin.settings.saved_cloud")}
+                  {translate("admin.settings.saved_cloud")}
                 </span>
               )}
             </div>
@@ -203,7 +208,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Bell className="h-4 w-4 text-cyan-500" />
-              {t("admin.settings.notifications")}
+              {translate("admin.settings.notifications")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-5">
@@ -217,8 +222,8 @@ export default function SettingsPage() {
                     <item.icon className={`h-5 w-5 text-${item.color}-500`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground/90">{t(item.labelKey)}</p>
-                    <p className="text-xs text-muted-foreground">{t(item.descKey)}</p>
+                    <p className="text-sm font-medium text-foreground/90">{translate(item.labelKey)}</p>
+                    <p className="text-xs text-muted-foreground">{translate(item.descKey)}</p>
                   </div>
                 </div>
                 <button
@@ -239,12 +244,12 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSave}>
                 {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
-                {saved ? t("admin.settings.saved") : t("admin.settings.save_notification")}
+                {saved ? translate("admin.settings.saved") : translate("admin.settings.save_notification")}
               </Button>
               {saved && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {t("admin.settings.saved_cloud")}
+                  {translate("admin.settings.saved_cloud")}
                 </span>
               )}
             </div>
@@ -258,14 +263,14 @@ export default function SettingsPage() {
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Lock className="h-4 w-4 text-purple-500" />
-              {t("admin.settings.advanced")}
+              {translate("admin.settings.advanced")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {advancedFields.map((field) => (
                 <div key={field.labelKey} className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground/80">{t(field.labelKey)}</Label>
+                  <Label className="text-sm font-medium text-foreground/80">{translate(field.labelKey)}</Label>
                   <Input
                     className="h-10 rounded-lg border-border/60 bg-background/50 font-mono text-xs"
                     type={field.type}
@@ -281,20 +286,20 @@ export default function SettingsPage() {
                 <AlertTriangle className="h-4 w-4 text-red-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground/90">{t("admin.settings.danger_warning")}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t("admin.settings.danger_warning_desc")}</p>
+                <p className="text-sm font-medium text-foreground/90">{translate("admin.settings.danger_warning")}</p>
+                <p className="text-xs text-muted-foreground mt-1">{translate("admin.settings.danger_warning_desc")}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSave}>
                 {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
-                {saved ? t("admin.settings.saved") : t("admin.settings.save_advanced")}
+                {saved ? translate("admin.settings.saved") : translate("admin.settings.save_advanced")}
               </Button>
               {saved && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {t("admin.settings.saved_cloud")}
+                  {translate("admin.settings.saved_cloud")}
                 </span>
               )}
             </div>
