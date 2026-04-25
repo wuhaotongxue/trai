@@ -23,16 +23,16 @@ import { useAdminI18n } from "@/contexts/admin_i18n_context";
 import { useAdminToast } from "@/contexts/admin_toast_context";
 
 const STATUS_TABS = [
-  { key: "admin.users.all", api: undefined as string | undefined, filterKey: "全部" },
-  { key: "admin.users.pending", api: "pending" as const, filterKey: "待审核" },
-  { key: "admin.users.normal", api: "active" as const, filterKey: "正常" },
-  { key: "admin.users.disabled", api: "disabled" as const, filterKey: "已禁用" },
+  { key: "admin.users.all", api: undefined as string | undefined },
+  { key: "admin.users.pending", api: "pending" as const },
+  { key: "admin.users.normal", api: "active" as const },
+  { key: "admin.users.disabled", api: "disabled" as const },
 ];
 
 const STATUS_CONFIG = {
-  pending: { labelKey: "admin.users.table.pending", cls: "text-amber-600 bg-amber-500/10", dot: "bg-amber-500", icon: Clock },
-  active: { labelKey: "admin.users.table.normal", cls: "text-emerald-600 bg-emerald-500/10", dot: "bg-emerald-500", icon: CheckCircle2 },
-  disabled: { labelKey: "admin.users.table.disabled", cls: "text-red-600 bg-red-500/10", dot: "bg-red-500", icon: XCircle },
+  pending: { labelKey: "admin.users.pending", cls: "text-amber-600 bg-amber-500/10", dot: "bg-amber-500", icon: Clock },
+  active: { labelKey: "admin.users.normal", cls: "text-emerald-600 bg-emerald-500/10", dot: "bg-emerald-500", icon: CheckCircle2 },
+  disabled: { labelKey: "admin.users.disabled", cls: "text-red-600 bg-red-500/10", dot: "bg-red-500", icon: XCircle },
 };
 
 const ROLE_CONFIG = {

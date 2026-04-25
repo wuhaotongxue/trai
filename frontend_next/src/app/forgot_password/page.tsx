@@ -11,22 +11,21 @@ import { Bot, ArrowLeft, Mail, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useI18n } from "@/i18n/i18n_context";
 
 export default function ForgotPasswordPage() {
+  const { translate } = useI18n();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSend = () => {
-    if (!email) { setError("请输入邮箱地址"); return; }
-    if (!email.includes("@")) { setError("请输入有效的邮箱地址"); return; }
+    if (!email) { setError(translate("forgot_password.error_empty")); return; }
+    if (!email.includes("@")) { setError(translate("forgot_password.error_invalid")); return; }
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      setLoading(false);
-      setSent(true);
-    }, 1200);
+    setTimeout(() => { setLoading(false); setSent(true); }, 1200);
   };
 
   return (
@@ -52,21 +51,21 @@ export default function ForgotPasswordPage() {
         <div className="relative space-y-6">
           <div>
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              密码忘了?<br />
+              {translate("forgot_password.brand_line1")}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">
-                没关系
+                {translate("forgot_password.brand_line2")}
               </span>
             </h1>
             <p className="text-white/60 text-base leading-relaxed max-w-sm">
-              输入注册邮箱，我们会在 30 分钟内发送密码重置链接到您的邮箱
+              {translate("forgot_password.brand_desc")}
             </p>
           </div>
 
           <div className="space-y-3">
             {[
-              { step: "01", text: "输入注册邮箱地址" },
-              { step: "02", text: "查收密码重置邮件" },
-              { step: "03", text: "点击链接重置密码" },
+              { step: "01", text: translate("forgot_password.step1") },
+              { step: "02", text: translate("forgot_password.step2") },
+              { step: "03", text: translate("forgot_password.step3") },
             ].map((item) => (
               <div key={item.step} className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3.5 border border-white/10">
                 <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
@@ -79,7 +78,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="relative text-xs text-white/40">
-          AI Agent Platform · v2.0 · 10,000+ 企业用户
+          {translate("forgot_password.footer")}
         </div>
       </div>
 
@@ -100,25 +99,25 @@ export default function ForgotPasswordPage() {
                 <CheckCircle2 className="h-8 w-8 text-emerald-500" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">重置链接已发送!</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-2">{translate("forgot_password.sent_title")}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  我们已向 <span className="font-medium text-foreground">{email}</span> 发送了一封密码重置邮件，请点击邮件中的链接完成密码重置。
+                  {translate("forgot_password.sent_desc").replace("{email}", email)}
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-sm text-blue-600 dark:text-blue-400 text-left">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                  <p>没收到? 检查垃圾邮件，或联系 <a href="mailto:support@trai.ai" className="underline">support@trai.ai</a></p>
+                  <p>{translate("forgot_password.not_received")} <a href="mailto:support@trai.ai" className="underline">support@trai.ai</a></p>
                 </div>
               </div>
               <div className="space-y-2">
                 <Button variant="outline" className="w-full h-11 rounded-xl gap-2" onClick={() => { setSent(false); setEmail(""); }}>
                   <ArrowLeft className="h-4 w-4" />
-                  返回重新输入
+                  {translate("forgot_password.back_input")}
                 </Button>
                 <Link href="/login" className="block">
                   <Button className="w-full h-11 rounded-xl text-sm font-medium">
-                    返回登录
+                    {translate("forgot_password.back_login")}
                   </Button>
                 </Link>
               </div>
@@ -129,17 +128,17 @@ export default function ForgotPasswordPage() {
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4">
                   <Mail className="h-6 w-6 text-blue-500" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">找回密码</h2>
-                <p className="text-sm text-muted-foreground mt-2">输入你的注册邮箱，我们会发送重置链接</p>
+                <h2 className="text-2xl font-bold text-foreground">{translate("forgot_password.title")}</h2>
+                <p className="text-sm text-muted-foreground mt-2">{translate("forgot_password.subtitle")}</p>
               </div>
 
               <div className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">注册邮箱</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("forgot_password.email_label")}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="请输入你的邮箱"
+                    placeholder={translate("forgot_password.email_placeholder")}
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -158,13 +157,13 @@ export default function ForgotPasswordPage() {
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      正在发送...
+                      {translate("forgot_password.sending")}
                     </span>
-                  ) : "发送重置链接"}
+                  ) : translate("forgot_password.send_btn")}
                 </Button>
 
                 <div className="p-4 rounded-xl bg-muted/40 border border-border/60 text-xs text-muted-foreground">
-                  <strong className="text-foreground">提示:</strong> 重置链接将在 30 分钟内有效。如果未收到邮件，请检查垃圾邮件文件夹。
+                  {translate("forgot_password.hint")}
                 </div>
               </div>
             </>
@@ -173,7 +172,7 @@ export default function ForgotPasswordPage() {
           <div className="text-center mt-6">
             <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
-              返回登录
+              {translate("forgot_password.back_login")}
             </Link>
           </div>
         </div>

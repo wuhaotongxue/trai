@@ -7,8 +7,8 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Cpu, Plus, Download, Search, RefreshCw, Clock, Upload, X, FileText } from "lucide-react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Cpu, Plus, Download, Search, RefreshCw, Clock, Upload, X, FileText, Zap, CheckCircle, XCircle, Loader2, Trash2, Copy, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,248 +33,301 @@ type ReleaseItem = {
   installer_url: string | null;
 };
 
+type ReleaseListResponse = {
+  total: number;
+  items: ReleaseItem[];
+};
+
+type BuildStatus = {
+  status: "idle" | "running" | "success" | "failed";
+  message: string | null;
+  version: string | null;
+  error: string | null;
+};
+
 /**
  * 客户端发布管理页面
- * 
- * 用于管理桌面客户端的版本发布，包括上传安装包和更新配置文件
- * 支持版本列表查看、搜索和下载功能
  */
 export default function ClientReleasePage() {
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  // 表单状态
-  const [version, setVersion] = useState("");
+  const [buildStatus, setBuildStatus] = useState<BuildStatus>({ status: "idle", message: null, version: null, error: null });
   const [releaseNotes, setReleaseNotes] = useState("");
-  const [latestYml, setLatestYml] = useState<File | null>(null);
-  const [installerExe, setInstallerExe] = useState<File | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const { toast } = useToast();
+  const [initDone, setInitDone] = useState(false);
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  /**
-   * 获取发布版本列表
-   * 
-   * 从后端 API 获取所有客户端发布记录
-   */
-  const fetchReleases = async () => {
+  const fetchReleases = useCallback(async (pageNum = 1, search = searchQuery) => {
     setLoading(true);
     try {
-      const res = await request<ReleaseItem[]>("/admin/client/releases");
-      setReleases(res);
+      const params = new URLSearchParams({
+        limit: String(pageSize),
+        offset: String((pageNum - 1) * pageSize),
+      });
+      if (search) params.set("search", search);
+      const res = await request<ReleaseListResponse>(`/admin/client/releases?${params}`);
+      setReleases(res.items);
+      setTotal(res.total);
+      setPage(pageNum);
     } catch (e) {
       console.error("Fetch releases failed", e);
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchBuildStatus = useCallback(async () => {
+    try {
+      const res = await request<BuildStatus>("/admin/client/build/status");
+      setBuildStatus(res);
+      // 构建成功或失败后刷新列表
+      if (res.status === "success" || res.status === "failed") {
+        fetchReleases(1);
+      }
+    } catch (e) {
+      console.error("Fetch build status failed", e);
+    }
+  }, [fetchReleases]);
+
+  const handleDeleteRelease = useCallback(async (id: number, version: string) => {
+    if (!window.confirm(`确定删除版本 v${version} 吗？该操作不可恢复。`)) return;
+    try {
+      await request(`/admin/client/release/${id}`, { method: "DELETE" });
+      toast({ message: `版本 v${version} 已删除` });
+      fetchReleases(releases.length === 1 && page > 1 ? page - 1 : page);
+    } catch (err: any) {
+      toast({ message: err.message || "删除失败", variant: "error" });
+    }
+  }, [fetchReleases, toast]);
+
+  const handleCopyUrl = useCallback(async (url: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      toast({ message: "链接已复制到剪贴板" });
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      toast({ message: "复制失败，请手动复制", variant: "error" });
+    }
+  }, [toast]);
+
+  // 搜索触发
+  useEffect(() => {
+    void fetchReleases(1, searchQuery);
+  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 轮询状态管理：构建中 3 秒轮询，空闲时 30 秒
+  useEffect(() => {
+    if (!initDone) return;
+    if (buildStatus.status === "running") {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 3000);
+    } else if (buildStatus.status === "idle") {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 30000);
+    } else {
+      // success / failed：构建完成后刷新一次列表，再切回 30 秒
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+      void fetchReleases(1);
+      pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 30000);
+    }
+  }, [buildStatus.status, initDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    fetchReleases();
-  }, []);
+    if (initDone) return;
+    setInitDone(true);
+    void fetchReleases();
+    void fetchBuildStatus();
+    // 初始轮询：空闲状态 30 秒
+    pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 30000);
+    return () => {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /**
-   * 处理发布新版本
-   * 
-   * @param e 表单提交事件
-   * 
-   * 验证表单数据，上传文件到后端，处理成功或失败的回调
-   */
-  const handleRelease = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!version || !latestYml || !installerExe) {
-      toast({
-        title: "参数错误",
-        message: "版本号和文件均为必填项",
-        variant: "error"
-      });
+  // 一键打包
+  const handleBuildAndRelease = async () => {
+    if (!releaseNotes.trim()) {
+      toast({ message: "请填写更新日志", variant: "error" });
       return;
     }
-
     setSubmitting(true);
+    // 不关闭 modal，让用户看到构建状态
     try {
-      const formData = new FormData();
-      formData.append("version", version);
-      formData.append("release_notes", releaseNotes);
-      formData.append("latest_yml", latestYml);
-      formData.append("installer_exe", installerExe);
-
-      await request("/admin/client/release", {
+      await request("/admin/client/build_release", {
         method: "POST",
-        body: formData,
+        body: JSON.stringify({ release_notes: releaseNotes }),
       });
-
-      toast({
-        title: "发布成功",
-        message: `版本 v${version} 已成功上传并通知飞书`,
-      });
-      setIsModalOpen(false);
-      // 重置表单
-      setVersion("");
-      setReleaseNotes("");
-      setLatestYml(null);
-      setInstallerExe(null);
-      fetchReleases();
+      // 后端已返回 running，状态由轮询驱动更新
     } catch (err: any) {
-      toast({
-        title: "发布失败",
-        message: err.message || "上传过程中出现错误",
-        variant: "error"
-      });
-    } finally {
       setSubmitting(false);
+      setIsModalOpen(false);
+      toast({ title: "启动构建失败", message: err.message || "请重试", variant: "error" });
     }
   };
 
-/**
- * 过滤后的版本列表
- * 
- * 根据搜索关键词过滤版本号
- */
-  const filteredReleases = releases.filter(r => 
-    r.version.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 找出当前激活的版本
+  const activeRelease = releases[0];
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="p-6 space-y-6">
+      {/* 头部 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">客户端发布</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理桌面客户端和移动端的版本更新与下发</p>
+          <p className="text-sm text-muted-foreground mt-1">管理桌面客户端版本，支持一键打包和发布</p>
         </div>
         <div className="flex items-center gap-3">
           <Button className="h-9 gap-2 shadow-sm" onClick={() => setIsModalOpen(true)}>
-            <Plus className="h-4 w-4" />
-            发布新版本
+            <Zap className="h-4 w-4" />
+            一键打包发布
           </Button>
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      {/* 构建状态卡片 */}
+      {buildStatus.status !== "idle" && (
+        <Card className={cn(
+          "border-l-4",
+          buildStatus.status === "running" && "border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-500/10",
+          buildStatus.status === "success" && "border-l-green-500 bg-green-50/50 dark:bg-green-500/10",
+          buildStatus.status === "failed" && "border-l-red-500 bg-red-50/50 dark:bg-red-500/10"
+        )}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {buildStatus.status === "running" && <Loader2 className="h-5 w-5 text-yellow-600 animate-spin" />}
+                {buildStatus.status === "success" && <CheckCircle className="h-5 w-5 text-green-600" />}
+                {buildStatus.status === "failed" && <XCircle className="h-5 w-5 text-red-600" />}
+                <div>
+                  <p className="font-medium">
+                    {buildStatus.status === "running" && "正在构建中..."}
+                    {buildStatus.status === "success" && `构建成功: v${buildStatus.version}`}
+                    {buildStatus.status === "failed" && "构建失败"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {buildStatus.status === "running" && buildStatus.message}
+                    {buildStatus.status === "success" && buildStatus.message}
+                    {buildStatus.status === "failed" && buildStatus.error}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={fetchBuildStatus}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 发布对话框 */}
+      <Dialog open={isModalOpen} onOpenChange={(open) => {
+        // 构建中不允许关闭
+        if (!submitting && buildStatus.status !== "running") setIsModalOpen(open);
+      }}>
         <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>发布新版本</DialogTitle>
-            <DialogDescription>
-              请上传最新的客户端安装包及 electron-builder 生成的 yml 文件。
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleRelease} className="space-y-5 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="version">版本号</Label>
-              <Input 
-                id="version" 
-                placeholder="例如: 1.0.0" 
-                value={version}
-                onChange={e => setVersion(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">更新日志</Label>
-              <textarea 
-                id="notes"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="简述本次更新内容..."
-                value={releaseNotes}
-                onChange={e => setReleaseNotes(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>latest.yml</Label>
-                <div className="relative">
-                  <Input 
-                    type="file" 
-                    accept=".yml"
-                    className="hidden" 
-                    id="yml-upload"
-                    onChange={e => setLatestYml(e.target.files?.[0] || null)}
-                  />
-                  <Label 
-                    htmlFor="yml-upload"
-                    className={cn(
-                      "flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-                      latestYml ? "border-blue-500 bg-blue-50/50 dark:bg-blue-500/10" : "border-muted-foreground/20 hover:border-muted-foreground/40 bg-muted/20"
-                    )}
-                  >
-                    {latestYml ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <FileText className="h-6 w-6 text-blue-500" />
-                        <span className="text-[10px] truncate max-w-[120px]">{latestYml.name}</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground">上传 yml</span>
-                      </div>
-                    )}
-                  </Label>
-                </div>
+          {/* 构建中：显示实时状态 */}
+          {submitting || buildStatus.status === "running" ? (
+            <div className="space-y-5 py-6">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                <span className="font-medium text-foreground">正在构建中...</span>
               </div>
-
               <div className="space-y-2">
-                <Label>安装包 (.exe)</Label>
-                <div className="relative">
-                  <Input 
-                    type="file" 
-                    accept=".exe"
-                    className="hidden" 
-                    id="exe-upload"
-                    onChange={e => setInstallerExe(e.target.files?.[0] || null)}
-                  />
-                  <Label 
-                    htmlFor="exe-upload"
-                    className={cn(
-                      "flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-                      installerExe ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10" : "border-muted-foreground/20 hover:border-muted-foreground/40 bg-muted/20"
-                    )}
-                  >
-                    {installerExe ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <Download className="h-6 w-6 text-indigo-500" />
-                        <span className="text-[10px] truncate max-w-[120px]">{installerExe.name}</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground">上传 exe</span>
-                      </div>
-                    )}
-                  </Label>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">当前步骤</span>
+                  <span className="text-foreground font-medium">{buildStatus.message || "等待中..."}</span>
                 </div>
-              </div>
-            </div>
-
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={submitting}>
-                取消
-              </Button>
-              <Button type="submit" disabled={submitting} className="gap-2 min-w-[100px]">
-                {submitting ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    正在上传...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" />
-                    立即发布
-                  </>
+                {buildStatus.status === "success" && (
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">构建成功: v{buildStatus.version}</span>
+                  </div>
                 )}
-              </Button>
-            </DialogFooter>
-          </form>
+                {buildStatus.status === "failed" && (
+                  <div className="flex items-center gap-2 text-red-500">
+                    <XCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">构建失败: {buildStatus.error}</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {buildStatus.status === "running"
+                  ? "页面会自动刷新状态，请稍候..."
+                  : buildStatus.status === "success"
+                  ? "飞书通知已发送，构建完成！"
+                  : "构建遇到问题，请查看错误信息。"}
+              </p>
+              <DialogFooter>
+                <Button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setSubmitting(false);
+                    setReleaseNotes("");
+                    void fetchReleases(1);
+                  }}
+                  disabled={buildStatus.status === "running"}
+                >
+                  {buildStatus.status === "running" ? "构建中..." : "完成"}
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <>
+              {/* 正常状态：显示表单 */}
+              <DialogHeader>
+                <DialogTitle>一键打包发布</DialogTitle>
+                <DialogDescription>
+                  系统将在服务器上自动执行构建，完成后自动上传并发送飞书通知。
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-5 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="notes">更新日志</Label>
+                  <textarea
+                    id="notes"
+                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="简述本次更新内容..."
+                    value={releaseNotes}
+                    onChange={e => setReleaseNotes(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">此内容将包含在飞书通知中</p>
+                </div>
+              </div>
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setReleaseNotes(""); }}>
+                  取消
+                </Button>
+                <Button onClick={handleBuildAndRelease} disabled={submitting} className="gap-2 min-w-[140px]">
+                  <Zap className="h-4 w-4" />
+                  开始构建
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
+      {/* 版本列表 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-4 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Cpu className="h-5 w-5 text-indigo-500" />
               版本列表
+              {activeRelease && (
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                  当前版本: v{activeRelease.version.split(".")[0]}.{activeRelease.version.split(".")[1]}.{activeRelease.version.split(".")[2]}
+                </span>
+              )}
             </CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -294,7 +347,7 @@ export default function ClientReleasePage() {
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 opacity-20" />
                 正在加载版本记录...
               </div>
-            ) : filteredReleases.length === 0 ? (
+            ) : releases.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground">
                 <Download className="h-10 w-10 mx-auto mb-4 text-muted-foreground/30" />
                 <p className="text-sm">暂无发布记录</p>
@@ -310,12 +363,12 @@ export default function ClientReleasePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {filteredReleases.map((item) => (
+                  {releases.map((item, idx) => (
                     <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-indigo-600 dark:text-indigo-400">v{item.version}</span>
-                          {releases[0].id === item.id && (
+                          {idx === 0 && (
                             <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">最新</span>
                           )}
                         </div>
@@ -330,20 +383,122 @@ export default function ClientReleasePage() {
                         </p>
                       </td>
                       <td className="p-4 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-500/10"
-                          onClick={() => item.installer_url && window.open(item.installer_url)}
-                          disabled={!item.installer_url}
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          下载安装包
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-500/10"
+                            onClick={() => item.installer_url && window.open(item.installer_url)}
+                            disabled={!item.installer_url}
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            下载
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-colors"
+                            onClick={() => item.installer_url && handleCopyUrl(item.installer_url, item.id)}
+                            disabled={!item.installer_url}
+                            title="复制下载地址"
+                          >
+                            {copiedId === item.id ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                            {copiedId === item.id ? "已复制" : "复制"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                            onClick={() => handleDeleteRelease(item.id, item.version)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
+                {/* 分页控件 */}
+                {totalPages >= 1 && (
+                  <tfoot>
+                    <tr>
+                      <td colSpan={4} className="px-4 py-3 border-t border-border/60">
+                        <div className="flex items-center justify-between flex-wrap gap-3">
+                          {/* 左侧：每页条数 */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">每页</span>
+                            <select
+                              className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              value={pageSize}
+                              onChange={e => {
+                                setPageSize(Number(e.target.value));
+                                void fetchReleases(1);
+                              }}
+                            >
+                              <option value={5}>5 条</option>
+                              <option value={10}>10 条</option>
+                              <option value={20}>20 条</option>
+                              <option value={50}>50 条</option>
+                            </select>
+                          </div>
+
+                          {/* 中间：跳转 */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">跳至</span>
+                            <input
+                              type="number"
+                              className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-ring"
+                              min={1}
+                              max={totalPages}
+                              value={page}
+                              onChange={e => {
+                                const val = Number(e.target.value);
+                                if (val >= 1 && val <= totalPages) void fetchReleases(val);
+                              }}
+                              onBlur={e => {
+                                const val = Number(e.target.value);
+                                if (val < 1) void fetchReleases(1);
+                                else if (val > totalPages) void fetchReleases(totalPages);
+                              }}
+                            />
+                            <span className="text-sm text-muted-foreground">页</span>
+                          </div>
+
+                          {/* 右侧：翻页 + 总计 */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">
+                              共 {total} 条 / {totalPages} 页
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1"
+                              onClick={() => void fetchReleases(page - 1)}
+                              disabled={page <= 1}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                              上一页
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1"
+                              onClick={() => void fetchReleases(page + 1)}
+                              disabled={page >= totalPages}
+                            >
+                              下一页
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             )}
           </div>

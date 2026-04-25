@@ -13,7 +13,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Locale, defaultLocale, localeNames, locales } from "./config";
 import { publicApi } from "@/lib/api_client";
-import { LOCAL_TRANSLATIONS } from "./local_translations";
+import { PUBLIC_TRANSLATIONS } from "./public";
 
 type I18nContextType = {
   locale: Locale;
@@ -94,7 +94,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   // 优先使用本地翻译，API 翻译作为补充
   const getMergedTranslations = useCallback(
     (loc: Locale): Record<string, string> => {
-      const local = LOCAL_TRANSLATIONS[loc] || LOCAL_TRANSLATIONS[defaultLocale];
+      const local = PUBLIC_TRANSLATIONS[loc] || PUBLIC_TRANSLATIONS[defaultLocale];
       const api = apiTranslations[loc] || {};
       return mergeTranslations(local, api);
     },
@@ -159,8 +159,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const translate = useCallback(
     (key: string): string => {
-      const localDict = LOCAL_TRANSLATIONS[locale] as Record<string, string> | undefined;
-      const fallbackDict = LOCAL_TRANSLATIONS[defaultLocale] as Record<string, string> | undefined;
+      const localDict = PUBLIC_TRANSLATIONS[locale] as Record<string, string> | undefined;
+      const fallbackDict = PUBLIC_TRANSLATIONS[defaultLocale] as Record<string, string> | undefined;
       const merged = getMergedTranslations(locale);
       return merged[key] || localDict?.[key] || fallbackDict?.[key] || key;
     },

@@ -10,8 +10,10 @@
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
 import { Construction } from "lucide-react";
+import { useI18n } from "@/i18n/i18n_context";
 
 export default function EnterprisePage() {
+  const { translate } = useI18n();
   return (
     <>
       <Navbar />
@@ -19,8 +21,8 @@ export default function EnterprisePage() {
         <div className="w-20 h-20 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6">
           <Construction className="w-10 h-10" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-4">页面建设中</h1>
-        <p className="text-slate-500">企业定制服务页面正在开发中, 敬请期待...</p>
+        <h1 className="text-3xl font-bold text-slate-900 mb-4">{translate("enterprise.title")}</h1>
+        <p className="text-slate-500">{translate("enterprise.desc")}</p>
       </div>
       <Footer />
     </>

@@ -51,8 +51,8 @@ export default function AIManagementPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useAdminToast();
   const [imageProviders] = useState<ImageProvider[]>([
-    { id: "local", name: translate("admin.ai.management.local_node"), model: "Z-Image-Turbo", max_concurrent: 1, status: "online" },
-    { id: "dashscope", name: "通义万相", model: "wanx-v1", max_concurrent: 5, status: "online" },
+    { id: "local", name: translate("admin.ai.management.local_node"), model: "Z-Image-Turbo", max_concurrent: 1, status: "online" as const },
+    { id: "dashscope", name: translate("admin.ai.management.provider.dashscope"), model: "wanx-v1", max_concurrent: 5, status: "online" as const },
   ]);
   const [selectedProvider, setSelectedProvider] = useState("local");
 
@@ -269,7 +269,7 @@ export default function AIManagementPage() {
                   <Zap className="h-3 w-3 text-emerald-500" />
                   {translate("admin.ai.management.model_status")}
                 </span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">Idle</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{translate("admin.ai.model_status.idle")}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1.5">
