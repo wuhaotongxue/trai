@@ -46,6 +46,9 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 更新_2026_04_25_1717
+- **修复（前端）**: 修复管理后台中英文切换无效问题，admin_i18n_context.tsx 中 loadNamespace 存储 key 格式从 `key` 改为 `namespace.key` 与 translate 调用格式对齐
+
 ### 更新_2026_04_25_0409
 - **docs(git_submit)**: 新增编码检查规范，提交前必须检查文件是否乱码
 - **docs(skills)**: 增强命名规范禁止单字母变量名和命名冲突
