@@ -179,10 +179,9 @@ class ClientI18nInit:
         logger.info("初始化客户端国际化翻译数据")
         logger.info("=" * 60)
 
+        db = get_database()
+        session = db.get_session()
         try:
-            db = get_database()
-            session = db.get_session()
-
             saved_count = 0
             for locale, translations in CLIENT_TRANSLATIONS.items():
                 for key, value in translations.items():
@@ -212,8 +211,11 @@ class ClientI18nInit:
             logger.info(f"[OK] 客户端翻译数据初始化完成, 共保存 {saved_count} 条记录")
 
         except Exception as e:
+            session.rollback()
             logger.error(f"[ERROR] 客户端翻译初始化失败: {e}")
             raise
+        finally:
+            session.close()
 
 
 if __name__ == "__main__":
