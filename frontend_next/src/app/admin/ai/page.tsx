@@ -45,13 +45,13 @@ const IMAGE_PRESETS = [
 ];
 
 export default function AIManagementPage() {
-  const { t } = useAdminI18n();
+  const { translate, loadNamespace } = useAdminI18n();
   const [stats, setStats] = useState<AIStats | null>(null);
   const [models, setModels] = useState<ModelConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useAdminToast();
   const [imageProviders] = useState<ImageProvider[]>([
-    { id: "local", name: t("admin.ai.management.local_node"), model: "Z-Image-Turbo", max_concurrent: 1, status: "online" },
+    { id: "local", name: translate("admin.ai.management.local_node"), model: "Z-Image-Turbo", max_concurrent: 1, status: "online" },
     { id: "dashscope", name: "通义万相", model: "wanx-v1", max_concurrent: 5, status: "online" },
   ]);
   const [selectedProvider, setSelectedProvider] = useState("local");
@@ -73,22 +73,23 @@ export default function AIManagementPage() {
   };
 
   useEffect(() => {
+    void loadNamespace('admin');
     void fetchData();
   }, []);
 
   const handleToggle = async (id: string) => {
     try {
       await request(`/admin/ai/models/${id}/toggle`, { method: "POST" });
-      toast({ message: t("admin.ai.management.model_updated"), variant: "success" });
+      toast({ message: translate("admin.ai.management.model_updated"), variant: "success" });
       void fetchData();
     } catch (e: any) {
-      toast({ message: e.message || t("admin.ai.management.update_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.ai.management.update_failed"), variant: "error" });
     }
   };
 
   const handlePreset = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
-    toast({ message: t("admin.ai.management.prompt_copied"), variant: "success" });
+    toast({ message: translate("admin.ai.management.prompt_copied"), variant: "success" });
   };
 
   const statsData = [
@@ -141,8 +142,8 @@ export default function AIManagementPage() {
             <Sparkles className="h-5 w-5 text-violet-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">{t("admin.ai.management.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{t("admin.ai.management.subtitle")}</p>
+            <h1 className="text-xl font-bold text-foreground">{translate("admin.ai.management.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{translate("admin.ai.management.subtitle")}</p>
           </div>
         </div>
         <button
@@ -150,7 +151,7 @@ export default function AIManagementPage() {
           className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all border border-primary/20"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          {t("admin.ai.management.refresh")}
+          {translate("admin.ai.management.refresh")}
         </button>
       </div>
 
@@ -164,7 +165,7 @@ export default function AIManagementPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-3xl font-bold text-foreground mt-1">{item.value.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground mt-1">{t(item.labelKey)}</p>
+                <p className="text-sm text-muted-foreground mt-1">{translate(item.labelKey)}</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-background/80 flex items-center justify-center shadow-sm">
                 <item.icon className={`h-5 w-5 ${item.iconColor}`} />
@@ -181,20 +182,20 @@ export default function AIManagementPage() {
           <div className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Server className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold">{t("admin.ai.management.model_config")}</h2>
+              <h2 className="text-sm font-semibold">{translate("admin.ai.management.model_config")}</h2>
             </div>
             <button
-              onClick={() => toast({ message: t("admin.ai.management.coming_soon"), variant: "info" })}
+              onClick={() => toast({ message: translate("admin.ai.management.coming_soon"), variant: "info" })}
               className="inline-flex items-center gap-1.5 h-7 px-3 rounded-lg bg-background border border-border text-xs text-muted-foreground hover:bg-muted transition-colors"
             >
               <Settings className="h-3 w-3" />
-              {t("admin.ai.management.config_channel")}
+              {translate("admin.ai.management.config_channel")}
             </button>
           </div>
           <div className="p-4 space-y-3">
             {models.length === 0 && (
               <div className="text-center py-8 text-sm text-muted-foreground">
-                {loading ? t("admin.ai.management.loading") : t("admin.ai.management.no_models")}
+                {loading ? translate("admin.ai.management.loading") : translate("admin.ai.management.no_models")}
               </div>
             )}
             {models.map((m) => (
@@ -215,11 +216,11 @@ export default function AIManagementPage() {
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                         : "bg-muted text-muted-foreground"
                     }`}>
-                      {m.is_active ? t("admin.ai.management.running") : t("admin.ai.management.stopped")}
+                      {m.is_active ? translate("admin.ai.management.running") : translate("admin.ai.management.stopped")}
                     </span>
                     <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] text-muted-foreground font-mono">{m.provider}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{m.api_base || t("admin.ai.management.internal")}</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">{m.api_base || translate("admin.ai.management.internal")}</p>
                 </div>
                 <button
                   onClick={() => void handleToggle(m.id)}
@@ -230,7 +231,7 @@ export default function AIManagementPage() {
                   }`}
                 >
                   <Power className="h-3 w-3" />
-                  {m.is_active ? t("admin.ai.management.disable") : t("admin.ai.management.enable")}
+                  {m.is_active ? translate("admin.ai.management.disable") : translate("admin.ai.management.enable")}
                 </button>
               </div>
             ))}
@@ -242,7 +243,7 @@ export default function AIManagementPage() {
           <div className="px-6 py-4 border-b border-border bg-muted/20">
             <div className="flex items-center gap-2">
               <Cpu className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold">{t("admin.ai.management.system_status")}</h2>
+              <h2 className="text-sm font-semibold">{translate("admin.ai.management.system_status")}</h2>
             </div>
           </div>
           <div className="p-4 space-y-4">
@@ -250,7 +251,7 @@ export default function AIManagementPage() {
               {systemMetrics.map((item) => (
                 <div key={item.labelKey}>
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">{t(item.labelKey)}</span>
+                    <span className="text-muted-foreground">{translate(item.labelKey)}</span>
                     <span className="font-medium text-foreground">{item.used} / {item.total}</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -266,16 +267,16 @@ export default function AIManagementPage() {
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Zap className="h-3 w-3 text-emerald-500" />
-                  {t("admin.ai.management.model_status")}
+                  {translate("admin.ai.management.model_status")}
                 </span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">Idle</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   <Cloud className="h-3 w-3 text-blue-500" />
-                  {t("admin.ai.management.backend_service")}
+                  {translate("admin.ai.management.backend_service")}
                 </span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t("admin.ai.management.online")}</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{translate("admin.ai.management.online")}</span>
               </div>
             </div>
           </div>
@@ -287,7 +288,7 @@ export default function AIManagementPage() {
         <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-emerald-500/5 to-teal-500/5">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-emerald-500" />
-            <h2 className="text-sm font-semibold">{t("admin.ai.management.image_config")}</h2>
+            <h2 className="text-sm font-semibold">{translate("admin.ai.management.image_config")}</h2>
             <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Z-Image-Turbo</span>
           </div>
         </div>
@@ -295,7 +296,7 @@ export default function AIManagementPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 提供商选择 */}
             <div className="space-y-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("admin.ai.management.select_provider")}</label>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate("admin.ai.management.select_provider")}</label>
               <div className="space-y-2">
                 {imageProviders.map((p) => (
                   <button
@@ -321,7 +322,7 @@ export default function AIManagementPage() {
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                         : "bg-muted text-muted-foreground"
                     }`}>
-                      {p.status === "online" ? t("admin.ai.management.online") : t("admin.ai.management.offline")}
+                      {p.status === "online" ? translate("admin.ai.management.online") : translate("admin.ai.management.offline")}
                     </span>
                   </button>
                 ))}
@@ -330,20 +331,20 @@ export default function AIManagementPage() {
 
             {/* 快速提示词 */}
             <div className="md:col-span-2 space-y-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("admin.ai.management.preset_prompts")}</label>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate("admin.ai.management.preset_prompts")}</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMAGE_PRESETS.map((preset) => (
                   <button
                     key={preset.labelKey}
-                    onClick={() => handlePreset(t(preset.promptKey))}
+                    onClick={() => handlePreset(translate(preset.promptKey))}
                     className="flex items-start gap-3 p-3 rounded-xl border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left group"
                   >
                     <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
                       <Sparkles className="h-3 w-3 text-emerald-500" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">{t(preset.labelKey)}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{t(preset.promptKey)}</p>
+                      <p className="text-sm font-medium text-foreground">{translate(preset.labelKey)}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{translate(preset.promptKey)}</p>
                     </div>
                   </button>
                 ))}

@@ -3,33 +3,36 @@
  * 作者: wuhao
  * 日期: 2026-04-24
  * 描述: Admin 后台管理界面专属的国际化上下文，
- * 翻译全部从 /admin/i18n 接口获取。
+ * 翻译全部从 /admin/i18n 接口获取，按需加载。
  */
 
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { Locale, defaultLocale, localeNames, locales } from "@/i18n/config";
 import { adminApi } from "@/lib/api_client";
 
 type AdminI18nContextType = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  translate: (key: string) => string;
   localeName: string;
   loading: boolean;
   refreshing: boolean;
   refreshTranslations: () => Promise<void>;
+  /** 请求加载某个命名空间的翻译（按需加载） */
+  loadNamespace: (namespace: string) => Promise<void>;
 };
 
 const AdminI18nContext = createContext<AdminI18nContextType>({
   locale: defaultLocale,
   setLocale: () => {},
-  t: (key: string) => key,
+  translate: (key: string) => key,
   localeName: localeNames[defaultLocale],
-  loading: true,
+  loading: false,
   refreshing: false,
   refreshTranslations: async () => {},
+  loadNamespace: async () => {},
 });
 
 export function useAdminI18n() {
@@ -38,70 +41,75 @@ export function useAdminI18n() {
 
 const STORAGE_KEY = "trai-admin-locale";
 
-// 加载中兜底翻译（防止页面完全空白）
-const FALLBACK_TRANSLATIONS: Record<Locale, Record<string, string>> = {
-  zh: {},
-  en: {},
-};
+// 缓存已加载的命名空间
+const loadedNamespaces = new Set<string>();
 
 export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [dbTranslations, setDbTranslations] = useState<Record<Locale, Record<string, string>>>(FALLBACK_TRANSLATIONS);
-  const [loading, setLoading] = useState(true);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const loadingRef = useRef<Set<string>>(new Set());
 
-  const fetchTranslations = useCallback(async () => {
-    const results: Record<Locale, Record<string, string>> = { zh: {}, en: {} };
+  // 按需加载单个命名空间
+  const loadNamespace = useCallback(async (namespace: string) => {
+    if (loadedNamespaces.has(namespace) || loadingRef.current.has(namespace)) {
+      return;
+    }
+    loadingRef.current.add(namespace);
     try {
-      await Promise.all(
-        locales.map(async (loc) => {
-          const res = await adminApi.listI18n({ locale: loc, limit: 1000 });
-          if (res.items && res.items.length > 0) {
-            for (const item of res.items) {
-              results[loc][item.key] = item.value;
-            }
+      const res = await adminApi.listI18n({ locale, namespace, limit: 1000 });
+      if (res.items && res.items.length > 0) {
+        setTranslations((prev) => {
+          const next = { ...prev };
+          for (const item of res.items) {
+            // 存储时使用完整的 namespace.key 格式，与前端 translate 调用格式保持一致
+            next[`${item.namespace}.${item.key}`] = item.value;
           }
-        })
-      );
-      setDbTranslations(results);
-    } catch {
-      // 失败时保留已有数据
+          return next;
+        });
+        loadedNamespaces.add(namespace);
+      }
+    } catch (e) {
+      console.error(`[i18n] 加载 namespace ${namespace} 失败:`, e);
+    } finally {
+      loadingRef.current.delete(namespace);
+    }
+  }, [locale]);
+
+  // 语言切换时重新加载当前语言的翻译
+  const setLocale = useCallback((newLocale: Locale) => {
+    setLocaleState(newLocale);
+    localStorage.setItem(STORAGE_KEY, newLocale);
+  }, []);
+
+  // 语言变化时重新加载当前语言
+  useEffect(() => {
+    // 清空缓存，重新加载
+    loadedNamespaces.clear();
+    setTranslations({});
+  }, [locale]);
+
+  // 初始化：恢复语言选择
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
+    if (saved && locales.includes(saved)) {
+      setLocaleState(saved);
     }
   }, []);
 
-  // 初始化：恢复语言选择 + 加载翻译
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
-      if (saved && locales.includes(saved)) {
-        setLocaleState(saved);
-      }
-      await fetchTranslations();
-      setLoading(false);
-    };
-    init();
-  }, [fetchTranslations]);
-
   const refreshTranslations = useCallback(async () => {
     setRefreshing(true);
-    await fetchTranslations();
+    loadedNamespaces.clear();
+    setTranslations({});
     setRefreshing(false);
-  }, [fetchTranslations]);
+  }, []);
 
-  const setLocale = useCallback(
-    (newLocale: Locale) => {
-      setLocaleState(newLocale);
-      localStorage.setItem(STORAGE_KEY, newLocale);
-    },
-    []
-  );
-
-  const t = useCallback(
+  const translate = useCallback(
     (key: string): string => {
-      return dbTranslations[locale]?.[key] || dbTranslations[defaultLocale]?.[key] || key;
+      return translations[key] || key;
     },
-    [dbTranslations, locale]
+    [translations]
   );
 
   return (
@@ -109,11 +117,12 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
       value={{
         locale,
         setLocale,
-        t,
+        translate,
         localeName: localeNames[locale],
         loading,
         refreshing,
         refreshTranslations,
+        loadNamespace,
       }}
     >
       {children}
