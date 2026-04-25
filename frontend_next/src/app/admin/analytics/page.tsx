@@ -25,7 +25,7 @@ interface WeComAnalytics {
 }
 
 export default function AnalyticsPage() {
-  const { t, locale } = useAdminI18n();
+  const { translate, locale, loadNamespace } = useAdminI18n();
   const [data, setData] = useState<WeComAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -46,6 +46,7 @@ export default function AnalyticsPage() {
   };
 
   useEffect(() => {
+    void loadNamespace('admin');
     void fetchData();
   }, [locale]);
 
@@ -53,10 +54,10 @@ export default function AnalyticsPage() {
     setGenerating(true);
     try {
       const res = await request<{ pdf_url: string }>("/admin/analytics/report/generate", { method: "POST" });
-      toast({ message: t("admin.analytics.report_generated"), variant: "success" });
+      toast({ message: translate("admin.analytics.report_generated"), variant: "success" });
       if (res.pdf_url) window.open(res.pdf_url, "_blank");
     } catch (e: any) {
-      toast({ message: e.message || t("admin.analytics.report_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.analytics.report_failed"), variant: "error" });
     } finally {
       setGenerating(false);
     }
@@ -69,7 +70,7 @@ export default function AnalyticsPage() {
     legend: { bottom: "0%", left: "center", itemWidth: 8, itemHeight: 8, textStyle: { color: "#64748b", fontSize: 11 } },
     series: [
       {
-        name: t("admin.analytics.headcount"),
+        name: translate("admin.analytics.headcount"),
         type: "pie",
         radius: ["55%", "75%"],
         center: ["50%", "45%"],
@@ -106,7 +107,7 @@ export default function AnalyticsPage() {
     },
     series: [
       {
-        name: t("admin.analytics.performance_board"),
+        name: translate("admin.analytics.performance_board"),
         type: "line",
         smooth: true,
         lineStyle: { width: 3, color: "#4f46e5" },
@@ -132,7 +133,7 @@ export default function AnalyticsPage() {
   const systemStats = [
     { labelKey: "admin.analytics.db_latency", value: data?.db_latency || "12ms", color: "bg-blue-500" },
     { labelKey: "admin.analytics.api_efficiency", value: data?.api_latency || "45ms", color: "bg-emerald-500" },
-    { labelKey: "admin.analytics.ai_pressure", value: t("admin.analytics.low"), color: "bg-amber-500" },
+    { labelKey: "admin.analytics.ai_pressure", value: translate("admin.analytics.low"), color: "bg-amber-500" },
   ];
 
   return (
@@ -143,20 +144,20 @@ export default function AnalyticsPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold tracking-widest text-xs uppercase">
               <Activity className="h-3.5 w-3.5" />
-              {t("admin.analytics.exec_dashboard")}
+              {translate("admin.analytics.exec_dashboard")}
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
-              {t("admin.analytics.digital_assets")} <span className="text-muted-foreground font-light">{t("admin.analytics.and")}</span> {t("admin.analytics.performance_board")}
+              {translate("admin.analytics.digital_assets")} <span className="text-muted-foreground font-light">{translate("admin.analytics.and")}</span> {translate("admin.analytics.performance_board")}
             </h1>
             <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-              {t("admin.analytics.sync_desc")}
+              {translate("admin.analytics.sync_desc")}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden lg:block text-right mr-4">
-              <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">{t("admin.analytics.last_sync")}</p>
-              <p className="text-xs font-semibold text-foreground">{lastUpdated || t("admin.analytics.syncing_status")}</p>
+              <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">{translate("admin.analytics.last_sync")}</p>
+              <p className="text-xs font-semibold text-foreground">{lastUpdated || translate("admin.analytics.syncing_status")}</p>
             </div>
             <Button
               variant="outline"
@@ -164,7 +165,7 @@ export default function AnalyticsPage() {
               onClick={() => void fetchData()}
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-              {t("admin.analytics.refresh")}
+              {translate("admin.analytics.refresh")}
             </Button>
             <Button
               className="gap-2 shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
@@ -172,7 +173,7 @@ export default function AnalyticsPage() {
               disabled={generating}
             >
               {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              {t("admin.analytics.export_report")}
+              {translate("admin.analytics.export_report")}
             </Button>
           </div>
         </header>
@@ -186,10 +187,10 @@ export default function AnalyticsPage() {
                   <div className={cn("p-2 rounded-xl", item.bg)}>
                     <item.icon className={cn("h-5 w-5", item.color)} />
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground">{t(item.subKey)}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground">{translate(item.subKey)}</span>
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-1">{item.value}</h3>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t(item.labelKey)}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate(item.labelKey)}</p>
               </CardContent>
             </Card>
           ))}
@@ -202,8 +203,8 @@ export default function AnalyticsPage() {
             <CardHeader className="border-b border-border/40 shrink-0">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <CardTitle className="text-base font-bold text-foreground">{t("admin.analytics.trend_title")}</CardTitle>
-                  <CardDescription>{t("admin.analytics.trend_desc")}</CardDescription>
+                  <CardTitle className="text-base font-bold text-foreground">{translate("admin.analytics.trend_title")}</CardTitle>
+                  <CardDescription>{translate("admin.analytics.trend_desc")}</CardDescription>
                 </div>
                 <TrendingUp className="h-5 w-5 text-blue-500" />
               </div>
@@ -217,8 +218,8 @@ export default function AnalyticsPage() {
           <Card className="border-0 shadow-sm overflow-hidden flex flex-col bg-card/80 backdrop-blur-sm">
             <CardHeader className="border-b border-border/40 shrink-0">
               <div className="space-y-1">
-                <CardTitle className="text-base font-bold text-foreground">{t("admin.analytics.talent_matrix")}</CardTitle>
-                <CardDescription>{t("admin.analytics.talent_desc")}</CardDescription>
+                <CardTitle className="text-base font-bold text-foreground">{translate("admin.analytics.talent_matrix")}</CardTitle>
+                <CardDescription>{translate("admin.analytics.talent_desc")}</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 pt-4">
@@ -232,17 +233,17 @@ export default function AnalyticsPage() {
           {/* 详细列表 */}
           <Card className="lg:col-span-2 border-0 shadow-sm bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-base font-bold text-foreground">{t("admin.analytics.dept_metrics")}</CardTitle>
+              <CardTitle className="text-base font-bold text-foreground">{translate("admin.analytics.dept_metrics")}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead>
                     <tr className="border-b border-border/40">
-                      <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.analytics.dept")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{t("admin.analytics.headcount")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{t("admin.analytics.new_hires")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{t("admin.analytics.efficiency")}</th>
+                      <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.analytics.dept")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.analytics.headcount")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.analytics.new_hires")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.analytics.efficiency")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
@@ -287,27 +288,27 @@ export default function AnalyticsPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Bot className="h-5 w-5" />
-                  {t("admin.analytics.ai_suggestion")}
+                  {translate("admin.analytics.ai_suggestion")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: t("admin.analytics.ai_suggestion_text") }} />
+                <p className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: translate("admin.analytics.ai_suggestion_text") }} />
                 <div className="h-px bg-white/20" />
                 <div className="text-xs bg-white/10 p-3 rounded-lg border border-white/10">
-                  <p className="font-bold mb-1 opacity-60">{t("admin.analytics.system_optimization")}</p>
-                  {t("admin.analytics.system_optimization_text")}
+                  <p className="font-bold mb-1 opacity-60">{translate("admin.analytics.system_optimization")}</p>
+                  {translate("admin.analytics.system_optimization_text")}
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-sm font-bold text-foreground">{t("admin.analytics.system_summary")}</CardTitle>
+                <CardTitle className="text-sm font-bold text-foreground">{translate("admin.analytics.system_summary")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {systemStats.map((stat) => (
                   <div key={stat.labelKey} className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{t(stat.labelKey)}</span>
+                    <span className="text-muted-foreground">{translate(stat.labelKey)}</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-foreground">{stat.value}</span>
                       <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", stat.color)} />
