@@ -37,6 +37,9 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_04_25_1721
+- **fix(i18n)**: FrontendI18nInit 和 ClientI18nInit 初始化脚本修复 namespace 解析逻辑，从 key 中正确提取 namespace 存储到数据库，解决翻译不对应问题
+
 ### 🛠️ 系统更新_2026_04_24_2355
 - **feat(skills)**: 优化 git_submit 技能，推送完成后自动切换回 wuhao 分支；强制要求获取当前真实时间作为时间戳
 

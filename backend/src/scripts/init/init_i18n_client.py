@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: init_i18n_client.py
 # 作者: wuhao
-# 日期: 2026_04_24
+# 日期: 2026_04_25_172102
 # 描述: 初始化客户端(Electron)国际化翻译数据
 
 from __future__ import annotations
@@ -13,8 +13,26 @@ from loguru import logger
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
+# 加载 .env 环境变量
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent.parent
+env_file = base_dir / ".env"
+if env_file.exists():
+    content = env_file.read_text(encoding="utf-8")
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key:
+            os.environ.setdefault(key, value)
+
 from infrastructure.database import get_database
-from infrastructure.database.i18n_model import I18nModel
+from infrastructure.database.i18n_model import I18nStringModel
 
 CLIENT_TRANSLATIONS = {
     "zh": {
@@ -168,17 +186,23 @@ class ClientI18nInit:
             saved_count = 0
             for locale, translations in CLIENT_TRANSLATIONS.items():
                 for key, value in translations.items():
+                    # 从 key 中解析 namespace（格式为 "client.something"）
+                    if key.startswith("client."):
+                        namespace = "client"
+                        db_key = key[len("client."):]
+                    else:
+                        namespace = "client"
+                        db_key = key
                     existing = (
-                        session.query(I18nModel).filter_by(t_locale=locale, t_namespace="client", t_key=key).first()
+                        session.query(I18nStringModel).filter_by(t_locale=locale, t_namespace=namespace, t_key=db_key).first()
                     )
                     if existing:
                         existing.t_value = value
                     else:
-                        model = I18nModel(
-                            t_id=I18nModel.generate_id(locale, "client", key),
+                        model = I18nStringModel(
                             t_locale=locale,
-                            t_namespace="client",
-                            t_key=key,
+                            t_namespace=namespace,
+                            t_key=db_key,
                             t_value=value,
                         )
                         session.add(model)

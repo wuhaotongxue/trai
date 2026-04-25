@@ -65,6 +65,9 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_25_1721
+- **修复(i18n)**: 修复 admin_i18n_context.tsx 中 loadNamespace 存储 key 格式从 key 改为 namespace.key，与 translate 调用格式对齐；FrontendI18nInit 修复 namespace 解析逻辑，从 key 中正确提取 namespace 存储
+
 ### 🎨 前端_2026_04_25_1717
 - **修复(i18n)**: 修复管理后台中英文切换无效问题，loadNamespace 存储 key 格式从 `key` 改为 `namespace.key` 与 translate 调用格式对齐
 
