@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("admin123");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [shakeError, setShakeError] = useState(false);
-  const { t } = useI18n();
+  const { translate } = useI18n();
   const apiBase =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== "undefined"
@@ -50,9 +50,9 @@ export default function AdminLoginPage() {
       localStorage.setItem("trai-admin-locale", "zh");
       window.location.href = "/admin";
     } catch (e: any) {
-      const message = e?.message || t("admin.login.error.failed");
+      const message = e?.message || translate("admin.login.error.failed");
       if (message.toLowerCase().includes("fetch")) {
-        setErrorMessage(`${t("admin.login.error.backend")} ${apiBase}`);
+        setErrorMessage(`${translate("admin.login.error.backend")} ${apiBase}`);
       } else {
         setErrorMessage(message);
       }
@@ -85,8 +85,8 @@ export default function AdminLoginPage() {
               <Bot className="h-7 w-7 text-white" />
             </div>
           </Link>
-          <h1 className="text-2xl font-bold text-foreground mt-5 tracking-tight">{t("admin.login.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1.5">{t("admin.login.subtitle")}</p>
+          <h1 className="text-2xl font-bold text-foreground mt-5 tracking-tight">{translate("admin.login.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1.5">{translate("admin.login.subtitle")}</p>
         </div>
 
         <div className="bg-background/90 backdrop-blur-md rounded-3xl border border-border shadow-2xl shadow-blue-500/5 overflow-hidden">
@@ -96,18 +96,18 @@ export default function AdminLoginPage() {
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">{t("admin.login.header")}</h2>
-              <p className="text-blue-100/70 text-xs">{t("admin.login.header_desc")}</p>
+              <h2 className="text-base font-bold text-white">{translate("admin.login.header")}</h2>
+              <p className="text-blue-100/70 text-xs">{translate("admin.login.header_desc")}</p>
             </div>
           </div>
 
           <div className="p-6 space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="username" className="text-sm font-medium text-foreground/80">{t("admin.login.username")}</Label>
+              <Label htmlFor="username" className="text-sm font-medium text-foreground/80">{translate("admin.login.username")}</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder={t("admin.login.username_placeholder")}
+                placeholder={translate("admin.login.username_placeholder")}
                 className={`h-11 rounded-xl ${shakeError ? "border-red-400 animate-shake" : ""}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -116,12 +116,12 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{t("admin.login.password")}</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{translate("admin.login.password")}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={t("admin.login.password_placeholder")}
+                  placeholder={translate("admin.login.password_placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
@@ -132,7 +132,7 @@ export default function AdminLoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                  aria-label={showPassword ? t("admin.login.hide_password") : t("admin.login.show_password")}
+                  aria-label={showPassword ? translate("admin.login.hide_password") : translate("admin.login.show_password")}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -142,9 +142,9 @@ export default function AdminLoginPage() {
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
                 <input type="checkbox" id="admin-remember" className="rounded border-border text-blue-600 focus:ring-blue-500 cursor-pointer" />
-                <span>{t("admin.login.remember")}</span>
+                <span>{translate("admin.login.remember")}</span>
               </label>
-              <button className="text-xs text-blue-500 hover:underline">{t("admin.login.forgot")}</button>
+              <button className="text-xs text-blue-500 hover:underline">{translate("admin.login.forgot")}</button>
             </div>
 
             {errorMessage && (
@@ -164,11 +164,11 @@ export default function AdminLoginPage() {
               {loading ? (
                 <>
                   <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />
-                  {t("admin.login.verifying")}
+                  {translate("admin.login.verifying")}
                 </>
               ) : (
                 <>
-                  {t("admin.login.enter")}
+                  {translate("admin.login.enter")}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
@@ -176,14 +176,14 @@ export default function AdminLoginPage() {
 
             <div className="text-center">
               <Link href="/" className="text-xs text-muted-foreground hover:text-blue-500 transition-colors">
-                {t("admin.login.back")}
+                {translate("admin.login.back")}
               </Link>
             </div>
           </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          TRAI Admin System v2.0.0 · {t("admin.login.footer")}
+          TRAI Admin System v2.0.0 · {translate("admin.login.footer")}
         </p>
       </div>
     </div>

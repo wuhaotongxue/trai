@@ -109,22 +109,39 @@ function Reveal({ children, delay = 0, className = "" }: {
 }
 
 function HeroParticles() {
+  const [particles, setParticles] = useState<Array<{
+    left: string;
+    top: string;
+    animation: string;
+    animationDelay: string;
+    width: string;
+    height: string;
+    backgroundColor: string;
+  }>>([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 20 }).map((_, i) => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animation: `float ${8 + Math.random() * 4}s ease-in-out infinite`,
+        animationDelay: `${Math.random() * 5}s`,
+        width: `${2 + Math.random() * 3}px`,
+        height: `${2 + Math.random() * 3}px`,
+        backgroundColor:
+          i % 3 === 0
+            ? "rgba(59, 130, 246, 0.15)"
+            : i % 3 === 1
+              ? "rgba(139, 92, 246, 0.1)"
+              : "rgba(6, 182, 212, 0.1)",
+      }))
+    );
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {Array.from({ length: 20 }).map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animation: `float ${8 + Math.random() * 4}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 5}s`,
-            width: `${2 + Math.random() * 3}px`,
-            height: `${2 + Math.random() * 3}px`,
-            backgroundColor: i % 3 === 0 ? "rgba(59, 130, 246, 0.15)" : i % 3 === 1 ? "rgba(139, 92, 246, 0.1)" : "rgba(6, 182, 212, 0.1)",
-          }}
-        />
+      {particles.map((style, i) => (
+        <div key={i} className="absolute rounded-full" style={style} />
       ))}
     </div>
   );
@@ -132,7 +149,7 @@ function HeroParticles() {
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { t, locale } = useI18n();
+  const { translate, locale } = useI18n();
   const isEn = locale === "en";
 
   return (
@@ -151,31 +168,31 @@ export default function HomePage() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-300 text-sm font-medium mb-8 animate-fade-in">
             <Sparkles className="h-3.5 w-3.5" />
-            {t("hero.badge")}
+            {translate("hero.badge")}
           </div>
 
           {/* Main Headline */}
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-slate-900 dark:text-white animate-slide-up">
             <span className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              {t("hero.title")}
+              {translate("hero.title")}
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: "0.15s" }}>
-            {t("hero.subtitle")}
+            {translate("hero.subtitle")}
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up" style={{ animationDelay: "0.25s" }}>
             <Link href="/register">
               <Button size="lg" className="h-12 px-8 gap-2 shadow-lg shadow-blue-500/20 text-base font-semibold rounded-full btn-press bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500">
-                {t("hero.cta1")}
+                {translate("hero.cta1")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/features">
               <Button size="lg" variant="outline" className="h-12 px-8 gap-2 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 text-base rounded-full btn-press">
-                {t("hero.cta2")}
+                {translate("hero.cta2")}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </Link>
@@ -189,7 +206,7 @@ export default function HomePage() {
                   <div key={i} className={`w-8 h-8 rounded-full border-2 border-white dark:border-[#030712] bg-gradient-to-br from-${color}-400 to-${color}-600`} />
                 ))}
               </div>
-              <span>{t("hero.users")}</span>
+              <span>{translate("hero.users")}</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="flex items-center gap-1.5">
@@ -199,12 +216,12 @@ export default function HomePage() {
                 ))}
               </div>
               <span className="font-medium">4.9</span>
-              <span className="text-slate-400">{t("hero.reviews")}</span>
+              <span className="text-slate-400">{translate("hero.reviews")}</span>
             </div>
             <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>{t("hero.sla")}</span>
+              <span>{translate("hero.sla")}</span>
             </div>
           </div>
 
@@ -233,12 +250,12 @@ export default function HomePage() {
                         <Bot className="h-5 w-5 text-white" />
                       </div>
                       <div className="bg-[#21262d] rounded-2xl rounded-tl-md px-4 py-3 text-sm text-slate-200 max-w-md">
-                        {t("chat.hi")}
+                        {translate("chat.hi")}
                       </div>
                     </div>
                     <div className="flex gap-3 justify-end">
                       <div className="bg-blue-600 rounded-2xl rounded-tr-md px-4 py-3 text-sm text-white max-w-md">
-                        {t("hero.chat.user_beijing")}
+                        {translate("hero.chat.user_beijing")}
                       </div>
                     </div>
                     <div className="flex gap-3">
@@ -248,17 +265,17 @@ export default function HomePage() {
                       <div className="bg-[#21262d] rounded-2xl rounded-tl-md px-4 py-3 text-sm text-slate-200 max-w-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-emerald-400 text-xs font-medium">{t("chat.tool.weather")}</span>
+                          <span className="text-emerald-400 text-xs font-medium">{translate("chat.tool.weather")}</span>
                         </div>
                         <p className="text-slate-300">
-                          {t("hero.chat.beijing_weather")}
+                          {translate("hero.chat.beijing_weather")}
                         </p>
                       </div>
                     </div>
                     {/* Input Area */}
                     <div className="flex items-center gap-3 pt-2">
                       <div className="flex-1 bg-[#21262d] rounded-full px-4 py-3 text-sm text-slate-500 border border-slate-700">
-                        {t("hero.chat.input")}
+                        {translate("hero.chat.input")}
                       </div>
                       <button className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-500 transition-colors">
                         <ArrowRight className="h-4 w-4 text-white" />
@@ -273,7 +290,7 @@ export default function HomePage() {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400">
-          <span className="text-xs">{t("hero.scroll")}</span>
+          <span className="text-xs">{translate("hero.scroll")}</span>
           <ChevronDown className="h-5 w-5 animate-bounce" />
         </div>
       </section>
@@ -283,16 +300,16 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <Reveal>
             <p className="text-center text-sm text-slate-500 dark:text-slate-400 mb-8">
-              {t("trusted.title")}
+              {translate("trusted.title")}
             </p>
           </Reveal>
           <div className="flex flex-wrap items-center justify-center gap-12">
             {trustedBy.map((company) => (
               <div key={company.key} className="flex items-center gap-3 text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400 transition-colors">
                 <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-500 dark:text-slate-400">
-                  {t(`trusted.${company.key}`).charAt(0)}
+                  {translate(`trusted.${company.key}`).charAt(0)}
                 </div>
-                <span className="font-semibold text-sm">{t(`trusted.${company.key}`)}</span>
+                <span className="font-semibold text-sm">{translate(`trusted.${company.key}`)}</span>
               </div>
             ))}
           </div>
@@ -308,10 +325,10 @@ export default function HomePage() {
                 {isEn ? "Features" : "核心功能"}
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                {t("features.title")}
+                {translate("features.title")}
               </h2>
               <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                {t("features.subtitle")}
+                {translate("features.subtitle")}
               </p>
             </div>
           </Reveal>
@@ -324,10 +341,10 @@ export default function HomePage() {
                       <f.icon className={`h-6 w-6 text-${f.color}-600 dark:text-${f.color}-400`} />
                     </div>
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {t(`features.${f.key}`)}
+                      {translate(`features.${f.key}`)}
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {t(`features.${f.key}.desc`)}
+                      {translate(`features.${f.key}.desc`)}
                     </p>
                   </CardContent>
                 </Card>
@@ -349,7 +366,7 @@ export default function HomePage() {
               <Reveal key={stat.key} delay={i * 100}>
                 <div className="text-center">
                   <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">{stat.value}</div>
-                  <div className="text-sm text-slate-400">{t(`stats.${stat.key}`)}</div>
+                  <div className="text-sm text-slate-400">{translate(`stats.${stat.key}`)}</div>
                 </div>
               </Reveal>
             ))}
@@ -363,10 +380,10 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                {t("scenarios.title")}
+                {translate("scenarios.title")}
               </h2>
               <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-                {t("scenarios.subtitle")}
+                {translate("scenarios.subtitle")}
               </p>
             </div>
           </Reveal>
@@ -378,8 +395,8 @@ export default function HomePage() {
                     <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors">
                       <s.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t(`scenarios.${s.key}`)}</h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t(`scenarios.${s.key}.desc`)}</p>
+                    <h3 className="text-base font-semibold text-slate-900 dark:text-white">{translate(`scenarios.${s.key}`)}</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{translate(`scenarios.${s.key}.desc`)}</p>
                   </CardContent>
                 </Card>
               </Reveal>
@@ -398,19 +415,19 @@ export default function HomePage() {
                   {isEn ? "Tech Stack" : "技术架构"}
                 </span>
                 <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                  {isEn ? t("tech.title") : t("tech.title")}
+                  {isEn ? translate("tech.title") : translate("tech.title")}
                   <br />
-                  <span className="text-blue-600 dark:text-blue-400">{isEn ? t("tech.title2") : t("tech.title2")}</span>
+                  <span className="text-blue-600 dark:text-blue-400">{isEn ? translate("tech.title2") : translate("tech.title2")}</span>
                 </h2>
                 <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
-                  {t("tech.subtitle")}
+                  {translate("tech.subtitle")}
                 </p>
                 <div className="space-y-3">
                   {[
-                    t("tech.stack1"),
-                    t("tech.stack2"),
-                    t("tech.stack3"),
-                    t("tech.stack4"),
+                    translate("tech.stack1"),
+                    translate("tech.stack2"),
+                    translate("tech.stack3"),
+                    translate("tech.stack4"),
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                       <CheckCircle className="h-4 w-4 text-blue-500 dark:text-blue-400 flex-shrink-0" />
@@ -423,10 +440,10 @@ export default function HomePage() {
             <Reveal delay={150}>
               <div className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800/50 p-6 space-y-3">
                 {[
-                  { label: t("tech.layer.frontend"), icon: "🖥", desc: "Next.js 15 + App Router", color: "border-blue-200 dark:border-blue-500/30", dot: "bg-blue-500 dark:bg-blue-400" },
-                  { label: t("tech.layer.api"), icon: "⚡", desc: "FastAPI + SSE 流式", color: "border-cyan-200 dark:border-cyan-500/30", dot: "bg-cyan-500 dark:bg-cyan-400" },
-                  { label: t("tech.layer.ai"), icon: "🤖", desc: t("tech.layer.ai.desc"), color: "border-amber-200 dark:border-amber-500/30", dot: "bg-amber-500 dark:bg-amber-400" },
-                  { label: t("tech.layer.data"), icon: "💾", desc: "PostgreSQL + Redis + S3", color: "border-emerald-200 dark:border-emerald-500/30", dot: "bg-emerald-500 dark:bg-emerald-400" },
+                  { label: translate("tech.layer.frontend"), icon: "🖥", desc: "Next.js 15 + App Router", color: "border-blue-200 dark:border-blue-500/30", dot: "bg-blue-500 dark:bg-blue-400" },
+                  { label: translate("tech.layer.api"), icon: "⚡", desc: "FastAPI + SSE 流式", color: "border-cyan-200 dark:border-cyan-500/30", dot: "bg-cyan-500 dark:bg-cyan-400" },
+                  { label: translate("tech.layer.ai"), icon: "🤖", desc: translate("tech.layer.ai.desc"), color: "border-amber-200 dark:border-amber-500/30", dot: "bg-amber-500 dark:bg-amber-400" },
+                  { label: translate("tech.layer.data"), icon: "💾", desc: "PostgreSQL + Redis + S3", color: "border-emerald-200 dark:border-emerald-500/30", dot: "bg-emerald-500 dark:bg-emerald-400" },
                 ].map((layer) => (
                   <div key={layer.label} className={`flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/30 border ${layer.color}`}>
                     <div className="text-2xl">{layer.icon}</div>
@@ -449,10 +466,10 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                {t("steps.title")}
+                {translate("steps.title")}
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
-                {t("steps.subtitle")}
+                {translate("steps.subtitle")}
               </p>
             </div>
           </Reveal>
@@ -464,8 +481,8 @@ export default function HomePage() {
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm mb-6 mx-auto">
                     <span className="text-2xl font-bold bg-gradient-to-br from-blue-600 to-blue-500 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">{s.num}</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t(`steps.${s.key}.title`)}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{t(`steps.${s.key}.desc`)}</p>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{translate(`steps.${s.key}.title`)}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{translate(`steps.${s.key}.desc`)}</p>
                 </div>
               </Reveal>
             ))}
@@ -479,7 +496,7 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                {t("testimonials.title")}
+                {translate("testimonials.title")}
               </h2>
             </div>
           </Reveal>
@@ -493,14 +510,14 @@ export default function HomePage() {
                         <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic">&ldquo;{t(`testimonials.quote${idx + 1}`)}&rdquo;</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic">&ldquo;{translate(`testimonials.quote${idx + 1}`)}&rdquo;</p>
                     <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800/50">
                       <div className={`w-9 h-9 rounded-full bg-gradient-to-br from-${item.color}-400 to-${item.color}-600 flex items-center justify-center text-white text-sm font-medium`}>
                         {item.avatar}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">{t(`testimonials.${item.nameKey}`)}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-500">{t(`testimonials.${item.roleKey}`)}, {t(`testimonials.${item.companyKey}`)}</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{translate(`testimonials.${item.nameKey}`)}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-500">{translate(`testimonials.${item.roleKey}`)}, {translate(`testimonials.${item.companyKey}`)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -517,7 +534,7 @@ export default function HomePage() {
           <Reveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                {t("faq.title")}
+                {translate("faq.title")}
               </h2>
             </div>
           </Reveal>
@@ -529,12 +546,12 @@ export default function HomePage() {
                     className="w-full text-left p-5 flex items-center justify-between gap-4"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
-                    <span className="text-sm font-medium text-slate-900 dark:text-white">{t(`faq.${f.key}`)}</span>
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">{translate(`faq.${f.key}`)}</span>
                     <ChevronDown className={`h-4 w-4 text-slate-400 flex-shrink-0 transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`} />
                   </button>
                   {openFaq === i && (
                     <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/50 pt-4">
-                      {t(`faq.${f.key.replace("q", "a")}`)}
+                      {translate(`faq.${f.key.replace("q", "a")}`)}
                     </div>
                   )}
                 </Card>
@@ -552,36 +569,36 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center relative z-10">
           <Reveal>
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              {t("cta.title")}
+              {translate("cta.title")}
             </h2>
             <p className="text-slate-400 text-lg max-w-lg mx-auto mb-10">
-              {t("cta.subtitle")}
+              {translate("cta.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
                 <Button size="lg" className="h-12 px-10 gap-2 bg-white text-slate-900 hover:bg-slate-100 shadow-xl text-base font-semibold rounded-full btn-press">
-                  {t("cta.btn1")}
+                  {translate("cta.btn1")}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/contact">
                 <Button size="lg" variant="outline" className="h-12 px-10 gap-2 bg-transparent border-white/20 text-white hover:bg-white/10 text-base rounded-full btn-press">
-                  {t("cta.btn2")}
+                  {translate("cta.btn2")}
                 </Button>
               </Link>
             </div>
             <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-emerald-500" />
-                <span>{t("cta.free")}</span>
+                <span>{translate("cta.free")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-emerald-500" />
-                <span>{t("cta.card")}</span>
+                <span>{translate("cta.card")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-emerald-500" />
-                <span>{t("cta.support")}</span>
+                <span>{translate("cta.support")}</span>
               </div>
             </div>
           </Reveal>

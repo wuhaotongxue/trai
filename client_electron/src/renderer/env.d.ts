@@ -57,7 +57,19 @@ interface Window {
     ai_generate_report?: (file_data: any, filename: string, description: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     app_get_version?: () => Promise<string>;
     app_check_update?: () => Promise<{ success: boolean; data?: any; error?: string }>;
+    app_download_update?: () => Promise<{ success: boolean; error?: string }>;
     app_install_update?: () => Promise<{ success: boolean; error?: string }>;
+    app_get_update_status?: () => Promise<{
+      checking: boolean;
+      available: boolean;
+      downloaded: boolean;
+      error: string | null;
+      version: string | null;
+      releaseNotes: string | null;
+    }>;
+    // 更新事件监听
+    on_update_status?: (callback: (event: any, status: any) => void) => () => void;
+    on_update_progress?: (callback: (event: any, progress: { percent: number; bytesPerSecond: number; transferred: number; total: number }) => void) => () => void;
     // 通用 IPC 事件监听
     on: (channel: string, callback: (...args: any[]) => void) => void;
     off: (channel: string, callback: (...args: any[]) => void) => void;
