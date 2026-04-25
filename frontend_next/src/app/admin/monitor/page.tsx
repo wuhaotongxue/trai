@@ -44,7 +44,7 @@ const SERVICE_KEYS = [
 ];
 
 export default function MonitorPage() {
-  const { t, locale } = useAdminI18n();
+  const { translate, locale, loadNamespace } = useAdminI18n();
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [retentionDays, setRetentionPolicy] = useState(30);
@@ -58,51 +58,52 @@ export default function MonitorPage() {
       setBackups(res.sort((a, b) => new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime()));
       setLastRefresh(new Date());
     } catch {
-      toast({ message: t("admin.monitor.backup_list_failed"), variant: "error" });
+      toast({ message: translate("admin.monitor.backup_list_failed"), variant: "error" });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    void loadNamespace('admin');
     void fetchBackups();
   }, [locale]);
 
   const handleBackup = async () => {
-    toast({ message: t("admin.monitor.backup_started"), variant: "info" });
+    toast({ message: translate("admin.monitor.backup_started"), variant: "info" });
     try {
       await request("/system/database/backup", { method: "POST" });
-      toast({ message: t("admin.monitor.backup_success"), variant: "success" });
+      toast({ message: translate("admin.monitor.backup_success"), variant: "success" });
       void fetchBackups();
     } catch (e: any) {
-      toast({ message: `${t("admin.monitor.backup_failed")} ${e.message}`, variant: "error" });
+      toast({ message: `${translate("admin.monitor.backup_failed")} ${e.message}`, variant: "error" });
     }
   };
 
   const handleDelete = async (key: string) => {
-    if (!confirm(t("admin.monitor.delete_confirm"))) return;
+    if (!confirm(translate("admin.monitor.delete_confirm"))) return;
     try {
       await request(`/system/database/backup?key=${encodeURIComponent(key)}`, { method: "DELETE" });
-      toast({ message: t("admin.monitor.delete_success"), variant: "success" });
+      toast({ message: translate("admin.monitor.delete_success"), variant: "success" });
       void fetchBackups();
     } catch (e: any) {
-      toast({ message: `${t("admin.monitor.delete_failed")} ${e.message}`, variant: "error" });
+      toast({ message: `${translate("admin.monitor.delete_failed")} ${e.message}`, variant: "error" });
     }
   };
 
   const handleCleanup = async (days: number) => {
     setRetentionPolicy(days);
-    const msg = days === 0 ? t("admin.monitor.permanent") : `${days} ${t("admin.monitor.retention_days")}`;
-    toast({ message: `${t("admin.monitor.cleanup_updated")} ${msg}`, variant: "info" });
+    const msg = days === 0 ? translate("admin.monitor.permanent") : `${days} ${translate("admin.monitor.retention_days")}`;
+    toast({ message: `${translate("admin.monitor.cleanup_updated")} ${msg}`, variant: "info" });
     try {
       const res: any = await request("/system/database/cleanup", {
         method: "POST",
         body: JSON.stringify({ days })
       });
-      toast({ message: `${t("admin.monitor.cleanup_done")} ${res.message}`, variant: "success" });
+      toast({ message: `${translate("admin.monitor.cleanup_done")} ${res.message}`, variant: "success" });
       void fetchBackups();
     } catch (e: any) {
-      toast({ message: `${t("admin.monitor.cleanup_failed")} ${e.message}`, variant: "error" });
+      toast({ message: `${translate("admin.monitor.cleanup_failed")} ${e.message}`, variant: "error" });
     }
   };
 
@@ -115,10 +116,10 @@ export default function MonitorPage() {
   };
 
   const securityGuidelines = [
-    t("admin.monitor.auto_backup"),
-    t("admin.monitor.aes_encrypt"),
-    t("admin.monitor.audit_log"),
-    t("admin.monitor.dr_test"),
+    translate("admin.monitor.auto_backup"),
+    translate("admin.monitor.aes_encrypt"),
+    translate("admin.monitor.audit_log"),
+    translate("admin.monitor.dr_test"),
   ];
 
   const quickTools = [
@@ -143,21 +144,21 @@ export default function MonitorPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
               <ShieldCheck className="h-5 w-5 text-blue-500" />
             </div>
-            {t("admin.monitor.title")}
+            {translate("admin.monitor.title")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
-            {t("admin.monitor.sync_time")} {lastRefresh.toLocaleString(locale === "zh" ? "zh-CN" : "en-US")}
+            {translate("admin.monitor.sync_time")} {lastRefresh.toLocaleString(locale === "zh" ? "zh-CN" : "en-US")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="gap-1.5" onClick={() => void fetchBackups()}>
             <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
-            {t("admin.monitor.refresh_status")}
+            {translate("admin.monitor.refresh_status")}
           </Button>
           <Button size="sm" className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-sm" onClick={() => void handleBackup()}>
             <Database className="h-3.5 w-3.5" />
-            {t("admin.monitor.backup_now")}
+            {translate("admin.monitor.backup_now")}
           </Button>
         </div>
       </div>
@@ -175,11 +176,11 @@ export default function MonitorPage() {
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-sm font-semibold text-foreground">{t(svc.cnKey)}</span>
+                    <span className="text-sm font-semibold text-foreground">{translate(svc.cnKey)}</span>
                   </div>
                   <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
                     svc.status === "ok" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-400")}>
-                    {svc.status === "ok" ? t("admin.monitor.normal") : t("admin.monitor.warning")}
+                    {svc.status === "ok" ? translate("admin.monitor.normal") : translate("admin.monitor.warning")}
                   </span>
                 </div>
                 <div className="mt-1.5 flex items-center gap-3 text-[11px] text-muted-foreground font-mono">
@@ -205,22 +206,22 @@ export default function MonitorPage() {
             <div>
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                 <History className="h-4 w-4 text-blue-500" />
-                {t("admin.monitor.s3_backup")}
+                {translate("admin.monitor.s3_backup")}
               </CardTitle>
-              <CardDescription className="text-[11px]">{t("admin.monitor.s3_desc")}</CardDescription>
+              <CardDescription className="text-[11px]">{translate("admin.monitor.s3_desc")}</CardDescription>
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger className="inline-flex items-center justify-center gap-1 h-8 px-3 text-xs rounded-lg border border-border/60 bg-background hover:bg-muted cursor-pointer transition-colors text-sm">
                 <Settings2 className="h-3.5 w-3.5" />
-                {t("admin.monitor.retention")} {retentionDays === 0 ? t("admin.monitor.permanent") : `${retentionDays} ${t("admin.monitor.retention_days")}`}
+                {translate("admin.monitor.retention")} {retentionDays === 0 ? translate("admin.monitor.permanent") : `${retentionDays} ${translate("admin.monitor.retention_days")}`}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>{t("admin.monitor.auto_cleanup")}</DropdownMenuLabel>
+                <DropdownMenuLabel>{translate("admin.monitor.auto_cleanup")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {cleanupOptions.map((opt) => (
                   <DropdownMenuItem key={opt.days} onClick={() => void handleCleanup(opt.days)}>
-                    {t(opt.labelKey)}
+                    {translate(opt.labelKey)}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -231,10 +232,10 @@ export default function MonitorPage() {
               <table className="w-full text-sm text-left">
                 <thead>
                   <tr className="border-b border-border/40">
-                    <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.monitor.backup_file")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{t("admin.monitor.size")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{t("admin.monitor.backup_time")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{t("admin.monitor.operation")}</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.monitor.backup_file")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.monitor.size")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.monitor.backup_time")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.monitor.operation")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -276,7 +277,7 @@ export default function MonitorPage() {
                   {backups.length === 0 && (
                     <tr>
                       <td colSpan={4} className="px-5 py-10 text-center text-muted-foreground text-sm italic">
-                        {t("admin.monitor.no_backups")}
+                        {translate("admin.monitor.no_backups")}
                       </td>
                     </tr>
                   )}
@@ -295,7 +296,7 @@ export default function MonitorPage() {
             <CardHeader>
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-blue-400" />
-                {t("admin.monitor.data_security")}
+                {translate("admin.monitor.data_security")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 relative z-10">
@@ -308,15 +309,15 @@ export default function MonitorPage() {
                 ))}
               </div>
               <div className="pt-4 border-t border-slate-700/50">
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">{t("admin.monitor.storage_status")}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">{translate("admin.monitor.storage_status")}</p>
                 <div className="flex justify-between items-end">
                   <div className="space-y-1">
-                    <p className="text-xl font-bold">{backups.length} <span className="text-xs font-normal opacity-50">{t("admin.monitor.files")}</span></p>
-                    <p className="text-[10px] opacity-50">{t("admin.monitor.bucket")} trai-backups</p>
+                    <p className="text-xl font-bold">{backups.length} <span className="text-xs font-normal opacity-50">{translate("admin.monitor.files")}</span></p>
+                    <p className="text-[10px] opacity-50">{translate("admin.monitor.bucket")} trai-backups</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xl font-bold">{formatSize(backups.reduce((acc, b) => acc + b.size, 0))}</p>
-                    <p className="text-[10px] opacity-50 text-blue-400 font-bold">{t("admin.monitor.cloud_total")}</p>
+                    <p className="text-[10px] opacity-50 text-blue-400 font-bold">{translate("admin.monitor.cloud_total")}</p>
                   </div>
                 </div>
               </div>
@@ -325,13 +326,13 @@ export default function MonitorPage() {
 
           <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-foreground">{t("admin.monitor.quick_tools")}</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.monitor.quick_tools")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {quickTools.map((tool) => (
                 <Button key={tool.labelKey} variant="outline" className="w-full justify-start text-xs h-9 border-border/60 hover:bg-muted/50">
                   <tool.icon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                  {t(tool.labelKey)}
+                  {translate(tool.labelKey)}
                 </Button>
               ))}
             </CardContent>
