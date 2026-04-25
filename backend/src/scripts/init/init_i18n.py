@@ -13,6 +13,24 @@ from loguru import logger
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
+# 加载 .env 环境变量
+from pathlib import Path
+base_dir = Path(__file__).resolve().parent.parent.parent
+env_file = base_dir / ".env"
+if env_file.exists():
+    content = env_file.read_text(encoding="utf-8")
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key:
+            os.environ.setdefault(key, value)
+
 from infrastructure.database import get_database
 from scripts.init.init_i18n_client import ClientI18nInit
 from scripts.init.init_i18n_frontend import FrontendI18nInit

@@ -46,8 +46,19 @@ contextBridge.exposeInMainWorld('electron_api', {
   kb_delete_index_file: (index_id: string, file_id: string) => ipcRenderer.invoke('kb:delete_index_file', index_id, file_id),
   kb_upload_text: (index_id: string, file_name: string, content: string) => ipcRenderer.invoke('kb:upload_text', index_id, file_name, content),
   app_check_update: () => ipcRenderer.invoke('app:check_update'),
+  app_download_update: () => ipcRenderer.invoke('app:download_update'),
   app_install_update: () => ipcRenderer.invoke('app:install_update'),
   app_get_version: () => ipcRenderer.invoke('app:get_version'),
+  app_get_update_status: () => ipcRenderer.invoke('app:get_update_status'),
+  // 更新事件监听
+  on_update_status: (callback: (event: any, status: any) => void) => {
+    ipcRenderer.on('update:status', callback)
+    return () => { ipcRenderer.removeListener('update:status', callback) }
+  },
+  on_update_progress: (callback: (event: any, progress: any) => void) => {
+    ipcRenderer.on('update:progress', callback)
+    return () => { ipcRenderer.removeListener('update:progress', callback) }
+  },
   // 窗口控制
   window_minimize: () => ipcRenderer.invoke('window:minimize'),
   window_maximize: () => ipcRenderer.invoke('window:maximize'),

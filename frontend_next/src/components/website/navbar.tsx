@@ -25,7 +25,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const { setFloatingChatOpen } = useAgentStore();
-  const { t, locale } = useI18n();
+  const { translate, locale } = useI18n();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -34,22 +34,22 @@ export function Navbar() {
   }, []);
 
   const navItems = [
-    { label: t("nav.home"), href: "/" },
-    { label: t("nav.features"), href: "/features" },
-    { label: t("nav.pricing"), href: "/pricing" },
-    { label: t("nav.scenarios"), href: "/#scenarios" },
+    { label: translate("nav.home"), href: "/" },
+    { label: translate("nav.features"), href: "/features" },
+    { label: translate("nav.pricing"), href: "/pricing" },
+    { label: translate("nav.scenarios"), href: "/#scenarios" },
     {
-      label: t("nav.docs"),
+      label: translate("nav.docs"),
       href: "/docs",
       children: [
-        { label: t("nav.quickstart"), href: "/docs/quickstart" },
-        { label: t("nav.api"), href: "/docs/api" },
-        { label: t("nav.sdk"), href: "/docs/sdk" },
-        { label: t("nav.faq"), href: "/docs/faq" },
+        { label: translate("nav.quickstart"), href: "/docs/quickstart" },
+        { label: translate("nav.api"), href: "/docs/api" },
+        { label: translate("nav.sdk"), href: "/docs/sdk" },
+        { label: translate("nav.faq"), href: "/docs/faq" },
       ],
     },
-    { label: t("nav.about"), href: "/about" },
-    { label: t("nav.contact"), href: "/contact" },
+    { label: translate("nav.about"), href: "/about" },
+    { label: translate("nav.contact"), href: "/contact" },
   ];
 
   return (
@@ -134,11 +134,11 @@ export function Navbar() {
                 <Bot className="h-4 w-4 text-blue-500" />
                 <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
               </div>
-              {t("nav.ai_assistant")}
+              {translate("nav.ai_assistant")}
             </Button>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
-                {t("nav.login")}
+                {translate("nav.login")}
               </Button>
             </Link>
             <Link href="/register">
@@ -147,7 +147,7 @@ export function Navbar() {
                 className="text-sm font-semibold shadow-md shadow-blue-500/15 transition-all duration-300 rounded-full px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
               >
                 <Sparkles className="h-3 w-3 mr-1.5" />
-                {t("nav.register")}
+                {translate("nav.register")}
               </Button>
             </Link>
           </div>
@@ -201,12 +201,12 @@ export function Navbar() {
           ))}
           <div className="flex gap-2 pt-4 mt-2 border-t border-slate-200 dark:border-slate-800/60">
             <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" className="w-full text-sm rounded-lg">{t("nav.login")}</Button>
+              <Button variant="outline" className="w-full text-sm rounded-lg">{translate("nav.login")}</Button>
             </Link>
             <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
               <Button className="w-full text-sm font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
                 <Sparkles className="h-3 w-3 mr-1.5" />
-                {t("nav.register")}
+                {translate("nav.register")}
               </Button>
             </Link>
           </div>

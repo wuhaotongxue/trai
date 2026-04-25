@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # 文件名: run.py
 # 作者: wuhao
-# 日期: 2026_04_16_17:24:17
-# 描述: TRAI 后端服务入口文件
+# 日期: 2026_04_25_18:42:00
+# 描述: TRAI 后端服务入口文件，支持端口检测、进程清理与日志记录
 
 from __future__ import annotations
 
+import io
 import os
+import signal
+import subprocess
 import sys
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -92,6 +97,126 @@ class EnvFileLoader:
         EnvFileLoader.load_if_exists(base_dir / ".env.local")
 
 
+class PortCleaner:
+    """端口清理工具,自动清理占用端口的僵尸进程."""
+
+    @staticmethod
+    def find_processes_on_port(port: int) -> list[dict[str, Any]]:
+        """查找占用指定端口的进程"""
+        processes: list[dict[str, Any]] = []
+
+        try:
+            import psutil
+
+            for conn in psutil.net_connections():
+                if conn.laddr and conn.laddr.port == port:
+                    try:
+                        proc = psutil.Process(conn.pid)
+                        processes.append(
+                            {"pid": conn.pid, "name": proc.name(), "port": port}
+                        )
+                    except psutil.NoSuchProcess:
+                        pass
+        except ImportError:
+            pass
+
+        seen: set[int] = set()
+        unique: list[dict[str, Any]] = []
+        for p in processes:
+            if p["pid"] not in seen:
+                seen.add(p["pid"])
+                unique.append(p)
+        return unique
+
+    @staticmethod
+    def kill_process(pid: int, name: str) -> bool:
+        """杀掉指定进程"""
+        try:
+            import psutil
+
+            proc = psutil.Process(pid)
+            proc.kill()
+            proc.wait(timeout=3)
+            print(f"  [OK] 已终止: {name} (PID: {pid})")
+            return True
+        except psutil.NoSuchProcess:
+            print(f"  [~] 进程不存在: {pid}")
+            return True
+        except psutil.AccessDenied:
+            print(f"  [!] 权限不足,等待内核自动释放: {name} (PID: {pid})")
+            time.sleep(3)
+            return True
+        except Exception:
+            pass
+
+        try:
+            if sys.platform == "win32":
+                result = subprocess.run(
+                    ["taskkill", "/F", "/PID", str(pid)],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                )
+                success = result.returncode == 0
+                if success:
+                    print(f"  [OK] 已终止(taskkill): {name} (PID: {pid})")
+                else:
+                    print(f"  [!] 终止失败: {result.stderr.strip()}")
+                return success
+            else:
+                os.kill(pid, signal.SIGTERM)
+                print(f"  [OK] 已终止: {name} (PID: {pid})")
+                return True
+        except ProcessLookupError:
+            print(f"  [~] 进程不存在: {pid}")
+            return True
+        except PermissionError:
+            print(f"  [!] 权限不足: {name} (PID: {pid})")
+            return False
+        except Exception:
+            return False
+
+    @classmethod
+    def cleanup(cls, port: int) -> bool:
+        """清理占用指定端口的进程,返回端口是否已释放"""
+        print(f"\n{'=' * 60}")
+        print(f"端口 {port} 检测")
+        print(f"{'=' * 60}")
+
+        processes = cls.find_processes_on_port(port)
+
+        if not processes:
+            print(f"  [OK] 端口 {port} 空闲")
+            return True
+
+        print(f"  [!] 发现 {len(processes)} 个进程占用端口 {port}:")
+
+        killed_any = False
+        for proc in processes:
+            if proc["pid"] == os.getpid():
+                print(f"  [~] 跳过自身: {proc['name']} (PID: {proc['pid']})")
+                continue
+
+            if cls.kill_process(proc["pid"], proc["name"]):
+                killed_any = True
+                time.sleep(0.5)
+
+        if killed_any:
+            time.sleep(1)
+            remaining = cls.find_processes_on_port(port)
+            if remaining:
+                print(f"  [!] 警告: 仍有 {len(remaining)} 个进程占用端口")
+                for p in remaining:
+                    print(f"      - {p['name']} (PID: {p['pid']})")
+                return False
+            else:
+                print(f"  [OK] 端口 {port} 已释放")
+                return True
+
+        return False
+
+
 def get_config() -> dict[str, Any]:
     """从环境变量获取配置
 
@@ -111,6 +236,163 @@ def main() -> None:
     EnvFileLoader.load_local_envs()
     init_logger(level="INFO")
     config = get_config()
+
+    print(f"\n{'=' * 60}")
+    print(f"TRAI 后端服务")
+    print(f"{'=' * 60}")
+    print(f"工作目录: {Path(__file__).resolve().parent}")
+    print(f"目标端口: {config['port']}")
+    print(f"调试模式: {config['reload']}")
+    print(f"Python: {sys.executable}")
+    print(f"{'=' * 60}\n")
+
+    # 清理占用端口的进程
+    if not PortCleaner.cleanup(config["port"]):
+        print("\n[!] 端口清理未完成,继续启动可能失败")
+
+    print(f"{'=' * 60}")
+    print(f"[启动] 后端服务...")
+    print(f"{'=' * 60}")
+
+    import socket as _socket
+
+    def _wait_port_free(port: int, max_wait: int = 30) -> bool:
+        for i in range(max_wait):
+            s = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+            s.settimeout(1)
+            r = s.connect_ex(("127.0.0.1", port))
+            s.close()
+            if r != 0:
+                return True
+            print(f"  [!] 端口 {port} 仍被占用, {i + 1}s ...")
+            time.sleep(1)
+        return False
+
+    if not _wait_port_free(config["port"]):
+        print(f"\n  [!!] 端口 {config['port']} 等待 {30}s 后仍被占用,强制继续...")
+
+    # 创建日志目录和日志文件
+    log_dir = Path(__file__).resolve().parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = log_dir / f"backend_{timestamp}.log"
+
+    print(f"{'=' * 60}")
+    print(f"[启动] 后端服务...")
+    print(f"{'=' * 60}")
+
+    # 启动日志写入器
+    class LogWriter:
+        """日志写入器，将控制台输出同步写入文件"""
+
+        def __init__(self, file_path: Path) -> None:
+            self.file_handle: io.TextIOWrapper | None = None
+            self.file_path = file_path
+            self._start()
+
+        def _start(self) -> None:
+            """启动日志文件写入"""
+            self.file_handle = open(self.file_path, "w", encoding="utf-8")
+            self._write(f"TRAI Backend Service Log\n")
+            self._write(f"Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            self._write(f"Port: {config['port']}\n")
+            self._write(f"Debug: {config['reload']}\n")
+            self._write(f"{'=' * 60}\n\n")
+
+        def _write(self, message: str) -> None:
+            """写入消息到日志文件"""
+            if self.file_handle:
+                self.file_handle.write(message)
+                self.file_handle.flush()
+
+        def write(self, message: str) -> None:
+            """写入消息（供 sys.stdout 替换使用）"""
+            self._write(message)
+
+        def flush(self) -> None:
+            """刷新缓冲区"""
+            if self.file_handle:
+                self.file_handle.flush()
+
+        def close(self) -> None:
+            """关闭日志文件"""
+            if self.file_handle:
+                self._write(f"\n{'=' * 60}\n")
+                self._write(f"Stop Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                self._write(f"{'=' * 60}\n")
+                self.file_handle.close()
+                self.file_handle = None
+
+        def __enter__(self) -> LogWriter:
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+            self.close()
+
+    log_writer = LogWriter(log_file)
+
+    # 保存原始 stdout
+    original_stdout = sys.stdout
+    sys.stdout = log_writer  # type: ignore
+
+    # 启动 uvicorn 服务器(线程方式,避免子进程导致请求超时)
+    import asyncio
+    import threading
+
+    async def run_uvicorn() -> None:
+        app = create_app()
+        for attempt in range(3):
+            try:
+                server_config = uvicorn.Config(
+                    app=app,
+                    host=config["host"],
+                    port=config["port"],
+                    reload=config["reload"],
+                    log_level=config["log_level"],
+                )
+                server = uvicorn.Server(server_config)
+                await server.serve()
+                break
+            except OSError as e:
+                if e.errno == 10048 and attempt < 2:
+                    print(f"\n  [!] 端口 {config['port']} 被占用, {attempt + 1}s 后重试...")
+                    time.sleep(1)
+                    continue
+                raise
+
+    server_thread = threading.Thread(target=lambda: asyncio.run(run_uvicorn()), daemon=False)
+    server_thread.start()
+
+    print(f"[PID] {os.getpid()}")
+    print(f"[日志] {log_file}")
+    print(f"[地址] http://localhost:{config['port']}")
+    print(f"[提示] 按 Ctrl+C 停止")
+    print(f"{'=' * 60}\n")
+
+    # 恢复 stdout
+    sys.stdout = original_stdout
+
+    # 等待服务器启动
+    time.sleep(1)
+
+    # 日志监控:等待 Ctrl+C
+    try:
+        while server_thread.is_alive():
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[停止] 正在关闭后端...")
+        print("[停止] 后端已关闭")
+
+    # 关闭日志写入器
+    log_writer.close()
+
+
+def run_server() -> None:
+    """直接运行后端服务(供子进程调用)"""
+    EnvFileLoader.load_local_envs()
+    init_logger(level="INFO")
+    config = get_config()
+
     if config["reload"]:
         uvicorn.run(
             "api.main:create_app",
@@ -120,11 +402,15 @@ def main() -> None:
             reload=config["reload"],
             log_level=config["log_level"],
         )
-        return
-
-    app = create_app()
-    uvicorn.run(app, host=config["host"], port=config["port"], reload=False, log_level=config["log_level"])
+    else:
+        app = create_app()
+        uvicorn.run(app, host=config["host"], port=config["port"], reload=False, log_level=config["log_level"])
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--no-cleanup":
+        # 子进程模式,直接运行服务
+        run_server()
+    else:
+        # 主进程模式,清理端口后启动服务
+        main()

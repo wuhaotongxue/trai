@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 /** 默认 API 基础 URL */
-const DEFAULT_API_BASE = "http://192.168.100.119:5666/api_trai/v1";
+const DEFAULT_API_BASE = "http://localhost:5666/api_trai/v1";
 
 /**
  * 获取 API 基础 URL
@@ -60,6 +60,7 @@ async function refreshToken(): Promise<string | null> {
 
       const res = await fetch(`${getApiBase()}/auth/refresh`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: rt }),
       });
@@ -108,6 +109,7 @@ export async function request<T>(
 
   let res = await fetch(`${getApiBase()}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -128,6 +130,7 @@ export async function request<T>(
       options._retry = true;
       res = await fetch(`${getApiBase()}${path}`, {
         ...options,
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${newToken}`,

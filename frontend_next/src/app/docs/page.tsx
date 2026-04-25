@@ -5,35 +5,41 @@ import { BookOpen, FileText, HelpCircle, Package } from "lucide-react";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/i18n_context";
 
 const docsCards = [
   {
-    title: "快速开始",
-    desc: "从 0 到 1 了解 TRAI 的核心能力与使用方式",
+    titleKey: "docs.quickstart.title",
+    descKey: "docs.quickstart.desc",
+    enterKey: "docs.enter",
     href: "/docs/quickstart",
     icon: BookOpen,
   },
   {
-    title: "API 参考",
-    desc: "查看后端 Swagger 文档, 支持全屏阅读",
+    titleKey: "docs.api.title",
+    descKey: "docs.api.desc",
+    enterKey: "docs.enter",
     href: "/docs/api",
     icon: FileText,
   },
   {
-    title: "SDK 下载",
-    desc: "获取前端与后端 SDK, 快速集成到你的系统",
+    titleKey: "docs.sdk.title",
+    descKey: "docs.sdk.desc",
+    enterKey: "docs.enter",
     href: "/docs/sdk",
     icon: Package,
   },
   {
-    title: "常见问题",
-    desc: "账号, 配额, 登录, 回调等高频问题汇总",
+    titleKey: "docs.faq.title",
+    descKey: "docs.faq.desc",
+    enterKey: "docs.enter",
     href: "/docs/faq",
     icon: HelpCircle,
   },
 ];
 
 export default function DocsIndexPage() {
+  const { translate } = useI18n();
   return (
     <>
       <Navbar />
@@ -42,13 +48,13 @@ export default function DocsIndexPage() {
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium mb-6">
               <BookOpen className="h-4 w-4" />
-              文档中心
+              {translate("docs.title")}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-              TRAI 文档
+              {translate("docs.subtitle")}
             </h1>
             <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed">
-              这里提供快速开始, API 参考, SDK 下载与常见问题. 如果你需要更系统的接入方案, 可以先从快速开始进入.
+              {translate("docs.desc")}
             </p>
           </div>
         </section>
@@ -68,10 +74,10 @@ export default function DocsIndexPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-lg font-bold text-slate-900 dark:text-white">
-                        {c.title}
+                        {translate(c.titleKey)}
                       </p>
                       <p className="text-sm text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">
-                        {c.desc}
+                        {translate(c.descKey)}
                       </p>
                       <div className="mt-4">
                         <Button
@@ -79,7 +85,7 @@ export default function DocsIndexPage() {
                           variant="outline"
                           className="border-slate-200 dark:border-slate-700"
                         >
-                          进入
+                          {translate(c.enterKey)}
                         </Button>
                       </div>
                     </div>

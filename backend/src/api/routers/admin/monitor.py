@@ -26,6 +26,10 @@ class LogItem(BaseModel):
     module: str
     ip_address: str | None
     created_at: str
+    level: str
+    method: str
+    status_code: int
+    duration_ms: int
 
 class SystemStats(BaseModel):
     cpu_percent: float
@@ -38,18 +42,22 @@ class SystemStats(BaseModel):
 async def get_audit_logs(admin: AdminUser, limit: int = 50):
     """获取系统操作日志"""
     db = get_session()
-    stmt = select(AuditLogModel).order_by(desc(AuditLogModel.t_created_at)).limit(limit)
+    stmt = select(AuditLogModel).order_by(desc(AuditLogModel.t_timestamp)).limit(limit)
     logs = db.execute(stmt).scalars().all()
-    
+
     return [
         LogItem(
             id=log.t_id,
-            user_id=log.t_user_id,
+            user_id=log.t_user_id or "",
             username=log.t_username or "unknown",
             action=log.t_action,
-            module=log.t_module,
-            ip_address=log.t_ip_address,
-            created_at=log.t_created_at.isoformat()
+            module=log.t_path,
+            ip_address=log.t_client_ip,
+            created_at=log.t_timestamp.isoformat(),
+            level=log.t_level,
+            method=log.t_method,
+            status_code=log.t_status_code,
+            duration_ms=log.t_duration_ms,
         )
         for log in logs
     ]

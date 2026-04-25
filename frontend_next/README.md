@@ -65,6 +65,9 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_25_2247
+- **界面(i18n)**: 为 admin/ai、admin/quotas、admin/users/new 页面补充完整的中英文翻译 keys，修复页面内硬编码文本
+
 ### 🎨 前端_2026_04_25_1721
 - **修复(i18n)**: 修复 admin_i18n_context.tsx 中 loadNamespace 存储 key 格式从 key 改为 namespace.key，与 translate 调用格式对齐；FrontendI18nInit 修复 namespace 解析逻辑
 - **修复(i18n)**: 为所有管理后台页面添加 loadNamespace('admin') 调用，确保每个页面都能正确加载翻译数据

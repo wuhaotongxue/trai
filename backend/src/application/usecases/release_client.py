@@ -5,6 +5,7 @@
 # 描述: 客户端发布用例,支持 S3 上传及通知推送
 
 import os
+from datetime import datetime
 from typing import Any
 
 import requests
@@ -78,7 +79,7 @@ class ReleaseClientUseCase:
                 "elements": [
                     {
                         "tag": "div",
-                        "text": {"tag": "lark_md", "content": f"**版本号:** v{version}\n**发布时间:** {os.popen('date /t').read().strip()} {os.popen('time /t').read().strip()}"},
+                        "text": {"tag": "lark_md", "content": f"**版本号:** v{version}\n**发布时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}"},
                     },
                     {"tag": "hr"},
                     {
