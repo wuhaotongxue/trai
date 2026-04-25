@@ -54,7 +54,7 @@ export default function MonitorPage() {
   const fetchBackups = async () => {
     setLoading(true);
     try {
-      const res = await request<BackupFile[]>("/system/database/backups");
+      const res = await request<BackupFile[]>("/admin/system/backups");
       setBackups(res.sort((a, b) => new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime()));
       setLastRefresh(new Date());
     } catch {
@@ -72,7 +72,7 @@ export default function MonitorPage() {
   const handleBackup = async () => {
     toast({ message: translate("admin.monitor.backup_started"), variant: "info" });
     try {
-      await request("/system/database/backup", { method: "POST" });
+      await request("/admin/system/database/backup", { method: "POST" });
       toast({ message: translate("admin.monitor.backup_success"), variant: "success" });
       void fetchBackups();
     } catch (e: any) {
@@ -83,7 +83,7 @@ export default function MonitorPage() {
   const handleDelete = async (key: string) => {
     if (!confirm(translate("admin.monitor.delete_confirm"))) return;
     try {
-      await request(`/system/database/backup?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+      await request(`/admin/system/database/backup?key=${encodeURIComponent(key)}`, { method: "DELETE" });
       toast({ message: translate("admin.monitor.delete_success"), variant: "success" });
       void fetchBackups();
     } catch (e: any) {
@@ -96,7 +96,7 @@ export default function MonitorPage() {
     const msg = days === 0 ? translate("admin.monitor.permanent") : `${days} ${translate("admin.monitor.retention_days")}`;
     toast({ message: `${translate("admin.monitor.cleanup_updated")} ${msg}`, variant: "info" });
     try {
-      const res: any = await request("/system/database/cleanup", {
+      const res: any = await request("/admin/system/database/cleanup", {
         method: "POST",
         body: JSON.stringify({ days })
       });

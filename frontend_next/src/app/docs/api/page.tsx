@@ -11,26 +11,27 @@ import Link from "next/link";
 import { Terminal, ArrowRight, Code, Key, Zap, Shield, FileJson } from "lucide-react";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
+import { useI18n } from "@/i18n/i18n_context";
 
 const apiFeatures = [
   {
-    title: "RESTful 架构",
-    description: "基于标准 REST 原则设计, 资源导向的清晰路径结构.",
+    titleKey: "docs.api.rest",
+    descKey: "docs.api.rest.desc",
     icon: <Code className="h-5 w-5 text-blue-500" />,
   },
   {
-    title: "JWT 身份认证",
-    description: "使用标准的 Bearer Token 进行鉴权, 保障数据访问安全.",
+    titleKey: "docs.api.jwt",
+    descKey: "docs.api.jwt.desc",
     icon: <Key className="h-5 w-5 text-emerald-500" />,
   },
   {
-    title: "SSE 流式响应",
-    description: "支持 Server-Sent Events, 为长文本生成提供打字机效果.",
+    titleKey: "docs.api.sse",
+    descKey: "docs.api.sse.desc",
     icon: <Zap className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "严格校验",
-    description: "基于 Pydantic 的全链路数据校验, 确保输入输出绝对可靠.",
+    titleKey: "docs.api.validate",
+    descKey: "docs.api.validate.desc",
     icon: <Shield className="h-5 w-5 text-indigo-500" />,
   },
 ];
@@ -39,30 +40,31 @@ const endpoints = [
   {
     method: "POST",
     path: "/api/auth/login",
-    desc: "用户登录获取 Access Token",
+    descKey: "docs.api.login",
     color: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10",
   },
   {
     method: "GET",
     path: "/api/users/me",
-    desc: "获取当前登录用户信息",
+    descKey: "docs.api.me",
     color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10",
   },
   {
     method: "POST",
     path: "/api/chat/completions",
-    desc: "发起 AI 对话 (支持流式)",
+    descKey: "docs.api.chat",
     color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
   },
   {
     method: "POST",
     path: "/api/tools/compress-image",
-    desc: "上传并压缩图片",
+    descKey: "docs.api.upload",
     color: "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10",
   },
 ];
 
 export default function ApiDocsPage() {
+  const { translate } = useI18n();
   const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:5666/api_trai/v1";
   const backendOrigin = apiBase.replace(/\/api_trai\/v1\/?$/, "").replace(/\/api\/?$/, "");
   const openapiDocsUrl = `${backendOrigin}/docs`;
@@ -78,29 +80,27 @@ export default function ApiDocsPage() {
               API Reference
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mt-6 tracking-tight">
-              API 接口文档
+              {translate("docs.api.title")}
             </h1>
             <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed max-w-3xl">
-              TRAI 提供了一套功能强大且易于集成的 REST API. 你可以通过这些接口接入大模型对话能力、管理工具库以及执行用户认证. 
-              <br className="hidden md:block" />
-              所有接口均支持完整的 OpenAPI (Swagger) 规范.
+              {translate("docs.api.subtitle")}
             </p>
-            
+
             <div className="mt-8 flex flex-wrap gap-4">
-              <a 
+              <a
                 href={openapiDocsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center h-10 px-6 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
               >
-                打开 Swagger 交互文档
+                {translate("docs.api.swagger")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
-              <Link 
+              <Link
                 href="/docs/sdk"
                 className="inline-flex items-center justify-center h-10 px-6 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
-                查看 SDK 接入指南
+                {translate("docs.api.sdk_guide")}
               </Link>
             </div>
           </div>
@@ -114,8 +114,8 @@ export default function ApiDocsPage() {
                   <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700">
                     {feature.icon}
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{translate(feature.titleKey)}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{translate(feature.descKey)}</p>
                 </div>
               ))}
             </div>
@@ -125,10 +125,10 @@ export default function ApiDocsPage() {
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <FileJson className="h-6 w-6 text-blue-500" />
-                    核心接口概览
+                    {translate("docs.api.overview")}
                   </h2>
                   <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-                    以下列出了业务中最常用的几个核心 API 路径, 完整接口定义请前往 Swagger 交互页面查看.
+                    {translate("docs.api.overview.desc")}
                   </p>
                 </div>
 
@@ -144,7 +144,7 @@ export default function ApiDocsPage() {
                         </code>
                       </div>
                       <span className="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
-                        {ep.desc}
+                        {translate(ep.descKey)}
                       </span>
                     </div>
                   ))}
@@ -174,7 +174,7 @@ export default function ApiDocsPage() {
                     <code className="block text-amber-300">
                       {"  "}-d '{JSON.stringify({
                         model: "Qwen/Qwen3.5-0.8B",
-                        messages: [{ role: "user", content: "你好, TRAI!" }],
+                        messages: [{ role: "user", content: translate("docs.api.example_request") }],
                         stream: true
                       }, null, 2)}'
                     </code>

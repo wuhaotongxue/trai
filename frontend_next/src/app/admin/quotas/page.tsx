@@ -239,8 +239,8 @@ export default function QuotasPage() {
                 value={imageConfig?.provider || "modelscope"}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, provider: e.target.value } : prev)}
               >
-                <option value="modelscope">ModelScope (Z-Image-Turbo)</option>
-                <option value="openai">OpenAI DALL-E</option>
+                <option value="modelscope">{translate("admin.quotas.option.modelscope")}</option>
+                <option value="openai">{translate("admin.quotas.option.openai")}</option>
                 <option value="api">{translate("admin.quotas.custom_api")}</option>
               </select>
             </div>
