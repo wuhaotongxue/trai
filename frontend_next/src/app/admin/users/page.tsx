@@ -49,7 +49,7 @@ const ROLE_FILTER_TABS = [
 ];
 
 export default function UsersPage() {
-  const { t, locale } = useAdminI18n();
+  const { translate, locale, loadNamespace } = useAdminI18n();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState(0);
   const [activeRoleTab, setActiveRoleTab] = useState(0);
@@ -82,26 +82,27 @@ export default function UsersPage() {
   }, [activeTab, activeRoleTab, page, pageSize]);
 
   useEffect(() => {
+    void loadNamespace('admin');
     void fetchUsers();
   }, [fetchUsers]);
 
   const handleApprove = async (user: UserInfo) => {
     try {
       await adminApi.approveUser(user.user_id);
-      toast({ message: `${user.display_name || user.username} ${t("admin.users.approved")}`, variant: "success" });
+      toast({ message: `${user.display_name || user.username} ${translate("admin.users.approved")}`, variant: "success" });
       void fetchUsers();
     } catch (e: any) {
-      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
   const handleReject = async (user: UserInfo) => {
     try {
       await adminApi.rejectUser(user.user_id);
-      toast({ message: `${user.display_name || user.username} ${t("admin.users.rejected")}`, variant: "success" });
+      toast({ message: `${user.display_name || user.username} ${translate("admin.users.rejected")}`, variant: "success" });
       void fetchUsers();
     } catch (e: any) {
-      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
@@ -109,21 +110,21 @@ export default function UsersPage() {
     const newStatus = user.status === "active" ? "disabled" : "active";
     try {
       await adminApi.updateUserStatus(user.user_id, newStatus);
-      toast({ message: t("admin.users.status_updated"), variant: "success" });
+      toast({ message: translate("admin.users.status_updated"), variant: "success" });
       void fetchUsers();
     } catch (e: any) {
-      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm(t("admin.users.confirm_delete"))) return;
+    if (!confirm(translate("admin.users.confirm_delete"))) return;
     try {
       await adminApi.deleteUser(userId);
-      toast({ message: t("admin.users.deleted"), variant: "success" });
+      toast({ message: translate("admin.users.deleted"), variant: "success" });
       void fetchUsers();
     } catch (e: any) {
-      toast({ message: e.message || t("admin.users.error.operation_failed"), variant: "error" });
+      toast({ message: e.message || translate("admin.users.error.operation_failed"), variant: "error" });
     }
   };
 
@@ -132,34 +133,34 @@ export default function UsersPage() {
       const res = await adminApi.listUsers({ limit: 10000 } as any);
       const allUsers = res.users || [];
       const headers = [
-        t("admin.users.employee_id_col"),
-        t("admin.users.username_col"),
-        t("admin.users.display_name_col"),
-        t("admin.users.email_col"),
-        t("admin.users.role_col"),
-        t("admin.users.status_col"),
-        t("admin.users.wecom_col"),
-        t("admin.users.created_col"),
+        translate("admin.users.employee_id_col"),
+        translate("admin.users.username_col"),
+        translate("admin.users.display_name_col"),
+        translate("admin.users.email_col"),
+        translate("admin.users.role_col"),
+        translate("admin.users.status_col"),
+        translate("admin.users.wecom_col"),
+        translate("admin.users.created_col"),
       ];
       const roleMap: Record<string, string> = {
-        admin: t("admin.users.admin"),
-        vip: t("admin.users.vip"),
-        normal: t("admin.users.normal_user"),
+        admin: translate("admin.users.admin"),
+        vip: translate("admin.users.vip"),
+        normal: translate("admin.users.normal_user"),
       };
       const statusMap: Record<string, string> = {
-        active: t("admin.users.normal"),
-        pending: t("admin.users.pending"),
-        disabled: t("admin.users.disabled"),
+        active: translate("admin.users.normal"),
+        pending: translate("admin.users.pending"),
+        disabled: translate("admin.users.disabled"),
       };
       const data: Record<string, string>[] = allUsers.map((user) => ({
-        [t("admin.users.employee_id_col")]: user.user_id,
-        [t("admin.users.username_col")]: user.username || "",
-        [t("admin.users.display_name_col")]: user.display_name || "",
-        [t("admin.users.email_col")]: user.email || "",
-        [t("admin.users.role_col")]: roleMap[user.role] || user.role,
-        [t("admin.users.status_col")]: statusMap[user.status ?? ""] || user.status || "",
-        [t("admin.users.wecom_col")]: user.wecom_user_id || "",
-        [t("admin.users.created_col")]: user.created_at || "",
+        [translate("admin.users.employee_id_col")]: user.user_id,
+        [translate("admin.users.username_col")]: user.username || "",
+        [translate("admin.users.display_name_col")]: user.display_name || "",
+        [translate("admin.users.email_col")]: user.email || "",
+        [translate("admin.users.role_col")]: roleMap[user.role] || user.role,
+        [translate("admin.users.status_col")]: statusMap[user.status ?? ""] || user.status || "",
+        [translate("admin.users.wecom_col")]: user.wecom_user_id || "",
+        [translate("admin.users.created_col")]: user.created_at || "",
       }));
       const date = new Date().toISOString().split("T")[0];
       const filename = locale === "zh"
@@ -208,9 +209,9 @@ export default function UsersPage() {
             <Shield className="h-5 w-5 text-blue-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">{t("admin.users.title")}</h1>
+            <h1 className="text-xl font-bold text-foreground">{translate("admin.users.title")}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {t("admin.users.total")} {total} {t("admin.users.registered")}
+              {translate("admin.users.total")} {total} {translate("admin.users.registered")}
             </p>
           </div>
         </div>
@@ -218,26 +219,26 @@ export default function UsersPage() {
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 h-9 px-4 text-sm rounded-lg border border-border bg-background hover:bg-slate-100 cursor-pointer transition-colors">
               <Download className="h-3.5 w-3.5" />
-              {t("admin.users.export")}
+              {translate("admin.users.export")}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuItem onClick={() => void handleExportUsers("csv")} className="flex items-center gap-2 cursor-pointer">
                 <FileText className="h-4 w-4" />
-                {t("admin.users.csv")}
+                {translate("admin.users.csv")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => void handleExportUsers("excel")} className="flex items-center gap-2 cursor-pointer">
                 <FileSpreadsheet className="h-4 w-4" />
-                {t("admin.users.excel")}
+                {translate("admin.users.excel")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => void handleExportUsers("json")} className="flex items-center gap-2 cursor-pointer">
                 <FileJson className="h-4 w-4" />
-                {t("admin.users.json")}
+                {translate("admin.users.json")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={() => window.location.href = "/admin/users/new"}>
             <UserPlus className="h-3.5 w-3.5" />
-            {t("admin.users.new_user")}
+            {translate("admin.users.new_user")}
           </Button>
         </div>
       </div>
@@ -250,16 +251,16 @@ export default function UsersPage() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">
-              {t("admin.users.pending_count")} <span className="text-amber-600 font-bold">{pendingCount}</span> {t("admin.users.pending_wait")}
+              {translate("admin.users.pending_count")} <span className="text-amber-600 font-bold">{pendingCount}</span> {translate("admin.users.pending_wait")}
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("admin.users.pending_desc")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{translate("admin.users.pending_desc")}</p>
           </div>
           <Button
             size="sm"
             className="h-8 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium"
             onClick={() => { setActiveTab(pendingTabIndex); setPage(1); }}
           >
-            {t("admin.users.go_review")}
+            {translate("admin.users.go_review")}
           </Button>
         </div>
       )}
@@ -274,7 +275,7 @@ export default function UsersPage() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("admin.users.search")}
+                placeholder={translate("admin.users.search")}
                 className="h-9 pl-9 pr-4 rounded-lg border-border text-sm"
               />
             </div>
@@ -294,7 +295,7 @@ export default function UsersPage() {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {t(tab.key)}
+                    {translate(tab.key)}
                     {count > 0 && (
                       <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
                         activeTab === i
@@ -314,7 +315,7 @@ export default function UsersPage() {
 
           {/* 角色筛选 */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{t("admin.users.role")}</span>
+            <span className="text-xs text-muted-foreground">{translate("admin.users.role")}</span>
             <div className="flex items-center gap-1.5">
               {ROLE_FILTER_TABS.map((tab, i) => (
                 <button
@@ -326,7 +327,7 @@ export default function UsersPage() {
                       : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border/60"
                   }`}
                 >
-                  {t(tab.labelKey)}
+                  {translate(tab.labelKey)}
                 </button>
               ))}
             </div>
@@ -341,13 +342,13 @@ export default function UsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.user")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.employee_id")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.role")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.status")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.reg_time")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.login_ip")}</th>
-                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.users.table.action")}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.user")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.employee_id")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.role")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.status")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.reg_time")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.login_ip")}</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -356,13 +357,13 @@ export default function UsersPage() {
                     <td colSpan={7} className="px-5 py-12 text-center">
                       <div className="flex items-center justify-center gap-2 text-muted-foreground">
                         <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                        <span className="text-sm">{t("admin.users.loading")}</span>
+                        <span className="text-sm">{translate("admin.users.loading")}</span>
                       </div>
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">{t("admin.users.no_result")}</td>
+                    <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">{translate("admin.users.no_result")}</td>
                   </tr>
                 ) : (
                   filtered.map((user) => {
@@ -390,14 +391,14 @@ export default function UsersPage() {
                         </td>
                         <td className="px-4 py-3.5">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${roleCfg.cls}`}>
-                            {t(roleCfg.labelKey)}
+                            {translate(roleCfg.labelKey)}
                           </span>
                         </td>
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5">
                             <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} ${user.status === "pending" ? "animate-pulse" : ""}`} />
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${stCfg.cls}`}>
-                              {t(stCfg.labelKey)}
+                              {translate(stCfg.labelKey)}
                             </span>
                           </div>
                         </td>
@@ -416,18 +417,18 @@ export default function UsersPage() {
                                 <button
                                   onClick={() => void handleApprove(user)}
                                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
-                                  title={t("admin.users.approve")}
+                                  title={translate("admin.users.approve")}
                                 >
                                   <CheckCircle2 className="h-3.5 w-3.5" />
-                                  {t("admin.users.approve")}
+                                  {translate("admin.users.approve")}
                                 </button>
                                 <button
                                   onClick={() => void handleReject(user)}
                                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-medium transition-colors"
-                                  title={t("admin.users.reject")}
+                                  title={translate("admin.users.reject")}
                                 >
                                   <XCircle className="h-3.5 w-3.5" />
-                                  {t("admin.users.reject")}
+                                  {translate("admin.users.reject")}
                                 </button>
                               </>
                             )}
@@ -436,10 +437,10 @@ export default function UsersPage() {
                               <button
                                 onClick={() => void toggleStatus(user)}
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-red-500/10 text-muted-foreground hover:text-red-500 text-xs font-medium transition-colors"
-                                title={t("admin.users.disable")}
+                                title={translate("admin.users.disable")}
                               >
                                 <XCircle className="h-3.5 w-3.5" />
-                                {t("admin.users.disable")}
+                                {translate("admin.users.disable")}
                               </button>
                             )}
                             {/* 已禁用用户 */}
@@ -447,16 +448,16 @@ export default function UsersPage() {
                               <button
                                 onClick={() => void toggleStatus(user)}
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
-                                title={t("admin.users.enable")}
+                                title={translate("admin.users.enable")}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                {t("admin.users.enable")}
+                                {translate("admin.users.enable")}
                               </button>
                             )}
                             <button
                               onClick={() => void deleteUser(user.user_id)}
                               className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"
-                              title={t("admin.users.delete")}
+                              title={translate("admin.users.delete")}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -474,14 +475,14 @@ export default function UsersPage() {
           {total > 0 && (
             <div className="p-4 border-t border-border/60 flex items-center justify-between bg-muted/10">
               <div className="text-xs text-muted-foreground">
-                {t("admin.users.pagination.show")} {(page - 1) * pageSize + 1} {t("admin.users.pagination.to")} {Math.min(page * pageSize, total)} {t("admin.users.pagination.total")} {total}
+                {translate("admin.users.pagination.show")} {(page - 1) * pageSize + 1} {translate("admin.users.pagination.to")} {Math.min(page * pageSize, total)} {translate("admin.users.pagination.total")} {total}
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1 || loading}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="text-xs font-medium px-2">
-                  {t("admin.users.pagination.page")} {page} / {Math.ceil(total / pageSize)} {t("admin.users.pagination.pages")}
+                  {translate("admin.users.pagination.page")} {page} / {Math.ceil(total / pageSize)} {translate("admin.users.pagination.pages")}
                 </div>
                 <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => setPage((p) => Math.min(Math.ceil(total / pageSize), p + 1))} disabled={page === Math.ceil(total / pageSize) || loading}>
                   <ChevronRight className="h-4 w-4" />
