@@ -67,7 +67,7 @@ class DashboardResponse(BaseModel):
     top_models: list[ModelUsage] = Field(description="模型使用排行")
 
 
-@router.get("/admin/dashboard", response_model=DashboardResponse, tags=["管理后台"])
+@router.get("/dashboard", response_model=DashboardResponse, tags=["管理后台"])
 async def get_dashboard(admin: AdminUser) -> DashboardResponse:
     """获取管理后台仪表盘数据
 

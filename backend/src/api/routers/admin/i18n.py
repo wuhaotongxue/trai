@@ -69,7 +69,7 @@ async def list_i18n_strings(
     session: Annotated[Session, Depends(get_db_session)],
     locale: Annotated[str | None, Query(description="语言代码过滤")] = None,
     namespace: Annotated[str | None, Query(description="命名空间过滤")] = None,
-    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    limit: Annotated[int, Query(ge=1, le=2000)] = 100,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> I18nStringListResponse:
     """获取翻译字符串列表(仅管理员)

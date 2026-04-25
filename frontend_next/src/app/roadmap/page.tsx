@@ -10,6 +10,7 @@
 import { CheckCircle2, ChevronRight, CircleDashed, Milestone, Rocket } from "lucide-react";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
+import { useI18n } from "@/i18n/i18n_context";
 import { useMemo, useState } from "react";
 
 type ChangeArea = "frontend" | "backend" | "client";
@@ -305,6 +306,7 @@ function RelationshipGraph({
 }
 
 export default function RoadmapPage() {
+  const { translate } = useI18n();
   const [active_id, set_active_id] = useState<string>(roadmap_nodes[0]?.id ?? "");
   const [selected_area, set_selected_area] = useState<ChangeArea | "all">("all");
   const active_node = useMemo<RoadmapNode | null>(() => {
@@ -357,13 +359,13 @@ export default function RoadmapPage() {
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
               <Milestone className="h-4 w-4" />
-              发展路线图
+              {translate("roadmap.title")}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mt-6 tracking-tight">
               Roadmap
             </h1>
             <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed">
-              这里展示了 TRAI 平台的开发进展和未来规划. 我们致力于构建稳定、强大的企业级 AI 基础设施.
+              {translate("roadmap.desc")}
             </p>
           </div>
         </section>
@@ -373,11 +375,11 @@ export default function RoadmapPage() {
             <div className="rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-6">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
-                  <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">线性时间轴</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">按 Git 提交历史汇总</div>
+                  <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">{translate("roadmap.timeline")}</div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">Git {translate("roadmap.timeline")}</div>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                  点击节点切换查看该时间段内的提交
+                  {translate("roadmap.timeline.hint")}
                 </div>
               </div>
 
@@ -517,7 +519,7 @@ export default function RoadmapPage() {
                       })}
                       {active_area_stats.areas.length === 0 ? (
                         <span className="text-xs text-slate-500 dark:text-slate-400">
-                          当前时间段未识别到前端/后端/客户端的提交标签
+                          {translate("roadmap.summary.empty")}
                         </span>
                       ) : null}
                     </div>
@@ -530,7 +532,7 @@ export default function RoadmapPage() {
                       </div>
                     ) : null}
                     <div className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                      过滤: {selected_area === "all" ? "全部" : get_area_meta(selected_area).label}
+                      {translate("roadmap.filter")} {selected_area === "all" ? translate("roadmap.filter.all") : get_area_meta(selected_area).label}
                     </div>
                   </div>
                 </div>

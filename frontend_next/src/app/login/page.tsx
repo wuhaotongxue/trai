@@ -24,7 +24,7 @@ const features = [
 ];
 
 function LoginForm() {
-  const { t } = useI18n();
+  const { translate } = useI18n();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -46,15 +46,15 @@ function LoginForm() {
     const err = searchParams.get("error");
     const reason = searchParams.get("reason");
     if (reason === "quota_exceeded") {
-      setErrorMessage(t("login.error.quota_exceeded"));
+      setErrorMessage(translate("login.error.quota_exceeded"));
     } else if (err === "not_bound") {
-      setErrorMessage(t("login.error.not_bound"));
+      setErrorMessage(translate("login.error.not_bound"));
     } else if (err === "account_disabled") {
-      setErrorMessage(t("login.error.account_disabled"));
+      setErrorMessage(translate("login.error.account_disabled"));
     } else if (err === "auth_failed" || err === "wecom_auth_failed") {
-      setErrorMessage(t("login.error.wecom_failed"));
+      setErrorMessage(translate("login.error.wecom_failed"));
     }
-  }, [searchParams, t]);
+  }, [searchParams, translate]);
 
   const lastSubmitTime = useRef(0);
 
@@ -76,11 +76,11 @@ function LoginForm() {
         window.location.href = "/agent";
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : t("login.error.failed");
+      const message = e instanceof Error ? e.message : translate("login.error.failed");
       if (message.toLowerCase().includes("fetch") || message.toLowerCase().includes("network")) {
-        setErrorMessage(`${t("login.error.backend")} ${apiBase}`);
+        setErrorMessage(`${translate("login.error.backend")} ${apiBase}`);
       } else if (message.includes("403") || message.includes("待审核") || message.includes("禁用")) {
-        setErrorMessage(message.includes("403") ? t("login.error.account_disabled_2") : message);
+        setErrorMessage(message.includes("403") ? translate("login.error.account_disabled_2") : message);
       } else {
         setErrorMessage(message);
       }
@@ -146,7 +146,7 @@ function LoginForm() {
                 <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
                   <f.icon className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm text-white/90 font-medium">{t(f.key)}</span>
+                <span className="text-sm text-white/90 font-medium">{translate(f.key)}</span>
               </div>
             ))}
           </div>
@@ -161,13 +161,13 @@ function LoginForm() {
               ))}
             </div>
             <p className="text-sm text-white/80 italic leading-relaxed mb-3">
-              &ldquo;{t("login.testimonial.quote")}&rdquo;
+              &ldquo;{translate("login.testimonial.quote")}&rdquo;
             </p>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center text-white text-xs font-semibold">{t("login.testimonial.avatar")}</div>
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center text-white text-xs font-semibold">{translate("login.testimonial.avatar")}</div>
               <div>
-                <p className="text-xs font-medium text-white">{t("login.testimonial.name")}</p>
-                <p className="text-xs text-white/50">{t("login.testimonial.role")}</p>
+                <p className="text-xs font-medium text-white">{translate("login.testimonial.name")}</p>
+                <p className="text-xs text-white/50">{translate("login.testimonial.role")}</p>
               </div>
             </div>
           </div>
@@ -175,7 +175,7 @@ function LoginForm() {
 
         {/* 底部 */}
         <div className="relative text-xs text-white/40">
-          {t("login.footer.brand")}
+          {translate("login.footer.brand")}
         </div>
       </div>
 
@@ -194,17 +194,17 @@ function LoginForm() {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">{t("login.form.title")}</h2>
-            <p className="text-sm text-muted-foreground mt-2">{t("login.form.subtitle")}</p>
+            <h2 className="text-2xl font-bold text-foreground">{translate("login.form.title")}</h2>
+            <p className="text-sm text-muted-foreground mt-2">{translate("login.form.subtitle")}</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{t("login.form.username")}</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("login.form.username")}</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder={t("login.form.username_placeholder")}
+                placeholder={translate("login.form.username_placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
@@ -214,16 +214,16 @@ function LoginForm() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{t("login.form.password")}</Label>
+                <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{translate("login.form.password")}</Label>
                 <Link href="/forgot_password" className="text-xs text-blue-500 hover:text-blue-600 transition-colors">
-                  {t("login.form.forgot_password")}
+                  {translate("login.form.forgot_password")}
                 </Link>
               </div>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={t("login.form.password_placeholder")}
+                  placeholder={translate("login.form.password_placeholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm pr-12"
@@ -256,11 +256,11 @@ function LoginForm() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  {t("login.form.logging_in")}
+                  {translate("login.form.logging_in")}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  {t("login.form.login")}
+                  {translate("login.form.login")}
                   <ArrowRight className="h-4 w-4" />
                 </span>
               )}
@@ -270,7 +270,7 @@ function LoginForm() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border/60" />
               </div>
-              <span className="relative px-3 bg-background text-xs text-muted-foreground">{t("login.form.other_methods")}</span>
+              <span className="relative px-3 bg-background text-xs text-muted-foreground">{translate("login.form.other_methods")}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -281,7 +281,7 @@ function LoginForm() {
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866.523 3.952 1.464l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.478 2.543 12s4.478 10 10.002 10c3.31 0 5.954-1.193 8.033-3.152l-3.033-2.609z" />
                 </svg>
-                {t("login.form.google")}
+                {translate("login.form.google")}
               </button>
               <button
                 type="button"
@@ -294,30 +294,30 @@ function LoginForm() {
                       window.location.href = data.url;
                     }
                   } catch {
-                    setErrorMessage(t("login.error.wecom_url_failed"));
+                    setErrorMessage(translate("login.error.wecom_url_failed"));
                   }
                 }}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.996 22.46c-5.772 0-10.45-4.679-10.45-10.45S6.224 1.56 11.996 1.56c5.771 0 10.45 4.678 10.45 10.45s-4.679 10.45-10.45 10.45zm0-19.46c-4.968 0-8.988 4.02-8.988 8.988s4.02 8.989 8.988 8.989c4.968 0 8.988-4.021 8.988-8.989S16.964 3 11.996 3zm-2.85 13.568v-7.14h1.764v5.617h3.693v1.523H9.146zm2.85-8.54c-.642 0-1.162-.52-1.162-1.163 0-.641.52-1.162 1.162-1.162.641 0 1.162.521 1.162 1.162 0 .642-.52 1.163-1.162 1.163z" />
                 </svg>
-                {t("login.form.wecom")}
+                {translate("login.form.wecom")}
               </button>
             </div>
           </form>
 
           <p className="text-center text-xs text-muted-foreground mt-6">
-            {t("login.form.no_account")}{" "}
+            {translate("login.form.no_account")}{" "}
             <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium transition-colors">
-              {t("login.form.register_now")}
+              {translate("login.form.register_now")}
             </Link>
           </p>
 
           <p className="text-center text-xs text-muted-foreground/60 mt-4">
-            {t("login.form.agree_terms_1")}{" "}
-            <Link href="/terms" className="underline hover:text-foreground transition-colors">{t("login.form.terms")}</Link>
-            {" "}{t("login.form.and")}{" "}
-            <Link href="/privacy" className="underline hover:text-foreground transition-colors">{t("login.form.privacy")}</Link>
+            {translate("login.form.agree_terms_1")}{" "}
+            <Link href="/terms" className="underline hover:text-foreground transition-colors">{translate("login.form.terms")}</Link>
+            {" "}{translate("login.form.and")}{" "}
+            <Link href="/privacy" className="underline hover:text-foreground transition-colors">{translate("login.form.privacy")}</Link>
           </p>
         </div>
       </div>

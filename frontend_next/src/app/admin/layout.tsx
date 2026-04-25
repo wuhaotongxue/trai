@@ -38,7 +38,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toasts, toast, dismiss } = useAdminToast();
-  const { locale, setLocale, refreshTranslations, refreshing, t } = useAdminI18n();
+  const { locale, setLocale, refreshTranslations, refreshing, translate } = useAdminI18n();
   const { setFloatingChatOpen } = useAgentStore();
   const [token, setToken] = useState<string | null | undefined>(undefined);
   const [isAdmin, setIsAdmin] = useState<boolean | undefined>(undefined);
@@ -88,61 +88,61 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 
   const menuGroups = useMemo(() => [
     {
-      label: t("admin.overview"),
+      label: translate("admin.overview"),
       key: "overview",
       items: [
-        { label: t("admin.dashboard"), href: "/admin", icon: LayoutDashboard, desc: t("admin.dashboard.desc") },
-        { label: t("admin.analytics"), href: "/admin/analytics", icon: BarChart3, desc: t("admin.analytics.desc") },
-        { label: t("admin.monitor"), href: "/admin/monitor", icon: Activity, desc: t("admin.monitor.desc") },
+        { label: translate("admin.dashboard"), href: "/admin", icon: LayoutDashboard, desc: translate("admin.dashboard.desc") },
+        { label: translate("admin.analytics"), href: "/admin/analytics", icon: BarChart3, desc: translate("admin.analytics.desc") },
+        { label: translate("admin.monitor"), href: "/admin/monitor", icon: Activity, desc: translate("admin.monitor.desc") },
       ],
     },
     {
-      label: t("admin.userManagement"),
+      label: translate("admin.userManagement"),
       key: "userManagement",
       items: [
-        { label: t("admin.users"), href: "/admin/users", icon: Users, desc: t("admin.users.desc") },
-        { label: t("admin.users.new"), href: "/admin/users/new", icon: UserPlus, desc: t("admin.users.new.desc") },
-        { label: t("admin.sessions"), href: "/admin/sessions", icon: MessageSquare, desc: t("admin.sessions.desc") },
+        { label: translate("admin.users"), href: "/admin/users", icon: Users, desc: translate("admin.users.desc") },
+        { label: translate("admin.users.new"), href: "/admin/users/new", icon: UserPlus, desc: translate("admin.users.new.desc") },
+        { label: translate("admin.sessions"), href: "/admin/sessions", icon: MessageSquare, desc: translate("admin.sessions.desc") },
       ],
     },
     {
-      label: t("admin.businessFunctions"),
+      label: translate("admin.businessFunctions"),
       key: "businessFunctions",
       items: [
-        { label: t("admin.ai_assistant"), href: "/admin/ai_assistant", icon: Bot, desc: t("admin.ai_assistant.desc") },
-        { label: t("admin.ai"), href: "/admin/ai", icon: Bot, desc: t("admin.ai.desc") },
-        { label: t("admin.knowledge_base"), href: "/admin/knowledge_base", icon: Database, desc: t("admin.knowledge_base.desc") },
-        { label: t("admin.organization"), href: "/admin/organization", icon: Users, desc: t("admin.organization.desc") },
-        { label: t("admin.client_release"), href: "/admin/client_release", icon: Cpu, desc: t("admin.client_release.desc") },
+        { label: translate("admin.ai_assistant"), href: "/admin/ai_assistant", icon: Bot, desc: translate("admin.ai_assistant.desc") },
+        { label: translate("admin.ai"), href: "/admin/ai", icon: Bot, desc: translate("admin.ai.desc") },
+        { label: translate("admin.knowledge_base"), href: "/admin/knowledge_base", icon: Database, desc: translate("admin.knowledge_base.desc") },
+        { label: translate("admin.organization"), href: "/admin/organization", icon: Users, desc: translate("admin.organization.desc") },
+        { label: translate("admin.client_release"), href: "/admin/client_release", icon: Cpu, desc: translate("admin.client_release.desc") },
       ],
     },
     {
-      label: t("admin.operations"),
+      label: translate("admin.operations"),
       key: "operations",
       items: [
-        { label: t("admin.quotas"), href: "/admin/quotas", icon: Cpu, desc: t("admin.quotas.desc") },
-        { label: t("admin.notifications"), href: "/admin/notifications", icon: Bell, desc: t("admin.notifications.desc") },
-        { label: t("admin.logs"), href: "/admin/logs", icon: FileText, desc: t("admin.logs.desc") },
+        { label: translate("admin.quotas"), href: "/admin/quotas", icon: Cpu, desc: translate("admin.quotas.desc") },
+        { label: translate("admin.notifications"), href: "/admin/notifications", icon: Bell, desc: translate("admin.notifications.desc") },
+        { label: translate("admin.logs"), href: "/admin/logs", icon: FileText, desc: translate("admin.logs.desc") },
       ],
     },
     {
-      label: t("admin.systemSettings"),
+      label: translate("admin.systemSettings"),
       key: "systemSettings",
       items: [
-        { label: t("admin.settings"), href: "/admin/settings", icon: Settings, desc: t("admin.settings.desc") },
-        { label: t("admin.i18n"), href: "/admin/i18n", icon: Globe, desc: t("admin.i18n.desc") },
-        { label: t("admin.database"), href: "/admin/database", icon: Database, desc: t("admin.database.desc") },
-        { label: t("admin.network"), href: "/admin/network", icon: Wifi, desc: t("admin.network.desc") },
+        { label: translate("admin.settings"), href: "/admin/settings", icon: Settings, desc: translate("admin.settings.desc") },
+        { label: translate("admin.i18n"), href: "/admin/i18n", icon: Globe, desc: translate("admin.i18n.desc") },
+        { label: translate("admin.database"), href: "/admin/database", icon: Database, desc: translate("admin.database.desc") },
+        { label: translate("admin.network"), href: "/admin/network", icon: Wifi, desc: translate("admin.network.desc") },
       ],
     },
-  ], [t]);
+  ], [translate]);
 
   if (token === undefined || isAdmin === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
-          <div className="text-sm font-semibold text-foreground">TRAI {t("admin.title")}</div>
-          <div className="text-xs text-muted-foreground mt-2">{t("admin.loading")}</div>
+          <div className="text-sm font-semibold text-foreground">TRAI {translate("admin.title")}</div>
+          <div className="text-xs text-muted-foreground mt-2">{translate("admin.loading")}</div>
         </div>
       </div>
     );
@@ -155,16 +155,16 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-foreground">{t("admin.access_denied.title")}</h2>
+          <h2 className="text-xl font-bold text-foreground">{translate("admin.access_denied.title")}</h2>
           <p className="text-sm text-muted-foreground">
-            {token === null ? t("admin.access_denied.not_logged_in") : t("admin.access_denied.admin_only")}
+            {token === null ? translate("admin.access_denied.not_logged_in") : translate("admin.access_denied.admin_only")}
           </p>
           <div className="pt-4 flex items-center justify-center gap-3">
             <Link href="/" className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors">
-              {t("admin.access_denied.back_to_home")}
+              {translate("admin.access_denied.back_to_home")}
             </Link>
             <Link href="/admin/login" className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-              {t("admin.access_denied.relogin")}
+              {translate("admin.access_denied.relogin")}
             </Link>
           </div>
         </div>
@@ -197,10 +197,10 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           {!(sidebarCollapsed ?? false) && (
             <div className="relative z-10">
               <span className="text-lg font-bold text-white tracking-wide">TRAI</span>
-              <span className="text-xs text-white/70 block -mt-0.5 leading-none">{t("admin.sidebar.brand")}</span>
+              <span className="text-xs text-white/70 block -mt-0.5 leading-none">{translate("admin.sidebar.brand")}</span>
             </div>
           )}
-          <button type="button" onClick={toggleSidebar} className="ml-auto w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all relative z-10" aria-label={t("admin.sidebar.toggle_sidebar")}>
+          <button type="button" onClick={toggleSidebar} className="ml-auto w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all relative z-10" aria-label={translate("admin.sidebar.toggle_sidebar")}>
             {(sidebarCollapsed ?? false) ? <ChevronsRight className="h-4 w-4 text-white/90" /> : <ChevronsLeft className="h-4 w-4 text-white/90" />}
           </button>
         </div>
@@ -208,13 +208,13 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         {/* 搜索框 */}
         <div className={cn("py-3 border-b border-border/40", (sidebarCollapsed ?? false) ? "px-3" : "px-4")}>
           {(sidebarCollapsed ?? false) ? (
-            <button type="button" className="w-full h-10 rounded-lg border border-border/60 bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title={t("admin.sidebar.search_menu")} aria-label={t("admin.sidebar.search_menu")}>
+            <button type="button" className="w-full h-10 rounded-lg border border-border/60 bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title={translate("admin.sidebar.search_menu")} aria-label={translate("admin.sidebar.search_menu")}>
               <Search className="h-4 w-4 text-muted-foreground" />
             </button>
           ) : (
             <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/60 transition-all focus-within:border-blue-500/50 group">
               <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
-              <input type="text" placeholder={t("admin.sidebar.search_menu")} className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full" />
+              <input type="text" placeholder={translate("admin.sidebar.search_menu")} className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full" />
             </div>
           )}
         </div>
@@ -227,10 +227,10 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 {!(sidebarCollapsed ?? false) && (
                   <button type="button" onClick={() => toggleGroup(group.key)} className="w-full flex items-center justify-between px-2 mb-2 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider hover:text-foreground transition-colors">
                     <span>{group.label}</span>
-                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", collapsedGroups[group.key] ? "-rotate-90" : "")} />
+                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", !collapsedGroups[group.key] ? "-rotate-90" : "")} />
                   </button>
                 )}
-                {(sidebarCollapsed ?? false) && collapsedGroups[group.key] ? null : (
+                {collapsedGroups[group.key] ? null : (
                   <>
                     {group.items.map((item) => {
                       const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -277,12 +277,12 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2 text-sm">
               <span className="font-medium text-foreground/80">TRAI</span>
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
-              <span className="font-semibold text-foreground">{t("admin.dashboard")}</span>
+              <span className="font-semibold text-foreground">{translate("admin.dashboard")}</span>
             </div>
             <div className="hidden md:block h-5 w-px bg-border/60" />
             <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <span>{t("admin.v2.0.0")}</span>
+              <span>{translate("admin.v2.0.0")}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -294,13 +294,13 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 const next = locale === "zh" ? "en" : "zh";
                 setLocale(next);
                 await refreshTranslations();
-                toast({ message: t("admin.topbar.lang_switched"), variant: "success", duration: 2000 });
+                toast({ message: translate("admin.topbar.lang_switched"), variant: "success", duration: 2000 });
               }}
               className="flex items-center gap-1.5 px-3 py-2 bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-xl border border-violet-500/20 hover:border-violet-500/40 hover:bg-violet-500/15 transition-all text-xs font-medium disabled:opacity-60"
-              title={t("admin.topbar.switch_lang")}
+              title={translate("admin.topbar.switch_lang")}
             >
               <Globe className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
-              <span>{refreshing ? t("admin.topbar.switching") : locale === "zh" ? "EN" : "中文"}</span>
+              <span>{refreshing ? translate("admin.topbar.switching") : locale === "zh" ? "EN" : "中文"}</span>
             </button>
 
             <button type="button" onClick={() => setFloatingChatOpen(true)}
@@ -309,22 +309,22 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 <Bot className="h-4 w-4" />
                 <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
               </div>
-              <span className="text-sm font-medium hidden sm:inline">{t("admin.topbar.ai_assistant")}</span>
+              <span className="text-sm font-medium hidden sm:inline">{translate("admin.topbar.ai_assistant")}</span>
             </button>
             <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
               <div className="relative">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-500 animate-ping opacity-75" />
               </div>
-              <span className="text-xs font-medium">{t("admin.systemNormal")}</span>
+              <span className="text-xs font-medium">{translate("admin.systemNormal")}</span>
             </div>
             <div className="h-6 w-px bg-border/60 mx-1" />
             <ThemeToggle />
             <button type="button" className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/50 rounded-lg transition-colors" onClick={() => window.location.reload()}>
               <RefreshCw className="h-3.5 w-3.5" />
-              <span>{t("admin.topbar.refresh")}</span>
+              <span>{translate("admin.topbar.refresh")}</span>
             </button>
-            <button type="button" aria-label={t("admin.topbar.notifications")} title={t("admin.topbar.notifications")} onClick={() => router.push("/admin/notifications")}
+            <button type="button" aria-label={translate("admin.topbar.notifications")} title={translate("admin.topbar.notifications")} onClick={() => router.push("/admin/notifications")}
               className="relative p-2 rounded-lg hover:bg-muted/50 transition-colors">
               <Bell className="h-4 w-4 text-muted-foreground" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-card animate-pulse" />
@@ -348,13 +348,13 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="rounded-lg cursor-pointer"><UserIcon className="mr-2 h-4 w-4" /><span>{t("admin.topbar.profile")}</span></DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-lg cursor-pointer"><Settings className="mr-2 h-4 w-4" /><span>{t("admin.topbar.account_settings")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-lg cursor-pointer"><UserIcon className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.profile")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-lg cursor-pointer"><Settings className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.account_settings")}</span></DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="rounded-lg cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
                   onClick={() => { Cookies.remove("token"); Cookies.remove("refresh_token"); window.location.href = "/login"; }}>
-                  <LogOut className="mr-2 h-4 w-4" /><span>{t("admin.topbar.logout")}</span>
+                  <LogOut className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.logout")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

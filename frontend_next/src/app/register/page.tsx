@@ -26,7 +26,7 @@ function validatePassword(p: string): boolean {
 }
 
 export default function RegisterPage() {
-  const { t } = useI18n();
+  const { translate } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -46,10 +46,10 @@ export default function RegisterPage() {
     setError(null);
     const errors: typeof fieldErrors = {};
 
-    if (form.username.length < 3) errors.username = t("register.validation.username_min");
-    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) errors.username = t("register.validation.username_format");
-    if (!form.email.includes("@")) errors.email = t("register.validation.email_invalid");
-    if (!validatePassword(form.password)) errors.password = t("register.validation.password_weak");
+    if (form.username.length < 3) errors.username = translate("register.validation.username_min");
+    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) errors.username = translate("register.validation.username_format");
+    if (!form.email.includes("@")) errors.email = translate("register.validation.email_invalid");
+    if (!validatePassword(form.password)) errors.password = translate("register.validation.password_weak");
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -66,7 +66,7 @@ export default function RegisterPage() {
       setRegisteredEmail(form.email);
       setSuccess(true);
     } catch (e: any) {
-      setError(e.message || t("register.error.failed"));
+      setError(e.message || translate("register.error.failed"));
     } finally {
       setLoading(false);
     }
@@ -98,13 +98,13 @@ export default function RegisterPage() {
         <div className="relative space-y-8">
           <div>
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              {t("register.hero.title1")}<br />
+              {translate("register.hero.title1")}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">
-                {t("register.hero.title2")}
+                {translate("register.hero.title2")}
               </span>
             </h1>
             <p className="text-white/60 text-base leading-relaxed max-w-sm">
-              {t("register.hero.subtitle")}
+              {translate("register.hero.subtitle")}
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export default function RegisterPage() {
                 <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
                   <b.icon className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm text-white/90 font-medium">{t(b.key)}</span>
+                <span className="text-sm text-white/90 font-medium">{translate(b.key)}</span>
               </div>
             ))}
           </div>
@@ -129,13 +129,13 @@ export default function RegisterPage() {
               ))}
             </div>
             <p className="text-sm text-white/80 italic leading-relaxed mb-3">
-              &ldquo;{t("register.testimonial.quote")}&rdquo;
+              &ldquo;{translate("register.testimonial.quote")}&rdquo;
             </p>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white text-xs font-semibold">{t("register.testimonial.avatar")}</div>
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white text-xs font-semibold">{translate("register.testimonial.avatar")}</div>
               <div>
-                <p className="text-xs font-medium text-white">{t("register.testimonial.name")}</p>
-                <p className="text-xs text-white/50">{t("register.testimonial.role")}</p>
+                <p className="text-xs font-medium text-white">{translate("register.testimonial.name")}</p>
+                <p className="text-xs text-white/50">{translate("register.testimonial.role")}</p>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative text-xs text-white/40">
-          {t("register.footer.brand")}
+          {translate("register.footer.brand")}
         </div>
       </div>
 
@@ -167,43 +167,43 @@ export default function RegisterPage() {
                 <CheckCircle2 className="h-8 w-8 text-emerald-500" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">{t("register.success.title")}</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-2">{translate("register.success.title")}</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {t("register.success.email_sent")} <span className="font-medium text-foreground">{registeredEmail}</span>
+                  {translate("register.success.email_sent")} <span className="font-medium text-foreground">{registeredEmail}</span>
                 </p>
                 <div className="mt-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-sm text-blue-600 dark:text-blue-400 text-left">
                   <div className="flex items-start gap-2">
                     <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p>{t("register.success.awaiting_review")}</p>
+                    <p>{translate("register.success.awaiting_review")}</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
                 <Link href="/login">
                   <Button className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/20">
-                    {t("register.success.back_to_login")}
+                    {translate("register.success.back_to_login")}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <button onClick={() => { setSuccess(false); setForm({ username: "", email: "", password: "" }); }} className="w-full h-11 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  {t("register.success.register_another")}
+                  {translate("register.success.register_another")}
                 </button>
               </div>
             </div>
           ) : (
             <>
               <div className="mb-8">
-                <h2 className="text-2xl font-bold text-foreground">{t("register.form.title")}</h2>
-                <p className="text-sm text-muted-foreground mt-2">{t("register.form.subtitle")}</p>
+                <h2 className="text-2xl font-bold text-foreground">{translate("register.form.title")}</h2>
+                <p className="text-sm text-muted-foreground mt-2">{translate("register.form.subtitle")}</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="username" className="text-sm font-medium text-foreground/80">{t("register.form.username")}</Label>
+                  <Label htmlFor="username" className="text-sm font-medium text-foreground/80">{translate("register.form.username")}</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder={t("register.form.username_placeholder")}
+                    placeholder={translate("register.form.username_placeholder")}
                     value={form.username}
                     onChange={setField("username")}
                     className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm ${fieldErrors.username ? "border-red-500/60 focus:border-red-500" : ""}`}
@@ -215,11 +215,11 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{t("register.form.email")}</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("register.form.email")}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder={t("register.form.email_placeholder")}
+                    placeholder={translate("register.form.email_placeholder")}
                     value={form.email}
                     onChange={setField("email")}
                     className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm ${fieldErrors.email ? "border-red-500/60 focus:border-red-500" : ""}`}
@@ -231,12 +231,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{t("register.form.password")}</Label>
+                  <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{translate("register.form.password")}</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder={t("register.form.password_placeholder")}
+                      placeholder={translate("register.form.password_placeholder")}
                       value={form.password}
                       onChange={setField("password")}
                       className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm pr-12 ${fieldErrors.password ? "border-red-500/60 focus:border-red-500" : ""}`}
@@ -271,12 +271,12 @@ export default function RegisterPage() {
                       {validatePassword(form.password) ? (
                         <div className="flex items-center gap-1.5 text-xs text-emerald-500">
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          {t("register.form.password_strong")}
+                          {translate("register.form.password_strong")}
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs text-amber-500">
                           <AlertCircle className="h-3.5 w-3.5" />
-                          {t("register.form.password_weak")}
+                          {translate("register.form.password_weak")}
                         </div>
                       )}
                     </div>
@@ -291,11 +291,11 @@ export default function RegisterPage() {
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      {t("register.form.registering")}
+                      {translate("register.form.registering")}
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      {t("register.form.register")}
+                      {translate("register.form.register")}
                       <ArrowRight className="h-4 w-4" />
                     </span>
                   )}
@@ -306,20 +306,20 @@ export default function RegisterPage() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border/60" />
                 </div>
-                <span className="relative px-3 bg-background text-xs text-muted-foreground">{t("register.form.has_account")}</span>
+                <span className="relative px-3 bg-background text-xs text-muted-foreground">{translate("register.form.has_account")}</span>
               </div>
 
               <Link href="/login">
                 <Button variant="outline" className="w-full h-12 text-sm font-medium rounded-xl mt-5">
-                  {t("register.form.login_now")}
+                  {translate("register.form.login_now")}
                 </Button>
               </Link>
 
               <p className="text-center text-xs text-muted-foreground/60 mt-5">
-                {t("register.form.agree_terms_1")}{" "}
-                <Link href="/terms" className="underline hover:text-foreground transition-colors">{t("register.form.terms")}</Link>
-                {" "}{t("register.form.and")}{" "}
-                <Link href="/privacy" className="underline hover:text-foreground transition-colors">{t("register.form.privacy")}</Link>
+                {translate("register.form.agree_terms_1")}{" "}
+                <Link href="/terms" className="underline hover:text-foreground transition-colors">{translate("register.form.terms")}</Link>
+                {" "}{translate("register.form.and")}{" "}
+                <Link href="/privacy" className="underline hover:text-foreground transition-colors">{translate("register.form.privacy")}</Link>
               </p>
             </>
           )}
