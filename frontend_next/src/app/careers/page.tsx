@@ -10,8 +10,10 @@
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
 import { Construction } from "lucide-react";
+import { useI18n } from "@/i18n/i18n_context";
 
 export default function CareersPage() {
+  const { translate } = useI18n();
   return (
     <>
       <Navbar />
@@ -19,8 +21,8 @@ export default function CareersPage() {
         <div className="w-20 h-20 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6">
           <Construction className="w-10 h-10" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-4">加入我们</h1>
-        <p className="text-slate-500">招聘页面正在建设中, 敬请期待...</p>
+        <h1 className="text-3xl font-bold text-slate-900 mb-4">{translate("careers.title")}</h1>
+        <p className="text-slate-500">{translate("careers.desc")}</p>
       </div>
       <Footer />
     </>

@@ -6,7 +6,8 @@
  */
 import React, { useState, useEffect, useRef } from 'react'
 import { use_auth_store } from '@/store/auth'
-import { User, Upload, KeyRound, Save, Settings as SettingsIcon, Monitor, ChevronRight, Globe, RefreshCw, PanelLeftClose, PanelLeftOpen, List, Loader2 } from 'lucide-react'
+import { User, Upload, KeyRound, Settings as SettingsIcon, Monitor, ChevronRight, Globe, PanelLeftClose, PanelLeftOpen, List, RefreshCw } from 'lucide-react'
+import { UpdatePanel } from './components'
 
 interface SettingItem {
   id: string
@@ -31,10 +32,6 @@ const Settings: React.FC = () => {
     { label: '本地开发', value: 'http://127.0.0.1:5666' },
     { label: '远程生产', value: 'https://trai.tuoren.com' },
   ]
-  const [update_status, set_update_status] = useState<string>('')
-  const [is_checking, set_is_checking] = useState(false)
-  const [has_update, set_has_update] = useState(false)
-  const [current_version, set_current_version] = useState('')
 
   const [old_password, set_old_password] = useState('')
   const [new_password, set_new_password] = useState('')
@@ -62,20 +59,7 @@ const Settings: React.FC = () => {
         }
       }
     }
-    
-    const load_version = async () => {
-      if (window.electron_api?.app_get_version) {
-        try {
-          const v = await window.electron_api.app_get_version()
-          set_current_version(v)
-        } catch (e) {
-          console.error('Failed to get app version', e)
-        }
-      }
-    }
-    
     load_config()
-    load_version()
   }, [])
 
   const handle_save = async () => {
@@ -85,36 +69,6 @@ const Settings: React.FC = () => {
         set_saved(true)
         setTimeout(() => set_saved(false), 2000)
       }
-    }
-  }
-
-  const check_update = async () => {
-    if (!window.electron_api?.app_check_update) return
-    
-    set_is_checking(true)
-    set_update_status('正在检查更新...')
-    set_has_update(false)
-    
-    try {
-      const res = await window.electron_api.app_check_update()
-      if (res.success && res.data) {
-        set_has_update(true)
-        set_update_status(`发现新版本: ${res.data.updateInfo.version}`)
-      } else {
-        set_update_status('当前已经是最新版本')
-      }
-    } catch (err) {
-      set_update_status('检查更新失败, 请稍后再试')
-      console.error(err)
-    } finally {
-      set_is_checking(false)
-    }
-  }
-
-  const install_update = async () => {
-    if (window.electron_api?.app_install_update) {
-      set_update_status('正在准备重启安装...')
-      await window.electron_api.app_install_update()
     }
   }
 
@@ -272,99 +226,7 @@ const Settings: React.FC = () => {
           </div>
         )
       case 'update':
-        return (
-          <div style={{ padding: '24px' }}>
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--ui_text)', margin: '0 0 8px 0' }}>系统更新</h3>
-              <p style={{ fontSize: '13px', color: 'var(--ui_text_muted)', margin: 0 }}>检查并安装最新版本的 TRAI 客户端</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '480px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', backgroundColor: 'var(--ui_panel)', borderRadius: '12px', border: '1px solid var(--ui_border)' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <RefreshCw size={28} color="var(--ui_accent)" />
-                </div>
-                <div>
-                  <div style={{ fontSize: '14px', color: 'var(--ui_text_muted)', marginBottom: '4px' }}>当前版本</div>
-                  <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_text)' }}>v{current_version || '未知'}</div>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <button 
-                  onClick={check_update}
-                  disabled={is_checking}
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: is_checking ? 'var(--ui_panel_alt)' : 'var(--ui_panel)',
-                    color: is_checking ? 'var(--ui_text_muted)' : 'var(--ui_text)',
-                    border: '1px solid var(--ui_border)',
-                    borderRadius: '10px',
-                    cursor: is_checking ? 'not-allowed' : 'pointer',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {is_checking ? <Loader2 size={16} className="anim_spin" /> : <RefreshCw size={16} />}
-                  {is_checking ? '检查中...' : '检查更新'}
-                </button>
-                
-                {has_update && (
-                  <button 
-                    onClick={install_update}
-                    style={{
-                      padding: '12px 24px',
-                      backgroundColor: 'var(--ui_accent)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(14, 165, 233, 0.25)',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    立即安装
-                  </button>
-                )}
-              </div>
-              
-              {update_status && (
-                <div style={{ 
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '14px 18px',
-                  backgroundColor: has_update ? 'rgba(14, 165, 233, 0.1)' : 'var(--ui_panel)',
-                  border: `1px solid ${has_update ? 'rgba(14, 165, 233, 0.2)' : 'var(--ui_border)'}`,
-                  borderRadius: '10px'
-                }}>
-                  <div style={{ 
-                    width: '24px', height: '24px', borderRadius: '50%',
-                    backgroundColor: has_update ? 'var(--ui_accent)' : 'var(--ui_panel_alt)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: has_update ? 'white' : 'var(--ui_text_muted)',
-                    fontSize: '12px', fontWeight: 700
-                  }}>
-                    {has_update ? '!' : 'i'}
-                  </div>
-                  <span style={{ 
-                    color: has_update ? 'var(--ui_accent)' : 'var(--ui_text_muted)', 
-                    fontSize: '14px',
-                    fontWeight: has_update ? 500 : 400
-                  }}>
-                    {update_status}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )
+        return <UpdatePanel autoCheck={false} />
       case 'avatar':
         return (
           <div style={{ padding: '24px' }}>

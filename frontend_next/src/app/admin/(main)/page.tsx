@@ -5,15 +5,13 @@
  */
 
 "use client";
-import Cookies from "js-cookie";
-
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Activity, AlertCircle, ArrowUp, Bot, CheckCircle2, Clock, Cpu, Database, Eye, FileText, MessageSquare, RefreshCw, Star, TrendingUp, Upload, Users, Wifi, Zap, Shield, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAdminI18n } from "@/contexts/admin_i18n_context";
-import { useAdminToast } from "@/contexts/admin_toast_context";
+import { adminApi } from "@/lib/api_client";
 
 type DashboardStats = {
   total_users: number;
@@ -188,7 +186,7 @@ function SkeletonCard({ gradient }: { gradient: string }) {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { t, locale } = useAdminI18n();
+  const { translate, locale, loadNamespace } = useAdminI18n();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [trends, setTrends] = useState<DailyTrend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,24 +196,7 @@ export default function AdminDashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = Cookies.get("token");
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE || "http://192.168.100.119:5666/api_trai/v1"}/admin/dashboard`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        }
-      );
-      if (res.status === 401) {
-        Cookies.remove("token");
-        Cookies.remove("refresh_token");
-        router.replace("/admin/login");
-        return;
-      }
-      if (!res.ok) {
-        await res.json().catch(() => null);
-        return;
-      }
-      const data = (await res.json()) as { stats: DashboardStats; trends?: DailyTrend[] };
+      const data = await adminApi.getDashboard();
       setStats(data.stats);
       setTrends(data.trends ?? []);
       setLastUpdated(new Date());
@@ -223,22 +204,23 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
-    const t = window.setTimeout(() => { void fetchData(); }, 0);
-    return () => window.clearTimeout(t);
-  }, [fetchData]);
+    void loadNamespace('admin');
+    const timer = window.setTimeout(() => { void fetchData(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData, loadNamespace]);
 
   useEffect(() => {
     setNow(new Date());
   }, []);
 
   const greeting =
-    !now ? t("admin.dashboard.greeting.morning") :
-    now.getHours() < 11 ? t("admin.dashboard.greeting.morning") :
-    now.getHours() < 14 ? t("admin.dashboard.greeting.noon") :
-    now.getHours() < 18 ? t("admin.dashboard.greeting.afternoon") : t("admin.dashboard.greeting.evening");
+    !now ? translate("admin.dashboard.greeting.morning") :
+    now.getHours() < 11 ? translate("admin.dashboard.greeting.morning") :
+    now.getHours() < 14 ? translate("admin.dashboard.greeting.noon") :
+    now.getHours() < 18 ? translate("admin.dashboard.greeting.afternoon") : translate("admin.dashboard.greeting.evening");
 
   if (loading) {
     return (
@@ -285,7 +267,7 @@ export default function AdminDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <span className="text-2xl">&#x1F44B;</span>
-            {greeting}, {t("admin.dashboard.admin")}
+            {greeting}, {translate("admin.dashboard.admin")}
           </h1>
           <div className="flex items-center gap-3 mt-1.5">
             {now && (
@@ -301,7 +283,7 @@ export default function AdminDashboardPage() {
             {lastUpdated && (
               <span className="text-xs text-muted-foreground flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {t("admin.dashboard.updated_to")} {lastUpdated.toLocaleTimeString(locale === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                {translate("admin.dashboard.updated_to")} {lastUpdated.toLocaleTimeString(locale === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
           </div>
@@ -314,7 +296,7 @@ export default function AdminDashboardPage() {
             onClick={fetchData}
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            {t("admin.dashboard.refresh")}
+            {translate("admin.dashboard.refresh")}
           </Button>
           <Button
             size="sm"
@@ -322,7 +304,7 @@ export default function AdminDashboardPage() {
             onClick={() => router.push("/admin/analytics")}
           >
             <TrendingUp className="h-3.5 w-3.5" />
-            {t("admin.dashboard.view_report")}
+            {translate("admin.dashboard.view_report")}
           </Button>
         </div>
       </div>
@@ -355,10 +337,10 @@ export default function AdminDashboardPage() {
                   <p className="text-2xl font-bold text-slate-900 dark:text-white leading-none mb-1.5 tabular-nums">
                     {typeof val === "number" ? val.toLocaleString() : val}
                   </p>
-                  <p className="text-xs font-medium text-muted-foreground leading-none flex items-center gap-1">
+                  <div className="text-xs font-medium text-muted-foreground leading-none flex items-center gap-1">
                     <div className={`w-1 h-1 rounded-full ${card.badge.replace("bg-", "bg-").split(" ")[0]}`} />
-                    {t(card.label)}
-                  </p>
+                    {translate(card.label)}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -374,16 +356,16 @@ export default function AdminDashboardPage() {
             <div>
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
-                {t("admin.dashboard.agent_trend")}
+                {translate("admin.dashboard.agent_trend")}
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {t("admin.dashboard.total_calls")} {chartBars.reduce((s, t) => s + t.agent_calls, 0).toLocaleString()} {t("admin.dashboard.calls")}
+                {translate("admin.dashboard.total_calls")} {chartBars.reduce((s, t) => s + t.agent_calls, 0).toLocaleString()} {translate("admin.dashboard.calls")}
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="w-2 h-2 rounded-sm bg-gradient-to-r from-blue-500 to-blue-600 inline-block" />
-                {t("admin.dashboard.agent_trend_label")}
+                {translate("admin.dashboard.agent_trend_label")}
               </span>
             </div>
           </CardHeader>
@@ -404,7 +386,7 @@ export default function AdminDashboardPage() {
                     <div
                       className="w-full rounded-t-sm transition-all duration-300 bg-gradient-to-t from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-400 group-hover:shadow-lg group-hover:shadow-blue-500/30 cursor-pointer"
                       style={{ height: `${Math.max(3, height)}%` }}
-                      title={`${label}: ${bar.agent_calls} ${t("admin.dashboard.calls")}`}
+                      title={`${label}: ${bar.agent_calls} ${translate("admin.dashboard.calls")}`}
                     />
                     {i % 5 === 0 && (
                       <span className="text-[9px] text-muted-foreground leading-none">{label}</span>
@@ -421,11 +403,11 @@ export default function AdminDashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Shield className="h-4 w-4 text-emerald-500" />
-              {t("admin.dashboard.service_status")}
+              {translate("admin.dashboard.service_status")}
             </CardTitle>
             <span className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {t("admin.dashboard.all_ok")}
+              {translate("admin.dashboard.all_ok")}
             </span>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -440,7 +422,7 @@ export default function AdminDashboardPage() {
                     <svc.icon className={`h-4 w-4 ${ok ? "text-emerald-400" : "text-amber-400"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground/90">{t(svc.nameKey)}</p>
+                    <p className="text-xs font-medium text-foreground/90">{translate(svc.nameKey)}</p>
                     <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                       <Zap className="h-2.5 w-2.5" />
                       {svc.latency} &middot; {svc.uptime}
@@ -465,7 +447,7 @@ export default function AdminDashboardPage() {
           <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
-              {t("admin.dashboard.key_metrics")}
+              {translate("admin.dashboard.key_metrics")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
@@ -505,8 +487,8 @@ export default function AdminDashboardPage() {
                     <item.icon className={`h-4 w-4 ${item.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground/90">{t(item.labelKey)}</p>
-                    <p className="text-[11px] text-muted-foreground">{t(item.descKey)}</p>
+                    <p className="text-xs font-medium text-foreground/90">{translate(item.labelKey)}</p>
+                    <p className="text-[11px] text-muted-foreground">{translate(item.descKey)}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${item.color}`}>{displayValue}</p>
@@ -523,11 +505,11 @@ export default function AdminDashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Bell className="h-4 w-4 text-cyan-500" />
-              {t("admin.dashboard.daily_detail")}
+              {translate("admin.dashboard.daily_detail")}
             </CardTitle>
             <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground" onClick={() => router.push("/admin/analytics")}>
               <Eye className="h-3 w-3" />
-              {t("admin.dashboard.view_all")}
+              {translate("admin.dashboard.view_all")}
             </Button>
           </CardHeader>
           <CardContent>
@@ -535,12 +517,12 @@ export default function AdminDashboardPage() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border/60">
-                    <th className="text-left pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.dashboard.date")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.dashboard.users")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.dashboard.sessions")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.dashboard.messages")}</th>
+                    <th className="text-left pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.date")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.users")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.sessions")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.messages")}</th>
                     <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">Agent</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{t("admin.dashboard.health")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.health")}</th>
                   </tr>
                 </thead>
                 <tbody>

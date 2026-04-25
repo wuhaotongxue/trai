@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { request } from "@/lib/api_client";
 import { useToast } from "@/components/toast/use_toast";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 interface TableInfo {
   name: string;
@@ -52,6 +53,7 @@ interface SchemaSyncResponse {
 }
 
 export default function DatabasePage() {
+  const { translate, locale } = useAdminI18n();
   const [optimizing, setOptimizing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
   const [backups, setBackups] = useState<BackupInfo[]>([]);
@@ -64,7 +66,7 @@ export default function DatabasePage() {
   const fetchBackups = async () => {
     setLoading(true);
     try {
-      const res = await request<BackupInfo[]>("/admin/system/database/backups");
+      const res = await request<BackupInfo[]>("/admin/system/backups");
       setBackups(res.sort((a, b) => b.last_modified.localeCompare(a.last_modified)));
     } catch (e) {
       console.error("Fetch backups failed", e);
@@ -148,21 +150,21 @@ export default function DatabasePage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Database Management</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">PostgreSQL 16.2 - Connection OK</p>
+          <h1 className="text-xl font-bold text-foreground">{translate("admin.database.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">PostgreSQL 16.2 - {translate("admin.database.connection_ok")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={handleOptimize}>
             <RefreshCw className={`h-3.5 w-3.5 ${optimizing ? "animate-spin" : ""}`} />
-            {optimizing ? "Optimizing..." : "Optimize Tables"}
+            {optimizing ? translate("admin.database.optimizing") : translate("admin.database.optimize")}
           </Button>
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={fetchBackups}>
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+            {translate("admin.monitor.refresh_status")}
           </Button>
           <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-red-600 hover:bg-red-700" onClick={handleBackup} disabled={backingUp}>
             {backingUp ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            {backingUp ? "Backing up..." : "Manual Backup"}
+            {backingUp ? translate("admin.database.backing_up") : translate("admin.database.manual_backup")}
           </Button>
         </div>
       </div>
@@ -170,19 +172,19 @@ export default function DatabasePage() {
       {/* Database Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Tables", value: schema?.total_tables?.toString() || "24", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
-          { label: "Total Rows", value: schema?.total_rows?.toLocaleString() || "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { label: "Backups", value: backups.length.toString(), icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
-          { label: "Status", value: "OK", icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { labelKey: "admin.database.total_tables", value: schema?.total_tables?.toString() || "24", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
+          { labelKey: "admin.database.total_rows", value: schema?.total_rows?.toLocaleString(locale === "zh" ? "zh-CN" : "en-US") || "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { labelKey: "admin.database.backups", value: backups.length.toString(), icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { labelKey: "admin.database.status", value: translate("admin.database.ok"), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
         ].map((item) => (
-          <Card key={item.label} className="border-0 shadow-sm">
+          <Card key={item.labelKey} className="border-0 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${item.bg}`}>
                 <item.icon className={`h-4.5 w-4.5 ${item.color}`} />
               </div>
               <div>
                 <p className="text-lg font-bold text-foreground">{item.value}</p>
-                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{translate(item.labelKey)}</p>
               </div>
             </CardContent>
           </Card>
@@ -194,22 +196,22 @@ export default function DatabasePage() {
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Table2 className="h-4 w-4" />
-            Schema Documentation
+            {translate("admin.database.schema_doc")}
           </CardTitle>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
-              Last synced: {schema?.synced_at ? new Date(schema.synced_at).toLocaleString() : "Never"}
+              {translate("admin.database.last_synced")}: {schema?.synced_at ? new Date(schema.synced_at).toLocaleString(locale === "zh" ? "zh-CN" : "en-US") : translate("admin.database.never")}
             </span>
             <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={fetchSchema} disabled={schemaLoading}>
               <RefreshCw className={`h-3.5 w-3.5 ${schemaLoading ? "animate-spin" : ""}`} />
-              Sync
+              {translate("admin.database.sync")}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {schemaLoading ? (
-              <div className="py-8 text-center text-muted-foreground">Loading schema...</div>
+              <div className="py-8 text-center text-muted-foreground">{translate("admin.database.loading_schema")}</div>
             ) : schema?.tables && schema.tables.length > 0 ? (
               schema.tables.map((table) => (
                 <div key={table.table_name} className="border border-border rounded-lg overflow-hidden">
@@ -232,9 +234,9 @@ export default function DatabasePage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{table.row_count.toLocaleString()} rows</span>
+                      <span>{table.row_count.toLocaleString(locale === "zh" ? "zh-CN" : "en-US")} {translate("admin.database.rows")}</span>
                       <span>{formatBytes(table.total_bytes)}</span>
-                      <span>{table.columns.length} columns</span>
+                      <span>{table.columns.length} {translate("admin.database.columns")}</span>
                     </div>
                   </div>
                   {expandedTables.has(table.table_name) && (
@@ -242,10 +244,10 @@ export default function DatabasePage() {
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="bg-muted/40">
-                            <th className="px-4 py-2 text-left font-medium">Column</th>
-                            <th className="px-4 py-2 text-left font-medium">Type</th>
-                            <th className="px-4 py-2 text-left font-medium">Nullable</th>
-                            <th className="px-4 py-2 text-left font-medium">Default</th>
+                            <th className="px-4 py-2 text-left font-medium">{translate("admin.database.column")}</th>
+                            <th className="px-4 py-2 text-left font-medium">{translate("admin.database.type")}</th>
+                            <th className="px-4 py-2 text-left font-medium">{translate("admin.database.nullable")}</th>
+                            <th className="px-4 py-2 text-left font-medium">{translate("admin.database.default")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -253,7 +255,7 @@ export default function DatabasePage() {
                             <tr key={col.name} className="border-t border-border/50">
                               <td className="px-4 py-2 font-mono text-blue-600">{col.name}</td>
                               <td className="px-4 py-2 font-mono text-emerald-600">{col.type}</td>
-                              <td className="px-4 py-2">{col.nullable ? "YES" : "NO"}</td>
+                              <td className="px-4 py-2">{col.nullable ? translate("admin.database.yes") : translate("admin.database.no")}</td>
                               <td className="px-4 py-2 text-muted-foreground">{col.default || "-"}</td>
                             </tr>
                           ))}
@@ -265,7 +267,7 @@ export default function DatabasePage() {
               ))
             ) : (
               <div className="py-8 text-center text-muted-foreground">
-                No schema data. Click Sync to fetch.
+                {translate("admin.database.no_schema_data")}
               </div>
             )}
           </div>
@@ -275,18 +277,18 @@ export default function DatabasePage() {
       {/* Backup History */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-semibold">S3 Backup History</CardTitle>
+          <CardTitle className="text-sm font-semibold">{translate("admin.database.s3_backup_history")}</CardTitle>
           <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
-            Latest: {backups[0]?.last_modified || "None"}
+            {translate("admin.database.latest")}: {backups[0]?.last_modified || translate("admin.database.none")}
           </span>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {loading ? (
-              <div className="col-span-2 py-8 text-center text-muted-foreground">Loading...</div>
+              <div className="col-span-2 py-8 text-center text-muted-foreground">{translate("admin.loading")}</div>
             ) : backups.length === 0 ? (
-              <div className="col-span-2 py-8 text-center text-muted-foreground">No backups</div>
+              <div className="col-span-2 py-8 text-center text-muted-foreground">{translate("admin.database.no_backups")}</div>
             ) : (
               backups.map((b) => (
                 <div key={b.key} className="flex items-center gap-4 p-4 rounded-xl bg-muted/25 hover:bg-muted/40 transition-colors">

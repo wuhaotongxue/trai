@@ -46,6 +46,9 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 更新_2026_04_25_2247
+- **界面（前端）**: 为 admin/ai、admin/quotas、admin/users/new 页面补充完整的中英文翻译 keys，修复页面内硬编码文本
+
 ### 更新_2026_04_25_1737
 - **修复（前端）**: 确认翻译脚本 init_i18n_frontend.py 包含所有 key（admin.dashboard.greeting.afternoon、admin.dashboard.admin 等），数据库已同步 564 条翻译记录
 - **优化（项目）**: 优化后台启动脚本 start_backend.py，添加实时日志输出到终端和日志文件，便于排查卡住问题

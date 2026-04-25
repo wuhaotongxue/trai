@@ -1,6 +1,6 @@
 {
   "name": "trai",
-  "version": "0.1.0",
+  "version": "0.1.19",
   "description": "TRAI 桌面客户端 (Electron)",
   "main": "dist/main/index.js",
   "author": "wuhao",
@@ -8,8 +8,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && electron-builder",
+    "build:version": "node build_with_version.js",
+    "build:only": "vite build",
     "preview": "electron .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "publish": "node publish.js",
+    "publish:local": "set TRAI_API_URL=http://127.0.0.1:5666 && node publish.js"
   },
   "dependencies": {
     "axios": "^1.15.0",
