@@ -213,6 +213,66 @@ description: >-
 ### 9. 反馈
 告知五号同学提交成功，并简述提交的内容以及拉取/推送的分支详情。
 
+### 10. 推送完成后自动发送飞书+企业微信通知（重要！！）
+
+<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#E65100;">&#x1F4E7; 每次推送完成后必须发送通知</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li>所有分支推送完成后，立即调用飞书和企业微信 webhook</li>
+    <li>通知内容包含：分支名、commit message、文件变更统计</li>
+    <li>方便在群里追溯每次推送的历史记录</li>
+    <li>使用 <code>Invoke-WebRequest</code>（Windows PowerShell）发送 HTTP POST 请求</li>
+  </ul>
+</div>
+
+**通知格式要求**：
+- 标题：`🚀 TRAI 代码推送通知`
+- 包含分支、commit message、变更文件数量
+- 优先使用卡片消息（Feishu `send_card`，WeCom `send_template_card`）
+
+**飞书卡片格式（PowerShell）**：
+```powershell
+$body = @{
+    msg_type = "interactive"
+    card = @{
+        config = @{ wide_screen_mode = $true }
+        header = @{
+            title = @{ tag = "plain_text"; content = "🚀 TRAI 代码推送通知" }
+            template = "blue"
+        }
+        elements = @(
+            @{ tag = "markdown"; content = "**分支**: `develop`\n**Commit**: 提交信息内容\n**变更**: X 个文件" }
+        )
+    }
+} | ConvertTo-Json -Depth 10 -Compress
+Invoke-WebRequest -Uri "飞书WEBHOOK地址" -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+```
+
+**企业微信卡片格式（PowerShell）**：
+```powershell
+$body = @{
+    msgtype = "template_card"
+    template_card = @{
+        card_type = "text_notice"
+        main_title = @{
+            title = "🚀 TRAI 代码推送通知"
+            desc = "commit message 内容"
+        }
+        horizontal_content_list = @(
+            @{ keyname = "分支"; value = "develop" }
+            @{ keyname = "变更文件"; value = "X 个文件" }
+            @{ keyname = "推送人"; value = "wuhao" }
+        )
+    }
+} | ConvertTo-Json -Depth 10 -Compress
+Invoke-WebRequest -Uri "企业微信WEBHOOK地址" -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+```
+
+**实际执行时**：
+- 从仓库根目录的 `backend/.env` 或环境变量中读取 `NOTIFY_FEISHU_WEBHOOK` 和 `NOTIFY_WECOM_WEBHOOK`
+- 如果环境变量未配置，跳过该通知（不报错）
+- 通知失败也不中断流程，仅打印警告日志
+
 ---
 
 ## 快速参考
