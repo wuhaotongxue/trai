@@ -12,11 +12,12 @@ description: >-
 
 ### 1. 确认本次变更模块与范围
 
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0;">
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:12px 0;">
   <div style="background:#F5F5F5;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;font-size:13px;">backend/</div>
   <div style="background:#F5F5F5;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;font-size:13px;">frontend_next/</div>
   <div style="background:#F5F5F5;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;font-size:13px;">desktop_client/</div>
   <div style="background:#F5F5F5;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;font-size:13px;">electron/</div>
+  <div style="background:#F5F5F5;border:1px solid #E1E1E1;border-radius:8px;padding:12px;text-align:center;font-size:13px;">.cursor/skills/</div>
 </div>
 
 ### 2. 生成真实时间戳标题
