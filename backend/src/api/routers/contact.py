@@ -169,28 +169,30 @@ def send_contact_notification(
         if wecom_webhook:
             try:
                 wecom_service = NotifyServiceFactory.create_wecom(wecom_webhook)
+                # horizontal_content_list: keyname + value 格式, 最多 6 条
+                horizontal_list = [
+                    {"keyname": "姓名", "value": name},
+                    {"keyname": "电话", "value": phone},
+                    {"keyname": "咨询类型", "value": type_display},
+                ]
+                card_content = f"邮箱: {email}\n公司: {company}\nIP: {contact_data.get('ip_address', '未知')}\n位置: {ip_location}\n时间: {contact_data.get('created_at', '未知')}\n留言: {content}"
+                admin_url = os.getenv("ADMIN_BASE_URL", "https://trai.tuoren.com")
+                jump_url = f"{admin_url}/admin/contact/messages"
+                logger.info(f"[WECOM] 发送通知卡片 | name={name} | type={contact_type}")
                 result = wecom_service.send_template_card(
-                    card_type="normal_news",
+                    card_type="text_notice",
                     main_title={"title": "📩 新的联系我们消息", "desc": f"来自 {name} 的 {type_display}"},
-                    horizontal_content_list=[
-                        {"title": "姓名", "desc": name},
-                        {"title": "电话", "desc": phone},
-                        {"title": "邮箱", "desc": email},
-                        {"title": "公司", "desc": company},
-                        {"title": "咨询类型", "desc": type_display},
-                        {"title": "IP", "desc": contact_data.get("ip_address", "未知")},
-                        {"title": "位置", "desc": ip_location},
-                        {"title": "时间", "desc": contact_data.get("created_at", "未知")},
-                    ],
-                    sub_title_text=f"留言内容: {content}",
-                    jump_list=[{"title": "查看详情", "action_name": "处理", "action_url": f"https://trai.tuoren.com/admin/contact/messages"}],
+                    horizontal_content_list=horizontal_list,
+                    sub_title_text=card_content,
+                    card_action={"type": 1, "url": jump_url},
                 )
+                logger.info(f"[WECOM] 通知结果 | success={result.success} | message={result.message}")
                 if result.success:
-                    logger.info("WeCom notification sent successfully")
+                    logger.info(f"[WECOM] 企业微信通知发送成功 | name={name} | type={type_display}")
                 else:
-                    logger.error(f"Failed to send WeCom notification: {result.message}")
+                    logger.error(f"[WECOM] 企业微信通知发送失败 | name={name} | error={result.message}")
             except Exception as error:
-                logger.exception(f"Error sending WeCom notification: {error}")
+                logger.exception(f"[WECOM] 企业微信通知异常 | name={name} | error={error}")
 
     if os.getenv("NOTIFY_FEISHU_ENABLED", "false").lower() == "true":
         feishu_webhook = os.getenv("NOTIFY_FEISHU_WEBHOOK")
@@ -207,16 +209,18 @@ IP地址: {contact_data.get("ip_address", "未知")}
 地理位置: {ip_location}
 提交时间: {contact_data.get("created_at", "未知")}
 提交ID: {submission_id}"""
+                logger.info(f"[FEISHU] 发送通知卡片 | name={name} | type={contact_type}")
                 result = feishu_service.send_card(
                     title=f"📩 新的联系我们消息 - {name}",
                     content=card_content,
                 )
+                logger.info(f"[FEISHU] 通知结果 | success={result.success} | message={result.message}")
                 if result.success:
-                    logger.info("Feishu notification sent successfully")
+                    logger.info(f"[FEISHU] 飞书通知发送成功 | name={name} | type={type_display}")
                 else:
-                    logger.error(f"Failed to send Feishu notification: {result.message}")
+                    logger.error(f"[FEISHU] 飞书通知发送失败 | name={name} | error={result.message}")
             except Exception as error:
-                logger.exception(f"Error sending Feishu notification: {error}")
+                logger.exception(f"[FEISHU] 飞书通知异常 | name={name} | error={error}")
 
 
 @router.post(

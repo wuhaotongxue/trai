@@ -201,19 +201,21 @@ class WeComNotifyService(BaseNotifyService):
         emphasis_content: dict[str, str] | None = None,
         quote_area: dict[str, str] | None = None,
         sub_title_text: str = "",
-        horizontal_content_list: list[dict[str, str]] | None = None,
-        jump_list: list[dict[str, str]] | None = None,
+        horizontal_content_list: list[dict[str, Any]] | None = None,
+        jump_list: list[dict[str, Any]] | None = None,
+        card_action: dict[str, Any] | None = None,
     ) -> NotifyResult:
         """发送模板卡片消息
 
         Args:
-            card_type: 卡片类型 (normal_news, news, blueprint)
+            card_type: 卡片类型 (text_notice, news_notice, button_interaction)
             main_title: 主标题 {"title": "", "desc": ""}
             emphasis_content: 强调内容 {"title": "", "desc": ""}
             quote_area: 引用区域 {"title": "", "quote_source": ""}
             sub_title_text: 副标题
-            horizontal_content_list: 横向内容 [{"title": "", "desc": ""}]
-            jump_list: 跳转列表 [{"title": "", "action_name": "", "action_url": ""}]
+            horizontal_content_list: 横向内容 [{"keyname": "", "value": ""}]
+            jump_list: 跳转列表 [{"type": 1, "url": "", "title": ""}]
+            card_action: 整体卡片点击跳转 {"type": 1, "url": ""}
 
         Returns:
             NotifyResult: 发送结果
@@ -245,6 +247,9 @@ class WeComNotifyService(BaseNotifyService):
 
         if jump_list:
             template_card["jump_list"] = jump_list
+
+        if card_action:
+            template_card["card_action"] = card_action
 
         try:
             client = self._get_client()

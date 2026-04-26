@@ -145,7 +145,7 @@ class FeishuNotifyService(BaseNotifyService):
                 },
                 "elements": [
                     {
-                        "tag": "div",
+                        "tag": "markdown",
                         "content": content,
                     },
                 ],
