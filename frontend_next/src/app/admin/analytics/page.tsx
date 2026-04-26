@@ -38,8 +38,9 @@ export default function AnalyticsPage() {
       const res = await request<WeComAnalytics>("/admin/analytics/wecom");
       setData(res);
       setLastUpdated(new Date().toLocaleString(locale === "zh" ? "zh-CN" : "en-US"));
-    } catch {
-      console.error("Fetch analytics failed");
+    } catch (e: any) {
+      const errorMsg = e?.message || e?.msg || translate("admin.analytics.fetch_failed");
+      toast({ message: errorMsg, variant: "error" });
     } finally {
       setLoading(false);
     }

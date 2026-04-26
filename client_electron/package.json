@@ -1,6 +1,6 @@
 {
   "name": "trai",
-  "version": "0.1.19",
+  "version": "0.1.21",
   "description": "TRAI 桌面客户端 (Electron)",
   "main": "dist/main/index.js",
   "author": "wuhao",

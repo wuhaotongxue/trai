@@ -10,7 +10,10 @@ import Sidebar from './sidebar'
 import TitleBar from './title_bar'
 import PageTransition from './page_transition'
 import { use_auth_store } from '@/store/auth'
-import { t } from '@/i18n'
+// 直接使用中文文本，不使用翻译函数
+function t(key: string): string {
+  return key
+}
 
 const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)

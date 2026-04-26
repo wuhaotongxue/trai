@@ -68,8 +68,8 @@ export default function DatabasePage() {
     try {
       const res = await request<BackupInfo[]>("/admin/system/backups");
       setBackups(res.sort((a, b) => b.last_modified.localeCompare(a.last_modified)));
-    } catch (e) {
-      console.error("Fetch backups failed", e);
+    } catch (e: any) {
+      toast({ message: e.message || translate("admin.database.fetch_backups_failed"), variant: "error" });
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 文件名: sidebar.tsx
  * 作者: wuhao
  * 日期: 2026-04-24 00:10:00
@@ -14,7 +14,35 @@ import {
   Sparkles, Wand2
 } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
-import { t, type Locale } from '@/i18n'
+// 直接使用中文文本，不使用翻译函数
+function t(key: string): string {
+  const translations: Record<string, string> = {
+    navigation: '导航',
+    not_logged_in: '未登录',
+    dashboard: '仪表盘',
+    overview: '概览',
+    agent: '智能体',
+    management: '管理',
+    knowledge_base: '知识库',
+    files: '文件',
+    ai_creation: 'AI 创作',
+    chat: '聊天',
+    text_to_image: '文本生成图片',
+    image_to_image: '图片生成图片',
+    music_generation: '音乐生成',
+    video_generation: '视频生成',
+    tools: '工具',
+    tool: '工具',
+    media_center: '媒体中心',
+    player: '播放器',
+    media_processing: '媒体处理',
+    feedback: '反馈',
+    settings: '设置',
+    logout: '退出登录',
+    app_name: 'TRAI'
+  }
+  return translations[key] || key
+}
 import { use_locale_store } from '@/store/locale'
 
 type NavChild = {

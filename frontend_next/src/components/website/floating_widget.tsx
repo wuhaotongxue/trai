@@ -7,16 +7,14 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowUp, ArrowDown, BotMessageSquare, X, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
+import { useState } from "react";
+import { Bot, X, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAgentStore } from "@/stores/agent.store";
 
 export function FloatingWidget() {
-  const [showTop, setShowTop] = useState(false);
-  const [showBottom, setShowBottom] = useState(true);
   const { isFloatingChatOpen: isChatOpen, setFloatingChatOpen: setIsChatOpen } = useAgentStore();
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
@@ -29,89 +27,30 @@ export function FloatingWidget() {
     !pathname.startsWith("/docs") &&
     !pathname.startsWith("/todo");
 
-  useEffect(() => {
-    // 即使在管理后台也显示, 但位置调高避免遮挡分页
-    const handleScroll = () => {
-      setShowTop(window.scrollY > 300);
-
-      const scrolledToBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 300;
-      setShowBottom(!scrolledToBottom);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
-
   if (!isWebsitePage) return null;
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const scrollToBottom = () => {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-  };
-
-  const isAdminPage = pathname.startsWith("/admin");
 
   return (
     <>
-      <div className={cn(
-        "fixed z-50 flex flex-col gap-3 transition-all duration-300",
-        isAdminPage ? "bottom-24 right-6" : "bottom-12 right-6"
-      )}>
-        <Button
-          size="icon"
-          variant="outline"
-          className={cn(
-            "h-12 w-12 rounded-full shadow-xl border-blue-200/50 dark:border-blue-500/30 transition-all hover:scale-110 active:scale-95 group relative overflow-hidden",
-            isChatOpen 
-              ? "bg-blue-600 text-white hover:bg-blue-700" 
-              : "bg-white/90 dark:bg-[#0d1220]/90 text-blue-600 hover:text-blue-700"
-          )}
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          title={isChatOpen ? "关闭助手" : "打开 AI 助手"}
-        >
-          {!isChatOpen && (
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 animate-pulse" />
-          )}
-          <BotMessageSquare className={cn("h-6 w-6 relative z-10", isChatOpen && "animate-bounce")} />
-          {!isChatOpen && (
-            <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-            </span>
-          )}
-        </Button>
-
-        {showTop && (
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-10 w-10 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:-translate-y-1"
-            onClick={scrollToTop}
-            title="返回顶部"
-          >
-            <ArrowUp className="h-5 w-5" />
-          </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        className={cn(
+          "fixed z-50 h-10 w-10 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 group relative",
+          isChatOpen 
+            ? "bg-blue-600 text-white hover:bg-blue-700" 
+            : "bg-white/90 dark:bg-[#0d1220]/90 text-blue-600 hover:text-blue-700 dark:hover:bg-white/10",
+          pathname.startsWith("/admin") ? "bottom-24 right-6" : "bottom-12 right-6"
         )}
-
-        {showBottom && (
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-10 w-10 rounded-full shadow-lg border-slate-200 bg-white/90 dark:bg-[#0d1220]/90 glass text-slate-600 hover:text-blue-600 transition-all hover:translate-y-1"
-            onClick={scrollToBottom}
-            title="直达底部"
-          >
-            <ArrowDown className="h-5 w-5" />
-          </Button>
-        )}
-
-        {/* 移除重复的 AI 助手按钮，统一入口 */}
-      </div>
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        title={isChatOpen ? "关闭助手" : "打开 AI 助手"}
+      >
+        <div className="relative">
+          <Bot className="h-4 w-4 relative z-10" />
+          {!isChatOpen && (
+            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+          )}
+        </div>
+      </Button>
 
       {isChatOpen && (
         <div className={`fixed z-50 bg-background border border-border shadow-2xl overflow-hidden flex flex-col animate-in fade-in duration-300 transition-all ${
@@ -122,7 +61,7 @@ export function FloatingWidget() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
-                <BotMessageSquare className="h-4 w-4 text-white" />
+                <Bot className="h-4 w-4 text-white" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-foreground leading-none">TRAI Agent</h3>

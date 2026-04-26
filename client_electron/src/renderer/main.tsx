@@ -9,10 +9,18 @@ import ReactDOM from 'react-dom/client'
 import App from './app'
 import './styles/global.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+console.log('[main] main.tsx loading...')
+console.log('[main] App imported:', App)
+
+const root = document.getElementById('root')
+console.log('[main] root element:', root)
+
+ReactDOM.createRoot(root!).render(
   // 注意: 暂时禁用 StrictMode 以诊断白屏问题
   // <React.StrictMode>
   //   <App />
   // </React.StrictMode>
   <App />
 )
+
+console.log('[main] App rendered')
