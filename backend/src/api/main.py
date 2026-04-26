@@ -398,6 +398,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.session import session
     from api.routers.system import feedback, health, notify
     from api.routers.system import monitor as system_monitor
+    from api.routers.contact import router as contact_router
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
@@ -433,7 +434,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
-    app.include_router(i18n_public_router, prefix=api_prefix, tags=["国际化"])
+    app.include_router(contact_router, prefix=api_prefix, tags=["公开接口"])
     app.include_router(admin_i18n_router, prefix=f"{api_prefix}/admin", tags=["国际化管理"])
 
     @app.get("/", tags=["首页"])
