@@ -26,6 +26,7 @@ function t(key: string): string {
   return translations[key] || key
 }
 import { use_locale_store } from '@/store/locale'
+import { Locale } from '@/i18n'
 
 const TitleBar: React.FC = () => {
   const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
