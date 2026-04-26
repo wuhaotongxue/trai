@@ -8,7 +8,23 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown, Minus, Square, X, Maximize2 } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
-import { t, type Locale } from '@/i18n'
+// 直接使用中文文本，不使用翻译函数
+function t(key: string): string {
+  const translations: Record<string, string> = {
+    switch_to_light: '切换到亮色模式',
+    switch_to_dark: '切换到深色模式',
+    refresh: '刷新',
+    show_logs: '显示日志',
+    hide_logs: '隐藏日志',
+    system_logs: '系统日志',
+    clear: '清空',
+    close: '关闭',
+    no_logs: '暂无日志',
+    caps_lock_on: '大写锁定已开启',
+    caps_lock_off: '大写锁定已关闭'
+  }
+  return translations[key] || key
+}
 import { use_locale_store } from '@/store/locale'
 
 const TitleBar: React.FC = () => {

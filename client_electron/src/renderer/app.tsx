@@ -10,7 +10,61 @@ import { router } from './router/index'
 import { setup_axios_interceptors, init_api_base_url } from './utils/axios_interceptor'
 import { use_auth_store } from './store/auth'
 import { use_locale_store } from './store/locale'
-import { t } from './i18n'
+
+console.log('[app] app.tsx loading...')
+console.log('[app] React imported:', React)
+console.log('[app] RouterProvider imported:', RouterProvider)
+console.log('[app] router imported:', router)
+console.log('[app] setup_axios_interceptors imported:', setup_axios_interceptors)
+console.log('[app] init_api_base_url imported:', init_api_base_url)
+console.log('[app] use_auth_store imported:', use_auth_store)
+console.log('[app] use_locale_store imported:', use_locale_store)
+
+// 直接定义翻译函数
+const translations = {
+  zh: {
+    login_welcome: '欢迎回来',
+    login_subtitle: '请登录您的账户以继续',
+    username: '用户名',
+    enter_username: '请输入用户名',
+    password: '密码',
+    enter_password: '请输入密码',
+    save_login_state: '记住登录状态',
+    login: '登录',
+    or: '或',
+    wecom_login: '企业微信登录',
+    no_account: '还没有账户？',
+    register_here: '立即注册',
+  },
+  en: {
+    login_welcome: 'Welcome back',
+    login_subtitle: 'Please log in to your account to continue',
+    username: 'Username',
+    enter_username: 'Please enter username',
+    password: 'Password',
+    enter_password: 'Please enter password',
+    save_login_state: 'Remember login state',
+    login: 'Login',
+    or: 'or',
+    wecom_login: 'WeCom Login',
+    no_account: "Don't have an account?",
+    register_here: 'Register here',
+  },
+}
+
+function t(key: string): string {
+  const locale = use_locale_store.getState().locale
+  return translations[locale][key] || key
+}
+
+async function init_i18n() {
+  console.log('[app] init_i18n called')
+  // 模拟初始化
+  return Promise.resolve()
+}
+
+console.log('[app] t function defined:', t)
+console.log('[app] init_i18n function defined:', init_i18n)
 
 // 语言切换动画
 const GlobalTransition: React.FC<{ is_transitioning: boolean }> = ({ is_transitioning }) => {
@@ -81,50 +135,50 @@ const App: React.FC = () => {
     if (init_ref.current) return
     init_ref.current = true
 
-    // 先初始化 API 地址，再设置拦截器
-    init_api_base_url().then(() => {
-      setup_axios_interceptors()
-    })
-
-    const check_auto_login = async () => {
+    const initialize_app = async () => {
       try {
-        if (!window.electron_api) {
-          set_initializing(false)
-          return
-        }
+        // 1. 初始化 API 地址
+        await init_api_base_url()
+        setup_axios_interceptors()
 
-        // 检查 access token 和 refresh token
-        const token_res = await window.electron_api.config_get('access_token', null)
-        const has_token = token_res.data != null
+        // 2. 加载语言偏好
+        // 直接设置为中文，不从配置中读取
+        use_locale_store.getState().set_locale('zh')
+        console.log('[app] locale set to zh')
 
-        if (!has_token) {
-          set_initializing(false)
-          return
-        }
+        // 3. 初始化翻译数据
+        await init_i18n()
 
-        // 有 token 则验证
-        try {
-          const me_res = await window.electron_api.auth_me()
-          if (me_res.success && me_res.data) {
-            const user_data = me_res.data.user || me_res.data
-            login({
-              username: user_data.username || 'user',
-              email: user_data.email || 'user@trai.local',
-              role: user_data.role || 'user'
-            })
+        // 4. 检查自动登录
+        if (window.electron_api) {
+          const token_res = await window.electron_api.config_get('access_token', null)
+          const has_token = token_res.data != null
+
+          if (has_token) {
+            try {
+              const me_res = await window.electron_api.auth_me()
+              if (me_res.success && me_res.data) {
+                const user_data = me_res.data.user || me_res.data
+                login({
+                  username: user_data.username || 'user',
+                  email: user_data.email || 'user@trai.local',
+                  role: user_data.role || 'user'
+                })
+              }
+            } catch (auth_error) {
+              await window.electron_api.config_set('access_token', null)
+              await window.electron_api.config_set('refresh_token', null)
+            }
           }
-        } catch (auth_error) {
-          await window.electron_api.config_set('access_token', null)
-          await window.electron_api.config_set('refresh_token', null)
         }
       } catch (err) {
-        console.error('Auto login check failed', err)
+        console.error('App initialization failed', err)
       } finally {
         set_initializing(false)
       }
     }
 
-    void check_auto_login()
+    void initialize_app()
   }, [login])
 
   if (initializing) {
