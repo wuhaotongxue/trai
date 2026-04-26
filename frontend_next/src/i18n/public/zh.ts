@@ -310,7 +310,6 @@ export const PUBLIC_ZH = {
   "docs.api.sse.desc": "支持 Server-Sent Events, 为长文本生成提供打字机效果.",
   "docs.api.validate": "严格校验",
   "docs.api.validate.desc": "基于 Pydantic 的全链路数据校验, 确保输入输出绝对可靠.",
-  "docs.api.overview": "核心接口概览",
   "docs.api.overview.desc": "以下列出了业务中最常用的几个核心 API 路径, 完整接口定义请前往 Swagger 交互页面查看.",
   "docs.api.login": "用户登录获取 Access Token",
   "docs.api.me": "获取当前登录用户信息",

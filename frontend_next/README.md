@@ -65,6 +65,9 @@ src/
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_04_26_1635
+- **修复(i18n)**: 修复 changelog 页面 JSX 语法错误（多余的括号）和 en.ts/zh.ts 重复键名问题
+
 ### 🎨 前端_2026_04_25_2247
 - **界面(i18n)**: 为 admin/ai、admin/quotas、admin/users/new 页面补充完整的中英文翻译 keys，修复页面内硬编码文本
 
