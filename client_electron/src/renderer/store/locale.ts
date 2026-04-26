@@ -14,5 +14,11 @@ interface LocaleState {
 
 export const use_locale_store = create<LocaleState>((set) => ({
   locale: 'zh',
-  set_locale: (locale) => set({ locale }),
+  set_locale: (locale) => {
+    set({ locale })
+    // 保存语言偏好到配置存储
+    if (window.electron_api) {
+      window.electron_api.config_set('locale', locale).catch(() => {})
+    }
+  },
 }))
