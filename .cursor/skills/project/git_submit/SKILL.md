@@ -37,7 +37,12 @@ description: >-
 
 检查是否更新了对应模块的 `README.md` 与根 `README.md` 的 `## 📝 更新日志 (Changelog)` 顶部。
 
-**如果未更新**，必须调用 `readme-update` 技能：
+**特殊情况处理**：
+- 如果 README 中**没有 Changelog 章节**，直接跳过 README 更新步骤，继续执行提交流程
+- 不要报错、不要停止、不要尝试创建新章节
+- 这种情况下只需在 commit message 中描述清楚变更内容即可
+
+**如果已存在 Changelog 章节**，必须调用 `readme-update` 技能：
 - 追加到两处 README 顶部，按时间倒序
 
 ### 4. 编码检查 (CRITICAL - 每次提交前必须执行)
