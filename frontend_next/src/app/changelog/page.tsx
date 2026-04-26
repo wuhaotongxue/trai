@@ -109,7 +109,7 @@ export default function ChangelogPage() {
     setExpandedVersions((prev) =>
       prev.includes(version)
         ? prev.filter((v) => v !== version)
-        : [...prev, version]),
+        : [...prev, version]
     );
   };
 

@@ -11,6 +11,8 @@ import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
 import { use_locale_store } from '@/store/locale'
+import { Locale } from '@/i18n'
+
 // 直接使用中文文本，不使用翻译函数
 function t(key: string): string {
   // 直接返回中文文本，不使用翻译函数

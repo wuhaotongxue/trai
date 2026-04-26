@@ -20,42 +20,8 @@ console.log('[app] init_api_base_url imported:', init_api_base_url)
 console.log('[app] use_auth_store imported:', use_auth_store)
 console.log('[app] use_locale_store imported:', use_locale_store)
 
-// 直接定义翻译函数
-const translations = {
-  zh: {
-    login_welcome: '欢迎回来',
-    login_subtitle: '请登录您的账户以继续',
-    username: '用户名',
-    enter_username: '请输入用户名',
-    password: '密码',
-    enter_password: '请输入密码',
-    save_login_state: '记住登录状态',
-    login: '登录',
-    or: '或',
-    wecom_login: '企业微信登录',
-    no_account: '还没有账户？',
-    register_here: '立即注册',
-  },
-  en: {
-    login_welcome: 'Welcome back',
-    login_subtitle: 'Please log in to your account to continue',
-    username: 'Username',
-    enter_username: 'Please enter username',
-    password: 'Password',
-    enter_password: 'Please enter password',
-    save_login_state: 'Remember login state',
-    login: 'Login',
-    or: 'or',
-    wecom_login: 'WeCom Login',
-    no_account: "Don't have an account?",
-    register_here: 'Register here',
-  },
-}
-
-function t(key: string): string {
-  const locale = use_locale_store.getState().locale
-  return translations[locale][key] || key
-}
+// 从 i18n.ts 导入翻译函数
+import { t } from './i18n'
 
 async function init_i18n() {
   console.log('[app] init_i18n called')
