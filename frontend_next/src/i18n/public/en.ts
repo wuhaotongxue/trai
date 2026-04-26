@@ -307,7 +307,6 @@ export const PUBLIC_EN = {
   "docs.api.sse.desc": "Supports Server-Sent Events, typewriter effect for long text generation.",
   "docs.api.validate": "Strict Validation",
   "docs.api.validate.desc": "Full-chain Pydantic validation, ensures absolute reliability.",
-  "docs.api.overview": "Core API Overview",
   "docs.api.overview.desc": "Here are the most commonly used API paths. Visit Swagger for full definitions.",
   "docs.api.login": "Login to get Access Token",
   "docs.api.me": "Get current user info",
@@ -315,7 +314,6 @@ export const PUBLIC_EN = {
   "docs.api.upload": "Upload and compress images",
   "docs.api.example_request": "Hello, TRAI!",
   // ===== SDK Docs =====
-  "docs.sdk.title": "SDK Download",
   "docs.sdk.title": "SDK Download",
   "docs.sdk.subtitle": "SDK & Integration Methods",
   "docs.sdk.subtitle_desc": "SDK and OpenAPI entry. Go to API Reference for interface definitions.",

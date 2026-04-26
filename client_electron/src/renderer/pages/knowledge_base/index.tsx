@@ -127,20 +127,29 @@ const KnowledgeBasePage: React.FC = () => {
       set_debug_messages((prev) => [...prev.slice(-19), `${ts} ${msg}`])
     }
     try {
+      console.log('[knowledge_base] 开始获取文件列表:', { active_kb_id, page, effective_page_size })
       append_debug(`request kb_id=${active_kb_id} page=${page} page_size=${effective_page_size}`)
       const res = await window.electron_api.kb_list_index_files(active_kb_id, page, effective_page_size)
+      console.log('[knowledge_base] 文件列表响应:', res)
       if (!res.success) {
+        console.log('[knowledge_base] 获取文件列表失败:', res.error)
         set_files_error(res.error || '获取知识库文件失败')
         append_debug(`error page=${page} msg=${res.error || 'unknown'}`)
         return
       }
-      const data_root = res.data?.data || res.data
-      const items_source = data_root?.items || data_root?.data?.items || data_root?.data || []
+      const data_root = res.data
+      console.log('[knowledge_base] 文件列表数据根:', data_root)
+      const items_source = data_root?.items || []
+      console.log('[knowledge_base] 文件源数据:', items_source)
       const items: any[] = Array.isArray(items_source) ? items_source : []
-      const total_source = data_root?.total ?? data_root?.data?.total
+      console.log('[knowledge_base] 文件数组:', items)
+      const total_source = data_root?.total
+      console.log('[knowledge_base] 文件总数源:', total_source)
       const fallback_total_from_kb = kb_list.find((it) => it.id === active_kb_id)?.file_count
+      console.log('[knowledge_base] 知识库文件数:', fallback_total_from_kb)
       const total_candidate = typeof total_source === 'number' ? total_source : typeof total_source === 'string' && total_source.trim() && !Number.isNaN(Number(total_source)) ? Number(total_source) : 0
       const total = Math.max(total_candidate, typeof fallback_total_from_kb === 'number' ? fallback_total_from_kb : 0, file_total, items.length) || items.length
+      console.log('[knowledge_base] 最终文件总数:', total)
       const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
       const mapped_files: KbFile[] = items.map((it) => {
         const raw_status = String(it.status || it.Status || it.document_status || it.documentStatus || '').toUpperCase()
@@ -156,16 +165,20 @@ const KnowledgeBasePage: React.FC = () => {
           status
         }
       }).filter((f) => f.id && f.name)
+      console.log('[knowledge_base] 映射后的文件:', mapped_files)
       set_files(mapped_files)
       set_file_total(total)
       set_file_page(page)
       set_kb_list((prev) => prev.map((kb) => kb.id === active_kb_id ? { ...kb, file_count: total } : kb))
       append_debug(`response page=${page} items=${mapped_files.length} total=${total}`)
+      console.log('[knowledge_base] 文件列表更新完成:', { items: mapped_files.length, total })
     } catch (err: any) {
+      console.error('[knowledge_base] 获取文件列表异常:', err)
       set_files_error(err?.message || '获取知识库文件失败')
       append_debug(`exception page=${page} msg=${String(err?.message || err)}`)
     } finally {
       set_files_loading(false)
+      console.log('[knowledge_base] 获取文件列表完成')
     }
   }, [active_kb_id, file_page_size, file_total, kb_list])
 
@@ -235,7 +248,10 @@ const KnowledgeBasePage: React.FC = () => {
         let content: string
         const ext = file.name.toLowerCase().split('.').pop() || ''
         const text_extensions = ['txt', 'md', 'csv', 'json', 'xml', 'html', 'htm']
-        if (text_extensions.includes(ext)) { content = await file.text() } else {
+        if (text_extensions.includes(ext)) {
+          const text_content = await file.text()
+          content = btoa(unescape(encodeURIComponent(text_content)))
+        } else {
           const array_buffer = await file.arrayBuffer()
           const uint8_array = new Uint8Array(array_buffer)
           content = btoa(String.fromCharCode(...uint8_array))
@@ -389,7 +405,16 @@ const KnowledgeBasePage: React.FC = () => {
     </div>
   )
 
-  const render_middle_sidebar = () => (
+  const render_middle_sidebar = () => {
+    console.log('[knowledge_base] 渲染中间侧边栏:', {
+      active_cat: active_cat?.name,
+      active_cat_id,
+      categories: categories.map(c => ({ id: c.id, name: c.name })),
+      current_cat_kbs: current_cat_kbs.length,
+      current_cat_kbs_detail: current_cat_kbs.map(kb => ({ id: kb.id, name: kb.name, category_id: kb.category_id })),
+      active_kb_id
+    })
+    return (
     <div style={{
       width: is_middle_sidebar_open ? '220px' : '0px', minWidth: is_middle_sidebar_open ? '220px' : '0px', flexShrink: 1,
       opacity: is_middle_sidebar_open ? 1 : 0, backgroundColor: 'var(--ui_panel)',
@@ -437,6 +462,7 @@ const KnowledgeBasePage: React.FC = () => {
       </div>
     </div>
   )
+}
 
   const render_right_content = () => {
     if (!active_kb) return (
@@ -646,28 +672,67 @@ const KnowledgeBasePage: React.FC = () => {
     const load_remote = async () => {
       set_kb_loading(true)
       set_kb_error('')
-      if (!window.electron_api?.kb_list_categories || !window.electron_api?.kb_list_indices) { set_kb_error('当前客户端版本不支持拉取知识库列表'); set_kb_loading(false); return }
+      console.log('[knowledge_base] 开始加载知识库数据')
+      if (!window.electron_api?.kb_list_categories || !window.electron_api?.kb_list_indices) {
+        console.log('[knowledge_base] 客户端版本不支持拉取知识库列表')
+        set_kb_error('当前客户端版本不支持拉取知识库列表'); set_kb_loading(false); return 
+      }
       try {
+        console.log('[knowledge_base] 开始获取分类和知识库列表')
         const [cat_res, idx_res] = await Promise.all([window.electron_api.kb_list_categories(), window.electron_api.kb_list_indices()])
-        if (!cat_res.success) { set_kb_error(cat_res.error || '获取知识库分类失败'); set_kb_loading(false); return }
-        if (!idx_res.success) { set_kb_error(idx_res.error || '获取知识库列表失败'); set_kb_loading(false); return }
-        const cat_source = cat_res.data?.data?.items || cat_res.data?.items || cat_res.data?.data || cat_res.data || []
+        console.log('[knowledge_base] 分类列表响应:', cat_res)
+        console.log('[knowledge_base] 知识库列表响应:', idx_res)
+        if (!cat_res.success) {
+          console.log('[knowledge_base] 获取分类失败:', cat_res.error)
+          set_kb_error(cat_res.error || '获取知识库分类失败'); set_kb_loading(false); return 
+        }
+        if (!idx_res.success) {
+          console.log('[knowledge_base] 获取知识库列表失败:', idx_res.error)
+          set_kb_error(idx_res.error || '获取知识库列表失败'); set_kb_loading(false); return 
+        }
+        const cat_source = cat_res.data?.items || []
+        console.log('[knowledge_base] 分类源数据:', cat_source)
         const cat_items: any[] = Array.isArray(cat_source) ? cat_source : []
+        console.log('[knowledge_base] 分类数组:', cat_items)
         const mapped_categories: KbCategory[] = cat_items.map((it) => ({ id: String(it.category_id || it.categoryId || it.CategoryId || it.id || it.Id || ''), name: String(it.category_name || it.categoryName || it.CategoryName || it.name || it.Name || '') })).filter((c) => c.id && c.name)
+        console.log('[knowledge_base] 映射后的分类:', mapped_categories)
         const ensured_categories = mapped_categories.length > 0 ? mapped_categories : [{ id: 'default', name: '默认' }]
+        console.log('[knowledge_base] 确保后的分类:', ensured_categories)
         let default_cat = ensured_categories.find(c => c.name === '默认' || c.name === '默认类目')
         if (!default_cat) { default_cat = { id: 'default', name: '默认类目' }; ensured_categories.unshift(default_cat) } else { default_cat.name = '默认类目' }
+        console.log('[knowledge_base] 默认分类:', default_cat)
         const final_categories = ensured_categories.filter(c => !c.name.startsWith('trai_demo_cat'))
+        console.log('[knowledge_base] 最终分类:', final_categories)
         set_categories(final_categories)
         set_active_cat_id((prev) => prev || default_cat.id)
-        const idx_source = idx_res.data?.data?.items || idx_res.data?.items || idx_res.data?.data || idx_res.data || []
+        const idx_source = idx_res.data?.items || []
+        console.log('[knowledge_base] 知识库源数据:', idx_source)
         const idx_items: any[] = Array.isArray(idx_source) ? idx_source : []
+        console.log('[knowledge_base] 知识库数组:', idx_items)
         const now_str = new Date().toISOString().slice(0, 16).replace('T', ' ')
-        const cat_id_for_kb = default_cat.id
-        const mapped_kbs: KnowledgeBase[] = idx_items.map((it) => ({ id: String(it.index_id || it.indexId || it.IndexId || it.id || it.Id || ''), category_id: cat_id_for_kb, name: String(it.index_name || it.indexName || it.IndexName || it.name || it.Name || ''), file_count: Number(it.file_count || it.fileCount || it.DocumentCount || it.document_count || it.documentCount || 0), created_at: String(it.created_at || it.gmtCreate || it.GmtCreate || it.createTime || now_str) })).filter((kb) => kb.id && kb.name)
+        const final_cat_ids = new Set(final_categories.map(c => c.id))
+        const mapped_kbs: KnowledgeBase[] = idx_items.map((it) => {
+          const raw_cat_id = String(it.category_id || it.categoryId || it.CategoryId || it.categoryId || it.CategoryId || '')
+          const resolved_cat_id = final_cat_ids.has(raw_cat_id) ? raw_cat_id : default_cat.id
+          return {
+            id: String(it.Id || it.id || it.index_id || it.indexId || it.IndexId || ''),
+            category_id: resolved_cat_id,
+            name: String(it.Name || it.name || it.index_name || it.indexName || it.IndexName || ''),
+            file_count: Number(it.file_count || it.fileCount || it.DocumentCount || it.document_count || it.documentCount || 0),
+            created_at: String(it.created_at || it.gmtCreate || it.GmtCreate || it.createTime || now_str)
+          }
+        }).filter((kb) => kb.id && kb.name)
+        console.log('[knowledge_base] 映射后的知识库:', mapped_kbs)
         set_kb_list(mapped_kbs)
         set_active_kb_id((prev) => prev || (mapped_kbs[0]?.id || ''))
-      } catch (err: any) { set_kb_error(err?.message || '加载知识库失败') } finally { set_kb_loading(false) }
+        console.log('[knowledge_base] 激活的知识库ID:', (mapped_kbs[0]?.id || ''))
+      } catch (err: any) {
+        console.error('[knowledge_base] 加载失败:', err)
+        set_kb_error(err?.message || '加载知识库失败') 
+      } finally { 
+        set_kb_loading(false)
+        console.log('[knowledge_base] 加载完成')
+      }
     }
     void load_remote()
   }, [])
