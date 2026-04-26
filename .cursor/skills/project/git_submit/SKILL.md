@@ -213,6 +213,77 @@ description: >-
 ### 9. 反馈
 告知五号同学提交成功，并简述提交的内容以及拉取/推送的分支详情。
 
+### 10. 推送完成后自动发送飞书+企业微信通知（重要！！）
+
+<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#E65100;">&#x1F4E7; 每次推送完成后必须发送通知</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li>所有分支推送完成后，立即调用飞书和企业微信 webhook</li>
+    <li>通知内容包含：分支名、commit message、文件变更统计、<strong>推送时间</strong></li>
+    <li>方便在群里追溯每次推送的历史记录</li>
+    <li>使用 <code>Invoke-WebRequest</code>（Windows PowerShell）发送 HTTP POST 请求</li>
+  </ul>
+</div>
+
+**通知格式要求**：
+- 标题：`🚀 TRAI 代码推送通知`
+- 包含分支、commit message（**跟在推送人后面**）、变更文件数量、推送时间
+- 优先使用卡片消息（Feishu `send_card`，WeCom `markdown`）
+
+**飞书卡片格式（PowerShell）**：
+```powershell
+$feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
+$commitMsg = "文档（技能）爆炸分身更新 README Changelog，本来不想写的呜……啊呀终于不用混了！！终于不用混了！！"
+$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+$body = @{
+    msg_type = "interactive"
+    card = @{
+        config = @{ wide_screen_mode = $true }
+        header = @{
+            title = @{ tag = "plain_text"; content = "🚀 TRAI 代码推送通知" }
+            template = "blue"
+        }
+        elements = @(
+            @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
+            @{ tag = "markdown"; content = "**分支**: `wuhao / develop / main 已合并`\n**变更**: 2 个文件 (+7 -1)\n**时间**: $($timestamp)" }
+        )
+    }
+} | ConvertTo-Json -Depth 10 -Compress
+if ($feishuUrl) {
+    Invoke-WebRequest -Uri $feishuUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+}
+```
+
+**企业微信 Markdown 格式（PowerShell）**：
+```powershell
+$feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
+$wecomUrl  = $env:WECOM_CHAT_WEBHOOK_URL  # 从 backend/.env 读取，正确变量名
+$commitMsg = "文档（技能）爆炸分身更新 README Changelog，本来不想写的呜……啊呀终于不用混了！！终于不用混了！！"
+$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+$payload = @{
+    msgtype = "markdown"
+    markdown = @{
+        content = "**🚀 TRAI 代码推送通知**
+**推送人**: wuhao | **Commit**: $($commitMsg)
+**分支**: wuhao / develop / main 已合并
+**变更**: 2 个文件 (+7 -1)
+**时间**: $($timestamp)"
+    }
+}
+$body = $payload | ConvertTo-Json -Depth 10 -Compress
+if ($wecomUrl) {
+    Invoke-WebRequest -Uri $wecomUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+}
+```
+
+**实际执行时**：
+- 飞书从 `$env:NOTIFY_FEISHU_WEBHOOK` 读取（需手动配置）
+- 企业微信从 `$env:WECOM_CHAT_WEBHOOK_URL` 读取（已在 backend/.env 中配置）
+- 如果环境变量未配置，跳过该通知（不报错）
+- 通知失败也不中断流程，仅打印警告日志
+
 ---
 
 ## 快速参考
