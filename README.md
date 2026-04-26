@@ -38,7 +38,7 @@ cd trai
 
 - GitHub: https://github.com/wuhaotongxue/trai
 - Gitee: https://gitee.com/no5689/trai
-- 邮箱, 问题: wuhaotongxue@gmail.com
+- 谷歌邮箱, 问题: wuhaotongxue@gmail.com
 
 ## 问题
 
