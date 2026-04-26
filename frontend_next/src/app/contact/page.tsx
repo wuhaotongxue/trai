@@ -5,8 +5,9 @@
 
 "use client";
 
-import { useState } from "react";
-import { Send, Mail, Phone, MapPin, CheckCircle2, Clock } from "lucide-react";
+import { useState, useCallback } from "react";
+import Image from "next/image";
+import { Send, Mail, Phone, MapPin, CheckCircle2, Clock, MessageCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
@@ -26,10 +27,82 @@ const contactTypes = [
 export default function ContactPage() {
   const { translate } = useI18n();
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [selectedType, setSelectedType] = useState("other");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = () => {
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = translate("contact.error_name_required");
+    }
+
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = translate("contact.error_email_invalid");
+    }
+
+    if (formData.company.trim() && formData.company.trim().length > 15) {
+      newErrors.company = translate("contact.error_company_too_long");
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = translate("contact.error_message_required");
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData, translate]);
+
+  const handleSubmit = async () => {
+    setSubmitError("");
+    if (validateForm()) {
+      setLoading(true);
+      try {
+        const response = await fetch("/api_trai/v1/contact/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email || null,
+            company: formData.company || null,
+            contact_type: selectedType,
+            content: formData.message,
+          }),
+        });
+
+        if (response.ok) {
+          setSent(true);
+          setFormData({ name: "", email: "", company: "", message: "" });
+          setTimeout(() => setSent(false), 6000);
+        } else {
+          const data = await response.json();
+          setSubmitError(data.detail || translate("contact.submit_failed"));
+        }
+      } catch {
+        setSubmitError(translate("contact.network_error"));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   return (
@@ -104,26 +177,98 @@ export default function ContactPage() {
                   <p className="text-sm font-semibold text-slate-800 mb-2">{translate("contact.quick_title")}</p>
                   <p className="text-xs text-slate-500 leading-relaxed">{translate("contact.quick_desc")}</p>
                 </div>
+
+                {/* 微信二维码 */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                    <p className="text-sm font-semibold text-slate-800">{translate("contact.wechat_title")}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-xl shadow-sm overflow-hidden">
+                        <Image
+                          src="/weixin.jpg"
+                          alt={translate("contact.wechat_contact")}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-600">{translate("contact.wechat_contact")}</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-xl shadow-sm overflow-hidden">
+                        <Image
+                          src="/gongzhonghao.jpg"
+                          alt={translate("contact.wechat_official")}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-600">{translate("contact.wechat_official")}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* 右侧: 表单 */}
               <div className="lg:col-span-3">
+                {sent && (
+                  <div className="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-3 animate-pulse">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    <span className="font-medium">{translate("contact.submit_success")}</span>
+                  </div>
+                )}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                   <h2 className="text-lg font-bold text-slate-900 mb-5">{translate("contact.send_title")}</h2>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">{translate("contact.name_label")} *</Label>
-                        <Input className="h-10 rounded-lg" placeholder={translate("contact.name_placeholder")} />
+                        <Input
+                          className={`h-10 rounded-lg ${errors.name ? "border-red-500 focus:ring-red-100" : ""}`}
+                          placeholder={translate("contact.name_placeholder")}
+                          value={formData.name}
+                          onChange={(e) => handleChange("name", e.target.value)}
+                        />
+                        {errors.name && (
+                          <p className="text-xs text-red-500 flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            {errors.name}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm font-medium text-slate-700">{translate("contact.email_label")} *</Label>
-                        <Input className="h-10 rounded-lg" type="email" placeholder="your@email.com" />
+                        <Label className="text-sm font-medium text-slate-700">{translate("contact.email_label")}</Label>
+                        <Input
+                          className={`h-10 rounded-lg ${errors.email ? "border-red-500 focus:ring-red-100" : ""}`}
+                          type="email"
+                          placeholder="your@email.com"
+                          value={formData.email}
+                          onChange={(e) => handleChange("email", e.target.value)}
+                        />
+                        {errors.email && (
+                          <p className="text-xs text-red-500 flex items-center gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            {errors.email}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">{translate("contact.company_label")}</Label>
-                      <Input className="h-10 rounded-lg" placeholder={translate("contact.company_placeholder")} />
+                      <Input
+                        className={`h-10 rounded-lg ${errors.company ? "border-red-500 focus:ring-red-100" : ""}`}
+                        placeholder={translate("contact.company_placeholder")}
+                        value={formData.company}
+                        onChange={(e) => handleChange("company", e.target.value)}
+                      />
+                      {errors.company && (
+                        <p className="text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.company}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">{translate("contact.type_label")}</Label>
@@ -132,7 +277,12 @@ export default function ContactPage() {
                           <button
                             key={type.key}
                             type="button"
-                            className="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all"
+                            onClick={() => setSelectedType(type.key.replace("contact.type.", ""))}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                              selectedType === type.key.replace("contact.type.", "")
+                                ? "bg-blue-500 border-blue-500 text-white"
+                                : "border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
+                            }`}
                           >
                             {translate(type.key)}
                           </button>
@@ -142,16 +292,49 @@ export default function ContactPage() {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">{translate("contact.message_label")} *</Label>
                       <textarea
-                        className="w-full min-h-[120px] rounded-lg border border-slate-200 p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                        className={`w-full min-h-[120px] rounded-lg border p-3 text-sm resize-none focus:outline-none focus:ring-2 transition-all ${
+                          errors.message
+                            ? "border-red-500 focus:ring-red-100"
+                            : "border-slate-200 focus:ring-blue-100 focus:border-blue-400"
+                        }`}
                         placeholder={translate("contact.message_placeholder")}
+                        value={formData.message}
+                        onChange={(e) => handleChange("message", e.target.value)}
                       />
+                      {errors.message && (
+                        <p className="text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.message}
+                        </p>
+                      )}
                     </div>
+                    {submitError && (
+                      <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        {submitError}
+                      </div>
+                    )}
                     <Button
                       onClick={handleSubmit}
+                      disabled={loading}
                       className="h-10 px-6 font-semibold rounded-lg shadow-md shadow-blue-500/20 gap-2 w-full md:w-auto"
                     >
-                      {sent ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <Send className="h-4 w-4" />}
-                      {sent ? translate("contact.sent") : translate("contact.send_btn")}
+                      {loading ? (
+                        <>
+                          <span className="animate-spin">⟳</span>
+                          <span>提交中</span>
+                        </>
+                      ) : sent ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                          <span>{translate("contact.sent")}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" />
+                          <span>{translate("contact.send_btn")}</span>
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

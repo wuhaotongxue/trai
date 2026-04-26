@@ -390,7 +390,10 @@ def main() -> None:
 def run_server() -> None:
     """直接运行后端服务(供子进程调用)"""
     EnvFileLoader.load_local_envs()
-    init_logger(level="INFO")
+    # 使用 run.py 所在目录的绝对路径作为日志目录
+    backend_dir = Path(__file__).resolve().parent
+    log_dir = backend_dir / "logs"
+    init_logger(level="INFO", log_dir=log_dir)
     config = get_config()
 
     if config["reload"]:
