@@ -339,6 +339,82 @@ class AuditLogModel(Base):
     """扩展元数据"""
 
 
+class ContactMessageModel(Base):
+    """联系我们消息模型"""
+
+    __tablename__ = "t_contact_messages"
+    __comment__ = "联系我们消息表,存储用户提交的咨询信息"
+
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    """自增主键 ID"""
+    t_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    """提交人姓名"""
+    t_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """提交人邮箱(选填)"""
+    t_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """提交人电话(选填)"""
+    t_company: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    """公司名称(选填)"""
+    t_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    """咨询类型:presale/tech/business/purchase/channel/other"""
+    t_content: Mapped[str] = mapped_column(String(500), nullable=False)
+    """留言内容(限制50字)"""
+    t_attachment_urls: Mapped[list[str]] = mapped_column(JSON, default=list)
+    """附件 URL 列表"""
+    t_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, index=True)
+    """处理状态:pending/processed/replied"""
+    t_reply_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """回复备注"""
+    t_ip_address: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """提交者 IP 地址"""
+    t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """浏览器 User-Agent"""
+    t_submission_id: Mapped[str | None] = mapped_column(String(36), nullable=True, unique=True)
+    """提交唯一标识 UUID"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    """创建时间"""
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """更新时间"""
+
+
+class EmailConfigModel(Base):
+    """邮件配置模型"""
+
+    __tablename__ = "t_email_configs"
+    __comment__ = "邮件配置表,存储不同类型邮件的发送配置"
+
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    """自增主键 ID"""
+    t_config_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    """配置名称:contact_notify/system_notify/alert"""
+    t_host: Mapped[str] = mapped_column(String(255), nullable=False)
+    """SMTP 服务器地址"""
+    t_port: Mapped[int] = mapped_column(Integer, nullable=False)
+    """SMTP 端口"""
+    t_use_ssl: Mapped[bool] = mapped_column(default=True, nullable=False)
+    """是否使用 SSL"""
+    t_username: Mapped[str] = mapped_column(String(255), nullable=False)
+    """邮箱用户名"""
+    t_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    """邮箱密码/授权码(加密存储)"""
+    t_from_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    """发件人显示名称"""
+    t_to_emails: Mapped[list[str]] = mapped_column(JSON, default=list)
+    """默认收件人列表"""
+    t_is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    """是否启用"""
+    t_remark: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """备注说明"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    """创建时间"""
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """更新时间"""
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """更新人 user_id"""
+
+
 __all__ = [
     "Base",
     "ChatSessionModel",
@@ -353,4 +429,6 @@ __all__ = [
     "AuditLogModel",
     "DepartmentModel",
     "UserDepartmentMappingModel",
+    "ContactMessageModel",
+    "EmailConfigModel",
 ]
