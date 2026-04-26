@@ -37,6 +37,17 @@ description: >-
 
 检查是否更新了对应模块的 `README.md` 与根 `README.md` 的 `## 📝 更新日志 (Changelog)` 顶部。
 
+**修改范围检测**：
+| 修改目录 | 标注类型 | 更新范围 |
+|----------|----------|----------|
+| `backend/` | `功能（后端）` | backend/README.md + 根 README |
+| `frontend_next/` | `功能（前端）` | frontend_next/README.md + 根 README |
+| `client_electron/` | `功能（客户端）` | 根 README |
+| `desktop_client/` | `功能（桌面）` | 根 README |
+| `.cursor/skills/` | `功能（技能）` | 根 README |
+| `md/` | `功能（文档）` | 根 README |
+| 其他/根目录 | `功能（项目）` | 根 README |
+
 **特殊情况处理**：
 - 如果 README 中**没有 Changelog 章节**，直接跳过 README 更新步骤，继续执行提交流程
 - 不要报错、不要停止、不要尝试创建新章节
