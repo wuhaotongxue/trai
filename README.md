@@ -46,6 +46,15 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 更新_2026_04_26_1512
+- **新增（客户端）**: Electron 客户端国际化支持，新增 zh.ts 和 en.ts 本地翻译模块
+- **修复（客户端）**: 修复 i18n 翻译文件中 console.info 在变量定义前导致的 ReferenceError 问题
+
+### 更新_2026_04_26_1421
+- **新增（前端）**: FloatingWidget 悬浮 AI 助手组件，支持最小化/最大化/新窗口打开
+- **优化（前端）**: 优化 admin/analytics 和 admin/database 页面布局
+- **新增（前端）**: 补充 admin/en.ts 和 admin/zh.ts 翻译文件
+
 ### 更新_2026_04_25_2247
 - **界面（前端）**: 为 admin/ai、admin/quotas、admin/users/new 页面补充完整的中英文翻译 keys，修复页面内硬编码文本
 

@@ -68,7 +68,7 @@ function getInitialChatState(): InitialChatState {
 export function ChatPanel() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showGallery, setShowGallery] = useState(false);
-  const [showHistory, setShowHistory] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingSessionName, setEditingSessionName] = useState('');
   const [sessions, setSessions] = useState<ChatSession[]>(() => getInitialChatState().sessions);

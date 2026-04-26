@@ -37,4 +37,13 @@ export default defineConfig({
     ]),
     renderer(),
   ],
+  logLevel: 'debug',
+  optimizeDeps: {
+    debug: true,
+  },
+  build: {
+    minify: false,
+    sourcemap: true,
+    verbose: true,
+  },
 })
