@@ -14,6 +14,7 @@ import uuid
 import zipfile
 from io import BytesIO
 from pathlib import Path
+from typing import Annotated
 
 import markdown
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
@@ -977,7 +978,7 @@ class ToolsRouter:
         current_user: CurrentUser,
         file: UploadFile = File(...),
         quality: int = Form(60, description="压缩质量 (1-100)"),
-        target_size_kb: int | None = Form(None, description="目标文件大小(KB)"),
+        target_size_kb: Annotated[int | None, Form(description="目标文件大小(KB)")] = None,
         s3_service: S3StorageService = Depends(S3StorageService),
     ) -> ToolResultResponse:
         """压缩图片并上传到 S3 返回限时下载链接."""
@@ -1011,10 +1012,10 @@ class ToolsRouter:
         current_user: CurrentUser,
         file: UploadFile = File(...),
         target_format: str = Form(..., description="目标格式"),
-        sizes: str | None = Form(None, description="尺寸列表"),
-        width: int | None = Form(None, description="宽度"),
-        height: int | None = Form(None, description="高度"),
-        target_size_kb: int | None = Form(None, description="目标大小(KB)"),
+        sizes: Annotated[str | None, Form(description="尺寸列表")] = None,
+        width: Annotated[int | None, Form(description="宽度")] = None,
+        height: Annotated[int | None, Form(description="高度")] = None,
+        target_size_kb: Annotated[int | None, Form(description="目标大小(KB)")] = None,
         s3_service: S3StorageService = Depends(S3StorageService),
     ) -> ToolResultResponse:
         """转换图片格式并上传到 S3 返回限时下载链接."""

@@ -232,9 +232,9 @@ async def release_client(
     installer_exe: Annotated[UploadFile, File(..., description="安装包 exe 文件")],
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
-    release_notes: str | None = Form(None, description="更新日志内容"),
-    agent_role: Annotated[str | None, Header(None, description="AI 角色名称")] = None,
-    wecom_groups: Annotated[str | None, Form(None, description="企微群列表，逗号分隔，如 wuhao,wudu")] = None,
+    release_notes: Annotated[str | None, Form(description="更新日志内容")] = None,
+    agent_role: Annotated[str | None, Header(description="AI 角色名称")] = None,
+    wecom_groups: Annotated[str | None, Form(description="企微群列表，逗号分隔，如 wuhao,wudu")] = None,
 ) -> ReleaseResponse:
     """管理员发布新版本的 Electron 客户端并上传至 S3.
 

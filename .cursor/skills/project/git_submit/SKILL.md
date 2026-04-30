@@ -230,6 +230,7 @@ description: >-
 - 包含分支、commit message（**跟在推送人后面**）、变更文件数量、推送时间
 - **必须添加当前角色名称**（如「地理专家」「爆炸分身」等）
 - **必须添加角色专属评论**：不同角色风格不同，不一定是吐槽，可以是知识科普、心情表达、专业评价等
+- **必须添加变更详情**：列出本次变更的主要文件/模块
 - 优先使用卡片消息（Feishu `send_card`，WeCom `markdown`）
 
 **角色专属评论参考**：
@@ -265,7 +266,10 @@ $body = @{
         elements = @(
             @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
             @{ tag = "markdown"; content = "**角色**: $($roleName) | $($roleComment)" }
-            @{ tag = "markdown"; content = "**分支**: `wuhao / develop / main 已合并`\n**变更**: 2 个文件 (+76 -22)\n**时间**: $($timestamp)" }
+            @{ tag = "markdown"; content = "**变更详情**:
+- 后端: release_client.py 支持多企微群发送
+- 前端: client_release/page.tsx 添加企微群选择 UI" }
+            @{ tag = "markdown"; content = "**变更**: 2 个文件 (+76 -22)\n**时间**: $($timestamp)" }
         )
     }
 } | ConvertTo-Json -Depth 10 -Compress
@@ -293,7 +297,9 @@ $payload = @{
 
 **角色**: $($roleName) | $($roleComment)
 
-**分支**: wuhao / develop / main 已合并
+**变更详情**:
+- 后端: release_client.py 支持多企微群发送
+- 前端: client_release/page.tsx 添加企微群选择 UI
 
 **变更**: 2 个文件 (+76 -22)
 
