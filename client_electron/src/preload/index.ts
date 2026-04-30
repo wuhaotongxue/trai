@@ -78,11 +78,4 @@ contextBridge.exposeInMainWorld('electron_api', {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }
   },
-  // 通用的 IPC 事件监听
-  on: (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.on(channel, callback)
-  },
-  off: (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.removeListener(channel, callback)
-  }
 })

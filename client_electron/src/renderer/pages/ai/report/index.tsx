@@ -117,6 +117,7 @@ const AiReport: React.FC = () => {
     <>
       {report_templates.map(template => (
         <button
+          type="button"
           key={template.id}
           onClick={() => select_template(template)}
           style={{
@@ -278,6 +279,7 @@ const AiReport: React.FC = () => {
             <h2 style={{ fontSize: '15px', margin: 0, color: 'var(--ui_text)', fontWeight: '600' }}>生成结果</h2>
             {generated_report && (
               <button
+                type="button"
                 onClick={handle_download}
                 style={{
                   display: 'flex',

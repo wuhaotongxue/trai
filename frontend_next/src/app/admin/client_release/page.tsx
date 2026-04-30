@@ -8,11 +8,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Cpu, Plus, Download, Search, RefreshCw, Clock, Upload, X, FileText, Zap, CheckCircle, XCircle, Loader2, Trash2, Copy, ChevronLeft, ChevronRight } from "lucide-react";
+import { Cpu, Plus, Download, Search, RefreshCw, Clock, Upload, X, FileText, Zap, CheckCircle, XCircle, Loader2, Trash2, Copy, ChevronLeft, ChevronRight, Bot } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request } from "@/lib/api_client";
+import { adminApi } from "@/lib/api_client";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,16 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/toast/use_toast";
 import { cn } from "@/lib/utils";
+
+type AgentRole = {
+  t_id: number;
+  t_role_name: string;
+  t_role_comment: string;
+  t_role_keyword: string | null;
+  t_style_type: string;
+  t_priority: number;
+  t_is_active: boolean;
+};
 
 type ReleaseItem = {
   id: number;
@@ -59,10 +70,22 @@ export default function ClientReleasePage() {
   const [submitting, setSubmitting] = useState(false);
   const [buildStatus, setBuildStatus] = useState<BuildStatus>({ status: "idle", message: null, version: null, error: null });
   const [releaseNotes, setReleaseNotes] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [agentRoles, setAgentRoles] = useState<AgentRole[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const { toast } = useToast();
   const [initDone, setInitDone] = useState(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchAgentRoles = useCallback(async () => {
+    try {
+      const roles = await adminApi.listAgentRoles({ is_active: true });
+      setAgentRoles(roles);
+      setSelectedRole(prev => prev || (roles.length > 0 ? roles[0].t_role_name : ""));
+    } catch (e) {
+      console.error("Fetch agent roles failed", e);
+    }
+  }, []);
 
   const fetchReleases = useCallback(async (pageNum = 1, search = searchQuery) => {
     setLoading(true);
@@ -145,6 +168,7 @@ export default function ClientReleasePage() {
     setInitDone(true);
     void fetchReleases();
     void fetchBuildStatus();
+    void fetchAgentRoles();
     // 初始轮询：空闲状态 30 秒
     pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 30000);
     return () => {
@@ -163,6 +187,7 @@ export default function ClientReleasePage() {
     try {
       await request("/admin/client/build_release", {
         method: "POST",
+        headers: selectedRole ? { "agent-role": selectedRole } : undefined,
         body: JSON.stringify({ release_notes: releaseNotes }),
       });
       // 后端已返回 running，状态由轮询驱动更新
@@ -300,6 +325,30 @@ export default function ClientReleasePage() {
                     onChange={e => setReleaseNotes(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">此内容将包含在飞书通知中</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="agentRole" className="flex items-center gap-2">
+                    <Bot className="h-4 w-4" />
+                    AI 角色
+                  </Label>
+                  <select
+                    id="agentRole"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={selectedRole}
+                    onChange={e => setSelectedRole(e.target.value)}
+                  >
+                    <option value="">不指定角色</option>
+                    {agentRoles.map(role => (
+                      <option key={role.t_id} value={role.t_role_name}>
+                        {role.t_role_name}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedRole && agentRoles.find(r => r.t_role_name === selectedRole) && (
+                    <p className="text-xs text-muted-foreground">
+                      {agentRoles.find(r => r.t_role_name === selectedRole)?.t_role_comment}
+                    </p>
+                  )}
                 </div>
               </div>
               <DialogFooter className="pt-4">

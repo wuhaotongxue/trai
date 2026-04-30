@@ -13,8 +13,7 @@ from api.routers.admin.admin_deps import get_current_admin_user
 from infrastructure.database.database import get_session
 from infrastructure.database.models import AgentRoleModel
 
-
-router = APIRouter(prefix="/admin/agent_roles", tags=["AI 角色管理"])
+router = APIRouter(prefix="/agent_roles", tags=["AI 角色管理"])
 
 
 def get_db():

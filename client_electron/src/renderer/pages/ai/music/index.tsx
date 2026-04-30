@@ -100,6 +100,7 @@ const AiMusic: React.FC = () => {
     <>
       {categories.map(category => (
         <button
+          type="button"
           key={category.id}
           onClick={() => {
             set_active_category(category.id)
@@ -147,6 +148,7 @@ const AiMusic: React.FC = () => {
     <>
       {filtered_styles.map(style => (
         <button
+          type="button"
           key={style.id}
           onClick={() => apply_style(style)}
           style={{
@@ -217,6 +219,7 @@ const AiMusic: React.FC = () => {
               />
               {prompt && (
                 <button
+                  type="button"
                   onClick={() => set_prompt('')}
                   style={{
                     position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
@@ -232,6 +235,7 @@ const AiMusic: React.FC = () => {
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
+              type="button"
               onClick={handle_generate}
               disabled={loading || !prompt.trim()}
               style={{

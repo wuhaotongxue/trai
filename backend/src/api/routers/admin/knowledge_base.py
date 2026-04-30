@@ -905,26 +905,66 @@ class KnowledgeBaseDemoService:
         异常:
             HTTPException: 三方调用失败时抛出.
         """
-        client, bailian_models, workspace_id = self._create_bailian_client()
-        effective_page_size = page_size if page_size and page_size > 0 else 10
+        try:
+            client, bailian_models, workspace_id = self._create_bailian_client()
+            effective_page_size = page_size if page_size and page_size > 0 else 10
 
-        if page_number and page_number > 0:
-            provider_page_size = 10
-            start_index = (page_number - 1) * effective_page_size
-            provider_start_page = start_index // provider_page_size + 1
-            provider_start_offset = start_index % provider_page_size
-            provider_need = effective_page_size + provider_start_offset
-            provider_pages = (provider_need + provider_page_size - 1) // provider_page_size
-            provider_end_page = provider_start_page + provider_pages - 1
+            if page_number and page_number > 0:
+                provider_page_size = 10
+                start_index = (page_number - 1) * effective_page_size
+                provider_start_page = start_index // provider_page_size + 1
+                provider_start_offset = start_index % provider_page_size
+                provider_need = effective_page_size + provider_start_offset
+                provider_pages = (provider_need + provider_page_size - 1) // provider_page_size
+                provider_end_page = provider_start_page + provider_pages - 1
 
-            gathered: list[dict[str, Any]] = []
-            raw: dict[str, Any] = {}
+                gathered: list[dict[str, Any]] = []
+                raw: dict[str, Any] = {}
+                total: int | None = None
+                for p in range(provider_start_page, provider_end_page + 1):
+                    req = bailian_models.ListIndexFileDetailsRequest(
+                        index_id=index_id,
+                        page_number=str(p),
+                        page_size=str(provider_page_size),
+                    )
+                    resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
+                    raw = self._extract_raw(resp)
+                    body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+                    if isinstance(body, dict) and total is None:
+                        total = self._extract_total(body)
+                    items = self._extract_list(body)
+                    if items:
+                        gathered.extend(items)
+
+                    if len(items) < provider_page_size:
+                        break
+
+                items = gathered[provider_start_offset : provider_start_offset + effective_page_size]
+                if total is None:
+                    total = self._count_index_files(client, bailian_models, workspace_id, index_id, provider_page_size)
+                return KnowledgeBaseListResponse(
+                    items=items,
+                    raw={
+                        **raw,
+                        "provider_page_size": provider_page_size,
+                        "provider_start_page": provider_start_page,
+                        "provider_end_page": provider_end_page,
+                    },
+                    total=total,
+                    page_number=page_number,
+                    page_size=effective_page_size,
+                )
+
+            all_items: list[dict[str, Any]] = []
+            pages = 0
             total: int | None = None
-            for p in range(provider_start_page, provider_end_page + 1):
+            seen_ids: set[str] = set()
+            while True:
+                pages += 1
                 req = bailian_models.ListIndexFileDetailsRequest(
                     index_id=index_id,
-                    page_number=str(p),
-                    page_size=str(provider_page_size),
+                    page_number=str(pages),
+                    page_size=str(effective_page_size),
                 )
                 resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
                 raw = self._extract_raw(resp)
@@ -932,75 +972,39 @@ class KnowledgeBaseDemoService:
                 if isinstance(body, dict) and total is None:
                     total = self._extract_total(body)
                 items = self._extract_list(body)
-                if items:
-                    gathered.extend(items)
+                if not items:
+                    return KnowledgeBaseListResponse(
+                        items=all_items,
+                        raw={**raw, "fetched_pages": pages},
+                        total=total if total is not None else len(all_items),
+                    )
 
-                if len(items) < provider_page_size:
-                    break
+                new_items: list[dict[str, Any]] = []
+                for it in items:
+                    fid = str(
+                        it.get("Id") or it.get("id") or it.get("file_id") or it.get("fileId") or it.get("FileId") or ""
+                    ).strip()
+                    if fid and fid not in seen_ids:
+                        seen_ids.add(fid)
+                        new_items.append(it)
+                if new_items:
+                    all_items.extend(new_items)
+                else:
+                    return KnowledgeBaseListResponse(
+                        items=all_items,
+                        raw={**raw, "fetched_pages": pages, "stopped_reason": "no_new_items"},
+                        total=total if total is not None else len(all_items),
+                    )
 
-            items = gathered[provider_start_offset : provider_start_offset + effective_page_size]
-            if total is None:
-                total = self._count_index_files(client, bailian_models, workspace_id, index_id, provider_page_size)
-            return KnowledgeBaseListResponse(
-                items=items,
-                raw={
-                    **raw,
-                    "provider_page_size": provider_page_size,
-                    "provider_start_page": provider_start_page,
-                    "provider_end_page": provider_end_page,
-                },
-                total=total,
-                page_number=page_number,
-                page_size=effective_page_size,
-            )
-
-        all_items: list[dict[str, Any]] = []
-        pages = 0
-        total: int | None = None
-        seen_ids: set[str] = set()
-        while True:
-            pages += 1
-            req = bailian_models.ListIndexFileDetailsRequest(
-                index_id=index_id,
-                page_number=str(pages),
-                page_size=str(effective_page_size),
-            )
-            resp = self._call_bailian_api(client.list_index_file_details, workspace_id, req)
-            raw = self._extract_raw(resp)
-            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
-            if isinstance(body, dict) and total is None:
-                total = self._extract_total(body)
-            items = self._extract_list(body)
-            if not items:
-                return KnowledgeBaseListResponse(
-                    items=all_items,
-                    raw={**raw, "fetched_pages": pages},
-                    total=total if total is not None else len(all_items),
-                )
-
-            new_items: list[dict[str, Any]] = []
-            for it in items:
-                fid = str(
-                    it.get("Id") or it.get("id") or it.get("file_id") or it.get("fileId") or it.get("FileId") or ""
-                ).strip()
-                if fid and fid not in seen_ids:
-                    seen_ids.add(fid)
-                    new_items.append(it)
-            if new_items:
-                all_items.extend(new_items)
-            else:
-                return KnowledgeBaseListResponse(
-                    items=all_items,
-                    raw={**raw, "fetched_pages": pages, "stopped_reason": "no_new_items"},
-                    total=total if total is not None else len(all_items),
-                )
-
-            if len(items) < effective_page_size:
-                return KnowledgeBaseListResponse(
-                    items=all_items,
-                    raw={**raw, "fetched_pages": pages},
-                    total=total if total is not None else len(all_items),
-                )
+                if len(items) < effective_page_size:
+                    return KnowledgeBaseListResponse(
+                        items=all_items,
+                        raw={**raw, "fetched_pages": pages},
+                        total=total if total is not None else len(all_items),
+                    )
+        except HTTPException as e:
+            fallback_raw = {"fallback": True, "error": e.detail}
+            return KnowledgeBaseListResponse(items=[], raw=fallback_raw, total=0)
 
 
 class KnowledgeBaseDemoController:

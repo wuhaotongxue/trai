@@ -9,6 +9,8 @@ import os
 import sys
 from pathlib import Path
 
+from loguru import logger
+
 _backend_path = Path(__file__).parent.parent / "backend"
 if _backend_path.exists():
     sys.path.insert(0, str(_backend_path.resolve()))
@@ -25,10 +27,10 @@ def main():
         # 检查是否已存在
         existing = session.query(ClientReleaseModel).filter_by(t_version=version).first()
         if existing:
-            print(f"[INFO] Version {version} already exists, activating...")
+            logger.info(f"Version {version} already exists, activating...")
             existing.t_is_active = True
             session.commit()
-            print(f"[OK] Version {version} activated!")
+            logger.success(f"Version {version} activated!")
             return
 
         # 创建新记录
@@ -42,11 +44,11 @@ def main():
         )
         session.add(release)
         session.commit()
-        print(f"[OK] Version {version} added and activated!")
+        logger.success(f"Version {version} added and activated!")
 
     except Exception as e:
         session.rollback()
-        print(f"[ERROR] {e}")
+        logger.error(f"{e}")
     finally:
         session.close()
 

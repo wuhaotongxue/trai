@@ -61,6 +61,7 @@ const ComfyUI: React.FC = () => {
     <>
       {workflow_presets.map(workflow => (
         <button
+          type="button"
           key={workflow.id}
           onClick={() => select_workflow(workflow)}
           style={{
@@ -132,6 +133,7 @@ const ComfyUI: React.FC = () => {
           
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
+              type="button"
               onClick={handle_generate}
               disabled={loading}
               style={{

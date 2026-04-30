@@ -9,6 +9,8 @@ import os
 import sys
 from pathlib import Path
 
+from loguru import logger
+
 # 确保 backend 路径
 _backend_path = Path(__file__).parent.parent / "backend"
 if _backend_path.exists():
@@ -37,13 +39,13 @@ def main():
         
         if result.rowcount > 0:
             session.commit()
-            print(f"[OK] Version {version} activated!")
+            logger.success(f"Version {version} activated!")
         else:
-            print(f"[ERROR] Version {version} not found")
+            logger.error(f"Version {version} not found")
             
     except Exception as e:
         session.rollback()
-        print(f"[ERROR] {e}")
+        logger.error(f"{e}")
     finally:
         session.close()
 

@@ -432,7 +432,7 @@ export const register_ipc_handlers = (): void => {
       return {
         success: true,
         data: {
-          transcript: `这是音频文件 "${file_path.split('\\').pop()}" 的语音识别结果。\n\n在实际应用中，这里会显示真实的语音识别文本。支持中文、英文、日文、韩文等多种语言。`,
+          transcript: `这是音频文件 "${file_path.split('\\').pop()}" 的语音识别结果。\n\n在实际应用中, 这里会显示真实的语音识别文本. 支持中文、英文、日文、韩文等多种语言.`,
           language: language,
           duration: 120000
         }
