@@ -21,8 +21,11 @@ logger = get_logger()
 
 # 飞书发布通知 Webhook, 从环境变量读取, 优先使用已有的 NOTIFY_FEISHU_WEBHOOK
 FEISHU_RELEASE_WEBHOOK = os.getenv("NOTIFY_FEISHU_WEBHOOK", "")
-# 企微通知 Webhook
-WECOM_WEBHOOK = os.getenv("NOTIFY_WECOM_WEBHOOK", "")
+# 企微通知 Webhook 列表（支持多个群）
+WECOM_WEBHOOKS = {
+    "wuhao": os.getenv("NOTIFY_WECOM_WEBHOOK", ""),  # 默认 wuhao 群
+    "wudu": os.getenv("NOTIFY_WECOM_WUDU_WEBHOOK", ""),  # wudu 群
+}
 
 
 class ReleaseClientUseCase:
@@ -58,13 +61,22 @@ class ReleaseClientUseCase:
                 "地理专家": "说到版本发布呀～这条消息已成功抵达群聊坐标！",
             }
 
-    async def execute(self, file_path: str, version: str, changelog: str) -> dict[str, Any]:
+    async def execute(
+        self,
+        file_path: str,
+        version: str,
+        changelog: str,
+        agent_role: str | None = None,
+        wecom_groups: list[str] | None = None,
+    ) -> dict[str, Any]:
         """执行发布流程, 包括上传文件到 S3 并发送通知.
 
         Args:
             file_path: 待上传的文件本地路径
             version: 发布的版本号
             changelog: 更新日志内容
+            agent_role: AI 角色名称
+            wecom_groups: 企微群列表，支持 ["wuhao", "wudu"]
 
         Returns:
             dict[str, Any]: 包含执行状态、版本号及下载 URL 的字典
@@ -81,7 +93,7 @@ class ReleaseClientUseCase:
             download_url = self._storage.get_file_url(s3_key)
 
             # 推送通知
-            self._send_notifications(version, download_url, changelog)
+            self._send_notifications(version, download_url, changelog, agent_role=agent_role, wecom_groups=wecom_groups)
 
             return {"status": "success", "version": version, "url": download_url}
 
@@ -97,6 +109,7 @@ class ReleaseClientUseCase:
         publisher: str | None = None,
         publisher_role: str | None = None,
         agent_role: str | None = None,
+        wecom_groups: list[str] | None = None,
     ) -> None:
         """发送发布通知 (飞书富文本卡片 + 企微 Markdown).
 
@@ -107,6 +120,7 @@ class ReleaseClientUseCase:
             publisher: 发布者用户名
             publisher_role: 发布者角色
             agent_role: AI 角色名称
+            wecom_groups: 企微群列表，支持 ["wuhao", "wudu"]，为空则默认发送 wuhao 群
         """
         
         # 角色专属评论映射表（从数据库加载）
@@ -184,8 +198,16 @@ class ReleaseClientUseCase:
             except Exception as e:
                 logger.error(f"Failed to send Feishu notification: {e}")
 
-        # 企微 Markdown
-        if WECOM_WEBHOOK:
+        # 企微 Markdown - 支持多群发送
+        # 确定要发送的群列表，默认 wuhao 群
+        if wecom_groups:
+            groups_to_send = [g for g in wecom_groups if g in WECOM_WEBHOOKS and WECOM_WEBHOOKS[g]]
+        else:
+            # 默认发送 wuhao 群
+            groups_to_send = ["wuhao"] if WECOM_WEBHOOKS.get("wuhao") else []
+
+        for group_name in groups_to_send:
+            wecom_url = WECOM_WEBHOOKS[group_name]
             publisher_line = ""
             if publisher:
                 role_text = f"({publisher_role})" if publisher_role else ""
@@ -205,6 +227,7 @@ class ReleaseClientUseCase:
                 }
             }
             try:
-                requests.post(WECOM_WEBHOOK, json=wecom_msg, timeout=10)
+                requests.post(wecom_url, json=wecom_msg, timeout=10)
+                logger.info(f"WeCom notification sent to {group_name}: {wecom_url}")
             except Exception as e:
-                logger.error(f"Failed to send WeCom notification: {e}")
+                logger.error(f"Failed to send WeCom notification to {group_name}: {e}")
