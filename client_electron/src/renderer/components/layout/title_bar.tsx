@@ -8,25 +8,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown, Minus, Square, X, Maximize2 } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
-// 直接使用中文文本，不使用翻译函数
-function t(key: string): string {
-  const translations: Record<string, string> = {
-    switch_to_light: '切换到亮色模式',
-    switch_to_dark: '切换到深色模式',
-    refresh: '刷新',
-    show_logs: '显示日志',
-    hide_logs: '隐藏日志',
-    system_logs: '系统日志',
-    clear: '清空',
-    close: '关闭',
-    no_logs: '暂无日志',
-    caps_lock_on: '大写锁定已开启',
-    caps_lock_off: '大写锁定已关闭'
-  }
-  return translations[key] || key
-}
 import { use_locale_store } from '@/store/locale'
-import { Locale } from '@/i18n'
+import { Locale, translate } from '@/i18n'
 
 const TitleBar: React.FC = () => {
   const { logs, show_logs, clear_logs, toggle_logs } = use_log_store()
@@ -137,7 +120,7 @@ const TitleBar: React.FC = () => {
         <button
           className="no-drag-region"
           type="button"
-          title={theme === 'dark' ? t('switch_to_light') : t('switch_to_dark')}
+          title={theme === 'dark' ? translate('switch_to_light') : translate('switch_to_dark')}
           onClick={switch_theme}
           style={{
             background: 'transparent',
@@ -244,9 +227,9 @@ const TitleBar: React.FC = () => {
         <button
           className="no-drag-region"
           type="button"
-          title={t('refresh')}
+          title={translate('refresh')}
           onClick={() => {
-            show(t('refresh') + '...', 0)
+            show(translate('refresh') + '...', 0)
             setTimeout(() => window.location.reload(), 800)
           }}
           style={{
@@ -272,7 +255,7 @@ const TitleBar: React.FC = () => {
           <button
             className="no-drag-region"
             type="button"
-            title={show_logs ? t('hide_logs') : t('show_logs')}
+            title={show_logs ? translate('hide_logs') : translate('show_logs')}
             onClick={toggle_logs}
             style={{
               background: show_logs ? 'var(--ui_accent_light)' : 'transparent',
@@ -333,12 +316,12 @@ const TitleBar: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '0 4px' }}>
-                <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>{t('system_logs')}</h3>
+                <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>{translate('system_logs')}</h3>
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {[
-                    { label: t('refresh'), action: () => window.location.reload() },
-                    { label: t('clear'), action: clear_logs },
-                    { label: t('close'), action: toggle_logs }
+                    { label: translate('refresh'), action: () => window.location.reload() },
+                    { label: translate('clear'), action: clear_logs },
+                    { label: translate('close'), action: toggle_logs }
                   ].map(({ label, action }) => (
                     <button
                       key={label}
@@ -367,7 +350,7 @@ const TitleBar: React.FC = () => {
                 {logs.length > 0 ? logs.map((log, i) => (
                   <div key={i} style={{ marginBottom: '2px', wordBreak: 'break-all' }}>{log}</div>
                 )) : (
-                  <div style={{ color: 'var(--ui_text_muted)', padding: '8px 0' }}>{t('no_logs')}</div>
+                  <div style={{ color: 'var(--ui_text_muted)', padding: '8px 0' }}>{translate('no_logs')}</div>
                 )}
               </div>
             </div>
@@ -398,7 +381,7 @@ const TitleBar: React.FC = () => {
           }}
         >
           <span style={{ fontSize: '14px' }}>{caps_lock_enabled ? '🔒' : '🔓'}</span>
-          {caps_lock_enabled ? t('caps_lock_on') : t('caps_lock_off')}
+          {caps_lock_enabled ? translate('caps_lock_on') : translate('caps_lock_off')}
         </div>
       )}
 

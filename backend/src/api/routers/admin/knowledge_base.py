@@ -234,7 +234,6 @@ class KnowledgeBaseDemoService:
         """
         try:
             return fn(*args, **kwargs)
-            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -872,11 +871,15 @@ class KnowledgeBaseDemoService:
         """
         client, bailian_models, workspace_id = self._create_bailian_client()
         req = bailian_models.ListIndicesRequest(index_name=index_name, page_number="1", page_size="100")
-        resp = self._call_bailian_api(client.list_indices, workspace_id, req)
-        raw = self._extract_raw(resp)
-        body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
-        items = self._extract_list(body)
-        return KnowledgeBaseListResponse(items=items, raw=raw)
+        try:
+            resp = self._call_bailian_api(client.list_indices, workspace_id, req)
+            raw = self._extract_raw(resp)
+            body = raw.get("data") if isinstance(raw.get("data"), dict) else raw
+            items = self._extract_list(body)
+            return KnowledgeBaseListResponse(items=items, raw=raw)
+        except HTTPException as e:
+            fallback_raw = {"fallback": True, "error": e.detail}
+            return KnowledgeBaseListResponse(items=[], raw=fallback_raw)
 
     def list_index_files(
         self,
@@ -1037,7 +1040,7 @@ class KnowledgeBaseDemoController:
         判断是否为超级管理员.
 
         规则:
-            目前以 username=admin 作为超级管理员标识.
+            以 role=admin 或 username=admin/wuhao 作为超级管理员标识.
 
         参数:
             current_user: 当前管理员.
@@ -1048,7 +1051,9 @@ class KnowledgeBaseDemoController:
         异常:
             无.
         """
-        return str(current_user.get("username") or "") == "admin"
+        if str(current_user.get("role") or "") == "admin":
+            return True
+        return str(current_user.get("username") or "") in ("admin", "wuhao")
 
     def _get_owner_prefix(self, current_user: CurrentUser) -> str:
         """

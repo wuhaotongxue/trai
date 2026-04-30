@@ -6,6 +6,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react'
 import { use_auth_store } from '@/store/auth'
+import { translate } from '@/i18n'
 import { User, Upload, KeyRound, Settings as SettingsIcon, Monitor, ChevronRight, Globe, PanelLeftClose, PanelLeftOpen, List, RefreshCw } from 'lucide-react'
 import { UpdatePanel } from './components'
 
@@ -108,11 +109,11 @@ const Settings: React.FC = () => {
     if (!file) return
     
     if (!file.type.startsWith('image/')) {
-      alert('请选择图片文件')
+      alert(translate('select_image_file'))
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('图片大小不能超过 2MB')
+      alert(translate('image_size_limit'))
       return
     }
     

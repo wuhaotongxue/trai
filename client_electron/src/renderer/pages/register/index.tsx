@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Sparkles, Eye, EyeOff } from 'lucide-react'
 import TitleBar from '@/components/layout/title_bar'
-import { t } from '@/i18n'
+import { translate } from '@/i18n'
 
 const Register: React.FC = () => {
   const [username, set_username] = useState('')
@@ -44,13 +44,13 @@ const Register: React.FC = () => {
   const handle_submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username || !email || !password) {
-      set_error_msg(t('empty_credentials'))
+      set_error_msg(translate('empty_credentials'))
       set_form_shake(true)
       setTimeout(() => set_form_shake(false), 600)
       return
     }
     if (password !== confirm_password) {
-      set_error_msg(t('password_mismatch'))
+      set_error_msg(translate('password_mismatch'))
       set_form_shake(true)
       setTimeout(() => set_form_shake(false), 600)
       return
@@ -59,9 +59,9 @@ const Register: React.FC = () => {
     try {
       const res = await window.electron_api.auth_register({ username, email, password })
       if (res.success) navigate('/login')
-      else set_error_msg(res.error || t('register_failed'))
+      else set_error_msg(res.error || translate('register_failed'))
     } catch (err: unknown) {
-      set_error_msg(String((err as Error)?.message || t('register_error')))
+      set_error_msg(String((err as Error)?.message || translate('register_error')))
     } finally {
       set_is_registering(false)
     }
@@ -75,11 +75,11 @@ const Register: React.FC = () => {
         {/* 左侧品牌区 */}
         <div style={{ flex: 1, background: 'linear-gradient(160deg, #0f172a 0%, #1e3a5f 40%, #0c4a6e 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
           {/* 动态光晕 */}
-          <div style={{ position: 'absolute', top: '20%', left: '15%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(14,165,233,0.25) 0%, transparent 70%)', animation: 'pulse 5s ease-in-out infinite' }} />
-          <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '180px', height: '180px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56,189,248,0.2) 0%, transparent 70%)', animation: 'pulse 7s ease-in-out infinite 2s' }} />
-          <div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translateX(-50%)', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 60%)' }} />
-          <div style={{ position: 'absolute', top: '55%', right: '20%', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%)', animation: 'pulse 6s ease-in-out infinite 1s' }} />
-          <div style={{ position: 'absolute', bottom: '30%', left: '20%', width: '70px', height: '70px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)', animation: 'float 7s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', top: '20%', left: '15%', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradientranslate(circle, rgba(14,165,233,0.25) 0%, transparent 70%)', animation: 'pulse 5s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '180px', height: '180px', borderRadius: '50%', background: 'radial-gradientranslate(circle, rgba(56,189,248,0.2) 0%, transparent 70%)', animation: 'pulse 7s ease-in-out infinite 2s' }} />
+          <div style={{ position: 'absolute', top: '40%', left: '50%', transform: 'translateX(-50%)', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradientranslate(circle, rgba(255,255,255,0.04) 0%, transparent 60%)' }} />
+          <div style={{ position: 'absolute', top: '55%', right: '20%', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradientranslate(circle, rgba(56,189,248,0.15) 0%, transparent 70%)', animation: 'pulse 6s ease-in-out infinite 1s' }} />
+          <div style={{ position: 'absolute', bottom: '30%', left: '20%', width: '70px', height: '70px', borderRadius: '50%', background: 'radial-gradientranslate(circle, rgba(255,255,255,0.08) 0%, transparent 70%)', animation: 'float 7s ease-in-out infinite' }} />
 
           {/* 左侧装饰线条 */}
           <div style={{ position: 'absolute', top: '30%', left: '8%', display: 'flex', flexDirection: 'column', gap: '12px', animation: 'fadeInLeft 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both' }}>
@@ -158,14 +158,14 @@ const Register: React.FC = () => {
             <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--ui_accent), #0ea5e9, #38bdf8)' }} />
             <div style={{ padding: '36px 32px' }}>
               <div style={{ marginBottom: '28px', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both' }}>
-                <h2 style={{ color: 'var(--ui_text)', margin: '0 0 6px 0', fontSize: '22px', fontWeight: 700 }}>{t('register')}</h2>
+                <h2 style={{ color: 'var(--ui_text)', margin: '0 0 6px 0', fontSize: '22px', fontWeight: 700 }}>{translate('register')}</h2>
                 <p style={{ color: 'var(--ui_text_muted)', margin: 0, fontSize: '13px' }}>Join us today. Start creating with AI.</p>
               </div>
 
               <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {/* 用户名 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('username')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('username')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type="text" value={username} onChange={(e) => set_username(e.target.value)} autoComplete="username"
                       onFocus={() => set_active_input('username')}
@@ -179,7 +179,7 @@ const Register: React.FC = () => {
                         boxShadow: active_input === 'username' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
                         transform: active_input === 'username' ? 'translateY(-1px)' : 'translateY(0)',
                       }}
-                      placeholder={t('enter_username')} />
+                      placeholder={translate('enter_username')} />
                     {active_input === 'username' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -188,7 +188,7 @@ const Register: React.FC = () => {
 
                 {/* 邮箱 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.22s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('email')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('email')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type="email" value={email} onChange={(e) => set_email(e.target.value)} autoComplete="email"
                       onFocus={() => set_active_input('email')}
@@ -202,7 +202,7 @@ const Register: React.FC = () => {
                         boxShadow: active_input === 'email' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
                         transform: active_input === 'email' ? 'translateY(-1px)' : 'translateY(0)',
                       }}
-                      placeholder={t('enter_email')} />
+                      placeholder={translate('enter_email')} />
                     {active_input === 'email' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -211,7 +211,7 @@ const Register: React.FC = () => {
 
                 {/* 密码 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.24s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('password')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('password')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={pwd_visible ? 'text' : 'password'} value={password} onChange={(e) => set_password(e.target.value)} autoComplete="new-password"
                       onFocus={() => set_active_input('password')}
@@ -225,7 +225,7 @@ const Register: React.FC = () => {
                         boxShadow: active_input === 'password' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
                         transform: active_input === 'password' ? 'translateY(-1px)' : 'translateY(0)',
                       }}
-                      placeholder={t('enter_password')} />
+                      placeholder={translate('enter_password')} />
                     {active_input === 'password' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -255,7 +255,7 @@ const Register: React.FC = () => {
 
                 {/* 确认密码 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.26s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('confirm_password')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('confirm_password')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={confirm_pwd_visible ? 'text' : 'password'} value={confirm_password} onChange={(e) => set_confirm_password(e.target.value)} autoComplete="new-password"
                       onFocus={() => set_active_input('confirm')}
@@ -269,7 +269,7 @@ const Register: React.FC = () => {
                         boxShadow: confirm_password && password !== confirm_password ? '0 0 0 3px var(--ui_danger_light)' : active_input === 'confirm' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
                         transform: active_input === 'confirm' ? 'translateY(-1px)' : 'translateY(0)',
                       }}
-                      placeholder={t('reenter_password')} />
+                      placeholder={translate('reenter_password')} />
                     {active_input === 'confirm' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -336,7 +336,7 @@ const Register: React.FC = () => {
                   {is_registering ? (
                     <><div className="typing-dots"><span /><span /><span /></div>Creating...</>
                   ) : (
-                    <><Sparkles size={15} />{t('register')}</>
+                    <><Sparkles size={15} />{translate('register')}</>
                   )}
                 </button>
 
