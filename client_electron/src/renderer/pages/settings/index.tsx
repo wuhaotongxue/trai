@@ -195,6 +195,7 @@ const Settings: React.FC = () => {
                 />
               </div>
               <button 
+                type="button"
                 onClick={handle_save}
                 style={{
                   padding: '12px 20px',

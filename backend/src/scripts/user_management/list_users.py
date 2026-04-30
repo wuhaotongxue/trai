@@ -2,6 +2,8 @@ import os
 import sys
 from pathlib import Path
 
+from loguru import logger
+
 # Load env
 base_dir = Path("e:/zzgit/tuoren/trai/backend")
 env_file = base_dir / ".env"
@@ -28,6 +30,6 @@ repo = UserRepository(session)
 
 from sqlalchemy import text
 users = session.execute(text("SELECT t_id, t_username, t_email FROM t_users LIMIT 10"))
-print("Users in database:")
+logger.info("Users in database:")
 for u in users:
-    print(f"  ID: {u[0]}, Username: {u[1]}, Email: {u[2]}")
+    logger.info(f"  ID: {u[0]}, Username: {u[1]}, Email: {u[2]}")

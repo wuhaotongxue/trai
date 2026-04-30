@@ -991,6 +991,7 @@ const Tools: React.FC = () => {
                 )}
 
                 <button 
+                  type="button"
                   onClick={active_tool.action} 
                   disabled={loading_task !== null}
                   style={{ 

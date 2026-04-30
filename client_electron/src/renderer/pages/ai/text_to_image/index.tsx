@@ -101,6 +101,7 @@ const TextToImage: React.FC = () => {
     <>
       {categories.map(category => (
         <button
+          type="button"
           key={category.id}
           onClick={() => {
             set_active_category(category.id)
@@ -148,6 +149,7 @@ const TextToImage: React.FC = () => {
     <>
       {filtered_templates.map(template => (
         <button
+          type="button"
           key={template.id}
           onClick={() => apply_template(template)}
           style={{
@@ -218,6 +220,7 @@ const TextToImage: React.FC = () => {
               />
               {prompt && (
                 <button
+                  type="button"
                   onClick={() => set_prompt('')}
                   style={{
                     position: 'absolute', right: '10px', top: '10px', padding: '4px 8px', 
@@ -233,6 +236,7 @@ const TextToImage: React.FC = () => {
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0' }}>
             <button
+              type="button"
               onClick={handle_generate}
               disabled={loading || !prompt.trim()}
               style={{

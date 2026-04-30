@@ -41,7 +41,7 @@ class GeoLocation:
 class IPGeolocationService:
     """IP 地理位置查询服务
 
-    支持多个数据源，按优先级尝试:
+    支持多个数据源, 按优先级尝试:
     1. ip-api.com (免费, 有频率限制)
     2. ipinfo.io (需 API Key)
     3. 太平洋网络 (备用)

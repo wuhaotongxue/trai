@@ -726,6 +726,7 @@ const AgentManagement: React.FC = () => {
                   状态操作
                 </div>
                 <button
+                  type="button"
                   onClick={() => handle_toggle(active_agent.id, active_agent.status)}
                   style={{
                     width: '100%',
@@ -760,6 +761,7 @@ const AgentManagement: React.FC = () => {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handle_check(active_agent.id)}
                   disabled={checking_id === active_agent.id}
                   style={{
@@ -798,6 +800,7 @@ const AgentManagement: React.FC = () => {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => open_edit_modal(active_agent)}
                   style={{
                     width: '100%',
@@ -900,6 +903,7 @@ const AgentManagement: React.FC = () => {
               </h2>
             </div>
             <button
+              type="button"
               onClick={fetch_agents}
               disabled={loading}
               style={{

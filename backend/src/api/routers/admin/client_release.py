@@ -108,13 +108,13 @@ async def list_releases(
     search: Annotated[str | None, Query(max_length=100)] = None,
     s3_service: S3StorageService = Depends(),
 ) -> ReleaseListResponse:
-    """获取已发布的版本列表（分页 + 搜索）.
+    """获取已发布的版本列表 (分页 + 搜索).
 
     Args:
         current_user: 当前管理员信息
-        limit: 每页数量，默认20，最大100
-        offset: 偏移量，默认0
-        search: 搜索关键词，匹配版本号或更新日志
+        limit: 每页数量, 默认20, 最大100
+        offset: 偏移量, 默认0
+        search: 搜索关键词, 匹配版本号或更新日志
         s3_service: S3 存储服务实例
 
     Returns:

@@ -289,6 +289,7 @@ const AgentChat: React.FC = () => {
             <div className="no-drag-region" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {!is_middle_open && (
                 <button
+                  type="button"
                   onClick={() => set_is_middle_open(true)}
                   title="展开会话栏"
                   style={{
@@ -305,6 +306,7 @@ const AgentChat: React.FC = () => {
               )}
               {!is_left_open && (
                 <button
+                  type="button"
                   onClick={() => set_is_left_open(true)}
                   title="展开 Agent 栏"
                   style={{
