@@ -11,67 +11,7 @@ import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
 import { use_locale_store } from '@/store/locale'
-import { Locale } from '@/i18n'
-
-// 直接使用中文文本，不使用翻译函数
-function t(key: string): string {
-  // 直接返回中文文本，不使用翻译函数
-  const translations: Record<string, string> = {
-    // 服务器配置
-    server_local: '本地服务器',
-    server_local_desc: '127.0.0.1:5666',
-    server_remote: '远程服务器',
-    server_remote_desc: 'trai.tuoren.com:5666',
-    server_production: '生产环境',
-    server_production_desc: 'trai.tuoren.com',
-    server_config_title: '服务器配置',
-    server_current: '当前服务器',
-    server_select_or_input: '选择或输入服务器地址',
-    server_address: '服务器地址',
-    server_address_hint: '例如: http://127.0.0.1:5666',
-    server_cancel: '取消',
-    server_save: '保存',
-    server_config: '服务器配置',
-
-    // 系统日志
-    system_logs: '系统日志',
-    clear: '清空',
-    close: '关闭',
-    no_logs: '暂无日志',
-
-    // 品牌
-    your_ai_platform: '您的 AI 平台',
-
-    // 登录页面
-    login_welcome: '欢迎回来',
-    login_subtitle: '请登录您的账户以继续',
-    username: '用户名',
-    enter_username: '请输入用户名',
-    password: '密码',
-    enter_password: '请输入密码',
-    password_error: '密码错误',
-    save_login_state: '记住登录状态',
-    signing_in: '正在登录...',
-    login: '登录',
-    or: '或',
-    wecom_login: '企业微信登录',
-    no_account: '还没有账户？',
-    register_here: '立即注册',
-    empty_credentials: '请填写用户名和密码',
-    login_error: '登录失败',
-
-    // 注册页面
-    email: '邮箱',
-    enter_email: '请输入邮箱地址',
-    confirm_password: '确认密码',
-    reenter_password: '请再次输入密码',
-    password_mismatch: '两次密码不一致',
-    register: '注册',
-    register_failed: '注册失败',
-    register_error: '注册失败，请稍后重试',
-  }
-  return translations[key] || key
-}
+import { Locale, translate } from '@/i18n'
 
 console.info('[login] Login component rendering...')
 
@@ -198,7 +138,7 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Server size={18} color="var(--ui_accent)" />
             <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ui_text)' }}>
-              {t('server_config_title')}
+              {translate('server_config_title')}
             </span>
           </div>
           <button
@@ -226,7 +166,7 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
             border: '1px solid rgba(14,165,233,0.2)',
           }}>
             <div style={{ fontSize: '11px', color: 'var(--ui_accent)', marginBottom: '4px', fontWeight: 500 }}>
-              {t('server_current')}
+              {translate('server_current')}
             </div>
             <div style={{ fontSize: '13px', color: 'var(--ui_text)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
               {current_display || current_url}
@@ -236,7 +176,7 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
           {/* 预定义服务器列表 */}
           <div style={{ marginBottom: '16px' }}>
             <div style={{ fontSize: '12px', color: 'var(--ui_text_secondary)', marginBottom: '10px', fontWeight: 500 }}>
-              {t('server_select_or_input')}
+              {translate('server_select_or_input')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {PREDEFINED_SERVERS.map((server) => {
@@ -270,10 +210,10 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
                       </div>
                       <div>
                         <div style={{ fontSize: '13px', color: 'var(--ui_text)', fontWeight: 500 }}>
-                          {t(server.label_key)}
+                          {translate(server.label_key)}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)', fontFamily: 'monospace' }}>
-                          {t(server.desc_key)}
+                          {translate(server.desc_key)}
                         </div>
                       </div>
                     </div>
@@ -302,13 +242,13 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
           {/* 自定义输入 */}
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', color: 'var(--ui_text_secondary)', fontWeight: 500 }}>
-              {t('server_address')}
+              {translate('server_address')}
             </label>
             <input
               type="text"
               value={custom_url}
               onChange={(e) => handle_custom_change(e.target.value)}
-              placeholder={t('server_address_hint')}
+              placeholder={translate('server_address_hint')}
               style={{
                 width: '100%', padding: '10px 12px',
                 borderRadius: 'var(--ui_radius_md)',
@@ -341,7 +281,7 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)'; e.currentTarget.style.color = 'var(--ui_text)' }}
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--ui_text_secondary)' }}
           >
-            {t('server_cancel')}
+            {translate('server_cancel')}
           </button>
           <button
             type="button"
@@ -356,7 +296,7 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
             }}
           >
             <Check size={14} />
-            {t('server_save')}
+            {translate('server_save')}
           </button>
         </div>
       </div>
@@ -517,11 +457,11 @@ const Login: React.FC = () => {
       const raw = String(res.error || '')
       add_log(`登录失败: ${raw}`)
       if (raw.includes('401') || raw.includes('密码错误')) {
-        set_error_msg(t('password_error'))
+        set_error_msg(translate('password_error'))
         set_password_shake(true)
         setTimeout(() => set_password_shake(false), 600)
       }
-      else set_error_msg(raw || t('login_error'))
+      else set_error_msg(raw || translate('login_error'))
     }
   }, [api_loading, normalized_api_url, remember_me, save_api_url, add_log, login, navigate])
 
@@ -529,10 +469,10 @@ const Login: React.FC = () => {
     e.preventDefault()
     if (Date.now() - last_submit_time.current < 1000) return
     last_submit_time.current = Date.now()
-    if (!username || !password) { set_error_msg(t('empty_credentials')); return }
+    if (!username || !password) { set_error_msg(translate('empty_credentials')); return }
     set_is_logging_in(true); set_error_msg('')
     try { await do_login(username, password) }
-    catch (err: unknown) { set_error_msg(String((err as Error)?.message || t('login_error'))) }
+    catch (err: unknown) { set_error_msg(String((err as Error)?.message || translate('login_error'))) }
     finally { set_is_logging_in(false) }
   }, [username, password, do_login])
 
@@ -553,7 +493,7 @@ const Login: React.FC = () => {
             className="no-drag-region"
             type="button"
             onClick={() => set_show_server_config(true)}
-            title={t('server_config')}
+            title={translate('server_config')}
             style={{
               background: 'transparent',
               border: '1px solid var(--ui_border)',
@@ -577,15 +517,15 @@ const Login: React.FC = () => {
             {show_logs && (
               <div ref={log_card_ref} className="no-drag-region" style={{ position: 'absolute', top: '40px', left: '0', width: '400px', maxWidth: '90vw', maxHeight: '300px', backgroundColor: 'var(--ui_panel)', border: '1px solid var(--ui_border)', borderRadius: 'var(--ui_radius_lg)', boxShadow: 'var(--ui_shadow_lg)', padding: '12px', overflow: 'auto', zIndex: 1000, animation: 'fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{t('system_logs')}</h3>
+                  <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{translate('system_logs')}</h3>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    {[{ label: t('clear'), a: clear_logs }, { label: t('close'), a: () => set_show_logs(false) }].map(({ label, a }) => (
+                    {[{ label: translate('clear'), a: clear_logs }, { label: translate('close'), a: () => set_show_logs(false) }].map(({ label, a }) => (
                       <button key={label} className="no-drag-region" type="button" onClick={a} style={{ background: 'var(--ui_panel_hover)', border: '1px solid var(--ui_border)', borderRadius: 'var(--ui_radius_sm)', padding: '2px 8px', cursor: 'pointer', fontSize: '12px', color: 'var(--ui_text_secondary)', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_active)' }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--ui_panel_hover)' }}>{label}</button>
                     ))}
                   </div>
                 </div>
                 <div style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--ui_text_secondary)' }}>
-                  {logs.length > 0 ? logs.map((log, i) => <div key={i} style={{ marginBottom: '4px', wordBreak: 'break-all' }}>{log}</div>) : <div style={{ color: 'var(--ui_text_muted)' }}>{t('no_logs')}</div>}
+                  {logs.length > 0 ? logs.map((log, i) => <div key={i} style={{ marginBottom: '4px', wordBreak: 'break-all' }}>{log}</div>) : <div style={{ color: 'var(--ui_text_muted)' }}>{translate('no_logs')}</div>}
                 </div>
               </div>
             )}
@@ -741,7 +681,7 @@ const Login: React.FC = () => {
 
             {/* 品牌名 */}
             <div style={{ fontSize: '36px', fontWeight: 800, color: 'white', letterSpacing: '0.15em', textShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>TRAI</div>
-            <div style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', letterSpacing: '0.02em' }}>{t('your_ai_platform')}</div>
+            <div style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', letterSpacing: '0.02em' }}>{translate('your_ai_platform')}</div>
           </div>
 
           {/* 底部标签 */}
@@ -773,14 +713,14 @@ const Login: React.FC = () => {
 
             <div style={{ padding: '36px 32px' }}>
               <div style={{ marginBottom: '28px', animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both' }}>
-                <h2 style={{ color: 'var(--ui_text)', margin: '0 0 6px 0', fontSize: '22px', fontWeight: 700 }}>{t('login_welcome')}</h2>
-                <p style={{ color: 'var(--ui_text_muted)', margin: 0, fontSize: '13px' }}>{t('login_subtitle')}</p>
+                <h2 style={{ color: 'var(--ui_text)', margin: '0 0 6px 0', fontSize: '22px', fontWeight: 700 }}>{translate('login_welcome')}</h2>
+                <p style={{ color: 'var(--ui_text_muted)', margin: 0, fontSize: '13px' }}>{translate('login_subtitle')}</p>
               </div>
 
               <form onSubmit={handle_submit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* 用户名 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('username')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('username')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type="text" value={username} onChange={(e) => set_username(e.target.value)} autoComplete="username"
                       onFocus={() => set_active_input('username')}
@@ -794,7 +734,7 @@ const Login: React.FC = () => {
                         boxShadow: active_input === 'username' ? '0 0 0 3px var(--ui_accent_light)' : 'none',
                         transform: active_input === 'username' ? 'translateY(-1px)' : 'translateY(0)',
                       }}
-                      placeholder={t('enter_username')} />
+                      placeholder={translate('enter_username')} />
                     {active_input === 'username' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -803,7 +743,7 @@ const Login: React.FC = () => {
 
                 {/* 密码 */}
                 <div style={{ animation: 'fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.25s both' }}>
-                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{t('password')}</label>
+                  <label style={{ color: 'var(--ui_text_secondary)', display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>{translate('password')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={password_visible ? 'text' : 'password'} value={password} onChange={(e) => set_password(e.target.value)} autoComplete="current-password"
                       onFocus={() => set_active_input('password')}
@@ -818,7 +758,7 @@ const Login: React.FC = () => {
                         transform: active_input === 'password' ? 'translateY(-1px)' : 'translateY(0)',
                         animation: password_shake ? 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both' : 'none',
                       }}
-                      placeholder={t('enter_password')} />
+                      placeholder={translate('enter_password')} />
                     {active_input === 'password' && (
                       <div style={{ position: 'absolute', left: '14px', bottom: '-4px', width: '30px', height: '3px', borderRadius: '2px', background: 'var(--ui_accent)', animation: 'scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                     )}
@@ -874,7 +814,7 @@ const Login: React.FC = () => {
                         transition: 'left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
                       }} />
                     </div>
-                    <span style={{ color: 'var(--ui_text_secondary)', fontSize: '12px' }}>{t('save_login_state')}</span>
+                    <span style={{ color: 'var(--ui_text_secondary)', fontSize: '12px' }}>{translate('save_login_state')}</span>
                   </label>
                 </div>
 
@@ -926,13 +866,13 @@ const Login: React.FC = () => {
                       animation: 'gradientShift 3s ease infinite',
                     }} />
                   )}
-                  {is_logging_in ? <><div className="typing-dots"><span /><span /><span /></div>{t('signing_in')}</> : <><Sparkles size={15} />{t('login')}</>}
+                  {is_logging_in ? <><div className="typing-dots"><span /><span /><span /></div>{translate('signing_in')}</> : <><Sparkles size={15} />{translate('login')}</>}
                 </button>
 
                 {/* 分隔线 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both' }}>
                   <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--ui_border)' }} />
-                  <span style={{ fontSize: '11px', color: 'var(--ui_text_muted)' }}>{t('or')}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--ui_text_muted)' }}>{translate('or')}</span>
                   <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--ui_border)' }} />
                 </div>
 
@@ -962,12 +902,12 @@ const Login: React.FC = () => {
                   onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1.01) translateY(-1px)' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z" /></svg>
-                  {t('wecom_login')}
+                  {translate('wecom_login')}
                 </button>
 
                 {/* 注册链接 */}
                 <div style={{ textAlign: 'center', animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both' }}>
-                  <span style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>{t('no_account')}{' '}</span>
+                  <span style={{ color: 'var(--ui_text_muted)', fontSize: '12px' }}>{translate('no_account')}{' '}</span>
                   <span onClick={() => navigate('/register')} style={{
                     color: 'var(--ui_accent)', fontSize: '12px', fontWeight: 600,
                     cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -983,7 +923,7 @@ const Login: React.FC = () => {
                       e.currentTarget.style.color = 'var(--ui_accent)'
                       e.currentTarget.style.letterSpacing = 'normal'
                     }}
-                  >{t('register_here')}</span>
+                  >{translate('register_here')}</span>
                 </div>
 
                 {/* 服务器配置链接 */}
@@ -1008,7 +948,7 @@ const Login: React.FC = () => {
                     }}
                   >
                     <Server size={12} />
-                    {t('server_config')}: <span style={{ fontFamily: 'monospace', fontSize: '10px' }}>{api_url}</span>
+                    {translate('server_config')}: <span style={{ fontFamily: 'monospace', fontSize: '10px' }}>{api_url}</span>
                   </span>
                 </div>
               </form>

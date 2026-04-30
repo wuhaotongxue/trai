@@ -16,6 +16,8 @@ import { knowledge_base_service } from '../services/knowledge_base'
 import { i18n_service } from '../services/i18n'
 import { main_window } from '../index'
 
+import { on_renderer_quit_confirm } from '../index'
+
 /**
  * IPC 请求缓存系统
  */
@@ -103,6 +105,10 @@ export const register_ipc_handlers = (): void => {
   // 提供给渲染进程保存配置的接口
   ipcMain.handle('config:set', async (_, key: string, value: any) => {
     try {
+      if (key === '_quit_anim_done') {
+        on_renderer_quit_confirm()
+        return { success: true }
+      }
       config_store.set(key, value)
       
       // 如果是主题配置变更，更新窗口标题栏颜色

@@ -273,7 +273,6 @@ export const PUBLIC_ZH = {
   "contact.sent": "消息已发送, 我们会尽快联系你",
   "contact.send_btn": "发送消息",
   "contact.submitting": "提交中...",
-  "contact.sent": "已发送",
   "contact.submit_success": "提交成功！我们会尽快与您联系",
   "contact.submit_failed": "提交失败，请重试",
   "contact.network_error": "网络错误，请检查网络连接",

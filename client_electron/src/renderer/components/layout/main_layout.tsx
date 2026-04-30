@@ -10,10 +10,7 @@ import Sidebar from './sidebar'
 import TitleBar from './title_bar'
 import PageTransition from './page_transition'
 import { use_auth_store } from '@/store/auth'
-// 直接使用中文文本，不使用翻译函数
-function t(key: string): string {
-  return key
-}
+import { translate } from '@/i18n'
 
 const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
@@ -86,10 +83,10 @@ const MainLayout: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--ui_success)', display: 'inline-block', boxShadow: '0 0 4px var(--ui_success)' }} />
-              {t('app_name')}
+              {translate('app_name')}
             </span>
             <span style={{ color: 'var(--ui_border)' }}>|</span>
-            <span>{t('footer_contact')}</span>
+            <span>{translate('footer_contact')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ fontWeight: 600, color: 'var(--ui_accent)' }}>TRAI</span>

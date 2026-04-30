@@ -66,7 +66,7 @@ export default function DatabasePage() {
   const fetchBackups = async () => {
     setLoading(true);
     try {
-      const res = await request<BackupInfo[]>("/admin/system/backups");
+      const res = await request<BackupInfo[]>("/admin/system/database/backups");
       setBackups(res.sort((a, b) => b.last_modified.localeCompare(a.last_modified)));
     } catch (e: any) {
       toast({ message: e.message || translate("admin.database.fetch_backups_failed"), variant: "error" });

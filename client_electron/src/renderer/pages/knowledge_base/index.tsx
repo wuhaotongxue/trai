@@ -359,8 +359,15 @@ const KnowledgeBasePage: React.FC = () => {
   }
 
   const active_cat = useMemo(() => categories.find(c => c.id === active_cat_id), [categories, active_cat_id])
-  const active_kb = useMemo(() => kb_list.find(kb => kb.id === active_kb_id), [kb_list, active_kb_id])
   const current_cat_kbs = useMemo(() => kb_list.filter(kb => kb.category_id === active_cat_id), [kb_list, active_cat_id])
+  const active_kb = useMemo(() => kb_list.find(kb => kb.id === active_kb_id), [kb_list, active_kb_id])
+
+  // 当 active_kb_id 不在 kb_list 中时，自动切换到有效的知识库
+  useEffect(() => {
+    if (!active_kb && current_cat_kbs.length > 0) {
+      set_active_kb_id(current_cat_kbs[0].id)
+    }
+  }, [active_kb, current_cat_kbs])
 
   const render_left_sidebar = () => (
     <div style={{
@@ -524,6 +531,21 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
               </div>
               <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+                {/* 错误提示 */}
+                {files_error && (
+                  <div style={{ margin: '16px 20px', padding: '12px 16px', backgroundColor: 'var(--ui_danger_light)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ color: 'var(--ui_danger)', fontSize: '16px', flexShrink: 0 }}>⚠️</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--ui_danger)', marginBottom: '4px' }}>加载失败</div>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_secondary)' }}>{files_error}</div>
+                      <button type="button" onClick={() => void request_files_page(1, 'refresh')} style={{ marginTop: '8px', padding: '4px 12px', backgroundColor: 'var(--ui_danger)', color: 'white', border: 'none', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>重试</button>
+                    </div>
+                  </div>
+                )}
+                {/* 调试信息 */}
+                <div style={{ margin: '8px 20px', padding: '8px 12px', backgroundColor: 'var(--ui_panel_alt)', border: '1px solid var(--ui_border)', borderRadius: '6px', fontSize: '11px', color: 'var(--ui_text_muted)', fontFamily: 'monospace' }}>
+                  kb_id: {active_kb_id || '-'} | files: {display_files.length} | loading: {files_loading ? '是' : '否'}
+                </div>
                 {files_loading && display_files.length === 0 ? (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', zIndex: 10 }}>
                     <style>{`

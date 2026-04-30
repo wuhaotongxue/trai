@@ -380,14 +380,14 @@ def register_routers(app: FastAPI) -> None:
         backup,
         dashboard_router,
         knowledge_base_router,
+        monitor as admin_monitor,
         organization,
         quota_config_router,
+        schema_doc_router,
         user_router,
     )
-    from api.routers.admin import (
-        monitor as admin_monitor,
-    )
     from api.routers.admin.client_release import router as admin_client_release_router
+    from api.routers.admin.agent_role import router as admin_agent_role_router
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
@@ -417,9 +417,11 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(quota_config_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(knowledge_base_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(admin_client_release_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(admin_agent_role_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(organization.router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(ai_mgmt.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(backup.router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
+    app.include_router(schema_doc_router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
     app.include_router(image_gen_config_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(admin_monitor.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(client_update_router, prefix=f"{api_prefix}/client", tags=["客户端更新"])

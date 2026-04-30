@@ -721,3 +721,20 @@ html[data-theme='dark'] .glass {
 html {
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ===== 窗口退出动画 ===== */
+@keyframes windowExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.window-exit {
+  animation: windowExit 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
