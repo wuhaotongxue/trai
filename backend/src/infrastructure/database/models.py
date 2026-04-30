@@ -415,6 +415,38 @@ class EmailConfigModel(Base):
     """更新人 user_id"""
 
 
+class AgentRoleModel(Base):
+    """AI 角色模型"""
+
+    __tablename__ = "t_agent_roles"
+    __comment__ = "AI 角色表,存储 AI 角色名称和发布通知时的专属评论"
+
+    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    """自增主键 ID"""
+    t_role_name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """角色名称,如:地理专家/小甜心/御姐"""
+    t_role_comment: Mapped[str] = mapped_column(Text, nullable=False)
+    """角色专属评论,发布通知时显示"""
+    t_role_keyword: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """触发关键词,逗号分隔,如:地理,专家,经纬度"""
+    t_style_type: Mapped[str] = mapped_column(String(32), default="default")
+    """风格类型:甜美可爱/御姐型/软萌撒娇/知性温柔/活泼开朗"""
+    t_priority: Mapped[int] = mapped_column(Integer, default=100)
+    """优先级,数字越小越优先"""
+    t_is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    """是否启用"""
+    t_remark: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """备注说明"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    """创建时间"""
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """更新时间"""
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """更新人 user_id"""
+
+
 __all__ = [
     "Base",
     "ChatSessionModel",
@@ -431,4 +463,5 @@ __all__ = [
     "UserDepartmentMappingModel",
     "ContactMessageModel",
     "EmailConfigModel",
+    "AgentRoleModel",
 ]

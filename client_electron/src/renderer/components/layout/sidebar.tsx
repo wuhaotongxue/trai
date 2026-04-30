@@ -14,35 +14,7 @@ import {
   Sparkles, Wand2
 } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
-// 直接使用中文文本，不使用翻译函数
-function t(key: string): string {
-  const translations: Record<string, string> = {
-    navigation: '导航',
-    not_logged_in: '未登录',
-    dashboard: '仪表盘',
-    overview: '概览',
-    agent: '智能体',
-    management: '管理',
-    knowledge_base: '知识库',
-    files: '文件',
-    ai_creation: 'AI 创作',
-    chat: '聊天',
-    text_to_image: '文本生成图片',
-    image_to_image: '图片生成图片',
-    music_generation: '音乐生成',
-    video_generation: '视频生成',
-    tools: '工具',
-    tool: '工具',
-    media_center: '媒体中心',
-    player: '播放器',
-    media_processing: '媒体处理',
-    feedback: '反馈',
-    settings: '设置',
-    logout: '退出登录',
-    app_name: 'TRAI'
-  }
-  return translations[key] || key
-}
+import { translate } from '@/i18n'
 import { use_locale_store } from '@/store/locale'
 
 type NavChild = {
@@ -254,7 +226,7 @@ const Sidebar: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Compass size={14} color="var(--ui_sidebar_accent)" />
               <span style={{ fontSize: '11px', color: 'var(--ui_text_muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                {t('navigation')}
+                {translate('navigation')}
               </span>
             </div>
           )}
@@ -306,7 +278,7 @@ const Sidebar: React.FC = () => {
             )}
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.username || t('not_logged_in')}
+                {user?.username || translate('not_logged_in')}
               </div>
               <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.role === 'admin' ? 'Administrator' : 'User'}
@@ -331,7 +303,7 @@ const Sidebar: React.FC = () => {
                   tabIndex={0}
                   onClick={() => toggle_group(item.id)}
                   onKeyDown={(e) => { if (e.key === 'Enter') toggle_group(item.id) }}
-                  title={is_collapsed ? t(item.label_key as any) : undefined}
+                  title={is_collapsed ? translate(item.label_key as any) : undefined}
                   style={{
                     padding: is_collapsed ? '10px 0' : '8px 12px',
                     cursor: 'pointer',
@@ -370,7 +342,7 @@ const Sidebar: React.FC = () => {
                   )}
                   <div style={{ display: 'flex', alignItems: 'center', gap: is_collapsed ? '0' : '10px' }}>
                     <span style={{ opacity: is_group_active ? 1 : 0.8 }}>{item.icon}</span>
-                    {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
+                    {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{translate(item.label_key as any)}</span>}
                   </div>
                   {!is_collapsed && (
                     is_expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />
@@ -417,7 +389,7 @@ const Sidebar: React.FC = () => {
                           }}
                         >
                           <span style={{ opacity: is_child_active ? 1 : 0.75 }}>{child.icon}</span>
-                          <span style={{ whiteSpace: 'nowrap' }}>{t(child.label_key as any)}</span>
+                          <span style={{ whiteSpace: 'nowrap' }}>{translate(child.label_key as any)}</span>
                         </div>
                       )
                     })}
@@ -436,7 +408,7 @@ const Sidebar: React.FC = () => {
               tabIndex={0}
               onClick={() => navigate(item.path as string)}
               onKeyDown={(e) => { if (e.key === 'Enter') navigate(item.path as string) }}
-              title={is_collapsed ? t(item.label_key as any) : undefined}
+              title={is_collapsed ? translate(item.label_key as any) : undefined}
               style={{
                 padding: is_collapsed ? '10px 0' : '8px 12px',
                 cursor: 'pointer',
@@ -475,7 +447,7 @@ const Sidebar: React.FC = () => {
                 }} />
               )}
               <span style={{ opacity: is_active ? 1 : 0.8 }}>{item.icon}</span>
-              {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{t(item.label_key as any)}</span>}
+              {!is_collapsed && <span style={{ whiteSpace: 'nowrap' }}>{translate(item.label_key as any)}</span>}
             </div>
           )
         })}
@@ -486,7 +458,7 @@ const Sidebar: React.FC = () => {
           tabIndex={0}
           onClick={handle_logout}
           onKeyDown={(e) => { if (e.key === 'Enter') handle_logout() }}
-          title={is_collapsed ? t('logout') : undefined}
+          title={is_collapsed ? translate('logout') : undefined}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -511,14 +483,14 @@ const Sidebar: React.FC = () => {
           }}
         >
           <LogOut size={18} />
-          {!is_collapsed && <span>{t('logout')}</span>}
+          {!is_collapsed && <span>{translate('logout')}</span>}
         </div>
       </div>
 
       {/* 版本号 */}
       <div style={{ ...SIDEBAR_STYLES.footer, ...(is_collapsed ? SIDEBAR_STYLES.footerCollapsed : {}) }}>
         <span style={SIDEBAR_STYLES.versionText}>
-          {t('app_name')} v{version}
+          {translate('app_name')} v{version}
         </span>
       </div>
     </div>

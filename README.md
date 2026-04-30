@@ -46,6 +46,14 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 功能_2026_04_30_1127
+- **新增（后端）**: t_agent_roles 表存储 AI 角色，支持角色名称、评论、关键词、风格类型管理
+- **新增（后端）**: agent_role.py CRUD API，支持增删改查操作
+- **新增（后端）**: release_client.py 从数据库读取角色评论，支持动态配置
+- **新增（后端）**: init_agent_roles.py 初始化脚本，预置 9 个默认角色
+- **新增（前端）**: /admin/agent_roles 管理页面，支持角色增删改查和启用/禁用
+- **新增（技能）**: release_notify/SKILL.md 客户端发布通知规范
+
 ### 🛠️ 技能_2026_04_26_2242
 - **优化（技能）**: git_submit/SKILL.md 更新企业微信通知格式，使用正确变量名 `$env:WECOM_CHAT_WEBHOOK_URL`
 - **优化（技能）**: git_submit/SKILL.md 更新飞书和企业微信通知格式，commit 信息跟在推送人后面，增加时间戳

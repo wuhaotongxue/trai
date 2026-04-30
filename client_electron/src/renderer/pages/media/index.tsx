@@ -7,7 +7,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, FolderOpen, Music, Film, ChevronLeft, ChevronRight, Search, X, ChevronDown, ChevronRight as ChevronRightIcon, Folder, Rewind, FastForward } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
-import { t } from '@/i18n'
+import { translate } from '@/i18n'
 
 /**
  * 媒体文件接口定义
@@ -109,7 +109,7 @@ const MediaPlayerPage: React.FC = () => {
         const build_folder_structure = (files: any[]) => {
           const root: FolderItem = {
             id: 'root',
-            name: t('root_folder'),
+            name: translate('root_folder'),
             path: '',
             type: 'folder',
             children: []
@@ -508,7 +508,7 @@ const MediaPlayerPage: React.FC = () => {
               {item.name}
             </div>
             <div style={{ fontSize: '11px', color: is_current ? 'rgba(255,255,255,0.7)' : 'var(--ui_text_muted)', marginTop: '2px' }}>
-              {item.type === 'audio' ? t('audio') : t('video')}
+              {item.type === 'audio' ? translate('audio') : translate('video')}
             </div>
           </div>
         </div>
@@ -576,7 +576,7 @@ const MediaPlayerPage: React.FC = () => {
           }}
         >
           <FolderOpen size={14} />
-          {t('select_folder_action')}
+          {translate('select_folder_action')}
         </button>
       </div>
       
@@ -590,7 +590,7 @@ const MediaPlayerPage: React.FC = () => {
           <Search size={16} style={{ position: 'absolute', left: '10px', color: 'var(--ui_text_muted)' }} />
           <input
             type="text"
-            placeholder={t('search_hint')}
+            placeholder={translate('search_hint')}
             value={search_query}
             onChange={(e) => set_search_query(e.target.value)}
             style={{
@@ -634,7 +634,7 @@ const MediaPlayerPage: React.FC = () => {
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {filtered_files.length === 0 ? (
           <div style={{ padding: '20px', textAlign: 'center', color: 'var(--ui_text_muted)', fontSize: '13px' }}>
-            {t('no_media_files')}
+            {translate('no_media_files')}
           </div>
         ) : (
           filtered_files.map(item => render_file_item(item))
@@ -645,9 +645,9 @@ const MediaPlayerPage: React.FC = () => {
   
   return (
     <ThreePanelLayout
-      title={current_file ? current_file.name : t('player')}
+      title={current_file ? current_file.name : translate('player')}
       titleIcon={<Music size={20} />}
-      leftPanelTitle={t('media_file')}
+      leftPanelTitle={translate('media_file')}
       leftPanel={left_panel}
       leftPanelDefaultOpen={true}
       contentPadding={0}
@@ -665,14 +665,14 @@ const MediaPlayerPage: React.FC = () => {
             current_file.type === 'folder' ? (
               <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)' }}>
                 <Folder size={80} style={{ marginBottom: '20px', opacity: 0.5, color: 'var(--ui_accent)' }} />
-                <h3 style={{ margin: 0, color: 'var(--ui_text)' }}>{t('please_select_media')}</h3>
-                <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: 'var(--ui_text_muted)' }}>{t('current_folder')}</p>
+                <h3 style={{ margin: 0, color: 'var(--ui_text)' }}>{translate('please_select_media')}</h3>
+                <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: 'var(--ui_text_muted)' }}>{translate('current_folder')}</p>
               </div>
             ) : current_file.type === 'audio' ? (
               <div style={{ textAlign: 'center', color: 'var(--ui_text)', padding: '40px' }}>
                 <Music size={80} style={{ marginBottom: '20px', color: 'var(--ui_accent)' }} />
                 <h2 style={{ margin: '0 0 10px 0', color: 'var(--ui_text)' }}>{current_file.name}</h2>
-                <p style={{ margin: 0, color: 'var(--ui_text_muted)' }}>{t('audio_playing')}</p>
+                <p style={{ margin: 0, color: 'var(--ui_text_muted)' }}>{translate('audio_playing')}</p>
                 <audio
                   ref={audio_ref}
                   src={current_file.path.replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:')}
@@ -699,8 +699,8 @@ const MediaPlayerPage: React.FC = () => {
           ) : (
             <div style={{ textAlign: 'center', color: 'var(--ui_text_muted)' }}>
               <Music size={80} style={{ marginBottom: '20px', opacity: 0.5, color: 'var(--ui_accent)' }} />
-              <h3 style={{ margin: 0, color: 'var(--ui_text)' }}>{t('please_select_media')}</h3>
-              <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: 'var(--ui_text_muted)' }}>{t('supports_music_video')}</p>
+              <h3 style={{ margin: 0, color: 'var(--ui_text)' }}>{translate('please_select_media')}</h3>
+              <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: 'var(--ui_text_muted)' }}>{translate('supports_music_video')}</p>
             </div>
           )}
         </div>

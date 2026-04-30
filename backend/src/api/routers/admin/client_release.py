@@ -231,6 +231,7 @@ async def release_client(
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
     release_notes: str | None = Form(None, description="更新日志内容"),
+    agent_role: Annotated[str | None, Header(None, description="AI 角色名称")] = None,
 ) -> ReleaseResponse:
     """管理员发布新版本的 Electron 客户端并上传至 S3.
 
@@ -294,7 +295,14 @@ async def release_client(
 
         releaser = ReleaseClientUseCase()
         download_url = s3_service.get_file_url(exe_key)
-        releaser._send_notifications(version, download_url, release_notes or "无更新日志")
+        releaser._send_notifications(
+            version,
+            download_url,
+            release_notes or "无更新日志",
+            publisher=current_user.get("username") or current_user.get("user_id"),
+            publisher_role=current_user.get("role"),
+            agent_role=agent_role,
+        )
 
         return ReleaseResponse(version=version, message="发布成功, 已通知飞书和企业微信")
 
@@ -333,6 +341,7 @@ async def build_and_release(
     body: BuildAndReleaseRequest,
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
+    agent_role: Annotated[str | None, Header(None, description="AI 角色名称")] = None,
 ) -> BuildStatus:
     """一键打包并发布新版本"""
     if current_user.get("role") != "admin":
@@ -445,7 +454,14 @@ async def build_and_release(
             logger.info(f"[飞书通知] Webhook 已配置: {bool(FEISHU_RELEASE_WEBHOOK)}, 长度={len(FEISHU_RELEASE_WEBHOOK)}")
             releaser = ReleaseClientUseCase()
             download_url = s3_service.get_file_url(exe_key)
-            releaser._send_notifications(full_version, download_url, body.release_notes or "无更新日志")
+            releaser._send_notifications(
+                full_version,
+                download_url,
+                body.release_notes or "无更新日志",
+                publisher=current_user.get("username") or current_user.get("user_id"),
+                publisher_role=current_user.get("role"),
+                agent_role=agent_role,
+            )
             logger.info(f"[飞书通知] 发送完成: v{full_version}")
 
             _build_status["status"] = "success"

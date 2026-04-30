@@ -9,8 +9,12 @@ from datetime import datetime
 from typing import Any
 
 import requests
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from core.logger import get_logger
+from infrastructure.database.database import SessionLocal
+from infrastructure.database.models import AgentRoleModel
 from infrastructure.storage.s3_storage import S3StorageService
 
 logger = get_logger()
@@ -26,6 +30,33 @@ class ReleaseClientUseCase:
 
     def __init__(self) -> None:
         self._storage = S3StorageService()
+
+    @staticmethod
+    def _get_role_comment_map() -> dict[str, str]:
+        """从数据库获取角色评论映射表.
+
+        Returns:
+            dict[str, str]: 角色名 -> 评论文本 的映射
+        """
+        try:
+            with Session(SessionLocal) as db:
+                stmt = select(AgentRoleModel).where(AgentRoleModel.t_is_active == True)
+                roles = db.execute(stmt).scalars().all()
+                return {r.t_role_name: r.t_role_comment for r in roles}
+        except Exception as e:
+            logger.warning(f"Failed to load agent roles from DB, using fallback: {e}")
+            # 降级：返回硬编码的默认映射
+            return {
+                "爆炸分身": "本来不想写的呜……啊呀终于发完了！",
+                "小甜心": "辛苦啦～小甜心觉得超棒的呢！",
+                "御姐": "嗯，做得还行，御姐准了。",
+                "软萌宝": "呜...人家觉得好厉害呀！",
+                "知心姐姐": "乖，辛苦了，这周做得很好呢。",
+                "开心果": "哈！搞定啦！开心果出击！",
+                "小泪包": "呜呜...好累呀...但是完成了呢！",
+                "审查官": "咳咳，检查通过，勉强合格。",
+                "地理专家": "说到版本发布呀～这条消息已成功抵达群聊坐标！",
+            }
 
     async def execute(self, file_path: str, version: str, changelog: str) -> dict[str, Any]:
         """执行发布流程, 包括上传文件到 S3 并发送通知.
@@ -58,28 +89,55 @@ class ReleaseClientUseCase:
             logger.error(f"Release failed: {e}")
             return {"status": "failed", "error": str(e)}
 
-    def _send_notifications(self, version: str, url: str, changelog: str) -> None:
+    def _send_notifications(
+        self,
+        version: str,
+        url: str,
+        changelog: str,
+        publisher: str | None = None,
+        publisher_role: str | None = None,
+        agent_role: str | None = None,
+    ) -> None:
         """发送发布通知 (飞书富文本卡片 + 企微 Markdown).
 
         Args:
             version: 版本号
             url: 下载地址
             changelog: 更新日志
+            publisher: 发布者用户名
+            publisher_role: 发布者角色
+            agent_role: AI 角色名称
         """
         
+        # 角色专属评论映射表（从数据库加载）
+        role_comments = self._get_role_comment_map()
+        role_comment = role_comments.get(agent_role, "") if agent_role else ""
+        
+        publisher_info = ""
+        if publisher:
+            role_text = f"({publisher_role})" if publisher_role else ""
+            publisher_info = f"**发布者:** {publisher} {role_text}\n"
+        
+        agent_info = ""
+        if agent_role:
+            agent_info = f"**AI 角色:** {agent_role}\n"
+
         # 飞书富文本卡片格式
         feishu_card = {
             "msg_type": "interactive",
             "card": {
                 "config": {"wide_screen_mode": True},
                 "header": {
-                    "title": {"tag": "plain_text", "content": f"🚀 TRAI Desktop v{version} 正式发布"},
+                    "title": {"tag": "plain_text", "content": f"TRAI Desktop v{version} 正式发布"},
                     "template": "blue",
                 },
                 "elements": [
                     {
                         "tag": "div",
-                        "text": {"tag": "lark_md", "content": f"**版本号:** v{version}\n**发布时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}"},
+                        "text": {"tag": "lark_md", "content": f"**版本号:** v{version}\n"
+                               f"**发布时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+                               f"{publisher_info}"
+                               f"{agent_info}"},
                     },
                     {"tag": "hr"},
                     {
@@ -111,6 +169,13 @@ class ReleaseClientUseCase:
             },
         }
 
+        # 如果有角色评论，添加到 elements 末尾
+        if role_comment:
+            feishu_card["card"]["elements"].append({
+                "tag": "div",
+                "text": {"tag": "lark_md", "content": f"> {role_comment}"},
+            })
+
         # 飞书发送 (仅当 Webhook 配置了才发送)
         if FEISHU_RELEASE_WEBHOOK:
             try:
@@ -121,12 +186,22 @@ class ReleaseClientUseCase:
 
         # 企微 Markdown
         if WECOM_WEBHOOK:
+            publisher_line = ""
+            if publisher:
+                role_text = f"({publisher_role})" if publisher_role else ""
+                publisher_line = f"**发布者:** {publisher} {role_text}\n"
+            agent_line = ""
+            if agent_role:
+                agent_line = f"**AI 角色:** {agent_role}\n"
             wecom_msg = {
                 "msgtype": "markdown",
                 "markdown": {
                     "content": f"🆕 **TRAI 客户端新版本发布 (v{version})**\n\n"
-                               f"> **更新日志:**\n>{changelog.replace('\\n', '\\n>')}\n\n"
-                               f"**下载地址:** [点击下载 EXE]({url})"
+                               f"{publisher_line}"
+                               f"{agent_line}"
+                               f"> **更新日志:**\n>{changelog.replace(chr(92) + 'n', chr(92) + 'n>')}\n\n"
+                               f"**下载地址:** [点击下载 EXE]({url})\n\n"
+                               f"> {role_comment}" if role_comment else f"**下载地址:** [点击下载 EXE]({url})"
                 }
             }
             try:

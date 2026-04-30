@@ -54,7 +54,7 @@ export default function MonitorPage() {
   const fetchBackups = async () => {
     setLoading(true);
     try {
-      const res = await request<BackupFile[]>("/admin/system/backups");
+      const res = await request<BackupFile[]>("/admin/system/database/backups");
       setBackups(res.sort((a, b) => new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime()));
       setLastRefresh(new Date());
     } catch {

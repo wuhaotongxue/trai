@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react'
 import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder, Code as FileCode, FileSpreadsheet } from 'lucide-react'
+import { translate } from '@/i18n'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { should_ellipsis } from '@/utils/ui_text'
@@ -488,7 +489,7 @@ const Tools: React.FC = () => {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(json_result)
-                  alert('已复制到剪贴板')
+                  alert(translate('copied_to_clipboard'))
                 }}
                 style={{
                   marginTop: '8px',

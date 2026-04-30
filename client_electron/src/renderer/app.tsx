@@ -21,7 +21,7 @@ console.log('[app] use_auth_store imported:', use_auth_store)
 console.log('[app] use_locale_store imported:', use_locale_store)
 
 // 从 i18n.ts 导入翻译函数
-import { t } from './i18n'
+import { translate } from '@/i18n'
 
 async function init_i18n() {
   console.log('[app] init_i18n called')
@@ -29,7 +29,7 @@ async function init_i18n() {
   return Promise.resolve()
 }
 
-console.log('[app] t function defined:', t)
+console.log('[app] translate function defined:', translate)
 console.log('[app] init_i18n function defined:', init_i18n)
 
 // 语言切换动画
@@ -63,6 +63,7 @@ const GlobalTransition: React.FC<{ is_transitioning: boolean }> = ({ is_transiti
 const App: React.FC = () => {
   const [initializing, set_initializing] = useState(true)
   const [is_locale_transitioning, set_is_locale_transitioning] = useState(false)
+  const [is_exiting, set_is_exiting] = useState(false)
   const login = use_auth_store((state) => state.login)
   const logout = use_auth_store((state) => state.logout)
   const locale = use_locale_store((state) => state.locale)
@@ -85,6 +86,22 @@ const App: React.FC = () => {
     return cleanup
   }, [logout])
 
+  // 监听退出动画事件
+  useEffect(() => {
+    if (!window.electron_api?.on) {
+      return
+    }
+
+    const cleanup = window.electron_api.on('app:quit-with-animation', () => {
+      set_is_exiting(true)
+      setTimeout(() => {
+        void window.electron_api.config_set('_quit_anim_done', '1').catch(() => {})
+      }, 400)
+    })
+
+    return cleanup
+  }, [])
+
   // 语言切换动画
   useEffect(() => {
     if (prev_locale_ref.current && prev_locale_ref.current !== locale) {
@@ -103,43 +120,58 @@ const App: React.FC = () => {
 
     const initialize_app = async () => {
       try {
-        // 1. 初始化 API 地址
-        await init_api_base_url()
+        // 1. 初始化 API 地址（添加超时保护）
+        console.log('[app] 开始初始化...')
+        try {
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('API init timeout')), 3000))
+          await Promise.race([init_api_base_url(), timeoutPromise])
+          console.log('[app] API 地址初始化完成')
+        } catch (e) {
+          console.warn('[app] API 初始化超时，继续使用默认地址:', e)
+        }
         setup_axios_interceptors()
 
         // 2. 加载语言偏好
-        // 直接设置为中文，不从配置中读取
         use_locale_store.getState().set_locale('zh')
         console.log('[app] locale set to zh')
 
         // 3. 初始化翻译数据
         await init_i18n()
 
-        // 4. 检查自动登录
+        // 4. 检查自动登录（添加超时保护）
         if (window.electron_api) {
-          const token_res = await window.electron_api.config_get('access_token', null)
-          const has_token = token_res.data != null
+          try {
+            const token_res = await window.electron_api.config_get('access_token', null)
+            const has_token = token_res.data != null
+            console.log('[app] Token 状态:', has_token ? '有Token' : '无Token')
 
-          if (has_token) {
-            try {
-              const me_res = await window.electron_api.auth_me()
-              if (me_res.success && me_res.data) {
-                const user_data = me_res.data.user || me_res.data
-                login({
-                  username: user_data.username || 'user',
-                  email: user_data.email || 'user@trai.local',
-                  role: user_data.role || 'user'
-                })
+            if (has_token) {
+              try {
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Auth check timeout')), 3000))
+                const me_res = await Promise.race([window.electron_api.auth_me(), timeoutPromise]) as { success: boolean; data?: { user?: { username?: string; email?: string; role?: string }; username?: string; email?: string; role?: string } } | { success: boolean; data?: null }
+                if (me_res.success && me_res.data) {
+                  const user_data = me_res.data.user || me_res.data
+                  login({
+                    username: user_data.username || 'user',
+                    email: user_data.email || 'user@trai.local',
+                    role: user_data.role || 'user'
+                  })
+                  console.log('[app] 自动登录成功')
+                }
+              } catch (auth_error) {
+                console.warn('[app] 自动登录失败，将显示登录页面:', auth_error)
+                await window.electron_api.config_set('access_token', null).catch(() => {})
+                await window.electron_api.config_set('refresh_token', null).catch(() => {})
               }
-            } catch (auth_error) {
-              await window.electron_api.config_set('access_token', null)
-              await window.electron_api.config_set('refresh_token', null)
             }
+          } catch (e) {
+            console.warn('[app] 获取Token状态失败:', e)
           }
         }
       } catch (err) {
         console.error('App initialization failed', err)
       } finally {
+        console.log('[app] 初始化完成，显示主界面')
         set_initializing(false)
       }
     }
@@ -154,7 +186,9 @@ const App: React.FC = () => {
   return (
     <>
       <GlobalTransition is_transitioning={is_locale_transitioning} />
-      <RouterProvider router={router} />
+      <div className={is_exiting ? 'window-exit' : ''} style={{ height: '100%' }}>
+        <RouterProvider router={router} />
+      </div>
     </>
   )
 }
@@ -205,7 +239,7 @@ const LoadingScreen: React.FC = () => (
       color: 'var(--ui_text_muted)',
       animation: 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both',
     }}>
-      {t('loading')}
+      {translate('loading')}
     </div>
   </div>
 )
