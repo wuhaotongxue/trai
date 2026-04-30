@@ -23,7 +23,7 @@ logger = get_logger()
 FEISHU_RELEASE_WEBHOOK = os.getenv("NOTIFY_FEISHU_WEBHOOK", "")
 # 企微通知 Webhook 列表（支持多个群）
 WECOM_WEBHOOKS = {
-    "wuhao": os.getenv("NOTIFY_WECOM_WEBHOOK", ""),  # 默认 wuhao 群
+    "wuhao": os.getenv("NOTIFY_WECOM_WUHAO_WEBHOOK", ""),  # wuhao 群
     "wudu": os.getenv("NOTIFY_WECOM_WUDU_WEBHOOK", ""),  # wudu 群
 }
 
