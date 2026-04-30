@@ -21,8 +21,11 @@ from infrastructure.security.password import PasswordService, get_password_servi
 
 router = APIRouter()
 
-DEMO_USERNAME = os.getenv("DEMO_USERNAME", "wuhao")
-DEMO_PASSWORD_PLAIN = os.getenv("DEMO_PASSWORD", "Tr@@2026...")
+DEMO_USERNAME = os.getenv("DEMO_USERNAME")
+DEMO_PASSWORD_PLAIN = os.getenv("DEMO_PASSWORD")
+
+# 演示账户为可选功能, 未配置则不启用
+DEMO_ENABLED = bool(DEMO_USERNAME and DEMO_PASSWORD_PLAIN)
 AES_KEY_STR = os.getenv("AES_KEY")
 AES_IV_STR = os.getenv("AES_IV")
 
@@ -124,8 +127,8 @@ async def login(
             detail={"code": 401, "message": "用户名或密码错误"},
         )
 
-    # 检查是否为 demo 账号
-    if request.username == DEMO_USERNAME and request.password == DEMO_PASSWORD_PLAIN:
+    # 检查是否为 demo 账号(仅在配置了演示账户时启用)
+    if DEMO_ENABLED and request.username == DEMO_USERNAME and request.password == DEMO_PASSWORD_PLAIN:
         # demo 账号直接通过
         pass
     else:

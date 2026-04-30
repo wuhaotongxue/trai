@@ -3,8 +3,8 @@
 # 文件名: feishu_ai_notify.py
 # 作者: wuhao
 # 日期: 2026_04_23
-# 描述: 飞书 AI 事件通知服务（文生图 + AI 对话）
-# 支持格式化卡片消息，包含图片预览、对话摘要等富文本内容
+# 描述: 飞书 AI 事件通知服务 (文生图 + AI 对话)
+# 支持格式化卡片消息, 包含图片预览、对话摘要等富文本内容
 
 from __future__ import annotations
 
@@ -286,13 +286,13 @@ class FeishuAINotifyService:
         """上传图片到飞书获取 image_key
 
         由于飞书卡片中的 img 标签需要先上传图片获取 image_key
-        此处返回空字符串，由调用方在外部上传图片后替换
+        此处返回空字符串, 由调用方在外部上传图片后替换
 
         Args:
             image_url: 图片 URL
 
         Returns:
-            str: 飞书图片 key，失败时返回空字符串
+            str: 飞书图片 key, 失败时返回空字符串
         """
         return ""
 

@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from core.logger import get_logger
 from infrastructure.database.models import EmailConfigModel
+from infrastructure.security.encryption import get_encryption_service
 
 
 class EmailService:
@@ -29,6 +30,7 @@ class EmailService:
         self._db_session = db_session
         self._logger = get_logger()
         self._config_cache: dict[str, dict[str, Any]] = {}
+        self._encryption_service = get_encryption_service()
 
     def _load_config(self, config_name: str) -> dict[str, Any] | None:
         """从数据库加载邮件配置
@@ -53,12 +55,20 @@ class EmailService:
             self._logger.warning(f"Email config not found or inactive: {config_name}")
             return None
 
+        # 解密邮箱密码
+        try:
+            decrypted_password = self._encryption_service.decrypt(config_model.t_password)
+        except Exception as e:
+            self._logger.error(f"Failed to decrypt email password for {config_name}: {e}")
+            # 如果解密失败,可能是旧的明文密码,直接使用
+            decrypted_password = config_model.t_password
+
         config = {
             "host": config_model.t_host,
             "port": config_model.t_port,
             "use_ssl": config_model.t_use_ssl,
             "username": config_model.t_username,
-            "password": config_model.t_password,
+            "password": decrypted_password,
             "from_name": config_model.t_from_name,
             "to_emails": config_model.t_to_emails or [],
         }

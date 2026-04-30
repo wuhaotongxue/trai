@@ -48,6 +48,18 @@ TRAI项目管理相关规范的统一入口。
 | 文件名 | meeting_export_service.py | meeting-export-service.py |
 | 变量名 | total_records | totalRecords |
 
+### 3. 全局配置文件与依赖管理 (CRITICAL)
+
+**强制要求：**
+- **只允许在项目根目录存在一个 `.gitignore` 文件**
+- 禁止在各子模块（如 `frontend_next`、`backend`、`client_electron` 等）中单独创建 `.gitignore`
+- 子模块的忽略规则必须统一提升并合并到根目录的 `.gitignore` 中，并使用对应的前缀进行约束（如 `frontend_next/node_modules/`）
+- **绝对禁止上传任何依赖包或构建产物**：无论是前端（node_modules）、后端（.venv, __pycache__）还是客户端（dist, release），在提交代码前必须确认这些目录已被 `.gitignore` 正确忽略。
+- **包管理器与镜像源强制要求**：前端 (`frontend_next`) 和客户端 (`client_electron`) **必须使用 `pnpm`** 管理依赖（禁止使用 `npm`/`yarn` 生成的 lock 文件），并且**必须配置国内淘宝镜像源加速** (`--registry=https://registry.npmmirror.com`) 以确保环境构建稳定。
+- **绝对禁止上传测试文件和临时脚本**：如 `check_comments.py` 等验证脚本必须在 `.gitignore` 中排除。
+- **临时测试代码规范**：测试文件应统一写在 `tests/` 或各自的测试文件夹下，临时验证用途的代码脚本（如一次性运行验证某逻辑的脚本）**使用后必须立即删除**，禁止留存在业务代码目录中。
+- **绝对禁止上传超过 500MB 的文件**：避免污染 Git 仓库历史记录。
+
 ## 对话风格规范
 
 ### 风格列表（随机切换）
@@ -102,6 +114,7 @@ TRAI项目管理相关规范的统一入口。
 
 | 版本 | 日期 | 更新内容 |
 |------|------|---------|
+| v1.3 | 2026-04-30 | 新增全局配置文件与依赖管理规范，同步对话风格规范 |
 | v1.2 | 2026-04-26 | 新增对话风格规范（5种风格随机切换） |
 | v1.1 | 2026-04-24 | 新增编码修复规范 |
 | v1.0 | 2026-04-08 | 初版发布 |

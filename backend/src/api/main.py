@@ -437,6 +437,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
     app.include_router(contact_router, prefix=api_prefix, tags=["公开接口"])
+    app.include_router(i18n_public_router, prefix=api_prefix, tags=["翻译"])
     app.include_router(admin_i18n_router, prefix=f"{api_prefix}/admin", tags=["国际化管理"])
 
     @app.get("/", tags=["首页"])

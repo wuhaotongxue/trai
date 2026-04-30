@@ -36,7 +36,7 @@ const withCache = <T extends (...args: any[]) => Promise<any>>(fn: T): T => {
   return (async (...args: any[]) => {
     // 生成缓存键
     const url = args[0] // 假设第一个参数是URL
-    const params = args[1]?.params || {} // 假设第二个参数是配置对象，其中包含params
+    const params = args[1]?.params || {} // 假设第二个参数是配置对象, 其中包含params
     const cacheKey = generateCacheKey(url, params)
     const now = Date.now()
     

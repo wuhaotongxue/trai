@@ -14,6 +14,7 @@ import uuid
 import zipfile
 from io import BytesIO
 from pathlib import Path
+from typing import Annotated
 
 import markdown
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
@@ -212,6 +213,11 @@ class ToolsAPI:
             if src.startswith(("data:", "http://", "https://")):
                 return img_tag
 
+            # 安全检查: 禁止路径遍历
+            if ".." in src or "\\" in src:
+                logger.warning(f"检测到路径遍历攻击尝试: {src}")
+                return img_tag
+
             # 解析图片路径
             if src.startswith("/"):
                 # 绝对路径, 从工作目录开始
@@ -221,11 +227,21 @@ class ToolsAPI:
                 img_path = base_path / src
 
             try:
+                # 规范化路径并检查是否在允许的范围内
+                resolved_path = img_path.resolve()
+                
+                # 安全检查: 确保路径在基础目录下
+                if base_path:
+                    base_resolved = base_path.resolve()
+                    if not str(resolved_path).startswith(str(base_resolved)):
+                        logger.warning(f"图片路径超出允许范围: {resolved_path}")
+                        return img_tag
+
                 if img_path.exists():
                     # 读取图片并转为 base64
-                    with open(img_path, "rb") as f:
+                    with open(resolved_path, "rb") as f:
                         img_data = f.read()
-                    mime_type, _ = mimetypes.guess_type(str(img_path))
+                    mime_type, _ = mimetypes.guess_type(str(resolved_path))
                     if not mime_type:
                         mime_type = "image/png"
                     base64_data = base64.b64encode(img_data).decode("utf-8")
@@ -962,7 +978,7 @@ class ToolsRouter:
         current_user: CurrentUser,
         file: UploadFile = File(...),
         quality: int = Form(60, description="压缩质量 (1-100)"),
-        target_size_kb: int | None = Form(None, description="目标文件大小(KB)"),
+        target_size_kb: Annotated[int | None, Form(description="目标文件大小(KB)")] = None,
         s3_service: S3StorageService = Depends(S3StorageService),
     ) -> ToolResultResponse:
         """压缩图片并上传到 S3 返回限时下载链接."""
@@ -996,10 +1012,10 @@ class ToolsRouter:
         current_user: CurrentUser,
         file: UploadFile = File(...),
         target_format: str = Form(..., description="目标格式"),
-        sizes: str | None = Form(None, description="尺寸列表"),
-        width: int | None = Form(None, description="宽度"),
-        height: int | None = Form(None, description="高度"),
-        target_size_kb: int | None = Form(None, description="目标大小(KB)"),
+        sizes: Annotated[str | None, Form(description="尺寸列表")] = None,
+        width: Annotated[int | None, Form(description="宽度")] = None,
+        height: Annotated[int | None, Form(description="高度")] = None,
+        target_size_kb: Annotated[int | None, Form(description="目标大小(KB)")] = None,
         s3_service: S3StorageService = Depends(S3StorageService),
     ) -> ToolResultResponse:
         """转换图片格式并上传到 S3 返回限时下载链接."""

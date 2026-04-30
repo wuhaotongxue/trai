@@ -18,6 +18,7 @@ from api.deps import AdminUser
 from core.logger import get_logger
 from infrastructure.database.database import get_db_session
 from infrastructure.database.models import EmailConfigModel
+from infrastructure.security.encryption import get_encryption_service
 
 
 router = APIRouter()
@@ -167,6 +168,7 @@ async def create_email_config(
     config_data: EmailConfigCreate,
     db: Annotated[Any, Depends(get_db_session)],
     admin_user: Annotated[AdminUser, Depends(AdminUser)],
+    encryption_service: Annotated[Any, Depends(get_encryption_service)],
 ) -> dict[str, Any]:
     """创建邮件配置"""
     stmt = select(EmailConfigModel).where(EmailConfigModel.t_config_name == config_data.config_name)
@@ -179,13 +181,16 @@ async def create_email_config(
             detail={"code": 400, "message": "配置名称已存在"},
         )
 
+    # 加密邮箱密码
+    encrypted_password = encryption_service.encrypt(config_data.password)
+
     model = EmailConfigModel(
         t_config_name=config_data.config_name,
         t_host=config_data.host,
         t_port=config_data.port,
         t_use_ssl=config_data.use_ssl,
         t_username=config_data.username,
-        t_password=config_data.password,
+        t_password=encrypted_password,
         t_from_name=config_data.from_name,
         t_to_emails=config_data.to_emails,
         t_is_active=config_data.is_active,
@@ -216,6 +221,7 @@ async def update_email_config(
     config_data: EmailConfigUpdate,
     db: Annotated[Any, Depends(get_db_session)],
     admin_user: Annotated[AdminUser, Depends(AdminUser)],
+    encryption_service: Annotated[Any, Depends(get_encryption_service)],
 ) -> dict[str, Any]:
     """更新邮件配置"""
     stmt = select(EmailConfigModel).where(EmailConfigModel.t_id == config_id)
@@ -230,6 +236,10 @@ async def update_email_config(
 
     update_data = config_data.model_dump(exclude_unset=True)
     if update_data:
+        # 如果更新了密码,需要加密
+        if "password" in update_data:
+            update_data["t_password"] = encryption_service.encrypt(update_data.pop("password"))
+        
         update_data["t_updated_at"] = datetime.now()
         update_data["t_updated_by"] = admin_user.get("user_id")
 

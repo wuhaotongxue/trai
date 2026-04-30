@@ -211,4 +211,6 @@ class SyncSysUsersToTUsersScript:
 
 if __name__ == "__main__":
     result = SyncSysUsersToTUsersScript().run(source="wecom")
-    print(result)
+    from core.logger import get_logger
+    logger = get_logger("sync_users")
+    logger.info(f"Sync result: {result}")

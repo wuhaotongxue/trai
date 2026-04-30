@@ -2,7 +2,7 @@
  * 文件名: store.ts
  * 作者: wuhao
  * 日期: 2026-04-25 03:12:00
- * 描述: TRAI 桌面客户端国际化状态管理模块，优先使用本地翻译，运行时翻译作为补充
+ * 描述: TRAI 桌面客户端国际化状态管理模块, 优先使用本地翻译, 运行时翻译作为补充
  */
 import type { Locale } from './types'
 import { use_locale_store } from '@/store/locale'
@@ -33,7 +33,7 @@ const LOCAL_TRANSLATIONS: Record<Locale, Record<string, string>> = {
   en: local_en,
 }
 
-// 运行时翻译缓存（从后端 API 获取，用于覆盖本地翻译）
+// 运行时翻译缓存(从后端 API 获取, 用于覆盖本地翻译)
 let runtime_translations: { zh: Record<string, string>; en: Record<string, string> } | null = null
 
 /**
@@ -44,7 +44,7 @@ export function set_runtime_translations(data: { zh: Record<string, string>; en:
 }
 
 /**
- * 翻译函数：优先使用本地翻译，其次使用运行时翻译
+ * 翻译函数: 优先使用本地翻译, 其次使用运行时翻译
  */
 function do_translate(locale: Locale, key: string): string {
   // 1. 先查找本地翻译
@@ -80,7 +80,7 @@ export function t(key: string): string {
   return do_translate(locale, key)
 }
 
-// 翻译函数别名（符合 skill 规范，禁止使用单字母函数名）
+// 翻译函数别名(符合 skill 规范, 禁止使用单字母函数名)
 export { t as translate }
 
 // 获取当前语言

@@ -16,15 +16,15 @@ from typing import Any
 
 
 # ============================================================
-# 模型单例管理器：模型常驻 GPU，生成完成后 idle 释放显存
+# 模型单例管理器: 模型常驻 GPU, 生成完成后 idle 释放显存
 # ============================================================
 
 
 class _ImageModelManager:
     """线程安全的模型单例管理器
 
-    模型加载后常驻 GPU 显存，每次 generate 调用重置 idle 计时器。
-    idle 超时后自动释放 pipeline + gc.collect + torch.cuda.empty_cache。
+    模型加载后常驻 GPU 显存, 每次 generate 调用重置 idle 计时器.
+    idle 超时后自动释放 pipeline + gc.collect + torch.cuda.empty_cache.
     """
 
     _instance: "_ImageModelManager | None" = None
