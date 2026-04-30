@@ -936,6 +936,53 @@ export const adminApi = {
       `/admin/i18n?locale=${encodeURIComponent(locale)}&namespace=${encodeURIComponent(namespace)}&key=${encodeURIComponent(key)}`,
       { method: "DELETE" }
     ),
+  /** 获取 AI 角色列表 */
+  listAgentRoles: (params?: { is_active?: boolean }) => {
+    const qs = params?.is_active !== undefined ? `?is_active=${params.is_active}` : "";
+    return request<Array<{
+      t_id: number;
+      t_role_name: string;
+      t_role_comment: string;
+      t_role_keyword: string | null;
+      t_style_type: string;
+      t_priority: number;
+      t_is_active: boolean;
+      t_remark: string | null;
+      t_created_at: string;
+      t_updated_at: string;
+    }>>(`/admin/agent_roles${qs}`);
+  },
+  /** 创建 AI 角色 */
+  createAgentRole: (data: {
+    t_role_name: string;
+    t_role_comment: string;
+    t_role_keyword?: string | null;
+    t_style_type?: string;
+    t_priority?: number;
+    t_is_active?: boolean;
+    t_remark?: string | null;
+  }) =>
+    request<{ t_id: number }>("/admin/agent_roles", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** 更新 AI 角色 */
+  updateAgentRole: (id: number, data: Partial<{
+    t_role_name: string;
+    t_role_comment: string;
+    t_role_keyword: string | null;
+    t_style_type: string;
+    t_priority: number;
+    t_is_active: boolean;
+    t_remark: string | null;
+  }>) =>
+    request(`/admin/agent_roles/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  /** 删除 AI 角色 */
+  deleteAgentRole: (id: number) =>
+    request(`/admin/agent_roles/${id}`, { method: "DELETE" }),
   /** 获取配置列表 */
   listSettings: (category?: string) => {
     const qs = category ? `?category=${encodeURIComponent(category)}` : "";
@@ -984,6 +1031,65 @@ export const adminApi = {
     request<{ message: string; key: string }>(`/admin/settings/${encodeURIComponent(key)}`, {
       method: "DELETE",
     }),
+  /** 获取联系留言列表 */
+  getContactMessages: (params?: {
+    page?: number;
+    page_size?: number;
+    status?: string;
+    type?: string;
+  }) => {
+    const qs = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<{ code: number; data: never[]; total: number }>(
+      `/admin/contact_messages${qs ? `?${qs}` : ""}`
+    );
+  },
+  /** 更新留言状态 */
+  updateContactMessageStatus: (messageId: number, data: { status: string; reply_note?: string }) =>
+    request<{ message: string }>(`/admin/contact_messages/${messageId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  /** 删除留言 */
+  deleteContactMessage: (messageId: number) =>
+    request<{ message: string }>(`/admin/contact_messages/${messageId}`, { method: "DELETE" }),
+  /** 获取邮件配置列表 */
+  getEmailConfigs: () =>
+    request<{ code: number; data: never[] }>("/admin/email_configs"),
+  /** 更新邮件配置 */
+  updateEmailConfig: (id: number, data: Record<string, unknown>) =>
+    request<{ message: string }>(`/admin/email_configs/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  /** 创建邮件配置 */
+  createEmailConfig: (data: Record<string, unknown>) =>
+    request<{ message: string }>("/admin/email_configs", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  /** 删除邮件配置 */
+  deleteEmailConfig: (id: number) =>
+    request<{ message: string }>(`/admin/email_configs/${id}`, { method: "DELETE" }),
+  /** 获取审计日志 */
+  getAuditLogs: (params?: {
+    page?: number;
+    page_size?: number;
+    action?: string;
+    level?: string;
+  }) => {
+    const qs = new URLSearchParams(
+      Object.entries(params || {})
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, String(v)])
+    ).toString();
+    return request<{ code: number; data: never[]; total: number }>(
+      `/admin/audit_logs${qs ? `?${qs}` : ""}`
+    );
+  },
 };
 
 /** 公开 API(无需认证) */

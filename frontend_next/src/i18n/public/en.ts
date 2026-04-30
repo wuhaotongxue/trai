@@ -271,7 +271,6 @@ export const PUBLIC_EN = {
   "contact.sent": "Message sent! We'll get back to you soon.",
   "contact.send_btn": "Send Message",
   "contact.submitting": "Submitting...",
-  "contact.sent": "Sent",
   "contact.submit_success": "Submitted successfully! We will contact you soon",
   "contact.submit_failed": "Submission failed, please try again",
   "contact.network_error": "Network error, please check your connection",

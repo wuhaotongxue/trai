@@ -80,6 +80,9 @@ export function t(key: string): string {
   return do_translate(locale, key)
 }
 
+// 翻译函数别名（符合 skill 规范，禁止使用单字母函数名）
+export { t as translate }
+
 // 获取当前语言
 export function get_locale(): Locale {
   return use_locale_store.getState().locale

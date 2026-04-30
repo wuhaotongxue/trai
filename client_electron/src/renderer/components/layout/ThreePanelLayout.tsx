@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react'
 import { PanelLeftOpen, PanelLeftClose, List } from 'lucide-react'
-import { t } from '@/i18n'
+import { translate } from '@/i18n'
 
 interface ThreePanelLayoutProps {
   title: string
@@ -79,7 +79,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
               <button
                 type="button"
                 onClick={() => set_is_left_open(false)}
-                title={t('collapse')}
+                title={translate('collapse')}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -115,7 +115,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                   <button
                     type="button"
                     onClick={() => set_is_left_open(true)}
-                    title={t('expand')}
+                    title={translate('expand')}
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -135,7 +135,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
               <button
                 type="button"
                 onClick={() => set_is_middle_open(false)}
-                title={t('collapse')}
+                title={translate('collapse')}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -168,7 +168,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 <button
                   type="button"
                   onClick={() => set_is_left_open(true)}
-                  title={t('expand')}
+                  title={translate('expand')}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -185,7 +185,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
                 <button
                   type="button"
                   onClick={() => set_is_middle_open(true)}
-                  title={t('expand')}
+                  title={translate('expand')}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '6px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',

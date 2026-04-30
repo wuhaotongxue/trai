@@ -228,12 +228,30 @@ description: >-
 **通知格式要求**：
 - 标题：`🚀 TRAI 代码推送通知`
 - 包含分支、commit message（**跟在推送人后面**）、变更文件数量、推送时间
+- **必须添加当前角色名称**（如「地理专家」「爆炸分身」等）
+- **必须添加角色专属评论**：不同角色风格不同，不一定是吐槽，可以是知识科普、心情表达、专业评价等
 - 优先使用卡片消息（Feishu `send_card`，WeCom `markdown`）
+
+**角色专属评论参考**：
+
+| 角色 | 评论风格 | 示例 |
+|------|---------|------|
+| 爆炸分身 | 吐槽抱怨 | 本来不想写的呜……啊呀终于写完了！ |
+| 小甜心 | 撒娇卖萌 | 辛苦啦～小甜心觉得超棒的呢！ |
+| 御姐 | 霸道点评 | 嗯，做得还行，御姐准了。 |
+| 软萌宝 | 委屈撒娇 | 呜...人家觉得好厉害呀！ |
+| 知心姐姐 | 温柔鼓励 | 乖，辛苦了，这周做得很好呢。 |
+| 开心果 | 活泼正能量 | 哈！搞定啦！开心果出击！ |
+| 小泪包 | 心疼安慰 | 呜呜...好累呀...但是完成了呢！ |
+| 审查官 | 严格评价 | 咳咳，检查通过，勉强合格。 |
+| 地理专家 | 地理科普 | 说到经纬度...咳，总之推送成功啦。 |
 
 **飞书卡片格式（PowerShell）**：
 ```powershell
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
-$commitMsg = "文档（技能）爆炸分身更新 README Changelog，本来不想写的呜……啊呀终于不用混了！！终于不用混了！！"
+$commitMsg = "文档（技能）更新 git_submit 通知格式"
+$roleName = "地理专家"
+$roleComment = "说到推送通知呀～这条北纬120度的消息从东经出发，已成功抵达群聊坐标！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $body = @{
@@ -246,7 +264,8 @@ $body = @{
         }
         elements = @(
             @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
-            @{ tag = "markdown"; content = "**分支**: `wuhao / develop / main 已合并`\n**变更**: 2 个文件 (+7 -1)\n**时间**: $($timestamp)" }
+            @{ tag = "markdown"; content = "**角色**: $($roleName) | $($roleComment)" }
+            @{ tag = "markdown"; content = "**分支**: `wuhao / develop / main 已合并`\n**变更**: 2 个文件 (+76 -22)\n**时间**: $($timestamp)" }
         )
     }
 } | ConvertTo-Json -Depth 10 -Compress
@@ -259,7 +278,9 @@ if ($feishuUrl) {
 ```powershell
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
 $wecomUrl  = $env:WECOM_CHAT_WEBHOOK_URL  # 从 backend/.env 读取，正确变量名
-$commitMsg = "文档（技能）爆炸分身更新 README Changelog，本来不想写的呜……啊呀终于不用混了！！终于不用混了！！"
+$commitMsg = "文档（技能）更新 git_submit 通知格式"
+$roleName = "地理专家"
+$roleComment = "说到推送通知呀～这条北纬120度的消息从东经出发，已成功抵达群聊坐标！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $payload = @{
@@ -267,8 +288,9 @@ $payload = @{
     markdown = @{
         content = "**🚀 TRAI 代码推送通知**
 **推送人**: wuhao | **Commit**: $($commitMsg)
+**角色**: $($roleName) | $($roleComment)
 **分支**: wuhao / develop / main 已合并
-**变更**: 2 个文件 (+7 -1)
+**变更**: 2 个文件 (+76 -22)
 **时间**: $($timestamp)"
     }
 }

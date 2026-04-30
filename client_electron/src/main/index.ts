@@ -22,6 +22,27 @@ export let main_window: BrowserWindow | null = null
 // 是否真正退出应用的标记
 export let is_quitting = false
 
+let quit_animation_timer: ReturnType<typeof setTimeout> | null = null
+
+function perform_quit_with_animation() {
+  if (!main_window || main_window.isDestroyed()) {
+    app.quit()
+    return
+  }
+  main_window.webContents.send('app:quit-with-animation')
+  quit_animation_timer = setTimeout(() => {
+    app.quit()
+  }, 3000)
+}
+
+export function on_renderer_quit_confirm() {
+  if (quit_animation_timer) {
+    clearTimeout(quit_animation_timer)
+    quit_animation_timer = null
+  }
+  app.quit()
+}
+
 // 保证应用单例运行 (软件唯一性)
 const got_the_lock = app.requestSingleInstanceLock()
 
@@ -130,7 +151,7 @@ if (!got_the_lock) {
         main_window?.hide()
       } else if (close_action === 'quit') {
         is_quitting = true
-        app.quit()
+        perform_quit_with_animation()
       } else {
         // 提示用户选择
         if (!main_window) return
@@ -160,7 +181,7 @@ if (!got_the_lock) {
             main_window?.hide()
           } else {
             is_quitting = true
-            app.quit()
+            perform_quit_with_animation()
           }
         }).catch((err) => {
           log.error('关闭提示框出错:', err)
