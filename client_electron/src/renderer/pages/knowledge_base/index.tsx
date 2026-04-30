@@ -681,8 +681,8 @@ const KnowledgeBasePage: React.FC = () => {
             </div>
             <div style={{ marginBottom: '24px' }}><p style={{ margin: 0, fontSize: '14px', color: 'var(--ui_text_muted)', lineHeight: '1.6' }}>{custom_modal_message}</p></div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              {custom_modal_type === 'confirm' && <button onClick={() => set_show_custom_modal(false)} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 500, border: '1px solid var(--ui_border)', borderRadius: '6px', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text_muted)', cursor: 'pointer' }}>取消</button>}
-              <button onClick={() => { set_show_custom_modal(false); if (custom_modal_callback) custom_modal_callback() }} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 500, border: 'none', borderRadius: '6px', backgroundColor: 'var(--ui_accent)', color: 'white', cursor: 'pointer' }}>{custom_modal_type === 'confirm' ? '确认' : '确定'}</button>
+              {custom_modal_type === 'confirm' && <button type="button" onClick={() => set_show_custom_modal(false)} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 500, border: '1px solid var(--ui_border)', borderRadius: '6px', backgroundColor: 'var(--ui_panel)', color: 'var(--ui_text_muted)', cursor: 'pointer' }}>取消</button>}
+              <button type="button" onClick={() => { set_show_custom_modal(false); if (custom_modal_callback) custom_modal_callback() }} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 500, border: 'none', borderRadius: '6px', backgroundColor: 'var(--ui_accent)', color: 'white', cursor: 'pointer' }}>{custom_modal_type === 'confirm' ? '确认' : '确定'}</button>
             </div>
           </div>
         </div>

@@ -4,26 +4,18 @@
 # 日期: 2026_04_30_11:15:00
 # 描述: AI 角色管理 API
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from api.routers.admin.admin_deps import get_current_admin_user
-from infrastructure.database.database import get_session
+from infrastructure.database.database import get_db_session
 from infrastructure.database.models import AgentRoleModel
 
-
-router = APIRouter(prefix="/admin/agent_roles", tags=["AI 角色管理"])
-
-
-def get_db():
-    """获取数据库会话"""
-    db = get_session()
-    try:
-        yield db
-    finally:
-        db.close()
+router = APIRouter(prefix="/agent_roles", tags=["AI 角色管理"])
 
 
 class AgentRoleBase(BaseModel):
@@ -56,8 +48,8 @@ class AgentRoleUpdate(BaseModel):
 class AgentRoleResponse(AgentRoleBase):
     """AI 角色响应"""
     t_id: int
-    t_created_at: str
-    t_updated_at: str
+    t_created_at: datetime
+    t_updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -67,7 +59,7 @@ class AgentRoleResponse(AgentRoleBase):
 def list_agent_roles(
     is_active: bool | None = None,
     _ = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ) -> list[AgentRoleModel]:
     """获取所有 AI 角色列表"""
     stmt = select(AgentRoleModel)
@@ -81,7 +73,7 @@ def list_agent_roles(
 def get_agent_role(
     role_id: int,
     _ = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """根据 ID 获取 AI 角色"""
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_id == role_id)
@@ -95,7 +87,7 @@ def get_agent_role(
 def create_agent_role(
     role_data: AgentRoleCreate,
     admin_user = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """创建新的 AI 角色"""
     # 检查角色名是否已存在
@@ -125,7 +117,7 @@ def update_agent_role(
     role_id: int,
     role_data: AgentRoleUpdate,
     admin_user = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """更新 AI 角色信息"""
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_id == role_id)
@@ -149,7 +141,7 @@ def update_agent_role(
 def delete_agent_role(
     role_id: int,
     _ = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ) -> None:
     """删除 AI 角色"""
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_id == role_id)

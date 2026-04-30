@@ -7,13 +7,15 @@
 
 用法:
     python s3_upload_simple.py              # 交互模式
-    python s3_upload_simple.py --version 0.1.0  # 指定版本，自动上传
+    python s3_upload_simple.py --version 0.1.0  # 指定版本, 自动上传
 """
 
 import os
 import sys
 import argparse
 from pathlib import Path
+
+from loguru import logger
 
 # 确保 backend 路径
 _backend_path = Path(__file__).parent.parent / "backend"
@@ -56,31 +58,31 @@ def main():
     version = args.version or os.getenv("VERSION", "0.1.0")
     release_dir = Path(__file__).parent / "release"
 
-    print(f"\n{'='*50}")
-    print("TRAI Client S3 Upload Tool")
-    print(f"{'='*50}\n")
+    logger.info(f"\n{'='*50}")
+    logger.info("TRAI Client S3 Upload Tool")
+    logger.info(f"{'='*50}\n")
 
     exe_files = list(release_dir.glob("*.exe"))
     exe_files = [f for f in exe_files if "Setup" in f.name]
     
     if not exe_files:
-        print(f"[ERROR] No installer found: {release_dir}")
+        logger.error(f"No installer found: {release_dir}")
         return
 
     exe_file = exe_files[0]
-    print(f"[INFO] Installer: {exe_file}")
-    print(f"[INFO] Version: {version}")
-    print(f"[INFO] Size: {exe_file.stat().st_size / 1024 / 1024:.2f} MB")
-    print(f"[INFO] Bucket: {bucket}")
-    print(f"[INFO] Endpoint: {endpoint}\n")
+    logger.info(f"Installer: {exe_file}")
+    logger.info(f"Version: {version}")
+    logger.info(f"Size: {exe_file.stat().st_size / 1024 / 1024:.2f} MB")
+    logger.info(f"Bucket: {bucket}")
+    logger.info(f"Endpoint: {endpoint}\n")
 
     if not args.auto:
         confirm = input("Confirm upload? (y/n): ").strip().lower()
         if confirm != 'y':
-            print("[INFO] Cancelled")
+            logger.info("Cancelled")
             return
     else:
-        print("[INFO] Auto mode, skipping confirm")
+        logger.info("Auto mode, skipping confirm")
 
     s3 = boto3.client(
         's3',
@@ -91,7 +93,7 @@ def main():
     )
 
     exe_key = f"releases/{version}/{exe_file.name}"
-    print(f"\n[INFO] Uploading installer to: {exe_key}")
+    logger.info(f"\nUploading installer to: {exe_key}")
     
     try:
         s3.upload_file(
@@ -103,9 +105,9 @@ def main():
                 'ACL': 'public-read'
             }
         )
-        print(f"[OK] Installer uploaded!")
+        logger.success("Installer uploaded!")
     except ClientError as e:
-        print(f"[ERROR] Upload failed: {e}")
+        logger.error(f"Upload failed: {e}")
         return
 
     import datetime
@@ -123,7 +125,7 @@ def main():
     yml_content = yaml.dump(yml_data)
     yml_key = f"releases/{version}/latest.yml"
     
-    print(f"\n[INFO] Uploading latest.yml to: {yml_key}")
+    logger.info(f"\nUploading latest.yml to: {yml_key}")
     
     try:
         s3.put_object(
@@ -133,12 +135,12 @@ def main():
             ContentType='application/x-yaml',
             ACL='public-read'
         )
-        print(f"[OK] latest.yml uploaded!")
+        logger.success("latest.yml uploaded!")
     except ClientError as e:
-        print(f"[ERROR] latest.yml upload failed: {e}")
+        logger.error(f"latest.yml upload failed: {e}")
         return
 
-    print(f"\n[INFO] Updating latest channel...")
+    logger.info(f"\nUpdating latest channel...")
     try:
         s3.put_object(
             Bucket=bucket,
@@ -152,21 +154,21 @@ def main():
             Key=f'releases/TRAI-latest.exe',
             CopySource={'Bucket': bucket, 'Key': exe_key}
         )
-        print(f"[OK] Latest channel updated!")
+        logger.success("Latest channel updated!")
     except ClientError as e:
-        print(f"[WARN] Latest channel update failed: {e}")
+        logger.warning(f"Latest channel update failed: {e}")
 
-    print(f"\n{'='*50}")
-    print("[OK] Upload completed!")
-    print(f"{'='*50}\n")
+    logger.info(f"\n{'='*50}")
+    logger.success("Upload completed!")
+    logger.info(f"{'='*50}\n")
     
     if public_domain:
         url = f"{public_domain}/releases/{version}/{exe_file.name}"
     else:
         url = f"{endpoint}/{bucket}/releases/{version}/{exe_file.name}"
     
-    print(f"Download URL: {url}")
-    print(f"\nClients can check for updates in Settings page")
+    logger.info(f"Download URL: {url}")
+    logger.info(f"\nClients can check for updates in Settings page")
 
 if __name__ == "__main__":
     main()

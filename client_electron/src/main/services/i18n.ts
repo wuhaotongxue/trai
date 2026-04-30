@@ -2,7 +2,7 @@
  * 文件名: i18n.ts
  * 作者: wuhao
  * 日期: 2026-04-24 16:30:00
- * 描述: 客户端国际化服务，调用后端 API 获取翻译
+ * 描述: 客户端国际化服务, 调用后端 API 获取翻译
  */
 import log from 'electron-log'
 import { ApiEndpoints } from '../platform/api_endpoints'
