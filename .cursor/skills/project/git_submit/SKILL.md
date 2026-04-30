@@ -274,10 +274,11 @@ if ($feishuUrl) {
 }
 ```
 
-**企业微信 Markdown 格式（PowerShell）**：
+**企业微信 Markdown 格式（PowerShell）- 推送到 wuhao 和 wudu 两个群**：
 ```powershell
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
-$wecomUrl  = $env:WECOM_CHAT_WEBHOOK_URL  # 从 backend/.env 读取，正确变量名
+$wecomWuhaoUrl = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=688936ed-0ea7-4f3f-8aa8-4476f638718a"
+$wecomWuduUrl = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=2016667c-09a2-4da4-ac8c-29dd242f4bb1"
 $commitMsg = "文档（技能）更新 git_submit 通知格式"
 $roleName = "地理专家"
 $roleComment = "说到推送通知呀～这条北纬120度的消息从东经出发，已成功抵达群聊坐标！"
@@ -287,22 +288,35 @@ $payload = @{
     msgtype = "markdown"
     markdown = @{
         content = "**🚀 TRAI 代码推送通知**
+
 **推送人**: wuhao | **Commit**: $($commitMsg)
+
 **角色**: $($roleName) | $($roleComment)
+
 **分支**: wuhao / develop / main 已合并
+
 **变更**: 2 个文件 (+76 -22)
+
 **时间**: $($timestamp)"
     }
 }
 $body = $payload | ConvertTo-Json -Depth 10 -Compress
-if ($wecomUrl) {
-    Invoke-WebRequest -Uri $wecomUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+
+# 推送到 wuhao 群
+if ($wecomWuhaoUrl) {
+    Invoke-WebRequest -Uri $wecomWuhaoUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+}
+
+# 推送到 wudu 群
+if ($wecomWuduUrl) {
+    Invoke-WebRequest -Uri $wecomWuduUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
 }
 ```
 
 **实际执行时**：
 - 飞书从 `$env:NOTIFY_FEISHU_WEBHOOK` 读取（需手动配置）
-- 企业微信从 `$env:WECOM_CHAT_WEBHOOK_URL` 读取（已在 backend/.env 中配置）
+- 企业微信 wuhao 群：`688936ed-0ea7-4f3f-8aa8-4476f638718a`
+- 企业微信 wudu 群：`2016667c-09a2-4da4-ac8c-29dd242f4bb1`
 - 如果环境变量未配置，跳过该通知（不报错）
 - 通知失败也不中断流程，仅打印警告日志
 
