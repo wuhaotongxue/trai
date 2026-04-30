@@ -281,8 +281,8 @@ if ($feishuUrl) {
 **企业微信 Markdown 格式（PowerShell）- 推送到 wuhao 和 wudu 两个群**：
 ```powershell
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
-$wecomWuhaoUrl = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=688936ed-0ea7-4f3f-8aa8-4476f638718a"
-$wecomWuduUrl = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=2016667c-09a2-4da4-ac8c-29dd242f4bb1"
+$wecomWuhaoUrl = $env:NOTIFY_WECOM_WUHAO_WEBHOOK
+$wecomWuduUrl = $env:NOTIFY_WECOM_WUDU_WEBHOOK
 $commitMsg = "文档（技能）更新 git_submit 通知格式"
 $roleName = "地理专家"
 $roleComment = "说到推送通知呀～这条北纬120度的消息从东经出发，已成功抵达群聊坐标！"
@@ -321,8 +321,8 @@ if ($wecomWuduUrl) {
 
 **实际执行时**：
 - 飞书从 `$env:NOTIFY_FEISHU_WEBHOOK` 读取（需手动配置）
-- 企业微信 wuhao 群：`688936ed-0ea7-4f3f-8aa8-4476f638718a`
-- 企业微信 wudu 群：`2016667c-09a2-4da4-ac8c-29dd242f4bb1`
+- 企业微信 wuhao 群从 `$env:NOTIFY_WECOM_WUHAO_WEBHOOK` 读取
+- 企业微信 wudu 群从 `$env:NOTIFY_WECOM_WUDU_WEBHOOK` 读取
 - 如果环境变量未配置，跳过该通知（不报错）
 - 通知失败也不中断流程，仅打印警告日志
 

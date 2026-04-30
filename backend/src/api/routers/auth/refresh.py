@@ -92,12 +92,12 @@ async def refresh_token(
 
         # 生成新的令牌对
         new_access_token = jwt_service.create_access_token(
-            user_id=user.t_user_id,
-            username=user.t_username,
-            role=user.t_role.value,
-            tenant_id=user.t_tenant_id,
+            user_id=user.user_id,
+            username=user.username,
+            role=user.role.value,
+            tenant_id=user.tenant_id,
         )
-        new_refresh_token = jwt_service.create_refresh_token(user_id=user.t_user_id)
+        new_refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
 
         # 将旧的 refresh_token 加入黑名单
         try:
