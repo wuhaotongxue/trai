@@ -43,6 +43,8 @@ class BuildAndReleaseRequest(BaseModel):
     """一键打包发布请求"""
 
     release_notes: str | None = Field(default=None, description="更新日志内容")
+    agent_role: str | None = Field(default=None, description="AI 角色名称")
+    wecom_groups: list[str] | None = Field(default=None, description="企微群列表，支持 wuhao/wudu")
 
 
 class BuildStatus(BaseModel):
@@ -232,6 +234,7 @@ async def release_client(
     s3_service: S3StorageService = Depends(),
     release_notes: str | None = Form(None, description="更新日志内容"),
     agent_role: Annotated[str | None, Header(None, description="AI 角色名称")] = None,
+    wecom_groups: Annotated[str | None, Form(None, description="企微群列表，逗号分隔，如 wuhao,wudu")] = None,
 ) -> ReleaseResponse:
     """管理员发布新版本的 Electron 客户端并上传至 S3.
 
@@ -295,6 +298,8 @@ async def release_client(
 
         releaser = ReleaseClientUseCase()
         download_url = s3_service.get_file_url(exe_key)
+        # 解析 wecom_groups
+        groups_list = [g.strip() for g in wecom_groups.split(",")] if wecom_groups else None
         releaser._send_notifications(
             version,
             download_url,
@@ -302,6 +307,7 @@ async def release_client(
             publisher=current_user.get("username") or current_user.get("user_id"),
             publisher_role=current_user.get("role"),
             agent_role=agent_role,
+            wecom_groups=groups_list,
         )
 
         return ReleaseResponse(version=version, message="发布成功, 已通知飞书和企业微信")
@@ -460,7 +466,8 @@ async def build_and_release(
                 body.release_notes or "无更新日志",
                 publisher=current_user.get("username") or current_user.get("user_id"),
                 publisher_role=current_user.get("role"),
-                agent_role=agent_role,
+                agent_role=body.agent_role,
+                wecom_groups=body.wecom_groups,
             )
             logger.info(f"[飞书通知] 发送完成: v{full_version}")
 

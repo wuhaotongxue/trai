@@ -72,6 +72,7 @@ export default function ClientReleasePage() {
   const [releaseNotes, setReleaseNotes] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [agentRoles, setAgentRoles] = useState<AgentRole[]>([]);
+  const [selectedWecomGroups, setSelectedWecomGroups] = useState<string[]>(["wuhao"]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const { toast } = useToast();
   const [initDone, setInitDone] = useState(false);
@@ -182,13 +183,24 @@ export default function ClientReleasePage() {
       toast({ message: "请填写更新日志", variant: "error" });
       return;
     }
+    if (selectedWecomGroups.length === 0) {
+      toast({ message: "请至少选择一个企微通知群", variant: "error" });
+      return;
+    }
     setSubmitting(true);
     // 不关闭 modal，让用户看到构建状态
     try {
       await request("/admin/client/build_release", {
         method: "POST",
-        headers: selectedRole ? { "agent-role": selectedRole } : undefined,
-        body: JSON.stringify({ release_notes: releaseNotes }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(selectedRole ? { "agent-role": selectedRole } : {}),
+        },
+        body: JSON.stringify({
+          release_notes: releaseNotes,
+          agent_role: selectedRole || null,
+          wecom_groups: selectedWecomGroups,
+        }),
       });
       // 后端已返回 running，状态由轮询驱动更新
     } catch (err: any) {
@@ -349,6 +361,44 @@ export default function ClientReleasePage() {
                       {agentRoles.find(r => r.t_role_name === selectedRole)?.t_role_comment}
                     </p>
                   )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="wecomGroups" className="flex items-center gap-2">
+                    企微通知群
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedWecomGroups.includes("wuhao")}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedWecomGroups(prev => [...prev, "wuhao"]);
+                          } else {
+                            setSelectedWecomGroups(prev => prev.filter(g => g !== "wuhao"));
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                      />
+                      <span className="text-sm">wuhao 群</span>
+                    </label>
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedWecomGroups.includes("wudu")}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedWecomGroups(prev => [...prev, "wudu"]);
+                          } else {
+                            setSelectedWecomGroups(prev => prev.filter(g => g !== "wudu"));
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                      />
+                      <span className="text-sm">wudu 群</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">选择要发送通知的企微群，至少选择一个</p>
                 </div>
               </div>
               <DialogFooter className="pt-4">
