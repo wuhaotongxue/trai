@@ -28,7 +28,7 @@ from infrastructure.agent.tools.wecom_contact import (
 class WeComContactTool(BaseTool):
     """企业微信通讯录工具
 
-    提供用户查询、部门查询等能力,供 AI Agent 在对话中调用,
+    提供用户查询,部门查询等能力,供 AI Agent 在对话中调用,
     帮助解答「某人在哪个部门」「某部门的负责人是谁」等问题.
     """
 
@@ -43,7 +43,7 @@ class WeComContactTool(BaseTool):
                 id="wecom_contact",
                 name="企业微信通讯录",
                 description=(
-                    "查询企业微信中的用户信息和部门结构.可根据用户姓名、工号查询用户详细信息,"
+                    "查询企业微信中的用户信息和部门结构.可根据用户姓名,工号查询用户详细信息,"
                     "或列出指定部门的成员列表及部门树结构.返回中文格式化的结果."
                 ),
                 category=ToolCategory.UTILITY,
@@ -51,7 +51,7 @@ class WeComContactTool(BaseTool):
                 parameters=[
                     ToolParameter(
                         name="action",
-                        description="操作类型:get_user(查询用户详情)、list_users(查询部门成员)、list_departments(查询部门列表)、search_user(按姓名搜索用户)",
+                        description="操作类型:get_user(查询用户详情),list_users(查询部门成员),list_departments(查询部门列表),search_user(按姓名搜索用户)",
                         type="string",
                         required=True,
                         enum=["get_user", "list_users", "list_departments", "search_user"],

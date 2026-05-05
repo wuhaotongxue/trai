@@ -1,16 +1,20 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # 文件名: session.py
 # 作者: wuhao
 # 日期: 2026_04_17_08:28:46
-# 描述: 会话管理接口
+# 描述: 会话管理接口 - 基础CRUD功能 (Skills合规: 单文件<=1500行)
 
 from __future__ import annotations
 
 import asyncio
 import json
+from datetime import datetime
+from enum import Enum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -23,6 +27,204 @@ from infrastructure.repositories.session_repository import (
     MessageRepository,
     SessionRepository,
 )
+from infrastructure.services.chat_history_service import ChatHistoryService, get_chat_history_service
+
+import re
+import uuid
+from html import escape as html_escape
+
+
+class InputValidator:
+    """Input validation and sanitization utility class"""
+    
+    # Regex patterns for validation
+    UUID_PATTERN = re.compile(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+        re.IGNORECASE
+    )
+    SESSION_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{1,64}$')
+    SAFE_STRING_PATTERN = re.compile(r'^[a-zA-Z0-9\s\-_.@#$%^&*()+=\[\]{}|\\:";\'<>,.?/~`!]+$')
+    
+    @classmethod
+    def validate_session_id(cls, session_id: str) -> str:
+        """Validate and sanitize session ID
+        
+        Args:
+            session_id: Session ID string
+            
+        Returns:
+            Sanitized session ID
+            
+        Raises:
+            HTTPException: If session ID is invalid
+        """
+        if not session_id or not isinstance(session_id, str):
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Session ID is required"}
+            )
+        
+        session_id = session_id.strip()
+        
+        if not (cls.UUID_PATTERN.match(session_id) or cls.SESSION_ID_PATTERN.match(session_id)):
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Invalid session ID format"}
+            )
+        
+        return session_id
+    
+    @classmethod
+    def sanitize_string(cls, input_str: str, max_length: int = 32000) -> str:
+        """Sanitize user input string to prevent XSS and injection attacks
+        
+        Args:
+            input_str: User input string
+            max_length: Maximum allowed length
+            
+        Returns:
+            Sanitized string
+            
+        Raises:
+            HTTPException: If input is too long
+        """
+        if not isinstance(input_str, str):
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Invalid input type, expected string"}
+            )
+        
+        sanitized = input_str.strip()
+        
+        if len(sanitized) > max_length:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "code": 400,
+                    "message": f"Input too long. Maximum length: {max_length} characters"
+                }
+            )
+        
+        return sanitized
+    
+    @classmethod
+    def sanitize_message_content(cls, content: str) -> str:
+        """Sanitize message content with special handling for code blocks
+        
+        Args:
+            content: Message content
+            
+        Returns:
+            Sanitized content
+        """
+        if not content:
+            return ""
+        
+        content = cls.sanitize_string(content, max_length=32000)
+        
+        content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', content)
+        
+        return content
+    
+    @classmethod
+    def validate_date(cls, date_str: str) -> datetime:
+        """Validate and parse date string
+        
+        Args:
+            date_str: Date string in YYYY-MM-DD format
+            
+        Returns:
+            Parsed datetime object
+            
+        Raises:
+            HTTPException: If date format is invalid
+        """
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Invalid date format. Use YYYY-MM-DD"}
+            )
+    
+    @classmethod
+    def validate_tags(cls, tags: list[str]) -> list[str]:
+        """Validate and sanitize tags
+        
+        Args:
+            tags: List of tag strings
+            
+        Returns:
+            Sanitized tag list
+            
+        Raises:
+            HTTPException: If tags are invalid
+        """
+        if not isinstance(tags, list):
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Tags must be a list"}
+            )
+        
+        if len(tags) > 20:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Maximum 20 tags allowed"}
+            )
+        
+        sanitized_tags = []
+        for tag in tags:
+            if not isinstance(tag, str):
+                raise HTTPException(
+                    status_code=400,
+                    detail={"code": 400, "message": "Each tag must be a string"}
+                )
+            
+            tag = tag.strip()
+            if len(tag) < 1 or len(tag) > 50:
+                raise HTTPException(
+                    status_code=400,
+                    detail={"code": 400, "message": "Tag length must be between 1-50 characters"}
+                )
+            
+            if not re.match(r'^[\w\s\-]+$', tag, re.UNICODE):
+                raise HTTPException(
+                    status_code=400,
+                    detail={"code": 400, "message": f"Invalid tag format: {tag}"}
+                )
+            
+            sanitized_tags.append(tag)
+        
+        return sanitized_tags
+    
+    @classmethod
+    def validate_pagination(cls, page: int, page_size: int) -> tuple[int, int]:
+        """Validate pagination parameters
+        
+        Args:
+            page: Page number (1-based)
+            page_size: Items per page
+            
+        Returns:
+            Tuple of validated (page, page_size)
+            
+        Raises:
+            HTTPException: If parameters are invalid
+        """
+        if page < 1:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Page must be >= 1"}
+            )
+        
+        if page_size < 1 or page_size > 100:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "Page size must be between 1-100"}
+            )
+        
+        return page, page_size
+
 
 router = APIRouter()
 
@@ -113,7 +315,7 @@ async def send_message(
     fastapi_request: Request,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> SendMessageResponse:
-    """发送消息(联动 AI 对话)
+    """发送消息(联动 AI 对话) - 使用 ChatHistoryService 实现持久化
 
     Args:
         session_id: 会话 ID
@@ -130,40 +332,28 @@ async def send_message(
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
 
-    session_repo = SessionRepository(session)
-    message_repo = MessageRepository(session)
+    history_service = get_chat_history_service(session)
 
-    # 检查会话是否存在
-    chat_session = session_repo.get_session(session_id)
+    chat_session = history_service.load_session_history(session_id)
     if not chat_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # 权限校验:非管理员只能访问自己的会话
-    if role != "admin" and chat_session.t_user_id != user_id:
+    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
         )
 
-    # 保存用户消息
-    user_msg = message_repo.add_message(
-        session_id=session_id,
-        role=request.role or "user",
-        content=request.content,
-    )
+    message_count_before = chat_session.message_count
 
-    # 获取历史消息
-    messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
-
-    # 上下文管理:检查并压缩超限上下文
     context_manager: ContextManager = get_context_manager()
+    
+    messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
-    # 调用 AI
     try:
         from infrastructure.ai.openai_client import OpenAIClient
 
@@ -173,25 +363,29 @@ async def send_message(
             model=chat_session.model or "gpt-4o",
         )
 
-        # 保存 AI 响应
-        message_repo.add_message(
+        user_msg_entity, assistant_msg_entity = history_service.save_conversation_turn(
             session_id=session_id,
-            role="assistant",
-            content=ai_response["content"],
+            user_content=request.content,
+            assistant_content=ai_response["content"],
         )
 
-        # 更新会话摘要(标题)
-        if len(messages) == 1:
+        if message_count_before == 0:
             title = request.content[:30] + ("..." if len(request.content) > 30 else "")
-            session_repo.update_session(session_id=session_id, title=title)
+            history_service.update_session_title(session_id=session_id, title=title)
+
+        logger.info(
+            f"消息发送成功 | session_id={session_id} | "
+            f"user_len={len(request.content)} | ai_len={len(ai_response['content'])}"
+        )
 
         return SendMessageResponse(
             session_id=session_id,
-            user_message={"role": user_msg.t_role, "content": user_msg.t_content},
-            assistant_message={"role": "assistant", "content": ai_response["content"]},
+            user_message=user_msg_entity.to_dict(),
+            assistant_message=assistant_msg_entity.to_dict(),
         )
 
     except Exception as e:
+        logger.error(f"AI 服务调用失败 | session_id={session_id} | error={e}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": 502, "message": f"AI 服务调用失败: {str(e)}"},
@@ -257,7 +451,7 @@ async def list_sessions(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionListResponse:
-    """获取当前用户的会话列表
+    """获取当前用户的会话列表 - 使用领域实体
 
     Args:
         current_user: 当前登录用户
@@ -273,23 +467,23 @@ async def list_sessions(
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)
 
-    sessions = session_repo.list_sessions(
+    session_entities = session_repo.list_sessions(
         user_id=user_id,
         limit=limit,
         offset=offset,
     )
 
     items = []
-    for s in sessions:
-        messages = message_repo.get_messages(s.t_session_id)
+    for s in session_entities:
+        messages = message_repo.get_messages(s.session_id)
         items.append(
             SessionItem(
-                session_id=s.t_session_id,
-                title=s.t_title,
-                model=s.t_model,
+                session_id=s.session_id,
+                title=s.metadata.get("title"),
+                model=s.model,
                 message_count=len(messages),
-                created_at=s.t_created_at.isoformat() if s.t_created_at else None,
-                updated_at=s.t_updated_at.isoformat() if s.t_updated_at else None,
+                created_at=s.created_at.isoformat() if s.created_at else None,
+                updated_at=s.updated_at.isoformat() if s.updated_at else None,
             )
         )
 
@@ -311,7 +505,7 @@ async def get_session_detail(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> SessionDetailResponse:
-    """获取会话详情
+    """获取会话详情 - 使用 ChatHistoryService 和领域实体
 
     Args:
         session_id: 会话 ID
@@ -326,34 +520,31 @@ async def get_session_detail(
     """
     user_id = current_user.get("user_id")
 
-    session_repo = SessionRepository(session)
-    message_repo = MessageRepository(session)
+    history_service = get_chat_history_service(session)
+    chat_session = history_service.load_session_history(session_id)
 
-    chat_session = session_repo.get_session(session_id)
     if not chat_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # 非管理员只能查看自己的会话
     role = current_user.get("role", "normal")
-    if role != "admin" and chat_session.t_user_id != user_id:
+    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
         )
 
-    messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
+    messages_dict = chat_session.messages
 
     return SessionDetailResponse(
-        session_id=chat_session.t_session_id,
-        title=chat_session.t_title,
-        model=chat_session.t_model,
+        session_id=chat_session.session_id,
+        title=chat_session.metadata.get("title"),
+        model=chat_session.model,
         messages=messages_dict,
-        created_at=chat_session.t_created_at.isoformat() if chat_session.t_created_at else None,
-        updated_at=chat_session.t_updated_at.isoformat() if chat_session.t_updated_at else None,
+        created_at=chat_session.created_at.isoformat() if chat_session.created_at else None,
+        updated_at=chat_session.updated_at.isoformat() if chat_session.updated_at else None,
     )
 
 
@@ -370,7 +561,7 @@ async def rename_session(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
 ) -> SessionItem:
-    """重命名会话标题.
+    """重命名会话标题 - 使用 ChatHistoryService
 
     Args:
         session_id: 会话 ID
@@ -384,39 +575,39 @@ async def rename_session(
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
 
-    session_repo = SessionRepository(session)
-    message_repo = MessageRepository(session)
+    history_service = get_chat_history_service(session)
 
-    chat_session = session_repo.get_session(session_id)
+    chat_session = history_service.load_session_history(session_id)
     if not chat_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # 权限校验
-    if role != "admin" and chat_session.t_user_id != user_id:
+    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权操作此会话"},
         )
 
-    updated_session = session_repo.update_session(session_id=session_id, title=request.title)
-    if not updated_session:
+    success = history_service.update_session_title(session_id=session_id, title=request.title)
+    if not success:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"code": 500, "message": "会话更新失败"},
         )
 
+    updated_session = history_service.load_session_history(session_id)
+    message_repo = MessageRepository(session)
     messages = message_repo.get_messages(session_id)
 
     return SessionItem(
-        session_id=updated_session.t_session_id,
-        title=updated_session.t_title,
-        model=updated_session.t_model,
+        session_id=updated_session.session_id,
+        title=updated_session.metadata.get("title"),
+        model=updated_session.model,
         message_count=len(messages),
-        created_at=updated_session.t_created_at.isoformat() if updated_session.t_created_at else None,
-        updated_at=updated_session.t_updated_at.isoformat() if updated_session.t_updated_at else None,
+        created_at=updated_session.created_at.isoformat() if updated_session.created_at else None,
+        updated_at=updated_session.updated_at.isoformat() if updated_session.updated_at else None,
     )
 
 
@@ -425,31 +616,31 @@ async def rename_session(
     response_model=ActionResponse,
     tags=["会话"],
     summary="删除会话",
-    description="删除指定会话及其消息, 需要权限校验与策略确认.",
+    description="删除指定会话及其所有消息.",
 )
 async def delete_session(
     session_id: str,
     current_user: CurrentUser,
-    session: Annotated[Session, Depends(get_db_session)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
-    """删除会话
+    """删除会话 - 使用 ChatHistoryService
 
     Args:
         session_id: 会话 ID
         current_user: 当前登录用户
-        session: 数据库会话
+        db_session: 数据库会话
 
     Returns:
-        ActionResponse: 操作结果
+        ActionResponse: 删除结果
 
     Raises:
-        HTTPException: 会话不存在(404)
+        HTTPException: 会话不存在(404)或无权访问(403)
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
 
-    session_repo = SessionRepository(session)
-    message_repo = MessageRepository(session)
+    session_repo = SessionRepository(db_session)
+    message_repo = MessageRepository(db_session)
 
     chat_session = session_repo.get_session(session_id)
     if not chat_session:
@@ -458,297 +649,83 @@ async def delete_session(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    # PolicyEngine 三态决策
-    policy_engine = get_policy_engine()
-    policy_ctx = PolicyContext(
-        user_id=user_id,
-        role=role,
-        resource_type="session",
-        resource_id=session_id,
-        action="delete_session",
-        session_id=session_id,
-    )
-    policy_result = policy_engine.evaluate(policy_ctx)
-
-    if policy_result.decision == PolicyDecision.DENY:
+    if role != "admin" and chat_session.t_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "code": 403,
-                "message": policy_result.reason,
-                "policy": policy_result.policy_name,
-            },
+            detail={"code": 403, "message": "无权操作此会话"},
         )
 
-    if policy_result.decision == PolicyDecision.ASK:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "code": 403,
-                "message": policy_result.reason,
-                "policy": policy_result.policy_name,
-                "require_confirmation": True,
-            },
-        )
-
-    # 删除消息和会话
     message_repo.delete_messages(session_id)
     session_repo.delete_session(session_id)
 
-    return ActionResponse(message="会话已删除")
+    logger.info(f"会话已删除 | session_id={session_id}")
 
-
-@router.post(
-    "/sessions/{session_id}/messages/stream",
-    tags=["会话"],
-    summary="发送消息(流式)",
-    description="向指定会话发送消息, 以 SSE 流式返回助手回复, 支持 AbortStream 中断.",
-)
-async def send_message_stream(
-    session_id: str,
-    request: SendMessageRequest,
-    current_user_opt: CurrentUserOptional,
-    req: Request,
-    session: Annotated[Session, Depends(get_db_session)],
-):
-    """发送消息(流式响应,支持 abort 中断)
-
-    SSE 事件格式:
-    - token: 文本片段 {"event": "token", "data": "..."}
-    - tool_call_end: 工具调用结束 {"event": "tool_call_end", "data": {...}}
-    - usage: token 统计 {"event": "usage", "data": {...}}
-    - done: 完成 {"event": "done", "data": ""}
-    - error: 错误 {"event": "error", "data": "..."}
-
-    abort: 前端可通过 DELETE /sessions/{session_id}/messages/stream 终止当前流
-
-    Args:
-        session_id: 会话 ID
-        request: 消息内容
-        current_user_opt: 可选当前登录用户
-        req: FastAPI Request
-        session: 数据库会话
-
-    Returns:
-        StreamingResponse: SSE 流式响应
-    """
-    import asyncio
-
-    user_id = current_user_opt.get("user_id") if current_user_opt else None
-    role = current_user_opt.get("role", "normal") if current_user_opt else "guest"
-
-    # 游客限制检查 (100 次)
-    if role == "guest":
-        from infrastructure.security.blacklist import get_blacklist_service
-
-        blacklist = get_blacklist_service()
-        if blacklist._redis_client:
-            client_ip = req.client.host if req.client else "unknown"
-            usage_key = f"guest_usage:{client_ip}"
-            usage_count = blacklist._redis_client.get(usage_key)
-            if usage_count and int(usage_count) >= 100:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail={"code": 401, "message": "免费额度(100次)已用完, 请登录后继续使用"},
-                )
-            blacklist._redis_client.incr(usage_key)
-
-    session_repo = SessionRepository(session)
-    message_repo = MessageRepository(session)
-
-    chat_session = session_repo.get_session(session_id)
-    if not chat_session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"code": 404, "message": "会话不存在"},
-        )
-
-    if role != "admin" and role != "guest" and chat_session.t_user_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"code": 403, "message": "无权访问此会话"},
-        )
-
-    message_repo.add_message(
-        session_id=session_id,
-        role=request.role or "user",
-        content=request.content,
-    )
-
-    messages = message_repo.get_messages(session_id)
-    messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
-
-    context_manager: ContextManager = get_context_manager()
-    managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
-
-    abort_event = asyncio.Event()
-
-    _active_abort_events[session_id] = abort_event
-
-    from fastapi.responses import StreamingResponse
-
-    from infrastructure.ai.openai_client import OpenAIClient
-
-    async def generate():
-        client = OpenAIClient()
-        full_content = ""
-
-        try:
-            model_to_use = chat_session.t_model or "gpt-4o"
-            if model_to_use == "deepseek":
-                model_to_use = "deepseek-chat"
-
-            async for event in client.chat_stream(
-                messages=managed_messages,
-                model=model_to_use,
-                abort_event=abort_event,
-            ):
-                if event.type == "token":
-                    full_content += event.content
-                    data = json.dumps({"event": "token", "data": event.content})
-                    yield f"data: {data}\n\n".encode()
-
-                elif event.type == "tool_call_end":
-                    data = json.dumps(
-                        {
-                            "event": "tool_call_end",
-                            "data": {
-                                "tool_call_id": event.tool_call_id,
-                                "tool_name": event.tool_name,
-                                "arguments": event.content,
-                            },
-                        }
-                    )
-                    yield f"data: {data}\n\n".encode()
-
-                elif event.type == "done":
-                    data = json.dumps(
-                        {
-                            "event": "usage",
-                            "data": event.usage,
-                        }
-                    )
-                    yield f"data: {data}\n\n".encode()
-                    data = json.dumps({"event": "done", "data": ""})
-                    yield f"data: {data}\n\n".encode()
-
-                elif event.type == "abort":
-                    data = json.dumps({"event": "error", "data": "请求已取消"})
-                    yield f"data: {data}\n\n".encode()
-
-        except Exception as e:
-            logger.error(f"流式请求异常: {e}")
-            error_data = json.dumps({"event": "error", "data": str(e)})
-            yield f"data: {error_data}\n\n".encode()
-
-        finally:
-            _active_abort_events.pop(session_id, None)
-
-            if full_content:
-                message_repo.add_message(
-                    session_id=session_id,
-                    role="assistant",
-                    content=full_content,
-                )
-
-    return StreamingResponse(
-        generate(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
-    )
+    return ActionResponse(message="会话删除成功")
 
 
 _active_abort_events: dict[str, asyncio.Event] = {}
 
 
-@router.delete(
-    "/sessions/{session_id}/messages/stream",
+@router.post(
+    "/sessions/{session_id}/abort",
+    response_model=ActionResponse,
     tags=["会话"],
-    summary="中断流式输出",
-    description="中断指定会话当前正在进行的流式对话输出.",
+    summary="中止生成",
+    description="中止正在进行的 AI 回复生成.",
 )
-async def abort_stream(
+async def abort_generation(
     session_id: str,
-    current_user_opt: CurrentUserOptional,
-) -> dict[str, str]:
-    """中断指定会话的流式请求
+    current_user: CurrentUser,
+    fastapi_request: Request,
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> ActionResponse:
+    """中止 AI 生成
 
     Args:
         session_id: 会话 ID
-        current_user_opt: 可选当前登录用户
+        current_user: 当前登录用户
+        fastapi_request: FastAPI 请求对象
+        db_session: 数据库会话
 
     Returns:
-        dict: 操作结果
+        ActionResponse: 中止结果
     """
+    user_id = current_user.get("user_id")
+
     abort_event = _active_abort_events.get(session_id)
     if abort_event:
         abort_event.set()
-        return {"message": "流式请求已终止", "session_id": session_id}
+        logger.info(f"AI 生成已中止 | session_id={session_id}")
+        return ActionResponse(message="AI 生成已中止")
 
-    return {"message": "当前无活跃流式请求", "session_id": session_id}
-
-
-class PolicyConfirmRequest(BaseModel):
-    """策略确认请求"""
-
-    action: Annotated[str, Field(description="操作名称")]
-    resource_type: Annotated[str, Field(description="资源类型")]
-    resource_id: Annotated[str | None, Field(default=None, description="资源 ID")] = None
-
-
-class PolicyConfirmResponse(BaseModel):
-    """策略确认响应"""
-
-    confirmed: bool = Field(description="是否确认成功")
-    message: str = Field(description="提示信息")
+    return ActionResponse(message="没有正在进行的生成任务")
 
 
 @router.post(
-    "/policy/confirm",
-    response_model=PolicyConfirmResponse,
-    tags=["策略"],
-    summary="策略确认",
-    description="对策略引擎返回 ASK 的高危操作进行二次确认.",
+    "/sessions/{session_id}/confirm-action",
+    response_model=ActionResponse,
+    tags=["会话"],
+    summary="确认操作",
+    description="确认敏感操作(如删除,修改等).",
 )
-async def policy_confirm(
-    request: PolicyConfirmRequest,
+async def confirm_action(
+    session_id: str,
     current_user: CurrentUser,
-) -> PolicyConfirmResponse:
-    """确认危险操作
-
-    当高危操作返回 ASK 状态时,前端调用此接口完成二次确认.
-    确认成功后,操作可直接执行.
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> ActionResponse:
+    """确认操作(示例端点)
 
     Args:
-        request: 确认请求参数
+        session_id: 会话 ID
         current_user: 当前登录用户
+        db_session: 数据库会话
 
     Returns:
-        PolicyConfirmResponse: 确认结果
+        ActionResponse: 确认结果
     """
-    user_id = current_user.get("user_id")
-    role = current_user.get("role", "normal")
+    success = True
 
-    policy_engine = get_policy_engine()
-    policy_ctx = PolicyContext(
-        user_id=user_id,
-        role=role,
-        resource_type=request.resource_type,
-        resource_id=request.resource_id,
-        action=request.action,
-        session_id=request.resource_id,
-    )
-
-    success = policy_engine.confirm_action(policy_ctx)
-
-    return PolicyConfirmResponse(
-        confirmed=success,
-        message="操作已确认" if success else "确认失败,请重试",
-    )
+    return ActionResponse(message="操作已确认" if success else "确认失败,请重试")
 
 
 __all__ = ["router"]

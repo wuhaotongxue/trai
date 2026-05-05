@@ -2,24 +2,53 @@
 # 文件名: session_repository.py
 # 作者: wuhao
 # 日期: 2026_04_09
-# 描述: 会话仓储
+# 描述: 会话仓储 - 实现领域仓储接口,负责实体与数据库转换 (优化版: 添加缓存支持)
 
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from domain.entities.chat_session import ChatSession, SessionStatus
+from domain.entities.message import Message, MessageRole
 from infrastructure.database.models import ChatSessionModel, MessageModel
+from infrastructure.services.query_cache_service import query_cache
 
 
 class SessionRepository:
-    """会话仓储"""
+    """会话仓储 - 实现 ISessionRepository 接口 (性能优化版)"""
 
     def __init__(self, session: Session) -> None:
         self._session = session
+
+    def _to_domain(self, model: ChatSessionModel) -> ChatSession:
+        """将数据库模型转换为领域实体
+
+        Args:
+            model: 数据库模型实例
+
+        Returns:
+            ChatSession: 领域实体
+        """
+        return ChatSession(
+            session_id=model.t_session_id,
+            model=model.t_model,
+            messages=model.t_messages or [],
+            status=SessionStatus.ACTIVE if model.t_deleted_at is None else SessionStatus.COMPLETED,
+            created_at=model.t_created_at,
+            updated_at=model.t_updated_at,
+            metadata={
+                "user_id": model.t_user_id,
+                "title": model.t_title,
+                "extra_data": model.t_extra_data,
+                "created_by": model.t_created_by,
+                "updated_by": model.t_updated_by,
+            },
+        )
 
     def create_session(
         self,
@@ -28,40 +57,83 @@ class SessionRepository:
         title: str | None,
         model: str,
         extra_data: dict[str, Any] | None = None,
-    ) -> ChatSessionModel:
-        """创建会话"""
-        session = ChatSessionModel(
+    ) -> ChatSession:
+        """创建会话
+
+        Args:
+            session_id: 会话唯一标识
+            user_id: 用户 ID
+            title: 会话标题
+            model: AI 模型名称
+            extra_data: 扩展数据
+
+        Returns:
+            ChatSession: 创建的会话领域实体
+        """
+        db_session = ChatSessionModel(
             t_session_id=session_id,
             t_user_id=user_id,
             t_title=title,
             t_model=model,
             t_extra_data=extra_data or {},
         )
-        self._session.add(session)
+        self._session.add(db_session)
         self._session.commit()
-        self._session.refresh(session)
-        return session
+        self._session.refresh(db_session)
+        return self._to_domain(db_session)
 
-    def get_session(self, session_id: str) -> ChatSessionModel | None:
-        """获取会话"""
+    def get_session(self, session_id: str) -> ChatSession | None:
+        """获取会话 (带缓存优化)
+
+        Args:
+            session_id: 会话唯一标识
+
+        Returns:
+            ChatSession | None: 会话领域实体
+        """
+        # 尝试从缓存获取
+        cache_key = f"session:{session_id}"
+        cached = query_cache.get(cache_key)
+        if cached is not None:
+            logger.debug(f"Cache hit for session {session_id}")
+            return cached
+        
+        # 缓存未命中, 查询数据库
         stmt = select(ChatSessionModel).where(
             ChatSessionModel.t_session_id == session_id,
             ChatSessionModel.t_deleted_at.is_(None),
         )
-        return self._session.scalar(stmt)
+        model = self._session.scalar(stmt)
+        result = self._to_domain(model) if model else None
+        
+        # 存入缓存(60秒TTL)
+        if result is not None:
+            query_cache.set(cache_key, result, ttl=60)
+        
+        return result
 
     def list_sessions(
         self,
         user_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> list[ChatSessionModel]:
-        """获取会话列表"""
+    ) -> list[ChatSession]:
+        """获取会话列表
+
+        Args:
+            user_id: 用户 ID(可选)
+            limit: 每页数量(默认 50)
+            offset: 偏移量(默认 0)
+
+        Returns:
+            list[ChatSession]: 会话领域实体列表
+        """
         stmt = select(ChatSessionModel).where(ChatSessionModel.t_deleted_at.is_(None))
         if user_id:
             stmt = stmt.where(ChatSessionModel.t_user_id == user_id)
         stmt = stmt.order_by(ChatSessionModel.t_updated_at.desc()).limit(limit).offset(offset)
-        return list(self._session.scalars(stmt))
+        models = list(self._session.scalars(stmt))
+        return [self._to_domain(m) for m in models]
 
     def update_session(
         self,
@@ -69,40 +141,96 @@ class SessionRepository:
         title: str | None = None,
         messages: list[dict[str, Any]] | None = None,
         extra_data: dict[str, Any] | None = None,
-    ) -> ChatSessionModel | None:
-        """更新会话"""
-        session = self.get_session(session_id)
-        if not session:
+    ) -> ChatSession | None:
+        """更新会话 (带缓存失效)
+
+        Args:
+            session_id: 会话唯一标识
+            title: 会话标题(可选)
+            messages: 消息列表(可选)
+            extra_data: 扩展数据(可选)
+
+        Returns:
+            ChatSession | None: 更新后的会话领域实体
+        """
+        model = self._session.scalar(
+            select(ChatSessionModel).where(
+                ChatSessionModel.t_session_id == session_id,
+                ChatSessionModel.t_deleted_at.is_(None),
+            )
+        )
+        if not model:
             return None
 
         if title is not None:
-            session.t_title = title
+            model.t_title = title
         if messages is not None:
-            session.t_messages = messages
+            model.t_messages = messages
         if extra_data is not None:
-            session.t_extra_data = extra_data
+            model.t_extra_data = extra_data
 
-        session.t_updated_at = datetime.now()
+        model.t_updated_at = datetime.now()
         self._session.commit()
-        self._session.refresh(session)
-        return session
+        self._session.refresh(model)
+        
+        # 更新缓存
+        result = self._to_domain(model)
+        query_cache.set(f"session:{session_id}", result, ttl=60)
+        
+        return result
 
     def delete_session(self, session_id: str) -> bool:
-        """删除会话"""
-        session = self.get_session(session_id)
-        if not session:
+        """删除会话(软删除)(带缓存失效)
+
+        Args:
+            session_id: 会话唯一标识
+
+        Returns:
+            bool: 是否删除成功
+        """
+        model = self._session.scalar(
+            select(ChatSessionModel).where(
+                ChatSessionModel.t_session_id == session_id,
+                ChatSessionModel.t_deleted_at.is_(None),
+            )
+        )
+        if not model:
             return False
 
-        session.t_deleted_at = datetime.now()
+        model.t_deleted_at = datetime.now()
         self._session.commit()
+        
+        # 删除缓存
+        query_cache.delete(f"session:{session_id}")
+        
         return True
 
 
 class MessageRepository:
-    """消息仓储"""
+    """消息仓储 - 实现 IMessageRepository 接口"""
 
     def __init__(self, session: Session) -> None:
         self._session = session
+
+    def _to_domain(self, model: MessageModel) -> Message:
+        """将数据库模型转换为领域实体
+
+        Args:
+            model: 数据库模型实例
+
+        Returns:
+            Message: 消息领域实体
+        """
+        return Message(
+            role=MessageRole(model.t_role),
+            content=model.t_content,
+            created_at=model.t_created_at,
+            metadata={
+                "message_id": model.t_id,
+                "session_id": model.t_session_id,
+                **(model.t_msg_metadata or {}),
+            },
+        )
 
     def add_message(
         self,
@@ -110,8 +238,18 @@ class MessageRepository:
         role: str,
         content: str,
         msg_metadata: dict[str, Any] | None = None,
-    ) -> MessageModel:
-        """添加消息"""
+    ) -> Message:
+        """添加消息
+
+        Args:
+            session_id: 会话 ID
+            role: 消息角色(system/user/assistant)
+            content: 消息内容
+            msg_metadata: 消息元数据(可选)
+
+        Returns:
+            Message: 创建的消息领域实体
+        """
         message = MessageModel(
             t_session_id=session_id,
             t_role=role,
@@ -121,19 +259,38 @@ class MessageRepository:
         self._session.add(message)
         self._session.commit()
         self._session.refresh(message)
-        return message
+        return self._to_domain(message)
 
-    def get_messages(self, session_id: str) -> list[MessageModel]:
-        """获取会话消息"""
-        stmt = select(MessageModel).where(MessageModel.t_session_id == session_id).order_by(MessageModel.t_created_at)
-        return list(self._session.scalars(stmt))
+    def get_messages(self, session_id: str) -> list[Message]:
+        """获取会话消息
+
+        Args:
+            session_id: 会话 ID
+
+        Returns:
+            list[Message]: 消息领域实体列表
+        """
+        stmt = (
+            select(MessageModel)
+            .where(MessageModel.t_session_id == session_id)
+            .order_by(MessageModel.t_created_at)
+        )
+        models = list(self._session.scalars(stmt))
+        return [self._to_domain(m) for m in models]
 
     def delete_messages(self, session_id: str) -> int:
-        """删除会话消息"""
+        """删除会话消息
+
+        Args:
+            session_id: 会话 ID
+
+        Returns:
+            int: 删除的消息数量
+        """
         stmt = select(MessageModel).where(MessageModel.t_session_id == session_id)
-        messages = list(self._session.scalars(stmt))
-        count = len(messages)
-        for msg in messages:
+        models = list(self._session.scalars(stmt))
+        count = len(models)
+        for msg in models:
             self._session.delete(msg)
         self._session.commit()
         return count

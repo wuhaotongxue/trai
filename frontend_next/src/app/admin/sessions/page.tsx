@@ -205,7 +205,7 @@ export default function SessionsPage() {
       {total > pageSize && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            共 {total} 条记录，第 {page} / {totalPages} 页
+            共 {total} 条记录,第 {page} / {totalPages} 页
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>

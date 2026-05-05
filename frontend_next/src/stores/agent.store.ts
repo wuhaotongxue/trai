@@ -242,7 +242,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateError: null,
   musicGallery: [],
 
-  // 从本地存储加载图片廊、视频廊、音乐廊
+  // 从本地存储加载图片廊,视频廊,音乐廊
   ...(() => {
     const result: Partial<AgentState> = {};
     try {

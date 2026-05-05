@@ -40,7 +40,7 @@ class ComfyUIAPI:
         """
         logger.info(f"User {user.get('user_id')} submitted comfyui task: {request.prompt}")
 
-        # 模拟后端直接返回一张 Mock 图片（实际应通过 requests 调用本地或远端 ComfyUI /prompt 接口）
+        # 模拟后端直接返回一张 Mock 图片(实际应通过 requests 调用本地或远端 ComfyUI /prompt 接口)
         return {
             "code": 200,
             "msg": "任务已提交",

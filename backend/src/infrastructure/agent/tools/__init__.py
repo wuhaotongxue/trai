@@ -2,7 +2,7 @@
 # 文件名: __init__.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:21:00
-# 描述: Agent 工具包 - 工具基类、注册表、治理器及内置工具
+# 描述: Agent 工具包 - 工具基类,注册表,治理器及内置工具
 
 from infrastructure.agent.error_classifier import (
     ClassifiedError,

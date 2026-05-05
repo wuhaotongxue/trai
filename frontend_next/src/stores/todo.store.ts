@@ -32,7 +32,7 @@ interface TodoStore {
   // Actions
   /**
    * 添加任务
-   * @param task - 任务信息（不包含自动生成的字段）
+   * @param task - 任务信息(不包含自动生成的字段)
    */
   addTask: (task: Omit<Task, 'id' | 'startTime' | 'completeTime'>) => void;
   /**
@@ -82,7 +82,7 @@ interface TodoStore {
   /**
    * 获取模块进度
    * @param module - 模块 ID
-   * @returns 模块进度信息（总数、完成数、完成百分比）
+   * @returns 模块进度信息(总数,完成数,完成百分比)
    */
   getModuleProgress: (module: string) => { total: number; completed: number; percentage: number };
 }
@@ -92,11 +92,11 @@ interface TodoStore {
  */
 const INITIAL_TASKS: Task[] = [
   // Backend Core
-  { id: '1', name: 'run.py 应用入口', status: 'completed', priority: 'high', module: 'backend_core', description: 'FastAPI 实例、生命周期管理', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-02', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
-  { id: '2', name: 'api/main.py FastAPI 配置', status: 'completed', priority: 'high', module: 'backend_core', description: 'CORS、请求限流、异常处理', startTime: '2026-04-02', completeTime: '2026-04-03', plannedStart: '2026-04-02', plannedEnd: '2026-04-03', actualStart: '2026-04-02', actualEnd: '2026-04-03' },
-  { id: '3', name: 'api/middleware.py 中间件', status: 'in_progress', priority: 'high', module: 'backend_core', description: '请求日志、认证、请求 ID', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
+  { id: '1', name: 'run.py 应用入口', status: 'completed', priority: 'high', module: 'backend_core', description: 'FastAPI 实例,生命周期管理', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-02', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
+  { id: '2', name: 'api/main.py FastAPI 配置', status: 'completed', priority: 'high', module: 'backend_core', description: 'CORS,请求限流,异常处理', startTime: '2026-04-02', completeTime: '2026-04-03', plannedStart: '2026-04-02', plannedEnd: '2026-04-03', actualStart: '2026-04-02', actualEnd: '2026-04-03' },
+  { id: '3', name: 'api/middleware.py 中间件', status: 'in_progress', priority: 'high', module: 'backend_core', description: '请求日志,认证,请求 ID', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
   { id: '4', name: 'api/routers/system/health.py 健康检查', status: 'pending', priority: 'high', module: 'backend_core', description: '/health 接口', startTime: null, completeTime: null, plannedStart: '2026-04-06', plannedEnd: '2026-04-06', actualStart: null, actualEnd: null },
-  { id: '5', name: 'api/routers/system/monitor.py 监控接口', status: 'pending', priority: 'high', module: 'backend_core', description: '系统状态、内存、CPU', startTime: null, completeTime: null, plannedStart: '2026-04-07', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
+  { id: '5', name: 'api/routers/system/monitor.py 监控接口', status: 'pending', priority: 'high', module: 'backend_core', description: '系统状态,内存,CPU', startTime: null, completeTime: null, plannedStart: '2026-04-07', plannedEnd: '2026-04-08', actualStart: null, actualEnd: null },
   { id: '6', name: 'api/routers/ai/chat.py AI 对话', status: 'pending', priority: 'medium', module: 'backend_core', description: 'OpenAI/Claude 对接', startTime: null, completeTime: null, plannedStart: '2026-04-09', plannedEnd: '2026-04-11', actualStart: null, actualEnd: null },
   { id: '7', name: 'api/routers/ai/image.py AI 绘图', status: 'pending', priority: 'medium', module: 'backend_core', description: 'DALL-E/Midjourney', startTime: null, completeTime: null, plannedStart: '2026-04-12', plannedEnd: '2026-04-14', actualStart: null, actualEnd: null },
   { id: '8', name: 'api/routers/media/access.py 媒体访问', status: 'pending', priority: 'medium', module: 'backend_core', description: 'Presigned URL 生成', startTime: null, completeTime: null, plannedStart: '2026-04-15', plannedEnd: '2026-04-16', actualStart: null, actualEnd: null },
@@ -117,13 +117,13 @@ const INITIAL_TASKS: Task[] = [
 
   // Backend Infrastructure
   { id: '19', name: 'S3 存储适配器', status: 'completed', priority: 'low', module: 'backend_infrastructure', description: 'AWS S3 / MinIO', startTime: '2026-04-09', completeTime: '2026-04-09', plannedStart: '2026-04-01', plannedEnd: '2026-04-03', actualStart: '2026-04-01', actualEnd: '2026-04-03' },
-  { id: '20', name: 'Redis 缓存', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: '会话缓存、限流', startTime: null, completeTime: null, plannedStart: '2026-05-10', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
+  { id: '20', name: 'Redis 缓存', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: '会话缓存,限流', startTime: null, completeTime: null, plannedStart: '2026-05-10', plannedEnd: '2026-05-12', actualStart: null, actualEnd: null },
   { id: '21', name: 'PostgreSQL 连接', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: '数据持久化', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-15', actualStart: null, actualEnd: null },
   { id: '22', name: 'AI 服务适配器', status: 'pending', priority: 'low', module: 'backend_infrastructure', description: 'OpenAI/Claude 封装', startTime: null, completeTime: null, plannedStart: '2026-05-16', plannedEnd: '2026-05-18', actualStart: null, actualEnd: null },
 
   // Frontend Init
   { id: '23', name: '项目脚手架', status: 'completed', priority: 'high', module: 'frontend_init', description: 'create-next-app 初始化', startTime: '2026-04-01', completeTime: '2026-04-01', plannedStart: '2026-04-01', plannedEnd: '2026-04-01', actualStart: '2026-04-01', actualEnd: '2026-04-01' },
-  { id: '24', name: 'TypeScript 配置', status: 'completed', priority: 'high', module: 'frontend_init', description: 'tsconfig、严格模式', startTime: '2026-04-02', completeTime: '2026-04-02', plannedStart: '2026-04-02', plannedEnd: '2026-04-02', actualStart: '2026-04-02', actualEnd: '2026-04-02' },
+  { id: '24', name: 'TypeScript 配置', status: 'completed', priority: 'high', module: 'frontend_init', description: 'tsconfig,严格模式', startTime: '2026-04-02', completeTime: '2026-04-02', plannedStart: '2026-04-02', plannedEnd: '2026-04-02', actualStart: '2026-04-02', actualEnd: '2026-04-02' },
   { id: '25', name: 'Tailwind CSS 配置', status: 'completed', priority: 'high', module: 'frontend_init', description: '主题定制', startTime: '2026-04-03', completeTime: '2026-04-03', plannedStart: '2026-04-03', plannedEnd: '2026-04-03', actualStart: '2026-04-03', actualEnd: '2026-04-03' },
   { id: '26', name: '目录结构', status: 'in_progress', priority: 'high', module: 'frontend_init', description: 'FSD 架构', startTime: '2026-04-04', completeTime: null, plannedStart: '2026-04-04', plannedEnd: '2026-04-05', actualStart: '2026-04-04', actualEnd: null },
 
@@ -159,7 +159,7 @@ const INITIAL_TASKS: Task[] = [
   { id: '47', name: '主进程配置', status: 'pending', priority: 'high', module: 'electron', description: 'Main Process', startTime: null, completeTime: null, plannedStart: '2026-05-13', plannedEnd: '2026-05-14', actualStart: null, actualEnd: null },
   { id: '48', name: '渲染进程配置', status: 'pending', priority: 'high', module: 'electron', description: 'Renderer Process', startTime: null, completeTime: null, plannedStart: '2026-05-15', plannedEnd: '2026-05-16', actualStart: null, actualEnd: null },
   { id: '49', name: 'IPC 通道设计', status: 'pending', priority: 'high', module: 'electron', description: '进程通信', startTime: null, completeTime: null, plannedStart: '2026-05-17', plannedEnd: '2026-05-19', actualStart: null, actualEnd: null },
-  { id: '50', name: '窗口管理', status: 'pending', priority: 'high', module: 'electron', description: '多窗口、最大化', startTime: null, completeTime: null, plannedStart: '2026-05-20', plannedEnd: '2026-05-22', actualStart: null, actualEnd: null },
+  { id: '50', name: '窗口管理', status: 'pending', priority: 'high', module: 'electron', description: '多窗口,最大化', startTime: null, completeTime: null, plannedStart: '2026-05-20', plannedEnd: '2026-05-22', actualStart: null, actualEnd: null },
   { id: '51', name: 'AI 对话界面', status: 'pending', priority: 'high', module: 'electron', description: 'Web 端 Chat', startTime: null, completeTime: null, plannedStart: '2026-05-23', plannedEnd: '2026-05-26', actualStart: null, actualEnd: null },
   { id: '52', name: '自动更新', status: 'pending', priority: 'medium', module: 'electron', description: 'S3 发布更新', startTime: null, completeTime: null, plannedStart: '2026-05-27', plannedEnd: '2026-05-29', actualStart: null, actualEnd: null },
   { id: '53', name: '系统托盘', status: 'pending', priority: 'medium', module: 'electron', description: '最小化托盘', startTime: null, completeTime: null, plannedStart: '2026-05-30', plannedEnd: '2026-05-31', actualStart: null, actualEnd: null },

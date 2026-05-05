@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 class DingTalkNotifyService(BaseNotifyService):
     """钉钉通知服务
 
-    支持文本、Markdown、ActionCard、FeedCard 等多种消息类型
+    支持文本,Markdown,ActionCard,FeedCard 等多种消息类型
     Webhook 地址格式: https://oapi.dingtalk.com/robot/send?access_token=xxx
     支持加签密钥: secret=xxx
     """

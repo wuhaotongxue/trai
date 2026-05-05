@@ -2,7 +2,7 @@
 # 文件名: management.py
 # 作者: wuhao
 # 日期: 2026_04_14_12:45:00
-# 描述: 多 Agent 管理接口,负责智能体的注册、启动、停止和列表查询
+# 描述: 多 Agent 管理接口,负责智能体的注册,启动,停止和列表查询
 
 from typing import Any
 
@@ -56,7 +56,7 @@ _MOCK_AGENTS = [
         "name": "默认",
         "description": "全能型助手, 可以处理各种问题",
         "model": "gpt-4o",
-        "system_prompt": "你是一个友好、专业的全能型 AI 助手. 你可以回答各种问题, 帮助用户解决困难. 请用清晰、简洁、有帮助的方式回复. ",
+        "system_prompt": "你是一个友好,专业的全能型 AI 助手. 你可以回答各种问题, 帮助用户解决困难. 请用清晰,简洁,有帮助的方式回复. ",
         "icon": "Bot",
         "status": "running",
         "created_at": "2026-04-10T10:00:00Z",
@@ -66,7 +66,7 @@ _MOCK_AGENTS = [
         "name": "代码助手",
         "description": "精通多种语言的代码编写和审查",
         "model": "gpt-4o",
-        "system_prompt": "你是一位精通多种编程语言的资深开发工程师. 你可以帮助用户编写代码、调试问题、优化性能、审查代码. 请给出专业、清晰、可运行的代码解决方案. ",
+        "system_prompt": "你是一位精通多种编程语言的资深开发工程师. 你可以帮助用户编写代码,调试问题,优化性能,审查代码. 请给出专业,清晰,可运行的代码解决方案. ",
         "icon": "Wrench",
         "status": "running",
         "created_at": "2026-04-10T10:00:00Z",
@@ -76,7 +76,7 @@ _MOCK_AGENTS = [
         "name": "设计大师",
         "description": "专门负责文生图和图生图的提示词优化",
         "model": "claude-3-opus",
-        "system_prompt": "你是一位创意设计大师, 专门负责生成高质量的图像提示词. 你擅长将用户的想法转化为详细、专业的 AI 绘画提示词, 以生成精美的图像. ",
+        "system_prompt": "你是一位创意设计大师, 专门负责生成高质量的图像提示词. 你擅长将用户的想法转化为详细,专业的 AI 绘画提示词, 以生成精美的图像. ",
         "icon": "Sparkles",
         "status": "stopped",
         "created_at": "2026-04-11T12:30:00Z",
@@ -86,7 +86,7 @@ _MOCK_AGENTS = [
         "name": "计算器",
         "description": "专业的数学计算工具, 可以处理各种数学问题",
         "model": "gpt-4o",
-        "system_prompt": "你是一位专业的数学助手, 专门帮助用户解决各种数学问题. 你可以进行基本运算、代数计算、几何分析、统计计算等. 请给出准确的计算结果和详细的解题过程. ",
+        "system_prompt": "你是一位专业的数学助手, 专门帮助用户解决各种数学问题. 你可以进行基本运算,代数计算,几何分析,统计计算等. 请给出准确的计算结果和详细的解题过程. ",
         "icon": "Calculator",
         "status": "running",
         "created_at": "2026-04-19T00:45:00Z",
@@ -203,7 +203,7 @@ class AgentManagementAPI:
         # 模拟网络延迟
         await asyncio.sleep(0.5)
 
-        # 模拟检测逻辑: 如果 agent 是 stopped 状态, 那必定是正常（因为它没在运行）
+        # 模拟检测逻辑: 如果 agent 是 stopped 状态, 那必定是正常(因为它没在运行)
         # 如果是 running 状态, 有 20% 的概率检测为异常
         is_normal = True
         if target_agent["status"] == "running":

@@ -1,6 +1,6 @@
 /**
  * use_toast.ts
- * Toast 通知 Hook（情感化中文文案规范）
+ * Toast 通知 Hook(情感化中文文案规范)
  * "Loading..." -> "正在为您极速构建中..."
  * "Saved" -> "刚刚保存, 已同步至云端"
  */

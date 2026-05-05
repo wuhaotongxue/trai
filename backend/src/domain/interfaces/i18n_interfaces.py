@@ -16,10 +16,10 @@ class I18nRepository(Protocol):
         """获取指定语言的所有翻译
 
         Args:
-            locale: 语言代码，如 zh, en
+            locale: 语言代码,如 zh, en
 
         Returns:
-            Dict[str, str]: 翻译键值对，格式为 {"namespace.key": "value"}
+            Dict[str, str]: 翻译键值对,格式为 {"namespace.key": "value"}
         """
         ...
 
@@ -32,7 +32,7 @@ class I18nRepository(Protocol):
             key: 翻译键
 
         Returns:
-            Optional[str]: 翻译值，如果不存在返回 None
+            Optional[str]: 翻译值,如果不存在返回 None
         """
         ...
 
@@ -69,8 +69,8 @@ class I18nRepository(Protocol):
         """列出翻译
 
         Args:
-            locale: 语言代码，可选
-            namespace: 命名空间，可选
+            locale: 语言代码,可选
+            namespace: 命名空间,可选
             limit: 限制数量
             offset: 偏移量
 

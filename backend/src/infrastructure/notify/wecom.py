@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 class WeComNotifyService(BaseNotifyService):
     """企业微信通知服务
 
-    支持文本、Markdown、图文等多种消息类型
+    支持文本,Markdown,图文等多种消息类型
     Webhook 地址格式: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx
     """
 

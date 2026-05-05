@@ -40,9 +40,9 @@ class KnowledgeBaseDemoCreateRequest(BaseModel):
         无.
     """
 
-    content: str | None = Field(default=None, description="上传到知识库的 Markdown 内容（为空则使用默认 demo）")
-    file_name: str | None = Field(default=None, description="上传文件名（为空则自动生成）")
-    index_name: str | None = Field(default=None, description="知识库名称（为空则自动生成）")
+    content: str | None = Field(default=None, description="上传到知识库的 Markdown 内容(为空则使用默认 demo)")
+    file_name: str | None = Field(default=None, description="上传文件名(为空则自动生成)")
+    index_name: str | None = Field(default=None, description="知识库名称(为空则自动生成)")
 
 
 class KnowledgeBaseDemoCreateResponse(BaseModel):
@@ -62,11 +62,11 @@ class KnowledgeBaseDemoCreateResponse(BaseModel):
         无.
     """
 
-    index_id: str = Field(description="知识库 ID（IndexId）")
+    index_id: str = Field(description="知识库 ID(IndexId)")
     index_name: str = Field(description="知识库名称")
-    file_id: str = Field(description="文档 ID（FileId）")
+    file_id: str = Field(description="文档 ID(FileId)")
     file_name: str = Field(description="文档名称")
-    job_id: str = Field(description="建库任务 ID（JobId）")
+    job_id: str = Field(description="建库任务 ID(JobId)")
     job_status: str = Field(description="建库任务状态")
 
 

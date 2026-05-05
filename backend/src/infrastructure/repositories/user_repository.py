@@ -243,7 +243,7 @@ class UserRepository(IUserRepository):
 
             mapped = field_map.get(k)
             if mapped:
-                # 特殊处理角色字段，确保传入的是有效的角色值
+                # 特殊处理角色字段,确保传入的是有效的角色值
                 if k == "role" and isinstance(v, str):
                     try:
                         # 验证角色值是否有效

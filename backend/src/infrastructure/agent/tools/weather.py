@@ -61,13 +61,13 @@ class WeatherTool(BaseTool):
             self._definition = ToolDefinition(
                 id="weather_current",
                 name="天气查询",
-                description="查询指定城市的当前天气情况,包括温度、湿度、风力、空气质量等",
+                description="查询指定城市的当前天气情况,包括温度,湿度,风力,空气质量等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[
                     ToolParameter(
                         name="city",
-                        description="城市名称,如:北京、上海、Tokyo、London",
+                        description="城市名称,如:北京,上海,Tokyo,London",
                         type="string",
                         required=True,
                     ),
@@ -117,7 +117,7 @@ class WeatherTool(BaseTool):
                 logger.info(f"地理编码结果数: {len(results)}")
 
                 if results:
-                    # 找到了结果, 优先找城市（administration_level >= 2）
+                    # 找到了结果, 优先找城市(administration_level >= 2)
                     location = None
                     for result in results:
                         # 优先选城市级别的

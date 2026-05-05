@@ -101,7 +101,7 @@ export default function KnowledgeBasePage() {
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    if (!selectedKB || !confirm("确定要删除该文档吗？")) return;
+    if (!selectedKB || !confirm("确定要删除该文档吗?")) return;
     try {
       await request(`/admin/knowledge_base/indices/${selectedKB.id}/files/${fileId}`, {
         method: "DELETE"
@@ -135,7 +135,7 @@ export default function KnowledgeBasePage() {
   };
 
   const handleDeleteIndex = async (kbId: string) => {
-    if (!confirm("确定要删除整个知识库吗？此操作不可撤销。")) return;
+    if (!confirm("确定要删除整个知识库吗?此操作不可撤销.")) return;
     try {
       await request(`/admin/knowledge_base/indices/${kbId}`, {
         method: "DELETE"

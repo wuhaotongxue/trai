@@ -2,7 +2,7 @@
 # 文件名: openai_client.py
 # 作者: wuhao
 # 日期: 2026_04_16_16:42:28
-# 描述: OpenAI 客户端适配器(支持 Vision 多模态、abort 中断、流式 token 统计)
+# 描述: OpenAI 客户端适配器(支持 Vision 多模态,abort 中断,流式 token 统计)
 
 from __future__ import annotations
 

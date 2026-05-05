@@ -115,7 +115,7 @@ export function Footer() {
               <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
                 {isEn
                   ? "Next-generation AI Agent platform for secure, reliable, and scalable enterprise solutions."
-                  : "新一代 AI Agent 平台，为企业提供安全、可靠、可扩展的智能助手解决方案。"}
+                  : "新一代 AI Agent 平台,为企业提供安全,可靠,可扩展的智能助手解决方案."}
               </p>
 
               {/* 社交媒体 */}
@@ -179,7 +179,7 @@ export function Footer() {
           {/* 底部版权栏 */}
           <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-6 text-xs text-slate-500">
-              <span>&copy; {new Date().getFullYear()} TRAI. {isEn ? "All rights reserved." : "保留所有权利。"}</span>
+              <span>&copy; {new Date().getFullYear()} TRAI. {isEn ? "All rights reserved." : "保留所有权利."}</span>
               <span className="hidden md:block w-px h-3 bg-slate-700" />
               <span>{isEn ? "Built with Next.js + Tailwind CSS" : "基于 Next.js + Tailwind CSS 构建"}</span>
             </div>

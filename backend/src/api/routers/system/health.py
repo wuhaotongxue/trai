@@ -74,7 +74,7 @@ async def health_check() -> HealthResponse:
 async def detailed_health_check() -> DetailedHealthResponse:
     """详细健康检查接口
 
-    检查数据库、Redis、AI 服务等依赖状态
+    检查数据库,Redis,AI 服务等依赖状态
 
     Returns:
         DetailedHealthResponse: 详细健康状态

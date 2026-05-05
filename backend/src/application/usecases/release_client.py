@@ -79,7 +79,7 @@ class ReleaseClientUseCase:
             wecom_groups: 企微群列表，支持 ["wuhao", "wudu"]
 
         Returns:
-            dict[str, Any]: 包含执行状态、版本号及下载 URL 的字典
+            dict[str, Any]: 包含执行状态,版本号及下载 URL 的字典
         """
         filename = os.path.basename(file_path)
         s3_key = f"releases/desktop/{version}/{filename}"

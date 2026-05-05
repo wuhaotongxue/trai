@@ -86,7 +86,7 @@ function DeptTreeItem({
 
 /**
  * 组织架构管理主页面
- * 提供企业部门同步、列表查看及成员管理功能
+ * 提供企业部门同步,列表查看及成员管理功能
  * @returns React 组件
  */
 export default function OrganizationPage() {
@@ -162,7 +162,7 @@ export default function OrganizationPage() {
       fetchUsers();
     } catch (e) {
       console.error("Sync failed", e);
-      alert("同步失败，请查看控制台日志");
+      alert("同步失败,请查看控制台日志");
     } finally {
       setSyncing(false);
     }
@@ -199,7 +199,7 @@ export default function OrganizationPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">组织架构</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理企业部门、团队及成员结构</p>
+          <p className="text-sm text-muted-foreground mt-1">管理企业部门,团队及成员结构</p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={handleSync} disabled={syncing} variant="outline" className="h-9 gap-2 shadow-sm">
@@ -219,7 +219,7 @@ export default function OrganizationPage() {
             <div className="flex items-center gap-3 text-emerald-600">
               <RefreshCw className="h-5 w-5" />
               <div className="text-sm font-medium">
-                同步完成: 更新了 {syncResult.departments} 个部门，{syncResult.users} 名用户
+                同步完成: 更新了 {syncResult.departments} 个部门,{syncResult.users} 名用户
               </div>
             </div>
             <Button size="sm" variant="ghost" onClick={() => setSyncResult(null)} className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10">
@@ -355,7 +355,7 @@ export default function OrganizationPage() {
             {total > 0 && (
               <div className="p-4 border-t flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                 <div className="text-xs text-muted-foreground">
-                  显示 {startIdx} 到 {endIdx} 条，共 {total} 条
+                  显示 {startIdx} 到 {endIdx} 条,共 {total} 条
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 

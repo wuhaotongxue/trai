@@ -105,7 +105,7 @@ async def login(
     """用户登录
 
     Args:
-        request: 登录请求参数(用户名、密码)
+        request: 登录请求参数(用户名,密码)
         fastapi_request: FastAPI 请求对象
         jwt_service: JWT 服务实例
         password_service: 密码服务实例
@@ -190,7 +190,7 @@ async def login_with_encrypted_password(
     password_service: Annotated[PasswordService, Depends(get_password_service)],
     session: Annotated[Session, Depends(get_db_session)],
 ) -> LoginResponse:
-    """使用加密密码登录（demo 账号专用）
+    """使用加密密码登录(demo 账号专用)
 
     Args:
         request: 加密登录请求

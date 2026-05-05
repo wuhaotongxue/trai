@@ -22,7 +22,7 @@ function getApiBase(): string {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     
-    // 如果是通过 HTTPS 访问，可能是 Nginx 代理，直接用 /api_trai/v1 作为基础路径
+    // If accessed via HTTPS, might be Nginx proxy, use /api_trai/v1 as base path
     if (protocol === "https:") {
       return `${protocol}//${hostname}/api_trai/v1`;
     }
@@ -143,11 +143,11 @@ export async function request<T>(
   if (!res.ok) {
     // 处理 4008 请求限流
     if (res.status === 429 || res.status === 4008) {
-      throw new Error("请求太频繁, 请稍后再试 (4008)");
+      throw new Error("Request too frequent, please try again later (4008)");
     }
 
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    const errorMessage = error.detail?.message || error.message || "请求失败";
+    const errorMessage = error.detail?.message || error.message || "Request failed";
 
     // 游客免费额度用完特殊处理
     if (res.status === 401 && errorMessage.includes("免费额度")) {
@@ -496,6 +496,454 @@ export const agentApi = {
   /** 文生音乐 */
   generateMusic: (data: { prompt: string; model?: string; duration?: number; style?: string }) =>
     request<{ task_id: string; status: string; music_url?: string; error?: string }>("/ai/music", { method: "POST", body: JSON.stringify(data) }),
+};
+
+// ============================================================
+// 多模态 Agent API (Multimodal Agent Routes)
+// ============================================================
+
+/**
+ * Agent 类型枚举
+ */
+export type AgentTypeValue =
+  | "chat"
+  | "code_assistant"
+  | "translator"
+  | "writer"
+  | "vision"
+  | "image_generator"
+  | "image_editor"
+  | "ocr_agent"
+  | "speech_to_text"
+  | "text_to_speech"
+  | "audio_analyzer"
+  | "pdf_parser"
+  | "document_qa"
+  | "summarizer"
+  | "data_analyst"
+  | "chart_generator"
+  | "excel_processor";
+
+/**
+ * Agent 模态类型
+ */
+export type ModalityType = "text" | "image" | "audio" | "video" | "document" | "data" | "chart";
+
+/**
+ * Agent 能力接口
+ * @property input_modalities - 支持的输入模态
+ * @property output_modalities - 支持的输出模态
+ * @property max_input_size_mb - 最大输入大小(MB)
+ * @property supported_formats - 支持的文件格式
+ * @property streaming_supported - 是否支持流式输出
+ */
+export interface AgentCapability {
+  /** 支持的输入模态 */
+  input_modalities: ModalityType[];
+  /** 支持的输出模态 */
+  output_modalities: ModalityType[];
+  /** 最大输入大小(MB) */
+  max_input_size_mb: number;
+  /** 支持的文件格式 */
+  supported_formats: string[];
+  /** 是否支持流式输出 */
+  streaming_supported: boolean;
+}
+
+/**
+ * Agent 配置接口
+ * @property agent_id - Agent ID
+ * @property name - 名称
+ * @property description - 描述
+ * @property type - 类型
+ * @property model - 模型
+ * @property system_prompt - 系统提示词
+ * @property temperature - 温度
+ * @property max_tokens - 最大Token数
+ * @property capability - 能力
+ * @property tools - 工具列表
+ */
+export interface AgentConfig {
+  /** Agent ID */
+  agent_id: string;
+  /** 名称 */
+  name: string;
+  /** 描述 */
+  description: string;
+  /** 类型 */
+  type: AgentTypeValue;
+  /** 模型 */
+  model: string;
+  /** 系统提示词(截断版) */
+  system_prompt: string;
+  /** 温度 */
+  temperature: number;
+  /** 最大Token数 */
+  max_tokens: number;
+  /** 能力 */
+  capability: AgentCapability;
+  /** 工具列表 */
+  tools: string[];
+}
+
+/**
+ * Agent 列表项接口(简化版)
+ */
+export interface AgentListItem {
+  /** Agent ID */
+  id: string;
+  /** 名称 */
+  name: string;
+  /** 描述 */
+  description: string;
+  /** 类型 */
+  type: AgentTypeValue;
+  /** 分类 */
+  category: "chat" | "vision" | "audio" | "document" | "data";
+  /** 输入模态 */
+  input_modalities: ModalityType[];
+  /** 输出模态 */
+  output_modalities: ModalityType[];
+  /** 是否支持流式 */
+  streaming_supported: boolean;
+  /** 图标名称(可选) */
+  icon?: string;
+}
+
+/**
+ * 路由结果接口
+ * @property task_type - 任务类型
+ * @property agent_type - Agent类型
+ * @property confidence - 置信度
+ * @property reasoning - 推理说明
+ * @property fallback_agents - 备选Agent列表
+ */
+export interface RoutingResult {
+  /** 任务类型 */
+  task_type: string;
+  /** Agent类型 */
+  agent_type: AgentTypeValue;
+  /** 置信度 */
+  confidence: number;
+  /** 推理说明 */
+  reasoning: string;
+  /** 备选Agent列表 */
+  fallback_agents: AgentTypeValue[];
+}
+
+/**
+ * 子任务接口
+ * @property task_id - 任务ID
+ * @property task_type - 任务类型
+ * @property primary_agent - 主Agent配置
+ * @property context - 上下文
+ */
+export interface SubTaskItem {
+  /** 任务ID */
+  task_id: string;
+  /** 任务类型 */
+  task_type: string;
+  /** 主Agent配置 */
+  primary_agent: AgentConfig;
+  /** 上下文 */
+  context?: Record<string, unknown>;
+}
+
+/**
+ * 多模态处理响应接口
+ * @property success - 是否成功
+ * @property output_type - 输出类型
+ * @property data - 数据
+ * @property processing_time_ms - 处理时间(ms)
+ * @property tokens_used - Token使用量
+ */
+export interface MultimodalResponse<T = unknown> {
+  /** 是否成功 */
+  success: boolean;
+  /** 输出类型 */
+  output_type: string;
+  /** 数据 */
+  data: T;
+  /** 处理时间(ms) */
+  processing_time_ms: number;
+  /** Token使用量 */
+  tokens_used?: number;
+}
+
+/** 多模态 API */
+export const multimodalApi = {
+  /**
+   * 获取所有可用Agent类型
+   * @returns Agent列表和总数
+   */
+  listAgents: () =>
+    request<{ agents: AgentListItem[]; total: number }>("/agent/multimodal/agents"),
+
+  /**
+   * 获取Agent详细信息
+   * @param agentType - Agent类型
+   * @returns Agent完整配置
+   */
+  getAgentDetail: (agentType: string) =>
+    request<AgentConfig>(`/agent/multimodal/agents/${agentType}`),
+
+  /**
+   * 智能任务路由
+   * @param message - 用户消息
+   * @param attachmentType - 附件类型(可选)
+   * @returns 路由结果
+   */
+  smartRoute: (message: string, attachmentType?: string) =>
+    request<RoutingResult>("/agent/multimodal/route", {
+      method: "POST",
+      body: JSON.stringify({
+        message,
+        attachment_type: attachmentType,
+      } as Record<string, unknown>),
+    }),
+
+  /**
+   * 分解复杂任务
+   * @param complexInput - 复杂任务描述
+   * @param maxSubtasks - 最大子任务数
+   * @returns 子任务列表
+   */
+  decomposeTask: (complexInput: string, maxSubtasks?: number) =>
+    request<{
+      original_input: string;
+      subtask_count: number;
+      subtasks: SubTaskItem[];
+    }>("/agent/multimodal/decompose", {
+      method: "POST",
+      body: JSON.stringify({
+        complex_input: complexInput,
+        max_subtasks: maxSubtasks || 5,
+      }),
+    }),
+
+  /**
+   * 图像分析/理解(Vision API)
+   * @param file - 图片文件
+   * @param prompt - 分析提示词
+   * @param detail - 精度(auto/low/high)
+   * @returns 分析结果
+   */
+  analyzeImage: async (
+    file: File,
+    prompt?: string,
+    detail?: string
+  ): Promise<MultimodalResponse<string>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (prompt) formData.append("prompt", prompt);
+    formData.append("detail", detail || "auto");
+
+    const token =
+      typeof window !== "undefined"
+        ? require("js-cookie").get("token")
+        : null;
+
+    const res = await fetch(`${getApiBase()}/agent/multimodal/vision/analyze`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.detail?.message || error.message || "Image analysis failed");
+    }
+
+    return res.json();
+  },
+
+  /**
+   * AI图像生成(DALL-E 3)
+   * @param prompt - 图像描述
+   * @param size - 尺寸
+   * @param quality - 质量
+   * @param style - 风格
+   * @param n - 生成数量
+   * @returns 生成结果
+   */
+  generateImage: (
+    prompt: string,
+    size?: string,
+    quality?: string,
+    style?: string,
+    n?: number
+  ) =>
+    request<MultimodalResponse<Record<string, unknown>>>(
+      "/agent/multimodal/vision/generate",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          prompt,
+          size: size || "1024x1024",
+          quality: quality || "standard",
+          style: style || "vivid",
+          n: n || 1,
+        }),
+      }
+    ),
+
+  /**
+   * 语音转文字(STT / Whisper)
+   * @param file - 音频文件
+   * @param language - 语言代码(可选)
+   * @returns 转录文本
+   */
+  speechToText: async (
+    file: File,
+    language?: string
+  ): Promise<MultimodalResponse<Record<string, unknown>>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (language) formData.append("language", language);
+
+    const token =
+      typeof window !== "undefined"
+        ? require("js-cookie").get("token")
+        : null;
+
+    const res = await fetch(
+      `${getApiBase()}/agent/multimodal/audio/transcribe`,
+      {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.detail?.message || error.message || "Transcription failed");
+    }
+
+    return res.json();
+  },
+
+  /**
+   * 文字转语音(TTS)
+   * @param text - 要转换的文本
+   * @param voice - 音色
+   * @param responseFormat - 音频格式
+   * @param speed - 语速
+   * @returns Blob音频数据
+   */
+  textToSpeech: async (
+    text: string,
+    voice?: string,
+    responseFormat?: string,
+    speed?: number
+  ): Promise<Blob> => {
+    const token =
+      typeof window !== "undefined"
+        ? require("js-cookie").get("token")
+        : null;
+
+    const res = await fetch(
+      `${getApiBase()}/agent/multimodal/audio/synthesize`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          text,
+          voice: voice || "alloy",
+          response_format: responseFormat || "mp3",
+          speed: speed || 1.0,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.detail?.message || error.message || "TTS failed");
+    }
+
+    return res.blob();
+  },
+
+  /**
+   * PDF文档解析
+   * @param file - PDF文件
+   * @param extractTables - 是否提取表格
+   * @param extractImages - 是否提取图片描述
+   * @returns 解析结果
+   */
+  parsePdf: async (
+    file: File,
+    extractTables?: boolean,
+    extractImages?: boolean
+  ): Promise<MultimodalResponse<Record<string, unknown>>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("extract_tables", String(extractTables ?? true));
+    formData.append("extract_images", String(extractImages ?? false));
+
+    const token =
+      typeof window !== "undefined"
+        ? require("js-cookie").get("token")
+        : null;
+
+    const res = await fetch(
+      `${getApiBase()}/agent/multimodal/document/pdf/parse`,
+      {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.detail?.message || error.message || "PDF parse failed");
+    }
+
+    return res.json();
+  },
+
+  /**
+   * OCR文字识别
+   * @param file - 包含文字的图片
+   * @returns 识别结果
+   */
+  ocrRecognize: async (file: File): Promise<MultimodalResponse<string>> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token =
+      typeof window !== "undefined"
+        ? require("js-cookie").get("token")
+        : null;
+
+    const res = await fetch(
+      `${getApiBase()}/agent/multimodal/document/ocr`,
+      {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    );
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.detail?.message || error.message || "OCR failed");
+    }
+
+    return res.json();
+  },
 };
 
 // ============================================================
@@ -890,7 +1338,7 @@ export const adminApi = {
   /** 审核拒绝用户 */
   rejectUser: (userId: string) =>
     request<{ message: string; user_id: string }>(`/admin/users/${userId}/reject`, { method: "POST" }),
-  /** 更新用户状态（启用/禁用） */
+  /** 更新用户状态(启用/禁用) */
   updateUserStatus: (userId: string, status: "active" | "disabled") =>
     request<{ message: string; user_id: string }>(`/admin/users/${userId}`, {
       method: "PUT",
@@ -1106,4 +1554,5 @@ export const publicApi = {
 export const api = {
   session: sessionApi,
   agent: agentApi,
+  multimodal: multimodalApi,
 };

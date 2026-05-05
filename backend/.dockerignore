@@ -1,0 +1,83 @@
+# ============================================
+# Docker Ignore - 优化构建上下文
+# ============================================
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 测试
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# 日志和临时文件
+logs/
+*.log
+logs_*.log
+tmp/
+temp/
+
+# 数据文件(敏感)
+*.db
+*.sqlite3
+*.sqlite
+data/
+uploads/
+backups/
+archives/
+
+# 环境变量 (不应进入镜像)
+.env
+.env.local
+.env.*.local
+
+# Docker 相关
+Dockerfile*
+docker-compose*.yml
+docker-dev.*
+.docker/
+
+# 文档
+README.md
+CHANGELOG.md
+docs/
+*.md
+!requirements.md
+
+# 监控配置
+monitoring/
+
+# Node.js (如果有前端)
+node_modules/
+dist/
+build/
+
+# OS 文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 其他
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.flake8

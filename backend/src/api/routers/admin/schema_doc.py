@@ -59,8 +59,8 @@ async def get_schema_docs(
 ) -> SchemaSyncResponse:
     """获取所有表的结构和描述信息
 
-    从 information_schema 自动获取表结构，并结合预定义的描述信息.
-    支持手动同步，可以及时反映数据库的变化.
+    从 information_schema 自动获取表结构,并结合预定义的描述信息.
+    支持手动同步,可以及时反映数据库的变化.
 
     Args:
         current_user: 管理员用户

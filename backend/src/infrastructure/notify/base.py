@@ -89,7 +89,7 @@ class NotifyResult:
 class BaseNotifyService(ABC):
     """通知服务基类
 
-    所有通知服务(飞书、企业微信、钉钉等)都应继承此类
+    所有通知服务(飞书,企业微信,钉钉等)都应继承此类
     实现统一的发送接口
     """
 

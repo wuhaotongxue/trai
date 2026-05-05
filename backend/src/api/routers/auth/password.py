@@ -50,7 +50,7 @@ async def change_password(
     """修改当前用户密码
 
     Args:
-        request: 修改密码请求(旧密码、新密码)
+        request: 修改密码请求(旧密码,新密码)
         current_user: 当前登录用户
         password_service: 密码服务实例
         session: 数据库会话

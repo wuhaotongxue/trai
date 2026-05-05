@@ -1,7 +1,7 @@
 /**
  * i18n.ts
  * 国际化配置
- * 支持中文（默认）和英文
+ * 支持中文(默认)和英文
  */
 
 export const locales = ["zh", "en"] as const;

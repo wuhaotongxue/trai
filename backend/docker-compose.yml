@@ -1,0 +1,333 @@
+# ============================================
+# Trai Backend - Docker Compose 配置
+# 作者: wuhao
+# 日期: 2026_05_04
+# 描述: 完整容器化部署 (生产/开发/监控)
+# ============================================
+
+version: '3.8'
+
+services:
+  # ====================
+  # 后端API服务 (Python 3.13 + Conda)
+  # ====================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-production}  # production / development / testing
+    container_name: trai-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5666}:5666"
+    environment:
+      # 应用配置
+      - APP_ENV=${APP_ENV:-production}
+      - DEBUG=${DEBUG:-false}
+      - APP_HOST=0.0.0.0
+      - APP_PORT=5666
+      - WORKERS=${WORKERS:-4}
+      
+      # 数据库 (PostgreSQL 15)
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-trai}:${POSTGRES_PASSWORD:-trai123}@postgres:5432/${POSTGRES_DB:-trai}
+      - DB_POOL_SIZE=20
+      - DB_ECHO_SQL=false
+      
+      # Redis 缓存
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      
+      # AI 服务配置
+      - AI_PROVIDER=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - AI_DEFAULT_MODEL=gpt-4o
+      - AI_VISION_MODEL=gpt-4o-vision-preview
+      - AI_IMAGE_MODEL=dall-e-3
+      - AI_WHISPER_MODEL=whisper-1
+      - AI_TTS_MODEL=tts-1
+      
+      # 阿里云百炼 (RAG/文档解析)
+      - ALIBABA_CLOUD_ACCESS_KEY_ID=${ALIBABA_CLOUD_ACCESS_KEY_ID}
+      - ALIBABA_CLOUD_ACCESS_KEY_SECRET=${ALIBABA_CLOUD_ACCESS_KEY_SECRET}
+      
+      # AWS S3 文件存储
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-trai-files}
+      - AWS_REGION=${AWS_REGION:-ap-southeast-1}
+      
+      # JWT 认证
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES:-1440}
+      
+      # 缓存配置
+      - CACHE_ENABLED=true
+      - CACHE_TTL=300
+      
+      # 限流配置
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_GLOBAL_RPM=60
+      - RATE_LIMIT_PER_IP_RPM=30
+      
+      # 日志配置
+      - LOG_LEVEL=INFO
+      - LOG_JSON_FORMAT=true
+      - LOG_FILE_OUTPUT=true
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-elasticsearch:9200}
+      
+      # WebSocket
+      - WS_HEARTBEAT_INTERVAL=30
+    
+    volumes:
+      - ./logs:/app/logs
+      - ./backups:/app/backups
+      - ./archives:/app/archives
+      - ./data:/app/data          # 上传文件存储
+      - ./uploads:/app/uploads    # 用户上传目录
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5666/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - trai-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ====================
+  # PostgreSQL 15 数据库
+  # ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: trai-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trai123}
+      POSTGRES_DB: ${POSTGRES_DB:-trai}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trai} -d ${POSTGRES_DB:-trai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    networks:
+      - trai-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  # ====================
+  # Redis 7 缓存服务
+  # ====================
+  redis:
+    image: redis:7-alpine
+    container_name: trai-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: >
+      redis-server 
+      --maxmemory 256mb 
+      --maxmemory-policy allkeys-lru 
+      --appendonly yes 
+      --appendfsync everysec
+      --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    
+    networks:
+      - trai-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ====================
+  # Elasticsearch (日志收集 + 搜索)
+  # ====================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: trai-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "${ES_PORT:-9200}:9200"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    
+    networks:
+      - trai-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  # ====================
+  # Kibana (日志可视化)
+  # ====================
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: trai-kibana
+    restart: unless-stopped
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+    
+    networks:
+      - trai-network
+
+  # ====================
+  # Grafana (系统监控仪表板)
+  # ====================
+  grafana:
+    image: grafana/grafana:10.2.4
+    container_name: trai-grafana
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    
+    networks:
+      - trai-network
+
+  # ====================
+  # Prometheus (指标采集)
+  # ====================
+  prometheus:
+    image: prom/prometheus:v2.49.0
+    container_name: trai-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    
+    networks:
+      - trai-network
+
+  # ====================
+  # MinIO (对象存储/S3兼容)
+  # 可选: 用于本地开发替代AWS S3
+  # ====================
+  minio:
+    image: minio/minio:latest
+    container_name: trai-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    
+    networks:
+      - trai-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+# ====================
+# 网络配置
+# ====================
+networks:
+  trai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ====================
+# 数据卷(持久化存储)
+# ====================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  es_data:
+    driver: local
+  grafana_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  minio_data:
+    driver: local

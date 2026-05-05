@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | TRAI",
   },
   description:
-    "TRAI 是一个强大的 AI 智能助手平台, 支持多工具调用、Agent 自动化、VLM 视觉理解与流式交互",
+    "TRAI 是一个强大的 AI 智能助手平台, 支持多工具调用,Agent 自动化,VLM 视觉理解与流式交互",
   keywords: ["AI", "Agent", "智能助手", "工具调用", "大模型", "GPT"],
   icons: {
     icon: "/kity.svg",
@@ -53,7 +53,7 @@ export default function RootLayout({
         </I18nProviderWrapper>
 
         {/* aria-live 动态播报区域 (A11y 规范)
-            当 SPA 异步数据刷新、表单提交成功或系统级错误时,
+            当 SPA 异步数据刷新,表单提交成功或系统级错误时,
             此区域内容会被屏幕阅读器实时朗读
             中文播报示例: "数据同步已完成, 共拉取 45 条新记录" */}
         <div

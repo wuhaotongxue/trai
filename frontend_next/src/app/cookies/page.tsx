@@ -39,7 +39,7 @@ export default function CookiesPage() {
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">什么是 Cookie? </h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
-              <p>Cookie 是由浏览器存储在设备上的小型文本文件, 用于记住你的偏好设置、登录状态和使用习惯. TRAI 使用 Cookie 来确保网站正常运行并提供更好的体验. </p>
+              <p>Cookie 是由浏览器存储在设备上的小型文本文件, 用于记住你的偏好设置,登录状态和使用习惯. TRAI 使用 Cookie 来确保网站正常运行并提供更好的体验. </p>
             </div>
           </section>
 
@@ -52,25 +52,25 @@ export default function CookiesPage() {
               {[
                 {
                   name: "必要 Cookie",
-                  desc: "网站正常运行所必需, 无法关闭. 如登录状态、安全验证、会话管理. ",
+                  desc: "网站正常运行所必需, 无法关闭. 如登录状态,安全验证,会话管理. ",
                   example: "session_id, auth_token, csrf_token",
                   safe: true,
                 },
                 {
                   name: "功能 Cookie",
-                  desc: "记住你的偏好设置, 如语言选择、主题设置、显示密度等. ",
+                  desc: "记住你的偏好设置, 如语言选择,主题设置,显示密度等. ",
                   example: "lang=zh-CN, theme=light, density=comfortable",
                   safe: true,
                 },
                 {
                   name: "分析 Cookie",
-                  desc: "帮助我们了解网站访问量、最受欢迎的功能和使用路径, 用于持续改进产品. ",
+                  desc: "帮助我们了解网站访问量,最受欢迎的功能和使用路径, 用于持续改进产品. ",
                   example: "_ga, _gid, _gat",
                   safe: false,
                 },
                 {
                   name: "营销 Cookie",
-                  desc: "用于个性化推荐和广告投放（TRAI 暂不使用第三方营销 Cookie）. ",
+                  desc: "用于个性化推荐和广告投放(TRAI 暂不使用第三方营销 Cookie). ",
                   example: "—",
                   safe: true,
                 },
@@ -111,7 +111,7 @@ export default function CookiesPage() {
               <ul className="space-y-2 pl-4 list-disc">
                 <li><strong>OpenAI / ModelScope: </strong>AI 模型服务提供商, 用于对话处理</li>
                 <li><strong>Vercel / 云服务: </strong>网站托管与 CDN 服务</li>
-                <li><strong>支付服务: </strong>如 Stripe / 支付宝（仅在购买时使用）</li>
+                <li><strong>支付服务: </strong>如 Stripe / 支付宝(仅在购买时使用)</li>
               </ul>
             </div>
           </section>
