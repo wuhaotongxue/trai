@@ -408,7 +408,7 @@ class ToolsAPI:
             # 将本地图片转换为 base64
             html_with_images = ToolsAPI._convert_images_to_base64(html_text, base_path)
 
-            # 添加中文字体、emoji、数学公式和 Mermaid 支持的 HTML 模板
+            # 添加中文字体,emoji,数学公式和 Mermaid 支持的 HTML 模板
             # 使用内联资源避免网络加载超时
             html_with_font = f"""<!DOCTYPE html>
 <html>
@@ -773,10 +773,10 @@ class ToolsAPI:
             original_size = len(content)
 
             # 这里使用 python-docx 来处理 Word 文件
-            # 注意：python-docx 只支持 docx 格式，不支持 doc 格式
-            # 对于 doc 格式，需要使用其他库如 pywin32 (Windows 平台) 或 antiword (Linux 平台)
+            # 注意:python-docx 只支持 docx 格式,不支持 doc 格式
+            # 对于 doc 格式,需要使用其他库如 pywin32 (Windows 平台) 或 antiword (Linux 平台)
             
-            # 简化处理：直接返回模拟响应
+            # 简化处理:直接返回模拟响应
             # 实际项目中需要集成真实的 Word 转 PDF 库
             pdf_content = f"PDF content generated from {file.filename}".encode('utf-8')
             converted_size = len(pdf_content)
@@ -834,7 +834,7 @@ class ToolsAPI:
             # 这里使用 PyPDF2 或 pdfplumber 来处理 PDF 文件
             # 实际项目中需要集成真实的 PDF 转 Word 库
             
-            # 简化处理：直接返回模拟响应
+            # 简化处理:直接返回模拟响应
             docx_content = f"Word content generated from {file.filename}".encode('utf-8')
             converted_size = len(docx_content)
 
@@ -888,7 +888,7 @@ class ToolsAPI:
         if target_format not in ["csv", "json", "xlsx"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": 400, "message": "目标格式只支持 csv、json、xlsx"},
+                detail={"code": 400, "message": "目标格式只支持 csv,json,xlsx"},
             )
 
         try:
@@ -898,7 +898,7 @@ class ToolsAPI:
             # 这里使用 pandas 来处理 Excel 文件
             # 实际项目中需要集成真实的 Excel 转换库
             
-            # 简化处理：直接返回模拟响应
+            # 简化处理:直接返回模拟响应
             if target_format == "csv":
                 converted_content = f"CSV content generated from {file.filename}".encode('utf-8')
                 file_name = file.filename.replace(".xlsx", ".csv").replace(".xls", ".csv")

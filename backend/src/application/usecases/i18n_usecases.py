@@ -46,7 +46,7 @@ class I18nUseCase:
         """批量导入翻译
 
         Args:
-            translations: 翻译数据，格式为 {"locale": {"namespace.key": "value"}}
+            translations: 翻译数据,格式为 {"locale": {"namespace.key": "value"}}
             overwrite: 是否覆盖现有翻译
 
         Returns:

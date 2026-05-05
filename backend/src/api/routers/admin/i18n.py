@@ -165,7 +165,7 @@ async def bulk_import_i18n(
 ) -> ImportResponse:
     """批量导入翻译字符串(仅管理员)
 
-    支持批量导入多个语言、多个命名空间的翻译
+    支持批量导入多个语言,多个命名空间的翻译
     格式: { "zh": { "nav.home": "首页", "hero.title": "你好" }, "en": { "nav.home": "Home" } }
 
     Args:

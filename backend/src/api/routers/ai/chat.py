@@ -2,20 +2,25 @@
 # 文件名: chat.py
 # 作者: wuhao
 # 日期: 2026_04_10
-# 描述: AI 对话接口
+# 描述: AI 对话接口 - 集成对话历史持久化
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncIterator
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from loguru import logger
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
 from application.usecases.chat import ChatInput, ChatUseCase
 from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.database import get_db_session
+from infrastructure.services.chat_history_service import get_chat_history_service
 
 router = APIRouter()
 
@@ -136,25 +141,112 @@ async def chat_with_session(
     model: Annotated[str, Body(description="模型名称")] = "gpt-4o",
     temperature: Annotated[float, Body(ge=0, le=2)] = 0.7,
     current_user: CurrentUser = None,
+    db_session: Annotated[Session, Depends(get_db_session)] = None,
 ) -> ChatResponse:
-    """在新会话中发送消息并自动创建会话
+    """在新会话中发送消息并自动创建/加载会话
+
+    集成对话历史持久化功能:
+    - 自动创建新会话或加载已有会话
+    - 保存用户消息和AI回复到数据库
+    - 支持多轮对话上下文
 
     Args:
-        session_id: 会话 ID
+        session_id: 会话 ID(如果为空则自动生成)
         content: 用户消息
         model: 模型名称
         temperature: 温度参数
         current_user: 当前登录用户
+        db_session: 数据库会话
 
     Returns:
         ChatResponse: AI 响应
+
+    Raises:
+        HTTPException: AI 服务错误(502)
     """
-    # 此接口需要集成会话管理和 AI ��话
-    # 暂时返回占位响应
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail={"code": 501, "message": "此接口正在开发中,请使用 /chat 接口配合 /api/sessions/{id}/messages"},
-    )
+    try:
+        user_id = current_user.get("user_id") if current_user else None
+
+        # 使用 ChatHistoryService 管理对话历史
+        history_service = get_chat_history_service(db_session)
+
+        # 如果 session_id 为空,生成新的
+        if not session_id or session_id.strip() == "":
+            session_id = str(uuid.uuid4())
+            logger.info(f"自动生成新会话 ID: {session_id}")
+
+        # 尝试加载现有会话历史
+        chat_session = history_service.load_session_history(session_id)
+
+        if not chat_session:
+            # 会话不存在,通过仓储创建(使用默认值)
+            from infrastructure.repositories.session_repository import SessionRepository
+
+            repo = SessionRepository(db_session)
+            chat_session = repo.create_session(
+                session_id=session_id,
+                user_id=user_id,
+                title="新对话",
+                model=model,
+            )
+            logger.info(f"创建新会话 | session_id={session_id}")
+
+        # 保存用户消息到数据库
+        user_msg_entity = history_service.save_message(
+            session_id=session_id,
+            role="user",
+            content=content,
+        )
+
+        # 获取完整的消息历史(包含刚保存的用户消息)
+        updated_session = history_service.load_session_history(session_id)
+        messages_for_ai = updated_session.to_ai_format()
+
+        # 调用 AI 服务
+        client = OpenAIClient()
+        use_case = ChatUseCase(ai_client=client)
+
+        input_data = ChatInput(
+            messages=messages_for_ai,
+            model=model or "gpt-4o",
+            temperature=temperature,
+            max_tokens=4096,
+        )
+        result = await use_case.execute(input_data)
+
+        # 保存 AI 回复到数据库
+        ai_msg_entity = history_service.save_message(
+            session_id=session_id,
+            role="assistant",
+            content=result.content,
+        )
+
+        # 如果是第一条消息,更新会话标题
+        if updated_session.message_count <= 1:
+            auto_title = content[:30] + ("..." if len(content) > 30 else "")
+            history_service.update_session_title(session_id=session_id, title=auto_title)
+
+        logger.info(
+            f"对话完成 | session_id={session_id} | "
+            f"user_len={len(content)} | ai_len={len(result.content)} | "
+            f"tokens={result.usage}"
+        )
+
+        return ChatResponse(
+            content=result.content,
+            model=result.model,
+            usage=result.usage,
+            finish_reason=result.finish_reason or "stop",
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"chat_with_session 执行失败 | error={e}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"code": 502, "message": f"AI 服务错误: {str(e)}"},
+        )
 
 
 __all__ = ["router"]

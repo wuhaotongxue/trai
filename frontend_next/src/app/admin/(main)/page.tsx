@@ -1,7 +1,7 @@
 /**
  * page.tsx
  * 管理员仪表盘
- * - 企业级 SaaS 规范: 高信息密度、骨架屏、情感化文案、多彩紧凑布局
+ * - 企业级 SaaS 规范: 高信息密度,骨架屏,情感化文案,多彩紧凑布局
  */
 
 "use client";
@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* ===== 数据卡片（紧凑 2x4）====== */}
+      {/* ===== 数据卡片(紧凑 2x4)====== */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {statCards.map((card) => {
           const val = stats ? stats[card.key] : 0;

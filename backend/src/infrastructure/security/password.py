@@ -18,7 +18,7 @@ class PasswordService:
     """密码服务
 
     封装密码哈希与验证逻辑,使用 passlib + bcrypt/argon2
-    遵循安全规范:禁止明文存储、使用强哈希算法
+    遵循安全规范:禁止明文存储,使用强哈希算法
     """
 
     _ALGORITHM_ARGON2 = "argon2"

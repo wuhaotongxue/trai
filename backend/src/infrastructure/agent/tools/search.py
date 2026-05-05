@@ -49,7 +49,7 @@ class SearchTool(BaseTool):
             self._definition = ToolDefinition(
                 id="utility_search",
                 name="联网搜索",
-                description="搜索互联网上的相关信息,返回标题、摘要和链接",
+                description="搜索互联网上的相关信息,返回标题,摘要和链接",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.MONITORED,
                 parameters=[

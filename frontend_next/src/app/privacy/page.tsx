@@ -44,9 +44,9 @@ export default function PrivacyPage() {
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
               <p>我们高度重视你的隐私安全. 当你注册 TRAI 账号时, 我们会收集以下信息: </p>
               <ul className="space-y-2 pl-4 list-disc">
-                <li>账号信息: 邮箱地址、昵称、密码（加密存储）</li>
-                <li>使用数据: 对话记录、Agent 调用次数、功能使用偏好</li>
-                <li>设备信息: IP 地址、浏览器类型、操作系统（用于安全分析）</li>
+                <li>账号信息: 邮箱地址,昵称,密码(加密存储)</li>
+                <li>使用数据: 对话记录,Agent 调用次数,功能使用偏好</li>
+                <li>设备信息: IP 地址,浏览器类型,操作系统(用于安全分析)</li>
                 <li>上传文件: 仅用于 AI 处理目的, 处理完成后自动删除</li>
               </ul>
             </div>
@@ -62,8 +62,8 @@ export default function PrivacyPage() {
               <ul className="space-y-2 pl-4 list-disc">
                 <li>提供和改进 AI 对话服务</li>
                 <li>账户安全验证与异常检测</li>
-                <li>发送服务通知（如系统维护公告）</li>
-                <li>生成使用统计报告（全部匿名化, 不涉及个人）</li>
+                <li>发送服务通知(如系统维护公告)</li>
+                <li>生成使用统计报告(全部匿名化, 不涉及个人)</li>
                 <li>客户支持与问题解答</li>
               </ul>
             </div>
@@ -111,9 +111,9 @@ export default function PrivacyPage() {
               <p>我们不会将你的个人信息出售给任何第三方. 以下情况除外: </p>
               <ul className="space-y-2 pl-4 list-disc">
                 <li>经你明确同意的共享行为</li>
-                <li>为提供服务而必须共享给 AI 模型供应商（OpenAI、ModelScope 等）</li>
+                <li>为提供服务而必须共享给 AI 模型供应商(OpenAI,ModelScope 等)</li>
                 <li>法律法规要求的强制性披露</li>
-                <li>企业并购或重组时的业务转移（同等隐私保护下）</li>
+                <li>企业并购或重组时的业务转移(同等隐私保护下)</li>
               </ul>
             </div>
           </section>
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
                 <li>随时查看和导出你的个人数据</li>
                 <li>要求更正不准确的个人信息</li>
                 <li>注销账户并要求删除全部个人数据</li>
-                <li>拒绝接收营销类通知（系统公告仍会正常发送）</li>
+                <li>拒绝接收营销类通知(系统公告仍会正常发送)</li>
               </ul>
               <p className="mt-3">行使以上权利请联系 <a href="mailto:privacy@trai.ai" className="text-blue-600 hover:underline">privacy@trai.ai</a></p>
             </div>

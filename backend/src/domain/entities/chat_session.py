@@ -44,6 +44,39 @@ class ChatSession:
         )
         self.updated_at = datetime.now()
 
+    def get_last_messages(self, count: int = 10) -> list[dict[str, Any]]:
+        """获取最近 N 条消息
+
+        Args:
+            count: 消息数量(默认 10)
+
+        Returns:
+            list[dict]: 最近的消息列表
+        """
+        return self.messages[-count:] if count > 0 else []
+
+    @property
+    def message_count(self) -> int:
+        """获取消息总数
+
+        Returns:
+            int: 消息数量
+        """
+        return len(self.messages)
+
+    def clear_messages(self) -> None:
+        """清空所有消息"""
+        self.messages.clear()
+        self.updated_at = datetime.now()
+
+    def to_ai_format(self) -> list[dict[str, str]]:
+        """转换为 AI API 所需的格式
+
+        Returns:
+            list[dict]: AI API 格式的消息列表
+        """
+        return [{"role": msg["role"], "content": msg["content"]} for msg in self.messages]
+
     def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {

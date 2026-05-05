@@ -136,7 +136,7 @@ function LoginForm() {
               </span>
             </h1>
             <p className="text-white/60 text-base leading-relaxed max-w-sm">
-              企业级 AI 助手平台，支持多工具调用、自动纠错、VLM 视觉理解与流式交互
+              企业级 AI 助手平台,支持多工具调用,自动纠错,VLM 视觉理解与流式交互
             </p>
           </div>
 

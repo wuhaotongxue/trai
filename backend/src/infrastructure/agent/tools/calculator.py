@@ -49,7 +49,7 @@ class CalculatorTool(BaseTool):
             self._definition = ToolDefinition(
                 id="utility_calculator",
                 name="计算器",
-                description="执行基础数学计算,支持加减乘除、幂运算、开方、三角函数、对数等",
+                description="执行基础数学计算,支持加减乘除,幂运算,开方,三角函数,对数等",
                 category=ToolCategory.UTILITY,
                 risk_level=RiskLevel.SAFE,
                 parameters=[

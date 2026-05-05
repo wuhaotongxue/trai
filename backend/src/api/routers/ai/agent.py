@@ -2,7 +2,7 @@
 # 文件名: agent.py
 # 作者: wuhao
 # 日期: 2026_04_17_08:28:46
-# 描述: Agent 工具调用路由
+# 描述: Agent 工具调用路由 - 集成对话历史持久化
 
 from __future__ import annotations
 
@@ -10,8 +10,10 @@ import os
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from loguru import logger
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser, CurrentUserOptional
 from core.exceptions import ExternalServiceError
@@ -23,6 +25,8 @@ from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
 from infrastructure.notify.base import NotifyLevel, NotifyMessage, NotifyType
 from infrastructure.notify.factory import NotifyServiceFactory
+from infrastructure.database import get_db_session
+from infrastructure.services.chat_history_service import get_chat_history_service
 
 router = APIRouter()
 
@@ -142,16 +146,23 @@ async def agent_chat(
     request: AgentChatRequest,
     current_user: CurrentUser,
     fastapi_request: Request,
+    db_session: Annotated[Session, Depends(get_db_session)] = None,
 ) -> Any:
-    """Agent 对话(支持多轮工具调用)
+    """Agent 对话(支持多轮工具调用 + 对话历史持久化)
 
     支持 AI 自动调用工具(天气/搜索/翻译/计算等),
-    多轮对话直到 AI 完成回答或达到最大轮数.
+    多轮对话直到 AI 完成回答或达到最大轮次.
+    
+    新增功能:
+    - 自动保存用户消息和AI回复到数据库
+    - 支持加载历史对话上下文
+    - 完整的对话持久化和追溯
 
     Args:
         request: Agent 对话请求
         current_user: 当前登录用户
         fastapi_request: FastAPI 请求对象
+        db_session: 数据库会话
 
     Returns:
         AgentChatResponse: AI 回复及执行明细
@@ -228,13 +239,36 @@ async def agent_chat(
                 rag_sources = KnowledgeBaseSourceExtractor.extract(res.body.data.nodes)
                 rag_context = "\n\n以下是相关的知识库参考资料:\n"
                 for i, node in enumerate(res.body.data.nodes):
-                    rag_context += f"【资料 {i + 1}】\n{node.text}\n"
+                    rag_context += f"[资料 {i + 1}]\n{node.text}\n"
         except Exception as e:
             from loguru import logger
 
             logger.warning(f"RAG retrieve failed for kb {request.knowledge_base_id}: {e}")
 
     messages = []
+    
+    # == 对话历史持久化:加载历史消息 ==
+    history_service = get_chat_history_service(db_session)
+    existing_session = history_service.load_session_history(request.session_id)
+    
+    if existing_session and existing_session.message_count > 0:
+        # 加载历史消息(最多最近20条,避免上下文过长)
+        history_messages = existing_session.get_last_messages(20)
+        messages = [{"role": msg["role"], "content": msg["content"]} for msg in history_messages]
+        logger.info(f"加载历史消息 | session_id={request.session_id} | 历史消息数={len(messages)}")
+    
+    # 保存用户消息到数据库
+    try:
+        user_msg_entity = history_service.save_message(
+            session_id=request.session_id,
+            role="user",
+            content=request.message,
+            metadata={"agent_id": agent_id, "trace_id": trace_id},
+        )
+        logger.info(f"保存用户消息成功 | session_id={request.session_id}")
+    except Exception as e:
+        logger.warning(f"保存用户消息失败(不影响对话)| error={e}")
+    
     if rag_context:
         final_message = (
             "请结合以下参考资料回答我的问题. "
@@ -279,6 +313,35 @@ async def agent_chat(
             reasoning_parts.append(rc)
 
     full_reasoning = "\n\n".join(reasoning_parts) if reasoning_parts else None
+
+    # == 保存 AI 回复到数据库 ==
+    final_content = result["final_content"]
+    try:
+        ai_msg_entity = history_service.save_message(
+            session_id=request.session_id,
+            role="assistant",
+            content=final_content,
+            metadata={
+                "agent_id": agent_id,
+                "trace_id": trace_id,
+                "total_turns": result.get("total_turns", 0),
+                "total_tokens": result.get("total_tokens", 0),
+                "reasoning_content": full_reasoning,
+                "steps_count": len(result.get("steps", [])),
+            },
+        )
+        
+        # 如果是第一条消息,自动生成标题
+        if not existing_session or existing_session.message_count <= 1:
+            auto_title = request.message[:30] + ("..." if len(request.message) > 30 else "")
+            history_service.update_session_title(
+                session_id=request.session_id, 
+                title=f"[Agent:{agent_id}] {auto_title}"
+            )
+        
+        logger.info(f"保存AI回复成功 | session_id={request.session_id} | content_len={len(final_content)}")
+    except Exception as e:
+        logger.warning(f"保存AI回复失败(不影响返回)| error={e}")
 
     return AgentChatResponse(
         session_id=request.session_id,

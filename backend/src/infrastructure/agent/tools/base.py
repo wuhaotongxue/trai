@@ -2,7 +2,7 @@
 # 文件名: base.py
 # 作者: wuhao
 # 日期: 2026_04_10_09:19:27
-# 描述: Agent 工具定义 - 工具基类、枚举和统一数据结构
+# 描述: Agent 工具定义 - 工具基类,枚举和统一数据结构
 
 from __future__ import annotations
 

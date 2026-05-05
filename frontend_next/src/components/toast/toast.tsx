@@ -127,7 +127,7 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   );
 }
 
-// 全局 Toast 状态管理器（跨组件共享）
+// 全局 Toast 状态管理器(跨组件共享)
 let globalSetToasts: React.Dispatch<React.SetStateAction<ToastItem[]>> | null = null;
 
 export function registerToastState(

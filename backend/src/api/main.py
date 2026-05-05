@@ -289,6 +289,8 @@ def create_app() -> FastAPI:
         {"name": "AI 能力", "description": "AI 能力接口, 如对话与生成能力."},
         {"name": "智能体", "description": "智能体对话与工具调用接口."},
         {"name": "智能体管理", "description": "智能体管理接口."},
+        {"name": "多模态Agent", "description": "多模态AI能力接口, 包括图像理解/生成, 语音识别/合成, PDF解析等."},
+        {"name": "WebSocket", "description": "实时通信接口."},
         {"name": "媒体", "description": "文件上传等媒体接口."},
         {"name": "会话", "description": "会话管理接口."},
         {"name": "工具", "description": "通用工具接口."},
@@ -304,6 +306,8 @@ def create_app() -> FastAPI:
             {"name": "AI", "description": "AI APIs, chat and generations."},
             {"name": "Agent", "description": "Agent chat and tool calling."},
             {"name": "Agent Management", "description": "Agent management APIs."},
+            {"name": "Multimodal Agent", "description": "Multimodal AI APIs: vision, audio, document processing."},
+            {"name": "WebSocket", "description": "Real-time communication APIs."},
             {"name": "Media", "description": "Media upload APIs."},
             {"name": "Sessions", "description": "Session APIs."},
             {"name": "Tools", "description": "Utility tools APIs."},
@@ -391,6 +395,8 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
+    from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
+    from api.routers.websocket_routes import router as websocket_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
     from api.routers.i18n_public import router as i18n_public_router
@@ -433,6 +439,8 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(report.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
+    app.include_router(multimodal_agent_router, prefix=api_prefix, tags=["Multimodal Agent"])
+    app.include_router(websocket_router, tags=["WebSocket"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 class FeishuNotifyService(BaseNotifyService):
     """飞书通知服务
 
-    支持文本、Markdown、卡片等多种消息类型
+    支持文本,Markdown,卡片等多种消息类型
     Webhook 地址格式: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
     """
 

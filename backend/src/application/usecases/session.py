@@ -2,7 +2,7 @@
 # 文件名: session.py
 # 作者: wuhao
 # 日期: 2026_04_09
-# 描述: 会话管理用例
+# 描述: 会话管理用例 - 使用领域实体进行业务逻辑处理
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from application.usecases.base import UseCase
+from domain.entities.chat_session import ChatSession
 from infrastructure.ai.openai_client import OpenAIClient
 from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import (
@@ -53,7 +54,7 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
             repo = SessionRepository(db_session)
 
             session_id = str(uuid.uuid4())
-            session = repo.create_session(
+            session_entity = repo.create_session(
                 session_id=session_id,
                 user_id=input_data.user_id,
                 title=input_data.title or "新对话",
@@ -62,12 +63,12 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
             )
 
             return SessionOutput(
-                session_id=session.t_session_id,
-                title=session.t_title,
-                model=session.t_model,
-                messages=session.t_messages,
-                created_at=session.t_created_at.isoformat(),
-                updated_at=session.t_updated_at.isoformat(),
+                session_id=session_entity.session_id,
+                title=session_entity.metadata.get("title"),
+                model=session_entity.model,
+                messages=session_entity.messages,
+                created_at=session_entity.created_at.isoformat(),
+                updated_at=session_entity.updated_at.isoformat(),
             )
 
 
@@ -105,32 +106,40 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
             if not chat_session:
                 raise ValueError(f"会话不存在: {input_data.session_id}")
 
-            message_repo.add_message(
+            # 保存用户消息(使用领域实体)
+            user_msg_entity = message_repo.add_message(
                 session_id=input_data.session_id,
                 role=input_data.role,
                 content=input_data.content,
             )
 
-            messages = message_repo.get_messages(input_data.session_id)
-            messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
+            # 获取历史消息(返回领域实体列表)
+            messages_entities = message_repo.get_messages(input_data.session_id)
 
+            # 转换为 AI API 格式
+            messages_dict = [msg.to_dict() for msg in messages_entities]
+
+            # 调用 AI
             ai_response = await self._ai_client.chat(messages=messages_dict)
 
-            message_repo.add_message(
+            # 保存 AI 响应
+            assistant_msg_entity = message_repo.add_message(
                 session_id=input_data.session_id,
                 role="assistant",
                 content=ai_response["content"],
             )
 
+            # 更新会话的消息历史
+            updated_messages = messages_dict + [assistant_msg_entity.to_dict()]
             session_repo.update_session(
                 session_id=input_data.session_id,
-                messages=messages_dict + [{"role": "assistant", "content": ai_response["content"]}],
+                messages=updated_messages,
             )
 
             return SendMessageOutput(
                 session_id=input_data.session_id,
-                user_message={"role": input_data.role, "content": input_data.content},
-                assistant_message={"role": "assistant", "content": ai_response["content"]},
+                user_message=user_msg_entity.to_dict(),
+                assistant_message=assistant_msg_entity.to_dict(),
             )
 
 
@@ -159,7 +168,8 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, ListSessionsOutput]):
         with get_session() as db_session:
             repo = SessionRepository(db_session)
 
-            sessions = repo.list_sessions(
+            # 获取领域实体列表
+            session_entities = repo.list_sessions(
                 user_id=input_data.user_id,
                 limit=input_data.limit,
                 offset=input_data.offset,
@@ -168,16 +178,16 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, ListSessionsOutput]):
             return ListSessionsOutput(
                 sessions=[
                     SessionOutput(
-                        session_id=s.t_session_id,
-                        title=s.t_title,
-                        model=s.t_model,
-                        messages=s.t_messages,
-                        created_at=s.t_created_at.isoformat(),
-                        updated_at=s.t_updated_at.isoformat(),
+                        session_id=s.session_id,
+                        title=s.metadata.get("title"),
+                        model=s.model,
+                        messages=s.messages,
+                        created_at=s.created_at.isoformat(),
+                        updated_at=s.updated_at.isoformat(),
                     )
-                    for s in sessions
+                    for s in session_entities
                 ],
-                total=len(sessions),
+                total=len(session_entities),
             )
 
 
@@ -209,20 +219,24 @@ class GetSessionUseCase(UseCase[GetSessionInput, GetSessionOutput]):
             repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
 
-            session = repo.get_session(input_data.session_id)
-            if not session:
+            # 获取领域实体
+            session_entity = repo.get_session(input_data.session_id)
+            if not session_entity:
                 raise ValueError(f"会话不存在: {input_data.session_id}")
 
-            messages = message_repo.get_messages(input_data.session_id)
-            messages_dict = [{"role": m.t_role, "content": m.t_content} for m in messages]
+            # 获取消息领域实体列表
+            message_entities = message_repo.get_messages(input_data.session_id)
+
+            # 转换为字典格式
+            messages_dict = [msg.to_dict() for msg in message_entities]
 
             return GetSessionOutput(
-                session_id=session.t_session_id,
-                title=session.t_title,
-                model=session.t_model,
+                session_id=session_entity.session_id,
+                title=session_entity.metadata.get("title"),
+                model=session_entity.model,
                 messages=messages_dict,
-                created_at=session.t_created_at.isoformat(),
-                updated_at=session.t_updated_at.isoformat(),
+                created_at=session_entity.created_at.isoformat(),
+                updated_at=session_entity.updated_at.isoformat(),
             )
 
 

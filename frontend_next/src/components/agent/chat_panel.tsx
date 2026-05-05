@@ -20,6 +20,8 @@ import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { type Message as AgentMessage } from "@/stores/agent.store";
+import { MultimodalUpload, type UploadedFileInfo } from "./multimodal_upload";
+import { AgentTypeSelector } from "./agent_type_selector";
 
 type TabId = "chat" | "image" | "video" | "music";
 
@@ -111,14 +113,17 @@ export function ChatPanel() {
 
   const [input, setInput] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍，阳光明媚，花朵盛开');
-  const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海，海浪拍打着礁石，天空中乌云密布');
-  const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐，钢琴和萨克斯风演奏，适合下午茶时光');
+  const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍, 阳光明媚, 花朵盛开');
+  const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海, 海浪拍打着礁石, 天空中乌云密布');
+  const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光');
   const bottomRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
+  const [selectedAgentType, setSelectedAgentType] = useState<string>("chat");
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     if (sessions.length > 0) {
@@ -155,7 +160,7 @@ export function ChatPanel() {
     if (tab === "chat") return base + "bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer";
     if (tab === "image") return base + "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors cursor-pointer";
     if (tab === "video") return base + "bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 text-xs text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors cursor-pointer";
-    return base + "bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors cursor-pointer";
+    return base + "bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors cursor-pointer";
   };
 
   useEffect(() => {
@@ -165,16 +170,23 @@ export function ChatPanel() {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim() && images.length === 0) return;
+    if (!input.trim() && images.length === 0 && uploadedFiles.length === 0) return;
     if (isStreaming) return;
 
     const content = input.trim();
     const imageList = [...images];
     setInput("");
     setImages([]);
+    setApiError(null);
 
-    await sendMessage(content, imageList);
-    inputRef.current?.focus();
+    try {
+      await sendMessage(content, imageList);
+      inputRef.current?.focus();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message";
+      setApiError(errorMessage);
+      console.error("Send message error:", error);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -367,7 +379,7 @@ export function ChatPanel() {
             { id: "chat" as TabId, label: "对话", icon: Bot, color: "text-blue-500" },
             { id: "image" as TabId, label: "绘图", icon: ImageIcon, color: "text-emerald-500" },
             { id: "video" as TabId, label: "视频", icon: Video, color: "text-orange-500" },
-            { id: "music" as TabId, label: "音乐", icon: Music, color: "text-purple-500" },
+            { id: "music" as TabId, label: "音乐", icon: Music, color: "text-indigo-500" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -390,6 +402,18 @@ export function ChatPanel() {
           </Button>
         </div>
 
+        {/* Agent Type Selector - Only show in chat mode */}
+        {activeTab === "chat" && (
+          <div className="px-4 pb-2 border-b border-border">
+            <AgentTypeSelector
+              value={selectedAgentType}
+              onChange={setSelectedAgentType}
+              compact={true}
+              className="max-w-full"
+            />
+          </div>
+        )}
+
         {/* 主内容区域 - 绘图 / 视频 / 音乐模式 */}
         {activeTab !== "chat" ? (
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -407,7 +431,7 @@ export function ChatPanel() {
                       </div>
                       <div>
                         <h2 className="text-xl font-bold text-foreground mt-1">AI 创意绘图</h2>
-                        <p className="text-sm text-muted-foreground mt-1">输入画面描述，AI 创作精美图像</p>
+                        <p className="text-sm text-muted-foreground mt-1">输入画面描述, AI 创作精美图像</p>
                       </div>
                     </div>
 
@@ -416,10 +440,10 @@ export function ChatPanel() {
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">试试这些提示词</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
-                          { tag: "人像", text: "一位精致的亚洲女性，柔和自然光，超高分辨率，8K 画质" },
-                          { tag: "风景", text: "壮丽山脉日出，云海翻涌，航拍视角，HDR 电影感" },
-                          { tag: "赛博", text: "霓虹灯街道，雨夜，反射光影，赛博朋克风格，电影级" },
-                          { tag: "动漫", text: "樱花树下少女，宫崎骏风格，温暖色调，手绘质感" },
+                          { tag: "人像", text: "一位精致的亚洲女性, 柔和自然光, 超高分辨率, 8K 画质" },
+                          { tag: "风景", text: "壮丽山脉日出, 云海翻涌, 航拍视角, HDR 电影感" },
+                          { tag: "赛博", text: "霓虹灯街道, 雨夜, 反射光影, 赛博朋克风格, 电影级" },
+                          { tag: "动漫", text: "樱花树下少女, 宫崎骏风格, 温暖色调, 手绘质感" },
                         ].map((item) => (
                           <button
                             key={item.tag}
@@ -529,7 +553,7 @@ export function ChatPanel() {
                       </div>
                       <div>
                         <h2 className="text-xl font-bold text-foreground mt-1">AI 视频合成</h2>
-                        <p className="text-sm text-muted-foreground mt-1">描述场景，AI 生成电影级视频</p>
+                        <p className="text-sm text-muted-foreground mt-1">描述场景, AI 生成电影级视频</p>
                       </div>
                     </div>
 
@@ -603,12 +627,12 @@ export function ChatPanel() {
                 {activeTab === "music" && (
                   <div className="space-y-8">
                     <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/10">
-                        <Music className="h-7 w-7 text-purple-500" />
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-400/20 to-cyan-500/20 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/10">
+                        <Music className="h-7 w-7 text-indigo-500" />
                       </div>
                       <div>
                         <h2 className="text-xl font-bold text-foreground mt-1">AI 音乐创作</h2>
-                        <p className="text-sm text-muted-foreground mt-1">描述风格，AI 创作原创音乐</p>
+                        <p className="text-sm text-muted-foreground mt-1">描述风格, AI 创作原创音乐</p>
                       </div>
                     </div>
 
@@ -624,13 +648,13 @@ export function ChatPanel() {
                     {generatedMusicUrl && (
                       <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                           <p className="text-xs text-muted-foreground font-medium">生成完成</p>
                         </div>
-                        <div className="rounded-2xl border border-border bg-gradient-to-br from-purple-500/5 to-pink-500/5 p-6 shadow-lg">
+                        <div className="rounded-2xl border border-border bg-gradient-to-br from-indigo-500/5 to-cyan-500/5 p-6 shadow-lg">
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                              <Music className="h-6 w-6 text-purple-500" />
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 flex items-center justify-center">
+                              <Music className="h-6 w-6 text-indigo-500" />
                             </div>
                             <div>
                               <p className="text-sm font-medium text-foreground">AI 创作音乐</p>
@@ -640,7 +664,7 @@ export function ChatPanel() {
                           <audio
                             src={generatedMusicUrl}
                             controls
-                            className="w-full [&::-webkit-media-controls-panel]:bg-purple-500/10"
+                            className="w-full [&::-webkit-media-controls-panel]:bg-indigo-500/10"
                           />
                           <div className="flex items-center gap-2 mt-4">
                             <button
@@ -665,10 +689,10 @@ export function ChatPanel() {
                     {isGeneratingMusic && (
                       <div className="flex flex-col items-center gap-4 py-12">
                         <div className="relative">
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center">
-                            <Music className="h-7 w-7 text-purple-500 animate-pulse" />
+                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400/20 to-cyan-500/20 border border-indigo-500/20 flex items-center justify-center">
+                            <Music className="h-7 w-7 text-indigo-500 animate-pulse" />
                           </div>
-                          <div className="absolute -inset-2 rounded-3xl border-2 border-purple-500/20 animate-ping" />
+                          <div className="absolute -inset-2 rounded-3xl border-2 border-indigo-500/20 animate-ping" />
                         </div>
                         <div className="text-center">
                           <p className="text-sm font-medium text-foreground">正在创作音乐...</p>
@@ -698,9 +722,9 @@ export function ChatPanel() {
                    activeTab === "video" ? "AI 视频合成" : "AI 音乐创作"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mb-4">
-                  {activeTab === "chat" ? "输入消息与 AI 助手对话，支持上传图片和调用工具." :
-                   activeTab === "image" ? "描述你想要的画面，AI 将为你生成精美的图像." :
-                   activeTab === "video" ? "提供视频描述或参考图，开启电影级 AI 视频创作." : "输入歌词或风格描述，创作属于你的 AI 音乐."}
+                  {activeTab === "chat" ? "输入消息与 AI 助手对话, 支持上传图片和调用工具." :
+                   activeTab === "image" ? "描述你想要的画面, AI 将为你生成精美的图像." :
+                   activeTab === "video" ? "提供视频描述或参考图, 开启电影级 AI 视频创作." : "输入歌词或风格描述, 创作属于你的 AI 音乐."}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {(() => {
@@ -735,9 +759,27 @@ export function ChatPanel() {
               </div>
             )}
 
-            {/* 消息列表 - 固定高度，可滚动 */}
+            {/* 消息列表 - 固定高度,可滚动 */}
             <ScrollArea className="flex-1 px-4 py-4">
               <div ref={messagesStartRef}>
+                {/* API Error Display */}
+                {apiError && (
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-600 dark:text-red-400">Error</p>
+                      <p className="text-xs text-red-500/80 mt-1">{apiError}</p>
+                    </div>
+                    <button
+                      onClick={() => setApiError(null)}
+                      className="text-red-500 hover:text-red-600 transition-colors"
+                      aria-label="Dismiss error"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+
                 {messages.map((msg) => {
                   const isUser = msg.role === "user";
                   const isTool = msg.role === "tool";
@@ -900,19 +942,15 @@ export function ChatPanel() {
             <div className="flex items-end gap-2">
               {activeTab === "chat" && (
                 <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    id="image-upload"
-                    onChange={handleImageUpload}
+                  <MultimodalUpload
+                    acceptedTypes={["image", "audio", "pdf"]}
+                    maxSizeMB={50}
+                    maxFiles={5}
+                    onFilesChange={setUploadedFiles}
+                    value={uploadedFiles}
+                    showPreview={true}
+                    className="mb-2"
                   />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Button variant="ghost" size="icon" type="button">
-                      <ImageIcon className="h-5 w-5" />
-                    </Button>
-                  </label>
                 </>
               )}
 
