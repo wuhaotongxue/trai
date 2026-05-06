@@ -159,9 +159,28 @@ const App: React.FC = () => {
                   console.log('[app] 自动登录成功')
                 }
               } catch (auth_error) {
-                console.warn('[app] 自动登录失败，将显示登录页面:', auth_error)
-                await window.electron_api.config_set('access_token', null).catch(() => {})
-                await window.electron_api.config_set('refresh_token', null).catch(() => {})
+                // 检查是否为离线模式（离线模式下 auth_me 失败是正常的）
+                try {
+                  const offline_mode_res = await window.electron_api.config_get('offline_mode', false)
+                  const is_offline_mode = offline_mode_res.data === true
+                  if (is_offline_mode) {
+                    console.log('[app] 离线模式：auth_me 失败但保持登录状态')
+                    // 离线模式下不需要验证，直接使用已有状态
+                    login({
+                      username: 'wuhaotongxue',
+                      email: 'wuhaotongxue@trai.local',
+                      role: 'user'
+                    })
+                  } else {
+                    console.warn('[app] 自动登录失败，将显示登录页面:', auth_error)
+                    await window.electron_api.config_set('access_token', null).catch(() => {})
+                    await window.electron_api.config_set('refresh_token', null).catch(() => {})
+                  }
+                } catch {
+                  console.warn('[app] 自动登录失败，将显示登录页面:', auth_error)
+                  await window.electron_api.config_set('access_token', null).catch(() => {})
+                  await window.electron_api.config_set('refresh_token', null).catch(() => {})
+                }
               }
             }
           } catch (e) {
