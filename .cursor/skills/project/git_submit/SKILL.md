@@ -6,6 +6,12 @@ description: >-
 
 # 自动提交与推送代码_(git_submit)
 
+> **通知配置**（每次推送必须使用）：
+> - **企业微信 wuhao 群**：`$env:NOTIFY_WECOM_WUHAO_WEBHOOK`
+> - **企业微信 wudu 群**：`$env:NOTIFY_WECOM_WUDU_WEBHOOK`
+> - **飞书群**：`$env:NOTIFY_FEISHU_WEBHOOK`
+> - 配置位置：`backend/.env` 第 3479-3524 行
+
 当用户调用此技能时，请严格按照以下步骤连贯执行：
 
 ## 执行步骤
@@ -214,6 +220,15 @@ description: >-
 告知五号同学提交成功，并简述提交的内容以及拉取/推送的分支详情。
 
 ### 10. 推送完成后自动发送飞书+企业微信通知（重要！！）
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x26A0; 重要提醒：搜索 .env 配置时</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>禁止只用 Grep 搜索 .env 文件</strong>（Grep 对超大文件可能返回空结果）</li>
+    <li>必须用 Shell + <code>Select-String</code> 或直接 Read 工具读取</li>
+    <li>企业微信配置在第 3479-3491 行，飞书配置在第 3521-3530 行</li>
+  </ul>
+</div>
 
 <div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
   <strong style="color:#E65100;">&#x1F4E7; 每次推送完成后必须发送通知</strong>
