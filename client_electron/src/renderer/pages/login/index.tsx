@@ -390,16 +390,22 @@ const Login: React.FC = () => {
     if (api_loading) return
     
     const check_backend_connection = async () => {
+      // 先设置为离线模式，如果连接成功再改回来
+      // 这样可以防止在检查连接时触发 logout
+      set_offline_mode(true)
+      
       try {
         // 尝试连接后端获取 Agent 列表
         const res = await window.electron_api.agent_management_list()
         if (res.success && res.data && res.data.length > 0) {
           add_log(`已连接到后台服务`)
           set_offline_mode(false)
+          // 清除离线模式配置
+          window.electron_api.config_set('offline_mode', false).catch(() => {})
           return
         }
       } catch {
-        // 连接失败
+        // 连接失败，保持离线模式
       }
       
       // 无法连接到后台，使用离线模式
@@ -514,22 +520,6 @@ const Login: React.FC = () => {
       else set_error_msg(raw || translate('login_error'))
     }
   }, [api_loading, normalized_api_url, remember_me, save_api_url, add_log, login, navigate])
-
-  // 离线模式时自动登录
-  useEffect(() => {
-    if (offline_mode && !api_loading) {
-      add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
-      login({ 
-        username: DEFAULT_OFFLINE_USER.username, 
-        email: `${DEFAULT_OFFLINE_USER.username}@trai.local`, 
-        role: 'user' 
-      })
-      // 保存离线登录状态
-      window.electron_api.config_set('offline_mode', true)
-      window.electron_api.config_set('remember_me', true)
-      navigate('/')
-    }
-  }, [offline_mode, api_loading])
 
   const handle_submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()

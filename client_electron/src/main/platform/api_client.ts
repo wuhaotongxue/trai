@@ -126,8 +126,15 @@ async function handle_logout_redirect(error: any) {
   const current_token = config_store.get('access_token')
   const current_refresh_token = config_store.get('refresh_token')
 
-  // 如果 token 已经被清空（用户主动登出），不显示弹框，直接通知跳转
+  // 如果 token 已经被清空（可能是用户主动登出）
   if (!current_token && !current_refresh_token) {
+    // 检查是否为离线模式（离线模式下 token 为空是正常的，不应触发登出）
+    const is_offline_mode = config_store.get('offline_mode')
+    if (is_offline_mode) {
+      log.info('Offline mode: tokens are empty, skip logout redirect')
+      is_handling_logout = false
+      return Promise.reject(error)
+    }
     log.info('Tokens already cleared (user logged out), sending need-login event directly')
     const win = BrowserWindow.getFocusedWindow()
     if (win) {
@@ -162,3 +169,8 @@ async function handle_logout_redirect(error: any) {
   is_handling_logout = false
   return Promise.reject(error)
 }
+
+// 注册 IPC 处理器
+ipcMain.handle('api:get_client', () => {
+  return api_client
+})
