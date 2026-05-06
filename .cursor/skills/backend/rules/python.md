@@ -19,7 +19,7 @@
 
 | 设置项 | 值 |
 |--------|------|
-| 标准环境 | `trai` (Conda) |
+| 标准环境 | `trai31313` (Conda) |
 | 类型提示 | `|` 替代 `Union`/`Optional`，`list[int]` 替代 `typing.List` |
 | 缩进 | 4 个空格，禁止 Tab |
 

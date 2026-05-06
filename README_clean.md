@@ -4,23 +4,23 @@
 
 ## 环境要求
 
-- **后端 Python 环境**: `trai` (Conda) / Python 3.13.13
+- **后端 Python 环境**: `trai31313` (Conda) / Python 3.13.13
 
 ### 使用 Conda 创建后端环境（推荐使用清华源）
 
 ```bash
 # 1. 创建 conda 虚拟环境
-conda create -n trai python=3.13.13 -y
+conda create -n trai31313 python=3.13.13 -y
 
 # 2. 激活环境
-conda activate trai
+conda activate trai31313
 
 # 3. 设置默认激活环境 (可选)
 # 如果你希望每次打开终端时自动激活该环境，可以执行以下命令：
 # 对于 PowerShell:
-# Add-Content -Path $PROFILE -Value "`nconda activate trai"
+# Add-Content -Path $PROFILE -Value "`nconda activate trai31313"
 # 对于 CMD:
-# reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "conda activate trai" /f
+# reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "conda activate trai31313" /f
 
 # 4. 安装依赖（使用清华源加速）
 cd backend
