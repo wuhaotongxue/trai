@@ -53,6 +53,7 @@ class ModalityType(str, Enum):
     DOCUMENT = "document"
     CODE = "code"
     TABLE = "table"
+    CHART = "chart"
 
 
 @dataclass

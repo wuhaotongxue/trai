@@ -147,6 +147,7 @@ export const en = {
   file_limit_hint: 'Max 3 files, each up to 10MB',
 
   // 媒体播放器
+  player: 'Player',
   audio: 'Audio',
   video: 'Video',
   root_folder: 'Root Folder',

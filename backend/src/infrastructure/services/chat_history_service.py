@@ -14,10 +14,6 @@ from sqlalchemy.orm import Session
 from domain.entities.chat_session import ChatSession
 from domain.entities.message import Message, MessageRole
 from infrastructure.database.database import get_session
-from infrastructure.repositories.session_repository import (
-    MessageRepository,
-    SessionRepository,
-)
 
 
 class ChatHistoryService:
@@ -44,6 +40,11 @@ class ChatHistoryService:
         Returns:
             tuple: (SessionRepository, MessageRepository)
         """
+        from infrastructure.repositories.session_repository import (
+            MessageRepository,
+            SessionRepository,
+        )
+
         if self._session_repo is None or self._message_repo is None:
             if self._db_session is None:
                 db_session = get_session()
