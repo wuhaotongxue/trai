@@ -28,10 +28,8 @@ const MainLayout: React.FC = () => {
       logout()
       navigate('/login')
     }
-    window.electron_api.on('auth:need-login', handle_need_login)
-    return () => {
-      window.electron_api.off('auth:need-login', handle_need_login)
-    }
+    const cleanup = window.electron_api.on_auth_need_login(handle_need_login)
+    return cleanup
   }, [logout, navigate])
 
   if (!is_authenticated) {

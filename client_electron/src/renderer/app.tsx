@@ -72,11 +72,11 @@ const App: React.FC = () => {
 
   // 监听需要登录事件
   useEffect(() => {
-    if (!window.electron_api?.on) {
+    if (!window.electron_api?.on_auth_need_login) {
       return
     }
 
-    const cleanup = window.electron_api.on('auth:need-login', () => {
+    const cleanup = window.electron_api.on_auth_need_login(() => {
       logout()
       window.electron_api.config_set('access_token', null).catch(() => {})
       window.electron_api.config_set('refresh_token', null).catch(() => {})
@@ -88,11 +88,11 @@ const App: React.FC = () => {
 
   // 监听退出动画事件
   useEffect(() => {
-    if (!window.electron_api?.on) {
+    if (!window.electron_api?.on_app_quit_with_animation) {
       return
     }
 
-    const cleanup = window.electron_api.on('app:quit-with-animation', () => {
+    const cleanup = window.electron_api.on_app_quit_with_animation(() => {
       set_is_exiting(true)
       setTimeout(() => {
         void window.electron_api.config_set('_quit_anim_done', '1').catch(() => {})

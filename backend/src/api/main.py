@@ -396,7 +396,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
     from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
-    from api.routers.websocket_routes import router as websocket_router
+    from api.routers.websocket_routes import websocket_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
     from api.routers.i18n_public import router as i18n_public_router
@@ -440,7 +440,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
     app.include_router(multimodal_agent_router, prefix=api_prefix, tags=["Multimodal Agent"])
-    app.include_router(websocket_router, tags=["WebSocket"])
+    app.include_router(websocket_router.router, tags=["WebSocket"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])

@@ -78,4 +78,12 @@ contextBridge.exposeInMainWorld('electron_api', {
     ipcRenderer.on('agent:chat:chunk', callback)
     return () => { ipcRenderer.removeListener('agent:chat:chunk', callback) }
   },
+  on_auth_need_login: (callback: (event: any) => void) => {
+    ipcRenderer.on('auth:need-login', callback)
+    return () => { ipcRenderer.removeListener('auth:need-login', callback) }
+  },
+  on_app_quit_with_animation: (callback: (event: any) => void) => {
+    ipcRenderer.on('app:quit-with-animation', callback)
+    return () => { ipcRenderer.removeListener('app:quit-with-animation', callback) }
+  },
 })

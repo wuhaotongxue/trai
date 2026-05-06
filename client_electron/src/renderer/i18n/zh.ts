@@ -147,6 +147,7 @@ export const zh = {
   file_limit_hint: '最多上传 3 个附件，单个不超过 10MB',
 
   // 媒体播放器
+  player: '播放器',
   audio: '音频',
   video: '视频',
   root_folder: '根目录',
