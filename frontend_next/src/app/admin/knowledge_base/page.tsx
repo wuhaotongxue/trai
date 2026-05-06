@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request } from "@/lib/api_client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { globalToast } from "@/components/toast/toast";
+import { toastMessages } from "@/components/toast/use_toast";
 
 interface KnowledgeBase {
   id: string;
@@ -29,6 +31,13 @@ interface KBFile {
   status: string;
   size?: number;
   createdAt?: string;
+}
+
+interface CreateKBDialogState {
+  open: boolean;
+  name: string;
+  content: string;
+  creating: boolean;
 }
 
 export default function KnowledgeBasePage() {
@@ -48,6 +57,14 @@ export default function KnowledgeBasePage() {
   const [uploadContent, setUploadContent] = useState("");
   const [uploadFileName, setUploadFileName] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  // 新建知识库弹窗状态
+  const [createKBDialog, setCreateKBDialog] = useState<CreateKBDialogState>({
+    open: false,
+    name: "",
+    content: "",
+    creating: false,
+  });
 
   const fetchIndices = useCallback(async () => {
     setLoading(true);
@@ -100,19 +117,22 @@ export default function KnowledgeBasePage() {
     fetchFiles(kb.id);
   };
 
-  const handleDeleteFile = async (fileId: string) => {
-    if (!selectedKB || !confirm("确定要删除该文档吗?")) return;
-    try {
-      await request(`/admin/knowledge_base/indices/${selectedKB.id}/files/${fileId}`, {
-        method: "DELETE"
-      });
-      fetchFiles(selectedKB.id);
-    } catch (err) {
-      alert("删除失败");
+  const handleDeleteClick = (type: "file" | "index", id: string, name: string) => {
+    const message = type === "file" 
+      ? `确定要删除文档 "${name}" 吗？此操作不可撤销。`
+      : `确定要删除知识库 "${name}" 吗？此操作不可撤销。`;
+    if (confirm(message)) {
+      if (type === "file" && selectedKB) {
+        request(`/admin/knowledge_base/indices/${selectedKB.id}/files/${id}`, { method: "DELETE" })
+          .then(() => { globalToast({ message: toastMessages.deleted, variant: "success" }); fetchFiles(selectedKB.id); })
+          .catch(() => globalToast({ message: toastMessages.deleteFailed, variant: "error" }));
+      } else {
+        request(`/admin/knowledge_base/indices/${id}`, { method: "DELETE" })
+          .then(() => { globalToast({ message: toastMessages.deleted, variant: "success" }); fetchIndices(); })
+          .catch(() => globalToast({ message: toastMessages.deleteFailed, variant: "error" }));
+      }
     }
   };
-
-  const handleUploadText = async () => {
     if (!selectedKB || !uploadContent || !uploadFileName) return;
     setUploading(true);
     try {
@@ -123,26 +143,53 @@ export default function KnowledgeBasePage() {
           file_name: uploadFileName.endsWith(".md") ? uploadFileName : `${uploadFileName}.md`
         })
       });
+      globalToast({ message: toastMessages.created, variant: "success" });
       setUploadDialogOpen(false);
       setUploadContent("");
       setUploadFileName("");
       fetchFiles(selectedKB.id);
     } catch (err) {
-      alert("上传失败");
+      globalToast({ message: toastMessages.uploadFailed, variant: "error" });
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteIndex = async (kbId: string) => {
-    if (!confirm("确定要删除整个知识库吗?此操作不可撤销.")) return;
     try {
       await request(`/admin/knowledge_base/indices/${kbId}`, {
         method: "DELETE"
       });
+      globalToast({ message: toastMessages.deleted, variant: "success" });
       fetchIndices();
     } catch (err) {
-      alert("删除知识库失败");
+      globalToast({ message: toastMessages.deleteFailed, variant: "error" });
+    }
+  };
+
+  const handleCreateKB = async () => {
+    if (!createKBDialog.name.trim()) {
+      globalToast({ message: "请输入知识库名称", variant: "warning" });
+      return;
+    }
+    setCreateKBDialog(prev => ({ ...prev, creating: true }));
+    try {
+      const res = await request<{ index_id: string; job_status: string }>("/admin/knowledge_base/demo_create", {
+        method: "POST",
+        body: JSON.stringify({
+          index_name: createKBDialog.name,
+          content: createKBDialog.content || "# " + createKBDialog.name + "\n\n这是新建的知识库内容。",
+        })
+      });
+      if (res.index_id) {
+        globalToast({ message: toastMessages.created, variant: "success" });
+        setCreateKBDialog({ open: false, name: "", content: "", creating: false });
+        fetchIndices();
+      }
+    } catch (err) {
+      globalToast({ message: toastMessages.createFailed, variant: "error" });
+    } finally {
+      setCreateKBDialog(prev => ({ ...prev, creating: false }));
     }
   };
 
@@ -158,7 +205,7 @@ export default function KnowledgeBasePage() {
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             刷新
           </Button>
-          <Button className="h-9 gap-2 shadow-sm" onClick={() => alert("功能开发中...")}>
+          <Button className="h-9 gap-2 shadow-sm" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: true }))}>
             <Plus className="h-4 w-4" />
             新建知识库
           </Button>
@@ -244,7 +291,7 @@ export default function KnowledgeBasePage() {
                         <td className="px-6 py-4 text-muted-foreground">{docCount}</td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <Button variant="ghost" size="sm" className="h-8 text-indigo-600" onClick={() => handleManageDocs(kb)}>管理文档</Button>
-                          <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteIndex(id)}>删除</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteClick("index", id, name)}>删除</Button>
                         </td>
                       </tr>
                     );
@@ -302,7 +349,7 @@ export default function KnowledgeBasePage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Button variant="ghost" size="sm" className="h-7 text-red-500" onClick={() => handleDeleteFile(file.id)}>
+                          <Button variant="ghost" size="sm" className="h-7 text-red-500" onClick={() => handleDeleteClick("file", file.id, file.name)}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </td>
@@ -348,6 +395,45 @@ export default function KnowledgeBasePage() {
             <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>取消</Button>
             <Button onClick={handleUploadText} disabled={uploading || !uploadContent || !uploadFileName}>
               {uploading ? "上传中..." : "开始上传"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 新建知识库弹窗 */}
+      <Dialog open={createKBDialog.open} onOpenChange={(open) => setCreateKBDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-indigo-500" />
+              新建知识库
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">知识库名称</label>
+              <Input 
+                placeholder="例如: 产品文档库" 
+                value={createKBDialog.name}
+                onChange={(e) => setCreateKBDialog(prev => ({ ...prev, name: e.target.value }))}
+                maxLength={20}
+              />
+              <p className="text-xs text-muted-foreground">最多 20 个字符</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">初始内容 (可选)</label>
+              <textarea
+                className="w-full h-48 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="输入初始的 Markdown 内容... (不填则使用默认内容)"
+                value={createKBDialog.content}
+                onChange={(e) => setCreateKBDialog(prev => ({ ...prev, content: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: false }))}>取消</Button>
+            <Button onClick={handleCreateKB} disabled={createKBDialog.creating || !createKBDialog.name.trim()}>
+              {createKBDialog.creating ? "创建中..." : "创建知识库"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -47,10 +47,10 @@ const AgentChat: React.FC = () => {
         if (window.electron_api.kb_list_indices) {
           const res = await window.electron_api.kb_list_indices()
           if (res.success) {
-            const items: any[] = Array.isArray(res.data) ? res.data : []
+            const items: any[] = Array.isArray(res.data) ? res.data : (res.data?.items || [])
             set_available_kbs(items.map((it: any) => ({
-              id: String(it.index_id || it.indexName || it.id || ''),
-              name: String(it.index_name || it.indexName || it.name || ''),
+              id: String(it.Id || it.id || it.index_id || it.indexId || it.IndexId || it.IndexID || ''),
+              name: String(it.Name || it.name || it.index_name || it.indexName || it.IndexName || ''),
             })).filter((k: { id: string; name: string }) => k.id && k.name))
           }
         }
