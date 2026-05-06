@@ -390,9 +390,11 @@ const Login: React.FC = () => {
     if (api_loading) return
     
     const check_backend_connection = async () => {
-      // 先设置为离线模式，如果连接成功再改回来
+      // 先设置为离线模式并保存到配置文件
       // 这样可以防止在检查连接时触发 logout
       set_offline_mode(true)
+      // 同步保存到配置文件，主进程才能读取到
+      await window.electron_api.config_set('offline_mode', true)
       
       try {
         // 尝试连接后端获取 Agent 列表
@@ -401,7 +403,7 @@ const Login: React.FC = () => {
           add_log(`已连接到后台服务`)
           set_offline_mode(false)
           // 清除离线模式配置
-          window.electron_api.config_set('offline_mode', false).catch(() => {})
+          await window.electron_api.config_set('offline_mode', false)
           return
         }
       } catch {
