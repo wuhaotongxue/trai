@@ -37,6 +37,9 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 规范_2026_05_06_2139
+- **优化**: 后台环境统一为 trai31313 / Python 3.13.13，修改 backend/README.md、skills、rules 等所有配置文件
+
 ### 🛠️ 后端_2026_05_06_1449
 - **优化**: i18n.py 和 feishu.py 完善国际化翻译和飞书通知功能
 
