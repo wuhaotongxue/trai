@@ -270,7 +270,7 @@ $roleName = "地理专家"
 $roleComment = "说到推送通知呀～这条北纬120度的消息从东经出发，已成功抵达群聊坐标！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-$body = @{
+$feishuBody = @{
     msg_type = "interactive"
     card = @{
         config = @{ wide_screen_mode = $true }
@@ -289,7 +289,13 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 10 -Compress
 if ($feishuUrl) {
-    Invoke-WebRequest -Uri $feishuUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+    try {
+        # 强制 UTF-8 编码，防止中文乱码
+        Invoke-WebRequest -Uri $feishuUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($feishuBody)) -TimeoutSec 15
+        Write-Host "飞书通知发送成功"
+    } catch {
+        Write-Host "飞书通知发送失败: $_"
+    }
 }
 ```
 
@@ -321,16 +327,27 @@ $payload = @{
 **时间**: $($timestamp)"
     }
 }
-$body = $payload | ConvertTo-Json -Depth 10 -Compress
+# 强制 UTF-8 编码，防止中文乱码
+$wecomBody = $payload | ConvertTo-Json -Depth 10 -Compress
 
 # 推送到 wuhao 群
 if ($wecomWuhaoUrl) {
-    Invoke-WebRequest -Uri $wecomWuhaoUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+    try {
+        Invoke-WebRequest -Uri $wecomWuhaoUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($wecomBody)) -TimeoutSec 15
+        Write-Host "企业微信 wuhao 群通知发送成功"
+    } catch {
+        Write-Host "企业微信 wuhao 群通知发送失败: $_"
+    }
 }
 
 # 推送到 wudu 群
 if ($wecomWuduUrl) {
-    Invoke-WebRequest -Uri $wecomWuduUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+    try {
+        Invoke-WebRequest -Uri $wecomWuduUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($wecomBody)) -TimeoutSec 15
+        Write-Host "企业微信 wudu 群通知发送成功"
+    } catch {
+        Write-Host "企业微信 wudu 群通知发送失败: $_"
+    }
 }
 ```
 
