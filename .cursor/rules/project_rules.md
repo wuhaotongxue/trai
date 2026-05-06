@@ -23,7 +23,7 @@
 - **示例文件脱敏**: 如果要提交 `.env.example`，必须确保其中的所有 Token、Secret 和密码都已打码或替换为虚假信息(如 `YOUR_TOKEN_HERE`)。
 
 ## 6. 后端架构纪律 (v6.0 白皮书约束)
-- **环境约束**: 后端项目必须使用 **Python 3.13** 进行开发 (Conda 环境: `trai`)。
+- **环境约束**: 后端项目必须使用 **Python 3.13** 进行开发 (Conda 环境: `trai31313`)。
 - 后端开发必须严格遵守 `TRAI_架构.md` 中的 DDD 5 层架构规范。
 - 严禁在 `api/` 路由层直写业务逻辑或数据库操作，严禁写臃肿的面条式 `func.py`。
 - 新增 API 或 Tool 前，必须使用 `/skill backend-code-check-wuhao` 进行架构审查。

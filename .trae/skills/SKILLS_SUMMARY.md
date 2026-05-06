@@ -341,7 +341,7 @@ TRAI 项目共有 **16 个 Skills**, 按功能分为 **5 大类**:
 
 | 服务 | 命令 |
 |------|------|
-| 后端 | `conda activate trai` → `cd backend` → `python run.py` |
+| 后端 | `conda activate trai31313` → `cd backend` → `python run.py` |
 | 前端 | `cd frontend_next` → `pnpm run type-check` → `pnpm dev` |
 | 客户端 | `cd client_electron` → `pnpm run type-check` → `pnpm dev` |
 

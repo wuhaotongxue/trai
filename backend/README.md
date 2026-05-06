@@ -17,8 +17,8 @@ TRAI 项目后端服务, 基于 FastAPI 框架构建.
 推荐使用清华源加速:
 
 ```bash
-conda create -n trai python=3.13.13 -y
-conda activate trai
+conda create -n trai31313 python=3.13.13 -y
+conda activate trai31313
 cd backend
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -e .
 ```

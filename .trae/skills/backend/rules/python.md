@@ -19,8 +19,8 @@
 
 | 设置项 | 值 |
 |--------|------|
-| 标准环境 | `trai` (Conda) |
-| 虚拟环境强制 | **绝对禁止**使用非虚拟环境 (System Python)。必须在 `trai` 环境下操作 |
+| 标准环境 | `trai31313` (Conda) |
+| 虚拟环境强制 | **绝对禁止**使用非虚拟环境 (System Python)。必须在 `trai31313` 环境下操作 |
 | 类型提示 | `|` 替代 `Union`/`Optional`，`list[int]` 替代 `typing.List` |
 | 缩进 | 4 个空格，禁止 Tab |
 

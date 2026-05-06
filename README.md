@@ -4,23 +4,23 @@
 
 ## 环境
 
-- **Python 环境**: rai (Conda) / Python 3.13.13
+- **Python 环境**: trai31313 (Conda) / Python 3.13.13
 
 ### Conda 环境配置指南
 
 ```bash
 # 1. 创建 conda 环境
-conda create -n trai python=3.13.13 -y
+conda create -n trai31313 python=3.13.13 -y
 
 # 2. 激活环境
-conda activate trai
+conda activate trai31313
 
 # 3. 永久激活（推荐）
 # 永久设置默认进入 trai 环境
 # Windows PowerShell:
-# Add-Content -Path $PROFILE -Value "conda activate trai"
+# Add-Content -Path $PROFILE -Value "conda activate trai31313"
 # CMD:
-# reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "conda activate trai" /f
+# reg add "HKCU\Software\Microsoft\Command Processor" /v AutoRun /t REG_EXPAND_SZ /d "conda activate trai31313" /f
 
 # 4. 安装后端依赖
 cd backend
@@ -45,6 +45,9 @@ cd trai
 提交 Issue / PR?
 
 ## 更新日志 (Changelog)
+
+### 🛠️ 更新_2026_05_06_2139
+- **优化（项目）**: 后台环境统一为 trai31313 / Python 3.13.13，修改 README、skills、rules 等所有配置文件
 
 ### 🛠️ 技能_2026_05_06_1510
 - **优化（技能）**: git_submit/SKILL.md 添加通知配置说明（企微/飞书 webhook 环境变量）
