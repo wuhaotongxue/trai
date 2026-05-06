@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown, Server, X, Check, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, FileText, RotateCw, Sparkles, Globe, ChevronDown, Server, X, Check, Loader2, Wifi } from 'lucide-react'
 import { use_auth_store } from '@/store/auth'
 import { use_log_store } from '@/store/log'
 import TitleBar from '@/components/layout/title_bar'
@@ -304,6 +304,12 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
   )
 }
 
+// 默认离线角色配置
+const DEFAULT_OFFLINE_USER = {
+  username: 'wuhaotongxue',
+  password: 'whf123456'
+}
+
 const Login: React.FC = () => {
   console.info('[login] Login function called')
   const [username, set_username] = useState('wuhao')
@@ -322,6 +328,7 @@ const Login: React.FC = () => {
   const [locale, set_locale] = useState<Locale>('zh')
   const [show_lang_menu, set_show_lang_menu] = useState(false)
   const [show_server_config, set_show_server_config] = useState(false)
+  const [offline_mode, set_offline_mode] = useState(false)
   const lang_menu_ref = useRef<HTMLDivElement>(null)
   const [, force_update] = useState(0)
   const navigate = useNavigate()
@@ -377,6 +384,49 @@ const Login: React.FC = () => {
     }
     void load_config()
   }, [add_log])
+
+  // 检查是否连接后台，如果连接失败则自动使用离线模式
+  useEffect(() => {
+    if (api_loading) return
+    
+    const check_backend_connection = async () => {
+      try {
+        // 尝试连接后端获取 Agent 列表
+        const res = await window.electron_api.agent_management_list()
+        if (res.success && res.data && res.data.length > 0) {
+          add_log(`已连接到后台服务`)
+          set_offline_mode(false)
+          return
+        }
+      } catch {
+        // 连接失败
+      }
+      
+      // 无法连接到后台，使用离线模式
+      add_log(`无法连接后台，自动切换到离线模式`)
+      set_offline_mode(true)
+      set_username(DEFAULT_OFFLINE_USER.username)
+      set_password(DEFAULT_OFFLINE_USER.password)
+    }
+    
+    void check_backend_connection()
+  }, [api_loading])
+
+  // 离线模式时自动登录
+  useEffect(() => {
+    if (offline_mode && !api_loading) {
+      add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
+      login({ 
+        username: DEFAULT_OFFLINE_USER.username, 
+        email: `${DEFAULT_OFFLINE_USER.username}@trai.local`, 
+        role: 'user' 
+      })
+      // 保存离线登录状态
+      window.electron_api.config_set('offline_mode', true)
+      window.electron_api.config_set('remember_me', true)
+      navigate('/')
+    }
+  }, [offline_mode, api_loading])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -464,6 +514,22 @@ const Login: React.FC = () => {
       else set_error_msg(raw || translate('login_error'))
     }
   }, [api_loading, normalized_api_url, remember_me, save_api_url, add_log, login, navigate])
+
+  // 离线模式时自动登录
+  useEffect(() => {
+    if (offline_mode && !api_loading) {
+      add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
+      login({ 
+        username: DEFAULT_OFFLINE_USER.username, 
+        email: `${DEFAULT_OFFLINE_USER.username}@trai.local`, 
+        role: 'user' 
+      })
+      // 保存离线登录状态
+      window.electron_api.config_set('offline_mode', true)
+      window.electron_api.config_set('remember_me', true)
+      navigate('/')
+    }
+  }, [offline_mode, api_loading])
 
   const handle_submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -817,6 +883,22 @@ const Login: React.FC = () => {
                     <span style={{ color: 'var(--ui_text_secondary)', fontSize: '12px' }}>{translate('save_login_state')}</span>
                   </label>
                 </div>
+
+                {/* 离线模式提示 */}
+                {offline_mode && (
+                  <div style={{
+                    color: 'var(--ui_accent)', fontSize: '12px', padding: '10px 12px',
+                    backgroundColor: 'var(--ui_accent_light)', borderRadius: '8px',
+                    border: '1px solid rgba(14,165,233,0.2)',
+                    animation: 'fadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                  }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'var(--ui_accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flexShrink: 0 }}>
+                      <Wifi size={12} />
+                    </div>
+                    离线模式：使用默认角色直接进入
+                  </div>
+                )}
 
                 {/* 登录按钮 */}
                 <button type="submit" disabled={is_logging_in}
