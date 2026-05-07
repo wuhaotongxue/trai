@@ -10,27 +10,11 @@ import { router } from './router/index'
 import { setup_axios_interceptors, init_api_base_url } from './utils/axios_interceptor'
 import { use_auth_store } from './store/auth'
 import { use_locale_store } from './store/locale'
-
-console.log('[app] app.tsx loading...')
-console.log('[app] React imported:', React)
-console.log('[app] RouterProvider imported:', RouterProvider)
-console.log('[app] router imported:', router)
-console.log('[app] setup_axios_interceptors imported:', setup_axios_interceptors)
-console.log('[app] init_api_base_url imported:', init_api_base_url)
-console.log('[app] use_auth_store imported:', use_auth_store)
-console.log('[app] use_locale_store imported:', use_locale_store)
-
-// 从 i18n.ts 导入翻译函数
 import { translate } from '@/i18n'
 
 async function init_i18n() {
-  console.log('[app] init_i18n called')
-  // 模拟初始化
   return Promise.resolve()
 }
-
-console.log('[app] translate function defined:', translate)
-console.log('[app] init_i18n function defined:', init_i18n)
 
 // 语言切换动画
 const GlobalTransition: React.FC<{ is_transitioning: boolean }> = ({ is_transitioning }) => {
@@ -63,7 +47,7 @@ const GlobalTransition: React.FC<{ is_transitioning: boolean }> = ({ is_transiti
 const App: React.FC = () => {
   const [initializing, set_initializing] = useState(true)
   const [is_locale_transitioning, set_is_locale_transitioning] = useState(false)
-  const [is_exiting, set_is_exiting] = useState(false)
+  const is_exiting_ref = useRef(false)
   const login = use_auth_store((state) => state.login)
   const logout = use_auth_store((state) => state.logout)
   const locale = use_locale_store((state) => state.locale)
@@ -77,14 +61,16 @@ const App: React.FC = () => {
     }
 
     const cleanup = window.electron_api.on_auth_need_login(() => {
-      logout()
+      // 退出过程中忽略 auth:need-login，避免触发更多 API 请求
+      if (is_exiting_ref.current) return
+      // 不调用 logout()（会触发 API 请求），只清理本地状态
       window.electron_api.config_set('access_token', null).catch(() => {})
       window.electron_api.config_set('refresh_token', null).catch(() => {})
       window.location.hash = '#/login'
     })
 
     return cleanup
-  }, [logout])
+  }, [])
 
   // 监听退出动画事件
   useEffect(() => {
@@ -93,7 +79,7 @@ const App: React.FC = () => {
     }
 
     const cleanup = window.electron_api.on_app_quit_with_animation(() => {
-      set_is_exiting(true)
+      is_exiting_ref.current = true
       setTimeout(() => {
         void window.electron_api.config_set('_quit_anim_done', '1').catch(() => {})
       }, 400)
@@ -134,6 +120,9 @@ const App: React.FC = () => {
         // 2. 加载语言偏好
         use_locale_store.getState().set_locale('zh')
         console.log('[app] locale set to zh')
+
+        // 清除主动退出标记，防止干扰下次启动
+        await window.electron_api.config_set('_logout_intentional', null).catch(() => {})
 
         // 3. 初始化翻译数据
         await init_i18n()
@@ -205,7 +194,7 @@ const App: React.FC = () => {
   return (
     <>
       <GlobalTransition is_transitioning={is_locale_transitioning} />
-      <div className={is_exiting ? 'window-exit' : ''} style={{ height: '100%' }}>
+      <div className={is_exiting_ref.current ? 'window-exit' : ''} style={{ height: '100%' }}>
         <RouterProvider router={router} />
       </div>
     </>

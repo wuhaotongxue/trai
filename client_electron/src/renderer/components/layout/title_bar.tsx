@@ -5,7 +5,7 @@
  * 描述: TRAI 桌面客户端 Win11 风格自定义标题栏，支持主题切换、日志查看与国际化
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown, Minus, Square, X, Maximize2 } from 'lucide-react'
+import { RotateCw, FileText, Sun, Moon, Globe, ChevronDown, Minus, Square, X, Maximize2, WifiOff } from 'lucide-react'
 import { use_log_store } from '@/store/log'
 import { use_notification_store } from '@/store/notification'
 import { use_locale_store } from '@/store/locale'
@@ -20,6 +20,7 @@ const TitleBar: React.FC = () => {
   const [caps_lock_enabled, set_caps_lock_enabled] = useState(false)
   const [locale, set_locale] = useState<Locale>('zh')
   const [show_lang_menu, set_show_lang_menu] = useState(false)
+  const [offline_mode, set_offline_mode] = useState(false)
   const lang_menu_ref = useRef<HTMLDivElement>(null)
   const [, force_update] = useState(0)
 
@@ -43,6 +44,19 @@ const TitleBar: React.FC = () => {
         document.documentElement.dataset.theme = 'light'
         set_theme('light')
       })
+  }, [])
+
+  // 监听离线模式状态
+  useEffect(() => {
+    const load_offline = () => {
+      window.electron_api.config_get('offline_mode', false).then((res) => {
+        set_offline_mode(res.data === true)
+      }).catch(() => set_offline_mode(false))
+    }
+    load_offline()
+    // 每 5 秒检查一次，防止登录后状态不同步
+    const interval = setInterval(load_offline, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -108,10 +122,27 @@ const TitleBar: React.FC = () => {
         zIndex: 1000,
       }}
     >
-      {/* 左侧: Logo + 品牌名 */}
+      {/* 左侧: Logo + 品牌名 + 离线模式指示器 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         <img src="./kity.png" alt="logo" style={{ width: '15px', height: '15px' }} />
         <span style={{ fontWeight: 600, fontSize: '13px', letterSpacing: '0.02em' }}>TRAI</span>
+        {offline_mode && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 8px',
+            backgroundColor: 'var(--ui_warning)',
+            color: 'white',
+            borderRadius: '10px',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.02em',
+          }}>
+            <WifiOff size={11} />
+            离线模式
+          </div>
+        )}
       </div>
 
       {/* 中间: 工具按钮 */}

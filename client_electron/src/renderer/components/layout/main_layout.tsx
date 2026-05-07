@@ -4,7 +4,7 @@
  * 日期: 2026-04-23 22:05:00
  * 描述: TRAI 桌面客户端主布局组件，整合标题栏、侧边栏与内容区域
  */
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import Sidebar from './sidebar'
 import TitleBar from './title_bar'
@@ -16,6 +16,7 @@ const MainLayout: React.FC = () => {
   const is_authenticated = use_auth_store((state) => state.is_authenticated)
   const logout = use_auth_store((state) => state.logout)
   const navigate = useNavigate()
+  const is_exiting_ref = useRef(false)
 
   useEffect(() => {
     if (!is_authenticated) {
@@ -25,12 +26,21 @@ const MainLayout: React.FC = () => {
 
   useEffect(() => {
     const handle_need_login = () => {
+      if (is_exiting_ref.current) return
       logout()
       navigate('/login')
     }
     const cleanup = window.electron_api.on_auth_need_login(handle_need_login)
     return cleanup
   }, [logout, navigate])
+
+  useEffect(() => {
+    if (!window.electron_api?.on_app_quit_with_animation) return
+    const cleanup = window.electron_api.on_app_quit_with_animation(() => {
+      is_exiting_ref.current = true
+    })
+    return cleanup
+  }, [])
 
   if (!is_authenticated) {
     return null

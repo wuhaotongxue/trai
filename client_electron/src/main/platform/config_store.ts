@@ -80,6 +80,14 @@ class ConfigStore {
     this.data[key] = value
     this.save()
   }
+
+  public get_is_quitting(): boolean {
+    return this.data['_is_quitting'] === true
+  }
+
+  public set_is_quitting(value: boolean): void {
+    this.data['_is_quitting'] = value
+  }
 }
 
 /**

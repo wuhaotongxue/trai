@@ -42,6 +42,12 @@ api_client.interceptors.request.use((config) => {
 api_client.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // 如果正在退出应用中, 直接拒绝所有请求不再处理
+    // (斩断 401 -> handle_logout_redirect -> auth:need-login -> 页面跳转 -> 发请求 -> 401 的死循环)
+    if (config_store.get_is_quitting()) {
+      return Promise.reject(error)
+    }
+
     const original_request = error.config
 
     if (error.response?.status === 401 && !original_request._retry) {
@@ -114,6 +120,12 @@ api_client.interceptors.response.use(
 let is_handling_logout = false
 
 async function handle_logout_redirect(error: any) {
+  // 如果正在退出应用中，直接拒绝所有请求不再处理
+  // (斩断 401 -> handle_logout_redirect -> auth:need-login -> logout() -> API请求 -> 401 的死循环)
+  if (config_store.get_is_quitting()) {
+    return Promise.reject(error)
+  }
+
   // 防止重复触发
   if (is_handling_logout) {
     return Promise.reject(error)
@@ -122,24 +134,17 @@ async function handle_logout_redirect(error: any) {
 
   log.warn('Token expired or invalid, handling logout redirect')
 
-  // 检查 token 是否已经为空（可能是用户主动登出）
+  // 如果 token 已经被清空（可能是用户主动登出）
   const current_token = config_store.get('access_token')
   const current_refresh_token = config_store.get('refresh_token')
-
-  // 如果 token 已经被清空（可能是用户主动登出）
   if (!current_token && !current_refresh_token) {
-    // 检查是否为离线模式（离线模式下 token 为空是正常的，不应触发登出）
     const is_offline_mode = config_store.get('offline_mode')
     if (is_offline_mode) {
       log.info('Offline mode: tokens are empty, skip logout redirect')
       is_handling_logout = false
       return Promise.reject(error)
     }
-    log.info('Tokens already cleared (user logged out), sending need-login event directly')
-    const win = BrowserWindow.getFocusedWindow()
-    if (win) {
-      win.webContents.send('auth:need-login')
-    }
+    log.info('Tokens already cleared (user logged out), skip auth:need-login to prevent redirect loop')
     is_handling_logout = false
     return Promise.reject(error)
   }
@@ -151,7 +156,6 @@ async function handle_logout_redirect(error: any) {
   // 获取当前窗口
   const win = BrowserWindow.getFocusedWindow()
   if (win) {
-    // 显示提示对话框
     const result = await dialog.showMessageBox(win, {
       type: 'warning',
       title: '登录已过期',
@@ -162,7 +166,6 @@ async function handle_logout_redirect(error: any) {
     })
 
     if (result.response === 0) {
-      // 通知渲染进程跳转到登录页面
       win.webContents.send('auth:need-login')
     }
   }

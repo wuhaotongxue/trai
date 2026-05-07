@@ -19,18 +19,32 @@ log.info('app starting...')
 // 提升 tray 变量到外层作用域, 防止被 V8 垃圾回收导致托盘消失
 export let tray: Tray | null = null
 export let main_window: BrowserWindow | null = null
-// 是否真正退出应用的标记
-export let is_quitting = false
+// 是否已经触发过退出流程，防止重复调用 app.quit()
+let quit_triggered = false
 
 let quit_animation_timer: ReturnType<typeof setTimeout> | null = null
 
+/**
+ * 发送退出事件给渲染进程并启动后备定时器
+ * 渲染进程收到后应调用 on_renderer_quit_confirm()
+ * 如果渲染进程无响应, 定时器到期后强制退出
+ */
 function perform_quit_with_animation() {
+  if (quit_triggered) return
+  quit_triggered = true
+  config_store.set_is_quitting(true)
+
   if (!main_window || main_window.isDestroyed()) {
     app.quit()
     return
   }
+
+  // 通知渲染进程播放退出动画
   main_window.webContents.send('app:quit-with-animation')
+
+  // 后备定时器: 渲染进程 3s 内未确认则强制退出
   quit_animation_timer = setTimeout(() => {
+    log.info('[quit] animation timeout, force quitting')
     app.quit()
   }, 3000)
 }
@@ -40,7 +54,11 @@ export function on_renderer_quit_confirm() {
     clearTimeout(quit_animation_timer)
     quit_animation_timer = null
   }
-  app.quit()
+  // 双重保险: 只有尚未触发退出时才 quit
+  if (!quit_triggered) {
+    quit_triggered = true
+    app.quit()
+  }
 }
 
 // 保证应用单例运行 (软件唯一性)
@@ -140,7 +158,7 @@ if (!got_the_lock) {
 
     // 拦截关闭事件, 转为隐藏窗口或退出程序
     main_window.on('close', (event) => {
-      if (is_quitting) return
+      if (config_store.get_is_quitting()) return
 
       event.preventDefault()
       
@@ -149,7 +167,7 @@ if (!got_the_lock) {
       if (close_action === 'tray') {
         main_window?.hide()
       } else if (close_action === 'quit') {
-        is_quitting = true
+        config_store.set_is_quitting(true)
         perform_quit_with_animation()
       } else {
         // 提示用户选择
@@ -179,7 +197,7 @@ if (!got_the_lock) {
           if (action === 'tray') {
             main_window?.hide()
           } else {
-            is_quitting = true
+            config_store.set_is_quitting(true)
             perform_quit_with_animation()
           }
         }).catch((err) => {
@@ -220,12 +238,14 @@ if (!got_the_lock) {
     const context_menu = Menu.buildFromTemplate([
       { label: '显示主界面', click: () => main_window?.show() },
       { type: 'separator' },
-      { 
-        label: '完全退出', 
+      {
+        label: '完全退出',
         click: () => {
-          is_quitting = true
+          if (quit_triggered) return
+          quit_triggered = true
+          config_store.set_is_quitting(true)
           app.quit()
-        } 
+        }
       }
     ])
     tray.setToolTip('TRAI')
@@ -261,7 +281,7 @@ app.whenReady().then(() => {
 })
 
   app.on('before-quit', () => {
-    is_quitting = true
+    config_store.set_is_quitting(true)
   })
 
   app.on('window-all-closed', () => {
