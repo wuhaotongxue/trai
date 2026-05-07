@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.logger import get_logger
-from infrastructure.database.database import SessionLocal
+from infrastructure.database.database import Database
 from infrastructure.database.models import AgentRoleModel
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -42,10 +42,14 @@ class ReleaseClientUseCase:
             dict[str, str]: 角色名 -> 评论文本 的映射
         """
         try:
-            with Session(SessionLocal) as db:
+            db = Database()
+            session = db.get_session()
+            try:
                 stmt = select(AgentRoleModel).where(AgentRoleModel.t_is_active == True)
-                roles = db.execute(stmt).scalars().all()
+                roles = session.execute(stmt).scalars().all()
                 return {r.t_role_name: r.t_role_comment for r in roles}
+            finally:
+                session.close()
         except Exception as e:
             logger.warning(f"Failed to load agent roles from DB, using fallback: {e}")
             # 降级：返回硬编码的默认映射
