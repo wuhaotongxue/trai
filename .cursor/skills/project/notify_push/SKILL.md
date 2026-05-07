@@ -65,6 +65,14 @@ if ($feishuUrl) {
 }
 ```
 
+### 常见错误排查
+
+| 错误写法 | 正确写法 | 说明 |
+|---------|---------|------|
+| `-Body $hashtable` | `-Body ([Encoding]::UTF8.GetBytes($hashtable \| ConvertTo-Json))` | hashtable 必须先转 JSON 字符串再编码 |
+| `-Body $jsonString` | `-Body ([Encoding]::UTF8.GetBytes($jsonString))` | 字符串也要显式 UTF8 编码 |
+| `-ContentType "application/json"` | `-ContentType "application/json; charset=utf-8"` | 必须声明 UTF-8 编码 |
+
 ## 企业微信 Markdown 通知（PowerShell - 同时推 wuhao 和 wudu 两个群）
 
 ```powershell

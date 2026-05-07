@@ -192,6 +192,8 @@ const Sidebar: React.FC = () => {
     } catch (error) {
       console.error('logout error:', error)
     } finally {
+      // 标记为用户主动退出，防止 login 页面离线模式自动重新登录
+      window.electron_api.config_set('_logout_intentional', true).catch(() => {})
       // 延迟跳转，等待动画完成
       setTimeout(() => {
         logout()

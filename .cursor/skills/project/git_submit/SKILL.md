@@ -288,10 +288,10 @@ $feishuBody = @{
         )
     }
 } | ConvertTo-Json -Depth 10 -Compress
+$feishuBytes = [System.Text.Encoding]::UTF8.GetBytes($feishuBody)
 if ($feishuUrl) {
     try {
-        # 强制 UTF-8 编码，防止中文乱码
-        Invoke-WebRequest -Uri $feishuUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($feishuBody)) -TimeoutSec 15
+        Invoke-WebRequest -Uri $feishuUrl -Method Post -ContentType "application/json; charset=utf-8" -Body $feishuBytes -TimeoutSec 15
         Write-Host "飞书通知发送成功"
     } catch {
         Write-Host "飞书通知发送失败: $_"
@@ -329,11 +329,12 @@ $payload = @{
 }
 # 强制 UTF-8 编码，防止中文乱码
 $wecomBody = $payload | ConvertTo-Json -Depth 10 -Compress
+$wecomBytes = [System.Text.Encoding]::UTF8.GetBytes($wecomBody)
 
 # 推送到 wuhao 群
 if ($wecomWuhaoUrl) {
     try {
-        Invoke-WebRequest -Uri $wecomWuhaoUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($wecomBody)) -TimeoutSec 15
+        Invoke-WebRequest -Uri $wecomWuhaoUrl -Method Post -ContentType "application/json; charset=utf-8" -Body $wecomBytes -TimeoutSec 15
         Write-Host "企业微信 wuhao 群通知发送成功"
     } catch {
         Write-Host "企业微信 wuhao 群通知发送失败: $_"
@@ -343,7 +344,7 @@ if ($wecomWuhaoUrl) {
 # 推送到 wudu 群
 if ($wecomWuduUrl) {
     try {
-        Invoke-WebRequest -Uri $wecomWuduUrl -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($wecomBody)) -TimeoutSec 15
+        Invoke-WebRequest -Uri $wecomWuduUrl -Method Post -ContentType "application/json; charset=utf-8" -Body $wecomBytes -TimeoutSec 15
         Write-Host "企业微信 wudu 群通知发送成功"
     } catch {
         Write-Host "企业微信 wudu 群通知发送失败: $_"

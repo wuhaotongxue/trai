@@ -420,19 +420,28 @@ const Login: React.FC = () => {
     void check_backend_connection()
   }, [api_loading])
 
-  // 离线模式时自动登录
+  // 离线模式时自动登录（仅在非主动退出时触发）
   useEffect(() => {
     if (offline_mode && !api_loading) {
-      add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
-      login({ 
-        username: DEFAULT_OFFLINE_USER.username, 
-        email: `${DEFAULT_OFFLINE_USER.username}@trai.local`, 
-        role: 'user' 
+      // 检查是否为用户主动退出——主动退出后不应自动登录
+      window.electron_api.config_get('_logout_intentional', false).then((res) => {
+        if (res.data === true) {
+          // 用户主动退出，清除标记并停留在登录页
+          add_log('用户主动退出，禁止自动登录')
+          window.electron_api.config_set('_logout_intentional', null).catch(() => {})
+          return
+        }
+        add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
+        login({
+          username: DEFAULT_OFFLINE_USER.username,
+          email: `${DEFAULT_OFFLINE_USER.username}@trai.local`,
+          role: 'user'
+        })
+        // 保存离线登录状态
+        window.electron_api.config_set('offline_mode', true)
+        window.electron_api.config_set('remember_me', true)
+        navigate('/')
       })
-      // 保存离线登录状态
-      window.electron_api.config_set('offline_mode', true)
-      window.electron_api.config_set('remember_me', true)
-      navigate('/')
     }
   }, [offline_mode, api_loading])
 
@@ -528,11 +537,26 @@ const Login: React.FC = () => {
     if (Date.now() - last_submit_time.current < 1000) return
     last_submit_time.current = Date.now()
     if (!username || !password) { set_error_msg(translate('empty_credentials')); return }
+
+    // 离线模式下直接用离线角色登录，不走后端认证
+    if (offline_mode) {
+      login({
+        username: DEFAULT_OFFLINE_USER.username,
+        email: `${DEFAULT_OFFLINE_USER.username}@trai.local`,
+        role: 'user'
+      })
+      window.electron_api.config_set('offline_mode', true).catch(() => {})
+      window.electron_api.config_set('remember_me', true).catch(() => {})
+      add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
+      navigate('/')
+      return
+    }
+
     set_is_logging_in(true); set_error_msg('')
     try { await do_login(username, password) }
     catch (err: unknown) { set_error_msg(String((err as Error)?.message || translate('login_error'))) }
     finally { set_is_logging_in(false) }
-  }, [username, password, do_login])
+  }, [username, password, do_login, offline_mode, add_log, login, navigate])
 
   console.info('[login] About to return JSX, username:', username, 'locale:', locale)
   return (
