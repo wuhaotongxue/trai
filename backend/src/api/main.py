@@ -384,27 +384,29 @@ def register_routers(app: FastAPI) -> None:
         backup,
         dashboard_router,
         knowledge_base_router,
-        monitor as admin_monitor,
         organization,
         quota_config_router,
         schema_doc_router,
         user_router,
     )
-    from api.routers.admin.client_release import router as admin_client_release_router
+    from api.routers.admin import (
+        monitor as admin_monitor,
+    )
     from api.routers.admin.agent_role import router as admin_agent_role_router
+    from api.routers.admin.client_release import router as admin_client_release_router
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
     from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
-    from api.routers.websocket_routes import websocket_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
+    from api.routers.contact import router as contact_router
     from api.routers.i18n_public import router as i18n_public_router
     from api.routers.media import upload
     from api.routers.session import session
     from api.routers.system import feedback, health, notify
     from api.routers.system import monitor as system_monitor
-    from api.routers.contact import router as contact_router
+    from api.routers.websocket_routes import websocket_router
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])

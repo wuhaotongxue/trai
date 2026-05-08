@@ -6,17 +6,17 @@
 
 from __future__ import annotations
 
-import os
 import psutil
-from typing import Annotated
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
+from fastapi import APIRouter
+from pydantic import BaseModel
+from sqlalchemy import desc, select
+
 from api.deps import AdminUser
 from infrastructure.database import get_session
-from sqlalchemy import select, desc
 from infrastructure.database.models import AuditLogModel
 
 router = APIRouter(prefix="/admin/monitor", tags=["管理后台"])
+
 
 class LogItem(BaseModel):
     id: int
@@ -31,12 +31,14 @@ class LogItem(BaseModel):
     status_code: int
     duration_ms: int
 
+
 class SystemStats(BaseModel):
     cpu_percent: float
     memory_percent: float
     disk_percent: float
     network_sent: int
     network_recv: int
+
 
 @router.get("/logs", response_model=list[LogItem])
 async def get_audit_logs(admin: AdminUser, limit: int = 50):
@@ -62,6 +64,7 @@ async def get_audit_logs(admin: AdminUser, limit: int = 50):
         for log in logs
     ]
 
+
 @router.get("/system", response_model=SystemStats)
 async def get_system_stats(admin: AdminUser):
     """获取服务器硬件状态"""
@@ -71,5 +74,5 @@ async def get_system_stats(admin: AdminUser):
         memory_percent=psutil.virtual_memory().percent,
         disk_percent=psutil.disk_usage("/").percent,
         network_sent=net.bytes_sent,
-        network_recv=net.bytes_recv
+        network_recv=net.bytes_recv,
     )

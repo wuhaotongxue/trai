@@ -387,4 +387,12 @@ export const PUBLIC_ZH = {
   // ===== 招聘 =====
   "careers.title": "加入我们",
   "careers.desc": "招聘页面正在建设中, 敬请期待...",
+  // ===== 首页合作伙伴 =====
+  "trusted.title": "他们都在用 TRAI",
+  "trusted.bytedance": "字节跳动",
+  "trusted.tencent": "腾讯",
+  "trusted.alibaba": "阿里巴巴",
+  "trusted.meituan": "美团",
+  "trusted.xiaomi": "小米",
+  "trusted.huawei": "华为",
 };

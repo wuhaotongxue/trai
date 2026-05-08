@@ -384,4 +384,12 @@ export const PUBLIC_EN = {
   // ===== Careers =====
   "careers.title": "Join Us",
   "careers.desc": "Careers page is under construction, stay tuned...",
+  // ===== Homepage Trusted By =====
+  "trusted.title": "Trusted by leading companies",
+  "trusted.bytedance": "ByteDance",
+  "trusted.tencent": "Tencent",
+  "trusted.alibaba": "Alibaba",
+  "trusted.meituan": "Meituan",
+  "trusted.xiaomi": "Xiaomi",
+  "trusted.huawei": "Huawei",
 };

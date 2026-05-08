@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: settings_public.py
 # 作者: wuhao
 # 日期: 2026_04_24_16:00:00

@@ -1,5 +1,4 @@
 import os
-import sys
 from pathlib import Path
 
 # Load env
@@ -27,6 +26,7 @@ session = db.get_session()
 repo = UserRepository(session)
 
 from sqlalchemy import text
+
 users = session.execute(text("SELECT t_id, t_username, t_email FROM t_users LIMIT 10"))
 print("Users in database:")
 for u in users:

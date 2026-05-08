@@ -48,6 +48,29 @@
 
 ---
 
+## 已知错误处理规范
+
+以下错误类型在 TRAI 项目中已知会发生，必须主动处理而非忽略：
+
+### ConnectionResetError
+
+- **触发场景**：Windows 上 FastAPI/uvicorn 使用 `asyncio.ProactorEventLoop`，客户端提前断开连接时
+- **特征**：控制台出现 `Exception in callback _ProactorBasePipeTransport._call_connection_lost()`
+- **处理方式**：在 `run.py` 的 `run_uvicorn` 中注册 `loop.set_exception_handler`，过滤 `ConnectionResetError`
+- **相关文件**：`backend/run.py`
+
+### 连接类无害错误
+
+以下错误本质上是正常的网络行为，不影响服务运行，但会打印到控制台造成视觉干扰：
+
+| 错误类型 | 触发场景 | 处理方式 |
+|----------|----------|----------|
+| `ConnectionResetError` | 客户端提前关闭连接 | asyncio exception handler 过滤 |
+| `BrokenPipeError` | 客户端关闭后仍写入响应 | asyncio exception handler 过滤 |
+| `ConnectionAbortedError` | 连接被对端中止 | asyncio exception handler 过滤 |
+
+---
+
 ## 目录结构
 
 ```
@@ -150,5 +173,6 @@ file2.css  # 说明
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v3.0 | 2026-05-07 | 新增「已知错误处理规范」章节，含 ConnectionResetError 等 Windows 连接类错误处理 |
 | v2.0 | 2026-04-25 | 标题改用 `[HH:MM] ❌ 类型：简述` 格式 |
 | v1.0 | 2026-04-25 | 初版创建 |

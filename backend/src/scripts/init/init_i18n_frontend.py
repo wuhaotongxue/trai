@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # 加载 .env 环境变量
 from pathlib import Path
+
 base_dir = Path(__file__).resolve().parent.parent.parent
 env_file = base_dir / ".env"
 if env_file.exists():
@@ -1054,12 +1055,14 @@ class FrontendI18nInit:
                     if "." in key:
                         ns_idx = key.find(".")
                         namespace = key[:ns_idx]
-                        db_key = key[ns_idx + 1:]
+                        db_key = key[ns_idx + 1 :]
                     else:
                         namespace = "frontend"
                         db_key = key
                     existing = (
-                        session.query(I18nStringModel).filter_by(t_locale=locale, t_namespace=namespace, t_key=db_key).first()
+                        session.query(I18nStringModel)
+                        .filter_by(t_locale=locale, t_namespace=namespace, t_key=db_key)
+                        .first()
                     )
                     if existing:
                         existing.t_value = value

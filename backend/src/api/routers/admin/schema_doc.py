@@ -90,9 +90,7 @@ async def get_schema_docs(
         for row in result:
             table_name = row[0]
 
-            count_result = db.execute(
-                text(f'SELECT COUNT(*) FROM "{table_name}"')
-            ).scalar()
+            count_result = db.execute(text(f'SELECT COUNT(*) FROM "{table_name}"')).scalar()
             row_count = int(count_result) if count_result else 0
 
             col_result = db.execute(

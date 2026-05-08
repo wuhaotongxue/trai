@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: session_usecases.py
 # 作者: wuhao
 # 日期: 2026_05_04_16:00:00
@@ -9,14 +8,11 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any
 
 from loguru import logger
-from sqlalchemy.orm import Session
 
 from application.usecases.base import UseCase
-from domain.entities.chat_session import ChatSession, SessionStatus
 from infrastructure.ai.openai_client import OpenAIClient
 from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import (
@@ -53,7 +49,7 @@ class SessionOutput:
 class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
     """
     创建会话 UseCase (Skills 规范: 业务逻辑在Application层)
-    
+
     职责:
     - 输入验证
     - 会话创建
@@ -62,17 +58,17 @@ class CreateSessionUseCase(UseCase[CreateSessionInput, SessionOutput]):
 
     async def execute(self, input_data: CreateSessionInput) -> SessionOutput:
         """执行创建会话业务逻辑"""
-        
+
         # 输入验证
         if input_data.model and len(input_data.model) > 64:
             raise ValueError("Model name too long (max 64 characters)")
-        
+
         with get_session() as db_session:
             repo = SessionRepository(db_session)
 
             session_id = str(uuid.uuid4())
             title = input_data.title or "新对话"
-            
+
             session_entity = repo.create_session(
                 session_id=session_id,
                 user_id=input_data.user_id,
@@ -105,7 +101,7 @@ class ListSessionsInput:
 class ListSessionsUseCase(UseCase[ListSessionsInput, list[SessionOutput]]):
     """
     查询会话列表 UseCase
-    
+
     职责:
     - 权限验证(只能查看自己的)
     - 分页处理
@@ -114,7 +110,7 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, list[SessionOutput]]):
 
     async def execute(self, input_data: ListSessionsInput) -> list[SessionOutput]:
         """执行列表查询业务逻辑"""
-        
+
         with get_session() as db_session:
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
@@ -130,21 +126,20 @@ class ListSessionsUseCase(UseCase[ListSessionsInput, list[SessionOutput]]):
             results = []
             for s in session_entities:
                 messages = message_repo.get_messages(s.session_id)
-                
-                results.append(SessionOutput(
-                    session_id=s.session_id,
-                    title=s.metadata.get("title"),
-                    model=s.model,
-                    message_count=len(messages),
-                    created_at=s.created_at.isoformat() if s.created_at else "",
-                    updated_at=s.updated_at.isoformat() if s.updated_at else "",
-                ))
 
-            logger.info(
-                f"Sessions listed | user={input_data.user_id} | "
-                f"count={len(results)}"
-            )
-            
+                results.append(
+                    SessionOutput(
+                        session_id=s.session_id,
+                        title=s.metadata.get("title"),
+                        model=s.model,
+                        message_count=len(messages),
+                        created_at=s.created_at.isoformat() if s.created_at else "",
+                        updated_at=s.updated_at.isoformat() if s.updated_at else "",
+                    )
+                )
+
+            logger.info(f"Sessions listed | user={input_data.user_id} | count={len(results)}")
+
             return results
 
 
@@ -160,7 +155,7 @@ class GetSessionDetailInput:
 class GetSessionDetailUseCase(UseCase[GetSessionDetailInput, SessionOutput]):
     """
     获取会话详情 UseCase
-    
+
     职责:
     - 会话存在性检查
     - 权限验证(管理员可查看所有)
@@ -169,25 +164,21 @@ class GetSessionDetailUseCase(UseCase[GetSessionDetailInput, SessionOutput]):
 
     async def execute(self, input_data: GetSessionDetailInput) -> SessionOutput:
         """执行获取详情业务逻辑"""
-        
+
         with get_session() as db_session:
             history_service = get_chat_history_service(db_session)
-            
+
             chat_session = history_service.load_session_history(input_data.session_id)
-            
+
             if not chat_session:
                 raise ValueError(f"Session not found: {input_data.session_id}")
-            
+
             # 权限校验
-            if (input_data.role != "admin" and 
-                chat_session.metadata.get("user_id") != input_data.user_id):
+            if input_data.role != "admin" and chat_session.metadata.get("user_id") != input_data.user_id:
                 raise PermissionError("No permission to access this session")
-            
-            logger.info(
-                f"Session detail retrieved | session_id={input_data.session_id} | "
-                f"user={input_data.user_id}"
-            )
-            
+
+            logger.info(f"Session detail retrieved | session_id={input_data.session_id} | user={input_data.user_id}")
+
             return SessionOutput(
                 session_id=chat_session.session_id,
                 title=chat_session.metadata.get("title"),
@@ -221,7 +212,7 @@ class SendMessageOutput:
 class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
     """
     发送消息 UseCase (核心业务逻辑)
-    
+
     职责:
     - 会话存在性和权限验证
     - 上下文管理和压缩
@@ -235,68 +226,61 @@ class SendMessageUseCase(UseCase[SendMessageInput, SendMessageOutput]):
 
     async def execute(self, input_data: SendMessageInput) -> SendMessageOutput:
         """执行发送消息业务逻辑(完整版)"""
-        
+
         from core.context_manager import ContextManager, get_context_manager
-        
+
         with get_session() as db_session:
             history_service = get_chat_history_service(db_session)
-            
+
             # 加载会话
             chat_session = history_service.load_session_history(input_data.session_id)
             if not chat_session:
                 raise ValueError(f"Session not found: {input_data.session_id}")
-            
+
             # 权限验证
-            if (input_data.role != "admin" and 
-                chat_session.metadata.get("user_id") != input_data.user_id):
+            if input_data.role != "admin" and chat_session.metadata.get("user_id") != input_data.user_id:
                 raise PermissionError("No permission to access this session")
-            
+
             # 记录当前消息数量(用于判断是否首条消息)
             message_count_before = chat_session.message_count
-            
+
             # 上下文管理
             context_manager: ContextManager = get_context_manager()
             messages_dict = chat_session.to_ai_format()
-            managed_messages, context_stats = context_manager.check_and_manage(
-                messages_dict, 
-                input_data.session_id
-            )
-            
+            managed_messages, context_stats = context_manager.check_and_manage(messages_dict, input_data.session_id)
+
             # 调用AI服务
             try:
                 ai_response = await self._ai_client.chat(
                     messages=managed_messages,
                     model=chat_session.model or "gpt-4o",
                 )
-                
+
                 # 保存对话轮次(原子操作)
                 user_msg_entity, assistant_msg_entity = history_service.save_conversation_turn(
                     session_id=input_data.session_id,
                     user_content=input_data.content,
                     assistant_content=ai_response["content"],
                 )
-                
+
                 # 首条消息时自动生成标题
                 if message_count_before == 0:
                     title = input_data.content[:30]
                     if len(input_data.content) > 30:
                         title += "..."
-                    history_service.update_session_title(
-                        session_id=input_data.session_id, 
-                        title=title
-                    )
-                
+                    history_service.update_session_title(session_id=input_data.session_id, title=title)
+
                 logger.info(
                     f"Message sent | session_id={input_data.session_id} | "
                     f"user_len={len(input_data.content)} | ai_len={len(ai_response['content'])}"
                 )
-                
+
                 return SendMessageOutput(
                     session_id=input_data.session_id,
                     user_message=user_msg_entity.to_dict(),
                     assistant_message=assistant_msg_entity.to_dict(),
                 )
-                
+
             except Exception as e:
                 logger.error(f"AI service call failed | error={e}")
                 raise RuntimeError(f"AI service error: {str(e)}")
@@ -315,7 +299,7 @@ class RenameSessionInput:
 class RenameSessionUseCase(UseCase[RenameSessionInput, SessionOutput]):
     """
     重命名会话 UseCase
-    
+
     职责:
     - 标题长度验证
     - 权限检查
@@ -324,40 +308,38 @@ class RenameSessionUseCase(UseCase[RenameSessionInput, SessionOutput]):
 
     async def execute(self, input_data: RenameSessionInput) -> SessionOutput:
         """执行重命名业务逻辑"""
-        
+
         # 输入验证
         if not input_data.new_title or len(input_data.new_title.strip()) == 0:
             raise ValueError("Title cannot be empty")
-        
+
         if len(input_data.new_title) > 255:
             raise ValueError("Title too long (max 255 characters)")
-        
+
         with get_session() as db_session:
             history_service = get_chat_history_service(db_session)
-            
+
             chat_session = history_service.load_session_history(input_data.session_id)
             if not chat_session:
                 raise ValueError(f"Session not found: {input_data.session_id}")
-            
+
             # 权限验证
-            if (input_data.role != "admin" and 
-                chat_session.metadata.get("user_id") != input_data.user_id):
+            if input_data.role != "admin" and chat_session.metadata.get("user_id") != input_data.user_id:
                 raise PermissionError("No permission to modify this session")
-            
+
             # 执行更新
             success = history_service.update_session_title(
-                session_id=input_data.session_id, 
-                title=input_data.new_title.strip()
+                session_id=input_data.session_id, title=input_data.new_title.strip()
             )
-            
+
             if not success:
                 raise RuntimeError("Failed to update session title")
-            
+
             # 返回更新后的数据
             updated = history_service.load_session_history(input_data.session_id)
-            
+
             logger.info(f"Session renamed | session_id={input_data.session_id}")
-            
+
             return SessionOutput(
                 session_id=updated.session_id,
                 title=updated.metadata.get("title"),
@@ -380,7 +362,7 @@ class DeleteSessionInput:
 class DeleteSessionUseCase(UseCase[DeleteSessionInput, bool]):
     """
     删除会话 UseCase
-    
+
     职责:
     - 存在性检查
     - 权限验证
@@ -391,37 +373,36 @@ class DeleteSessionUseCase(UseCase[DeleteSessionInput, bool]):
 
     async def execute(self, input_data: DeleteSessionInput) -> bool:
         """执行删除业务逻辑"""
-        
+
         with get_session() as db_session:
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
-            
+
             chat_session = session_repo.get_session(input_data.session_id)
             if not chat_session:
                 raise ValueError(f"Session not found: {input_data.session_id}")
-            
+
             # 权限验证
-            if (input_data.role != "admin" and 
-                chat_session.metadata.get("user_id") != input_data.user_id):
+            if input_data.role != "admin" and chat_session.metadata.get("user_id") != input_data.user_id:
                 raise PermissionError("No permission to delete this session")
-            
+
             # 先删除关联消息
             message_repo.delete_messages(input_data.session_id)
-            
+
             # 再软删除会话
             success = session_repo.delete_session(input_data.session_id)
-            
+
             if success:
                 # 清除缓存
                 query_cache.delete(f"session:{input_data.session_id}")
                 logger.info(f"Session deleted | session_id={input_data.session_id}")
-            
+
             return success
 
 
 __all__ = [
     "CreateSessionUseCase",
-    "ListSessionsUseCase", 
+    "ListSessionsUseCase",
     "GetSessionDetailUseCase",
     "SendMessageUseCase",
     "RenameSessionUseCase",

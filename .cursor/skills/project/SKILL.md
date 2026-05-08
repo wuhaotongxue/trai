@@ -9,17 +9,18 @@ TRAI项目管理相关规范的统一入口。
 
 ## 快速索引
 
-| 子规范 | 路径 | 触发场景 |
-|--------|------|----------|
-| 命名规范 | `naming_convention/SKILL.md` | 创建/修改任何代码文件时 |
-| 临时文件 | `temp_files/SKILL.md` | 管理fix_/check_临时文件 |
-| Git提交 | `git_submit/SKILL.md` | 提交代码时 |
-| README更新 | `readme_update/SKILL.md` | 更新文档时 |
-| 周报生成 | `report_generation/SKILL.md` | 生成工作周报/月报时 |
-| 期数文档 | `issue_index/SKILL.md` | 撰写md/issue_NN/index.md |
-| Markdown样式 | `markdown_style/SKILL.md` | 编写文档时使用增强样式 |
-| 编码修复 | `fix_encoding/SKILL.md` | 代码文件出现中文乱码时 |
-| 推送通知 | `notify_push/SKILL.md` | 推送代码后发送飞书/企微通知时 |
+|| 子规范 | 路径 | 触发场景 |
+||--------|------|----------|
+|| 命名规范 | `naming_convention/SKILL.md` | 创建/修改任何代码文件时 |
+|| 临时文件 | `temp_files/SKILL.md` | 管理fix_/check_临时文件 |
+|| Git提交 | `git_submit/SKILL.md` | 提交代码时 |
+|| README更新 | `readme_update/SKILL.md` | 更新文档时 |
+|| 周报生成 | `report_generation/SKILL.md` | 生成工作周报/月报时 |
+|| 期数文档 | `issue_index/SKILL.md` | 撰写md/issue_NN/index.md |
+|| Markdown样式 | `markdown_style/SKILL.md` | 编写文档时使用增强样式 |
+|| 编码修复 | `fix_encoding/SKILL.md` | 代码文件出现中文乱码时 |
+|| 推送通知 | `notify_push/SKILL.md` | 推送代码后发送飞书/企微通知时 |
+| 启动开发 | `dev_start/SKILL.md` | 启动前后端和客户端服务时 |
 
 ## 统一规则
 
@@ -44,10 +45,10 @@ TRAI项目管理相关规范的统一入口。
 - 所有标识符必须使用snake_case
 - 禁止kebab-case（中间横杠）
 
-| 类型 | 正确 | 禁止 |
-|------|------|------|
-| 文件名 | meeting_export_service.py | meeting-export-service.py |
-| 变量名 | total_records | totalRecords |
+|| 类型 | 正确 | 禁止 |
+||------|------|------|
+|| 文件名 | meeting_export_service.py | meeting-export-service.py |
+|| 变量名 | total_records | totalRecords |
 
 ### 3. 全局配置文件与依赖管理 (CRITICAL)
 
@@ -60,6 +61,36 @@ TRAI项目管理相关规范的统一入口。
 - **绝对禁止上传测试文件和临时脚本**：如 `check_comments.py` 等验证脚本必须在 `.gitignore` 中排除。
 - **临时测试代码规范**：测试文件应统一写在 `tests/` 或各自的测试文件夹下，临时验证用途的代码脚本（如一次性运行验证某逻辑的脚本）**使用后必须立即删除**，禁止留存在业务代码目录中。
 - **绝对禁止上传超过 500MB 的文件**：避免污染 Git 仓库历史记录。
+
+### 4. 环境管理规范 (CRITICAL)
+
+**强制要求：**
+
+#### 4.1 只允许使用 Conda 管理 Python 虚拟环境
+
+- 禁止使用 `venv`、`virtualenv` 等非 conda 工具创建或管理 Python 虚拟环境
+- 禁止使用 `pip install --user` 等绕过 conda 管理的方式安装包
+- 所有 Python 环境必须通过 conda 创建和管理
+
+#### 4.2 禁止擅自使用已有的 conda 环境
+
+- 除非用户明确指定，否则 **绝对禁止直接使用已有的 conda 虚拟环境**（如 `base`、`trai`、`trai31313` 等）
+- 启动服务或运行代码前，**必须先检查 README 中的环境配置说明**
+- 如果 README 指定了特定环境名称（如 `trai31313`），必须使用该名称
+- 如果该环境不存在，**必须先创建**（如 `conda create -n trai31313 python=3.13.13 -y`），禁止跳过此步骤直接使用其他环境
+- 只有在 README 或用户明确指定环境名称后，才可使用对应环境
+
+#### 4.3 禁止在命令输出中隐藏内容
+
+- **禁止使用 `2>&1` 隐藏错误输出**：所有 shell 命令必须能够正常显示输出结果，便于排查问题
+- 正确做法：让命令输出自然显示，有错误时能直接看到
+- 唯一例外：需要同时捕获 stdout 和 stderr 并保持可读性时，可以使用 `2>&1`，但必须确保输出内容对用户可见
+
+#### 4.4 依赖安装规范
+
+- 安装依赖时必须使用 conda 环境中的 python：`D:\anaconda3\envs\{环境名}\python.exe`
+- 安装命令格式：`conda run -n {环境名} pip install ...` 或直接调用环境中的 python
+- 禁止在不激活环境的情况下混用系统级 python 和 conda python
 
 ## 对话风格规范
 
@@ -113,10 +144,11 @@ TRAI项目管理相关规范的统一入口。
 
 ## 版本历史
 
-| 版本 | 日期 | 更新内容 |
-|------|------|---------|
-| v1.4 | 2026-05-06 | 新增推送通知规范 notify_push，含 UTF-8 防乱码最佳实践 |
-| v1.3 | 2026-04-30 | 新增全局配置文件与依赖管理规范，同步对话风格规范 |
-| v1.2 | 2026-04-26 | 新增对话风格规范（5种风格随机切换） |
-| v1.1 | 2026-04-24 | 新增编码修复规范 |
-| v1.0 | 2026-04-08 | 初版发布 |
+|| 版本 | 日期 | 更新内容 |
+||------|------|---------|
+|| v1.5 | 2026-05-07 | 新增环境管理规范：禁止擅自使用已有 conda 环境、禁止 2>&1 隐藏输出、强制 conda 管理 Python 环境 |
+|| v1.4 | 2026-05-06 | 新增推送通知规范 notify_push，含 UTF-8 防乱码最佳实践 |
+|| v1.3 | 2026-04-30 | 新增全局配置文件与依赖管理规范，同步对话风格规范 |
+|| v1.2 | 2026-04-26 | 新增对话风格规范（5种风格随机切换） |
+|| v1.1 | 2026-04-24 | 新增编码修复规范 |
+|| v1.0 | 2026-04-08 | 初版发布 |

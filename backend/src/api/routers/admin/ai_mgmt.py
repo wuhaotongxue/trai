@@ -6,15 +6,13 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter
+from pydantic import BaseModel
+
 from api.deps import AdminUser
-from infrastructure.database import get_session
-from sqlalchemy import select, desc
-from infrastructure.database.models import ChatSessionModel
 
 router = APIRouter(prefix="/admin/ai", tags=["管理后台"])
+
 
 class ModelConfig(BaseModel):
     id: str
@@ -23,31 +21,32 @@ class ModelConfig(BaseModel):
     api_base: str | None
     is_active: bool
 
+
 class AIStats(BaseModel):
     chat_count: int
     image_count: int
     video_count: int
     audio_count: int
 
+
 @router.get("/stats", response_model=AIStats)
 async def get_ai_stats(admin: AdminUser):
     """获取 AI 各项能力的使用统计"""
     # 实际应从数据库查询
-    return AIStats(
-        chat_count=1240,
-        image_count=85,
-        video_count=12,
-        audio_count=45
-    )
+    return AIStats(chat_count=1240, image_count=85, video_count=12, audio_count=45)
+
 
 @router.get("/models", response_model=list[ModelConfig])
 async def list_models(admin: AdminUser):
     """获取 AI 模型配置列表"""
     return [
-        ModelConfig(id="ds-1", name="DeepSeek Chat", provider="DeepSeek", is_active=True, api_base="https://api.deepseek.com"),
+        ModelConfig(
+            id="ds-1", name="DeepSeek Chat", provider="DeepSeek", is_active=True, api_base="https://api.deepseek.com"
+        ),
         ModelConfig(id="mj-1", name="Midjourney V6", provider="ModelScope", is_active=True, api_base=None),
         ModelConfig(id="v-1", name="Stable Video", provider="Stability", is_active=False, api_base=None),
     ]
+
 
 @router.post("/models/{model_id}/toggle")
 async def toggle_model(model_id: str, admin: AdminUser):

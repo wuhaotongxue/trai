@@ -7,13 +7,12 @@
 from __future__ import annotations
 
 import gc
-import threading
 import os
+import threading
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
-
 
 # ============================================================
 # 模型单例管理器: 模型常驻 GPU, 生成完成后 idle 释放显存
@@ -27,11 +26,11 @@ class _ImageModelManager:
     idle 超时后自动释放 pipeline + gc.collect + torch.cuda.empty_cache.
     """
 
-    _instance: "_ImageModelManager | None" = None
+    _instance: _ImageModelManager | None = None
     _lock = threading.Lock()
 
     @classmethod
-    def get_instance(cls) -> "_ImageModelManager":
+    def get_instance(cls) -> _ImageModelManager:
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -55,6 +54,7 @@ class _ImageModelManager:
             self._pipe_client = None
             gc.collect()
             import torch
+
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
                 logger.info("GPU 显存已释放")
@@ -133,8 +133,7 @@ class LocalModelScopeImageClient(IImageGenerationClient):
     def _init_state(self) -> None:
         """初始化实例状态（供单例管理器调用）"""
         self._model_path: str = os.getenv(
-            "MODELSCOPE_IMAGE_MODEL_PATH",
-            "/root/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
+            "MODELSCOPE_IMAGE_MODEL_PATH", "/root/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
         )
         self._default_width: int = int(os.getenv("MODELSCOPE_IMAGE_WIDTH", "1024"))
         self._default_height: int = int(os.getenv("MODELSCOPE_IMAGE_HEIGHT", "1024"))
@@ -163,7 +162,7 @@ class LocalModelScopeImageClient(IImageGenerationClient):
         if self._pipe is None:
             import torch
             from loguru import logger
-            
+
             # 自动选择空闲显存最多的 GPU
             device_str = "cpu"
             if torch.cuda.is_available():
@@ -178,19 +177,20 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                             logger.info(f"GPU {i}: 空闲显存 {free / 1024**3:.2f} GB / 总显存 {total / 1024**3:.2f} GB")
                         except Exception as e:
                             logger.warning(f"无法获取 GPU {i} 信息: {e}")
-                    
+
                     if free_memories:
                         # 按空闲显存排序，选择最大的
                         best_device_index, max_free = max(free_memories, key=lambda x: x[1])
                         device_str = f"cuda:{best_device_index}"
                         logger.info(f"选择空闲显存最多的设备: {device_str} (剩余: {max_free / 1024**3:.2f} GB)")
-            
+
             dtype = torch.bfloat16 if device_str.startswith("cuda") else torch.float32
-            
+
             logger.info(f"加载本地 ModelScope 模型: {self._model_path} | 设备: {device_str} | 精度: {dtype}")
-            
+
             try:
                 from modelscope import ZImagePipeline
+
                 self._pipe = ZImagePipeline.from_pretrained(
                     self._model_path,
                     torch_dtype=dtype,
@@ -205,6 +205,7 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                 device_str = "cpu"
                 dtype = torch.float32
                 from modelscope import ZImagePipeline
+
                 self._pipe = ZImagePipeline.from_pretrained(
                     self._model_path,
                     torch_dtype=dtype,
@@ -221,9 +222,10 @@ class LocalModelScopeImageClient(IImageGenerationClient):
         seed: int | None = None,
     ) -> ImageGenerationResult:
         """通过本地 ModelScope 模型生成图片，生成完成后 idle 超时自动释放 GPU 显存"""
-        from loguru import logger
-        import torch
         import io
+
+        import torch
+        from loguru import logger
 
         from core.exceptions import ExternalServiceError
         from infrastructure.storage.s3_storage import S3StorageService
@@ -256,6 +258,7 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                 image = result.images[0]
 
                 import numpy as np
+
                 img_array = np.array(image)
                 logger.info(f"图像形状: {img_array.shape}")
                 logger.info(f"图像数据类型: {img_array.dtype}")
@@ -319,9 +322,10 @@ class DashScopeImageClient(IImageGenerationClient):
         seed: int | None = None,
     ) -> ImageGenerationResult:
         """通过 DashScope API 生成图片"""
+        import asyncio
+
         import httpx
         from loguru import logger
-        import asyncio
 
         from core.exceptions import ExternalServiceError
 
@@ -342,15 +346,13 @@ class DashScopeImageClient(IImageGenerationClient):
 
         payload = {
             "model": self._model,
-            "input": {
-                "prompt": prompt
-            },
+            "input": {"prompt": prompt},
             "parameters": {
                 "size": f"{(width or self._default_width)}*{(height or self._default_height)}",
                 "n": 1,
                 "steps": steps or self._default_steps,
-                "seed": seed if seed is not None else (self._default_seed if self._default_seed != -1 else None)
-            }
+                "seed": seed if seed is not None else (self._default_seed if self._default_seed != -1 else None),
+            },
         }
 
         try:
@@ -406,9 +408,7 @@ class OpenAIImageClient(IImageGenerationClient):
     """OpenAI DALL-E 图片生成客户端 (API 模式)"""
 
     def __init__(self) -> None:
-        self._base_url: str = os.getenv(
-            "IMAGE_API_BASE_URL", "https://api.openai.com/v1"
-        )
+        self._base_url: str = os.getenv("IMAGE_API_BASE_URL", "https://api.openai.com/v1")
         self._model: str = os.getenv("IMAGE_API_MODEL", "dall-e-3")
         self._api_key: str = os.getenv("IMAGE_API_KEY", "")
         self._timeout: int = int(os.getenv("IMAGE_API_TIMEOUT", "120"))

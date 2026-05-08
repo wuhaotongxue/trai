@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: contact_messages.py
 # 作者: wuhao
 # 日期: 2026_04_26_19:00:00
@@ -18,7 +17,6 @@ from api.deps import AdminUser
 from core.logger import get_logger
 from infrastructure.database.database import get_db_session
 from infrastructure.database.models import ContactMessageModel
-
 
 router = APIRouter()
 logger = get_logger()
@@ -178,10 +176,14 @@ async def update_contact_message_status(
             detail={"code": 400, "message": f"状态必须是以下之一: {', '.join(valid_statuses)}"},
         )
 
-    stmt = update(ContactMessageModel).where(ContactMessageModel.t_id == message_id).values(
-        t_status=update_data.status,
-        t_reply_note=update_data.reply_note,
-        t_updated_at=datetime.now(),
+    stmt = (
+        update(ContactMessageModel)
+        .where(ContactMessageModel.t_id == message_id)
+        .values(
+            t_status=update_data.status,
+            t_reply_note=update_data.reply_note,
+            t_updated_at=datetime.now(),
+        )
     )
     db.execute(stmt)
     db.commit()

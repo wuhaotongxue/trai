@@ -229,7 +229,7 @@ class ToolsAPI:
             try:
                 # 规范化路径并检查是否在允许的范围内
                 resolved_path = img_path.resolve()
-                
+
                 # 安全检查: 确保路径在基础目录下
                 if base_path:
                     base_resolved = base_path.resolve()
@@ -775,10 +775,10 @@ class ToolsAPI:
             # 这里使用 python-docx 来处理 Word 文件
             # 注意:python-docx 只支持 docx 格式,不支持 doc 格式
             # 对于 doc 格式,需要使用其他库如 pywin32 (Windows 平台) 或 antiword (Linux 平台)
-            
+
             # 简化处理:直接返回模拟响应
             # 实际项目中需要集成真实的 Word 转 PDF 库
-            pdf_content = f"PDF content generated from {file.filename}".encode('utf-8')
+            pdf_content = f"PDF content generated from {file.filename}".encode()
             converted_size = len(pdf_content)
 
             file_name = file.filename.replace(".docx", ".pdf").replace(".doc", ".pdf")
@@ -833,16 +833,20 @@ class ToolsAPI:
 
             # 这里使用 PyPDF2 或 pdfplumber 来处理 PDF 文件
             # 实际项目中需要集成真实的 PDF 转 Word 库
-            
+
             # 简化处理:直接返回模拟响应
-            docx_content = f"Word content generated from {file.filename}".encode('utf-8')
+            docx_content = f"Word content generated from {file.filename}".encode()
             converted_size = len(docx_content)
 
             file_name = file.filename.replace(".pdf", ".docx")
 
             try:
                 object_key = f"tools/docx/{current_user['user_id']}/{uuid.uuid4().hex}.docx"
-                s3_service.upload_bytes(docx_content, object_key, content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                s3_service.upload_bytes(
+                    docx_content,
+                    object_key,
+                    content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
                 presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
 
                 return ToolResultResponse(
@@ -897,18 +901,18 @@ class ToolsAPI:
 
             # 这里使用 pandas 来处理 Excel 文件
             # 实际项目中需要集成真实的 Excel 转换库
-            
+
             # 简化处理:直接返回模拟响应
             if target_format == "csv":
-                converted_content = f"CSV content generated from {file.filename}".encode('utf-8')
+                converted_content = f"CSV content generated from {file.filename}".encode()
                 file_name = file.filename.replace(".xlsx", ".csv").replace(".xls", ".csv")
                 content_type = "text/csv"
             elif target_format == "json":
-                converted_content = f"{{\"data\": \"Generated from {file.filename}\"}}".encode('utf-8')
+                converted_content = f'{{"data": "Generated from {file.filename}"}}'.encode()
                 file_name = file.filename.replace(".xlsx", ".json").replace(".xls", ".json")
                 content_type = "application/json"
             else:  # xlsx
-                converted_content = f"Excel content generated from {file.filename}".encode('utf-8')
+                converted_content = f"Excel content generated from {file.filename}".encode()
                 file_name = file.filename
                 content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 

@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # 加载 .env 环境变量
 from pathlib import Path
+
 base_dir = Path(__file__).resolve().parent.parent.parent
 env_file = base_dir / ".env"
 if env_file.exists():

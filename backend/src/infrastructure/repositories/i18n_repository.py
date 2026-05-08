@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: i18n_repository.py
 # 作者: wuhao
 # 日期: 2026_04_24_14:30:00
@@ -8,9 +7,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from infrastructure.database.i18n_model import I18nStringModel, SystemSettingModel
@@ -94,7 +92,7 @@ class I18nRepository:
                     continue
                 idx = ns_key.rfind(".")
                 namespace = ns_key[:idx]
-                key = ns_key[idx + 1:]
+                key = ns_key[idx + 1 :]
                 self.upsert(locale, namespace, key, value, created_by, updated_by)
                 count += 1
         self._session.flush()
@@ -139,11 +137,7 @@ class I18nRepository:
         Returns:
             list[str]: 命名空间列表
         """
-        stmt = (
-            select(I18nStringModel.t_namespace)
-            .where(I18nStringModel.t_locale == locale)
-            .distinct()
-        )
+        stmt = select(I18nStringModel.t_namespace).where(I18nStringModel.t_locale == locale).distinct()
         results = self._session.execute(stmt).scalars().all()
         return list(results)
 

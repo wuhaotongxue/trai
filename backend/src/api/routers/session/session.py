@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: session.py
 # 作者: wuhao
 # 日期: 2026_04_17_08:28:46
@@ -8,221 +7,178 @@
 from __future__ import annotations
 
 import asyncio
-import json
+import re
+import uuid
 from datetime import datetime
-from enum import Enum
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser, CurrentUserOptional
 from core.context_manager import ContextManager, get_context_manager
-from core.policy_engine import PolicyContext, PolicyDecision, get_policy_engine
 from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
     SessionRepository,
 )
-from infrastructure.services.chat_history_service import ChatHistoryService, get_chat_history_service
-
-import re
-import uuid
-from html import escape as html_escape
+from infrastructure.services.chat_history_service import get_chat_history_service
 
 
 class InputValidator:
     """Input validation and sanitization utility class"""
-    
+
     # Regex patterns for validation
-    UUID_PATTERN = re.compile(
-        r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
-        re.IGNORECASE
-    )
-    SESSION_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{1,64}$')
+    UUID_PATTERN = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", re.IGNORECASE)
+    SESSION_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
     SAFE_STRING_PATTERN = re.compile(r'^[a-zA-Z0-9\s\-_.@#$%^&*()+=\[\]{}|\\:";\'<>,.?/~`!]+$')
-    
+
     @classmethod
     def validate_session_id(cls, session_id: str) -> str:
         """Validate and sanitize session ID
-        
+
         Args:
             session_id: Session ID string
-            
+
         Returns:
             Sanitized session ID
-            
+
         Raises:
             HTTPException: If session ID is invalid
         """
         if not session_id or not isinstance(session_id, str):
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Session ID is required"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Session ID is required"})
+
         session_id = session_id.strip()
-        
+
         if not (cls.UUID_PATTERN.match(session_id) or cls.SESSION_ID_PATTERN.match(session_id)):
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Invalid session ID format"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Invalid session ID format"})
+
         return session_id
-    
+
     @classmethod
     def sanitize_string(cls, input_str: str, max_length: int = 32000) -> str:
         """Sanitize user input string to prevent XSS and injection attacks
-        
+
         Args:
             input_str: User input string
             max_length: Maximum allowed length
-            
+
         Returns:
             Sanitized string
-            
+
         Raises:
             HTTPException: If input is too long
         """
         if not isinstance(input_str, str):
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Invalid input type, expected string"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Invalid input type, expected string"})
+
         sanitized = input_str.strip()
-        
+
         if len(sanitized) > max_length:
             raise HTTPException(
                 status_code=400,
-                detail={
-                    "code": 400,
-                    "message": f"Input too long. Maximum length: {max_length} characters"
-                }
+                detail={"code": 400, "message": f"Input too long. Maximum length: {max_length} characters"},
             )
-        
+
         return sanitized
-    
+
     @classmethod
     def sanitize_message_content(cls, content: str) -> str:
         """Sanitize message content with special handling for code blocks
-        
+
         Args:
             content: Message content
-            
+
         Returns:
             Sanitized content
         """
         if not content:
             return ""
-        
+
         content = cls.sanitize_string(content, max_length=32000)
-        
-        content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', content)
-        
+
+        content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", content)
+
         return content
-    
+
     @classmethod
     def validate_date(cls, date_str: str) -> datetime:
         """Validate and parse date string
-        
+
         Args:
             date_str: Date string in YYYY-MM-DD format
-            
+
         Returns:
             Parsed datetime object
-            
+
         Raises:
             HTTPException: If date format is invalid
         """
         try:
-            return datetime.strptime(date_str, '%Y-%m-%d')
+            return datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Invalid date format. Use YYYY-MM-DD"}
-            )
-    
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Invalid date format. Use YYYY-MM-DD"})
+
     @classmethod
     def validate_tags(cls, tags: list[str]) -> list[str]:
         """Validate and sanitize tags
-        
+
         Args:
             tags: List of tag strings
-            
+
         Returns:
             Sanitized tag list
-            
+
         Raises:
             HTTPException: If tags are invalid
         """
         if not isinstance(tags, list):
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Tags must be a list"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Tags must be a list"})
+
         if len(tags) > 20:
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Maximum 20 tags allowed"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Maximum 20 tags allowed"})
+
         sanitized_tags = []
         for tag in tags:
             if not isinstance(tag, str):
-                raise HTTPException(
-                    status_code=400,
-                    detail={"code": 400, "message": "Each tag must be a string"}
-                )
-            
+                raise HTTPException(status_code=400, detail={"code": 400, "message": "Each tag must be a string"})
+
             tag = tag.strip()
             if len(tag) < 1 or len(tag) > 50:
                 raise HTTPException(
-                    status_code=400,
-                    detail={"code": 400, "message": "Tag length must be between 1-50 characters"}
+                    status_code=400, detail={"code": 400, "message": "Tag length must be between 1-50 characters"}
                 )
-            
-            if not re.match(r'^[\w\s\-]+$', tag, re.UNICODE):
-                raise HTTPException(
-                    status_code=400,
-                    detail={"code": 400, "message": f"Invalid tag format: {tag}"}
-                )
-            
+
+            if not re.match(r"^[\w\s\-]+$", tag, re.UNICODE):
+                raise HTTPException(status_code=400, detail={"code": 400, "message": f"Invalid tag format: {tag}"})
+
             sanitized_tags.append(tag)
-        
+
         return sanitized_tags
-    
+
     @classmethod
     def validate_pagination(cls, page: int, page_size: int) -> tuple[int, int]:
         """Validate pagination parameters
-        
+
         Args:
             page: Page number (1-based)
             page_size: Items per page
-            
+
         Returns:
             Tuple of validated (page, page_size)
-            
+
         Raises:
             HTTPException: If parameters are invalid
         """
         if page < 1:
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Page must be >= 1"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Page must be >= 1"})
+
         if page_size < 1 or page_size > 100:
-            raise HTTPException(
-                status_code=400,
-                detail={"code": 400, "message": "Page size must be between 1-100"}
-            )
-        
+            raise HTTPException(status_code=400, detail={"code": 400, "message": "Page size must be between 1-100"})
+
         return page, page_size
 
 
@@ -350,7 +306,7 @@ async def send_message(
     message_count_before = chat_session.message_count
 
     context_manager: ContextManager = get_context_manager()
-    
+
     messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
@@ -417,7 +373,6 @@ async def create_session(
     user_id = current_user_opt.get("user_id") if current_user_opt else None
 
     session_repo = SessionRepository(session)
-    import uuid
 
     session_id = str(uuid.uuid4())
     title = request.title or "新对话"

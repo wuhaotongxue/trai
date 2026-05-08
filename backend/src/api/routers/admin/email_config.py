@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: email_config.py
 # 作者: wuhao
 # 日期: 2026_04_26_18:55:00
@@ -19,7 +18,6 @@ from core.logger import get_logger
 from infrastructure.database.database import get_db_session
 from infrastructure.database.models import EmailConfigModel
 from infrastructure.security.encryption import get_encryption_service
-
 
 router = APIRouter()
 logger = get_logger()
@@ -239,7 +237,7 @@ async def update_email_config(
         # 如果更新了密码,需要加密
         if "password" in update_data:
             update_data["t_password"] = encryption_service.encrypt(update_data.pop("password"))
-        
+
         update_data["t_updated_at"] = datetime.now()
         update_data["t_updated_by"] = admin_user.get("user_id")
 

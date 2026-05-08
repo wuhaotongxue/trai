@@ -6,26 +6,28 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from loguru import logger
+
 from infrastructure.ai.openai_client import OpenAIClient
+
 
 class AgentRouter:
     """Agent 路由分发器"""
 
-    def __init__(self, agents: List[Dict[str, Any]]):
+    def __init__(self, agents: list[dict[str, Any]]):
         self.agents = agents
         self.ai_client = OpenAIClient()
 
     async def route(self, query: str) -> str:
         """根据查询内容路由到最佳 Agent ID"""
-        
+
         # 构造路由提示词
-        agent_descriptions = "\n".join([
-            f"- ID: {a['id']}, 名称: {a['name']}, 描述: {a['description']}" 
-            for a in self.agents
-        ])
-        
+        agent_descriptions = "\n".join(
+            [f"- ID: {a['id']}, 名称: {a['name']}, 描述: {a['description']}" for a in self.agents]
+        )
+
         prompt = f"""
 你是一个智能路由系统. 请根据用户的输入, 从下面的 Agent 列表中选择一个最适合处理该请求的 Agent ID.
 
@@ -44,30 +46,29 @@ Agent 列表:
         try:
             # 使用较快的模型进行路由决策
             response = await self.ai_client.chat(
-                messages=[{"role": "user", "content": prompt}],
-                model="gpt-4o-mini",
-                temperature=0
+                messages=[{"role": "user", "content": prompt}], model="gpt-4o-mini", temperature=0
             )
             selected_id = response["content"].strip()
-            
+
             # 校验 ID 是否合法
             if any(a["id"] == selected_id for a in self.agents):
                 logger.info(f"Agent 路由成功: '{query}' -> {selected_id}")
                 return selected_id
-            
+
             logger.warning(f"Agent 路由返回无效 ID: {selected_id}, 使用默认值")
             return "agent-default"
-            
+
         except Exception as e:
             logger.error(f"Agent 路由失败: {e}")
             return "agent-default"
 
+
 class Orchestrator:
     """Agent 编排器 - 协调多 Agent 协作"""
-    
-    def __init__(self, agents: List[Dict[str, Any]]):
+
+    def __init__(self, agents: list[dict[str, Any]]):
         self.router = AgentRouter(agents)
-        
+
     async def dispatch(self, query: str) -> str:
         """分发任务并获取 Agent ID"""
         return await self.router.route(query)

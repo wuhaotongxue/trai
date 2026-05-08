@@ -243,7 +243,8 @@ def main() -> None:
     print(f"工作目录: {Path(__file__).resolve().parent}")
     print(f"目标端口: {config['port']}")
     print(f"调试模式: {config['reload']}")
-    print(f"Python: {sys.executable}")
+    print(f"Python: {sys.version.split()[0]}")
+    print(f"路径: {sys.executable}")
     print(f"{'=' * 60}\n")
 
     # 清理占用端口的进程
@@ -339,7 +340,17 @@ def main() -> None:
     import asyncio
     import threading
 
+    def _handle_exception(loop, context):
+        exc = context.get("exception")
+        if isinstance(exc, ConnectionResetError):
+            return
+        if exc is None and "ConnectionResetError" in context.get("message", ""):
+            return
+        loop.default_exception_handler(context)
+
     async def run_uvicorn() -> None:
+        loop = asyncio.get_running_loop()
+        loop.set_exception_handler(_handle_exception)
         app = create_app()
         for attempt in range(3):
             try:
