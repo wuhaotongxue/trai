@@ -7,11 +7,12 @@ print(f"Current PID: {current_pid}")
 
 # Get all Python PIDs via PowerShell
 result = subprocess.run(
-    ['powershell', '-Command', 'Get-Process python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id'],
-    capture_output=True, text=True
+    ["powershell", "-Command", "Get-Process python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id"],
+    capture_output=True,
+    text=True,
 )
 pids = []
-for line in result.stdout.strip().split('\n'):
+for line in result.stdout.strip().split("\n"):
     line = line.strip()
     if line.isdigit():
         pid = int(line)

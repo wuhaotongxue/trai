@@ -97,7 +97,7 @@ class SessionRepository:
         if cached is not None:
             logger.debug(f"Cache hit for session {session_id}")
             return cached
-        
+
         # 缓存未命中, 查询数据库
         stmt = select(ChatSessionModel).where(
             ChatSessionModel.t_session_id == session_id,
@@ -105,11 +105,11 @@ class SessionRepository:
         )
         model = self._session.scalar(stmt)
         result = self._to_domain(model) if model else None
-        
+
         # 存入缓存(60秒TTL)
         if result is not None:
             query_cache.set(cache_key, result, ttl=60)
-        
+
         return result
 
     def list_sessions(
@@ -172,11 +172,11 @@ class SessionRepository:
         model.t_updated_at = datetime.now()
         self._session.commit()
         self._session.refresh(model)
-        
+
         # 更新缓存
         result = self._to_domain(model)
         query_cache.set(f"session:{session_id}", result, ttl=60)
-        
+
         return result
 
     def delete_session(self, session_id: str) -> bool:
@@ -199,10 +199,10 @@ class SessionRepository:
 
         model.t_deleted_at = datetime.now()
         self._session.commit()
-        
+
         # 删除缓存
         query_cache.delete(f"session:{session_id}")
-        
+
         return True
 
 
@@ -270,11 +270,7 @@ class MessageRepository:
         Returns:
             list[Message]: 消息领域实体列表
         """
-        stmt = (
-            select(MessageModel)
-            .where(MessageModel.t_session_id == session_id)
-            .order_by(MessageModel.t_created_at)
-        )
+        stmt = select(MessageModel).where(MessageModel.t_session_id == session_id).order_by(MessageModel.t_created_at)
         models = list(self._session.scalars(stmt))
         return [self._to_domain(m) for m in models]
 

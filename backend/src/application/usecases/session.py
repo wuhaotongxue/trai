@@ -11,7 +11,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from application.usecases.base import UseCase
-from domain.entities.chat_session import ChatSession
 from infrastructure.ai.openai_client import OpenAIClient
 from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import (

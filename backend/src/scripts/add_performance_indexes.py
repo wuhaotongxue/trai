@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: add_performance_indexes.py
 # 作者: wuhao
 # 日期: 2026_05_04_15:00:00
@@ -14,14 +13,15 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from sqlalchemy import text
+
 from infrastructure.database.database import get_db_engine
 
 
 def add_performance_indexes():
     """添加性能优化索引"""
-    
+
     engine = get_db_engine()
-    
+
     indexes = [
         # ChatSession 表索引
         {
@@ -48,7 +48,6 @@ def add_performance_indexes():
             "columns": ["t_deleted_at"],
             "description": "加速软删除过滤",
         },
-        
         # Message 表索引
         {
             "name": "idx_messages_session_created",
@@ -63,7 +62,7 @@ def add_performance_indexes():
             "description": "加速按角色筛选消息",
         },
     ]
-    
+
     with engine.connect() as conn:
         for idx in indexes:
             columns_str = ", ".join(idx["columns"])
@@ -71,15 +70,15 @@ def add_performance_indexes():
                 CREATE INDEX IF NOT EXISTS {idx["name"]}
                 ON {idx["table"]} ({columns_str})
             """
-            
+
             try:
                 conn.execute(text(sql))
                 print(f"✅ Created index: {idx['name']} | {idx['description']}")
             except Exception as e:
                 print(f"❌ Failed to create index {idx['name']}: {e}")
-        
+
         conn.commit()
-    
+
     print("\n🎉 Performance indexes created successfully!")
 
 

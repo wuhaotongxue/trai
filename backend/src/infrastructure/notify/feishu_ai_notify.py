@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: feishu_ai_notify.py
 # 作者: wuhao
 # 日期: 2026_04_23
@@ -121,10 +120,28 @@ class FeishuAINotifyService:
                     {
                         "tag": "div",
                         "fields": [
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u5c3a\u5bf8**\n" + f"{event.width}x{event.height}"}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u4efb\u52a1ID**\n" + event.task_id[:16] + "..."}},
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u5c3a\u5bf8**\n" + f"{event.width}x{event.height}",
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u4efb\u52a1ID**\n" + event.task_id[:16] + "...",
+                                },
+                            },
                         ],
                     },
                     {"tag": "hr"},
@@ -194,8 +211,14 @@ class FeishuAINotifyService:
                     {
                         "tag": "div",
                         "fields": [
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model}},
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model},
+                            },
                         ],
                     },
                     {"tag": "hr"},
@@ -249,10 +272,23 @@ class FeishuAINotifyService:
                     {
                         "tag": "div",
                         "fields": [
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model}},
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model},
+                            },
                             {"is_short": True, "text": {"tag": "lark_md", "content": "**Tokens**\n" + tokens_str}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": "**\u4f1a\u8bddID**\n" + (event.session_id[:16] + "..." if event.session_id else "\u2014")}},
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u4f1a\u8bddID**\n"
+                                    + (event.session_id[:16] + "..." if event.session_id else "\u2014"),
+                                },
+                            },
                         ],
                     },
                     {"tag": "hr"},

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: i18n.py
 # 作者: wuhao
 # 日期: 2026_04_24_15:00:00
@@ -50,9 +49,7 @@ class UpsertI18nRequest(BaseModel):
 class BulkImportRequest(BaseModel):
     """批量导入翻译请求"""
 
-    translations: dict[str, dict[str, str]] = Field(
-        description="翻译字典, 格式为 {locale: {namespace.key: value}}"
-    )
+    translations: dict[str, dict[str, str]] = Field(description="翻译字典, 格式为 {locale: {namespace.key: value}}")
     overwrite: bool = Field(default=True, description="是否覆盖已有翻译")
 
 
@@ -91,17 +88,12 @@ async def list_i18n_strings(
     if locale:
         all_namespaces = repo.list_namespaces(locale)
     else:
-        all_namespaces = list(
-            set(repo.list_namespaces("zh")) | set(repo.list_namespaces("en"))
-        )
+        all_namespaces = list(set(repo.list_namespaces("zh")) | set(repo.list_namespaces("en")))
         all_namespaces.sort()
 
     if locale and namespace:
         raw_dict = repo.get_by_locale_and_namespace(locale, namespace)
-        items = [
-            I18nStringItem(locale=locale, namespace=namespace, key=k, value=v)
-            for k, v in raw_dict.items()
-        ]
+        items = [I18nStringItem(locale=locale, namespace=namespace, key=k, value=v) for k, v in raw_dict.items()]
         total = len(items)
         items = items[offset : offset + limit]
     elif locale:

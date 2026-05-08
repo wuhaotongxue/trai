@@ -32,26 +32,13 @@ class ImageGenConfigResponse(BaseModel):
 class ImageGenConfigUpdateRequest(BaseModel):
     """图片生成配置更新请求"""
 
-    provider: Annotated[
-        str,
-        Field(description="提供商: modelscope/openai/api")
-    ]
-    default_model: Annotated[
-        str,
-        Field(min_length=1, max_length=100, description="默认模型")
-    ]
-    modelscope_model: Annotated[
-        str,
-        Field(min_length=1, max_length=100, description="ModelScope 模型")
-    ] = "Z-Image-Turbo"
-    openai_model: Annotated[
-        str,
-        Field(min_length=1, max_length=100, description="OpenAI DALL-E 模型")
-    ] = "dall-e-3"
-    api_base_url: Annotated[
-        str,
-        Field(description="自定义 API 地址")
-    ] = ""
+    provider: Annotated[str, Field(description="提供商: modelscope/openai/api")]
+    default_model: Annotated[str, Field(min_length=1, max_length=100, description="默认模型")]
+    modelscope_model: Annotated[str, Field(min_length=1, max_length=100, description="ModelScope 模型")] = (
+        "Z-Image-Turbo"
+    )
+    openai_model: Annotated[str, Field(min_length=1, max_length=100, description="OpenAI DALL-E 模型")] = "dall-e-3"
+    api_base_url: Annotated[str, Field(description="自定义 API 地址")] = ""
 
 
 @router.get("/image_gen_config", response_model=ImageGenConfigResponse, tags=["管理后台"])
@@ -108,10 +95,7 @@ async def update_image_gen_config(
     if request.provider not in valid_providers:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "code": 400,
-                "message": f"无效的提供商: {request.provider}, 必须是 {valid_providers} 之一"
-            },
+            detail={"code": 400, "message": f"无效的提供商: {request.provider}, 必须是 {valid_providers} 之一"},
         )
 
     os.environ["IMAGE_GENERATION_PROVIDER"] = request.provider

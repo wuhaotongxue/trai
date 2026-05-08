@@ -8,14 +8,12 @@
 
 from __future__ import annotations
 
-import os
-import sys
-import json
 import argparse
+import os
 import subprocess
-from pathlib import Path
+import sys
 from datetime import datetime
-from typing import Optional
+from pathlib import Path
 
 import requests
 from loguru import logger
@@ -28,6 +26,7 @@ if _backend_path.exists():
 # 加载环境变量
 try:
     from run import EnvFileLoader
+
     EnvFileLoader.load_local_envs()
 except ImportError:
     pass
@@ -54,7 +53,7 @@ class ClientPublisher:
                 cwd=str(self.client_dir),
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 分钟超时
+                timeout=600,  # 10 分钟超时
             )
 
             if result.returncode != 0:
@@ -73,7 +72,7 @@ class ClientPublisher:
             logger.error(f"构建异常: {str(e)}")
             return False, str(e)
 
-    def find_artifacts(self) -> tuple[Optional[Path], Optional[Path]]:
+    def find_artifacts(self) -> tuple[Path | None, Path | None]:
         """查找构建产物"""
         logger.info("=" * 50)
         logger.info("Step 2/4: 查找构建产物...")
@@ -111,14 +110,15 @@ class ClientPublisher:
     def read_latest_yml(self, yml_path: Path) -> dict:
         """读取 latest.yml 内容"""
         import yaml
-        with open(yml_path, "r", encoding="utf-8") as f:
+
+        with open(yml_path, encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def read_release_notes(self) -> str:
         """读取更新日志"""
         changelog_path = self.client_dir / "CHANGELOG.md"
         if changelog_path.exists():
-            with open(changelog_path, "r", encoding="utf-8") as f:
+            with open(changelog_path, encoding="utf-8") as f:
                 content = f.read()
                 # 简单提取第一条记录
                 lines = content.split("\n")
@@ -133,11 +133,7 @@ class ClientPublisher:
         return ""
 
     def upload_to_s3(
-        self,
-        version: str,
-        yml_path: Path,
-        exe_path: Path,
-        release_notes: Optional[str] = None
+        self, version: str, yml_path: Path, exe_path: Path, release_notes: str | None = None
     ) -> tuple[bool, str]:
         """上传到 S3"""
         logger.info("=" * 50)
@@ -170,7 +166,7 @@ class ClientPublisher:
                     files=files,
                     data=data,
                     headers=headers,
-                    timeout=300  # 5 分钟超时
+                    timeout=300,  # 5 分钟超时
                 )
 
                 if response.status_code == 200:
@@ -207,12 +203,12 @@ class ClientPublisher:
             logger.info(f"[OK] 状态: {message}")
             logger.info("")
             logger.info("客户端用户可通过以下方式更新:")
-            logger.info(f"  1. 打开应用 -> 设置 -> 系统更新 -> 检查更新")
+            logger.info("  1. 打开应用 -> 设置 -> 系统更新 -> 检查更新")
             logger.info(f"  2. 或访问: {self.api_url}/api_trai/v1/client/update/latest.yml")
         else:
             logger.error(f"[FAIL] 发布失败: {message}")
 
-    def publish(self, version: Optional[str] = None) -> bool:
+    def publish(self, version: str | None = None) -> bool:
         """执行完整发布流程"""
         logger.info("TRAI 客户端一键发布工具")
         logger.info(f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -255,14 +251,11 @@ class ClientPublisher:
             logger.warning("未找到 latest.yml, 将只上传安装包")
             # 创建简单的 yml 内容
             import yaml
+
             yml_data = {
                 "version": version,
                 "releaseDate": datetime.now().isoformat(),
-                "files": [{
-                    "url": exe_path.name,
-                    "sha512": "placeholder",
-                    "size": exe_path.stat().st_size
-                }]
+                "files": [{"url": exe_path.name, "sha512": "placeholder", "size": exe_path.stat().st_size}],
             }
             yml_content = yaml.dump(yml_data)
             yml_path = self.release_dir / f"TRAI-{version}-x64.yml"
@@ -270,9 +263,7 @@ class ClientPublisher:
                 f.write(yml_content)
             logger.info(f"已生成: {yml_path}")
 
-        upload_ok, upload_message = self.upload_to_s3(
-            version, yml_path, exe_path, release_notes
-        )
+        upload_ok, upload_message = self.upload_to_s3(version, yml_path, exe_path, release_notes)
 
         # 6. 打印摘要
         self.print_summary(version, exe_path, upload_ok, upload_message)
@@ -286,19 +277,15 @@ def main():
         "--api-url",
         type=str,
         default=os.getenv("TRAI_API_URL", "http://127.0.0.1:5666"),
-        help="后端 API 地址 (默认: http://127.0.0.1:5666)"
+        help="后端 API 地址 (默认: http://127.0.0.1:5666)",
     )
     parser.add_argument(
         "--token",
         type=str,
         default=os.getenv("TRAI_ADMIN_TOKEN", ""),
-        help="管理员 Token (或设置 TRAI_ADMIN_TOKEN 环境变量)"
+        help="管理员 Token (或设置 TRAI_ADMIN_TOKEN 环境变量)",
     )
-    parser.add_argument(
-        "--version",
-        type=str,
-        help="版本号 (如 1.0.0), 如不指定则从 latest.yml 读取"
-    )
+    parser.add_argument("--version", type=str, help="版本号 (如 1.0.0), 如不指定则从 latest.yml 读取")
 
     args = parser.parse_args()
 

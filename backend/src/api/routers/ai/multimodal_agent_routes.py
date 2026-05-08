@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: multimodal_agent_routes.py
 # 作者: wuhao
 # 日期: 2026_05_04_20:00:00
@@ -7,45 +6,42 @@
 
 from __future__ import annotations
 
-import uuid
-from typing import Annotated, Any, BinaryIO
+from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from loguru import logger
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-from api.deps import CurrentUser
 from infrastructure.agent.multimodal.multimodal_processor import (
     MultimodalProcessor,
     ProcessingResult,
     multimodal_processor,
 )
 from infrastructure.agent.orchestrator.agent_orchestrator import (
-    AgentOrchestrator,
     RoutingResult,
     agent_orchestrator,
 )
 from infrastructure.agent.types.agent_types import (
     AgentType,
-    ModalityType,
-    get_all_agent_types,
     get_agent_template,
+    get_all_agent_types,
 )
-
 
 router = APIRouter(prefix="/agent/multimodal", tags=["Multimodal Agent"])
 
 
 # ========== Request/Response Models ==========
 
+
 class ImageAnalysisRequest(BaseModel):
     """图像分析请求"""
+
     prompt: str = Field(default="请详细描述这张图片的内容", description="分析提示词")
     detail: str = Field(default="auto", description="分析精度(auto/low/high)")
 
 
 class ImageGenerateRequest(BaseModel):
     """图像生成请求"""
+
     prompt: str = Field(..., description="图像描述(英文效果更好)")
     size: str = Field(default="1024x1024", description="尺寸")
     quality: str = Field(default="standard", description="质量(standard/hd)")
@@ -55,12 +51,14 @@ class ImageGenerateRequest(BaseModel):
 
 class AudioTranscribeRequest(BaseModel):
     """语音转文字请求"""
+
     language: str | None = Field(default=None, description="语言代码(可选)")
     response_format: str = Field(default="json", description="返回格式")
 
 
 class TTSRequest(BaseModel):
     """文字转语音请求"""
+
     text: str = Field(..., description="要转换的文本")
     voice: str = Field(default="alloy", description="音色(alloy/echo/fable/onyx/nova/shimmer)")
     response_format: str = Field(default="mp3", description="音频格式(mp3/opus/aac/flac/wav)")
@@ -69,26 +67,31 @@ class TTSRequest(BaseModel):
 
 class PDFParseRequest(BaseModel):
     """PDF解析请求"""
+
     extract_tables: bool = Field(default=True, description="是否提取表格")
     extract_images: bool = Field(default=False, description="是否提取图片描述")
 
 
 class SmartRouteRequest(BaseModel):
     """智能路由请求"""
+
     message: str = Field(..., description="用户输入")
     attachment_type: str | None = Field(default=None, description="附件类型(image/pdf/audio等)")
 
 
 class TaskDecomposeRequest(BaseModel):
     """任务分解请求"""
+
     complex_input: str = Field(..., description="复杂任务描述")
     max_subtasks: int = Field(default=5, ge=1, le=10, description="最大子任务数")
 
 
 # ========== Response Models ==========
 
+
 class MultimodalResponse(BaseModel):
     """通用多模态响应"""
+
     success: bool
     output_type: str
     data: Any
@@ -98,6 +101,7 @@ class MultimodalResponse(BaseModel):
 
 class RoutingResponse(BaseModel):
     """路由响应"""
+
     task_type: str
     agent_type: str
     agent_name: str
@@ -108,17 +112,19 @@ class RoutingResponse(BaseModel):
 
 class AgentListResponse(BaseModel):
     """Agent列表响应"""
+
     agents: list[dict]
     total: int
 
 
 # ========== 路由端点 ==========
 
+
 @router.get("/agents", summary="获取所有可用Agent类型")
 async def list_all_agents() -> AgentListResponse:
     """
     获取所有可用的Agent类型及其能力信息
-    
+
     返回:
         - Agent ID,名称,描述
         - 支持的输入/输出模态
@@ -126,7 +132,7 @@ async def list_all_agents() -> AgentListResponse:
         - 是否支持流式输出
     """
     agents = get_all_agent_types()
-    
+
     return AgentListResponse(
         agents=agents,
         total=len(agents),
@@ -137,20 +143,20 @@ async def list_all_agents() -> AgentListResponse:
 async def get_agent_detail(agent_type: str) -> dict:
     """
     获取指定Agent类型的详细配置
-    
+
     Args:
         agent_type: Agent类型ID
-        
+
     Returns:
         Agent完整配置(系统提示词,温度,可用工具等)
     """
     try:
         agent_enum = AgentType(agent_type)
         config = get_agent_template(agent_enum)
-        
+
         if not config:
             raise HTTPException(status_code=404, detail=f"Agent not found: {agent_type}")
-        
+
         return {
             "agent_id": config.agent_id,
             "name": config.name,
@@ -166,7 +172,7 @@ async def get_agent_detail(agent_type: str) -> dict:
             "supported_formats": config.capability.supported_formats,
             "tools": config.tools,
         }
-        
+
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Invalid agent type: {agent_type}")
 
@@ -175,26 +181,26 @@ async def get_agent_detail(agent_type: str) -> dict:
 async def smart_route(request: SmartRouteRequest) -> RoutingResponse:
     """
     根据用户输入自动选择最合适的Agent
-    
+
     功能:
     - 基于关键词和语义分析进行智能路由
     - 支持附件类型判断(图片→视觉Agent,PDF→文档Agent等)
     - 提供备选Agent列表
-    
+
     使用场景:
     - 用户不确定该使用哪个Agent时
     - 需要自动分类用户请求时
     """
     attachments = [request.attachment_type] if request.attachment_type else None
-    
+
     routing_result: RoutingResult = await agent_orchestrator.route(
         user_input=request.message,
         attachments=attachments,
     )
-    
+
     # 获取Agent名称
     primary_config = get_agent_template(routing_result.agent_type)
-    
+
     return RoutingResponse(
         task_type=routing_result.task_type.value,
         agent_type=routing_result.agent_type.value,
@@ -209,15 +215,15 @@ async def smart_route(request: SmartRouteRequest) -> RoutingResponse:
 async def decompose_task(request: TaskDecomposeRequest) -> dict:
     """
     将复杂任务分解为多个子任务
-    
+
     功能:
     - 自动识别任务中的多个需求点
     - 为每个子任务分配合适的Agent
     - 返回结构化的子任务列表
-    
+
     示例输入:
         "帮我翻译这段英文,然后总结要点,最后生成一张配图"
-    
+
     输出:
         [
             {task: "翻译...", agent: "translator"},
@@ -229,7 +235,7 @@ async def decompose_task(request: TaskDecomposeRequest) -> dict:
         user_input=request.complex_input,
         max_subtasks=request.max_subtasks,
     )
-    
+
     return {
         "original_input": request.complex_input,
         "subtask_count": len(subtasks),
@@ -248,6 +254,7 @@ async def decompose_task(request: TaskDecomposeRequest) -> dict:
 
 # ========== 图像相关端点 ==========
 
+
 @router.post("/vision/analyze", summary="图像理解分析")
 async def analyze_image(
     file: UploadFile = File(..., description="图片文件"),
@@ -255,32 +262,30 @@ async def analyze_image(
 ) -> MultimodalResponse:
     """
     图像理解和分析(GPT-4 Vision)
-    
+
     功能:
     - 详细描述图片内容
     - OCR文字识别
     - 物体和场景识别
     - 回答关于图片的问题
-    
+
     支持格式: JPG, PNG, GIF, WebP, BMP
     最大大小: 20MB
     """
     # 验证文件
     content = await file.read()
-    
-    is_valid, error_msg = MultimodalProcessor.validate_file(
-        content, file.filename or "image.jpg"
-    )
-    
+
+    is_valid, error_msg = MultimodalProcessor.validate_file(content, file.filename or "image.jpg")
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
-    
+
     result: ProcessingResult = await multimodal_processor.analyze_image(
         image_data=content,
         prompt=request.prompt,
         detail=request.detail,
     )
-    
+
     return MultimodalResponse(
         success=result.status.value == "success",
         output_type=result.output_type,
@@ -294,12 +299,12 @@ async def analyze_image(
 async def generate_image(request: ImageGenerateRequest) -> MultimodalResponse:
     """
     AI图像生成(DALL-E 3)
-    
+
     功能:
     - 根据文字描述生成高质量图像
     - 多种尺寸和质量选项
     - 支持 vivid(生动) 和 natural(自然) 两种风格
-    
+
     注意事项:
     - 英文提示词效果更好
     - 避免涉及公众人物,商标等受版权保护的内容
@@ -311,7 +316,7 @@ async def generate_image(request: ImageGenerateRequest) -> MultimodalResponse:
         style=request.style,
         n=request.n,
     )
-    
+
     return MultimodalResponse(
         success=result.status.value == "success",
         output_type=result.output_type,
@@ -322,6 +327,7 @@ async def generate_image(request: ImageGenerateRequest) -> MultimodalResponse:
 
 # ========== 音频相关端点 ==========
 
+
 @router.post("/audio/transcribe", summary="语音转文字")
 async def speech_to_text(
     file: UploadFile = File(..., description="音频文件"),
@@ -329,31 +335,29 @@ async def speech_to_text(
 ) -> MultimodalResponse:
     """
     语音转文字(Whisper)
-    
+
     功能:
     - 高精度语音识别
     - 支持多种语言和方言
     - 自动检测语言或手动指定
     - 支持带背景噪音的音频
-    
+
     支持格式: MP3, WAV, M4A, FLAC, OGG, WebM
     最大大小: 25MB
     """
     content = await file.read()
-    
-    is_valid, error_msg = MultimodalProcessor.validate_file(
-        content, file.filename or "audio.mp3", max_size_mb=25
-    )
-    
+
+    is_valid, error_msg = MultimodalProcessor.validate_file(content, file.filename or "audio.mp3", max_size_mb=25)
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
-    
+
     result: ProcessingResult = await multimodal_processor.speech_to_text(
         audio_data=content,
         language=request.language,
         response_format=request.response_format,
     )
-    
+
     return MultimodalResponse(
         success=result.status.value == "success",
         output_type=result.output_type,
@@ -367,13 +371,13 @@ async def speech_to_text(
 async def text_to_speech(request: TTSRequest) -> MultimodalResponse:
     """
     文字转语音(TTS)
-    
+
     功能:
     - 自然流畅的语音合成
     - 6种音色选择(alloy/echo/fable/onyx/nova/shimmer)
     - 可调节语速(0.25x - 4.0x)
     - 多种音频格式输出
-    
+
     音色说明:
     - alloy: 中性音色(推荐默认)
     - echo: 低沉男声
@@ -388,11 +392,12 @@ async def text_to_speech(request: TTSRequest) -> MultimodalResponse:
         response_format=request.response_format,
         speed=request.speed,
     )
-    
+
     if result.status.value == "success":
         from fastapi.responses import Response as FastAPIResponse
+
         audio_bytes = result.output_data.get("audio_bytes", b"")
-        
+
         return FastAPIResponse(
             content=audio_bytes,
             media_type=f"audio/{request.response_format}",
@@ -401,12 +406,13 @@ async def text_to_speech(request: TTSRequest) -> MultimodalResponse:
                 "X-Voice": request.voice,
             },
         )
-    
+
     else:
         raise HTTPException(status_code=500, detail=str(result.output_data))
 
 
 # ========== 文档相关端点 ==========
+
 
 @router.post("/document/pdf/parse", summary="PDF文档解析")
 async def parse_pdf(
@@ -415,30 +421,28 @@ async def parse_pdf(
 ) -> MultimodalResponse:
     """
     PDF文档解析
-    
+
     功能:
     - 提取全部文本内容(保留层级结构)
     - 表格数据提取(转为结构化格式)
     - 图片内容描述和分析
     - 元数据提取(标题,作者,日期等)
-    
+
     最大大小: 50MB
     """
     content = await file.read()
-    
-    is_valid, error_msg = MultimodalProcessor.validate_file(
-        content, file.filename or "document.pdf", max_size_mb=50
-    )
-    
+
+    is_valid, error_msg = MultimodalProcessor.validate_file(content, file.filename or "document.pdf", max_size_mb=50)
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
-    
+
     result: ProcessingResult = await multimodal_processor.parse_pdf(
         pdf_data=content,
         extract_tables=request.extract_tables,
         extract_images=request.extract_images,
     )
-    
+
     return MultimodalResponse(
         success=result.status.value == "success",
         output_type=result.output_type,
@@ -453,29 +457,27 @@ async def ocr_recognize(
 ) -> MultimodalResponse:
     """
     OCR高精度文字识别
-    
+
     功能:
     - 扫描件文字提取
     - 手写体识别
     - 多语言混合识别
     - 表格结构保持
-    
+
     适用场景:
     - 扫描文档数字化
     - 名片/发票/证件识别
     - 截图中的文字提取
     """
     content = await file.read()
-    
-    is_valid, error_msg = MultimodalProcessor.validate_file(
-        content, file.filename or "image.jpg"
-    )
-    
+
+    is_valid, error_msg = MultimodalProcessor.validate_file(content, file.filename or "image.jpg")
+
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
-    
+
     result: ProcessingResult = await multimodal_processor.ocr_recognize(image_data=content)
-    
+
     return MultimodalResponse(
         success=result.status.value == "success",
         output_type=result.output_type,

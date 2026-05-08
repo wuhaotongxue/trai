@@ -12,7 +12,7 @@ from loguru import logger
 from sqlalchemy.orm import Session
 
 from domain.entities.chat_session import ChatSession
-from domain.entities.message import Message, MessageRole
+from domain.entities.message import Message
 from infrastructure.database.database import get_session
 
 
@@ -94,8 +94,7 @@ class ChatHistoryService:
         session_entity.messages = messages_dict
 
         logger.info(
-            f"加载会话历史成功 | session_id={session_id} | "
-            f"消息数={len(messages_dict)} | model={session_entity.model}"
+            f"加载会话历史成功 | session_id={session_id} | 消息数={len(messages_dict)} | model={session_entity.model}"
         )
 
         return session_entity
@@ -144,10 +143,7 @@ class ChatHistoryService:
             messages=current_messages,
         )
 
-        logger.info(
-            f"保存消息成功 | session_id={session_id} | "
-            f"role={role} | content_length={len(content)}"
-        )
+        logger.info(f"保存消息成功 | session_id={session_id} | role={role} | content_length={len(content)}")
 
         return message_entity
 

@@ -169,13 +169,13 @@ class S3StorageService:
             response = self._client.list_objects_v2(Bucket=self._bucket, Prefix=prefix)
             if "Contents" not in response:
                 return []
-            
+
             return [
                 {
                     "key": item["Key"],
                     "size": item["Size"],
                     "last_modified": item["LastModified"].isoformat(),
-                    "url": self.get_presigned_url(item["Key"], 3600)
+                    "url": self.get_presigned_url(item["Key"], 3600),
                 }
                 for item in response["Contents"]
             ]

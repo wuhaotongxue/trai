@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: contact.py
 # 作者: wuhao
 # 日期: 2026_04_26_18:50:00
@@ -11,14 +10,13 @@ import re
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 
 from api.deps import CurrentUserOptional
 from core.logger import get_logger
 from infrastructure.database.database import get_db_session
 from infrastructure.services.email_service import EmailService
-
 
 router = APIRouter()
 logger = get_logger()
@@ -289,7 +287,9 @@ async def submit_contact_form(
 
     try:
         import uuid
+
         from sqlalchemy import insert
+
         from infrastructure.database.models import ContactMessageModel
 
         submission_id = str(uuid.uuid4())

@@ -19,6 +19,7 @@ router = APIRouter(prefix="/report", tags=["AI"])
 
 class GenerateReportRequest(BaseModel):
     """生成周报请求"""
+
     template_base64: str = Field(..., description="模板文件 Base64")
     template_name: str = Field(..., description="模板名称")
     description: str = Field(..., description="周报内容描述")
@@ -26,6 +27,7 @@ class GenerateReportRequest(BaseModel):
 
 class GenerateReportResponse(BaseModel):
     """生成周报响应"""
+
     code: int = Field(200, description="业务状态码")
     msg: str = Field("OK", description="消息")
     data: str = Field(..., description="生成的周报内容")
@@ -68,29 +70,21 @@ async def generate_report(
 
         # 调用 LLM 生成周报
         ai_client = OpenAIClient()
-        ai_response = await ai_client.chat(
-            messages=[{"role": "user", "content": prompt}],
-            model="gpt-4o"
-        )
+        ai_response = await ai_client.chat(messages=[{"role": "user", "content": prompt}], model="gpt-4o")
         content = ai_response["content"]
 
         # 构造响应
         import uuid
         from datetime import datetime
+
         req_id = str(uuid.uuid4())
         ts = datetime.now().isoformat()
 
-        return GenerateReportResponse(
-            code=200,
-            msg="OK",
-            data=content,
-            req_id=req_id,
-            ts=ts
-        )
+        return GenerateReportResponse(code=200, msg="OK", data=content, req_id=req_id, ts=ts)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"code": 500, "message": f"生成周报失败: {str(e)}"}
+            detail={"code": 500, "message": f"生成周报失败: {str(e)}"},
         )
 
 

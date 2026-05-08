@@ -24,12 +24,7 @@ logger = get_logger()
 router = APIRouter()
 
 # 构建状态存储 (生产环境应使用 Redis)
-_build_status = {
-    "status": "idle",
-    "message": None,
-    "version": None,
-    "error": None
-}
+_build_status = {"status": "idle", "message": None, "version": None, "error": None}
 
 
 class ReleaseResponse(BaseModel):
@@ -272,9 +267,7 @@ async def release_client(
         s3_service.upload_bytes(exe_content, exe_key, content_type="application/x-msdownload")
 
         # 3. 取消旧版本的激活状态（只保留最新版本为激活状态）
-        old_releases = db.query(ClientReleaseModel).filter(
-            ClientReleaseModel.t_is_active == True
-        ).all()
+        old_releases = db.query(ClientReleaseModel).filter(ClientReleaseModel.t_is_active == True).all()
         for old in old_releases:
             old.t_is_active = False
             logger.info(f"取消旧版本激活状态: {old.t_version}")
@@ -357,10 +350,11 @@ async def build_and_release(
         return BuildStatus(status="running", message="正在构建中...")
 
     async def _do_build():
-        import subprocess
-        import hashlib
-        import datetime as dt
         import asyncio
+        import datetime as dt
+        import hashlib
+        import subprocess
+
         import yaml
 
         try:
@@ -391,10 +385,11 @@ async def build_and_release(
 
             # 读取版本号 (JS 脚本写入的临时文件)
             import json as json_lib
+
             version_file = client_dir / ".build_version.json"
             if not version_file.exists():
                 raise RuntimeError("版本号文件不存在，请检查构建是否正常完成")
-            with open(version_file, "r", encoding="utf-8") as f:
+            with open(version_file, encoding="utf-8") as f:
                 version_info = json_lib.load(f)
             full_version = version_info["fullVersion"]
             version = version_info["buildVersion"]
@@ -414,7 +409,7 @@ async def build_and_release(
                 raise FileNotFoundError(f"安装包不存在: {exe_file}")
 
             # 计算 SHA512
-            _build_status["message"] = f"正在计算校验和 (SHA512)..."
+            _build_status["message"] = "正在计算校验和 (SHA512)..."
             sha512_hash = hashlib.sha512()
             with open(exe_file, "rb") as f:
                 for chunk in iter(lambda: f.read(8192), b""):
@@ -436,13 +431,17 @@ async def build_and_release(
             exe_key = f"releases/{full_version}/{exe_file.name}"
             with open(exe_file, "rb") as f:
                 s3_service.upload_bytes(f.read(), exe_key, content_type="application/x-msdownload")
-            s3_service.upload_bytes(yml_content.encode(), f"releases/{full_version}/latest.yml", content_type="application/x-yaml")
+            s3_service.upload_bytes(
+                yml_content.encode(), f"releases/{full_version}/latest.yml", content_type="application/x-yaml"
+            )
 
             # 保存到数据库
             _build_status["message"] = "正在保存版本记录..."
             with get_session() as db:
                 # 取消旧版本激活
-                db.query(ClientReleaseModel).filter(ClientReleaseModel.t_is_active == True).update({"t_is_active": False})
+                db.query(ClientReleaseModel).filter(ClientReleaseModel.t_is_active == True).update(
+                    {"t_is_active": False}
+                )
                 new_release = ClientReleaseModel(
                     t_version=full_version,
                     t_release_notes=body.release_notes,
@@ -456,8 +455,11 @@ async def build_and_release(
 
             # 发送通知
             _build_status["message"] = "正在发送通知..."
-            from application.usecases.release_client import ReleaseClientUseCase, FEISHU_RELEASE_WEBHOOK
-            logger.info(f"[飞书通知] Webhook 已配置: {bool(FEISHU_RELEASE_WEBHOOK)}, 长度={len(FEISHU_RELEASE_WEBHOOK)}")
+            from application.usecases.release_client import FEISHU_RELEASE_WEBHOOK, ReleaseClientUseCase
+
+            logger.info(
+                f"[飞书通知] Webhook 已配置: {bool(FEISHU_RELEASE_WEBHOOK)}, 长度={len(FEISHU_RELEASE_WEBHOOK)}"
+            )
             releaser = ReleaseClientUseCase()
             download_url = s3_service.get_file_url(exe_key)
             releaser._send_notifications(
@@ -482,6 +484,7 @@ async def build_and_release(
 
     # 后台执行构建
     import asyncio
+
     asyncio.create_task(_do_build())
     return BuildStatus(status="running", message="已启动构建，请在页面刷新查看进度")
 
@@ -508,8 +511,9 @@ async def get_sessions_grouped_by_user(
     Returns:
         SessionGroupedResponse: 按用户分组的会话统计列表
     """
-    from infrastructure.repositories.session_repository import SessionRepository
     from datetime import datetime, timedelta
+
+    from infrastructure.repositories.session_repository import SessionRepository
 
     if current_user.get("role") != "admin":
         raise HTTPException(

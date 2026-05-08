@@ -20,6 +20,7 @@ router = APIRouter(prefix="/agent_roles", tags=["AI 角色管理"])
 
 class AgentRoleBase(BaseModel):
     """AI 角色基础字段"""
+
     t_role_name: str
     t_role_comment: str
     t_role_keyword: str | None = None
@@ -31,11 +32,13 @@ class AgentRoleBase(BaseModel):
 
 class AgentRoleCreate(AgentRoleBase):
     """创建 AI 角色"""
+
     pass
 
 
 class AgentRoleUpdate(BaseModel):
     """更新 AI 角色"""
+
     t_role_name: str | None = None
     t_role_comment: str | None = None
     t_role_keyword: str | None = None
@@ -47,6 +50,7 @@ class AgentRoleUpdate(BaseModel):
 
 class AgentRoleResponse(AgentRoleBase):
     """AI 角色响应"""
+
     t_id: int
     t_created_at: datetime
     t_updated_at: datetime
@@ -58,7 +62,7 @@ class AgentRoleResponse(AgentRoleBase):
 @router.get("", response_model=list[AgentRoleResponse], summary="获取角色列表")
 def list_agent_roles(
     is_active: bool | None = None,
-    _ = Depends(get_current_admin_user),
+    _=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
 ) -> list[AgentRoleModel]:
     """获取所有 AI 角色列表"""
@@ -72,7 +76,7 @@ def list_agent_roles(
 @router.get("/{role_id}", response_model=AgentRoleResponse, summary="获取单个角色")
 def get_agent_role(
     role_id: int,
-    _ = Depends(get_current_admin_user),
+    _=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """根据 ID 获取 AI 角色"""
@@ -86,7 +90,7 @@ def get_agent_role(
 @router.post("", response_model=AgentRoleResponse, status_code=201, summary="创建角色")
 def create_agent_role(
     role_data: AgentRoleCreate,
-    admin_user = Depends(get_current_admin_user),
+    admin_user=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """创建新的 AI 角色"""
@@ -116,7 +120,7 @@ def create_agent_role(
 def update_agent_role(
     role_id: int,
     role_data: AgentRoleUpdate,
-    admin_user = Depends(get_current_admin_user),
+    admin_user=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
 ) -> AgentRoleModel:
     """更新 AI 角色信息"""
@@ -140,7 +144,7 @@ def update_agent_role(
 @router.delete("/{role_id}", status_code=204, summary="删除角色")
 def delete_agent_role(
     role_id: int,
-    _ = Depends(get_current_admin_user),
+    _=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
 ) -> None:
     """删除 AI 角色"""

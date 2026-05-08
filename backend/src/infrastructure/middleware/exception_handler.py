@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exception_handler.py
 # 作者: wuhao
 # 日期: 2026_05_04_16:30:00
@@ -19,15 +18,15 @@ from loguru import logger
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from infrastructure.logging.structured_logger import structured_log, LogLevel
+from infrastructure.logging.structured_logger import LogLevel, structured_log
 
 
 class ErrorCode(str, Enum):
     """业务错误码"""
-    
+
     # 成功
     SUCCESS = "0000"
-    
+
     # 客户端错误 (1xxx)
     BAD_REQUEST = "1000"
     UNAUTHORIZED = "1001"
@@ -36,14 +35,14 @@ class ErrorCode(str, Enum):
     METHOD_NOT_ALLOWED = "1005"
     VALIDATION_ERROR = "1010"
     RATE_LIMITED = "1020"
-    
+
     # 服务端错误 (2xxx)
     INTERNAL_ERROR = "2000"
     DATABASE_ERROR = "2010"
     CACHE_ERROR = "2020"
     AI_SERVICE_ERROR = "2030"
     EXTERNAL_SERVICE_ERROR = "2040"
-    
+
     # 业务错误 (3xxx)
     SESSION_NOT_FOUND = "3001"
     MESSAGE_TOO_LONG = "3010"
@@ -54,14 +53,14 @@ class ErrorCode(str, Enum):
 class AppError(Exception):
     """
     应用自定义异常基类 (Skills 规范: 统一异常格式)
-    
+
     属性:
         code: 错误码(ErrorCode枚举)
         message: 用户友好的错误消息
         details: 详细信息(可选)
         status_code: HTTP状态码
         log_level: 日志级别
-    
+
     使用示例:
         raise AppError(
             code=ErrorCode.SESSION_NOT_FOUND,
@@ -70,7 +69,7 @@ class AppError(Exception):
             log_level=LogLevel.WARNING,
         )
     """
-    
+
     def __init__(
         self,
         code: ErrorCode = ErrorCode.INTERNAL_ERROR,
@@ -93,20 +92,20 @@ class AppError(Exception):
 class GlobalExceptionHandler:
     """
     全局异常处理器类 (Skills 规范: 强制类封装)
-    
+
     功能:
     - 捕获所有未处理异常
     - 统一错误响应格式(code/msg/data/req_id/ts)
     - 异常分类和日志记录
     - 敏感信息过滤
     - 错误统计和监控
-    
+
     使用示例:
         app = FastAPI()
         handler = GlobalExceptionHandler()
         handler.register_handlers(app)
     """
-    
+
     def __init__(self):
         """初始化异常处理器"""
         self._error_stats = {
@@ -114,39 +113,39 @@ class GlobalExceptionHandler:
             "by_code": {},
             "by_type": {},
         }
-        
+
         logger.info("GlobalExceptionHandler initialized")
-    
+
     def register_handlers(self, app: FastAPI) -> None:
         """
         注册所有异常处理器到FastAPI应用
-        
+
         Args:
             app: FastAPI实例
         """
-        
+
         # 自定义AppError
         @app.exception_handler(AppError)
         async def handle_app_error(request: Request, exc: AppError):
             return await self._handle_app_error(request, exc)
-        
+
         # 请求验证错误(Pydantic)
         @app.exception_handler(RequestValidationError)
         async def handle_validation_error(request: Request, exc: RequestValidationError):
             return await self._handle_validation_error(request, exc)
-        
+
         # 数据库错误
         @app.exception_handler(SQLAlchemyError)
         async def handle_db_error(request: Request, exc: SQLAlchemyError):
             return await self._handle_database_error(request, exc)
-        
+
         # 通用HTTPException
         @app.exception_handler(Exception)
         async def handle_generic_error(request: Request, exc: Exception):
             return await self._handle_generic_error(request, exc)
-        
+
         logger.info("Exception handlers registered")
-    
+
     def _build_error_response(
         self,
         request: Request,
@@ -154,16 +153,16 @@ class GlobalExceptionHandler:
     ) -> dict[str, Any]:
         """
         构建统一错误响应 (Skills规范: code/msg/data/req_id/ts)
-        
+
         Args:
             request: FastAPI请求对象
             error: 应用异常
-            
+
         Returns:
             标准化错误响应字典
         """
         req_id = getattr(request.state, "request_id", None) or self._generate_request_id()
-        
+
         response = {
             "code": error.code.value,
             "msg": error.message,
@@ -175,17 +174,18 @@ class GlobalExceptionHandler:
             "req_id": req_id,
             "ts": error.timestamp,
         }
-        
+
         return response
-    
+
     def _generate_request_id(self) -> str:
         """生成请求ID"""
         import uuid
+
         return str(uuid.uuid4())[:12]
-    
+
     async def _handle_app_error(self, request: Request, error: AppError) -> JSONResponse:
         """处理自定义AppError"""
-        
+
         # 记录日志
         structured_log.error(
             category_name="api.error",
@@ -197,34 +197,32 @@ class GlobalExceptionHandler:
                 "details": error.details,
             },
         )
-        
+
         # 更新统计
         self._update_stats(error.code.value)
-        
+
         response_data = self._build_error_response(request, error)
-        
+
         return JSONResponse(
             status_code=error.status_code,
             content=response_data,
         )
-    
-    async def _handle_validation_error(
-        self, 
-        request: Request, 
-        error: RequestValidationError
-    ) -> JSONResponse:
+
+    async def _handle_validation_error(self, request: Request, error: RequestValidationError) -> JSONResponse:
         """处理请求验证错误(Pydantic)"""
-        
+
         # 提取字段级错误
         validation_errors = []
         for err in error.errors():
             field = ".".join(str(loc) for loc in err["loc"])
-            validation_errors.append({
-                "field": field,
-                "message": err["msg"],
-                "type": err["type"],
-            })
-        
+            validation_errors.append(
+                {
+                    "field": field,
+                    "message": err["msg"],
+                    "type": err["type"],
+                }
+            )
+
         app_error = AppError(
             code=ErrorCode.VALIDATION_ERROR,
             message="Request validation failed",
@@ -232,7 +230,7 @@ class GlobalExceptionHandler:
             status_code=422,
             log_level=LogLevel.WARNING,
         )
-        
+
         structured_log.warning(
             category_name="api.validation",
             message=f"Validation failed | errors={len(validation_errors)}",
@@ -241,21 +239,21 @@ class GlobalExceptionHandler:
                 "errors": validation_errors[:3],  # 只记录前3个错误
             },
         )
-        
+
         response_data = self._build_error_response(request, app_error)
         self._update_stats(app_error.code.value)
-        
+
         return JSONResponse(
             status_code=422,
             content=response_data,
         )
-    
+
     async def _handle_database_error(self, request: Request, error: SQLAlchemyError) -> JSONResponse:
         """处理数据库错误"""
-        
+
         # 避免泄露敏感的SQL错误信息
         safe_message = "Database operation failed"
-        
+
         if "unique" in str(error).lower():
             safe_message = "Duplicate entry detected"
             status_code = 409
@@ -264,7 +262,7 @@ class GlobalExceptionHandler:
             status_code = 404
         else:
             status_code = 500
-        
+
         app_error = AppError(
             code=ErrorCode.DATABASE_ERROR,
             message=safe_message,
@@ -272,7 +270,7 @@ class GlobalExceptionHandler:
             status_code=status_code,
             original_error=error,
         )
-        
+
         structured_log.error(
             category_name="database.error",
             message=f"DB Error: {str(error)[:200]}",
@@ -281,21 +279,21 @@ class GlobalExceptionHandler:
                 "error_type": type(error).__name__,
             },
         )
-        
+
         response_data = self._build_error_response(request, app_error)
         self._update_stats(app_error.code.value)
-        
+
         return JSONResponse(
             status_code=status_code,
             content=response_data,
         )
-    
+
     async def _handle_generic_error(self, request: Request, error: Exception) -> JSONResponse:
         """处理未预期的异常"""
-        
+
         # 获取完整堆栈跟踪
         tb_str = traceback.format_exc()
-        
+
         # 记录详细日志(包含堆栈)
         structured_log.critical(
             category_name="system.error",
@@ -307,7 +305,7 @@ class GlobalExceptionHandler:
                 "traceback": tb_str[:1000] if tb_str else "",  # 截断过长的堆栈
             },
         )
-        
+
         app_error = AppError(
             code=ErrorCode.INTERNAL_ERROR,
             message="An unexpected error occurred. Please try again later.",
@@ -317,27 +315,27 @@ class GlobalExceptionHandler:
             status_code=500,
             original_error=error,
         )
-        
+
         response_data = self._build_error_response(request, app_error)
         self._update_stats(app_error.code.value)
-        
+
         return JSONResponse(
             status_code=500,
             content=response_data,
         )
-    
+
     def _update_stats(self, code: str) -> None:
         """更新错误统计"""
         self._error_stats["total_errors"] += 1
-        
+
         if code not in self._error_stats["by_code"]:
             self._error_stats["by_code"][code] = 0
         self._error_stats["by_code"][code] += 1
-    
+
     def get_stats(self) -> dict[str, Any]:
         """
         获取错误统计信息
-        
+
         Returns:
             统计字典
         """
@@ -357,8 +355,10 @@ global_exception_handler = GlobalExceptionHandler()
 
 # ========== 便捷异常类 ==========
 
+
 class NotFoundError(AppError):
     """资源不存在异常"""
+
     def __init__(self, resource: str, identifier: str):
         super().__init__(
             code=ErrorCode.NOT_FOUND,
@@ -371,6 +371,7 @@ class NotFoundError(AppError):
 
 class UnauthorizedError(AppError):
     """未授权异常"""
+
     def __init__(self, message: str = "Authentication required"):
         super().__init__(
             code=ErrorCode.UNAUTHORIZED,
@@ -382,6 +383,7 @@ class UnauthorizedError(AppError):
 
 class ForbiddenError(AppError):
     """禁止访问异常"""
+
     def __init__(self, action: str = "access this resource"):
         super().__init__(
             code=ErrorCode.FORBIDDEN,
@@ -393,6 +395,7 @@ class ForbiddenError(AppError):
 
 class ValidationError(AppError):
     """业务验证失败异常"""
+
     def __init__(self, field: str, message: str):
         super().__init__(
             code=ErrorCode.VALIDATION_ERROR,
@@ -405,6 +408,7 @@ class ValidationError(AppError):
 
 class RateLimitExceededError(AppError):
     """限流异常"""
+
     def __init__(self, retry_after: int = 60):
         super().__init__(
             code=ErrorCode.RATE_LIMITED,
@@ -417,6 +421,7 @@ class RateLimitExceededError(AppError):
 
 class DatabaseError(AppError):
     """数据库操作异常"""
+
     def __init__(self, operation: str, original: Exception | None = None):
         super().__init__(
             code=ErrorCode.DATABASE_ERROR,
@@ -429,6 +434,7 @@ class DatabaseError(AppError):
 
 class AIServiceError(AppError):
     """AI服务调用异常"""
+
     def __init__(self, model: str, original: Exception | None = None):
         super().__init__(
             code=ErrorCode.AI_SERVICE_ERROR,
@@ -440,9 +446,15 @@ class AIServiceError(AppError):
 
 
 __all__ = [
-    "GlobalExceptionHandler", "global_exception_handler",
-    "AppError", "ErrorCode",
-    "NotFoundError", "UnauthorizedError", "ForbiddenError",
-    "ValidationError", "RateLimitExceededError",
-    "DatabaseError", "AIServiceError",
+    "GlobalExceptionHandler",
+    "global_exception_handler",
+    "AppError",
+    "ErrorCode",
+    "NotFoundError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "ValidationError",
+    "RateLimitExceededError",
+    "DatabaseError",
+    "AIServiceError",
 ]

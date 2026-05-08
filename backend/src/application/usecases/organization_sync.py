@@ -60,12 +60,10 @@ class SyncOrganizationUseCase:
         logger.info("开始同步组织架构...")
 
         # 获取同步前的所有有效用户 ID (用于计算离职)
-        from sqlalchemy import select
         from infrastructure.database.user_model import UserModel
-        
+
         stmt = select(UserModel.t_wecom_user_id).where(
-            UserModel.t_wecom_user_id.is_not(None),
-            UserModel.t_deleted_at.is_(None)
+            UserModel.t_wecom_user_id.is_not(None), UserModel.t_deleted_at.is_(None)
         )
         existing_wecom_ids = set(self._session.scalars(stmt).all())
 
@@ -111,7 +109,7 @@ class SyncOrganizationUseCase:
         # 计算入职和离职
         new_hires = []
         resignations = []
-        
+
         # 找出新入职 (WeCom 有, DB 没)
         for uid in new_wecom_ids - existing_wecom_ids:
             u = unique_users[uid]
@@ -159,14 +157,22 @@ class SyncOrganizationUseCase:
         # 4. 发送通知 (飞书 & 企微)
         # 计算本周累计数据
         week_ago = datetime.now() - timedelta(days=7)
-        weekly_hires = self._session.scalar(
-            select(func.count(UserModel.t_user_id))
-            .where(UserModel.t_created_at >= week_ago, UserModel.t_wecom_user_id.is_not(None))
-        ) or 0
-        weekly_resigns = self._session.scalar(
-            select(func.count(UserModel.t_user_id))
-            .where(UserModel.t_deleted_at >= week_ago, UserModel.t_wecom_user_id.is_not(None))
-        ) or 0
+        weekly_hires = (
+            self._session.scalar(
+                select(func.count(UserModel.t_user_id)).where(
+                    UserModel.t_created_at >= week_ago, UserModel.t_wecom_user_id.is_not(None)
+                )
+            )
+            or 0
+        )
+        weekly_resigns = (
+            self._session.scalar(
+                select(func.count(UserModel.t_user_id)).where(
+                    UserModel.t_deleted_at >= week_ago, UserModel.t_wecom_user_id.is_not(None)
+                )
+            )
+            or 0
+        )
 
         result = {
             "departments": len(wecom_depts),
@@ -175,7 +181,7 @@ class SyncOrganizationUseCase:
             "resignations": resignations,
             "weekly_hires": weekly_hires,
             "weekly_resigns": weekly_resigns,
-            "status": "success"
+            "status": "success",
         }
         self._send_feishu_notification(result)
         return result
@@ -188,53 +194,65 @@ class SyncOrganizationUseCase:
             resigns_count = len(result.get("resignations", []))
             weekly_hires = result.get("weekly_hires", 0)
             weekly_resigns = result.get("weekly_resigns", 0)
-            
+
             card = {
                 "config": {"wide_screen_mode": True},
-                "header": {
-                    "title": {"tag": "plain_text", "content": "🏢 组织架构同步报告"},
-                    "template": "blue"
-                },
+                "header": {"title": {"tag": "plain_text", "content": "🏢 组织架构同步报告"}, "template": "blue"},
                 "elements": [
                     {
                         "tag": "div",
                         "fields": [
-                            {"is_short": True, "text": {"tag": "lark_md", "content": f"**同步状态:**\n✅ 成功"}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": f"**同步时间:**\n{datetime.now().strftime('%Y-%m-%d %H:%M')}"}}
-                        ]
+                            {"is_short": True, "text": {"tag": "lark_md", "content": "**同步状态:**\n✅ 成功"}},
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": f"**同步时间:**\n{datetime.now().strftime('%Y-%m-%d %H:%M')}",
+                                },
+                            },
+                        ],
                     },
                     {
                         "tag": "div",
                         "fields": [
-                            {"is_short": True, "text": {"tag": "lark_md", "content": f"**部门总数:**\n{result['departments']}"}},
-                            {"is_short": True, "text": {"tag": "lark_md", "content": f"**人员总数:**\n{result['users']}"}}
-                        ]
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**部门总数:**\n{result['departments']}"},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**人员总数:**\n{result['users']}"},
+                            },
+                        ],
                     },
                     {"tag": "hr"},
                     {
                         "tag": "div",
-                        "text": {"tag": "lark_md", "content": f"📊 **本次同步变动:**\n- 🆕 新入职: **{hires_count}** 人\n- 🚪 已离职: **{resigns_count}** 人"}
+                        "text": {
+                            "tag": "lark_md",
+                            "content": f"📊 **本次同步变动:**\n- 🆕 新入职: **{hires_count}** 人\n- 🚪 已离职: **{resigns_count}** 人",
+                        },
                     },
                     {
                         "tag": "div",
-                        "text": {"tag": "lark_md", "content": f"📅 **本周累计变动 (近7天):**\n- 📈 累计入职: **{weekly_hires}** 人\n- 📉 累计离职: **{weekly_resigns}** 人"}
-                    }
-                ]
+                        "text": {
+                            "tag": "lark_md",
+                            "content": f"📅 **本周累计变动 (近7天):**\n- 📈 累计入职: **{weekly_hires}** 人\n- 📉 累计离职: **{weekly_resigns}** 人",
+                        },
+                    },
+                ],
             }
 
             if hires_count > 0:
                 hires_list = "\n".join([f"· {u['name']}" for u in result["new_hires"][:5]])
-                if hires_count > 5: hires_list += "\n· ..."
-                card["elements"].append({
-                    "tag": "note",
-                    "elements": [{"tag": "plain_text", "content": f"本次入职名单:\n{hires_list}"}]
-                })
+                if hires_count > 5:
+                    hires_list += "\n· ..."
+                card["elements"].append(
+                    {"tag": "note", "elements": [{"tag": "plain_text", "content": f"本次入职名单:\n{hires_list}"}]}
+                )
 
-            payload = {
-                "msg_type": "interactive",
-                "card": card
-            }
-            
+            payload = {"msg_type": "interactive", "card": card}
+
             requests.post(FEISHU_SYNC_WEBHOOK, json=payload, timeout=10)
         except Exception as e:
             logger.error(f"Failed to send Feishu notification: {e}")

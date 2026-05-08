@@ -10,7 +10,6 @@ from typing import Any
 
 import requests
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from core.logger import get_logger
 from infrastructure.database.database import Database
@@ -126,16 +125,16 @@ class ReleaseClientUseCase:
             agent_role: AI 角色名称
             wecom_groups: 企微群列表，支持 ["wuhao", "wudu"]，为空则默认发送 wuhao 群
         """
-        
+
         # 角色专属评论映射表（从数据库加载）
         role_comments = self._get_role_comment_map()
         role_comment = role_comments.get(agent_role, "") if agent_role else ""
-        
+
         publisher_info = ""
         if publisher:
             role_text = f"({publisher_role})" if publisher_role else ""
             publisher_info = f"**发布者:** {publisher} {role_text}\n"
-        
+
         agent_info = ""
         if agent_role:
             agent_info = f"**AI 角色:** {agent_role}\n"
@@ -152,10 +151,13 @@ class ReleaseClientUseCase:
                 "elements": [
                     {
                         "tag": "div",
-                        "text": {"tag": "lark_md", "content": f"**版本号:** v{version}\n"
-                               f"**发布时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
-                               f"{publisher_info}"
-                               f"{agent_info}"},
+                        "text": {
+                            "tag": "lark_md",
+                            "content": f"**版本号:** v{version}\n"
+                            f"**发布时间:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+                            f"{publisher_info}"
+                            f"{agent_info}",
+                        },
                     },
                     {"tag": "hr"},
                     {
@@ -189,10 +191,12 @@ class ReleaseClientUseCase:
 
         # 如果有角色评论，添加到 elements 末尾
         if role_comment:
-            feishu_card["card"]["elements"].append({
-                "tag": "div",
-                "text": {"tag": "lark_md", "content": f"> {role_comment}"},
-            })
+            feishu_card["card"]["elements"].append(
+                {
+                    "tag": "div",
+                    "text": {"tag": "lark_md", "content": f"> {role_comment}"},
+                }
+            )
 
         # 飞书发送 (仅当 Webhook 配置了才发送)
         if FEISHU_RELEASE_WEBHOOK:
@@ -223,12 +227,14 @@ class ReleaseClientUseCase:
                 "msgtype": "markdown",
                 "markdown": {
                     "content": f"🆕 **TRAI 客户端新版本发布 (v{version})**\n\n"
-                               f"{publisher_line}"
-                               f"{agent_line}"
-                               f"> **更新日志:**\n>{changelog.replace(chr(92) + 'n', chr(92) + 'n>')}\n\n"
-                               f"**下载地址:** [点击下载 EXE]({url})\n\n"
-                               f"> {role_comment}" if role_comment else f"**下载地址:** [点击下载 EXE]({url})"
-                }
+                    f"{publisher_line}"
+                    f"{agent_line}"
+                    f"> **更新日志:**\n>{changelog.replace(chr(92) + 'n', chr(92) + 'n>')}\n\n"
+                    f"**下载地址:** [点击下载 EXE]({url})\n\n"
+                    f"> {role_comment}"
+                    if role_comment
+                    else f"**下载地址:** [点击下载 EXE]({url})"
+                },
             }
             try:
                 requests.post(wecom_url, json=wecom_msg, timeout=10)

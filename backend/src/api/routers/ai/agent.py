@@ -11,21 +11,20 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser, CurrentUserOptional
+from api.routers.ai.management import _MOCK_AGENTS
 from core.exceptions import ExternalServiceError
 from infrastructure.agent.executor import AgentExecutor
 from infrastructure.agent.orchestrator.router import Orchestrator
-from api.routers.ai.management import _MOCK_AGENTS
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.loader import get_openai_tools_format
 from infrastructure.agent.tools.registry import get_tool_registry
+from infrastructure.database import get_db_session
 from infrastructure.notify.base import NotifyLevel, NotifyMessage, NotifyType
 from infrastructure.notify.factory import NotifyServiceFactory
-from infrastructure.database import get_db_session
 from infrastructure.services.chat_history_service import get_chat_history_service
 
 router = APIRouter()
@@ -152,7 +151,7 @@ async def agent_chat(
 
     支持 AI 自动调用工具(天气/搜索/翻译/计算等),
     多轮对话直到 AI 完成回答或达到最大轮次.
-    
+
     新增功能:
     - 自动保存用户消息和AI回复到数据库
     - 支持加载历史对话上下文
@@ -205,6 +204,7 @@ async def agent_chat(
         orchestrator = Orchestrator(_MOCK_AGENTS)
         agent_id = await orchestrator.dispatch(request.message)
         from loguru import logger
+
         logger.info(f"Agent 自动路由: '{request.message[:20]}...' -> {agent_id}")
 
     context = ExecutionContext(
@@ -246,17 +246,17 @@ async def agent_chat(
             logger.warning(f"RAG retrieve failed for kb {request.knowledge_base_id}: {e}")
 
     messages = []
-    
+
     # == 对话历史持久化:加载历史消息 ==
     history_service = get_chat_history_service(db_session)
     existing_session = history_service.load_session_history(request.session_id)
-    
+
     if existing_session and existing_session.message_count > 0:
         # 加载历史消息(最多最近20条,避免上下文过长)
         history_messages = existing_session.get_last_messages(20)
         messages = [{"role": msg["role"], "content": msg["content"]} for msg in history_messages]
         logger.info(f"加载历史消息 | session_id={request.session_id} | 历史消息数={len(messages)}")
-    
+
     # 保存用户消息到数据库
     try:
         user_msg_entity = history_service.save_message(
@@ -268,7 +268,7 @@ async def agent_chat(
         logger.info(f"保存用户消息成功 | session_id={request.session_id}")
     except Exception as e:
         logger.warning(f"保存用户消息失败(不影响对话)| error={e}")
-    
+
     if rag_context:
         final_message = (
             "请结合以下参考资料回答我的问题. "
@@ -330,15 +330,14 @@ async def agent_chat(
                 "steps_count": len(result.get("steps", [])),
             },
         )
-        
+
         # 如果是第一条消息,自动生成标题
         if not existing_session or existing_session.message_count <= 1:
             auto_title = request.message[:30] + ("..." if len(request.message) > 30 else "")
             history_service.update_session_title(
-                session_id=request.session_id, 
-                title=f"[Agent:{agent_id}] {auto_title}"
+                session_id=request.session_id, title=f"[Agent:{agent_id}] {auto_title}"
             )
-        
+
         logger.info(f"保存AI回复成功 | session_id={request.session_id} | content_len={len(final_content)}")
     except Exception as e:
         logger.warning(f"保存AI回复失败(不影响返回)| error={e}")

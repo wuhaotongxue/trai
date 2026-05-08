@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: migrate_add_contact_and_email.py
 # 作者: wuhao
 # 日期: 2026_04_26_18:40:00
@@ -16,6 +15,7 @@ from loguru import logger
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from sqlalchemy import text
+
 from infrastructure.database.database import get_database
 
 
@@ -93,7 +93,7 @@ def run_migration() -> None:
             default_email_password = os.getenv("DEFAULT_EMAIL_PASSWORD", "")
             default_email_from_name = os.getenv("DEFAULT_EMAIL_FROM_NAME", "TRAI 团队")
             default_email_to = os.getenv("DEFAULT_EMAIL_TO", "")
-            
+
             if default_email_username and default_email_password:
                 insert_default_config = text("""
                 INSERT INTO t_email_configs (
@@ -113,15 +113,18 @@ def run_migration() -> None:
                     '默认联系我们通知配置'
                 )
                 """)
-                to_emails = f'["{default_email_to}"]' if default_email_to else '[]'
-                session.execute(insert_default_config, {
-                    'host': default_email_host,
-                    'port': default_email_port,
-                    'username': default_email_username,
-                    'password': default_email_password,
-                    'from_name': default_email_from_name,
-                    'to_emails': to_emails
-                })
+                to_emails = f'["{default_email_to}"]' if default_email_to else "[]"
+                session.execute(
+                    insert_default_config,
+                    {
+                        "host": default_email_host,
+                        "port": default_email_port,
+                        "username": default_email_username,
+                        "password": default_email_password,
+                        "from_name": default_email_from_name,
+                        "to_emails": to_emails,
+                    },
+                )
                 session.commit()
                 logger.success("  - 默认邮件配置插入成功")
             else:

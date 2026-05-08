@@ -1,5 +1,4 @@
 import os
-import sys
 from pathlib import Path
 
 from loguru import logger
@@ -29,6 +28,7 @@ session = db.get_session()
 repo = UserRepository(session)
 
 from sqlalchemy import text
+
 users = session.execute(text("SELECT t_id, t_username, t_email FROM t_users LIMIT 10"))
 logger.info("Users in database:")
 for u in users:

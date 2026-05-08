@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: email_service.py
 # 作者: wuhao
 # 日期: 2026_04_26_18:45:00
@@ -9,11 +8,11 @@ from __future__ import annotations
 
 import smtplib
 import ssl
+from email.header import Header
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.header import Header
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -282,9 +281,9 @@ class EmailService:
                 </div>
                 <div class="content">
                     <div class="field">【姓名】: {name}</div>
-                    <div class="field">【电话】: {phone or '未填写'}</div>
-                    <div class="field">【邮箱】: {email or '未填写'}</div>
-                    <div class="field">【公司/区域】: {company or '未填写'}</div>
+                    <div class="field">【电话】: {phone or "未填写"}</div>
+                    <div class="field">【邮箱】: {email or "未填写"}</div>
+                    <div class="field">【公司/区域】: {company or "未填写"}</div>
                     <div class="field">【咨询类型】: {type_display}</div>
                     <div class="field">【留言内容】: {content}</div>
                     <div class="field">【IP地址】: {ip_address}</div>
