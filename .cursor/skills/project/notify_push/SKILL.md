@@ -23,7 +23,7 @@ PowerShell 的 ConvertTo-Json -Compress 默认输出字符串，但直接传给 
 | 企业微信 | wuhao 群 | $env:NOTIFY_WECOM_WUHAO_WEBHOOK |
 | 企业微信 | wudu 群 | $env:NOTIFY_WECOM_WUDU_WEBHOOK |
 
-Webhook URL 配置在 backend/.env 第 3479-3524 行（使用 Select-String 搜索，不要只用 Grep）。
+Webhook URL 配置在 `backend/env/notify_robot.env`（或 backend/.env 合并后，使用 Shell + grep 搜索，不要只用 Grep 对超大文件）。
 
 ## 飞书卡片通知（PowerShell）
 
