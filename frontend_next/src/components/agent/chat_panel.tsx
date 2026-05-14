@@ -139,23 +139,25 @@ export function ChatPanel() {
 
   useLayoutEffect(() => {
     // 自动滚动到最新消息
-    if (messages.length > 0) {
-      // 等待下一帧确保 DOM 完全更新
-      requestAnimationFrame(() => {
-        if (bottomRef.current) {
-          bottomRef.current.scrollIntoView({ behavior: "auto", block: "end" });
-        } else {
-          const viewport = document.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
-          if (viewport) {
-            viewport.scrollTop = viewport.scrollHeight;
-          }
+    if (!messages || messages.length === 0) return;
+    
+    // 等待下一帧确保 DOM 完全更新
+    requestAnimationFrame(() => {
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+      } else {
+        const viewport = document.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+        if (viewport) {
+          viewport.scrollTop = viewport.scrollHeight;
         }
-      });
-    }
-  }, [messages, isStreaming]);
+      }
+    });
+  }, [messages?.length, isStreaming]);
 
   // 当消息更新且有 thinking 时，默认展开
   useEffect(() => {
+    if (!messages || messages.length === 0) return;
+    
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.thinking && lastMsg.role === "assistant") {
       setExpandedThinking(prev => ({
@@ -163,7 +165,7 @@ export function ChatPanel() {
         [lastMsg.id]: true
       }));
     }
-  }, [messages]);
+  }, [messages?.length]);
 
   const downloadImage = (url: string) => {
     const link = document.createElement('a');
