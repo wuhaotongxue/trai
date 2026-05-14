@@ -3,9 +3,9 @@
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
 $wecomWuhaoUrl = $env:NOTIFY_WECOM_WUHAO_WEBHOOK
 $wecomWuduUrl = $env:NOTIFY_WECOM_WUDU_WEBHOOK
-$commitMsg = "chore: update README"
+$commitMsg = "💥 【前端优化】修复聊天界面滚动和打字机效果 + 新增思考过程折叠功能"
 $roleName = "爆炸分身"
-$roleComment = "呜呜本来只想推送的，结果发现漏了通知，补发补发！"
+$roleComment = "代码冲冲冲！打字机效果修复啦，思考过程也能折叠展开咯！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 # 检查配置是否完整
@@ -37,8 +37,11 @@ if ($feishuUrl) {
                 @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
                 @{ tag = "markdown"; content = "**角色**: $($roleName) | $($roleComment)" }
                 @{ tag = "markdown"; content = "**变更详情**:
-- backend/README.md: 更新文档" }
-                @{ tag = "markdown"; content = "**变更**: 1 个文件 (+3 -0)
+- 🚀 修复消息列表自动滚动，新消息稳稳显示在底部
+- ⌨️ 修复打字机效果，AI回复逐字蹦出来啦
+- 📜 添加右侧滚动条，长对话也能顺畅浏览
+- 💡 新增思考过程显示！支持折叠/展开" }
+                @{ tag = "markdown"; content = "**变更**: 41 个文件 (+968 -355)
 **时间**: $($timestamp)" }
             )
         }
@@ -66,9 +69,12 @@ if ($wecomWuhaoUrl) {
 **角色**: $($roleName) | $($roleComment)
 
 **变更详情**:
-- backend/README.md: 更新文档
+- 🚀 修复消息列表自动滚动，新消息稳稳显示在底部
+- ⌨️ 修复打字机效果，AI回复逐字蹦出来啦
+- 📜 添加右侧滚动条，长对话也能顺畅浏览
+- 💡 新增思考过程显示！支持折叠/展开
 
-**变更**: 1 个文件 (+3 -0)
+**变更**: 41 个文件 (+968 -355)
 
 **时间**: $($timestamp)"
         }

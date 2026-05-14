@@ -23,7 +23,7 @@ class ChatSessionModel(Base):
     __tablename__ = "t_chat_sessions"
     __comment__ = "AI 对话会话表,存储会话元数据和消息历史"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """会话唯一标识 UUID"""
@@ -57,7 +57,7 @@ class MessageModel(Base):
     __tablename__ = "t_messages"
     __comment__ = "AI 对话消息表,存储单条消息内容"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_session_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """关联的会话 session_id"""
@@ -79,7 +79,7 @@ class QuotaPlanModel(Base):
     __tablename__ = "t_quota_plans"
     __comment__ = "配额套餐表,定义各角色的月度配额上限"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_plan_name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     """套餐名称"""
@@ -115,7 +115,7 @@ class UserQuotaUsageModel(Base):
     __tablename__ = "t_user_quota_usage"
     __comment__ = "用户配额使用表,按自然月记录各类型配额消耗"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -151,7 +151,7 @@ class QuotaTransactionLogModel(Base):
     __tablename__ = "t_quota_transaction_log"
     __comment__ = "配额变动流水表,记录每次配额增减及原因"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -185,7 +185,7 @@ class ImageGenerationModel(Base):
     __tablename__ = "t_image_generations"
     __comment__ = "AI 图片生成任务表,存储图片生成请求和结果"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
@@ -235,7 +235,7 @@ class UploadTaskModel(Base):
     __tablename__ = "t_upload_tasks"
     __comment__ = "文件上传任务表,存储上传请求和结果"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
@@ -275,7 +275,7 @@ class ClientReleaseModel(Base):
     __tablename__ = "t_client_releases"
     __comment__ = "客户端版本发布表,记录 Electron 客户端的各个版本信息及 S3 路径"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_version: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
     """版本号,例如 0.1.0"""
@@ -299,7 +299,7 @@ class AuditLogModel(Base):
     __tablename__ = "t_audit_logs"
     __comment__ = "审计日志表,存储系统操作审计记录"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_log_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """日志唯一标识 UUID"""
@@ -345,7 +345,7 @@ class ContactMessageModel(Base):
     __tablename__ = "t_contact_messages"
     __comment__ = "联系我们消息表,存储用户提交的咨询信息"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_name: Mapped[str] = mapped_column(String(100), nullable=False)
     """提交人姓名"""
@@ -383,7 +383,7 @@ class EmailConfigModel(Base):
     __tablename__ = "t_email_configs"
     __comment__ = "邮件配置表,存储不同类型邮件的发送配置"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_config_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     """配置名称:contact_notify/system_notify/alert"""
@@ -421,7 +421,7 @@ class AgentRoleModel(Base):
     __tablename__ = "t_agent_roles"
     __comment__ = "AI 角色表,存储 AI 角色名称和发布通知时的专属评论"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_role_name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """角色名称,如:地理专家/小甜心/御姐"""

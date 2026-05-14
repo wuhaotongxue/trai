@@ -200,6 +200,8 @@ interface AgentState {
   removeFromMusicGallery: (id: string) => void;
   /** 清空音乐廊 */
   clearMusicGallery: () => void;
+  /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
+  hydrateGalleries: () => void;
 }
 
 // 兼容非安全环境的 UUID 生成
@@ -244,27 +246,25 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateError: null,
   musicGallery: [],
 
-  // 从本地存储加载图片廊,视频廊,音乐廊
-  ...(() => {
-    const result: Partial<AgentState> = {};
+  /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
+  hydrateGalleries: () => {
     try {
       const storedImageGallery = localStorage.getItem('imageGallery');
       if (storedImageGallery) {
-        result.imageGallery = JSON.parse(storedImageGallery);
+        set({ imageGallery: JSON.parse(storedImageGallery) });
       }
       const storedVideoGallery = localStorage.getItem('videoGallery');
       if (storedVideoGallery) {
-        result.videoGallery = JSON.parse(storedVideoGallery);
+        set({ videoGallery: JSON.parse(storedVideoGallery) });
       }
       const storedMusicGallery = localStorage.getItem('musicGallery');
       if (storedMusicGallery) {
-        result.musicGallery = JSON.parse(storedMusicGallery);
+        set({ musicGallery: JSON.parse(storedMusicGallery) });
       }
     } catch {
       // 忽略解析错误
     }
-    return result;
-  })(),
+  },
 
   startSession: async () => {
     set({ isLoading: true, error: null });

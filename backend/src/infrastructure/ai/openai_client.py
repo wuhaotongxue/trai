@@ -70,6 +70,21 @@ class OpenAIClient:
             )
             self._model: str = os.getenv("DASHSCOPE_CHAT_MODEL", "") or os.getenv("MODELSCOPE_CHAT_MODEL", "qwen-plus")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
+        elif self._provider == "qwen_vl":
+            self._api_key_env: str = "DASHSCOPE_API_KEY"
+            self._api_key_source_env, self._api_key = self._first_env(
+                "DASHSCOPE_API_KEY",
+                "AI_DASHSCOPE_API_KEY",
+                "MODELSCOPE_API_KEY",
+            )
+            self._base_url: str = (
+                os.getenv("DASHSCOPE_API_BASE", "")
+                or os.getenv("MODELSCOPE_API_BASE", "")
+                or os.getenv("AI_DASHSCOPE_API_BASE", "")
+                or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            )
+            self._model: str = os.getenv("MODELSCOPE_VISION_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
+            self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "300"))
         elif self._provider == "deepseek":
             self._api_key_env = "DEEPSEEK_API_KEY"
             self._api_key: str = os.getenv("DEEPSEEK_API_KEY", "")

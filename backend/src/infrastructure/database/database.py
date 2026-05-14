@@ -13,26 +13,28 @@ from typing import Any
 from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 
 class ConfigurationError(Exception):
     """配置错误异常"""
-    pass
 
-# 加载 backend/.env 配置
-# __file__ = e:\code\zzgit\trai\backend\src\infrastructure\database\database.py
-# parent.parent.parent = e:\code\zzgit\trai\backend\src
-# parent.parent.parent.parent = e:\code\zzgit\trai\backend
-_env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-if _env_path.exists():
-    with open(_env_path, encoding="utf-8") as _f:
-        for _line in _f:
-            _line = _line.strip()
-            if _line and not _line.startswith("#") and "=" in _line:
-                _key, _val = _line.split("=", 1)
-                os.environ[_key.strip()] = _val.strip()
+    def __init__(self, message: str = "配置错误"):
+        super().__init__(message)
+        self.message = message
+
+# 加载 backend/env/*.env 配置
+# __file__ = /path/to/backend/src/infrastructure/database/database.py
+# parent.parent.parent.parent = /path/to/backend
+_env_dir = Path(__file__).resolve().parent.parent.parent.parent / "env"
+for _env_file in _env_dir.glob("*.env"):
+    if _env_file.is_file():
+        with open(_env_file, encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line and not _line.startswith("#") and "=" in _line:
+                    _key, _val = _line.split("=", 1)
+                    os.environ[_key.strip()] = _val.strip()
 
 
 class Base(DeclarativeBase):
@@ -50,10 +52,6 @@ class DatabaseConfig:
         self._user: str = os.getenv("POSTGRES_USER") or os.getenv("DB_USER", "postgres")
         self._password: str = os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD", "")
         self._database: str = os.getenv("POSTGRES_DB") or os.getenv("DB_NAME", "trai")
-        self._sqlite_path: str = os.getenv(
-            "SQLITE_PATH",
-            str(Path(__file__).resolve().parent.parent.parent.parent / ".local_dev.sqlite3"),
-        )
 
     @property
     def url(self) -> URL:
@@ -67,23 +65,9 @@ class DatabaseConfig:
             database=self._database,
         )
 
-    @property
-    def sqlite_url(self) -> URL:
-        return URL.create(
-            drivername="sqlite",
-            database=self._sqlite_path,
-        )
-
     def create_engine(self, **kwargs: Any) -> Any:
         """创建数据库引擎"""
         return create_engine(self.url, **kwargs)
-
-    def create_sqlite_engine(self, **kwargs: Any) -> Any:
-        return create_engine(
-            self.sqlite_url,
-            connect_args={"check_same_thread": False},
-            **kwargs,
-        )
 
     def create_session_factory(self, engine: Any) -> sessionmaker[Session]:
         """创建会话工厂"""
@@ -103,25 +87,12 @@ class Database:
             connect_args={"connect_timeout": 5},
         )
 
-        try:
-            with self._engine.connect():
-                pass
-        except OperationalError as e:
-            safe_url = self._config.url.render_as_string(hide_password=True)
-            logger.warning(f"PostgreSQL connection failed, fallback to sqlite: url={safe_url}, error={e}")
-            self._engine = self._config.create_sqlite_engine(
-                pool_pre_ping=True,
-                echo=False,
-            )
+        with self._engine.connect():
+            pass
 
-            Base.metadata.create_all(self._engine)
-            self._session_factory = self._config.create_session_factory(self._engine)
-            self._ensure_default_admin()
-        else:
-            self._session_factory = self._config.create_session_factory(self._engine)
-
-            self._ensure_postgres_user_schema()
-            self._ensure_default_admin()
+        self._session_factory = self._config.create_session_factory(self._engine)
+        self._ensure_postgres_user_schema()
+        self._ensure_default_admin()
 
     @property
     def engine(self) -> Any:
@@ -183,80 +154,39 @@ class Database:
                 "updated_at": now,
             }
 
-            try:
-                if self._engine.dialect.name == "sqlite":
-                    next_id = session.execute(text("SELECT COALESCE(MAX(t_id), 0) + 1 FROM t_users")).scalar_one()
-                    params["t_id"] = int(next_id)
-                    session.execute(
-                        text(
-                            """
-                            INSERT INTO t_users (
-                                t_id,
-                                t_user_id,
-                                t_username,
-                                t_display_name,
-                                t_email,
-                                t_password_hash,
-                                t_role,
-                                t_status,
-                                t_created_at,
-                                t_updated_at
-                            ) VALUES (
-                                :t_id,
-                                :user_id,
-                                :username,
-                                :display_name,
-                                :email,
-                                :password_hash,
-                                :role,
-                                :status,
-                                :created_at,
-                                :updated_at
-                            )
-                            """
-                        ),
-                        params,
+            session.execute(
+                text(
+                    """
+                    INSERT INTO t_users (
+                        t_user_id,
+                        t_username,
+                        t_display_name,
+                        t_email,
+                        t_password_hash,
+                        t_role,
+                        t_status,
+                        t_created_at,
+                        t_updated_at
+                    ) VALUES (
+                        :user_id,
+                        :username,
+                        :display_name,
+                        :email,
+                        :password_hash,
+                        :role,
+                        :status,
+                        :created_at,
+                        :updated_at
                     )
-                else:
-                    session.execute(
-                        text(
-                            """
-                            INSERT INTO t_users (
-                                t_user_id,
-                                t_username,
-                                t_display_name,
-                                t_email,
-                                t_password_hash,
-                                t_role,
-                                t_status,
-                                t_created_at,
-                                t_updated_at
-                            ) VALUES (
-                                :user_id,
-                                :username,
-                                :display_name,
-                                :email,
-                                :password_hash,
-                                :role,
-                                :status,
-                                :created_at,
-                                :updated_at
-                            )
-                            """
-                        ),
-                        params,
-                    )
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                logger.warning(f"Ensure default admin skipped: {e}")
+                    """
+                ),
+                params,
+            )
+            session.commit()
         finally:
             session.close()
 
     def _ensure_postgres_user_schema(self) -> None:
-        if self._engine.dialect.name != "postgresql":
-            return
-
         from sqlalchemy import text
 
         session = self.get_session()

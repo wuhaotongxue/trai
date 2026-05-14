@@ -193,7 +193,7 @@ AGENT_TEMPLATES: dict[AgentType, AgentConfig] = {
             supported_formats=["jpg", "jpeg", "png", "gif", "webp", "bmp"],
             streaming_supported=False,
         ),
-        model="gpt-4o-vision-preview",
+        model="qwen-vl-plus",  # DashScope 视觉模型
         system_prompt="""你是一个视觉AI助手,能够理解和分析图像.
 
 能力范围:

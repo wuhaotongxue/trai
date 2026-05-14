@@ -82,6 +82,7 @@ class EnvFileLoader:
         加载顺序:
         1. backend/.env
         2. backend/.env.local
+        3. backend/env/*.env (所有 .env 文件，按字母顺序)
 
         Args:
             无.
@@ -95,6 +96,13 @@ class EnvFileLoader:
         base_dir = Path(__file__).resolve().parent
         EnvFileLoader.load_if_exists(base_dir / ".env")
         EnvFileLoader.load_if_exists(base_dir / ".env.local")
+
+        # 加载 env/ 目录下的所有 .env 文件（按字母顺序）
+        env_dir = base_dir / "env"
+        if env_dir.exists() and env_dir.is_dir():
+            env_files = sorted(env_dir.glob("*.env"))
+            for env_file in env_files:
+                EnvFileLoader.load_if_exists(env_file)
 
 
 class PortCleaner:

@@ -235,6 +235,7 @@ class SendMessageRequest(BaseModel):
 
     content: Annotated[str, Field(min_length=1, max_length=32000, description="消息内容")]
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
+    images: Annotated[list[str] | None, Field(default=None, description="图片 base64 列表")] = None
 
 
 class SendMessageResponse(BaseModel):
@@ -318,19 +319,47 @@ async def send_message(
     messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
-    try:
-        from infrastructure.ai.openai_client import OpenAIClient
+    # 检测是否包含图片，如果是则使用本地视觉模型
+    has_images = bool(request.images)
+    use_local_vision = has_images
 
-        ai_client = OpenAIClient()
-        ai_response = await ai_client.chat(
-            messages=managed_messages,
-            model=chat_session.model or "gpt-4o",
-        )
+    try:
+        if use_local_vision:
+            # 使用本地视觉模型处理图片
+            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+            vision_client = LocalModelScopeVisionClient()
+            
+            # 构建带图片的消息
+            user_message = {"role": "user", "content": []}
+            if request.content:
+                user_message["content"].append({"type": "text", "text": request.content})
+            for img_base64 in request.images:
+                user_message["content"].append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{img_base64}"}
+                })
+            managed_messages.append(user_message)
+            
+            # 调用本地视觉模型
+            result = await vision_client.chat(messages=managed_messages)
+            
+            if result.error:
+                raise Exception(result.error)
+            
+            ai_content = result.content
+        else:
+            from infrastructure.ai.openai_client import OpenAIClient
+            ai_client = OpenAIClient()
+            ai_response = await ai_client.chat(
+                messages=managed_messages,
+                model=chat_session.model or "gpt-4o",
+            )
+            ai_content = ai_response["content"]
 
         user_msg_entity, assistant_msg_entity = history_service.save_conversation_turn(
             session_id=session_id,
             user_content=request.content,
-            assistant_content=ai_response["content"],
+            assistant_content=ai_content,
         )
 
         if message_count_before == 0:
@@ -339,7 +368,7 @@ async def send_message(
 
         logger.info(
             f"消息发送成功 | session_id={session_id} | "
-            f"user_len={len(request.content)} | ai_len={len(ai_response['content'])}"
+            f"user_len={len(request.content)} | ai_len={len(ai_content)}"
         )
 
         return SendMessageResponse(
@@ -401,49 +430,104 @@ async def stream_message(
     context_manager: ContextManager = get_context_manager()
     messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
-    managed_messages.append({"role": msg.role, "content": msg.content})
+    # 构建用户消息(支持多模态 Vision 图片)
+    if msg.images:
+        # 多模态消息: content 为数组, 包含文本和图片
+        user_message: dict[str, Any] = {
+            "role": msg.role,
+            "content": [
+                {"type": "text", "text": msg.content},
+            ],
+        }
+        for img_base64 in msg.images:
+            # 支持 data:image/xxx;base64,xxx 格式和纯 base64 格式
+            if img_base64.startswith("data:"):
+                user_message["content"].append(
+                    {"type": "image_url", "image_url": {"url": img_base64}}
+                )
+            else:
+                # 纯 base64, 默认为 image/png
+                user_message["content"].append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/png;base64,{img_base64}"},
+                    }
+                )
+    else:
+        user_message = {"role": msg.role, "content": msg.content}
 
-    ai_client = OpenAIClient()
+    managed_messages.append(user_message)
 
     import json
+
+    # 检测是否包含图片，如果是则使用本地视觉模型
+    has_images = bool(msg.images)
+    use_local_vision = has_images
 
     async def generate_sse():
         try:
             full_response = ""
-            async for event in ai_client.chat_stream(
-                messages=managed_messages,
-                model=chat_session.model or "gpt-4o",
-            ):
-                if event.type == "token":
-                    full_response += event.content
-                    data_json = json.dumps({"event": "token", "data": event.content})
+            
+            if use_local_vision:
+                # 使用本地 Qwen2.5-VL 视觉模型
+                from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+                vision_client = LocalModelScopeVisionClient()
+                
+                async for chunk in vision_client.chat_stream(
+                    messages=managed_messages,
+                ):
+                    full_response += chunk
+                    data_json = json.dumps({"event": "token", "data": chunk})
                     yield f"event: token\ndata: {data_json}\n\n"
-                elif event.type == "reasoning":
-                    data_json = json.dumps({"event": "reasoning", "data": event.content})
-                    yield f"event: reasoning\ndata: {data_json}\n\n"
-                elif event.type == "tool_call_start":
-                    data_json = json.dumps({"event": "tool_call_start", "data": event.content})
-                    yield f"event: tool_call_start\ndata: {data_json}\n\n"
-                elif event.type == "tool_call_arg":
-                    data_json = json.dumps({"event": "tool_call_arg", "data": event.content})
-                    yield f"event: tool_call_arg\ndata: {data_json}\n\n"
-                elif event.type == "tool_call_end":
-                    data_json = json.dumps({"event": "tool_call_end", "data": event.content})
-                    yield f"event: tool_call_end\ndata: {data_json}\n\n"
-                elif event.type == "done":
-                    usage_data = event.usage if isinstance(event.usage, dict) else {}
-                    data_json = json.dumps({"event": "done", "data": full_response})
-                    yield f"event: done\ndata: {data_json}\n\n"
-                    usage_json = json.dumps({"event": "usage", "data": usage_data})
-                    yield f"event: usage\ndata: {usage_json}\n\n"
-                    history_service.save_conversation_turn(
-                        session_id=session_id,
-                        user_content=msg.content,
-                        assistant_content=full_response,
-                    )
-                    if chat_session.message_count == 0:
-                        title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
-                        history_service.update_session_title(session_id=session_id, title=title)
+                
+                # 发送 done 事件
+                data_json = json.dumps({"event": "done", "data": full_response})
+                yield f"event: done\ndata: {data_json}\n\n"
+                history_service.save_conversation_turn(
+                    session_id=session_id,
+                    user_content=msg.content,
+                    assistant_content=full_response,
+                )
+                if chat_session.message_count == 0:
+                    title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
+                    history_service.update_session_title(session_id=session_id, title=title)
+            else:
+                # 使用 OpenAI/DeepSeek 等文本模型
+                ai_client = OpenAIClient()
+                async for event in ai_client.chat_stream(
+                    messages=managed_messages,
+                    model=chat_session.model or "gpt-4o",
+                ):
+                    if event.type == "token":
+                        full_response += event.content
+                        data_json = json.dumps({"event": "token", "data": event.content})
+                        yield f"event: token\ndata: {data_json}\n\n"
+                    elif event.type == "reasoning":
+                        data_json = json.dumps({"event": "reasoning", "data": event.content})
+                        yield f"event: reasoning\ndata: {data_json}\n\n"
+                    elif event.type == "tool_call_start":
+                        data_json = json.dumps({"event": "tool_call_start", "data": event.content})
+                        yield f"event: tool_call_start\ndata: {data_json}\n\n"
+                    elif event.type == "tool_call_arg":
+                        data_json = json.dumps({"event": "tool_call_arg", "data": event.content})
+                        yield f"event: tool_call_arg\ndata: {data_json}\n\n"
+                    elif event.type == "tool_call_end":
+                        data_json = json.dumps({"event": "tool_call_end", "data": event.content})
+                        yield f"event: tool_call_end\ndata: {data_json}\n\n"
+                    elif event.type == "done":
+                        usage_data = event.usage if isinstance(event.usage, dict) else {}
+                        data_json = json.dumps({"event": "done", "data": full_response})
+                        yield f"event: done\ndata: {data_json}\n\n"
+                        usage_json = json.dumps({"event": "usage", "data": usage_data})
+                        yield f"event: usage\ndata: {usage_json}\n\n"
+                        history_service.save_conversation_turn(
+                            session_id=session_id,
+                            user_content=msg.content,
+                            assistant_content=full_response,
+                        )
+                        if chat_session.message_count == 0:
+                            title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
+                            history_service.update_session_title(session_id=session_id, title=title)
         except asyncio.CancelledError:
             data_json = json.dumps({"event": "error", "data": "Stream cancelled"})
             yield f"event: error\ndata: {data_json}\n\n"
