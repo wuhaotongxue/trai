@@ -306,6 +306,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Docker backup moved to /admin/backup page */}
     </div>
   );
 }

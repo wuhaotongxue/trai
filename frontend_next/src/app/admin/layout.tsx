@@ -14,7 +14,7 @@ import {
   Activity, AlertCircle, BarChart3, Bell, Bot, ChevronDown, ChevronRight,
   ChevronsLeft, ChevronsRight, Cpu, Database, FileText, Globe, LayoutDashboard,
   LogOut, MessageSquare, RefreshCw, Search, Settings, UserPlus, Users, Wifi,
-  User as UserIcon,
+  User as UserIcon, HardDrive,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { ThemeToggle } from "@/components/website/theme_toggle";
@@ -130,6 +130,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
       key: "systemSettings",
       items: [
         { label: translate("admin.settings"), href: "/admin/settings", icon: Settings, desc: translate("admin.settings.desc") },
+        { label: translate("admin.backup"), href: "/admin/backup", icon: HardDrive, desc: translate("admin.backup.desc") },
         { label: translate("admin.i18n"), href: "/admin/i18n", icon: Globe, desc: translate("admin.i18n.desc") },
         { label: translate("admin.database"), href: "/admin/database", icon: Database, desc: translate("admin.database.desc") },
         { label: translate("admin.network"), href: "/admin/network", icon: Wifi, desc: translate("admin.network.desc") },
