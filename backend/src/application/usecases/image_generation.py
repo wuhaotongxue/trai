@@ -17,7 +17,10 @@ from domain.entities.image_generation import (
 from domain.interfaces.image_generation_interfaces import (
     IImageGenerationRepository,
 )
-from infrastructure.ai.modelscope_client import ModelScopeClient
+from infrastructure.ai.image_client_factory import (
+    IImageGenerationClient,
+    ImageClientFactory,
+)
 
 
 @dataclass
@@ -53,10 +56,10 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
 
     def __init__(
         self,
-        client: ModelScopeClient | None = None,
+        client: IImageGenerationClient | None = None,
         repository: IImageGenerationRepository | None = None,
     ) -> None:
-        self._client = client or ModelScopeClient()
+        self._client = client or ImageClientFactory.create()
         self._repository = repository
 
     async def execute(self, input_data: ImageGenerationInput) -> ImageGenerationOutput:
@@ -87,7 +90,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
                 steps=input_data.steps,
                 seed=input_data.seed,
             )
-            image_url = result["image_url"]
+            image_url = result.image_url
             generation.mark_completed(image_url)
 
             if self._repository:
