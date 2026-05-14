@@ -895,7 +895,7 @@ export function ChatPanel() {
                           </ReactMarkdown>
                         </div>
 
-                        {msg.role === "assistant" && !isStreaming && msg.content && (
+                        {msg.content && (
                           <button
                             type="button"
                             onClick={() => handleCopy(msg.id, msg.content)}
