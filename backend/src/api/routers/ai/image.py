@@ -16,7 +16,6 @@ from application.usecases.image_generation import (
     ImageGenerationInput,
     ImageGenerationUseCase,
 )
-from infrastructure.ai.modelscope_client import ModelScopeClient
 from infrastructure.database import get_session
 
 router = APIRouter()
@@ -90,8 +89,7 @@ async def generate_image(
     try:
         with get_session() as db:
             repo = ImageGenerationRepository(db)
-            client = ModelScopeClient()
-            use_case = ImageGenerationUseCase(client=client, repository=repo)
+            use_case = ImageGenerationUseCase(repository=repo)
 
             input_data = ImageGenerationInput(
                 prompt=request.prompt,
@@ -132,8 +130,7 @@ async def generate_image_to_image(
     try:
         with get_session() as db:
             repo = ImageGenerationRepository(db)
-            client = ModelScopeClient()
-            use_case = ImageGenerationUseCase(client=client, repository=repo)
+            use_case = ImageGenerationUseCase(repository=repo)
 
             input_data = ImageGenerationInput(
                 prompt=request.prompt,
@@ -172,16 +169,13 @@ async def list_image_models(
     Returns:
         dict: 模型列表
     """
-    models = [
-        {"id": "AI-ModelScope/FLUX.1-dev", "name": "FLUX.1 Dev", "description": "高质量图片生成"},
-        {"id": "AI-ModelScope/FLUX.1-schnell", "name": "FLUX.1 Schnell", "description": "快速图片生成"},
-        {"id": "AI-ModelScope/SD3-Medium", "name": "SD3 Medium", "description": "Stable Diffusion 3"},
-        {"id": "AI-ModelScope/Wanx", "name": "Wanx", "description": "阿里图片生成模型"},
-    ]
+    from infrastructure.ai.image_client_factory import ImageClientFactory
+
+    models = ImageClientFactory.get_available_models()
 
     return {
         "models": models,
-        "default": "AI-ModelScope/FLUX.1-dev",
+        "default": models[0]["id"] if models else "local",
     }
 
 
