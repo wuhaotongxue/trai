@@ -35,12 +35,9 @@ __pycache__/
 .env
 .env.local
 .env.*.local
-# env/ 目录下所有 .env 文件（包含敏感配置）
-env/*.env
-env/*.env.local
-# 但保留 env_index.env 作为示例
-!env/env_index.env
-# env_example/ 目录作为备份示例
+# env/ 目录下所有文件（包含敏感配置，全部忽略）
+env/
+# env_example/ 目录作为备份示例（敏感信息已清理，可提交）
 !env_example/
 
 # IDE 配置
