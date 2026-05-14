@@ -189,12 +189,12 @@ class LocalModelScopeImageClient(IImageGenerationClient):
             logger.info(f"加载本地 ModelScope 模型: {self._model_path} | 设备: {device_str} | 精度: {dtype}")
 
             try:
-                from modelscope import ZImagePipeline
+                from modelscope import pipeline
 
-                self._pipe = ZImagePipeline.from_pretrained(
-                    self._model_path,
+                self._pipe = pipeline(
+                    "text-to-image",
+                    model=self._model_path,
                     torch_dtype=dtype,
-                    low_cpu_mem_usage=False,
                 )
                 self._pipe.to(device_str)
                 logger.info(f"模型加载完成，运行在设备: {device_str}")
@@ -204,12 +204,12 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                 logger.warning("尝试使用 CPU 加载模型")
                 device_str = "cpu"
                 dtype = torch.float32
-                from modelscope import ZImagePipeline
+                from modelscope import pipeline
 
-                self._pipe = ZImagePipeline.from_pretrained(
-                    self._model_path,
+                self._pipe = pipeline(
+                    "text-to-image",
+                    model=self._model_path,
                     torch_dtype=dtype,
-                    low_cpu_mem_usage=False,
                 )
                 logger.info("模型已切换至 CPU 加载完成")
 
