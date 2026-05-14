@@ -145,9 +145,7 @@ export function Sidebar() {
                       <div className="absolute right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <DropdownMenu>
                       <DropdownMenuTrigger onClick={e => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </Button>
+                        <MoreVertical className="h-3.5 w-3.5 cursor-pointer hover:text-blue-500" />
                       </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-32">
                             <DropdownMenuItem onClick={() => {

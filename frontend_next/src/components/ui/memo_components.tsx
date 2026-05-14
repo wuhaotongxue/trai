@@ -123,11 +123,14 @@ export const MemoToolCall = memo(function MemoToolCall({
         </div>
       )}
 
-      {status === "completed" && result && (
-        <div className="tool-result">
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
+      {status === "completed" && result != null && (() => {
+        const resultStr = JSON.stringify(result as Record<string, unknown>, null, 2);
+        return (
+          <div className="tool-result">
+            <pre>{resultStr}</pre>
+          </div>
+        );
+      })()}
 
       {status === "error" && (
         <div className="tool-error">Tool execution failed</div>

@@ -101,8 +101,8 @@ export function registerClipboardHandlers(): void {
 export function registerNotificationHandlers(): void {
   ipcDialogHandler(
     IPCChannel.NOTIFICATION_SHOW,
-    { title: string; body?: string; icon?: string },
-    async (payload) => {
+    { title: "", body: "", icon: "" },
+    async (payload: { title: string; body?: string; icon?: string }) => {
       if (!Notification.isSupported()) {
         throw new Error("System notifications not supported");
       }

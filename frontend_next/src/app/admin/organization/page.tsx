@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/toast/use_toast";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 /**
  * 部门树项组件
@@ -110,6 +111,7 @@ export default function OrganizationPage() {
   const [permTarget, setPermTarget] = useState<UserInfo | null>(null);
   const [permRole, setPermRole] = useState("");
   const { toast } = useToast();
+  const { translate } = useAdminI18n();
 
   /**
    * 获取部门树
@@ -162,7 +164,7 @@ export default function OrganizationPage() {
       fetchUsers();
     } catch (e) {
       console.error("Sync failed", e);
-      alert("同步失败,请查看控制台日志");
+      toast({ message: translate("admin.organization.sync_failed"), variant: "error" });
     } finally {
       setSyncing(false);
     }
@@ -181,11 +183,11 @@ export default function OrganizationPage() {
         method: "PUT",
         body: JSON.stringify({ role: permRole }),
       });
-      toast({ message: `已将 ${permTarget.display_name} 角色更新为 ${permRole === "admin" ? "管理员" : permRole === "vip" ? "VIP" : "普通用户"}`, variant: "success" });
+      toast({ message: translate("admin.organization.role_updated").replace("{name}", permTarget.display_name || "").replace("{role}", permRole === "admin" ? translate("admin.organization.admin") : permRole === "vip" ? translate("admin.organization.vip") : translate("admin.organization.normal_user")), variant: "success" });
       setPermDialogOpen(false);
       fetchUsers();
     } catch (e: any) {
-      toast({ message: e.message || "更新角色失败", variant: "error" });
+      toast({ message: e.message || translate("admin.organization.role_update_failed"), variant: "error" });
     }
   };
 
@@ -198,17 +200,17 @@ export default function OrganizationPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">组织架构</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理企业部门,团队及成员结构</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.organization.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{translate("admin.organization.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={handleSync} disabled={syncing} variant="outline" className="h-9 gap-2 shadow-sm">
             <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "正在同步..." : "从企业微信同步"}
+            {syncing ? translate("admin.organization.syncing") || "正在同步..." : translate("admin.organization.sync") || "从企业微信同步"}
           </Button>
           <Button className="h-9 gap-2 shadow-sm">
             <Plus className="h-4 w-4" />
-            新建部门
+            {translate("admin.organization.create")}
           </Button>
         </div>
       </div>
@@ -219,11 +221,11 @@ export default function OrganizationPage() {
             <div className="flex items-center gap-3 text-emerald-600">
               <RefreshCw className="h-5 w-5" />
               <div className="text-sm font-medium">
-                同步完成: 更新了 {syncResult.departments} 个部门,{syncResult.users} 名用户
+                {translate("admin.organization.sync_complete")}: {translate("admin.organization.sync_departments").replace("{departments}", syncResult.departments.toString())},{translate("admin.organization.sync_users").replace("{users}", syncResult.users.toString())}
               </div>
             </div>
             <Button size="sm" variant="ghost" onClick={() => setSyncResult(null)} className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10">
-              关闭
+              {translate("admin.organization.sync_close")}
             </Button>
           </CardContent>
         </Card>
@@ -236,7 +238,7 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-blue-500" />
-                部门
+                {translate("admin.organization.department")}
               </CardTitle>
             </div>
           </CardHeader>
@@ -250,7 +252,7 @@ export default function OrganizationPage() {
             >
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4" />
-                <span className="text-sm font-medium">全公司</span>
+                <span className="text-sm font-medium">{translate("admin.organization.all_company")}</span>
               </div>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedDeptId === null ? "bg-blue-100 dark:bg-blue-800" : "bg-slate-100 dark:bg-slate-800"}`}>
                 {total}
@@ -273,12 +275,12 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-500" />
-                成员列表
+                {translate("admin.organization.members")}
               </CardTitle>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
-                  placeholder="搜索成员..." 
+                  placeholder={translate("admin.organization.search_member")} 
                   className="pl-9 h-9" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -291,11 +293,11 @@ export default function OrganizationPage() {
               <table className="w-full text-sm text-left border-collapse">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 text-muted-foreground sticky top-0">
                   <tr>
-                    <th className="p-4 font-medium">姓名</th>
-                    <th className="p-4 font-medium">工号</th>
-                    <th className="p-4 font-medium">邮箱</th>
-                    <th className="p-4 font-medium">角色</th>
-                    <th className="p-4 font-medium text-right">操作</th>
+                    <th className="p-4 font-medium">{translate("admin.organization.col_name")}</th>
+                    <th className="p-4 font-medium">{translate("admin.organization.col_employee_id")}</th>
+                    <th className="p-4 font-medium">{translate("admin.organization.col_email")}</th>
+                    <th className="p-4 font-medium">{translate("admin.organization.col_role")}</th>
+                    <th className="p-4 font-medium text-right">{translate("admin.organization.col_action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -303,13 +305,13 @@ export default function OrganizationPage() {
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-muted-foreground">
                         <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2" />
-                        加载中...
+                        {translate("admin.organization.loading")}
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                        未找到成员数据
+                        {translate("admin.organization.no_members")}
                       </td>
                     </tr>
                   ) : (
@@ -335,13 +337,13 @@ export default function OrganizationPage() {
                             user.role === "vip" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
                             "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
                           }`}>
-                            {user.role === "admin" ? "管理员" : user.role === "vip" ? "VIP" : "普通用户"}
+                            {user.role === "admin" ? translate("admin.organization.admin") : user.role === "vip" ? translate("admin.organization.vip") : translate("admin.organization.normal_user")}
                           </span>
                         </td>
                         <td className="p-4 text-right">
                           <Button variant="ghost" size="sm" className="h-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20" onClick={() => handleOpenPerm(user)}>
                             <Shield className="h-3.5 w-3.5 mr-1" />
-                            管理
+                            {translate("admin.organization.manage_permission")}
                           </Button>
                         </td>
                       </tr>
@@ -355,7 +357,7 @@ export default function OrganizationPage() {
             {total > 0 && (
               <div className="p-4 border-t flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                 <div className="text-xs text-muted-foreground">
-                  显示 {startIdx} 到 {endIdx} 条,共 {total} 条
+                  {translate("admin.organization.showing")} {startIdx} {translate("admin.organization.to")} {endIdx},{translate("admin.organization.total")} {total} {translate("admin.organization.items")}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -368,7 +370,7 @@ export default function OrganizationPage() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <div className="text-xs font-medium px-2">
-                    第 {page} / {totalPages} 页
+                    {translate("admin.organization.page")} {page} / {totalPages} {translate("admin.organization.pages")}
                   </div>
                   <Button 
                     variant="outline" 
@@ -380,7 +382,7 @@ export default function OrganizationPage() {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                   <div className="flex items-center gap-1.5 ml-2 border-l pl-3 border-border/60">
-                    <span className="text-[10px] text-muted-foreground">跳转</span>
+                    <span className="text-[10px] text-muted-foreground">{translate("admin.organization.jump")}</span>
                     <Input
                       type="number"
                       min={1}
@@ -409,7 +411,7 @@ export default function OrganizationPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-500" />
-              设置用户角色
+              {translate("admin.organization.set_role")}
             </DialogTitle>
           </DialogHeader>
           {permTarget && (
@@ -424,12 +426,12 @@ export default function OrganizationPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">选择角色</label>
+                <label className="text-sm font-medium">{translate("admin.organization.select_role")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { value: "admin", label: "管理员", desc: "全部权限", color: "bg-blue-500" },
-                    { value: "vip", label: "VIP", desc: "高级用户", color: "bg-amber-500" },
-                    { value: "normal", label: "普通用户", desc: "基础权限", color: "bg-slate-500" },
+                    { value: "admin", label: translate("admin.organization.admin"), desc: translate("admin.organization.admin_desc"), color: "bg-blue-500" },
+                    { value: "vip", label: translate("admin.organization.vip"), desc: translate("admin.organization.vip_desc"), color: "bg-amber-500" },
+                    { value: "normal", label: translate("admin.organization.normal_user"), desc: translate("admin.organization.normal_desc"), color: "bg-slate-500" },
                   ].map((role) => (
                     <button
                       key={role.value}
@@ -454,10 +456,10 @@ export default function OrganizationPage() {
           )}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setPermDialogOpen(false)}>
-              取消
+              {translate("admin.organization.cancel")}
             </Button>
             <Button onClick={handleSavePerm}>
-              保存设置
+              {translate("admin.organization.save_settings")}
             </Button>
           </div>
         </DialogContent>

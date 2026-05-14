@@ -245,6 +245,14 @@ class SendMessageResponse(BaseModel):
     assistant_message: dict[str, Any] = Field(description="助手回复")
 
 
+class StreamMessageRequest(BaseModel):
+    """流式发送消息请求"""
+
+    content: Annotated[str, Field(min_length=1, max_length=32000, description="消息内容")]
+    role: Annotated[str, Field(default="user", description="消息角色")] = "user"
+    images: list[str] | None = Field(default=None, description="图片列表(base64)")
+
+
 class RenameSessionRequest(BaseModel):
     """重命名会话请求"""
 
@@ -349,6 +357,104 @@ async def send_message(
 
 
 @router.post(
+    "/sessions/{session_id}/messages/stream",
+    tags=["会话"],
+    summary="流式发送消息(SSE)",
+    description="向指定会话发送消息并以SSE流式返回AI回复",
+)
+async def stream_message(
+    session_id: str,
+    request: Request,
+    current_user: CurrentUser | None = None,
+    session: Annotated[Session, Depends(get_db_session)] = None,
+):
+    """流式发送消息(SSE)
+
+    Args:
+        session_id: 会话 ID
+        content: 消息内容
+        role: 角色 (user/assistant)
+        current_user: 当前登录用户
+        session: 数据库会话
+
+    Returns:
+        StreamingResponse: SSE流
+    """
+    from fastapi.responses import StreamingResponse
+    from infrastructure.ai.openai_client import OpenAIClient
+
+    body = await request.json()
+    msg = StreamMessageRequest(**body)
+
+    user_id = current_user.get("user_id") if current_user else None
+    role_check = current_user.get("role", "normal") if current_user else "normal"
+
+    history_service = get_chat_history_service(session)
+    chat_session = history_service.load_session_history(session_id)
+
+    if not chat_session:
+        raise HTTPException(status_code=404, detail="会话不存在")
+
+    if role_check != "admin" and chat_session.metadata.get("user_id") != user_id:
+        raise HTTPException(status_code=403, detail="无权访问此会话")
+
+    context_manager: ContextManager = get_context_manager()
+    messages_dict = chat_session.to_ai_format()
+    managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
+    managed_messages.append({"role": msg.role, "content": msg.content})
+
+    ai_client = OpenAIClient()
+
+    import json
+
+    async def generate_sse():
+        try:
+            full_response = ""
+            async for event in ai_client.chat_stream(
+                messages=managed_messages,
+                model=chat_session.model or "gpt-4o",
+            ):
+                if event.type == "token":
+                    full_response += event.content
+                    data_json = json.dumps({"event": "token", "data": event.content})
+                    yield f"event: token\ndata: {data_json}\n\n"
+                elif event.type == "reasoning":
+                    data_json = json.dumps({"event": "reasoning", "data": event.content})
+                    yield f"event: reasoning\ndata: {data_json}\n\n"
+                elif event.type == "tool_call_start":
+                    data_json = json.dumps({"event": "tool_call_start", "data": event.content})
+                    yield f"event: tool_call_start\ndata: {data_json}\n\n"
+                elif event.type == "tool_call_arg":
+                    data_json = json.dumps({"event": "tool_call_arg", "data": event.content})
+                    yield f"event: tool_call_arg\ndata: {data_json}\n\n"
+                elif event.type == "tool_call_end":
+                    data_json = json.dumps({"event": "tool_call_end", "data": event.content})
+                    yield f"event: tool_call_end\ndata: {data_json}\n\n"
+                elif event.type == "done":
+                    usage_data = event.usage if isinstance(event.usage, dict) else {}
+                    data_json = json.dumps({"event": "done", "data": full_response})
+                    yield f"event: done\ndata: {data_json}\n\n"
+                    usage_json = json.dumps({"event": "usage", "data": usage_data})
+                    yield f"event: usage\ndata: {usage_json}\n\n"
+                    history_service.save_conversation_turn(
+                        session_id=session_id,
+                        user_content=msg.content,
+                        assistant_content=full_response,
+                    )
+                    if chat_session.message_count == 0:
+                        title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
+                        history_service.update_session_title(session_id=session_id, title=title)
+        except asyncio.CancelledError:
+            data_json = json.dumps({"event": "error", "data": "Stream cancelled"})
+            yield f"event: error\ndata: {data_json}\n\n"
+        except Exception as e:
+            data_json = json.dumps({"event": "error", "data": str(e)})
+            yield f"event: error\ndata: {data_json}\n\n"
+
+    return StreamingResponse(generate_sse(), media_type="text/event-stream")
+
+
+@router.post(
     "/sessions",
     response_model=CreateSessionResponse,
     tags=["会话"],
@@ -386,9 +492,9 @@ async def create_session(
     )
 
     return CreateSessionResponse(
-        session_id=db_session.t_session_id,
-        title=db_session.t_title,
-        model=db_session.t_model,
+        session_id=db_session.session_id,
+        title=db_session.title,
+        model=db_session.model,
         message="会话创建成功",
     )
 
@@ -604,7 +710,7 @@ async def delete_session(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.t_user_id != user_id:
+    if role != "admin" and chat_session.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权操作此会话"},

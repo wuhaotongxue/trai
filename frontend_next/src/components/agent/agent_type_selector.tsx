@@ -24,7 +24,7 @@ import {
   FileText,
   Calculator,
   TrendingUp,
-  TableSpreadsheet,
+  FileSpreadsheet,
   Sparkles,
   ChevronDown,
   Loader2,
@@ -87,7 +87,7 @@ const CATEGORY_CONFIG: Record<
 const DEFAULT_AGENTS: AgentListItem[] = [
   // Chat agents
   {
-    id: "chat",
+    agent_id: "chat",
     name: "General Chat",
     description: "Multi-turn conversation assistant",
     type: "chat",
@@ -98,7 +98,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "Bot",
   },
   {
-    id: "code_assistant",
+    agent_id: "code_assistant",
     name: "Code Assistant",
     description: "Programming and debugging helper",
     type: "code_assistant",
@@ -109,7 +109,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "Code",
   },
   {
-    id: "translator",
+    agent_id: "translator",
     name: "Translator",
     description: "Multi-language translation expert",
     type: "translator",
@@ -120,7 +120,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "Languages",
   },
   {
-    id: "writer",
+    agent_id: "writer",
     name: "Writer",
     description: "Content creation assistant",
     type: "writer",
@@ -133,7 +133,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
 
   // Vision agents
   {
-    id: "vision",
+    agent_id: "vision",
     name: "Vision Analyzer",
     description: "Image understanding and analysis",
     type: "vision",
@@ -144,7 +144,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "Eye",
   },
   {
-    id: "image_generator",
+    agent_id: "image_generator",
     name: "Image Generator",
     description: "AI image creation (DALL-E)",
     type: "image_generator",
@@ -155,7 +155,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "ImagePlus",
   },
   {
-    id: "ocr_agent",
+    agent_id: "ocr_agent",
     name: "OCR Scanner",
     description: "Text extraction from images",
     type: "ocr_agent",
@@ -168,7 +168,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
 
   // Audio agents
   {
-    id: "speech_to_text",
+    agent_id: "speech_to_text",
     name: "Speech to Text",
     description: "Voice transcription (Whisper)",
     type: "speech_to_text",
@@ -179,7 +179,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "Mic",
   },
   {
-    id: "text_to_speech",
+    agent_id: "text_to_speech",
     name: "Text to Speech",
     description: "Natural voice synthesis",
     type: "text_to_speech",
@@ -192,7 +192,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
 
   // Document agents
   {
-    id: "pdf_parser",
+    agent_id: "pdf_parser",
     name: "PDF Parser",
     description: "Extract text and tables from PDFs",
     type: "pdf_parser",
@@ -203,7 +203,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "FileText",
   },
   {
-    id: "document_qa",
+    agent_id: "document_qa",
     name: "Document QA",
     description: "Question answering on documents",
     type: "document_qa",
@@ -214,7 +214,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "FileSearch",
   },
   {
-    id: "summarizer",
+    agent_id: "summarizer",
     name: "Summarizer",
     description: "Generate concise summaries",
     type: "summarizer",
@@ -227,7 +227,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
 
   // Data agents
   {
-    id: "data_analyst",
+    agent_id: "data_analyst",
     name: "Data Analyst",
     description: "Statistical analysis and insights",
     type: "data_analyst",
@@ -238,7 +238,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "BarChart3",
   },
   {
-    id: "chart_generator",
+    agent_id: "chart_generator",
     name: "Chart Generator",
     description: "Create visualizations from data",
     type: "chart_generator",
@@ -249,7 +249,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     icon: "TrendingUp",
   },
   {
-    id: "excel_processor",
+    agent_id: "excel_processor",
     name: "Excel Processor",
     description: "Process spreadsheet data",
     type: "excel_processor",
@@ -257,7 +257,7 @@ const DEFAULT_AGENTS: AgentListItem[] = [
     input_modalities: ["data"],
     output_modalities: ["data", "text"],
     streaming_supported: true,
-    icon: "TableSpreadsheet",
+    icon: "FileSpreadsheet",
   },
 ];
 
@@ -278,7 +278,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
   Calculator,
   TrendingUp,
-  TableSpreadsheet,
+  FileSpreadsheet,
   Sparkles,
 };
 
@@ -396,7 +396,7 @@ export function AgentTypeSelector({
         >
           <option value="auto">Auto-detect</option>
           {agents.map((agent) => (
-            <option key={agent.id} value={agent.type}>
+            <option key={agent.agent_id} value={agent.type}>
               {agent.name}
             </option>
           ))}
@@ -458,7 +458,7 @@ export function AgentTypeSelector({
 
                   return (
                     <button
-                      key={agent.id}
+                      key={agent.agent_id}
                       type="button"
                       onClick={() => handleSelect(agent.type)}
                       disabled={disabled}

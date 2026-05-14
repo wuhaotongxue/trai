@@ -36,14 +36,14 @@ class SessionRepository:
         """
         return ChatSession(
             session_id=model.t_session_id,
+            title=model.t_title,
+            user_id=model.t_user_id,
             model=model.t_model,
             messages=model.t_messages or [],
             status=SessionStatus.ACTIVE if model.t_deleted_at is None else SessionStatus.COMPLETED,
             created_at=model.t_created_at,
             updated_at=model.t_updated_at,
             metadata={
-                "user_id": model.t_user_id,
-                "title": model.t_title,
                 "extra_data": model.t_extra_data,
                 "created_by": model.t_created_by,
                 "updated_by": model.t_updated_by,

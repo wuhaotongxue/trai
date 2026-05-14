@@ -244,8 +244,7 @@ export function ElectronChatPanel({
                             style={vscDarkPlus}
                             language={language}
                             PreTag="div"
-                            customStyle={{ margin: 0, borderRadius: "8px", fontSize: "13px" }}
-                            {...props}
+                            customStyle={{}}
                           >
                             {String(children).replace(/\n$/, "")}
                           </SyntaxHighlighter>
