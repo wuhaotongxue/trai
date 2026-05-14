@@ -75,6 +75,7 @@ class SessionRepository:
             t_user_id=user_id,
             t_title=title,
             t_model=model,
+            t_messages=[],
             t_extra_data=extra_data or {},
         )
         self._session.add(db_session)

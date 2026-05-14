@@ -20,7 +20,7 @@ class DepartmentModel(Base):
     __tablename__ = "t_departments"
     __comment__ = "部门表,存储企业组织架构"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
 
     t_dept_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, index=True)
@@ -51,7 +51,7 @@ class UserDepartmentMappingModel(Base):
     __tablename__ = "t_user_department_mapping"
     __comment__ = "用户-部门多对多映射表"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
 
     t_user_id: Mapped[str] = mapped_column(String(64), ForeignKey("t_users.t_user_id"), nullable=False, index=True)

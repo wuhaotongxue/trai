@@ -31,33 +31,41 @@ description: "启动 TRAI 项目的前后端和客户端服务，包含后端、
 - 服务启动后，告诉用户各服务的端口和地址即可
 - 除非用户明确要求，不要反复读取 terminal 文件检查状态
 
+### 5. 禁止使用 nohup 和 2>&1
+
+- **禁止**使用 `nohup ... &` 方式启动
+- **禁止**使用 `> /tmp/xxx.log 2>&1` 重定向
+- 使用 Cursor Shell 的 `block_until_ms: 0` 参数后台运行
+
 ## 服务启动命令
 
 ### 后端（conda env: trai31313，端口: 5666）
 
 **调用 1：**
-```powershell
+```bash
 conda activate trai31313
 ```
 
 **调用 2：**
-```powershell
-python "e:\code\zzgit\trai\backend\run.py"
+```bash
+cd /home/qyjgylc_whf/code/trai/backend
+python run.py
 ```
 
-工作目录：`e:\code\zzgit\trai\backend`
+**后台运行方式：**
+使用 `block_until_ms: 0` 参数启动后台进程，不使用 nohup 或重定向。
 
 ### 前端（端口: 3000）
 
-```powershell
-cd "e:\code\zzgit\trai\frontend_next"
+```bash
+cd /home/qyjgylc_whf/code/trai/frontend_next
 pnpm dev
 ```
 
 ### 客户端（端口: 由应用自行管理）
 
-```powershell
-cd "e:\code\zzgit\trai\client_electron"
+```bash
+cd /home/qyjgylc_whf/code/trai/client_electron
 pnpm dev
 ```
 
@@ -68,14 +76,15 @@ pnpm dev
 3. 如果需要启动：
    - 后端分两条命令写，两个 Shell 调用
    - 前端和客户端各一个 Shell 调用
-4. 启动后等 10-15 秒，然后告诉用户：
+4. 使用 `block_until_ms: 0` 参数让服务后台运行
+5. 启动后告诉用户：
    - 后端地址：http://localhost:5666
    - 前端地址：http://localhost:3000
    - 客户端：Electron 窗口
 
 ## 已知问题与规避
 
-### conda run / conda activate 卡住
+### conda activate 卡住
 
 - **原因**：`&&` / `;` / `&` 等符号在 PowerShell 中触发语法解析导致挂起
 - **规避**：分两个 Shell 调用写，先 activate，确认后再 python
@@ -84,3 +93,8 @@ pnpm dev
 
 - 这是 Windows 上常见的无害警告，客户端提前关闭连接导致
 - 不影响服务正常运行，无需处理
+
+### www 用户占用端口
+
+- 如果 `www` 用户的旧进程占用端口，先用 `fuser -k 5666/tcp` 释放端口
+- 然后再启动新进程

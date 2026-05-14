@@ -110,7 +110,13 @@ export function ChatPanel() {
     musicGallery,
     removeFromMusicGallery,
     clearMusicGallery,
+    hydrateGalleries,
   } = useAgentStore();
+
+  // 从 localStorage 恢复 gallery 数据
+  useEffect(() => {
+    hydrateGalleries();
+  }, [hydrateGalleries]);
 
   const [input, setInput] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -221,8 +227,22 @@ export function ChatPanel() {
 
     const content = input.trim();
     const imageList = [...images];
+    
+    // 将 uploadedFiles 中的图片也转换为 base64
+    for (const fileInfo of uploadedFiles) {
+      if (fileInfo.fileType === "image") {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(fileInfo.file);
+        });
+        imageList.push(base64);
+      }
+    }
+    
     setInput("");
     setImages([]);
+    setUploadedFiles([]);
     setApiError(null);
 
     try {

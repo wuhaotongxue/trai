@@ -100,6 +100,7 @@ class MultimodalProcessor:
     def __init__(self):
         """初始化多模态处理器"""
         self._ai_client = None
+        self._vision_client = None
         logger.info("MultimodalProcessor initialized")
 
     def _get_ai_client(self):
@@ -109,6 +110,25 @@ class MultimodalProcessor:
 
             self._ai_client = OpenAIClient()
         return self._ai_client
+
+    def _get_vision_client(self):
+        """延迟初始化本地视觉客户端"""
+        if self._vision_client is None:
+            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+
+            self._vision_client = LocalModelScopeVisionClient()
+        return self._vision_client
+
+    def _use_local_vision(self) -> bool:
+        """判断是否使用本地视觉模型"""
+        vision_model = os.getenv("VISION_MODEL", "")
+        vision_provider = os.getenv("VISION_PROVIDER", os.getenv("LLM_PROVIDER", ""))
+        return (
+            vision_model.startswith("Qwen/")
+            or vision_model.startswith("local:")
+            or vision_provider == "qwen_vl"
+            or vision_provider == "local_vision"
+        )
 
     async def analyze_image(
         self,
@@ -144,45 +164,81 @@ class MultimodalProcessor:
             # 转换为base64
             base64_image = base64.b64encode(raw_data).decode("utf-8")
 
-            client = self._get_ai_client()
+            # 判断是否使用本地视觉模型
+            if self._use_local_vision():
+                # 使用本地 ModelScope 视觉模型
+                logger.info("使用本地 ModelScope 视觉模型")
+                vision_client = self._get_vision_client()
 
-            # 构建Vision API请求
-            messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{content_type};base64,{base64_image}",
-                                "detail": detail,
+                response = await vision_client.analyze_image(
+                    image_data=raw_data,
+                    prompt=prompt,
+                    max_tokens=kwargs.get("max_tokens", 2048),
+                    temperature=kwargs.get("temperature", 0.7),
+                )
+
+                if response.error:
+                    raise Exception(response.error)
+
+                duration_ms = (time.perf_counter() - start_time) * 1000
+
+                return ProcessingResult(
+                    status=ProcessingStatus.SUCCESS,
+                    output_type="text",
+                    output_data=response.content,
+                    processing_time_ms=duration_ms,
+                    tokens_used=response.usage.get("total_tokens", 0),
+                    metadata={
+                        "model": response.model,
+                        "provider": "local_vision",
+                        "image_size_mb": len(raw_data) / (1024 * 1024),
+                        "detail_level": detail,
+                    },
+                )
+            else:
+                # 使用 API 视觉模型
+                logger.info("使用 API 视觉模型")
+                vision_model = os.getenv("VISION_MODEL", "gpt-4o-vision-preview")
+                client = self._get_ai_client()
+
+                # 构建Vision API请求
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:{content_type};base64,{base64_image}",
+                                    "detail": detail,
+                                },
                             },
-                        },
-                    ],
-                }
-            ]
+                        ],
+                    }
+                ]
 
-            response = await client.chat(
-                messages=messages,
-                model="gpt-4o-vision-preview",
-                max_tokens=2000,
-            )
+                response = await client.chat(
+                    messages=messages,
+                    model=vision_model,
+                    max_tokens=2000,
+                )
 
-            duration_ms = (time.perf_counter() - start_time) * 1000
+                duration_ms = (time.perf_counter() - start_time) * 1000
 
-            return ProcessingResult(
-                status=ProcessingStatus.SUCCESS,
-                output_type="text",
-                output_data=response.get("content", ""),
-                processing_time_ms=duration_ms,
-                tokens_used=response.get("total_tokens", 0),
-                metadata={
-                    "model": "gpt-4o-vision-preview",
-                    "image_size_mb": len(raw_data) / (1024 * 1024),
-                    "detail_level": detail,
-                },
-            )
+                return ProcessingResult(
+                    status=ProcessingStatus.SUCCESS,
+                    output_type="text",
+                    output_data=response.get("content", ""),
+                    processing_time_ms=duration_ms,
+                    tokens_used=response.get("total_tokens", 0),
+                    metadata={
+                        "model": vision_model,
+                        "provider": "api",
+                        "image_size_mb": len(raw_data) / (1024 * 1024),
+                        "detail_level": detail,
+                    },
+                )
 
         except Exception as e:
             logger.error(f"Image analysis failed: {e}")
