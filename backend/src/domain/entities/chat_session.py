@@ -26,6 +26,8 @@ class ChatSession:
     """AI 对话会话实体"""
 
     model: str
+    title: str | None = None
+    user_id: str | None = None
     messages: list[dict[str, Any]] = field(default_factory=list)
     session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     status: SessionStatus = SessionStatus.ACTIVE

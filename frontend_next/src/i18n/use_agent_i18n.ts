@@ -35,7 +35,7 @@ export function useAgentI18n() {
     ): TranslationMap[K1][K2] => {
       const section = translations[key1];
       if (section && typeof section === "object" && key2 in section) {
-        return (section as Record<string, unknown>)[key2] as TranslationMap[K1][K2];
+        return section[key2] as TranslationMap[K1][K2];
       }
       return String(key2) as unknown as TranslationMap[K1][K2];
     },

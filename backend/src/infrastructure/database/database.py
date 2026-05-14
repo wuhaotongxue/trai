@@ -16,6 +16,11 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
+
+class ConfigurationError(Exception):
+    """配置错误异常"""
+    pass
+
 # 加载 backend/.env 配置
 # __file__ = e:\code\zzgit\trai\backend\src\infrastructure\database\database.py
 # parent.parent.parent = e:\code\zzgit\trai\backend\src

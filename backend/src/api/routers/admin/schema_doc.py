@@ -4,7 +4,7 @@
 # 日期: 2026-04-23
 # 描述: 数据库表结构文档 API
 
-from __future__ import annotations
+from datetime import datetime
 
 from typing import Any
 
@@ -127,7 +127,7 @@ async def get_schema_docs(
             tables=tables,
             total_tables=len(tables),
             total_rows=total_rows,
-            synced_at=db.execute(text("SELECT NOW()")).scalar() or "",
+            synced_at=datetime.now().isoformat(),
         )
 
 

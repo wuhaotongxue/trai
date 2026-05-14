@@ -591,7 +591,7 @@ export interface AgentConfig {
  */
 export interface AgentListItem {
   /** Agent ID */
-  id: string;
+  agent_id: string;
   /** 名称 */
   name: string;
   /** 描述 */

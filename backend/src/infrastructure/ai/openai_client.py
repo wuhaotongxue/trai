@@ -247,6 +247,11 @@ class OpenAIClient:
         if tools:
             payload["tools"] = tools
 
+        # 添加思考过程支持 (DeepSeek v4 模型)
+        if (model or self._model) in ["deepseek-v4-pro", "deepseek-v4-flash"]:
+            payload["reasoning_effort"] = "high"
+            payload["extra_body"] = {"thinking": {"type": "enabled"}}
+
         logger.info(f"LLM 流式请求 | provider: {self._provider} | 模型: {payload['model']}")
 
         tool_call_id = ""

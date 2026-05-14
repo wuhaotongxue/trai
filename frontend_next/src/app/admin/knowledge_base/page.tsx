@@ -16,6 +16,7 @@ import { request } from "@/lib/api_client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { globalToast } from "@/components/toast/toast";
 import { toastMessages } from "@/components/toast/use_toast";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 interface KnowledgeBase {
   id: string;
@@ -41,6 +42,7 @@ interface CreateKBDialogState {
 }
 
 export default function KnowledgeBasePage() {
+  const { translate } = useAdminI18n();
   const [indices, setIndices] = useState<KnowledgeBase[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -119,8 +121,8 @@ export default function KnowledgeBasePage() {
 
   const handleDeleteClick = (type: "file" | "index", id: string, name: string) => {
     const message = type === "file" 
-      ? `确定要删除文档 "${name}" 吗？此操作不可撤销。`
-      : `确定要删除知识库 "${name}" 吗？此操作不可撤销。`;
+      ? translate("admin.knowledge_base.delete_file_confirm").replace("{name}", name)
+      : translate("admin.knowledge_base.delete_confirm").replace("{name}", name);
     if (confirm(message)) {
       if (type === "file" && selectedKB) {
         request(`/admin/knowledge_base/indices/${selectedKB.id}/files/${id}`, { method: "DELETE" })
@@ -133,6 +135,8 @@ export default function KnowledgeBasePage() {
       }
     }
   };
+
+  const handleUploadText = async () => {
     if (!selectedKB || !uploadContent || !uploadFileName) return;
     setUploading(true);
     try {
@@ -169,7 +173,7 @@ export default function KnowledgeBasePage() {
 
   const handleCreateKB = async () => {
     if (!createKBDialog.name.trim()) {
-      globalToast({ message: "请输入知识库名称", variant: "warning" });
+      globalToast({ message: translate("admin.knowledge_base.name_required"), variant: "warning" });
       return;
     }
     setCreateKBDialog(prev => ({ ...prev, creating: true }));
@@ -197,17 +201,17 @@ export default function KnowledgeBasePage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">知识库管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理阿里云百炼检索增强生成的私有知识库</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.knowledge_base.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{translate("admin.knowledge_base.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="h-9 gap-2 shadow-sm" onClick={fetchIndices} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            刷新
+            {translate("admin.knowledge_base.refresh")}
           </Button>
           <Button className="h-9 gap-2 shadow-sm" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: true }))}>
             <Plus className="h-4 w-4" />
-            新建知识库
+            {translate("admin.knowledge_base.create")}
           </Button>
         </div>
       </div>
@@ -224,12 +228,12 @@ export default function KnowledgeBasePage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Database className="h-5 w-5 text-indigo-500" />
-              索引列表
+              {translate("admin.knowledge_base.index_list") || "索引列表"}
             </CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="搜索知识库名称..."
+                placeholder={translate("admin.knowledge_base.search_placeholder")}
                 className="pl-9 h-9"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -242,18 +246,18 @@ export default function KnowledgeBasePage() {
             <table className="w-full text-sm text-left">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
-                  <th className="px-6 py-4 font-medium">知识库名称</th>
-                  <th className="px-6 py-4 font-medium">索引 ID</th>
-                  <th className="px-6 py-4 font-medium">状态</th>
-                  <th className="px-6 py-4 font-medium">文档数</th>
-                  <th className="px-6 py-4 font-medium text-right">操作</th>
+                  <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_name")}</th>
+                  <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_index_id")}</th>
+                  <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_status")}</th>
+                  <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_doc_count")}</th>
+                  <th className="px-6 py-4 font-medium text-right">{translate("admin.knowledge_base.col_action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
                 {loading ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
-                      加载中...
+                      {translate("admin.sessions.loading")}
                     </td>
                   </tr>
                 ) : indices.length === 0 ? (
@@ -261,7 +265,7 @@ export default function KnowledgeBasePage() {
                     <td colSpan={5} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <FolderOpen className="h-10 w-10 mb-3 text-muted-foreground/50" />
-                        <p>暂无知识库数据</p>
+                        <p>{translate("admin.knowledge_base.no_data")}</p>
                       </div>
                     </td>
                   </tr>
@@ -290,8 +294,8 @@ export default function KnowledgeBasePage() {
                         </td>
                         <td className="px-6 py-4 text-muted-foreground">{docCount}</td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <Button variant="ghost" size="sm" className="h-8 text-indigo-600" onClick={() => handleManageDocs(kb)}>管理文档</Button>
-                          <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteClick("index", id, name)}>删除</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-indigo-600" onClick={() => handleManageDocs(kb)}>{translate("admin.knowledge_base.manage_docs")}</Button>
+                          <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteClick("index", id, name)}>{translate("admin.knowledge_base.delete")}</Button>
                         </td>
                       </tr>
                     );
@@ -309,15 +313,15 @@ export default function KnowledgeBasePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-indigo-500" />
-              文档管理 - {selectedKB?.name}
+              {translate("admin.knowledge_base.doc_manager_title")} - {selectedKB?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">管理该知识库下的所有已同步文档</p>
+              <p className="text-sm text-muted-foreground">{translate("admin.knowledge_base.doc_manager_hint")}</p>
               <Button size="sm" className="gap-2" onClick={() => setUploadDialogOpen(true)}>
                 <Upload className="h-4 w-4" />
-                上传文本
+                {translate("admin.knowledge_base.upload")}
               </Button>
             </div>
             
@@ -325,19 +329,19 @@ export default function KnowledgeBasePage() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3 font-medium">文件名</th>
-                    <th className="px-4 py-3 font-medium">状态</th>
-                    <th className="px-4 py-3 font-medium text-right">操作</th>
+                    <th className="px-4 py-3 font-medium">{translate("admin.knowledge_base.col_filename")}</th>
+                    <th className="px-4 py-3 font-medium">{translate("admin.knowledge_base.col_doc_status")}</th>
+                    <th className="px-4 py-3 font-medium text-right">{translate("admin.knowledge_base.col_doc_action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
                   {filesLoading ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">加载中...</td>
+                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">{translate("admin.sessions.loading")}</td>
                     </tr>
                   ) : files.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">暂无文档</td>
+                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">{translate("admin.knowledge_base.no_docs")}</td>
                     </tr>
                   ) : (
                     files.map(file => (
@@ -369,12 +373,12 @@ export default function KnowledgeBasePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileUp className="h-5 w-5 text-indigo-500" />
-              上传 Markdown 文本
+              {translate("admin.knowledge_base.upload_file")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">文件名</label>
+              <label className="text-sm font-medium">{translate("admin.knowledge_base.filename_label") || "文件名"}</label>
               <Input 
                 placeholder="例如: 产品手册.md" 
                 value={uploadFileName}
@@ -382,19 +386,19 @@ export default function KnowledgeBasePage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">文本内容 (Markdown)</label>
+              <label className="text-sm font-medium">{translate("admin.knowledge_base.content_label")}</label>
               <textarea
                 className="w-full h-64 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="请输入要上传的 Markdown 内容..."
+                placeholder={translate("admin.knowledge_base.content_placeholder")}
                 value={uploadContent}
                 onChange={(e) => setUploadContent(e.target.value)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>取消</Button>
+            <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>{translate("admin.knowledge_base.cancel")}</Button>
             <Button onClick={handleUploadText} disabled={uploading || !uploadContent || !uploadFileName}>
-              {uploading ? "上传中..." : "开始上传"}
+              {uploading ? translate("admin.knowledge_base.uploading") : translate("admin.knowledge_base.start_upload") || "开始上传"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -406,34 +410,34 @@ export default function KnowledgeBasePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Database className="h-5 w-5 text-indigo-500" />
-              新建知识库
+              {translate("admin.knowledge_base.create_dialog_title")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">知识库名称</label>
+              <label className="text-sm font-medium">{translate("admin.knowledge_base.name_label")}</label>
               <Input 
-                placeholder="例如: 产品文档库" 
+                placeholder={translate("admin.knowledge_base.name_placeholder")} 
                 value={createKBDialog.name}
                 onChange={(e) => setCreateKBDialog(prev => ({ ...prev, name: e.target.value }))}
                 maxLength={20}
               />
-              <p className="text-xs text-muted-foreground">最多 20 个字符</p>
+              <p className="text-xs text-muted-foreground">{translate("admin.knowledge_base.name_max_chars") || "最多 20 个字符"}</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">初始内容 (可选)</label>
+              <label className="text-sm font-medium">{translate("admin.knowledge_base.content_label")}</label>
               <textarea
                 className="w-full h-48 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="输入初始的 Markdown 内容... (不填则使用默认内容)"
+                placeholder={translate("admin.knowledge_base.content_placeholder")}
                 value={createKBDialog.content}
                 onChange={(e) => setCreateKBDialog(prev => ({ ...prev, content: e.target.value }))}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: false }))}>取消</Button>
+            <Button variant="outline" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: false }))}>{translate("admin.knowledge_base.cancel")}</Button>
             <Button onClick={handleCreateKB} disabled={createKBDialog.creating || !createKBDialog.name.trim()}>
-              {createKBDialog.creating ? "创建中..." : "创建知识库"}
+              {createKBDialog.creating ? translate("admin.knowledge_base.creating") : translate("admin.knowledge_base.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

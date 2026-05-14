@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/toast/use_toast";
 import { adminApi } from "@/lib/api_client";
 import { cn } from "@/lib/utils";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 type AgentRole = {
   t_id: number;
@@ -63,6 +64,7 @@ const STYLE_TYPE_OPTIONS = [
 
 export default function AgentRolesPage() {
   const { toast } = useToast();
+  const { translate } = useAdminI18n();
 
   const [roles, setRoles] = useState<AgentRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +82,7 @@ export default function AgentRolesPage() {
       setRoles(data);
     } catch (e) {
       console.error("Fetch agent roles failed", e);
-      toast({ message: "加载角色列表失败", variant: "error" });
+      toast({ message: translate("admin.agent_roles.load_failed"), variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -120,11 +122,11 @@ export default function AgentRolesPage() {
     setSaving(true);
     try {
       await adminApi.deleteAgentRole(deletingId);
-      toast({ message: "删除成功", variant: "success" });
+      toast({ message: translate("admin.agent_roles.delete_success"), variant: "success" });
       void fetchRoles();
     } catch (e) {
       console.error("Delete role failed", e);
-      toast({ message: "删除失败", variant: "error" });
+      toast({ message: translate("admin.agent_roles.delete_failed"), variant: "error" });
     } finally {
       setSaving(false);
       setIsDeleteDialogOpen(false);
@@ -137,11 +139,11 @@ export default function AgentRolesPage() {
 
     // 验证
     if (!editRole.t_role_name?.trim()) {
-      toast({ message: "角色名称不能为空", variant: "error" });
+      toast({ message: translate("admin.agent_roles.name_required"), variant: "error" });
       return;
     }
     if (!editRole.t_role_comment?.trim()) {
-      toast({ message: "角色评论不能为空", variant: "error" });
+      toast({ message: translate("admin.agent_roles.comment_required"), variant: "error" });
       return;
     }
 
@@ -160,17 +162,17 @@ export default function AgentRolesPage() {
       if (editRole.t_id) {
         // 更新
         await adminApi.updateAgentRole(editRole.t_id, payload);
-        toast({ message: "更新成功", variant: "success" });
+        toast({ message: translate("admin.agent_roles.update_success"), variant: "success" });
       } else {
         // 创建
         await adminApi.createAgentRole(payload);
-        toast({ message: "创建成功", variant: "success" });
+        toast({ message: translate("admin.agent_roles.create_success"), variant: "success" });
       }
       setIsModalOpen(false);
       void fetchRoles();
     } catch (e) {
       console.error("Save role failed", e);
-      toast({ message: "保存失败", variant: "error" });
+      toast({ message: translate("admin.agent_roles.save_failed"), variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -182,7 +184,7 @@ export default function AgentRolesPage() {
       void fetchRoles();
     } catch (e) {
       console.error("Toggle role status failed", e);
-      toast({ message: "修改状态失败", variant: "error" });
+      toast({ message: translate("admin.agent_roles.status_update_failed"), variant: "error" });
     }
   };
 
@@ -195,18 +197,18 @@ export default function AgentRolesPage() {
             <Bot className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">AI 角色管理</h1>
-            <p className="text-sm text-muted-foreground">管理发布通知时使用的 AI 角色和专属评论</p>
+            <h1 className="text-2xl font-bold">{translate("admin.agent_roles.title")}</h1>
+            <p className="text-sm text-muted-foreground">{translate("admin.agent_roles.subtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => void fetchRoles()}>
             <RefreshCw className={cn("w-4 h-4 mr-1", loading && "animate-spin")} />
-            刷新
+            {translate("admin.agent_roles.refresh")}
           </Button>
           <Button size="sm" onClick={handleAdd}>
             <Plus className="w-4 h-4 mr-1" />
-            添加角色
+            {translate("admin.agent_roles.create")}
           </Button>
         </div>
       </div>
@@ -217,7 +219,7 @@ export default function AgentRolesPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="搜索角色名称、评论或关键词..."
+              placeholder={translate("admin.agent_roles.search_placeholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -231,13 +233,13 @@ export default function AgentRolesPage() {
         {loading ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              加载中...
+              {translate("admin.agent_roles.loading")}
             </CardContent>
           </Card>
         ) : filteredRoles.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              {searchQuery ? "没有找到匹配的角色" : "暂无角色数据"}
+              {searchQuery ? translate("admin.agent_roles.no_match") : translate("admin.agent_roles.no_data")}
             </CardContent>
           </Card>
         ) : (
@@ -249,7 +251,7 @@ export default function AgentRolesPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold">{role.t_role_name}</h3>
                       <Badge variant={role.t_is_active ? "default" : "secondary"}>
-                        {role.t_is_active ? "启用" : "禁用"}
+                        {role.t_is_active ? translate("admin.agent_roles.enable") : translate("admin.agent_roles.disable")}
                       </Badge>
                       <Badge variant="outline">{role.t_style_type}</Badge>
                       <span className="text-xs text-muted-foreground">优先级: {role.t_priority}</span>
@@ -261,16 +263,16 @@ export default function AgentRolesPage() {
                     {role.t_role_keyword && (
                       <p className="text-xs text-muted-foreground mb-2">
                         <Tag className="inline w-3 h-3 mr-1" />
-                        关键词: {role.t_role_keyword}
+                        {translate("admin.agent_roles.keywords")}: {role.t_role_keyword}
                       </p>
                     )}
                     {role.t_remark && (
                       <p className="text-xs text-muted-foreground">
-                        备注: {role.t_remark}
+                        {translate("admin.agent_roles.remark")}: {role.t_remark}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-2">
-                      更新时间: {new Date(role.t_updated_at).toLocaleString("zh-CN")}
+                      {translate("admin.agent_roles.update_time")}: {new Date(role.t_updated_at).toLocaleString("zh-CN")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -303,46 +305,46 @@ export default function AgentRolesPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editRole?.t_id ? "编辑角色" : "添加角色"}</DialogTitle>
+            <DialogTitle>{editRole?.t_id ? translate("admin.agent_roles.edit") : translate("admin.agent_roles.add")}</DialogTitle>
             <DialogDescription>
-              {editRole?.t_id ? "修改角色信息" : "创建一个新的 AI 角色"}
+              {editRole?.t_id ? translate("admin.agent_roles.edit_desc") : translate("admin.agent_roles.add_desc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="role_name">
-                角色名称 <span className="text-destructive">*</span>
+                {translate("admin.agent_roles.role_name")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="role_name"
-                placeholder="如: 地理专家、小甜心、御姐"
+                placeholder={translate("admin.agent_roles.role_name_placeholder")}
                 value={editRole?.t_role_name || ""}
                 onChange={(e) => setEditRole((prev) => ({ ...prev, t_role_name: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="role_comment">
-                专属评论 <span className="text-destructive">*</span>
+                {translate("admin.agent_roles.role_comment")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="role_comment"
-                placeholder="如: 说到版本发布呀～这条消息已成功抵达群聊坐标！"
+                placeholder={translate("admin.agent_roles.role_comment_placeholder")}
                 value={editRole?.t_role_comment || ""}
                 onChange={(e) => setEditRole((prev) => ({ ...prev, t_role_comment: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role_keyword">触发关键词</Label>
+              <Label htmlFor="role_keyword">{translate("admin.agent_roles.trigger_keywords")}</Label>
               <Input
                 id="role_keyword"
-                placeholder="逗号分隔，如: 地理,专家,经纬度"
+                placeholder={translate("admin.agent_roles.keywords_placeholder")}
                 value={editRole?.t_role_keyword || ""}
                 onChange={(e) => setEditRole((prev) => ({ ...prev, t_role_keyword: e.target.value }))}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="style_type">风格类型</Label>
+                <Label htmlFor="style_type">{translate("admin.agent_roles.style_type")}</Label>
                 <select
                   id="style_type"
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
@@ -357,7 +359,7 @@ export default function AgentRolesPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="priority">优先级</Label>
+                <Label htmlFor="priority">{translate("admin.agent_roles.priority")}</Label>
                 <Input
                   id="priority"
                   type="number"
@@ -370,10 +372,10 @@ export default function AgentRolesPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="remark">备注</Label>
+              <Label htmlFor="remark">{translate("admin.agent_roles.remark")}</Label>
               <Input
                 id="remark"
-                placeholder="可选备注信息"
+                placeholder={translate("admin.agent_roles.remark_placeholder")}
                 value={editRole?.t_remark || ""}
                 onChange={(e) => setEditRole((prev) => ({ ...prev, t_remark: e.target.value }))}
               />
@@ -384,13 +386,13 @@ export default function AgentRolesPage() {
                 checked={editRole?.t_is_active ?? true}
                 onCheckedChange={(checked) => setEditRole((prev) => ({ ...prev, t_is_active: checked }))}
               />
-              <Label htmlFor="is_active">启用此角色</Label>
+              <Label htmlFor="is_active">{translate("admin.agent_roles.enable_role")}</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               <X className="w-4 h-4 mr-1" />
-              取消
+              {translate("admin.agent_roles.cancel")}
             </Button>
             <Button onClick={() => void handleSave()} disabled={saving}>
               {saving ? (
@@ -398,7 +400,7 @@ export default function AgentRolesPage() {
               ) : (
                 <Save className="w-4 h-4 mr-1" />
               )}
-              保存
+              {translate("admin.agent_roles.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -408,15 +410,14 @@ export default function AgentRolesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
+            <DialogTitle>{translate("admin.agent_roles.confirm_delete_title")}</DialogTitle>
             <DialogDescription>
-              确定要删除角色 &quot;{roles.find((r) => r.t_id === deletingId)?.t_role_name}&quot; 吗？
-              此操作不可撤销。
+              {translate("admin.agent_roles.confirm_delete").replace("{name}", roles.find((r) => r.t_id === deletingId)?.t_role_name || "")}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              取消
+              {translate("admin.agent_roles.cancel")}
             </Button>
             <Button variant="destructive" onClick={() => void handleDelete()} disabled={saving}>
               {saving ? (
@@ -424,7 +425,7 @@ export default function AgentRolesPage() {
               ) : (
                 <Trash2 className="w-4 h-4 mr-1" />
               )}
-              删除
+              {translate("admin.agent_roles.delete")}
             </Button>
           </DialogFooter>
         </DialogContent>

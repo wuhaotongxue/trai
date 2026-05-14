@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Cookies from "js-cookie";
 
-type WebSocketStatus = "connecting" | "connected" | "disconnected" | "error" | "reconnecting";
+export type WebSocketStatus = "connecting" | "connected" | "disconnected" | "error" | "reconnecting";
 
 interface WebSocketMessage {
   type: string;
@@ -19,7 +19,7 @@ interface WebSocketMessage {
   message_id?: string;
 }
 
-interface UseWebSocketOptions {
+export interface UseWebSocketOptions {
   url?: string;
   autoConnect?: boolean;
   reconnectAttempts?: number;

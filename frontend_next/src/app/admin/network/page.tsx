@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Clock, Globe, RefreshCw, Signal, XCircle, Cp
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { request } from "@/lib/api_client";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 interface SystemStats {
   cpu_percent: number;
@@ -15,6 +16,7 @@ interface SystemStats {
 }
 
 export default function NetworkPage() {
+  const { translate } = useAdminI18n();
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
@@ -42,16 +44,16 @@ export default function NetworkPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground">服务器状态</h1>
+          <h1 className="text-xl font-bold text-foreground">{translate("admin.network.server_status")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
-            上次检测: {lastRefresh.toLocaleTimeString("zh-CN")} (每 5s 自动刷新)
+            {translate("admin.network.last_check")}: {lastRefresh.toLocaleTimeString("zh-CN")} ({translate("admin.network.auto_refresh")})
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={fetchStats}>
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            重新检测
+            {translate("admin.network.refresh")}
           </Button>
         </div>
       </div>
@@ -59,9 +61,9 @@ export default function NetworkPage() {
       {/* 硬件状态总览 */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "CPU 使用率", value: `${stats?.cpu_percent || 0}%`, icon: Cpu, color: "text-blue-400", bg: "bg-blue-500/15" },
-          { label: "内存 使用率", value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { label: "磁盘 占用率", value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { label: translate("admin.network.cpu_usage"), value: `${stats?.cpu_percent || 0}%`, icon: Cpu, color: "text-blue-400", bg: "bg-blue-500/15" },
+          { label: translate("admin.network.memory_usage"), value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { label: translate("admin.network.disk_usage"), value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
         ].map((item) => (
           <Card key={item.label} className="border-0 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
@@ -80,13 +82,13 @@ export default function NetworkPage() {
       {/* 网络流量 */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-foreground">实时网络流量</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.network.real_time_traffic")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">总发送流量</span>
+                <span className="text-muted-foreground">{translate("admin.network.total_sent")}</span>
                 <span className="font-mono text-foreground">{( (stats?.network_sent || 0) / 1024 / 1024 / 1024 ).toFixed(2)} GB</span>
               </div>
               <div className="h-2 bg-muted/40 rounded-full overflow-hidden">
@@ -95,7 +97,7 @@ export default function NetworkPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">总接收流量</span>
+                <span className="text-muted-foreground">{translate("admin.network.total_received")}</span>
                 <span className="font-mono text-foreground">{( (stats?.network_recv || 0) / 1024 / 1024 / 1024 ).toFixed(2)} GB</span>
               </div>
               <div className="h-2 bg-muted/40 rounded-full overflow-hidden">

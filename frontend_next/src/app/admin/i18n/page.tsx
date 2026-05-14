@@ -41,6 +41,7 @@ import { useAdminToast } from "@/contexts/admin_toast_context";
 import { adminApi } from "@/lib/api_client";
 import I18nSection from "./i18n_section";
 import AddTranslationButton from "./add_translation_button";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 type I18nItem = {
   locale: string;
@@ -54,22 +55,23 @@ type ViewMode = "table" | "split";
 
 type TabKey = "all" | "client" | "frontend" | "admin";
 
-const TAB_LABELS: Record<TabKey, string> = {
-  all: "全部",
-  client: "客户端",
-  frontend: "前端",
-  admin: "管理端",
-};
-
-const NS_LABEL_MAP: Record<string, string> = {
-  login: "登录页",
-  register: "注册页",
-  users: "用户管理",
-  settings: "设置",
-};
-
 export default function I18nPage() {
   const { toast } = useAdminToast();
+  const { translate } = useAdminI18n();
+
+  const TAB_LABELS: Record<TabKey, string> = {
+    all: translate("admin.i18n.tab_all"),
+    client: translate("admin.i18n.tab_client"),
+    frontend: translate("admin.i18n.tab_frontend"),
+    admin: translate("admin.i18n.tab_admin"),
+  };
+
+  const NS_LABEL_MAP: Record<string, string> = {
+    login: translate("admin.i18n.ns_login"),
+    register: translate("admin.i18n.ns_register"),
+    users: translate("admin.i18n.ns_users"),
+    settings: translate("admin.i18n.ns_settings"),
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -323,27 +325,27 @@ export default function I18nPage() {
             <Globe className="h-5 w-5 text-violet-500" />
           </div>
           <div>
-            <h1 className="text-lg font-bold">国际化翻译管理</h1>
+            <h1 className="text-lg font-bold">{translate("admin.i18n.title")}</h1>
             <p className="text-xs text-muted-foreground">
-              共 {tabStats.all} 条 · 客户端 {tabStats.client} / 前端 {tabStats.frontend} / 管理端 {tabStats.admin}
+              {translate("admin.i18n.total")} {tabStats.all} {translate("admin.i18n.items")} · {translate("admin.i18n.tab_client")} {tabStats.client} / {translate("admin.i18n.tab_frontend")} {tabStats.frontend} / {translate("admin.i18n.tab_admin")} {tabStats.admin}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={importing}>
-            <Upload className="h-3 w-3" /> {importing ? "导入中" : "导入"}
+            <Upload className="h-3 w-3" /> {importing ? translate("admin.i18n.importing") : translate("admin.i18n.import")}
           </Button>
           <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={handleExport}>
-            <FileJson className="h-3 w-3" /> 导出
+            <FileJson className="h-3 w-3" /> {translate("admin.i18n.export")}
           </Button>
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={fetchAll} disabled={loading}>
-            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} /> 刷新
+            <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} /> {translate("admin.i18n.refresh")}
           </Button>
           {hasChanges && (
             <Button size="sm" className="h-8 gap-1.5 bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveAll} disabled={saving}>
-              <Save className="h-3 w-3" /> {saving ? "保存中" : `保存 (${Object.keys(editMap).length})`}
+              <Save className="h-3 w-3" /> {saving ? translate("admin.i18n.saving") : `${translate("admin.i18n.save")} (${Object.keys(editMap).length})`}
             </Button>
           )}
           <AddTranslationButton
@@ -391,14 +393,14 @@ export default function I18nPage() {
         <CardContent className="p-3 flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-            <Input className="h-8 pl-8 pr-3 rounded-lg text-xs" placeholder="搜索键名或翻译..." value={searchKey} onChange={(e) => { setSearchKey(e.target.value); setPage(1); }} />
+            <Input className="h-8 pl-8 pr-3 rounded-lg text-xs" placeholder={translate("admin.i18n.search_placeholder")} value={searchKey} onChange={(e) => { setSearchKey(e.target.value); setPage(1); }} />
           </div>
           <div className="inline-flex items-center rounded-lg border bg-muted/50 p-0.5 shrink-0">
             <button onClick={() => setViewMode("table")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${viewMode === "table" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
-              <Table2 className="h-3 w-3" /> 表格
+              <Table2 className="h-3 w-3" /> {translate("admin.i18n.view_table")}
             </button>
             <button onClick={() => setViewMode("split")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${viewMode === "split" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
-              <SplitSquareHorizontal className="h-3 w-3" /> 分栏
+              <SplitSquareHorizontal className="h-3 w-3" /> {translate("admin.i18n.view_split")}
             </button>
           </div>
         </CardContent>
@@ -409,19 +411,19 @@ export default function I18nPage() {
         <CardHeader className="pb-0 px-4 pt-4">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              翻译列表
+              {translate("admin.i18n.translation_list")}
               {hasChanges && (
                 <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-500/10 text-xs font-normal">
-                  {Object.keys(editMap).length} 项待保存
+                  {Object.keys(editMap).length} {translate("admin.i18n.pending_save")}
                 </Badge>
               )}
             </CardTitle>
           </div>
           {viewMode === "table" && (
             <div className="mt-3 grid grid-cols-12 gap-3 px-1">
-              <div className="col-span-4 text-xs font-semibold text-muted-foreground uppercase">翻译键</div>
-              <div className="col-span-4 text-xs font-semibold text-blue-500 uppercase">🇨🇳 中文</div>
-              <div className="col-span-3 text-xs font-semibold text-emerald-500 uppercase">🇺🇸 English</div>
+              <div className="col-span-4 text-xs font-semibold text-muted-foreground uppercase">{translate("admin.i18n.key")}</div>
+              <div className="col-span-4 text-xs font-semibold text-blue-500 uppercase">{translate("admin.i18n.chinese")}</div>
+              <div className="col-span-3 text-xs font-semibold text-emerald-500 uppercase">{translate("admin.i18n.english")}</div>
               <div className="col-span-1" />
             </div>
           )}
@@ -431,12 +433,12 @@ export default function I18nPage() {
           {loading ? (
             <div className="flex items-center justify-center py-16 text-muted-foreground text-sm gap-2">
               <div className="w-4 h-4 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
-              加载中...
+              {translate("admin.i18n.loading")}
             </div>
           ) : tabSections.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-sm gap-2">
               <Globe className="h-10 w-10 opacity-20" />
-              <p className="font-medium">暂无翻译数据</p>
+              <p className="font-medium">{translate("admin.i18n.no_data")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border/30">
@@ -468,7 +470,7 @@ export default function I18nPage() {
         {tabSections.length > PAGE_SIZE && (
           <div className="px-4 py-3 border-t border-border/40 flex items-center justify-between bg-muted/10">
             <p className="text-xs text-muted-foreground">
-              第 {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, tabSections.length)} 条，共 {tabSections.length} 条
+              {translate("admin.i18n.page")} {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, tabSections.length)} {translate("admin.i18n.items")}，{translate("admin.i18n.total")} {tabSections.length} {translate("admin.i18n.items")}
             </p>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setPage(1)} disabled={safePage === 1}><ChevronLast className="h-3.5 w-3.5" /></Button>

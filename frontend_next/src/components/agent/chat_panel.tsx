@@ -8,7 +8,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
@@ -20,8 +20,9 @@ import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { type Message as AgentMessage } from "@/stores/agent.store";
-import { MultimodalUpload, type UploadedFileInfo } from "./multimodal_upload";
+import { type UploadedFileInfo } from "./multimodal_upload";
 import { AgentTypeSelector } from "./agent_type_selector";
+import type { AgentTypeValue } from "@/lib/api_client";
 
 type TabId = "chat" | "image" | "video" | "music";
 
@@ -118,12 +119,14 @@ export function ChatPanel() {
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光');
   const bottomRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<React.ElementRef<typeof ScrollArea>>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
-  const [selectedAgentType, setSelectedAgentType] = useState<string>("chat");
+  const [selectedAgentType, setSelectedAgentType] = useState<AgentTypeValue>("chat");
   const [apiError, setApiError] = useState<string | null>(null);
+  const [expandedThinking, setExpandedThinking] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (sessions.length > 0) {
@@ -133,6 +136,34 @@ export function ChatPanel() {
       }));
     }
   }, [sessions, currentSessionId]);
+
+  useLayoutEffect(() => {
+    // 自动滚动到最新消息
+    if (messages.length > 0) {
+      // 等待下一帧确保 DOM 完全更新
+      requestAnimationFrame(() => {
+        if (bottomRef.current) {
+          bottomRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+        } else {
+          const viewport = document.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+          if (viewport) {
+            viewport.scrollTop = viewport.scrollHeight;
+          }
+        }
+      });
+    }
+  }, [messages, isStreaming]);
+
+  // 当消息更新且有 thinking 时，默认展开
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.thinking && lastMsg.role === "assistant") {
+      setExpandedThinking(prev => ({
+        ...prev,
+        [lastMsg.id]: true
+      }));
+    }
+  }, [messages]);
 
   const downloadImage = (url: string) => {
     const link = document.createElement('a');
@@ -147,8 +178,23 @@ export function ChatPanel() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const toggleThinking = (msgId: string) => {
+    setExpandedThinking(prev => ({
+      ...prev,
+      [msgId]: !prev[msgId]
+    }));
+  };
+
   const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    } else if (scrollAreaRef.current) {
+      // 尝试获取内部视口元素
+      const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      }
+    }
   };
 
   const scrollToTop = () => {
@@ -302,10 +348,11 @@ export function ChatPanel() {
             </Button>
           </div>
           <ScrollArea className="flex-1">
-            <div className="p-2 space-y-1">
+            <div className="p-2 space-y-1" suppressHydrationWarning>
               {sessions.map((session) => (
                 <div
                   key={session.id}
+                  suppressHydrationWarning
                   className={"group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors " + (currentSessionId === session.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-muted-foreground')}
                   onClick={() => switchSession(session.id)}
                 >
@@ -759,8 +806,8 @@ export function ChatPanel() {
               </div>
             )}
 
-            {/* 消息列表 - 固定高度,可滚动 */}
-            <ScrollArea className="flex-1 px-4 py-4">
+            {/* 消息列表 - 固定高度，可滚动 */}
+            <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4 overflow-y-auto">
               <div ref={messagesStartRef}>
                 {/* API Error Display */}
                 {apiError && (
@@ -813,6 +860,22 @@ export function ChatPanel() {
                             className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
                           />
                         ))}
+
+                        {msg.role === "assistant" && msg.thinking && (
+                          <div className="mb-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30">
+                            <div 
+                              className="flex items-center gap-2 mb-1 cursor-pointer"
+                              onClick={() => toggleThinking(msg.id)}
+                            >
+                              <Sparkles className="h-4 w-4 text-amber-500" />
+                              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">思考过程</span>
+                              <ChevronRight className={"h-4 w-4 text-amber-500 transition-transform " + (expandedThinking[msg.id] ? "rotate-90" : "")} />
+                            </div>
+                            {expandedThinking[msg.id] && (
+                              <p className="text-sm text-amber-700 dark:text-amber-300 whitespace-pre-wrap">{msg.thinking}</p>
+                            )}
+                          </div>
+                        )}
 
                         <div className="prose dark:prose-invert prose-sm max-w-none break-words">
                           <ReactMarkdown
@@ -942,15 +1005,63 @@ export function ChatPanel() {
             <div className="flex items-end gap-2">
               {activeTab === "chat" && (
                 <>
-                  <MultimodalUpload
-                    acceptedTypes={["image", "audio", "pdf"]}
-                    maxSizeMB={50}
-                    maxFiles={5}
-                    onFilesChange={setUploadedFiles}
-                    value={uploadedFiles}
-                    showPreview={true}
-                    className="mb-2"
-                  />
+                  <div className="flex flex-col gap-1 mb-2">
+                    {uploadedFiles.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {uploadedFiles.map((f) => (
+                          <div key={f.id} className="relative group">
+                            {f.fileType === "image" && f.previewUrl ? (
+                              <img src={f.previewUrl} alt={f.file.name} className="h-10 w-10 object-cover rounded border" />
+                            ) : (
+                              <div className="h-10 w-10 flex items-center justify-center rounded border bg-muted text-xs">
+                                {f.fileType.toUpperCase()}
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setUploadedFiles(uploadedFiles.filter(x => x.id !== f.id))}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = ".jpg,.jpeg,.png,.gif,.webp,.bmp,.mp3,.wav,.m4a,.flac,.ogg,.webm,.pdf";
+                          input.multiple = true;
+                          input.onchange = (e) => {
+                            const files = (e.target as HTMLInputElement).files;
+                            if (files) {
+                              const processed = Array.from(files).map((file) => ({
+                                id: Math.random().toString(36).slice(2),
+                                file,
+                                previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
+                                fileType: file.type.startsWith("image/") ? "image" as const : file.type.startsWith("audio/") ? "audio" as const : "pdf" as const,
+                                displaySize: file.size > 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(1)}MB` : `${(file.size / 1024).toFixed(1)}KB`,
+                              }));
+                              setUploadedFiles([...uploadedFiles, ...processed]);
+                            }
+                          };
+                          input.click();
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      {uploadedFiles.length > 0 && (
+                        <span className="text-xs text-muted-foreground">{uploadedFiles.length} 个文件</span>
+                      )}
+                    </div>
+                  </div>
                 </>
               )}
 

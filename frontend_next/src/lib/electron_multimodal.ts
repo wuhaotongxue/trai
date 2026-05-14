@@ -230,11 +230,11 @@ class ElectronMultimodalService {
 
   private async extractVideoThumbnail(videoBuffer: ArrayBuffer): Promise<string | null> {
     try {
-      if (!window.electronAPI?.fs) {
+      if (!window.electronAPI?.platform || !window.electronAPI?.fs) {
         return null;
       }
 
-      const tempPath = await window.electronAPI.fs.getAppPath("temp");
+      const tempPath = await window.electronAPI.platform.getAppPath("temp");
       const thumbnailPath = `${tempPath}/thumbnail_${Date.now()}.png`;
 
       await ipcService.invoke({ domain: "multimodal", action: "extractThumbnail" }, {

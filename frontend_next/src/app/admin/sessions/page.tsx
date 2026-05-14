@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { request } from "@/lib/api_client";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 type SessionRecord = {
   session_id: string;
@@ -38,6 +39,7 @@ export default function SessionsPage() {
   const [filterStatus, setFilterStatus] = useState("全部");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
+  const { translate } = useAdminI18n();
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -70,17 +72,17 @@ export default function SessionsPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-foreground">会话记录</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">管理用户的所有会话历史与消息</p>
+          <h1 className="text-xl font-bold text-foreground">{translate("admin.sessions.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{translate("admin.sessions.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={fetchSessions}>
             <RefreshCw className="h-3.5 w-3.5" />
-            刷新
+            {translate("admin.sessions.refresh")}
           </Button>
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border">
             <Download className="h-3.5 w-3.5" />
-            导出记录
+            {translate("admin.sessions.export")}
           </Button>
         </div>
       </div>
@@ -94,25 +96,28 @@ export default function SessionsPage() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="搜索用户..."
+                placeholder={translate("admin.sessions.search_placeholder")}
                 className="h-9 pl-9 rounded-lg border-border text-sm"
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/40 rounded-lg p-1 border border-border/60">
-              {["全部", "活跃", "不活跃"].map((label) => {
-                const value = label === "活跃" ? "active" : label === "不活跃" ? "inactive" : "全部";
-                const active = filterStatus === value;
+              {[
+                { label: translate("admin.sessions.filter_all"), value: "全部" },
+                { label: translate("admin.sessions.filter_active"), value: "active" },
+                { label: translate("admin.sessions.filter_inactive"), value: "inactive" },
+              ].map((item) => {
+                const active = filterStatus === item.value;
                 return (
                 <button
-                  key={label}
-                  onClick={() => setFilterStatus(value)}
+                  key={item.value}
+                  onClick={() => setFilterStatus(item.value)}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
                     active
                       ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {label}
+                  {item.label}
                 </button>
                 );
               })}
@@ -128,13 +133,13 @@ export default function SessionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">用户</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">会话数</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">消息数</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Agent 调用</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">最后活跃</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">状态</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">操作</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_user")}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_sessions")}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_messages")}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_agent_calls")}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_last_active")}</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_status")}</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.sessions.col_action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,14 +147,14 @@ export default function SessionsPage() {
                   <tr>
                     <td colSpan={7} className="p-8 text-center text-muted-foreground">
                       <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2" />
-                      加载中...
+                      {translate("admin.sessions.loading")}
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-8 text-center text-muted-foreground">
                       <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                      <p className="text-sm">未找到匹配的会话记录</p>
+                      <p className="text-sm">{translate("admin.sessions.no_results")}</p>
                     </td>
                   </tr>
                 ) : (
@@ -179,15 +184,15 @@ export default function SessionsPage() {
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           s.status === "active" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-muted-foreground"
                         }`}>
-                          {s.status === "active" ? "活跃" : "不活跃"}
+                          {s.status === "active" ? translate("admin.sessions.active") : translate("admin.sessions.inactive")}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors" title="查看详情">
+                          <button className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors" title={translate("admin.sessions.view_detail")}>
                             <Eye className="h-3.5 w-3.5" />
                           </button>
-                          <button className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors" title="删除">
+                          <button className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors" title={translate("admin.sessions.delete")}>
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
@@ -205,14 +210,14 @@ export default function SessionsPage() {
       {total > pageSize && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            共 {total} 条记录,第 {page} / {totalPages} 页
+            {translate("admin.sessions.pagination_info").replace("{total}", String(total)).replace("{page}", String(page)).replace("{totalPages}", String(totalPages))}
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-              上一页
+              {translate("admin.sessions.prev_page")}
             </Button>
             <Button size="sm" variant="outline" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-              下一页
+              {translate("admin.sessions.next_page")}
             </Button>
           </div>
         </div>

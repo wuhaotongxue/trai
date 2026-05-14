@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
@@ -228,7 +228,7 @@ async def release_client(
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
     release_notes: Annotated[str | None, Form(description="更新日志内容")] = None,
-    agent_role: Annotated[str | None, Header(description="AI 角色名称")] = None,
+    agent_role: str | None = Header(None),
     wecom_groups: Annotated[str | None, Form(description="企微群列表，逗号分隔，如 wuhao,wudu")] = None,
 ) -> ReleaseResponse:
     """管理员发布新版本的 Electron 客户端并上传至 S3.
@@ -340,7 +340,7 @@ async def build_and_release(
     body: BuildAndReleaseRequest,
     current_user: CurrentUser,
     s3_service: S3StorageService = Depends(),
-    agent_role: Annotated[str | None, Header(None, description="AI 角色名称")] = None,
+    agent_role: str | None = Header(None),
 ) -> BuildStatus:
     """一键打包并发布新版本"""
     if current_user.get("role") != "admin":
