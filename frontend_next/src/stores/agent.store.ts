@@ -37,6 +37,8 @@ export interface Message {
   toolSuccess?: boolean;
   /** 时间戳 */
   timestamp: number;
+  /** 思考过程 */
+  thinking?: string;
 }
 
 /**
@@ -267,7 +269,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   startSession: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.session.create({ model: "deepseek-chat" });
+      const res = await api.session.create({ model: "deepseek-v4-flash" });
       set({ sessionId: res.session_id, messages: [], isLoading: false });
       await get().loadSessions();
     } catch {
@@ -380,6 +382,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         buffer = lines.pop() || "";
 
         for (const line of lines) {
+          // 跳过 event: 行，只处理 data: 行
+          if (line.startsWith("event: ")) continue;
           if (!line.startsWith("data: ")) continue;
           const data = line.slice(6);
           if (data === "") continue;
@@ -389,9 +393,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
             if (parsed.event === "token") {
               assistantContent += parsed.data;
+              // 立即更新状态，确保打字机效果
               set((state) => ({
                 messages: state.messages.map((m) =>
                   m.id === assistantMsgId ? { ...m, content: assistantContent } : m
+                ),
+              }));
+            } else if (parsed.event === "reasoning") {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === assistantMsgId ? { ...m, thinking: parsed.data } : m
                 ),
               }));
             } else if (parsed.event === "tool_call_end") {

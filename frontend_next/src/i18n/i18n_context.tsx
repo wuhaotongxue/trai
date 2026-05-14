@@ -33,6 +33,8 @@ const I18nContext = createContext<I18nContextType>({
   refreshTranslations: async () => {},
 });
 
+export { I18nContext };
+
 export function useI18n() {
   return useContext(I18nContext);
 }

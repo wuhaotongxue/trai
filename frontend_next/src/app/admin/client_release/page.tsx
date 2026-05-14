@@ -25,6 +25,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/toast/use_toast";
 import { cn } from "@/lib/utils";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 type AgentRole = {
   t_id: number;
@@ -77,6 +78,7 @@ export default function ClientReleasePage() {
   const { toast } = useToast();
   const [initDone, setInitDone] = useState(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { translate } = useAdminI18n();
 
   const fetchAgentRoles = useCallback(async () => {
     try {
@@ -121,13 +123,13 @@ export default function ClientReleasePage() {
   }, [fetchReleases]);
 
   const handleDeleteRelease = useCallback(async (id: number, version: string) => {
-    if (!window.confirm(`确定删除版本 v${version} 吗？该操作不可恢复。`)) return;
+    if (!window.confirm(translate("admin.client_release.confirm_delete_version").replace("{version}", version))) return;
     try {
       await request(`/admin/client/release/${id}`, { method: "DELETE" });
-      toast({ message: `版本 v${version} 已删除` });
+      toast({ message: translate("admin.client_release.version_deleted").replace("{version}", version) });
       fetchReleases(releases.length === 1 && page > 1 ? page - 1 : page);
     } catch (err: any) {
-      toast({ message: err.message || "删除失败", variant: "error" });
+      toast({ message: err.message || translate("admin.client_release.delete_failed"), variant: "error" });
     }
   }, [fetchReleases, toast]);
 
@@ -135,10 +137,10 @@ export default function ClientReleasePage() {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
-      toast({ message: "链接已复制到剪贴板" });
+      toast({ message: translate("admin.client_release.copy_success") });
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      toast({ message: "复制失败，请手动复制", variant: "error" });
+      toast({ message: translate("admin.client_release.copy_failed"), variant: "error" });
     }
   }, [toast]);
 
@@ -180,11 +182,11 @@ export default function ClientReleasePage() {
   // 一键打包
   const handleBuildAndRelease = async () => {
     if (!releaseNotes.trim()) {
-      toast({ message: "请填写更新日志", variant: "error" });
+      toast({ message: translate("admin.client_release.fill_release_notes"), variant: "error" });
       return;
     }
     if (selectedWecomGroups.length === 0) {
-      toast({ message: "请至少选择一个企微通知群", variant: "error" });
+      toast({ message: translate("admin.client_release.select_wecom_group"), variant: "error" });
       return;
     }
     setSubmitting(true);
@@ -219,13 +221,13 @@ export default function ClientReleasePage() {
       {/* 头部 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">客户端发布</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理桌面客户端版本，支持一键打包和发布</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.client_release.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{translate("admin.client_release.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button className="h-9 gap-2 shadow-sm" onClick={() => setIsModalOpen(true)}>
             <Zap className="h-4 w-4" />
-            一键打包发布
+            {translate("admin.client_release.build_and_release")}
           </Button>
         </div>
       </div>
@@ -246,9 +248,9 @@ export default function ClientReleasePage() {
                 {buildStatus.status === "failed" && <XCircle className="h-5 w-5 text-red-600" />}
                 <div>
                   <p className="font-medium">
-                    {buildStatus.status === "running" && "正在构建中..."}
-                    {buildStatus.status === "success" && `构建成功: v${buildStatus.version}`}
-                    {buildStatus.status === "failed" && "构建失败"}
+                    {buildStatus.status === "running" && translate("admin.client_release.building")}
+                    {buildStatus.status === "success" && translate("admin.client_release.build_success").replace("{version}", buildStatus.version || "")}
+                    {buildStatus.status === "failed" && translate("admin.client_release.build_failed")}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {buildStatus.status === "running" && buildStatus.message}
@@ -276,32 +278,32 @@ export default function ClientReleasePage() {
             <div className="space-y-5 py-6">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-                <span className="font-medium text-foreground">正在构建中...</span>
+                <span className="font-medium text-foreground">{translate("admin.client_release.building")}</span>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">当前步骤</span>
-                  <span className="text-foreground font-medium">{buildStatus.message || "等待中..."}</span>
+                  <span className="text-muted-foreground">{translate("admin.client_release.current_step")}</span>
+                  <span className="text-foreground font-medium">{buildStatus.message || translate("admin.client_release.waiting")}</span>
                 </div>
                 {buildStatus.status === "success" && (
                   <div className="flex items-center gap-2 text-emerald-600">
                     <CheckCircle className="h-4 w-4" />
-                    <span className="text-sm font-medium">构建成功: v{buildStatus.version}</span>
+                    <span className="text-sm font-medium">{translate("admin.client_release.build_success").replace("{version}", buildStatus.version || "")}</span>
                   </div>
                 )}
                 {buildStatus.status === "failed" && (
                   <div className="flex items-center gap-2 text-red-500">
                     <XCircle className="h-4 w-4" />
-                    <span className="text-sm font-medium">构建失败: {buildStatus.error}</span>
+                    <span className="text-sm font-medium">{translate("admin.client_release.build_failed")}: {buildStatus.error}</span>
                   </div>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
                 {buildStatus.status === "running"
-                  ? "页面会自动刷新状态，请稍候..."
+                  ? translate("admin.client_release.auto_refresh")
                   : buildStatus.status === "success"
-                  ? "飞书通知已发送，构建完成！"
-                  : "构建遇到问题，请查看错误信息。"}
+                  ? translate("admin.client_release.feishu_sent")
+                  : translate("admin.client_release.build_error")}
               </p>
               <DialogFooter>
                 <Button
@@ -313,7 +315,7 @@ export default function ClientReleasePage() {
                   }}
                   disabled={buildStatus.status === "running"}
                 >
-                  {buildStatus.status === "running" ? "构建中..." : "完成"}
+                  {buildStatus.status === "running" ? translate("admin.client_release.build_in_progress") : translate("admin.client_release.complete")}
                 </Button>
               </DialogFooter>
             </div>
@@ -321,27 +323,27 @@ export default function ClientReleasePage() {
             <>
               {/* 正常状态：显示表单 */}
               <DialogHeader>
-                <DialogTitle>一键打包发布</DialogTitle>
-                <DialogDescription>
-                  系统将在服务器上自动执行构建，完成后自动上传并发送飞书通知。
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-5 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="notes">更新日志</Label>
-                  <textarea
-                    id="notes"
-                    className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="简述本次更新内容..."
-                    value={releaseNotes}
-                    onChange={e => setReleaseNotes(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">此内容将包含在飞书通知中</p>
+                    <DialogTitle>{translate("admin.client_release.build_and_release")}</DialogTitle>
+                    <DialogDescription>
+                      {translate("admin.client_release.build_desc")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-5 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">{translate("admin.client_release.release_notes_label")}</Label>
+                      <textarea
+                        id="notes"
+                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        placeholder={translate("admin.client_release.release_notes_placeholder")}
+                        value={releaseNotes}
+                        onChange={e => setReleaseNotes(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">{translate("admin.client_release.release_notes_hint")}</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="agentRole" className="flex items-center gap-2">
                     <Bot className="h-4 w-4" />
-                    AI 角色
+                    {translate("admin.client_release.ai_role_label")}
                   </Label>
                   <select
                     id="agentRole"
@@ -349,7 +351,7 @@ export default function ClientReleasePage() {
                     value={selectedRole}
                     onChange={e => setSelectedRole(e.target.value)}
                   >
-                    <option value="">不指定角色</option>
+                    <option value="">{translate("admin.client_release.no_role")}</option>
                     {agentRoles.map(role => (
                       <option key={role.t_id} value={role.t_role_name}>
                         {role.t_role_name}
@@ -364,7 +366,7 @@ export default function ClientReleasePage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="wecomGroups" className="flex items-center gap-2">
-                    企微通知群
+                    {translate("admin.client_release.wecom_groups_label")}
                   </Label>
                   <div className="flex flex-wrap gap-2">
                     <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
@@ -380,7 +382,7 @@ export default function ClientReleasePage() {
                         }}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600"
                       />
-                      <span className="text-sm">wuhao 群</span>
+                      <span className="text-sm">wuhao Group</span>
                     </label>
                     <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
                       <input
@@ -395,19 +397,19 @@ export default function ClientReleasePage() {
                         }}
                         className="h-4 w-4 rounded border-gray-300 text-blue-600"
                       />
-                      <span className="text-sm">wudu 群</span>
+                      <span className="text-sm">wudu Group</span>
                     </label>
                   </div>
-                  <p className="text-xs text-muted-foreground">选择要发送通知的企微群，至少选择一个</p>
+                  <p className="text-xs text-muted-foreground">{translate("admin.client_release.wecom_group_select_hint")}</p>
                 </div>
               </div>
               <DialogFooter className="pt-4">
                 <Button type="button" variant="outline" onClick={() => { setIsModalOpen(false); setReleaseNotes(""); }}>
-                  取消
+                  {translate("admin.client_release.cancel")}
                 </Button>
                 <Button onClick={handleBuildAndRelease} disabled={submitting} className="gap-2 min-w-[140px]">
                   <Zap className="h-4 w-4" />
-                  开始构建
+                  {translate("admin.client_release.start_build")}
                 </Button>
               </DialogFooter>
             </>
@@ -421,17 +423,17 @@ export default function ClientReleasePage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Cpu className="h-5 w-5 text-indigo-500" />
-              版本列表
+              {translate("admin.client_release.version_list")}
               {activeRelease && (
                 <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
-                  当前版本: v{activeRelease.version.split(".")[0]}.{activeRelease.version.split(".")[1]}.{activeRelease.version.split(".")[2]}
+                  {translate("admin.client_release.current_version")}: v{activeRelease.version.split(".")[0]}.{activeRelease.version.split(".")[1]}.{activeRelease.version.split(".")[2]}
                 </span>
               )}
             </CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="搜索版本号..." 
+                placeholder={translate("admin.client_release.search_version")} 
                 className="pl-9 h-9" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -444,21 +446,21 @@ export default function ClientReleasePage() {
             {loading ? (
               <div className="p-12 text-center text-muted-foreground">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 opacity-20" />
-                正在加载版本记录...
+                {translate("admin.client_release.loading_versions")}
               </div>
             ) : releases.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground">
                 <Download className="h-10 w-10 mx-auto mb-4 text-muted-foreground/30" />
-                <p className="text-sm">暂无发布记录</p>
+                <p className="text-sm">{translate("admin.client_release.no_releases")}</p>
               </div>
             ) : (
               <table className="w-full text-sm text-left border-collapse">
                 <thead className="bg-muted/30 text-muted-foreground">
                   <tr>
-                    <th className="p-4 font-medium">版本号</th>
-                    <th className="p-4 font-medium">发布时间</th>
-                    <th className="p-4 font-medium">更新说明</th>
-                    <th className="p-4 font-medium text-right">操作</th>
+                    <th className="p-4 font-medium">{translate("admin.client_release.col_version")}</th>
+                    <th className="p-4 font-medium">{translate("admin.client_release.col_time")}</th>
+                    <th className="p-4 font-medium">{translate("admin.client_release.col_notes")}</th>
+                    <th className="p-4 font-medium text-right">{translate("admin.client_release.col_action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
@@ -468,7 +470,7 @@ export default function ClientReleasePage() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-indigo-600 dark:text-indigo-400">v{item.version}</span>
                           {idx === 0 && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">最新</span>
+                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">{translate("admin.client_release.latest")}</span>
                           )}
                         </div>
                       </td>
@@ -491,7 +493,7 @@ export default function ClientReleasePage() {
                             disabled={!item.installer_url}
                           >
                             <Download className="h-3.5 w-3.5" />
-                            下载
+                            {translate("admin.client_release.download")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -499,14 +501,14 @@ export default function ClientReleasePage() {
                             className="h-8 gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-colors"
                             onClick={() => item.installer_url && handleCopyUrl(item.installer_url, item.id)}
                             disabled={!item.installer_url}
-                            title="复制下载地址"
+                            title={translate("admin.client_release.copy")}
                           >
                             {copiedId === item.id ? (
                               <CheckCircle className="h-3.5 w-3.5" />
                             ) : (
                               <Copy className="h-3.5 w-3.5" />
                             )}
-                            {copiedId === item.id ? "已复制" : "复制"}
+                            {copiedId === item.id ? translate("admin.client_release.copied") : translate("admin.client_release.copy")}
                           </Button>
                           <Button
                             variant="ghost"
@@ -529,7 +531,7 @@ export default function ClientReleasePage() {
                         <div className="flex items-center justify-between flex-wrap gap-3">
                           {/* 左侧：每页条数 */}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">每页</span>
+                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.items_per_page")}</span>
                             <select
                               className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               value={pageSize}
@@ -538,16 +540,16 @@ export default function ClientReleasePage() {
                                 void fetchReleases(1);
                               }}
                             >
-                              <option value={5}>5 条</option>
-                              <option value={10}>10 条</option>
-                              <option value={20}>20 条</option>
-                              <option value={50}>50 条</option>
+                              <option value={5}>5 {translate("admin.client_release.items")}</option>
+                              <option value={10}>10 {translate("admin.client_release.items")}</option>
+                              <option value={20}>20 {translate("admin.client_release.items")}</option>
+                              <option value={50}>50 {translate("admin.client_release.items")}</option>
                             </select>
                           </div>
 
                           {/* 中间：跳转 */}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">跳至</span>
+                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.jump_to")}</span>
                             <input
                               type="number"
                               className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-ring"
@@ -564,13 +566,13 @@ export default function ClientReleasePage() {
                                 else if (val > totalPages) void fetchReleases(totalPages);
                               }}
                             />
-                            <span className="text-sm text-muted-foreground">页</span>
+                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.page")}</span>
                           </div>
 
                           {/* 右侧：翻页 + 总计 */}
                           <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">
-                              共 {total} 条 / {totalPages} 页
+                              {translate("admin.client_release.total")} {total} {translate("admin.client_release.items")} / {totalPages} {translate("admin.client_release.page")}
                             </span>
                             <Button
                               variant="outline"
@@ -580,7 +582,7 @@ export default function ClientReleasePage() {
                               disabled={page <= 1}
                             >
                               <ChevronLeft className="h-4 w-4" />
-                              上一页
+                              {translate("admin.client_release.prev_page")}
                             </Button>
                             <Button
                               variant="outline"
@@ -589,7 +591,7 @@ export default function ClientReleasePage() {
                               onClick={() => void fetchReleases(page + 1)}
                               disabled={page >= totalPages}
                             >
-                              下一页
+                              {translate("admin.client_release.next_page")}
                               <ChevronRight className="h-4 w-4" />
                             </Button>
                           </div>

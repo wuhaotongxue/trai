@@ -64,7 +64,7 @@ def list_agent_roles(
     is_active: bool | None = None,
     _=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
-) -> list[AgentRoleModel]:
+) -> list[AgentRoleResponse]:
     """获取所有 AI 角色列表"""
     stmt = select(AgentRoleModel)
     if is_active is not None:
@@ -78,7 +78,7 @@ def get_agent_role(
     role_id: int,
     _=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
-) -> AgentRoleModel:
+) -> AgentRoleResponse:
     """根据 ID 获取 AI 角色"""
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_id == role_id)
     role = db.execute(stmt).scalar_one_or_none()
@@ -92,7 +92,7 @@ def create_agent_role(
     role_data: AgentRoleCreate,
     admin_user=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
-) -> AgentRoleModel:
+) -> AgentRoleResponse:
     """创建新的 AI 角色"""
     # 检查角色名是否已存在
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_role_name == role_data.t_role_name)
@@ -122,7 +122,7 @@ def update_agent_role(
     role_data: AgentRoleUpdate,
     admin_user=Depends(get_current_admin_user),
     db: Session = Depends(get_db_session),
-) -> AgentRoleModel:
+) -> AgentRoleResponse:
     """更新 AI 角色信息"""
     stmt = select(AgentRoleModel).where(AgentRoleModel.t_id == role_id)
     role = db.execute(stmt).scalar_one_or_none()

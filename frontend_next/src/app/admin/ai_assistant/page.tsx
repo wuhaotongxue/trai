@@ -10,9 +10,11 @@
 import { ChatPanel } from "@/components/agent/chat_panel";
 import { useAgentStore } from "@/stores/agent.store";
 import { useEffect, useState } from "react";
+import { useAdminI18n } from "@/contexts/admin_i18n_context";
 
 export default function AIAssistantPage() {
   const { sessionId, startSession, totalTokens, isStreaming } = useAgentStore();
+  const { translate } = useAdminI18n();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function AIAssistantPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-            <p className="text-sm text-muted-foreground">正在初始化...</p>
+            <p className="text-sm text-muted-foreground">{translate("admin.ai_assistant.init")}</p>
           </div>
         </div>
       </div>
@@ -43,7 +45,7 @@ export default function AIAssistantPage() {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isStreaming ? "bg-blue-500 animate-pulse" : "bg-emerald-500"}`} />
             <span className="text-xs font-medium text-muted-foreground">
-              {isStreaming ? "AI 正在思考中..." : "AI 助手已就绪"}
+              {isStreaming ? translate("admin.ai_assistant.thinking") : translate("admin.ai_assistant.ready")}
             </span>
           </div>
         </div>
