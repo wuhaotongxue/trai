@@ -520,11 +520,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   generateImage: async (prompt: string, model?: string, width?: number, height?: number) => {
     set({ isGeneratingImage: true, imageGenerateError: null, generatedImageUrl: null });
     try {
-      const res = await api.agent.generateImage({ prompt, model, width, height });
+      const res = await api.agent.generateImage({ prompt, model, width, height, steps: 4, seed: -1 });
       if (res.image_url) {
         set({ generatedImageUrl: res.image_url, isGeneratingImage: false });
         // 将生成的图片添加到图片廊
         get().addToImageGallery(res.image_url, prompt);
+      } else if (res.image_base64) {
+        const byteString = atob(res.image_base64);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+          bytes[i] = byteString.charCodeAt(i);
+        }
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+        set({ generatedImageUrl: blobUrl, isGeneratingImage: false });
       } else {
         set({ imageGenerateError: res.error || "图片生成失败", isGeneratingImage: false });
       }
@@ -535,10 +543,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   clearGeneratedImage: () => {
+    const current = get().generatedImageUrl;
+    if (current && current.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(current);
+      } catch {
+      }
+    }
     set({ generatedImageUrl: null, imageGenerateError: null });
   },
 
   addToImageGallery: (url: string, prompt: string) => {
+    if (url.startsWith("blob:") || url.startsWith("data:")) {
+      return;
+    }
     const newImage = {
       id: generateUUID(),
       url,

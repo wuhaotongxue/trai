@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import re
 import uuid
 from datetime import datetime
@@ -25,6 +26,7 @@ from infrastructure.repositories.session_repository import (
     SessionRepository,
 )
 from infrastructure.services.chat_history_service import get_chat_history_service
+from infrastructure.storage.s3_storage import S3StorageService
 
 
 class InputValidator:
@@ -233,7 +235,7 @@ class SessionDetailResponse(BaseModel):
 class SendMessageRequest(BaseModel):
     """发送消息请求"""
 
-    content: Annotated[str, Field(min_length=1, max_length=32000, description="消息内容")]
+    content: Annotated[str, Field(min_length=0, max_length=32000, description="消息内容")] = ""
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
     images: Annotated[list[str] | None, Field(default=None, description="图片 base64 列表")] = None
 
@@ -249,7 +251,7 @@ class SendMessageResponse(BaseModel):
 class StreamMessageRequest(BaseModel):
     """流式发送消息请求"""
 
-    content: Annotated[str, Field(min_length=1, max_length=32000, description="消息内容")]
+    content: Annotated[str, Field(min_length=0, max_length=32000, description="消息内容")] = ""
     role: Annotated[str, Field(default="user", description="消息角色")] = "user"
     images: list[str] | None = Field(default=None, description="图片列表(base64)")
 
@@ -296,6 +298,7 @@ async def send_message(
     """
     user_id = current_user.get("user_id")
     role = current_user.get("role", "normal")
+    tenant_id = current_user.get("tenant_id") or "default"
 
     history_service = get_chat_history_service(session)
 
@@ -319,9 +322,53 @@ async def send_message(
     messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
 
-    # 检测是否包含图片，如果是则使用本地视觉模型
-    has_images = bool(request.images)
-    use_local_vision = has_images
+    storage = S3StorageService()
+
+    extra_data = {}
+    if isinstance(chat_session.metadata, dict):
+        maybe_extra = chat_session.metadata.get("extra_data")
+        if isinstance(maybe_extra, dict):
+            extra_data = maybe_extra
+
+    image_object_keys: list[str] = []
+    if request.images:
+        for img_base64 in request.images:
+            raw = img_base64
+            if raw.startswith("data:"):
+                parts = raw.split("base64,", 1)
+                raw = parts[1] if len(parts) == 2 else raw
+
+            image_bytes = base64.b64decode(raw)
+
+            ext = "png"
+            content_type = "image/png"
+            if image_bytes.startswith(b"\xff\xd8\xff"):
+                ext = "jpg"
+                content_type = "image/jpeg"
+            elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                ext = "webp"
+                content_type = "image/webp"
+            elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
+                ext = "gif"
+                content_type = "image/gif"
+
+            object_key = (
+                f"private/tenants/{tenant_id}/attachments/chat_images/"
+                f"{user_id or 'anonymous'}/{uuid.uuid4().hex}.{ext}"
+            )
+            storage.upload_bytes(data=image_bytes, object_key=object_key, content_type=content_type)
+            image_object_keys.append(object_key)
+
+        history_service.update_session_extra_data(
+            session_id=session_id,
+            patch={"last_image_object_keys": image_object_keys},
+        )
+    else:
+        maybe_last = extra_data.get("last_image_object_keys")
+        if isinstance(maybe_last, list) and maybe_last:
+            image_object_keys = [str(maybe_last[-1])]
+
+    use_local_vision = bool(image_object_keys)
 
     try:
         if use_local_vision:
@@ -333,11 +380,20 @@ async def send_message(
             user_message = {"role": "user", "content": []}
             if request.content:
                 user_message["content"].append({"type": "text", "text": request.content})
-            for img_base64 in request.images:
-                user_message["content"].append({
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/png;base64,{img_base64}"}
-                })
+            for object_key in image_object_keys:
+                image_bytes = storage.get_object_bytes(object_key)
+                mime = "image/png"
+                if image_bytes.startswith(b"\xff\xd8\xff"):
+                    mime = "image/jpeg"
+                elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                    mime = "image/webp"
+                elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
+                    mime = "image/gif"
+
+                b64 = base64.b64encode(image_bytes).decode("utf-8")
+                user_message["content"].append(
+                    {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
+                )
             managed_messages.append(user_message)
             
             # 调用本地视觉模型
@@ -360,6 +416,7 @@ async def send_message(
             session_id=session_id,
             user_content=request.content,
             assistant_content=ai_content,
+            user_metadata={"image_object_keys": image_object_keys} if image_object_keys else None,
         )
 
         if message_count_before == 0:
@@ -430,29 +487,164 @@ async def stream_message(
     context_manager: ContextManager = get_context_manager()
     messages_dict = chat_session.to_ai_format()
     managed_messages, context_stats = context_manager.check_and_manage(messages_dict, session_id)
-    # 构建用户消息(支持多模态 Vision 图片)
-    if msg.images:
-        # 多模态消息: content 为数组, 包含文本和图片
-        user_message: dict[str, Any] = {
-            "role": msg.role,
-            "content": [
-                {"type": "text", "text": msg.content},
-            ],
-        }
-        for img_base64 in msg.images:
-            # 支持 data:image/xxx;base64,xxx 格式和纯 base64 格式
+    storage = S3StorageService()
+    tenant_id = current_user.get("tenant_id") if current_user else None
+    safe_tenant_id = tenant_id or "default"
+    safe_user_id = user_id or "anonymous"
+
+    extra_data = {}
+    if isinstance(chat_session.metadata, dict):
+        maybe_extra = chat_session.metadata.get("extra_data")
+        if isinstance(maybe_extra, dict):
+            extra_data = maybe_extra
+
+    image_object_keys: list[str] = []
+    has_new_images = bool(msg.images and len(msg.images) > 0)
+    
+    if has_new_images:
+        logger.info(f"收到新图片上传 | session_id={session_id} | 图片数量={len(msg.images)}")
+        valid_image_count = 0
+        
+        for idx, img_base64 in enumerate(msg.images):
+            # 验证图片数据
+            if not img_base64 or len(img_base64.strip()) == 0:
+                logger.warning(f"图片 {idx+1} 数据为空")
+                continue
+                
+            logger.info(f"图片 {idx+1} 原始数据长度={len(img_base64)} 字符")
             if img_base64.startswith("data:"):
-                user_message["content"].append(
-                    {"type": "image_url", "image_url": {"url": img_base64}}
-                )
+                logger.info(f"图片 {idx+1} 包含 data: 前缀")
+                parts = img_base64.split("base64,", 1)
+                if len(parts) == 2:
+                    logger.info(f"图片 {idx+1} base64 数据长度={len(parts[1])} 字符")
+                else:
+                    logger.warning(f"图片 {idx+1} 格式异常，无法拆分 base64")
+                    continue
+            
+            raw = img_base64
+            if raw.startswith("data:"):
+                parts = raw.split("base64,", 1)
+                raw = parts[1] if len(parts) == 2 else raw
+
+            try:
+                image_bytes = base64.b64decode(raw)
+            except Exception as e:
+                logger.warning(f"图片 {idx+1} base64 解码失败: {e}")
+                continue
+                
+            image_size = len(image_bytes)
+            
+            # 验证解码后的图片数据
+            if image_size == 0:
+                logger.warning(f"图片 {idx+1} 解码后为空")
+                continue
+                
+            logger.info(f"处理图片 {idx+1} | 解码后大小={image_size} bytes")
+
+            ext = "png"
+            content_type = "image/png"
+            if image_bytes.startswith(b"\xff\xd8\xff"):
+                ext = "jpg"
+                content_type = "image/jpeg"
+            elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                ext = "webp"
+                content_type = "image/webp"
+            elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
+                ext = "gif"
+                content_type = "image/gif"
+
+            object_key = (
+                f"private/tenants/{safe_tenant_id}/attachments/chat_images/"
+                f"{safe_user_id}/{uuid.uuid4().hex}.{ext}"
+            )
+            storage.upload_bytes(data=image_bytes, object_key=object_key, content_type=content_type)
+            image_object_keys.append(object_key)
+            valid_image_count += 1
+            logger.info(f"图片 {idx+1} 已上传 | object_key={object_key}")
+        
+        # 如果所有图片都无效，返回错误
+        if valid_image_count == 0:
+            logger.error(f"所有图片数据都无效 | session_id={session_id}")
+            raise HTTPException(
+                status_code=400,
+                detail="图片数据无效，请上传有效的图片文件"
+            )
+
+        history_service.update_session_extra_data(
+            session_id=session_id,
+            patch={"last_image_object_keys": image_object_keys},
+        )
+    elif msg.content.strip():
+        # 只有当有文字内容但没有图片时，才使用上次的图片
+        maybe_last = extra_data.get("last_image_object_keys")
+        if isinstance(maybe_last, list) and maybe_last:
+            image_object_keys = [str(maybe_last[-1])]
+            logger.info(f"使用上次的图片 | session_id={session_id} | object_key={image_object_keys[0]}")
+    else:
+        logger.info(f"无图片且无内容 | session_id={session_id}")
+
+    if image_object_keys:
+        logger.info(f"开始处理图片消息 | session_id={session_id} | 图片数量={len(image_object_keys)} | 原始内容='{msg.content[:50]}...'")
+        
+        # 如果内容为空，自动描述图片
+        if not msg.content.strip():
+            logger.info("内容为空，开始自动分析图片")
+            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+            vision_client = LocalModelScopeVisionClient()
+            
+            # 获取第一张图片进行分析
+            first_image_key = image_object_keys[0]
+            logger.info(f"分析图片 | object_key={first_image_key}")
+            
+            image_bytes = storage.get_object_bytes(first_image_key)
+            logger.info(f"读取图片完成 | 大小={len(image_bytes)} bytes")
+            
+            # 检查图片格式
+            if image_bytes.startswith(b"\xff\xd8\xff"):
+                logger.info("图片格式: JPEG")
+            elif image_bytes.startswith(b"\x89PNG"):
+                logger.info("图片格式: PNG")
+            elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                logger.info("图片格式: WebP")
+            elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
+                logger.info("图片格式: GIF")
             else:
-                # 纯 base64, 默认为 image/png
-                user_message["content"].append(
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/png;base64,{img_base64}"},
-                    }
+                logger.info(f"未知图片格式 | 前20字节: {image_bytes[:20].hex()}")
+            
+            b64 = base64.b64encode(image_bytes).decode("utf-8")
+            logger.info(f"Base64编码后长度: {len(b64)} 字符")
+            
+            # 使用视觉模型分析图片内容
+            try:
+                logger.info("调用视觉模型分析图片...")
+                analyze_result = await vision_client.analyze_image(
+                    b64,
+                    prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等，用中文回答"
                 )
+                auto_description = f"图片内容: {analyze_result.content}"
+                logger.info(f"图片分析成功 | 完整描述='{analyze_result.content}'")
+            except Exception as e:
+                logger.warning(f"图片分析失败: {e}")
+                auto_description = "分析图片内容"
+            
+            msg.content = auto_description
+            logger.info(f"自动描述已设置 | 内容='{msg.content[:100]}...'")
+        
+        user_message = {"role": msg.role, "content": [{"type": "text", "text": msg.content}]}
+        for object_key in image_object_keys:
+            image_bytes = storage.get_object_bytes(object_key)
+            mime = "image/png"
+            if image_bytes.startswith(b"\xff\xd8\xff"):
+                mime = "image/jpeg"
+            elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                mime = "image/webp"
+            elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
+                mime = "image/gif"
+
+            b64 = base64.b64encode(image_bytes).decode("utf-8")
+            user_message["content"].append(
+                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
+            )
     else:
         user_message = {"role": msg.role, "content": msg.content}
 
@@ -460,9 +652,7 @@ async def stream_message(
 
     import json
 
-    # 检测是否包含图片，如果是则使用本地视觉模型
-    has_images = bool(msg.images)
-    use_local_vision = has_images
+    use_local_vision = bool(image_object_keys)
 
     async def generate_sse():
         try:
@@ -487,6 +677,7 @@ async def stream_message(
                     session_id=session_id,
                     user_content=msg.content,
                     assistant_content=full_response,
+                    user_metadata={"image_object_keys": image_object_keys} if image_object_keys else None,
                 )
                 if chat_session.message_count == 0:
                     title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
@@ -524,6 +715,7 @@ async def stream_message(
                             session_id=session_id,
                             user_content=msg.content,
                             assistant_content=full_response,
+                            user_metadata={"image_object_keys": image_object_keys} if image_object_keys else None,
                         )
                         if chat_session.message_count == 0:
                             title = msg.content[:30] + ("..." if len(msg.content) > 30 else "")
@@ -549,6 +741,7 @@ async def create_session(
     request: CreateSessionRequest,
     current_user_opt: CurrentUserOptional,
     session: Annotated[Session, Depends(get_db_session)],
+    request_obj: Annotated[Request, Depends()],
 ) -> CreateSessionResponse:
     """创建新会话
 
@@ -556,11 +749,20 @@ async def create_session(
         request: 创建会话参数
         current_user_opt: 可选当前登录用户
         session: 数据库会话
+        request_obj: FastAPI Request 对象，用于获取客户端IP
 
     Returns:
         CreateSessionResponse: 创建的会话信息
     """
     user_id = current_user_opt.get("user_id") if current_user_opt else None
+    username = current_user_opt.get("username") if current_user_opt else None
+    
+    # 获取客户端IP地址
+    client_ip = request_obj.client.host if request_obj.client else None
+    # 处理代理情况下的真实IP
+    x_forwarded_for = request_obj.headers.get("X-Forwarded-For")
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(",")[0].strip()
 
     session_repo = SessionRepository(session)
 
@@ -571,8 +773,12 @@ async def create_session(
     db_session = session_repo.create_session(
         session_id=session_id,
         user_id=user_id,
+        username=username,
         title=title,
         model=model,
+        client_ip=client_ip,
+        created_by=user_id,
+        created_by_name=username,
     )
 
     return CreateSessionResponse(
@@ -588,18 +794,18 @@ async def create_session(
     response_model=SessionListResponse,
     tags=["会话"],
     summary="会话列表",
-    description="获取当前用户的会话列表.",
+    description="获取会话列表，支持游客模式（未登录用户）.",
 )
 async def list_sessions(
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional,
     session: Annotated[Session, Depends(get_db_session)],
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionListResponse:
-    """获取当前用户的会话列表 - 使用领域实体
+    """获取会话列表 - 支持游客模式
 
     Args:
-        current_user: 当前登录用户
+        current_user: 当前用户（可选，支持游客）
         session: 数据库会话
         limit: 每页数量
         offset: 偏移量
@@ -607,7 +813,7 @@ async def list_sessions(
     Returns:
         SessionListResponse: 会话列表
     """
-    user_id = current_user.get("user_id")
+    user_id = current_user.get("user_id") if current_user else None
 
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)
@@ -767,6 +973,7 @@ async def delete_session(
     session_id: str,
     current_user: CurrentUser,
     db_session: Annotated[Session, Depends(get_db_session)],
+    request: Annotated[Request, Depends()],
 ) -> ActionResponse:
     """删除会话 - 使用 ChatHistoryService
 
@@ -774,6 +981,7 @@ async def delete_session(
         session_id: 会话 ID
         current_user: 当前登录用户
         db_session: 数据库会话
+        request: FastAPI Request 对象，用于获取客户端IP
 
     Returns:
         ActionResponse: 删除结果
@@ -782,7 +990,14 @@ async def delete_session(
         HTTPException: 会话不存在(404)或无权访问(403)
     """
     user_id = current_user.get("user_id")
+    username = current_user.get("username")
     role = current_user.get("role", "normal")
+    
+    # 获取客户端IP地址
+    client_ip = request.client.host if request.client else None
+    x_forwarded_for = request.headers.get("X-Forwarded-For")
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(",")[0].strip()
 
     session_repo = SessionRepository(db_session)
     message_repo = MessageRepository(db_session)
@@ -801,9 +1016,14 @@ async def delete_session(
         )
 
     message_repo.delete_messages(session_id)
-    session_repo.delete_session(session_id)
+    session_repo.delete_session(
+        session_id=session_id,
+        deleted_by=user_id,
+        deleted_by_name=username,
+        deleted_ip=client_ip,
+    )
 
-    logger.info(f"会话已删除 | session_id={session_id}")
+    logger.info(f"会话已删除 | session_id={session_id} | deleted_by={user_id} | ip={client_ip}")
 
     return ActionResponse(message="会话删除成功")
 

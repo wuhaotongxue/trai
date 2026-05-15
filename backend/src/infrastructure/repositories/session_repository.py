@@ -57,6 +57,10 @@ class SessionRepository:
         title: str | None,
         model: str,
         extra_data: dict[str, Any] | None = None,
+        username: str | None = None,
+        client_ip: str | None = None,
+        created_by: str | None = None,
+        created_by_name: str | None = None,
     ) -> ChatSession:
         """创建会话
 
@@ -66,6 +70,10 @@ class SessionRepository:
             title: 会话标题
             model: AI 模型名称
             extra_data: 扩展数据
+            username: 用户姓名/昵称
+            client_ip: 客户端 IP 地址
+            created_by: 创建人 user_id
+            created_by_name: 创建人姓名
 
         Returns:
             ChatSession: 创建的会话领域实体
@@ -73,10 +81,14 @@ class SessionRepository:
         db_session = ChatSessionModel(
             t_session_id=session_id,
             t_user_id=user_id,
+            t_username=username,
             t_title=title,
             t_model=model,
             t_messages=[],
             t_extra_data=extra_data or {},
+            t_client_ip=client_ip,
+            t_created_by=created_by,
+            t_created_by_name=created_by_name,
         )
         self._session.add(db_session)
         self._session.commit()
@@ -180,11 +192,20 @@ class SessionRepository:
 
         return result
 
-    def delete_session(self, session_id: str) -> bool:
+    def delete_session(
+        self,
+        session_id: str,
+        deleted_by: str | None = None,
+        deleted_by_name: str | None = None,
+        deleted_ip: str | None = None,
+    ) -> bool:
         """删除会话(软删除)(带缓存失效)
 
         Args:
             session_id: 会话唯一标识
+            deleted_by: 删除操作人 user_id
+            deleted_by_name: 删除人姓名
+            deleted_ip: 删除时的客户端 IP 地址
 
         Returns:
             bool: 是否删除成功
@@ -199,6 +220,9 @@ class SessionRepository:
             return False
 
         model.t_deleted_at = datetime.now()
+        model.t_deleted_by = deleted_by
+        model.t_deleted_by_name = deleted_by_name
+        model.t_deleted_ip = deleted_ip
         self._session.commit()
 
         # 删除缓存
@@ -229,6 +253,8 @@ class MessageRepository:
             metadata={
                 "message_id": model.t_id,
                 "session_id": model.t_session_id,
+                "image_keys": model.t_image_keys or [],
+                "client_ip": model.t_client_ip,
                 **(model.t_msg_metadata or {}),
             },
         )
@@ -239,6 +265,9 @@ class MessageRepository:
         role: str,
         content: str,
         msg_metadata: dict[str, Any] | None = None,
+        image_keys: list[str] | None = None,
+        created_by: str | None = None,
+        client_ip: str | None = None,
     ) -> Message:
         """添加消息
 
@@ -247,6 +276,9 @@ class MessageRepository:
             role: 消息角色(system/user/assistant)
             content: 消息内容
             msg_metadata: 消息元数据(可选)
+            image_keys: 关联的图片 S3 对象键列表(可选)
+            created_by: 创建人 user_id(可选)
+            client_ip: 客户端 IP 地址(可选)
 
         Returns:
             Message: 创建的消息领域实体
@@ -255,7 +287,10 @@ class MessageRepository:
             t_session_id=session_id,
             t_role=role,
             t_content=content,
+            t_image_keys=image_keys or [],
             t_msg_metadata=msg_metadata or {},
+            t_created_by=created_by,
+            t_client_ip=client_ip,
         )
         self._session.add(message)
         self._session.commit()

@@ -26,6 +26,7 @@ class ImageGenerationInput:
 
     prompt: str
     user_id: str = ""
+    tenant_id: str | None = None
     model: str = "AI-ModelScope/FLUX.1-dev"
     width: int = 1024
     height: int = 1024
@@ -44,6 +45,7 @@ class ImageGenerationOutput:
 
     task_id: str
     image_url: str | None = None
+    image_base64: str | None = None
     status: str = "pending"
     error: str | None = None
 
@@ -86,10 +88,17 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
                 height=input_data.height,
                 steps=input_data.steps,
                 seed=input_data.seed,
+                user_id=input_data.user_id,
+                tenant_id=input_data.tenant_id,
             )
-            image_url = result["image_url"]
-            generation.mark_completed(image_url)
-
+            image_url = result.get("image_url")
+            image_base64 = result.get("image_base64")
+            
+            if image_url:
+                generation.mark_completed(image_url)
+            elif image_base64:
+                generation.mark_completed(f"data:image/png;base64,{image_base64[:50]}...")
+            
             if self._repository:
                 self._repository.update_status(
                     generation.task_id,
@@ -100,6 +109,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
             return ImageGenerationOutput(
                 task_id=generation.task_id,
                 image_url=image_url,
+                image_base64=image_base64,
                 status="completed",
             )
         except Exception as e:
