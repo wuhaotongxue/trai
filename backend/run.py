@@ -117,6 +117,8 @@ class PortCleaner:
             import psutil
 
             for conn in psutil.net_connections():
+                if getattr(conn, "status", None) not in (psutil.CONN_LISTEN, "LISTEN"):
+                    continue
                 if conn.laddr and conn.laddr.port == port:
                     try:
                         proc = psutil.Process(conn.pid)
@@ -143,6 +145,11 @@ class PortCleaner:
             import psutil
 
             proc = psutil.Process(pid)
+            for child in proc.children(recursive=True):
+                try:
+                    child.kill()
+                except psutil.NoSuchProcess:
+                    continue
             proc.kill()
             proc.wait(timeout=3)
             print(f"  [OK] 已终止: {name} (PID: {pid})")
@@ -373,7 +380,7 @@ def main() -> None:
                 await server.serve()
                 break
             except OSError as e:
-                if e.errno == 10048 and attempt < 2:
+                if e.errno in (98, 10048) and attempt < 2:
                     print(f"\n  [!] 端口 {config['port']} 被占用, {attempt + 1}s 后重试...")
                     time.sleep(1)
                     continue

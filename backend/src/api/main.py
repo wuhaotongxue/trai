@@ -384,6 +384,7 @@ def register_routers(app: FastAPI) -> None:
         backup,
         dashboard_router,
         knowledge_base_router,
+        login_logs,
         organization,
         quota_config_router,
         schema_doc_router,
@@ -427,6 +428,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(admin_client_release_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(admin_agent_role_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(organization.router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(login_logs.router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(ai_mgmt.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(backup.router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
     app.include_router(schema_doc_router, prefix=f"{api_prefix}/admin", tags=["系统管理"])

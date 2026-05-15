@@ -63,6 +63,8 @@ export const PUBLIC_ZH = {
   "nav.ai_assistant": "AI 助手",
   "nav.login": "登录",
   "nav.register": "注册",
+  "nav.profile": "个人中心",
+  "nav.logout": "退出登录",
   // ===== 首页 Hero =====
   "hero.badge": "企业级 AI 助手平台",
   "hero.title": "让 AI 替你完成工作",

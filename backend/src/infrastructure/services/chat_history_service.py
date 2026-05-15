@@ -209,6 +209,22 @@ class ChatHistoryService:
 
         return user_msg, assistant_msg
 
+    def update_session_extra_data(self, session_id: str, patch: dict[str, Any]) -> bool:
+        session_repo, _ = self._get_repos()
+        chat_session = session_repo.get_session(session_id)
+        if not chat_session:
+            raise ValueError(f"会话不存在: {session_id}")
+
+        current_extra = {}
+        if isinstance(chat_session.metadata, dict):
+            extra = chat_session.metadata.get("extra_data")
+            if isinstance(extra, dict):
+                current_extra = extra
+
+        merged = {**current_extra, **patch}
+        updated = session_repo.update_session(session_id=session_id, extra_data=merged)
+        return updated is not None
+
     def get_messages_for_ai(
         self,
         session_id: str,

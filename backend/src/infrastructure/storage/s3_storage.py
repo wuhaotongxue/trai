@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlparse, urlunparse
 from typing import Any
 
 import boto3
@@ -21,19 +22,20 @@ class S3StorageService:
 
     def __init__(self) -> None:
         self._endpoint: str = os.getenv("S3_ENDPOINT", "http://localhost:9000")
+        self._presign_public_base: str = os.getenv("S3_PRESIGNED_PUBLIC_BASE", "").strip()
         self._access_key: str = os.getenv("S3_ACCESS_KEY", "")
         self._secret_key: str = os.getenv("S3_SECRET_KEY", "")
         self._bucket: str = os.getenv("S3_BUCKET", "trai")
         self._region: str = os.getenv("S3_REGION", "us-east-1")
         self._secure: bool = os.getenv("S3_SECURE", "false").lower() == "true"
         self._public_domain: str = os.getenv("S3_PUBLIC_DOMAIN", "")
-        self._client = self._create_client()
+        self._client = self._create_client(endpoint=self._endpoint)
 
-    def _create_client(self) -> Any:
+    def _create_client(self, endpoint: str) -> Any:
         """创建 S3 客户端"""
         return boto3.client(
             "s3",
-            endpoint_url=self._endpoint,
+            endpoint_url=endpoint,
             aws_access_key_id=self._access_key,
             aws_secret_access_key=self._secret_key,
             region_name=self._region,
@@ -124,7 +126,7 @@ class S3StorageService:
                 Params={"Bucket": self._bucket, "Key": object_key},
                 ExpiresIn=expires_in,
             )
-            return url
+            return self._rewrite_presigned_url(url)
 
         except ClientError as e:
             logger.error(f"S3 预签名 URL 生成失败 | 错误: {str(e)}")
@@ -132,6 +134,31 @@ class S3StorageService:
                 message=f"S3 预签名 URL 生成失败: {str(e)}",
                 details={"error": str(e)},
             )
+
+    def _rewrite_presigned_url(self, url: str) -> str:
+        if not self._presign_public_base:
+            return url
+
+        base = urlparse(self._presign_public_base)
+        if not base.scheme or not base.netloc:
+            return url
+
+        original = urlparse(url)
+        base_path = base.path.rstrip("/")
+        original_path = original.path
+
+        new_path = f"{base_path}{original_path}" if base_path else original_path
+        new_url = urlunparse(
+            (
+                base.scheme,
+                base.netloc,
+                new_path,
+                original.params,
+                original.query,
+                original.fragment,
+            )
+        )
+        return new_url
 
     def delete_file(self, object_key: str) -> bool:
         """删除文件
@@ -149,6 +176,23 @@ class S3StorageService:
         except ClientError as e:
             logger.error(f"S3 删除失败 | 错误: {str(e)}")
             return False
+
+    def get_object_bytes(self, object_key: str) -> bytes:
+        try:
+            resp = self._client.get_object(Bucket=self._bucket, Key=object_key)
+            body = resp.get("Body")
+            if body is None:
+                raise ExternalServiceError(
+                    message="S3 获取对象失败: empty body",
+                    details={"object_key": object_key},
+                )
+            return body.read()
+        except ClientError as e:
+            logger.error(f"S3 获取对象失败 | 键: {object_key} | 错误: {str(e)}")
+            raise ExternalServiceError(
+                message=f"S3 获取对象失败: {str(e)}",
+                details={"error": str(e), "object_key": object_key},
+            )
 
     def get_file_url(self, object_key: str) -> str:
         """获取文件 URL (优先使用公共域名)"""
