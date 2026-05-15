@@ -46,6 +46,11 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_15_1703
+- **新增（文档）**: 新增第10期总结文档（md/issue_10/index.md）
+- **新增（后端）**: infrastructure/utils/ 本地图片生成和视觉推理基础设施
+- **新增（前端）**: 登录日志管理页面（/admin/login_logs）
+
 ### 🛠️ 后端_2026_05_15_1506
 - **新增（后端）**: 登录日志管理功能（LoginLogModel、LoginLogRepository、login_logs.py）
 - **新增（后端）**: 本地图片生成客户端（LocalImageClient），支持 Tongyi-MAI/Z-Image-Turbo 模型

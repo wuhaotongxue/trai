@@ -123,6 +123,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         { label: translate("admin.quotas"), href: "/admin/quotas", icon: Cpu, desc: translate("admin.quotas.desc") },
         { label: translate("admin.notifications"), href: "/admin/notifications", icon: Bell, desc: translate("admin.notifications.desc") },
         { label: translate("admin.logs"), href: "/admin/logs", icon: FileText, desc: translate("admin.logs.desc") },
+        { label: translate("admin.login_logs"), href: "/admin/login_logs", icon: FileText, desc: translate("admin.login_logs.desc") },
       ],
     },
     {
