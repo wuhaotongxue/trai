@@ -10,7 +10,7 @@ description: >-
 > - **企业微信 wuhao 群**：`$env:NOTIFY_WECOM_WUHAO_WEBHOOK`
 > - **企业微信 wudu 群**：`$env:NOTIFY_WECOM_WUDU_WEBHOOK`
 > - **飞书群**：`$env:NOTIFY_FEISHU_WEBHOOK`
-> - 配置位置：`backend/.env` 第 3479-3524 行
+> - 配置位置：`backend/env/notify_robot.env`（或 backend/.env 合并后）
 
 当用户调用此技能时，请严格按照以下步骤连贯执行：
 

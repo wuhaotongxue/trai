@@ -37,6 +37,12 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_14_1937
+- **新增**: 本地视觉模型支持，使用 Qwen2-VL-7B-Instruct 分析图片
+- **新增**: vision_client.py 提供本地 GPU 视觉推理能力（懒加载 + idle 释放）
+- **新增**: session.py 支持图片消息，自动路由到本地视觉模型
+- **修复**: 前端图片上传 base64 格式兼容性问题
+
 ### 🛠️ 后端_2026_05_14_1634
 - **重构**: 拆分 .env 为模块化目录（env/），敏感信息分离为 env_example/ 示例
 - **fix**: 修正 .gitignore 规则，正确忽略 backend/env/ 敏感目录

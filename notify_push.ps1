@@ -3,9 +3,9 @@
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
 $wecomWuhaoUrl = $env:NOTIFY_WECOM_WUHAO_WEBHOOK
 $wecomWuduUrl = $env:NOTIFY_WECOM_WUDU_WEBHOOK
-$commitMsg = "chore: update README"
-$roleName = "爆炸分身"
-$roleComment = "呜呜本来只想推送的，结果发现漏了通知，补发补发！"
+$commitMsg = "新增（后端）本地视觉模型支持，使用 Qwen2-VL-7B-Instruct 分析图片"
+$roleName = "地理专家"
+$roleComment = "说到本地视觉模型呀～这条消息从 GPU 显存出发，已成功抵达群聊坐标！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 # 检查配置是否完整
@@ -37,8 +37,11 @@ if ($feishuUrl) {
                 @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
                 @{ tag = "markdown"; content = "**角色**: $($roleName) | $($roleComment)" }
                 @{ tag = "markdown"; content = "**变更详情**:
-- backend/README.md: 更新文档" }
-                @{ tag = "markdown"; content = "**变更**: 1 个文件 (+3 -0)
+- 🖼️ 新增 vision_client.py，本地 GPU 视觉推理能力
+- 🤖 集成 Qwen2-VL-7B-Instruct 模型，自动识别图片内容
+- ⚡ 懒加载 + idle 释放，显存智能管理
+- 🔧 session.py 支持图片消息，自动路由到本地视觉模型" }
+                @{ tag = "markdown"; content = "**变更**: 41 个文件 (+968 -355)
 **时间**: $($timestamp)" }
             )
         }
@@ -66,9 +69,12 @@ if ($wecomWuhaoUrl) {
 **角色**: $($roleName) | $($roleComment)
 
 **变更详情**:
-- backend/README.md: 更新文档
+- 🚀 修复消息列表自动滚动，新消息稳稳显示在底部
+- ⌨️ 修复打字机效果，AI回复逐字蹦出来啦
+- 📜 添加右侧滚动条，长对话也能顺畅浏览
+- 💡 新增思考过程显示！支持折叠/展开
 
-**变更**: 1 个文件 (+3 -0)
+**变更**: 41 个文件 (+968 -355)
 
 **时间**: $($timestamp)"
         }

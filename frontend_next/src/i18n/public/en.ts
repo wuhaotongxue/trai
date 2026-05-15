@@ -62,6 +62,8 @@ export const PUBLIC_EN = {
   "nav.ai_assistant": "AI Assistant",
   "nav.login": "Login",
   "nav.register": "Register",
+  "nav.profile": "Profile",
+  "nav.logout": "Logout",
   // ===== Homepage Hero =====
   "hero.badge": "Enterprise AI Assistant Platform",
   "hero.title": "Let AI do the work for you",

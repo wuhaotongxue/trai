@@ -23,12 +23,14 @@ class ChatSessionModel(Base):
     __tablename__ = "t_chat_sessions"
     __comment__ = "AI 对话会话表,存储会话元数据和消息历史"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_session_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """会话唯一标识 UUID"""
     t_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     """用户 ID"""
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """用户姓名/昵称"""
     t_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     """会话标题"""
     t_model: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -37,10 +39,14 @@ class ChatSessionModel(Base):
     """消息历史 JSON 数组"""
     t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     """扩展数据字段"""
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """客户端 IP 地址"""
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     """创建时间"""
     t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     """创建人 user_id"""
+    t_created_by_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """创建人姓名"""
     t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
     """最后更新时间"""
     t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -49,6 +55,10 @@ class ChatSessionModel(Base):
     """软删除时间,为空表示未删除"""
     t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     """删除操作人 user_id"""
+    t_deleted_by_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """删除人姓名"""
+    t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """删除时的客户端 IP 地址"""
 
 
 class MessageModel(Base):
@@ -57,7 +67,7 @@ class MessageModel(Base):
     __tablename__ = "t_messages"
     __comment__ = "AI 对话消息表,存储单条消息内容"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_session_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """关联的会话 session_id"""
@@ -65,12 +75,16 @@ class MessageModel(Base):
     """消息角色:system/user/assistant"""
     t_content: Mapped[str] = mapped_column(Text, nullable=False)
     """消息内容"""
+    t_image_keys: Mapped[list[str]] = mapped_column(JSON, default=list)
+    """关联的图片 S3 对象键列表"""
     t_msg_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     """消息扩展元数据"""
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     """创建时间"""
     t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     """创建人 user_id"""
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """客户端 IP 地址"""
 
 
 class QuotaPlanModel(Base):
@@ -79,7 +93,7 @@ class QuotaPlanModel(Base):
     __tablename__ = "t_quota_plans"
     __comment__ = "配额套餐表,定义各角色的月度配额上限"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_plan_name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     """套餐名称"""
@@ -115,7 +129,7 @@ class UserQuotaUsageModel(Base):
     __tablename__ = "t_user_quota_usage"
     __comment__ = "用户配额使用表,按自然月记录各类型配额消耗"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -151,7 +165,7 @@ class QuotaTransactionLogModel(Base):
     __tablename__ = "t_quota_transaction_log"
     __comment__ = "配额变动流水表,记录每次配额增减及原因"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     """用户 ID"""
@@ -185,7 +199,7 @@ class ImageGenerationModel(Base):
     __tablename__ = "t_image_generations"
     __comment__ = "AI 图片生成任务表,存储图片生成请求和结果"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
@@ -235,7 +249,7 @@ class UploadTaskModel(Base):
     __tablename__ = "t_upload_tasks"
     __comment__ = "文件上传任务表,存储上传请求和结果"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """任务唯一标识 UUID"""
@@ -275,7 +289,7 @@ class ClientReleaseModel(Base):
     __tablename__ = "t_client_releases"
     __comment__ = "客户端版本发布表,记录 Electron 客户端的各个版本信息及 S3 路径"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_version: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
     """版本号,例如 0.1.0"""
@@ -299,7 +313,7 @@ class AuditLogModel(Base):
     __tablename__ = "t_audit_logs"
     __comment__ = "审计日志表,存储系统操作审计记录"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_log_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """日志唯一标识 UUID"""
@@ -345,7 +359,7 @@ class ContactMessageModel(Base):
     __tablename__ = "t_contact_messages"
     __comment__ = "联系我们消息表,存储用户提交的咨询信息"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_name: Mapped[str] = mapped_column(String(100), nullable=False)
     """提交人姓名"""
@@ -383,7 +397,7 @@ class EmailConfigModel(Base):
     __tablename__ = "t_email_configs"
     __comment__ = "邮件配置表,存储不同类型邮件的发送配置"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_config_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     """配置名称:contact_notify/system_notify/alert"""
@@ -421,7 +435,7 @@ class AgentRoleModel(Base):
     __tablename__ = "t_agent_roles"
     __comment__ = "AI 角色表,存储 AI 角色名称和发布通知时的专属评论"
 
-    t_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement="auto")
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
     t_role_name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     """角色名称,如:地理专家/小甜心/御姐"""
@@ -447,6 +461,88 @@ class AgentRoleModel(Base):
     """更新人 user_id"""
 
 
+class ChatLogModel(Base):
+    """AI 对话日志模型"""
+
+    __tablename__ = "t_chat_logs"
+    __comment__ = "AI 对话日志表,存储会话相关的日志记录"
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
+    t_log_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """日志唯一标识 UUID"""
+    t_session_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """关联的会话 session_id"""
+    t_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """用户 ID"""
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """用户姓名/昵称"""
+    t_level: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    """日志级别:debug/info/warning/error/critical"""
+    t_module: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """日志来源模块"""
+    t_message: Mapped[str] = mapped_column(Text, nullable=False)
+    """日志消息内容"""
+    t_stack_trace: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """错误堆栈信息"""
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """客户端 IP 地址"""
+    t_request_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """请求路径"""
+    t_method: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    """HTTP 方法"""
+    t_status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """HTTP 状态码"""
+    t_duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """响应耗时(毫秒)"""
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展数据字段"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """日志记录时间"""
+
+
+class LoginLogModel(Base):
+    """用户登录日志模型"""
+
+    __tablename__ = "t_login_logs"
+    __comment__ = "用户登录日志表,记录用户登录历史"
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
+    t_log_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """日志唯一标识 UUID"""
+    t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    """用户 ID"""
+    t_username: Mapped[str] = mapped_column(String(100), nullable=False)
+    """用户名"""
+    t_display_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """显示名称"""
+    t_role: Mapped[str] = mapped_column(String(20), nullable=False)
+    """用户角色"""
+    t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """租户 ID"""
+    t_login_status: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    """登录状态:success/failure"""
+    t_failure_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """失败原因"""
+    t_client_ip: Mapped[str] = mapped_column(String(50), nullable=False)
+    """客户端 IP 地址"""
+    t_user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """浏览器 User-Agent"""
+    t_device_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """设备类型:desktop/mobile/tablet"""
+    t_browser: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """浏览器名称"""
+    t_os: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """操作系统"""
+    t_location: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """地理位置(可选)"""
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展数据字段"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """登录时间"""
+
+
 __all__ = [
     "Base",
     "ChatSessionModel",
@@ -464,4 +560,6 @@ __all__ = [
     "ContactMessageModel",
     "EmailConfigModel",
     "AgentRoleModel",
+    "ChatLogModel",
+    "LoginLogModel",
 ]

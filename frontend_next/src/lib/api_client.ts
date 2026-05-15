@@ -487,7 +487,7 @@ export const agentApi = {
 
   /** 文生图 */
   generateImage: (data: { prompt: string; model?: string; width?: number; height?: number; steps?: number; seed?: number }) =>
-    request<{ task_id: string; status: string; image_url?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
+    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
 
   /** 文生视频 */
   generateVideo: (data: { prompt: string; model?: string; duration?: number; resolution?: string }) =>

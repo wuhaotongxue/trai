@@ -11,12 +11,13 @@ from typing import Annotated, Any
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional
 from application.usecases.image_generation import (
     ImageGenerationInput,
     ImageGenerationUseCase,
 )
 from infrastructure.ai.modelscope_client import ModelScopeClient
+from infrastructure.ai.vision_client import LocalModelScopeVisionClient
 from infrastructure.database import get_session
 
 router = APIRouter()
@@ -40,7 +41,8 @@ class ImageGenerationResponse(BaseModel):
 
     task_id: str = Field(description="任务 ID")
     status: str = Field(description="任务状态")
-    image_url: str | None = Field(default=None, description="生成的图片 URL")
+    image_url: str | None = Field(default=None, description="生成的图片 URL（远程 API）")
+    image_base64: str | None = Field(default=None, description="生成的图片 base64（本地模型）")
     error: str | None = Field(default=None, description="错误信息")
 
 
@@ -67,7 +69,7 @@ class ImageStatusRequest(BaseModel):
 @router.post("/image", response_model=ImageGenerationResponse, tags=["AI"])
 async def generate_image(
     request: ImageGenerationRequest,
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional = None,
 ) -> ImageGenerationResponse:
     """AI 图片生成接口(文生图)
 
@@ -85,7 +87,8 @@ async def generate_image(
         ImageGenerationRepository,
     )
 
-    user_id = current_user.get("user_id", "")
+    user_id = current_user.get("user_id", "") if current_user else ""
+    tenant_id = current_user.get("tenant_id") if current_user else None
 
     try:
         with get_session() as db:
@@ -96,6 +99,7 @@ async def generate_image(
             input_data = ImageGenerationInput(
                 prompt=request.prompt,
                 user_id=user_id,
+                tenant_id=tenant_id,
                 model=request.model,
                 width=request.width,
                 height=request.height,
@@ -108,6 +112,7 @@ async def generate_image(
                 task_id=result.task_id,
                 status=result.status,
                 image_url=result.image_url,
+                image_base64=result.image_base64,
                 error=result.error,
             )
 
@@ -121,22 +126,43 @@ async def generate_image(
 @router.post("/image_to_image", response_model=ImageGenerationResponse, tags=["AI"])
 async def generate_image_to_image(
     request: ImageToImageRequest,
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional = None,
 ) -> ImageGenerationResponse:
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,
     )
 
-    user_id = current_user.get("user_id", "")
+    user_id = current_user.get("user_id", "") if current_user else ""
 
     try:
+        prompt = request.prompt.strip() if request.prompt else ""
+        
+        if not prompt:
+            vision_client = LocalModelScopeVisionClient()
+            image_url = request.image_url
+            
+            if image_url.startswith("data:"):
+                image_data = image_url.split(",", 1)[1]
+                result = await vision_client.analyze_image(
+                    image_data,
+                    prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等"
+                )
+                if result.error:
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail={"code": 502, "message": f"图片分析失败: {result.error}"},
+                    )
+                prompt = f"根据图片内容生成类似风格的图片: {result.content}"
+            else:
+                prompt = "生成与参考图片风格相似的图片"
+
         with get_session() as db:
             repo = ImageGenerationRepository(db)
             client = ModelScopeClient()
             use_case = ImageGenerationUseCase(client=client, repository=repo)
 
             input_data = ImageGenerationInput(
-                prompt=request.prompt,
+                prompt=prompt,
                 user_id=user_id,
                 model=request.model,
                 width=request.width,
@@ -150,9 +176,12 @@ async def generate_image_to_image(
                 task_id=result.task_id,
                 status=result.status,
                 image_url=result.image_url,
+                image_base64=result.image_base64,
                 error=result.error,
             )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -162,7 +191,7 @@ async def generate_image_to_image(
 
 @router.get("/image/models", tags=["AI"])
 async def list_image_models(
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional = None,
 ) -> dict[str, Any]:
     """获取支持的图片生成模型列表
 

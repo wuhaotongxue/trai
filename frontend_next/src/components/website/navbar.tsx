@@ -12,20 +12,51 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bot, Menu, X, ChevronDown, Sparkles } from "lucide-react";
+import { Bot, Menu, X, ChevronDown, Sparkles, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme_toggle";
 import { LanguageSwitcher } from "./language_switcher";
 import { cn } from "@/lib/utils";
 import { useAgentStore } from "@/stores/agent.store";
 import { useI18n } from "@/i18n/i18n_context";
+import { authApi } from "@/lib/api_client";
+import Cookies from "js-cookie";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown_menu";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { setFloatingChatOpen } = useAgentStore();
   const { translate, locale } = useI18n();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = Cookies.get("token");
+      if (token) {
+        try {
+          const res = await authApi.me();
+          setUser(res.user);
+        } catch {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -136,20 +167,64 @@ export function Navbar() {
               </div>
               {translate("nav.ai_assistant")}
             </Button>
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
-                {translate("nav.login")}
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button
-                size="sm"
-                className="text-sm font-semibold shadow-md shadow-blue-500/15 transition-all duration-300 rounded-full px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
-              >
-                <Sparkles className="h-3 w-3 mr-1.5" />
-                {translate("nav.register")}
-              </Button>
-            </Link>
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2.5 pl-3 border-l border-slate-200/60 dark:border-slate-700/60 hover:opacity-90 transition-opacity outline-none">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shadow-lg shadow-blue-500/20">
+                    {user?.display_name?.[0] || user?.username?.[0] || "A"}
+                  </div>
+                  <div className="text-left hidden lg:block">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white leading-none">{user?.display_name || user?.username || "用户"}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{user?.email || "已登录"}</p>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 hidden lg:block" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52 p-2 bg-white dark:bg-[#0d1220] border border-slate-200 dark:border-slate-700 shadow-xl">
+                  <DropdownMenuLabel className="p-2">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{user?.display_name || user?.username || "用户"}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">{user?.email || ""}</div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem className="rounded-lg cursor-pointer text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>{translate("nav.profile")}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
+                  <DropdownMenuItem 
+                    className="rounded-lg cursor-pointer text-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    onClick={() => { 
+                      Cookies.remove("token"); 
+                      Cookies.remove("refresh_token"); 
+                      window.location.href = "/login"; 
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{translate("nav.logout")}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
+                    {translate("nav.login")}
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    size="sm"
+                    className="text-sm font-semibold shadow-md shadow-blue-500/15 transition-all duration-300 rounded-full px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+                  >
+                    <Sparkles className="h-3 w-3 mr-1.5" />
+                    {translate("nav.register")}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile: Language + Theme + Menu */}
@@ -200,15 +275,42 @@ export function Navbar() {
             </div>
           ))}
           <div className="flex gap-2 pt-4 mt-2 border-t border-slate-200 dark:border-slate-800/60">
-            <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" className="w-full text-sm rounded-lg">{translate("nav.login")}</Button>
-            </Link>
-            <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
-              <Button className="w-full text-sm font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
-                <Sparkles className="h-3 w-3 mr-1.5" />
-                {translate("nav.register")}
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <div className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
+                    {user?.display_name?.[0] || user?.username?.[0] || "A"}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{user?.display_name || user?.username}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                  </div>
+                </div>
+                <button
+                  className="w-full mt-2 px-4 py-2 text-sm text-red-500 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
+                  onClick={() => { 
+                    Cookies.remove("token"); 
+                    Cookies.remove("refresh_token"); 
+                    window.location.href = "/login"; 
+                  }}
+                >
+                  <LogOut className="h-4 w-4 inline mr-2" />
+                  {translate("nav.logout")}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+                  <Button variant="outline" className="w-full text-sm rounded-lg">{translate("nav.login")}</Button>
+                </Link>
+                <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full text-sm font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <Sparkles className="h-3 w-3 mr-1.5" />
+                    {translate("nav.register")}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

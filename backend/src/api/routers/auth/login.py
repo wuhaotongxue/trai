@@ -15,9 +15,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from infrastructure.database import get_db_session
+from infrastructure.repositories.login_log_repository import LoginLogRepository
 from infrastructure.repositories.user_repository import UserRepository
 from infrastructure.security.jwt import JWTService, get_jwt_service
 from infrastructure.security.password import PasswordService, get_password_service
+from infrastructure.utils.user_agent_parser import UserAgentParser
 
 router = APIRouter()
 
@@ -117,11 +119,37 @@ async def login(
     Raises:
         HTTPException: 认证失败(401)
     """
+    # 获取客户端信息
+    client_ip = fastapi_request.client.host if fastapi_request.client else "unknown"
+    x_forwarded_for = fastapi_request.headers.get("X-Forwarded-For")
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(",")[0].strip()
+    
+    user_agent = fastapi_request.headers.get("User-Agent")
+    ua_info = UserAgentParser.parse(user_agent)
+    
     # 从数据库查询用户
     user_repo = UserRepository(session)
     user = user_repo.get_by_username(request.username)
 
     if not user:
+        # 记录登录失败日志
+        login_log_repo = LoginLogRepository(session)
+        login_log_repo.create_log(
+            user_id="unknown",
+            username=request.username,
+            display_name=None,
+            role="unknown",
+            tenant_id=None,
+            login_status="failure",
+            client_ip=client_ip,
+            user_agent=user_agent,
+            device_type=ua_info.get("device_type"),
+            browser=ua_info.get("browser"),
+            os=ua_info.get("os"),
+            failure_reason="用户名不存在",
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": 401, "message": "用户名或密码错误"},
@@ -136,6 +164,23 @@ async def login(
         # 获取密码哈希并验证
         password_hash = user_repo.get_password_hash(user.user_id)
         if not password_hash:
+            # 记录登录失败日志
+            login_log_repo = LoginLogRepository(session)
+            login_log_repo.create_log(
+                user_id=user.user_id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role.value,
+                tenant_id=user.tenant_id,
+                login_status="failure",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                device_type=ua_info.get("device_type"),
+                browser=ua_info.get("browser"),
+                os=ua_info.get("os"),
+                failure_reason="密码哈希不存在",
+            )
+            
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"code": 401, "message": "用户名或密码错误"},
@@ -143,6 +188,23 @@ async def login(
 
         # 验证密码
         if not password_service.verify(request.password, password_hash):
+            # 记录登录失败日志
+            login_log_repo = LoginLogRepository(session)
+            login_log_repo.create_log(
+                user_id=user.user_id,
+                username=user.username,
+                display_name=user.display_name,
+                role=user.role.value,
+                tenant_id=user.tenant_id,
+                login_status="failure",
+                client_ip=client_ip,
+                user_agent=user_agent,
+                device_type=ua_info.get("device_type"),
+                browser=ua_info.get("browser"),
+                os=ua_info.get("os"),
+                failure_reason="密码错误",
+            )
+            
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"code": 401, "message": "用户名或密码错误"},
@@ -150,6 +212,23 @@ async def login(
 
     # 检查用户状态
     if not user.is_active():
+        # 记录登录失败日志
+        login_log_repo = LoginLogRepository(session)
+        login_log_repo.create_log(
+            user_id=user.user_id,
+            username=user.username,
+            display_name=user.display_name,
+            role=user.role.value,
+            tenant_id=user.tenant_id,
+            login_status="failure",
+            client_ip=client_ip,
+            user_agent=user_agent,
+            device_type=ua_info.get("device_type"),
+            browser=ua_info.get("browser"),
+            os=ua_info.get("os"),
+            failure_reason="账户已被禁用",
+        )
+        
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "账户已被禁用,请联系管理员"},
@@ -165,8 +244,23 @@ async def login(
     refresh_token = jwt_service.create_refresh_token(user_id=user.user_id)
 
     # 记录登录 IP
-    client_ip = fastapi_request.client.host if fastapi_request.client else "unknown"
     user_repo.update(user.user_id, last_login_ip=client_ip)
+    
+    # 记录登录成功日志
+    login_log_repo = LoginLogRepository(session)
+    login_log_repo.create_log(
+        user_id=user.user_id,
+        username=user.username,
+        display_name=user.display_name,
+        role=user.role.value,
+        tenant_id=user.tenant_id,
+        login_status="success",
+        client_ip=client_ip,
+        user_agent=user_agent,
+        device_type=ua_info.get("device_type"),
+        browser=ua_info.get("browser"),
+        os=ua_info.get("os"),
+    )
 
     return LoginResponse(
         access_token=access_token,

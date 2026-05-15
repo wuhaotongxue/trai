@@ -200,6 +200,8 @@ interface AgentState {
   removeFromMusicGallery: (id: string) => void;
   /** 清空音乐廊 */
   clearMusicGallery: () => void;
+  /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
+  hydrateGalleries: () => void;
 }
 
 // 兼容非安全环境的 UUID 生成
@@ -244,27 +246,25 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateError: null,
   musicGallery: [],
 
-  // 从本地存储加载图片廊,视频廊,音乐廊
-  ...(() => {
-    const result: Partial<AgentState> = {};
+  /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
+  hydrateGalleries: () => {
     try {
       const storedImageGallery = localStorage.getItem('imageGallery');
       if (storedImageGallery) {
-        result.imageGallery = JSON.parse(storedImageGallery);
+        set({ imageGallery: JSON.parse(storedImageGallery) });
       }
       const storedVideoGallery = localStorage.getItem('videoGallery');
       if (storedVideoGallery) {
-        result.videoGallery = JSON.parse(storedVideoGallery);
+        set({ videoGallery: JSON.parse(storedVideoGallery) });
       }
       const storedMusicGallery = localStorage.getItem('musicGallery');
       if (storedMusicGallery) {
-        result.musicGallery = JSON.parse(storedMusicGallery);
+        set({ musicGallery: JSON.parse(storedMusicGallery) });
       }
     } catch {
       // 忽略解析错误
     }
-    return result;
-  })(),
+  },
 
   startSession: async () => {
     set({ isLoading: true, error: null });
@@ -520,11 +520,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   generateImage: async (prompt: string, model?: string, width?: number, height?: number) => {
     set({ isGeneratingImage: true, imageGenerateError: null, generatedImageUrl: null });
     try {
-      const res = await api.agent.generateImage({ prompt, model, width, height });
+      const res = await api.agent.generateImage({ prompt, model, width, height, steps: 4, seed: -1 });
       if (res.image_url) {
         set({ generatedImageUrl: res.image_url, isGeneratingImage: false });
         // 将生成的图片添加到图片廊
         get().addToImageGallery(res.image_url, prompt);
+      } else if (res.image_base64) {
+        const byteString = atob(res.image_base64);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+          bytes[i] = byteString.charCodeAt(i);
+        }
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+        set({ generatedImageUrl: blobUrl, isGeneratingImage: false });
       } else {
         set({ imageGenerateError: res.error || "图片生成失败", isGeneratingImage: false });
       }
@@ -535,10 +543,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   clearGeneratedImage: () => {
+    const current = get().generatedImageUrl;
+    if (current && current.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(current);
+      } catch {
+      }
+    }
     set({ generatedImageUrl: null, imageGenerateError: null });
   },
 
   addToImageGallery: (url: string, prompt: string) => {
+    if (url.startsWith("blob:") || url.startsWith("data:")) {
+      return;
+    }
     const newImage = {
       id: generateUUID(),
       url,

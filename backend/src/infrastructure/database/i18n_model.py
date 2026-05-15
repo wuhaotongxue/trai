@@ -20,11 +20,7 @@ class I18nStringModel(Base):
     __tablename__ = "t_i18n_strings"
     __comment__ = "国际化字符串表,存储多语言翻译文本"
 
-    t_id: Mapped[int] = mapped_column(
-        BigInteger().with_variant(Integer, "sqlite"),
-        primary_key=True,
-        autoincrement=True,
-    )
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
 
     t_locale: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
@@ -58,11 +54,7 @@ class SystemSettingModel(Base):
     __tablename__ = "t_system_settings"
     __comment__ = "系统配置表,存储可由管理员修改的系统参数"
 
-    t_id: Mapped[int] = mapped_column(
-        BigInteger().with_variant(Integer, "sqlite"),
-        primary_key=True,
-        autoincrement=True,
-    )
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
 
     t_key: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)

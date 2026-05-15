@@ -25,6 +25,8 @@ import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
 
 type TabId = "chat" | "image" | "video" | "music";
+type GalleryViewMode = "grid" | "list";
+type GallerySortType = "latest" | "oldest";
 
 interface ChatSession {
   id: string;
@@ -33,49 +35,15 @@ interface ChatSession {
   messages: AgentMessage[];
 }
 
-interface InitialChatState {
-  sessions: ChatSession[];
-  currentSessionId: string;
-}
-
-function getInitialChatState(): InitialChatState {
-  const defaultSession = {
-    id: `session_${Date.now()}`,
-    name: '新对话',
-    createdAt: Date.now(),
-    messages: [] as AgentMessage[]
-  };
-
-  if (typeof window === "undefined") {
-    return { sessions: [defaultSession], currentSessionId: defaultSession.id };
-  }
-
-  const saved = localStorage.getItem('chat_sessions');
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      if (parsed.sessions && Array.isArray(parsed.sessions) && parsed.sessions.length > 0) {
-        return {
-          sessions: parsed.sessions,
-          currentSessionId: parsed.currentSessionId || parsed.sessions[0].id
-        };
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }
-
-  return { sessions: [defaultSession], currentSessionId: defaultSession.id };
-}
-
 export function ChatPanel() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showGallery, setShowGallery] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
-  const [editingSessionName, setEditingSessionName] = useState('');
-  const [sessions, setSessions] = useState<ChatSession[]>(() => getInitialChatState().sessions);
-  const [currentSessionId, setCurrentSessionId] = useState<string>(() => getInitialChatState().currentSessionId);
+  const [selectedImageForPreview, setSelectedImageForPreview] = useState<string | null>(null);
+  const [galleryViewMode, setGalleryViewMode] = useState<GalleryViewMode>('grid');
+  const [gallerySortType, setGallerySortType] = useState<GallerySortType>('latest');
+  const [gallerySearchQuery, setGallerySearchQuery] = useState('');
+  const [isGalleryMaximized, setIsGalleryMaximized] = useState(false);
 
   const {
     messages,
@@ -110,7 +78,19 @@ export function ChatPanel() {
     musicGallery,
     removeFromMusicGallery,
     clearMusicGallery,
+    hydrateGalleries,
+    sessions,
+    sessionId: currentSessionId,
+    startSession,
+    switchSession,
+    deleteSession,
+    loadSessions,
   } = useAgentStore();
+
+  // 从 localStorage 恢复 gallery 数据
+  useEffect(() => {
+    hydrateGalleries();
+  }, [hydrateGalleries]);
 
   const [input, setInput] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -128,14 +108,10 @@ export function ChatPanel() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [expandedThinking, setExpandedThinking] = useState<Record<string, boolean>>({});
 
+  // 加载会话列表
   useEffect(() => {
-    if (sessions.length > 0) {
-      localStorage.setItem('chat_sessions', JSON.stringify({
-        sessions,
-        currentSessionId
-      }));
-    }
-  }, [sessions, currentSessionId]);
+    loadSessions();
+  }, []);
 
   useLayoutEffect(() => {
     // 自动滚动到最新消息
@@ -220,9 +196,52 @@ export function ChatPanel() {
     if (isStreaming) return;
 
     const content = input.trim();
-    const imageList = [...images];
+    const imageList: string[] = [];
+    
+    // 验证并处理已有的图片（从拖拽上传）
+    for (const img of images) {
+      if (!img || !img.startsWith("data:image/")) {
+        setApiError("图片数据无效，请重新上传");
+        return;
+      }
+      // 检查图片数据是否为空
+      const base64Data = img.split("base64,").pop();
+      if (!base64Data || base64Data.trim().length === 0) {
+        setApiError("图片数据为空，请重新上传");
+        return;
+      }
+      imageList.push(img);
+    }
+    
+    // 将 uploadedFiles 中的图片也转换为 base64
+    for (const fileInfo of uploadedFiles) {
+      if (fileInfo.fileType === "image") {
+        // 验证文件大小
+        if (fileInfo.file.size === 0) {
+          setApiError("上传的图片文件为空，请选择有效的图片");
+          return;
+        }
+        
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(fileInfo.file);
+        });
+        
+        // 验证转换后的 base64 数据
+        const base64Data = base64.split("base64,").pop();
+        if (!base64Data || base64Data.trim().length === 0) {
+          setApiError("图片转换失败，请重新上传");
+          return;
+        }
+        
+        imageList.push(base64);
+      }
+    }
+    
     setInput("");
     setImages([]);
+    setUploadedFiles([]);
     setApiError(null);
 
     try {
@@ -264,44 +283,16 @@ export function ChatPanel() {
       .replace(/\\\)/g, "$");
   };
 
-  const createNewSession = () => {
-    const newSession: ChatSession = {
-      id: `session_${Date.now()}`,
-      name: '新对话',
-      createdAt: Date.now(),
-      messages: []
-    };
-    setSessions(prev => [newSession, ...prev]);
-    setCurrentSessionId(newSession.id);
-    clearMessages();
+  const createNewSession = async () => {
+    await startSession();
   };
 
-  const switchSession = (sessionId: string) => {
-    setCurrentSessionId(sessionId);
+  const handleSwitchSession = async (sessionId: string) => {
+    await switchSession(sessionId);
   };
 
-  const startEditSessionName = (session: ChatSession) => {
-    setEditingSessionId(session.id);
-    setEditingSessionName(session.name);
-  };
-
-  const saveSessionName = () => {
-    if (editingSessionId) {
-      setSessions(prev => prev.map(s =>
-        s.id === editingSessionId ? { ...s, name: editingSessionName || '未命名对话' } : s
-      ));
-      setEditingSessionId(null);
-      setEditingSessionName('');
-    }
-  };
-
-  const deleteSession = (sessionId: string) => {
-    if (sessions.length <= 1) return;
-    const newSessions = sessions.filter(s => s.id !== sessionId);
-    setSessions(newSessions);
-    if (currentSessionId === sessionId) {
-      setCurrentSessionId(newSessions[0].id);
-    }
+  const handleDeleteSession = async (sessionId: string) => {
+    await deleteSession(sessionId);
   };
 
   const renderCodeBlock = (className: string, children: React.ReactNode) => {
@@ -351,55 +342,26 @@ export function ChatPanel() {
             <div className="p-2 space-y-1" suppressHydrationWarning>
               {sessions.map((session) => (
                 <div
-                  key={session.id}
+                  key={session.session_id}
                   suppressHydrationWarning
-                  className={"group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors " + (currentSessionId === session.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-muted-foreground')}
-                  onClick={() => switchSession(session.id)}
+                  className={"group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors " + (currentSessionId === session.session_id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50 text-muted-foreground')}
+                  onClick={() => handleSwitchSession(session.session_id)}
                 >
                   <MessageSquare className="h-4 w-4 shrink-0" />
-                  {editingSessionId === session.id ? (
-                    <input
-                      type="text"
-                      value={editingSessionName}
-                      onChange={(e) => setEditingSessionName(e.target.value)}
-                      onBlur={saveSessionName}
-                      onKeyDown={(e) => e.key === 'Enter' && saveSessionName()}
-                      className="flex-1 min-w-0 text-sm bg-transparent border-none outline-none"
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <span className="flex-1 min-w-0 text-sm truncate">{session.name}</span>
-                  )}
-                  {currentSessionId === session.id && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEditSessionName(session);
-                        }}
-                        title="修改名称"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      {sessions.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 hover:text-red-500"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSession(session.id);
-                          }}
-                          title="删除对话"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
+                  <span className="flex-1 min-w-0 text-sm truncate">{session.title || '未命名对话'}</span>
+                  {currentSessionId === session.session_id && sessions.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSession(session.session_id);
+                      }}
+                      title="删除对话"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   )}
                 </div>
               ))}
@@ -519,22 +481,27 @@ export function ChatPanel() {
                     {/* 生成结果 */}
                     {generatedImageUrl && (
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          <p className="text-xs text-muted-foreground font-medium">生成完成</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <p className="text-xs text-muted-foreground font-medium">生成完成</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">点击图片查看原图</p>
                         </div>
-                        <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl shadow-black/5">
-                          <div className="relative" style={{ aspectRatio: "1/1" }}>
+                        <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl shadow-black/5 bg-slate-900 dark:bg-slate-800">
+                          <div className="relative max-h-[50vh] overflow-auto">
                             <Image
                               src={generatedImageUrl}
                               alt="Generated image"
-                              fill
+                              width={1024}
+                              height={1024}
                               unoptimized
-                              className="object-contain"
+                              className="w-full h-auto max-w-full object-contain cursor-pointer"
+                              onClick={() => window.open(generatedImageUrl, "_blank")}
                             />
                           </div>
                           {/* 图片操作栏 */}
-                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent flex items-center gap-2">
+                          <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center gap-2">
                             <button
                               onClick={() => navigator.clipboard.writeText(generatedImageUrl)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-medium transition-all"
@@ -547,7 +514,7 @@ export function ChatPanel() {
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-medium transition-all"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
-                              打开
+                              打开原图
                             </button>
                             <button
                               onClick={() => downloadImage(generatedImageUrl)}
@@ -1177,22 +1144,98 @@ export function ChatPanel() {
       </div>
 
       {/* 右侧图片廊面板 */}
-      <div className={"border-l border-border bg-background transition-all duration-300 ease-in-out " + (showGallery ? 'w-80' : 'w-0 overflow-hidden')}>
+      <div className={`border-l border-border bg-background transition-all duration-300 ease-in-out ${showGallery ? 'w-80' : 'w-0 overflow-hidden'} ${isGalleryMaximized ? 'fixed inset-4 z-50 w-auto !top-[100px] rounded-xl shadow-2xl' : ''}`}>
         <div className="flex flex-col h-full">
+          {/* 图片廊头部 */}
           <div className="flex items-center justify-between p-3 border-b border-border">
-            <span className="text-sm font-semibold text-foreground">图片廊</span>
-            {imageGallery.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearImageGallery}
-                className="text-xs text-muted-foreground hover:text-red-500 h-7"
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                清空
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">图片廊</span>
+              <span className="text-xs text-muted-foreground">({imageGallery.length})</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {imageGallery.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setGalleryViewMode(galleryViewMode === 'grid' ? 'list' : 'grid')}
+                  title={galleryViewMode === 'grid' ? '列表视图' : '网格视图'}
+                >
+                  {galleryViewMode === 'grid' ? (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  )}
+                </Button>
+              )}
+              {imageGallery.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => setIsGalleryMaximized(!isGalleryMaximized)}
+                  title={isGalleryMaximized ? '还原大小' : '最大化'}
+                >
+                  {isGalleryMaximized ? (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                  ) : (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                </Button>
+              )}
+              {imageGallery.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearImageGallery}
+                  className="text-xs text-muted-foreground hover:text-red-500 h-7"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  清空
+                </Button>
+              )}
+            </div>
           </div>
+
+          {/* 搜索和排序 */}
+          {imageGallery.length > 0 && (
+            <div className="p-3 border-b border-border">
+              <div className="relative mb-2">
+                <svg className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="搜索提示词..."
+                  value={gallerySearchQuery}
+                  onChange={(e) => setGallerySearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <select
+                  value={gallerySortType}
+                  onChange={(e) => setGallerySortType(e.target.value as GallerySortType)}
+                  className="text-xs rounded-md border border-input bg-background px-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="latest">最新</option>
+                  <option value="oldest">最早</option>
+                </select>
+                <span className="text-xs text-muted-foreground">
+                  {imageGallery.length} 张图片
+                </span>
+              </div>
+            </div>
+          )}
+
           <ScrollArea className="flex-1">
             {imageGallery.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-4">
@@ -1205,55 +1248,92 @@ export function ChatPanel() {
                 <p className="text-xs text-muted-foreground mt-1">在绘图模式下生成图片</p>
               </div>
             ) : (
-              <div className="p-2 space-y-2">
-                {imageGallery.map((img) => (
-                  <div key={img.id} className="group relative rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all">
-                    <div className="aspect-square overflow-hidden">
-                      <Image
-                        src={img.url}
-                        alt="Generated image"
-                        width={512}
-                        height={512}
-                        unoptimized
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <div className={`p-2 ${galleryViewMode === 'grid' ? 'space-y-2' : 'space-y-1'}`}>
+                {(() => {
+                  let filteredImages = [...imageGallery];
+                  if (gallerySearchQuery) {
+                    const query = gallerySearchQuery.toLowerCase();
+                    filteredImages = filteredImages.filter(img =>
+                      img.prompt.toLowerCase().includes(query)
+                    );
+                  }
+                  if (gallerySortType === 'latest') {
+                    filteredImages = filteredImages.sort((a, b) => b.timestamp - a.timestamp);
+                  } else {
+                    filteredImages = filteredImages.sort((a, b) => a.timestamp - b.timestamp);
+                  }
+                  return filteredImages;
+                })().map((img) => (
+                  <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all ${galleryViewMode === 'grid' ? '' : 'flex items-center gap-3'}`}>
+                    {galleryViewMode === 'grid' ? (
+                      <div className="aspect-square overflow-hidden cursor-pointer" onClick={() => setSelectedImageForPreview(img.url)}>
+                        <Image
+                          src={img.url}
+                          alt="Generated image"
+                          width={512}
+                          height={512}
+                          unoptimized
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 p-2">
+                        <div className="w-16 h-16 rounded overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
+                          <Image
+                            src={img.url}
+                            alt="Generated image"
+                            width={64}
+                            height={64}
+                            unoptimized
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(img.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <div className={`absolute ${galleryViewMode === 'grid' ? 'inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2' : 'right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1'}`}>
                       <Button
                         size="icon"
                         variant="secondary"
-                        className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-800"
+                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-white text-slate-800"
                         onClick={() => downloadImage(img.url)}
                         title="下载图片"
                       >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </Button>
                       <Button
                         size="icon"
                         variant="secondary"
-                        className="h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-800"
+                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-white text-slate-800"
                         onClick={() => window.open(img.url, "_blank")}
                         title="打开图片"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         size="icon"
                         variant="secondary"
-                        className="h-8 w-8 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors"
+                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors"
                         onClick={() => removeFromImageGallery(img.id)}
                         title="删除图片"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                    <div className="p-2 bg-background">
-                      <p className="text-xs text-muted-foreground truncate" title={img.prompt}>
-                        {img.prompt}
-                      </p>
-                    </div>
+                    {galleryViewMode === 'grid' && (
+                      <div className="p-2 bg-background">
+                        <p className="text-xs text-muted-foreground truncate" title={img.prompt}>
+                          {img.prompt}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1261,6 +1341,28 @@ export function ChatPanel() {
           </ScrollArea>
         </div>
       </div>
+
+      {/* 图片预览弹窗 */}
+      {selectedImageForPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setSelectedImageForPreview(null)}>
+          <div className="relative max-w-[90vw] max-h-[90vh] rounded-xl overflow-hidden shadow-2xl">
+            <button
+              onClick={() => setSelectedImageForPreview(null)}
+              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <Image
+              src={selectedImageForPreview}
+              alt="Preview"
+              width={2048}
+              height={2048}
+              unoptimized
+              className="max-w-[90vw] max-h-[90vh] object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

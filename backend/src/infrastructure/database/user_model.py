@@ -21,11 +21,7 @@ class UserModel(Base):
     __tablename__ = "t_users"
     __comment__ = "用户表,存储用户账户信息"
 
-    t_id: Mapped[int] = mapped_column(
-        BigInteger().with_variant(Integer, "sqlite"),
-        primary_key=True,
-        autoincrement=True,
-    )
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     """自增主键 ID"""
 
     t_user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
