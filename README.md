@@ -46,6 +46,13 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_15_1506
+- **新增（后端）**: 登录日志管理功能（LoginLogModel、LoginLogRepository、login_logs.py）
+- **新增（后端）**: 本地图片生成客户端（LocalImageClient），支持 Tongyi-MAI/Z-Image-Turbo 模型
+- **优化（后端）**: session.py 支持图片消息，自动路由到本地视觉模型
+- **优化（前端）**: ChatPanel 和 Navbar 组件优化，增强用户体验
+- **配置**: nginx 反向代理配置更新
+
 ### 🛠️ 后端_2026_05_14_1937
 - **新增**: 本地视觉模型支持，使用 Qwen2-VL-7B-Instruct 分析图片
 - **新增**: vision_client.py 提供本地 GPU 视觉推理能力（懒加载 + idle 释放）
