@@ -37,6 +37,9 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_15_1703
+- **新增**: infrastructure/utils/ 本地图片生成和视觉推理基础设施
+
 ### 🛠️ 后端_2026_05_15_1506
 - **新增**: 登录日志管理功能（LoginLogModel、LoginLogRepository、login_logs.py）
 - **新增**: 本地图片生成客户端（LocalImageClient），支持 Tongyi-MAI/Z-Image-Turbo 模型

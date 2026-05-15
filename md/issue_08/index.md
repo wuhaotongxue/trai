@@ -34,21 +34,7 @@
 | t_is_active | BOOLEAN | 是否启用 |
 | t_sort_order | INTEGER | 排序权重 |
 
-### 1.2 前端管理页面
-
-<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-  <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:10px;">AI 角色管理界面</div>
-  <img src="issue_08_01.png" alt="AI 角色管理界面" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
-</div>
-
-管理后台新增 AI 角色管理页面，支持：
-
-- 角色列表展示，支持启用/禁用
-- 新增、编辑、删除角色
-- 系统提示词可视化配置
-- 角色排序权重调整
-
-### 1.3 后端接口实现
+### 1.2 后端接口实现
 
 <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 14px;margin:10px 0;color:#065f46;font-size:0.9em;">
   <code style="background:#d1fae5;padding:1px 5px;border-radius:3px;">API</code> 新增 CRUD 接口，支持前端动态查询可用角色列表。
@@ -61,7 +47,14 @@
 - `PUT /agent-roles/{id}` - 更新角色
 - `DELETE /agent-roles/{id}` - 删除角色
 
-### 1.4 客户端角色选择
+管理后台路由 `/admin/agent_roles`，支持角色列表展示、新增/编辑/删除角色、系统提示词可视化配置、启用/禁用开关等操作。
+
+<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:10px;">AI 角色管理界面</div>
+  <img src="issue_08_02.png" alt="管理后台 AI 角色管理界面" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
+</div>
+
+### 1.3 客户端角色选择
 
 <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:10px 14px;margin:10px 0;color:#581c87;font-size:0.9em;">
   <code style="background:#f3e8ff;padding:1px 5px;border-radius:3px;">交互</code> 客户端发布页新增 AI 角色选择下拉框，发布时可指定通知角色。
@@ -158,7 +151,7 @@
 
 <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
   <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:10px;">企微群选择界面</div>
-  <img src="issue_08_02.png" alt="客户端发布页企微群选择" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
+  <img src="issue_08_03.png" alt="客户端发布页企微群选择" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
 </div>
 
 客户端发布页支持选择企微群：
@@ -187,6 +180,11 @@
 - 主题下拉选择（功能建议/Bug 反馈/商务合作/其他）
 - 富文本内容输入
 - 提交成功/失败提示
+
+<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  <div style="font-weight:600;font-size:0.85em;color:#1e293b;margin-bottom:10px;">联系我们页面</div>
+  <img src="issue_08_01.png" alt="联系我们页面，支持表单提交" style="width:100%;border-radius:8px;border:1px solid #e2e8f0;" />
+</div>
 
 ### 4.2 后端接口
 
