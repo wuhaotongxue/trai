@@ -68,6 +68,8 @@ export interface SessionItem {
   message_count: number;
   created_at: string | null;
   updated_at: string | null;
+  /** 本地缓存：第一条用户消息 */
+  firstUserMessage?: string;
 }
 
 /**
@@ -469,6 +471,23 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }
+    // 缓存第一条用户消息到会话列表，供会话标题展示
+    if (sessionId && content) {
+      set((state) => {
+        const updated = state.sessions.map((s) =>
+          s.session_id === sessionId && !s.firstUserMessage
+            ? { ...s, firstUserMessage: content }
+            : s
+        );
+        // 同步到 localStorage
+        try {
+          const stored = JSON.parse(localStorage.getItem("sessionFirstMessages") || "{}");
+          stored[sessionId] = content;
+          localStorage.setItem("sessionFirstMessages", JSON.stringify(stored));
+        } catch {}
+        return { sessions: updated };
+      });
+    }
     await get().loadSessions();
   },
 
@@ -526,13 +545,24 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   loadSessions: async () => {
     try {
       const res = await api.session.list();
+      // 从 localStorage 恢复第一条消息缓存
+      let storedFirstMsgs: Record<string, string> = {};
+      try {
+        storedFirstMsgs = JSON.parse(localStorage.getItem("sessionFirstMessages") || "{}");
+      } catch {}
       // 合并更新：API 返回的标题优先，避免竞态导致旧数据覆盖新标题
       set((state) => {
         const freshIds = new Set(res.sessions.map((s: { session_id: string }) => s.session_id));
-        const merged = res.sessions.map((fresh: { session_id: string; title: string | null; [key: string]: unknown }) => {
+        const freshSessions = res.sessions as unknown as Array<{ session_id: string; title: string | null | undefined }>;
+        const merged = freshSessions.map((fresh) => {
           const local = state.sessions.find((s) => s.session_id === fresh.session_id);
           // API 返回的标题为准；null 说明后端尚未更新（旧缓存），保留本地已知标题
-          return { ...local, ...fresh, title: fresh.title ?? local?.title };
+          return {
+            ...local,
+            ...fresh,
+            title: (fresh.title ?? local?.title) as string | null,
+            firstUserMessage: local?.firstUserMessage ?? storedFirstMsgs[fresh.session_id] ?? undefined,
+          } as SessionItem;
         });
         // 保留 API 未返回的会话（正常情况下不应出现）
         const others = state.sessions.filter((s) => !freshIds.has(s.session_id));
@@ -642,6 +672,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       const res = await api.agent.editImage({ image_url: imageToSend, prompt: editPrompt, steps: 25, seed: -1 });
       if (res.image_url) {
         set({ editedImageUrl: res.image_url, isEditingImage: false });
+        get().addToImageGallery(res.image_url, editPrompt);
       } else if (res.image_base64) {
         const byteString = atob(res.image_base64);
         const bytes = new Uint8Array(byteString.length);

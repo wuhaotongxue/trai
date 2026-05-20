@@ -355,7 +355,12 @@ export function ChatPanel() {
                   onClick={() => handleSwitchSession(session.session_id)}
                 >
                   <MessageSquare className="h-4 w-4 shrink-0" />
-                  <span className="flex-1 min-w-0 text-sm truncate">{session.title || '未命名对话'}</span>
+                  <span
+                    className="flex-1 min-w-0 text-sm truncate"
+                    title={session.firstUserMessage || session.title || "未命名对话"}
+                  >
+                    {session.firstUserMessage || session.title || "未命名对话"}
+                  </span>
                   {currentSessionId === session.session_id && sessions.length > 1 && (
                     <Button
                       variant="ghost"
@@ -436,300 +441,252 @@ export function ChatPanel() {
           <div className="flex-1 flex flex-col overflow-hidden">
             <ScrollArea className="flex-1">
               <div ref={topRef} />
-              <div className="w-full max-w-3xl mx-auto px-6 py-8">
+              <div className="w-full px-4 py-4">
 
-                {/* 绘图模式 */}
+                {/* 绘图模式 - 左右分栏布局 */}
                 {activeTab === "image" && (
-                  <div className="space-y-8">
-                    {/* 头部 */}
-                    <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/10">
-                        <ImageIcon className="h-7 w-7 text-emerald-500" />
+                  <div className="flex gap-4 w-full h-full overflow-hidden">
+                    {/* 左侧：表单区域 */}
+                    <div className="flex-1 min-w-0 overflow-y-auto space-y-4">
+                      {/* 头部 */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                          <ImageIcon className="h-5 w-5 text-emerald-500" />
+                        </div>
+                        <div>
+                          <h2 className="text-base font-bold text-foreground">AI 创意绘图</h2>
+                          <p className="text-xs text-muted-foreground">输入画面描述，AI 创作精美图像</p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-foreground mt-1">AI 创意绘图</h2>
-                        <p className="text-sm text-muted-foreground mt-1">输入画面描述, AI 创作精美图像</p>
+
+                      {/* 提示词示例 */}
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">试试这些提示词</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {[
+                            { tag: "人像", text: "一位精致的亚洲女性，柔和自然光，超高分辨率，8K 画质" },
+                            { tag: "风景", text: "壮丽山脉日出，云海翻涌，航拍视角，HDR 电影感" },
+                            { tag: "赛博", text: "霓虹灯街道，雨夜，反射光影，赛博朋克风格，电影级" },
+                            { tag: "动漫", text: "樱花树下少女，宫崎骏风格，温暖色调，手绘质感" },
+                          ].map((item) => (
+                            <button
+                              key={item.tag}
+                              onClick={() => setImagePrompt(item.text)}
+                              className="group flex items-start gap-2 p-3 rounded-xl border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left"
+                            >
+                              <span className="mt-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-medium shrink-0 group-hover:bg-emerald-500/20 transition-colors">
+                                {item.tag}
+                              </span>
+                              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">{item.text}</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
+
+                      {/* 错误提示 */}
+                      {imageGenerateError && (
+                        <div className="flex items-start gap-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                          <span className="text-red-500 text-xs font-bold shrink-0">!</span>
+                          <p className="text-xs text-red-600 dark:text-red-400">{imageGenerateError}</p>
+                        </div>
+                      )}
+
+                      {/* 加载状态 */}
+                      {isGeneratingImage && (
+                        <div className="flex flex-col items-center gap-2 py-6 rounded-xl border border-dashed border-emerald-200 dark:border-emerald-700">
+                          <Loader2 className="h-5 w-5 text-emerald-500 animate-spin" />
+                          <p className="text-xs text-muted-foreground">AI 正在创作中...</p>
+                        </div>
+                      )}
                     </div>
 
-                    {/* 提示词示例 */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">试试这些提示词</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {[
-                          { tag: "人像", text: "一位精致的亚洲女性, 柔和自然光, 超高分辨率, 8K 画质" },
-                          { tag: "风景", text: "壮丽山脉日出, 云海翻涌, 航拍视角, HDR 电影感" },
-                          { tag: "赛博", text: "霓虹灯街道, 雨夜, 反射光影, 赛博朋克风格, 电影级" },
-                          { tag: "动漫", text: "樱花树下少女, 宫崎骏风格, 温暖色调, 手绘质感" },
-                        ].map((item) => (
-                          <button
-                            key={item.tag}
-                            onClick={() => setImagePrompt(item.text)}
-                            className="group flex items-start gap-3 p-4 rounded-2xl border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left"
-                          >
-                            <span className="mt-0.5 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-medium shrink-0 group-hover:bg-emerald-500/20 transition-colors">
-                              {item.tag}
-                            </span>
-                            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">{item.text}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 错误提示 */}
-                    {imageGenerateError && (
-                      <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
-                        <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-red-500 text-xs font-bold">!</span>
-                        </div>
-                        <p className="text-sm text-red-600 dark:text-red-400">{imageGenerateError}</p>
-                      </div>
-                    )}
-
-                    {/* 生成结果 */}
-                    {generatedImageUrl && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            <p className="text-xs text-muted-foreground font-medium">生成完成</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">点击图片查看原图</p>
-                        </div>
-                        <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl shadow-black/5 bg-slate-900 dark:bg-slate-800">
-                          <div className="relative max-h-[50vh] overflow-auto">
+                    {/* 右侧：结果预览区 */}
+                    <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">生成结果</p>
+                      {generatedImageUrl ? (
+                        <div className="relative group rounded-xl overflow-hidden border bg-slate-900 dark:bg-slate-800">
+                          <div className="relative max-h-[60vh] overflow-auto">
                             <Image
                               src={generatedImageUrl}
                               alt="Generated image"
                               width={1024}
                               height={1024}
                               unoptimized
-                              className="w-full h-auto max-w-full object-contain cursor-pointer"
+                              className="w-full h-auto object-contain cursor-pointer"
                               onClick={() => window.open(generatedImageUrl, "_blank")}
                             />
                           </div>
-                          {/* 图片操作栏 */}
-                          <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center gap-2">
-                            <button
-                              onClick={() => navigator.clipboard.writeText(generatedImageUrl)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-medium transition-all"
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                              复制链接
+                          <div className="sticky bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center gap-1.5">
+                            <button onClick={() => navigator.clipboard.writeText(generatedImageUrl)} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-[10px] font-medium transition-all">
+                              <Copy className="h-3 w-3" />复制
                             </button>
-                            <button
-                              onClick={() => window.open(generatedImageUrl, "_blank")}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-medium transition-all"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                              打开原图
+                            <button onClick={() => window.open(generatedImageUrl, "_blank")} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-[10px] font-medium transition-all">
+                              <ExternalLink className="h-3 w-3" />打开
                             </button>
-                            <button
-                              onClick={() => downloadImage(generatedImageUrl)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-medium transition-all"
-                            >
-                              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              下载
+                            <button onClick={() => downloadImage(generatedImageUrl)} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-[10px] font-medium transition-all">
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>下载
                             </button>
                             <div className="flex-1" />
-                            <button
-                              onClick={clearGeneratedImage}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-white transition-all text-xs"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
+                            <button onClick={clearGeneratedImage} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/10 hover:bg-red-500/30 text-white/70 hover:text-white transition-all text-[10px]">
+                              <Trash2 className="h-3 w-3" />
                             </button>
                           </div>
                         </div>
-                      </div>
-                    )}
-
-                    {/* 加载状态 */}
-                    {isGeneratingImage && (
-                      <div className="flex flex-col items-center gap-4 py-12">
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center">
-                            <ImageIcon className="h-7 w-7 text-emerald-500 animate-pulse" />
+                      ) : (
+                        !isGeneratingImage ? (
+                          <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center">
+                            <ImageIcon className="h-6 w-6 text-slate-300 dark:text-slate-600 mb-2" />
+                            <p className="text-xs text-muted-foreground">输入提示词即可生成</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">结果将显示在右侧</p>
                           </div>
-                          <div className="absolute -inset-2 rounded-3xl border-2 border-emerald-500/20 animate-ping" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-foreground">正在生成图像...</p>
-                          <p className="text-xs text-muted-foreground mt-1">AI 正在发挥创造力</p>
-                        </div>
-                        <div className="w-48 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full animate-pulse" style={{ width: "60%" }} />
-                        </div>
-                      </div>
-                    )}
+                        ) : null
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* 图片编辑模式 */}
+                {/* 图片编辑模式 - 左右分栏布局 */}
                 {activeTab === "image_edit" && (
-                  <div className="space-y-8">
-                    {/* 头部 */}
-                    <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-400/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/10">
-                        <Pencil className="h-7 w-7 text-violet-500" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-foreground mt-1">AI 图片编辑</h2>
-                        <p className="text-sm text-muted-foreground mt-1">上传图片并描述修改内容，AI 智能编辑</p>
-                      </div>
-                    </div>
-
-                    {/* 图片上传区 */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">上传原图</p>
-                      {editingImagePreview ? (
-                        <div className="relative group">
-                          <img
-                            src={editingImagePreview}
-                            alt="待编辑图片"
-                            className="w-full max-h-80 object-contain rounded-xl border bg-white"
-                          />
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => setEditingImagePreview(null)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                  <div className="flex gap-4 w-full h-full overflow-hidden">
+                    {/* 左侧：表单区域 */}
+                    <div className="flex-1 min-w-0 overflow-y-auto space-y-4">
+                      {/* 头部 */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center shrink-0">
+                          <Pencil className="h-5 w-5 text-violet-500" />
                         </div>
-                      ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-violet-200 dark:border-violet-700 rounded-xl cursor-pointer hover:border-violet-400 dark:hover:border-violet-500 transition-colors bg-violet-50/30 dark:bg-violet-500/5">
-                          <Upload className="h-8 w-8 text-violet-400 mb-2" />
-                          <span className="text-sm text-muted-foreground">点击上传图片或拖拽到此处</span>
-                          <span className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、WebP</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (ev) => {
-                                  setEditingImagePreview(ev.target?.result as string);
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
+                        <div>
+                          <h2 className="text-base font-bold text-foreground">AI 图片编辑</h2>
+                          <p className="text-xs text-muted-foreground">上传图片并描述修改内容，AI 智能编辑</p>
+                        </div>
+                      </div>
+
+                      {/* 图片上传区 */}
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">上传原图</p>
+                        {editingImagePreview ? (
+                          <div className="relative group">
+                            <img
+                              src={editingImagePreview}
+                              alt="待编辑图片"
+                              className="w-full max-h-60 object-contain rounded-xl border bg-white"
+                            />
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7"
+                              onClick={() => setEditingImagePreview(null)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-violet-200 dark:border-violet-700 rounded-xl cursor-pointer hover:border-violet-400 dark:hover:border-violet-500 transition-colors bg-violet-50/30 dark:bg-violet-500/5">
+                            <Upload className="h-6 w-6 text-violet-400 mb-1" />
+                            <span className="text-xs text-muted-foreground">点击上传 / 拖拽图片</span>
+                            <span className="text-[10px] text-muted-foreground">JPG、PNG、WebP</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    setEditingImagePreview(ev.target?.result as string);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+
+                      {/* 编辑提示词 */}
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">编辑指令</p>
+                        <textarea
+                          value={editPrompt}
+                          onChange={(e) => setEditPrompt(e.target.value)}
+                          placeholder="例如：将背景替换为城市夜景，给人物换一套衣服"
+                          className="w-full h-16 px-3 py-2 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                        />
+                      </div>
+
+                      {/* 快捷指令 */}
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">快捷指令</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                          {[
+                            "将背景替换为星空",
+                            "给人物添加眼镜",
+                            "调整光线为夕阳暖色",
+                            "背景替换为室内咖啡馆",
+                          ].map((tip) => (
+                            <button
+                              key={tip}
+                              onClick={() => setEditPrompt(tip)}
+                              className="text-left px-3 py-1.5 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-xs text-foreground transition-colors"
+                            >
+                              {tip}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 错误提示 */}
+                      {imageEditError && (
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-xs">
+                          <X className="h-3 w-3 shrink-0" />
+                          {imageEditError}
+                        </div>
                       )}
                     </div>
 
-                    {/* 编辑提示词 */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">编辑指令</p>
-                      <textarea
-                        value={editPrompt}
-                        onChange={(e) => setEditPrompt(e.target.value)}
-                        placeholder="例如：将背景替换为城市夜景，给人物换一套衣服"
-                        className="w-full h-20 px-4 py-3 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50"
-                      />
-                    </div>
-
-                    {/* 快捷指令 */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">快捷指令</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {[
-                          "将背景替换为星空",
-                          "给人物添加眼镜",
-                          "调整光线为夕阳暖色",
-                          "背景替换为室内咖啡馆",
-                        ].map((tip) => (
-                          <button
-                            key={tip}
-                            onClick={() => setEditPrompt(tip)}
-                            className="text-left px-3 py-2 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-sm text-foreground transition-colors"
-                          >
-                            {tip}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 错误提示 */}
-                    {imageEditError && (
-                      <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm">
-                        <X className="h-4 w-4 shrink-0" />
-                        {imageEditError}
-                      </div>
-                    )}
-
-                    {/* 编辑结果 */}
-                    {editedImageUrl && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-foreground">编辑结果</p>
+                    {/* 右侧：结果预览区 */}
+                    <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">编辑结果</p>
+                      {/* 加载状态 */}
+                      {isEditingImage && (
+                        <div className="flex flex-col items-center gap-3 py-8 rounded-xl border border-dashed border-violet-200 dark:border-violet-700">
+                          <Loader2 className="h-7 w-7 text-violet-500 animate-spin" />
+                          <p className="text-xs text-muted-foreground">正在编辑中...</p>
                         </div>
+                      )}
+                      {/* 编辑结果 */}
+                      {!isEditingImage && editedImageUrl && (
                         <div className="relative group rounded-xl overflow-hidden border bg-white">
                           <img
                             src={editedImageUrl}
                             alt="编辑结果"
-                            width={1024}
+                            width={512}
                             className="w-full object-contain cursor-pointer"
                             onClick={() => window.open(editedImageUrl, "_blank")}
                           />
-                          <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              className="h-8 w-8 bg-white/80 hover:bg-white"
-                              onClick={() => navigator.clipboard.writeText(editedImageUrl)}
-                              title="复制链接"
-                            >
-                              <Copy className="h-4 w-4" />
+                          <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => navigator.clipboard.writeText(editedImageUrl)} title="复制链接">
+                              <Copy className="h-3 w-3" />
                             </Button>
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              className="h-8 w-8 bg-white/80 hover:bg-white"
-                              onClick={() => window.open(editedImageUrl, "_blank")}
-                              title="新窗口打开"
-                            >
-                              <ExternalLink className="h-4 w-4" />
+                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => window.open(editedImageUrl, "_blank")} title="新窗口打开">
+                              <ExternalLink className="h-3 w-3" />
                             </Button>
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              className="h-8 w-8 bg-white/80 hover:bg-white"
-                              onClick={() => {
-                                const a = document.createElement("a");
-                                a.href = editedImageUrl;
-                                a.download = "edited-image.png";
-                                a.click();
-                              }}
-                              title="下载图片"
-                            >
-                              <ArrowDownToLine className="h-4 w-4" />
+                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => { const a = document.createElement("a"); a.href = editedImageUrl; a.download = "edited-image.png"; a.click(); }} title="下载">
+                              <ArrowDownToLine className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
-                      </div>
-                    )}
-
-                    {/* 加载状态 */}
-                    {isEditingImage && (
-                      <div className="flex flex-col items-center gap-4 py-12">
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-violet-500/10 flex items-center justify-center">
-                            <Loader2 className="h-8 w-8 text-violet-500 animate-spin" />
-                          </div>
-                          <div className="absolute -inset-2 rounded-full border-2 border-violet-500/20 animate-ping" />
+                      )}
+                      {/* 无结果占位 */}
+                      {!isEditingImage && !editedImageUrl && (
+                        <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center">
+                          <Pencil className="h-6 w-6 text-slate-300 dark:text-slate-600 mb-2" />
+                          <p className="text-xs text-muted-foreground">上传图片并输入指令</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">即可在此预览结果</p>
                         </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-foreground">正在编辑图片...</p>
-                          <p className="text-xs text-muted-foreground mt-1">Qwen-Image-Edit-2511 智能处理中</p>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1429,107 +1386,130 @@ export function ChatPanel() {
           )}
 
           <ScrollArea className="flex-1">
-            {imageGallery.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                  <svg className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p className="text-sm text-muted-foreground">还没有生成过图片</p>
-                <p className="text-xs text-muted-foreground mt-1">在绘图模式下生成图片</p>
-              </div>
-            ) : (
-              <div className={`p-2 ${galleryViewMode === 'grid' ? 'space-y-2' : 'space-y-1'}`}>
-                {(() => {
-                  let filteredImages = [...imageGallery];
-                  if (gallerySearchQuery) {
-                    const query = gallerySearchQuery.toLowerCase();
-                    filteredImages = filteredImages.filter(img =>
-                      img.prompt.toLowerCase().includes(query)
-                    );
-                  }
-                  if (gallerySortType === 'latest') {
-                    filteredImages = filteredImages.sort((a, b) => b.timestamp - a.timestamp);
-                  } else {
-                    filteredImages = filteredImages.sort((a, b) => a.timestamp - b.timestamp);
-                  }
-                  return filteredImages;
-                })().map((img) => (
-                  <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all ${galleryViewMode === 'grid' ? '' : 'flex items-center gap-3'}`}>
-                    {galleryViewMode === 'grid' ? (
-                      <div className="aspect-square overflow-hidden cursor-pointer" onClick={() => setSelectedImageForPreview(img.url)}>
-                        <Image
-                          src={img.url}
-                          alt="Generated image"
-                          width={512}
-                          height={512}
-                          unoptimized
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 p-2">
-                        <div className="w-16 h-16 rounded overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
-                          <Image
-                            src={img.url}
-                            alt="Generated image"
-                            width={64}
-                            height={64}
-                            unoptimized
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(img.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    <div className={`absolute ${galleryViewMode === 'grid' ? 'inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2' : 'right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1'}`}>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-white text-slate-800"
-                        onClick={() => downloadImage(img.url)}
-                        title="下载图片"
-                      >
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-white text-slate-800"
-                        onClick={() => window.open(img.url, "_blank")}
-                        title="打开图片"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="h-7 w-7 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors"
-                        onClick={() => removeFromImageGallery(img.id)}
-                        title="删除图片"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+            {(() => {
+              // 构造统一图片列表：当前结果优先 + 历史记录
+              const currentImages: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
+              if (generatedImageUrl) {
+                currentImages.push({ id: "current-generated", url: generatedImageUrl, prompt: imagePrompt, timestamp: 0, isCurrent: true });
+              }
+              if (editedImageUrl) {
+                currentImages.push({ id: "current-edited", url: editedImageUrl, prompt: editPrompt, timestamp: 1, isCurrent: true });
+              }
+              const historyImages = imageGallery.map((img) => ({ ...img, isCurrent: false }));
+
+              // 搜索过滤
+              const filterImages = (imgs: typeof currentImages) => {
+                if (!gallerySearchQuery) return imgs;
+                const q = gallerySearchQuery.toLowerCase();
+                return imgs.filter((img) => img.prompt.toLowerCase().includes(q));
+              };
+              const filteredCurrent = filterImages(currentImages);
+              let filteredHistory = filterImages(historyImages);
+              if (gallerySortType === "latest") {
+                filteredHistory = filteredHistory.sort((a, b) => b.timestamp - a.timestamp);
+              } else {
+                filteredHistory = filteredHistory.sort((a, b) => a.timestamp - b.timestamp);
+              }
+
+              const allImages = [...filteredCurrent, ...filteredHistory];
+
+              if (allImages.length === 0) {
+                return (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                      <svg className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
                     </div>
-                    {galleryViewMode === 'grid' && (
-                      <div className="p-2 bg-background">
-                        <p className="text-xs text-muted-foreground truncate" title={img.prompt}>
-                          {img.prompt}
-                        </p>
-                      </div>
-                    )}
+                    <p className="text-sm text-muted-foreground">还没有生成过图片</p>
+                    <p className="text-xs text-muted-foreground mt-1">在绘图或编辑模式下生成图片</p>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              }
+
+              return (
+                <div className={`p-2 ${galleryViewMode === "grid" ? "space-y-2" : "space-y-1"}`}>
+                  {/* 当前结果区 */}
+                  {filteredCurrent.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider px-1 mb-2">
+                        当前结果
+                      </p>
+                      <div className={galleryViewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-1"}>
+                        {filteredCurrent.map((img) => (
+                          <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-emerald-300 dark:border-emerald-700 shadow-sm hover:shadow-md transition-all ${galleryViewMode === "grid" ? "" : "flex items-center gap-3"}`}>
+                            <div className="overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
+                              <Image src={img.url} alt={img.id === "current-generated" ? "生成的图片" : "编辑结果"} width={galleryViewMode === "grid" ? 512 : 64} height={galleryViewMode === "grid" ? 512 : 64} unoptimized className={`object-cover hover:scale-105 transition-transform ${galleryViewMode === "grid" ? "w-full aspect-square" : "w-16 h-16"}`} />
+                            </div>
+                            {galleryViewMode === "list" && (
+                              <div className="flex-1 min-w-0 p-2">
+                                <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
+                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">{img.id === "current-generated" ? "绘图生成" : "图片编辑"}</p>
+                              </div>
+                            )}
+                            <div className={`absolute ${galleryViewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
+                              <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => downloadImage(img.url)} title="下载"><Trash2 className="h-3 w-3" /></Button>
+                              <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(img.url, "_blank")} title="打开"><ExternalLink className="h-3 w-3" /></Button>
+                            </div>
+                            {galleryViewMode === "grid" && (
+                              <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
+                                <p className="text-[10px] text-white truncate" title={img.prompt}>{img.prompt}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 历史记录区 */}
+                  {filteredHistory.length > 0 && (
+                    <div>
+                      {filteredCurrent.length > 0 && (
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
+                          历史记录 ({filteredHistory.length})
+                        </p>
+                      )}
+                      {filteredHistory.map((img) => (
+                        <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all ${galleryViewMode === "grid" ? "" : "flex items-center gap-3"}`}>
+                          {galleryViewMode === "grid" ? (
+                            <div className="overflow-hidden cursor-pointer" onClick={() => setSelectedImageForPreview(img.url)}>
+                              <Image src={img.url} alt="Generated image" width={512} height={512} unoptimized className="w-full aspect-square object-cover hover:scale-105 transition-transform" />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-16 rounded overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
+                              <Image src={img.url} alt="Generated image" width={64} height={64} unoptimized className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          {galleryViewMode === "list" && (
+                            <div className="flex-1 min-w-0 p-2">
+                              <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
+                              <p className="text-xs text-muted-foreground">{new Date(img.timestamp).toLocaleString()}</p>
+                            </div>
+                          )}
+                          <div className={`absolute ${galleryViewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
+                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => downloadImage(img.url)} title="下载">
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </Button>
+                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(img.url, "_blank")} title="打开">
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors" onClick={() => removeFromImageGallery(img.id)} title="删除">
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          {galleryViewMode === "grid" && (
+                            <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
+                              <p className="text-[10px] text-white/80 truncate" title={img.prompt}>{img.prompt}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </ScrollArea>
         </div>
       </div>
