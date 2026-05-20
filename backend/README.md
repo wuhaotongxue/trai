@@ -37,6 +37,15 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_20_0839
+- **新增**: t_image_records 表统一存储文生图/图生图/图片编辑记录，含 IP 追溯、游客标识、飞书通知状态
+- **新增**: ImageRecordModel + ImageRecordRepository，支持完整 CRUD 和管理后台多条件查询
+- **新增**: image_records.py 管理后台接口（列表/详情/删除/批量删除/统计）
+- **新增**: image_record.py Entity + Interface（ImageRecordType/ImageRecordStatus）
+- **新增**: 飞书图片编辑通知（ImageEditedEvent + S3 图片下载 + 飞书 image_key 上传）
+- **新增**: notify_robot.env 新增 NOTIFY_FEISHU_IMAGE_WEBHOOK 和启用开关
+- **优化**: image.py 文生图/编辑成功后自动写入数据库，后台触发飞书卡片通知
+
 ### 🛠️ 后端_2026_05_15_1703
 - **新增**: infrastructure/utils/ 本地图片生成和视觉推理基础设施
 

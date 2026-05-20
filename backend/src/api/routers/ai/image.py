@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 # 文件名: image.py
 # 作者: wuhao
-# 日期: 2026_05_20_0820
-# 描述: AI 图片生成接口
+# 日期: 2026_05_20_0830
+# 描述: AI 图片生成接口，支持文生图、图生图、图片编辑，数据写入 t_image_records 表
+
 
 from __future__ import annotations
 
 import os
+import uuid
+from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
@@ -18,6 +21,7 @@ from application.usecases.image_generation import (
     ImageGenerationInput,
     ImageGenerationUseCase,
 )
+from domain.entities.image_record import ImageRecord, ImageRecordType
 from infrastructure.ai.modelscope_client import ModelScopeClient
 from infrastructure.ai.vision_client import LocalModelScopeVisionClient
 from infrastructure.database import get_session
@@ -26,8 +30,67 @@ from infrastructure.notify.feishu_ai_notify import (
     ImageGeneratedEvent,
     get_feishu_ai_notify_service,
 )
+from infrastructure.repositories.image_record_repository import ImageRecordRepository
+
 
 router = APIRouter()
+
+
+def _get_client_ip(request: Request) -> str:
+    """从请求中提取真实 IP（支持代理）"""
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip.strip()
+    if request.client:
+        return request.client.host or ""
+    return ""
+
+
+def _create_image_record(
+    repo: ImageRecordRepository,
+    record_type: ImageRecordType,
+    prompt: str,
+    model: str,
+    user_id: str,
+    username: str,
+    client_ip: str,
+    request_ip: str,
+    user_agent: str,
+    is_guest: bool,
+    tenant_id: str,
+    source_image_url: str = "",
+    width: int = 1024,
+    height: int = 1024,
+    steps: int = 25,
+    seed: int = -1,
+    session_id: str = "",
+) -> ImageRecord:
+    """创建图片记录并写入数据库"""
+    record = ImageRecord(
+        record_type=record_type,
+        prompt=prompt,
+        model=model,
+        task_id=str(uuid.uuid4()),
+        user_id=user_id,
+        username=username,
+        client_ip=client_ip,
+        request_ip=request_ip,
+        user_agent=user_agent,
+        is_guest=is_guest,
+        tenant_id=tenant_id,
+        source_image_url=source_image_url,
+        width=width,
+        height=height,
+        steps=steps,
+        seed=seed,
+        session_id=session_id,
+        created_by=user_id,
+    )
+    repo.create(record)
+    return record
 
 
 def _send_image_generated_notify(
@@ -56,8 +119,9 @@ def _send_image_generated_notify(
             height=height,
         )
         service.notify_image_generated(event)
+        _update_notify_status(task_id, True, "success")
     except Exception:
-        pass
+        _update_notify_status(task_id, False, "failed")
 
 
 def _send_image_edited_notify(
@@ -92,6 +156,19 @@ def _send_image_edited_notify(
             seed=seed,
         )
         service.notify_image_edited(event)
+        _update_notify_status(task_id, True, "success")
+    except Exception:
+        _update_notify_status(task_id, False, "failed")
+
+
+def _update_notify_status(task_id: str, notified: bool, notify_status: str) -> None:
+    """更新通知状态到数据库"""
+    try:
+        from infrastructure.database import get_session
+        with get_session() as db:
+            repo = ImageRecordRepository(db)
+            repo.update_notify_status(task_id, notified, notify_status)
+            db.commit()
     except Exception:
         pass
 
@@ -154,13 +231,15 @@ class ImageEditRequest(BaseModel):
 
 @router.post("/image", response_model=ImageGenerationResponse, tags=["AI"])
 async def generate_image(
+    request_http: Request,
     request: ImageGenerationRequest,
     current_user: CurrentUserOptional = None,
     background_tasks: BackgroundTasks | None = None,
 ) -> ImageGenerationResponse:
-    """AI 图片生成接口(文生图)
+    """AI 图片生成接口（文生图）
 
     Args:
+        request_http: HTTP 请求（用于获取 IP）
         request: 图片生成参数
         current_user: 当前登录用户
 
@@ -168,20 +247,48 @@ async def generate_image(
         ImageGenerationResponse: 生成结果
 
     Raises:
-        HTTPException: AI 服务错误(502)
+        HTTPException: AI 服务错误（502）
     """
+    from domain.entities.image_record import ImageRecordStatus
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,
     )
 
     user_id = current_user.get("user_id", "") if current_user else ""
-    tenant_id = current_user.get("tenant_id") if current_user else None
+    tenant_id = current_user.get("tenant_id") if current_user else ""
+    username = current_user.get("username", user_id) if current_user else user_id
+    is_guest = current_user is None
+    client_ip = _get_client_ip(request_http)
+    user_agent = request_http.headers.get("User-Agent", "")[:500]
+
+    task_id = str(uuid.uuid4())
 
     try:
         with get_session() as db:
-            repo = ImageGenerationRepository(db)
+            image_record_repo = ImageRecordRepository(db)
+            image_gen_repo = ImageGenerationRepository(db)
+
+            _create_image_record(
+                repo=image_record_repo,
+                record_type=ImageRecordType.TEXT_TO_IMAGE,
+                prompt=request.prompt,
+                model=request.model,
+                user_id=user_id,
+                username=username,
+                client_ip=client_ip,
+                request_ip=client_ip,
+                user_agent=user_agent,
+                is_guest=is_guest,
+                tenant_id=tenant_id,
+                width=request.width,
+                height=request.height,
+                steps=request.steps,
+                seed=request.seed,
+            )
+            db.commit()
+
             client = ModelScopeClient()
-            use_case = ImageGenerationUseCase(client=client, repository=repo)
+            use_case = ImageGenerationUseCase(client=client, repository=image_gen_repo)
 
             input_data = ImageGenerationInput(
                 prompt=request.prompt,
@@ -196,14 +303,25 @@ async def generate_image(
             result = await use_case.execute(input_data)
 
             if result.status == "completed" and result.image_url:
-                user_name = current_user.get("username", user_id) if current_user else user_id
-                bg = background_tasks
-                if bg is not None:
-                    bg.add_task(_send_image_generated_notify, user_id, user_name, request.prompt, result.image_url,
-                                request.model, result.task_id, request.width, request.height)
+                image_record_repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.COMPLETED,
+                    result_url=result.image_url,
+                    result_base64=result.image_base64 or "",
+                )
+                db.commit()
+
+                if background_tasks is not None:
+                    background_tasks.add_task(
+                        _send_image_generated_notify,
+                        user_id, username, request.prompt, result.image_url,
+                        request.model, task_id, request.width, request.height,
+                    )
                 else:
-                    _send_image_generated_notify(user_id, user_name, request.prompt, result.image_url,
-                                                 request.model, result.task_id, request.width, request.height)
+                    _send_image_generated_notify(
+                        user_id, username, request.prompt, result.image_url,
+                        request.model, task_id, request.width, request.height,
+                    )
 
             return ImageGenerationResponse(
                 task_id=result.task_id,
@@ -214,6 +332,17 @@ async def generate_image(
             )
 
     except Exception as e:
+        try:
+            with get_session() as db:
+                repo = ImageRecordRepository(db)
+                repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.FAILED,
+                    error_message=str(e),
+                )
+                db.commit()
+        except Exception:
+            pass
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": 502, "message": f"AI 图片生成服务错误: {str(e)}"},
@@ -222,41 +351,84 @@ async def generate_image(
 
 @router.post("/image_to_image", response_model=ImageGenerationResponse, tags=["AI"])
 async def generate_image_to_image(
+    request_http: Request,
     request: ImageToImageRequest,
     current_user: CurrentUserOptional = None,
 ) -> ImageGenerationResponse:
+    """AI 图生图接口
+
+    Args:
+        request_http: HTTP 请求（用于获取 IP）
+        request: 图生图参数
+        current_user: 当前登录用户
+
+    Returns:
+        ImageGenerationResponse: 生成结果
+
+    Raises:
+        HTTPException: AI 服务错误（502）
+    """
+    from domain.entities.image_record import ImageRecordStatus
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,
     )
 
     user_id = current_user.get("user_id", "") if current_user else ""
+    tenant_id = current_user.get("tenant_id") if current_user else ""
+    username = current_user.get("username", user_id) if current_user else user_id
+    is_guest = current_user is None
+    client_ip = _get_client_ip(request_http)
+    user_agent = request_http.headers.get("User-Agent", "")[:500]
+
+    task_id = str(uuid.uuid4())
 
     try:
         prompt = request.prompt.strip() if request.prompt else ""
-        
+
         if not prompt:
             vision_client = LocalModelScopeVisionClient()
             image_url = request.image_url
-            
+
             if image_url.startswith("data:"):
                 image_data = image_url.split(",", 1)[1]
-                result = await vision_client.analyze_image(
+                vision_result = await vision_client.analyze_image(
                     image_data,
-                    prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等"
+                    prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等",
                 )
-                if result.error:
+                if vision_result.error:
                     raise HTTPException(
                         status_code=status.HTTP_502_BAD_GATEWAY,
-                        detail={"code": 502, "message": f"图片分析失败: {result.error}"},
+                        detail={"code": 502, "message": f"图片分析失败: {vision_result.error}"},
                     )
-                prompt = f"根据图片内容生成类似风格的图片: {result.content}"
+                prompt = f"根据图片内容生成类似风格的图片: {vision_result.content}"
             else:
                 prompt = "生成与参考图片风格相似的图片"
 
         with get_session() as db:
-            repo = ImageGenerationRepository(db)
-            client = ModelScopeClient()
-            use_case = ImageGenerationUseCase(client=client, repository=repo)
+            image_record_repo = ImageRecordRepository(db)
+            image_gen_repo = ImageGenerationRepository(db)
+
+            _create_image_record(
+                repo=image_record_repo,
+                record_type=ImageRecordType.IMAGE_TO_IMAGE,
+                prompt=prompt,
+                model=request.model,
+                user_id=user_id,
+                username=username,
+                client_ip=client_ip,
+                request_ip=client_ip,
+                user_agent=user_agent,
+                is_guest=is_guest,
+                tenant_id=tenant_id,
+                source_image_url=request.image_url,
+                width=request.width,
+                height=request.height,
+                steps=request.steps,
+                seed=request.seed,
+            )
+            db.commit()
+
+            use_case = ImageGenerationUseCase(client=ModelScopeClient(), repository=image_gen_repo)
 
             input_data = ImageGenerationInput(
                 prompt=prompt,
@@ -269,6 +441,15 @@ async def generate_image_to_image(
             )
             result = await use_case.execute(input_data)
 
+            if result.status == "completed" and result.image_url:
+                image_record_repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.COMPLETED,
+                    result_url=result.image_url,
+                    result_base64=result.image_base64 or "",
+                )
+                db.commit()
+
             return ImageGenerationResponse(
                 task_id=result.task_id,
                 status=result.status,
@@ -280,6 +461,17 @@ async def generate_image_to_image(
     except HTTPException:
         raise
     except Exception as e:
+        try:
+            with get_session() as db:
+                repo = ImageRecordRepository(db)
+                repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.FAILED,
+                    error_message=str(e),
+                )
+                db.commit()
+        except Exception:
+            pass
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": 502, "message": f"AI 图生图服务错误: {str(e)}"},
@@ -303,6 +495,7 @@ async def list_image_models(
         {"id": "AI-ModelScope/FLUX.1-schnell", "name": "FLUX.1 Schnell", "description": "快速图片生成"},
         {"id": "AI-ModelScope/SD3-Medium", "name": "SD3 Medium", "description": "Stable Diffusion 3"},
         {"id": "AI-ModelScope/Wanx", "name": "Wanx", "description": "阿里图片生成模型"},
+        {"id": "Qwen/Qwen-Image-Edit-2511", "name": "Qwen Image Edit", "description": "图片编辑模型"},
     ]
 
     return {
@@ -313,6 +506,7 @@ async def list_image_models(
 
 @router.post("/image/edit", response_model=ImageGenerationResponse, tags=["AI"])
 async def edit_image(
+    request_http: Request,
     request: ImageEditRequest,
     current_user: CurrentUserOptional = None,
     background_tasks: BackgroundTasks | None = None,
@@ -320,6 +514,7 @@ async def edit_image(
     """AI 图片编辑接口（Qwen-Image-Edit-2511）
 
     Args:
+        request_http: HTTP 请求（用于获取 IP）
         request: 图片编辑参数
         current_user: 当前登录用户
 
@@ -329,10 +524,43 @@ async def edit_image(
     Raises:
         HTTPException: AI 服务错误（502）
     """
+    from domain.entities.image_record import ImageRecordStatus
+
     user_id = current_user.get("user_id", "") if current_user else ""
-    tenant_id = current_user.get("tenant_id") if current_user else None
+    tenant_id = current_user.get("tenant_id") if current_user else ""
+    username = current_user.get("username", user_id) if current_user else user_id
+    is_guest = current_user is None
+    client_ip = _get_client_ip(request_http)
+    user_agent = request_http.headers.get("User-Agent", "")[:500]
+
+    task_id = str(uuid.uuid4())
+    actual_width = request.width or 1024
+    actual_height = request.height or 1024
 
     try:
+        with get_session() as db:
+            image_record_repo = ImageRecordRepository(db)
+
+            _create_image_record(
+                repo=image_record_repo,
+                record_type=ImageRecordType.IMAGE_EDIT,
+                prompt=request.prompt,
+                model=request.model,
+                user_id=user_id,
+                username=username,
+                client_ip=client_ip,
+                request_ip=client_ip,
+                user_agent=user_agent,
+                is_guest=is_guest,
+                tenant_id=tenant_id,
+                source_image_url=request.image_url,
+                width=actual_width,
+                height=actual_height,
+                steps=request.steps,
+                seed=request.seed,
+            )
+            db.commit()
+
         client = ModelScopeClient()
         result = await client.image_edit(
             image_input=request.image_url,
@@ -345,39 +573,59 @@ async def edit_image(
             tenant_id=tenant_id,
         )
 
-        if result.get("status") == "completed" and result.get("image_url"):
-            user_name = current_user.get("username", user_id) if current_user else user_id
-            actual_width = result.get("width") or request.width or 1024
-            actual_height = result.get("height") or request.height or 1024
-            actual_seed = result.get("seed", request.seed)
-            bg = background_tasks
-            if bg is not None:
-                bg.add_task(
+        result_task_id = result.get("task_id", task_id)
+        result_url = result.get("image_url", "")
+        result_base64 = result.get("image_base64", "")
+
+        with get_session() as db:
+            image_record_repo = ImageRecordRepository(db)
+            image_record_repo.update_status(
+                task_id=task_id,
+                status=ImageRecordStatus.COMPLETED,
+                result_url=result_url,
+                result_base64=result_base64,
+            )
+            db.commit()
+
+        if result.get("status") == "completed" and result_url:
+            if background_tasks is not None:
+                background_tasks.add_task(
                     _send_image_edited_notify,
-                    user_id, user_name, request.prompt,
-                    request.image_url, result.get("image_url", ""),
-                    request.model, result.get("task_id", ""),
+                    user_id, username, request.prompt,
+                    request.image_url, result_url,
+                    request.model, task_id,
                     actual_width, actual_height,
-                    request.steps, actual_seed,
+                    request.steps, request.seed,
                 )
             else:
                 _send_image_edited_notify(
-                    user_id, user_name, request.prompt,
-                    request.image_url, result.get("image_url", ""),
-                    request.model, result.get("task_id", ""),
+                    user_id, username, request.prompt,
+                    request.image_url, result_url,
+                    request.model, task_id,
                     actual_width, actual_height,
-                    request.steps, actual_seed,
+                    request.steps, request.seed,
                 )
 
         return ImageGenerationResponse(
-            task_id=result.get("task_id", ""),
+            task_id=task_id,
             status=result.get("status", "completed"),
-            image_url=result.get("image_url"),
-            image_base64=result.get("image_base64"),
+            image_url=result_url,
+            image_base64=result_base64,
             error=None,
         )
 
     except Exception as e:
+        try:
+            with get_session() as db:
+                repo = ImageRecordRepository(db)
+                repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.FAILED,
+                    error_message=str(e),
+                )
+                db.commit()
+        except Exception:
+            pass
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={"code": 502, "message": f"AI 图片编辑服务错误: {str(e)}"},
