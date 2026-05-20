@@ -10,8 +10,7 @@
 import { ChatPanel } from "@/components/agent/chat_panel";
 import { Sidebar } from "@/components/agent/sidebar";
 import { Navbar } from "@/components/website/navbar";
-import { ToastContainer } from "@/components/toast/toast";
-import { registerToastState } from "@/components/toast/toast";
+import { ToastContainer, registerToastState, ToastItem } from "@/components/toast/toast";
 import { useAgentStore } from "@/stores/agent.store";
 import { useEffect, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -20,7 +19,7 @@ function AgentContent() {
   const { sessionId, startSession } = useAgentStore();
   const searchParams = useSearchParams();
   const isWidget = searchParams.get("mode") === "widget";
-  const [toasts, setToasts] = useState<Array<{ id: string; message: string; title?: string; variant?: "success" | "error" | "warning" | "info"; onDismiss: () => void }>>([]);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   useEffect(() => {
     registerToastState(setToasts);

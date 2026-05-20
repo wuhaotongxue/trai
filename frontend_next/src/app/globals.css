@@ -146,9 +146,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-text-size-adjust: 100%;
   }
   html {
     @apply font-sans scroll-smooth;
+  }
+  /* 浏览器缩放时防止出现双滚动条 */
+  html, body {
+    overflow-x: hidden;
   }
 }
 

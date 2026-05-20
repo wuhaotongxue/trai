@@ -39,6 +39,9 @@ class AINotifyEvent(Enum):
     CHAT_COMPLETED = "chat_completed"
     """AI 对话完成"""
 
+    VIDEO_GENERATED = "video_generated"
+    """视频生成完成"""
+
 
 @dataclass
 class ImageGeneratedEvent:
@@ -62,6 +65,8 @@ class ImageEditedEvent:
     user_name: str
     prompt: str
     source_image_url: str = ""
+    source_image_url_2: str = ""
+    """第二张源图片 URL（双图联动编辑）"""
     result_image_url: str = ""
     model: str = "Qwen/Qwen-Image-Edit-2511"
     task_id: str = ""
@@ -82,6 +87,22 @@ class ChatCompletedEvent:
     response_preview: str
     tokens_used: int = 0
     session_id: str | None = None
+
+
+@dataclass
+class VideoGeneratedEvent:
+    """视频生成完成事件数据"""
+
+    user_id: str
+    user_name: str
+    prompt: str
+    video_url: str = ""
+    object_key: str = ""
+    public_url: str = ""
+    model: str = "Wan-AI/Wan2.1-T2V-1.3B"
+    task_id: str = ""
+    frames: int = 81
+    resolution: str = "1280x720"
 
 
 @dataclass
@@ -334,6 +355,7 @@ class FeishuAINotifyService:
         """
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         prompt_preview = event.prompt[:200] + ("..." if len(event.prompt) > 200 else "")
+        is_dual = bool(event.source_image_url_2)
 
         result_image_key = ""
         if event.result_image_url and event.result_image_url.startswith("http"):
@@ -341,19 +363,28 @@ class FeishuAINotifyService:
             if result_bytes:
                 result_image_key = self._upload_image_to_feishu(result_bytes)
 
-        source_image_key = ""
+        source1_key = ""
         if event.source_image_url and event.source_image_url.startswith("http"):
-            source_bytes = self._download_image(event.source_image_url)
-            if source_bytes:
-                source_image_key = self._upload_image_to_feishu(source_bytes)
+            source1_bytes = self._download_image(event.source_image_url)
+            if source1_bytes:
+                source1_key = self._upload_image_to_feishu(source1_bytes)
+
+        source2_key = ""
+        if is_dual and event.source_image_url_2 and event.source_image_url_2.startswith("http"):
+            source2_bytes = self._download_image(event.source_image_url_2)
+            if source2_bytes:
+                source2_key = self._upload_image_to_feishu(source2_bytes)
+
+        header_title = "\u2705 AI \u53cc\u56fe\u8054\u52a8\u7f16\u8f91\u5b8c\u6210" if is_dual else "\u2705 AI \u56fe\u7247\u7f16\u8f91\u5b8c\u6210"
+        template = "purple" if is_dual else "blue"
 
         card = {
             "msg_type": "interactive",
             "card": {
                 "config": {"wide_screen_mode": True},
                 "header": {
-                    "title": {"tag": "plain_text", "content": "\u2705 AI \u56fe\u7247\u7f16\u8f91\u5b8c\u6210"},
-                    "template": "blue",
+                    "title": {"tag": "plain_text", "content": header_title},
+                    "template": template,
                 },
                 "elements": [
                     {
@@ -392,9 +423,16 @@ class FeishuAINotifyService:
                                 "is_short": True,
                                 "text": {
                                     "tag": "lark_md",
+                                    "content": "**\u7c7b\u578b**\n" + ("\u53cc\u56fe" if is_dual else "\u5355\u56fe"),
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
                                     "content": "**\u4efb\u52a1ID**\n" + event.task_id[:16] + "..."
                                     if event.task_id
-                                    else "**\u4efb\u52a1ID**\n—",
+                                    else "**\u4efb\u52a1ID**\n\u2014",
                                 },
                             },
                         ],
@@ -411,26 +449,16 @@ class FeishuAINotifyService:
             },
         }
 
-        if source_image_key:
+        if is_dual:
+            # 双图模式：三图并排（源图1 | 源图2 | 结果图）
             card["card"]["elements"].insert(
                 len(card["card"]["elements"]) - 1,
                 {
                     "tag": "div",
                     "fields": [
-                        {
-                            "is_short": True,
-                            "text": {
-                                "tag": "lark_md",
-                                "content": "**\u539f\u56fe**",
-                            },
-                        },
-                        {
-                            "is_short": True,
-                            "text": {
-                                "tag": "lark_md",
-                                "content": "**\u7ed3\u679c\u56fe**",
-                            },
-                        },
+                        {"is_short": True, "text": {"tag": "lark_md", "content": "**\u539f\u56fe 1**"}},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": "**\u539f\u56fe 2**"}},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": "**\u7ed3\u679c\u56fe**"}},
                     ],
                 },
             )
@@ -439,22 +467,36 @@ class FeishuAINotifyService:
                 {
                     "tag": "div",
                     "fields": [
-                        {
-                            "is_short": True,
-                            "text": {
-                                "tag": "lark_md",
-                                "content": "",
-                            },
-                            "img": {"img_key": source_image_key, "width": 150},
-                        },
-                        {
-                            "is_short": True,
-                            "text": {
-                                "tag": "lark_md",
-                                "content": "",
-                            },
-                            "img": {"img_key": result_image_key, "width": 150} if result_image_key else None,
-                        },
+                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
+                         "img": {"img_key": source1_key, "width": 120} if source1_key else None},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
+                         "img": {"img_key": source2_key, "width": 120} if source2_key else None},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
+                         "img": {"img_key": result_image_key, "width": 120} if result_image_key else None},
+                    ],
+                },
+            )
+        elif source1_key:
+            # 单图模式：原图 | 结果图 并排
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "fields": [
+                        {"is_short": True, "text": {"tag": "lark_md", "content": "**\u539f\u56fe**"}},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": "**\u7ed3\u679c\u56fe**"}},
+                    ],
+                },
+            )
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "fields": [
+                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
+                         "img": {"img_key": source1_key, "width": 150}},
+                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
+                         "img": {"img_key": result_image_key, "width": 150} if result_image_key else None},
                     ],
                 },
             )
@@ -680,6 +722,123 @@ class FeishuAINotifyService:
         return self._send_card(card)
 
 
+    def notify_video_generated(self, event: VideoGeneratedEvent) -> dict[str, Any]:
+        """通知视频生成完成事件
+
+        Args:
+            event: 视频生成事件数据
+
+        Returns:
+            dict: 飞书 API 响应
+        """
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        prompt_preview = event.prompt[:200] + ("..." if len(event.prompt) > 200 else "")
+
+        card = {
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": "\U0001f3ac AI \u89c6\u9891\u751f\u6210"},
+                    "template": "orange",
+                },
+                "elements": [
+                    {
+                        "tag": "div",
+                        "fields": [
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u5206\u8fa8\u7387**\n" + event.resolution,
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u5e27\u6570**\n" + str(event.frames),
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u4efb\u52a1ID**\n" + event.task_id[:16] + "..."
+                                    if event.task_id
+                                    else "**\u4efb\u52a1ID**\n\u2014",
+                                },
+                            },
+                        ],
+                    },
+                    {"tag": "hr"},
+                    {
+                        "tag": "div",
+                        "text": {
+                            "tag": "lark_md",
+                            "content": "**Prompt**\n" + prompt_preview,
+                        },
+                    },
+                    {"tag": "hr"},
+                    {
+                        "tag": "div",
+                        "text": {
+                            "tag": "lark_md",
+                            "content": "**S3 \u5bf9\u8c61\u952e**\n" + event.object_key,
+                        },
+                    },
+                ],
+            },
+        }
+
+        # 添加两个URL按钮（Presigned 域名 + 公共域名）
+        actions = []
+
+        # Presigned URL 按钮（30天有效）
+        if event.video_url and event.video_url.startswith("http"):
+            actions.append(
+                {
+                    "tag": "button",
+                    "text": {"tag": "plain_text", "content": "\u6253\u5f00\u89c6\u9891(Presigned-30\u5929)"},
+                    "type": "primary",
+                    "url": event.video_url,
+                }
+            )
+
+        # 公共域名 URL 按钮
+        if event.public_url and event.public_url.startswith("http"):
+            actions.append(
+                {
+                    "tag": "button",
+                    "text": {"tag": "plain_text", "content": "\u6253\u5f00\u89c6\u9891(\u516c\u5171\u57df\u540d)"},
+                    "type": "default",
+                    "url": event.public_url,
+                }
+            )
+
+        if actions:
+            card["card"]["elements"].append({"tag": "action", "actions": actions})
+
+        card["card"]["elements"].append(
+            {
+                "tag": "note",
+                "elements": [
+                    {"tag": "plain_text", "content": f"TRAI AI \u901a\u77e5 \u00b7 {now_str}"},
+                ],
+            },
+        )
+
+        return self._send_card(card)
+
+
 _ai_notify_service: FeishuAINotifyService | None = None
 
 
@@ -697,6 +856,7 @@ __all__ = [
     "ImageEditedEvent",
     "ImageFailedEvent",
     "ChatCompletedEvent",
+    "VideoGeneratedEvent",
     "FeishuAINotifyService",
     "get_feishu_ai_notify_service",
 ]

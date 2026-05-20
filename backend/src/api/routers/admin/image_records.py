@@ -36,6 +36,9 @@ class ImageRecordResponse(BaseModel):
     tenant_id: str | None = Field(description="租户 ID")
     prompt: str = Field(description="提示词")
     source_image_url: str | None = Field(description="源图片 URL")
+    source_image_url_2: str | None = Field(description="第二张源图片 URL（双图联动编辑）")
+    source_image_object_key: str | None = Field(description="源图片 S3 对象键")
+    source_image_object_key_2: str | None = Field(description="第二张源图片 S3 对象键")
     result_url: str | None = Field(description="结果图片 URL")
     model: str | None = Field(description="模型名称")
     status: str = Field(description="任务状态")
@@ -82,6 +85,7 @@ class ImageRecordStatsResponse(BaseModel):
     text_to_image_count: int = Field(description="文生图数量")
     image_to_image_count: int = Field(description="图生图数量")
     image_edit_count: int = Field(description="图片编辑数量")
+    image_edit_dual_count: int = Field(description="双图联动编辑数量")
 
 
 def _entity_to_response(entity: Any) -> ImageRecordResponse:
@@ -97,6 +101,9 @@ def _entity_to_response(entity: Any) -> ImageRecordResponse:
         tenant_id=entity.tenant_id or None,
         prompt=entity.prompt,
         source_image_url=entity.source_image_url or None,
+        source_image_url_2=entity.source_image_url_2 or None,
+        source_image_object_key=entity.source_image_object_key or None,
+        source_image_object_key_2=entity.source_image_object_key_2 or None,
         result_url=entity.result_url or None,
         model=entity.model or None,
         status=entity.status.value,
@@ -135,7 +142,7 @@ async def list_image_records(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
     keyword: Annotated[str | None, Query(description="搜索关键词（task_id/用户名/prompt）")] = None,
-    record_type: Annotated[str | None, Query(description="记录类型: text_to_image/image_to_image/image_edit")] = None,
+    record_type: Annotated[str | None, Query(description="记录类型: text_to_image/image_to_image/image_edit/image_edit_dual")] = None,
     status: Annotated[str | None, Query(description="任务状态: pending/processing/completed/failed")] = None,
     user_id: Annotated[str | None, Query(description="用户 ID")] = None,
     start_date: Annotated[str | None, Query(description="开始日期 ISO 格式")] = None,
@@ -211,6 +218,7 @@ async def get_image_record_stats(
             func.sum(func.case((ImageRecordModel.t_record_type == "text_to_image", 1), else_=0)).label("text_to_image"),
             func.sum(func.case((ImageRecordModel.t_record_type == "image_to_image", 1), else_=0)).label("image_to_image"),
             func.sum(func.case((ImageRecordModel.t_record_type == "image_edit", 1), else_=0)).label("image_edit"),
+            func.sum(func.case((ImageRecordModel.t_record_type == "image_edit_dual", 1), else_=0)).label("image_edit_dual"),
         ).where(ImageRecordModel.t_deleted_at.is_(None))
     )
 
@@ -225,6 +233,7 @@ async def get_image_record_stats(
         text_to_image_count=result.text_to_image or 0,
         image_to_image_count=result.image_to_image or 0,
         image_edit_count=result.image_edit or 0,
+        image_edit_dual_count=result.image_edit_dual or 0,
     )
 
 

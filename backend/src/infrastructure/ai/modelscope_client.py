@@ -108,6 +108,8 @@ class ModelScopeClient:
         """
         from infrastructure.ai.local_image_client import LocalImageClient
 
+        logger.info(f"[1/4] 开始本地图片生成 | 提示词: {prompt[:50]}... | 宽高: {width}x{height} | 步数: {steps} | seed: {seed}")
+
         client = LocalImageClient()
         result = await client.generate(
             prompt=prompt,
@@ -130,20 +132,35 @@ class ModelScopeClient:
         safe_user_id = user_id or "anonymous"
         object_key = f"private/tenants/{safe_tenant_id}/ai_generated/images/{safe_user_id}/{task_id}.png"
 
+        logger.info(f"[2/4] 图片生成完成 | 大小: {len(image_bytes):,} bytes | task_id: {task_id}")
+
         storage = S3StorageService()
         storage.upload_bytes(
             data=image_bytes,
             object_key=object_key,
             content_type="image/png",
         )
-        expires_in = int(os.getenv("S3_PRESIGNED_URL_EXPIRE_SECONDS", "300"))
-        presigned_url = storage.get_presigned_url(object_key, expires_in=expires_in)
+        logger.info(f"[3/4] 上传 S3 完成 | 对象键: {object_key}")
+
+        # 生成 30 天有效的长期 URL，方便前端长期访问
+        image_url = storage.get_long_term_url(object_key, expires_days=30)
+        public_domain = storage.get_file_url(object_key)
+
+        logger.info(
+            f"[4/4] 生成完成!\n"
+            f"    S3 对象键: {object_key}\n"
+            f"    Presigned URL: {image_url[:100]}...\n"
+            f"    公共域名 URL: {public_domain}\n"
+            f"    提示词: {prompt[:50]}..."
+        )
 
         return {
-            "image_url": presigned_url,
+            "image_url": image_url,
             "image_base64": image_base64,
             "task_id": task_id,
             "status": "completed",
+            "object_key": object_key,
+            "public_url": public_domain,
         }
 
     async def _generate_remote(
@@ -217,11 +234,13 @@ class ModelScopeClient:
         seed: int | None = None,
         user_id: str | None = None,
         tenant_id: str | None = None,
+        image_input_2: str | None = None,
     ) -> dict[str, Any]:
-        """编辑图片（使用 Qwen-Image-Edit-2511 本地模型）
+        """编辑图片（单图或双图联动，使用 Qwen-Image-Edit-2511 本地模型）
 
         Args:
-            image_input: 图片（URL / base64 / 字节）
+            image_input: 第一张图片（URL / base64 / 字节）
+            image_input_2: 第二张图片（双图联动编辑模式，None 时使用单图模式）
             prompt: 编辑描述
             width: 宽度
             height: 高度
@@ -235,6 +254,13 @@ class ModelScopeClient:
         """
         from infrastructure.ai.local_image_edit_client import LocalImageEditClient
 
+        is_dual = image_input_2 is not None
+        mode_str = "双图联动" if is_dual else "单图"
+        logger.info(
+            f"[1/5] 开始图片编辑 | 模式: {mode_str} | 提示词: {prompt[:50]}... | "
+            f"宽高: {width or '默认'}x{height or '默认'} | 步数: {steps} | seed: {seed}"
+        )
+
         client = LocalImageEditClient()
         result = await client.edit(
             image_input=image_input,
@@ -243,7 +269,9 @@ class ModelScopeClient:
             height=height,
             steps=steps,
             seed=seed,
+            image_input_2=image_input_2,
         )
+        logger.info(f"[2/5] 推理完成 | task_id: {result.get('task_id', 'N/A')}")
 
         image_base64 = result.get("image_base64", "")
         if not image_base64:
@@ -253,10 +281,12 @@ class ModelScopeClient:
             )
 
         image_bytes = base64.b64decode(image_base64)
-        task_id = f"edit_{seed or -1}_{hash(prompt) % 100000}"
+        task_id = f"edit_{('dual' if is_dual else 'single')}_{seed or -1}_{hash(prompt) % 100000}"
         safe_tenant_id = tenant_id or "default"
         safe_user_id = user_id or "anonymous"
-        object_key = (
+
+        # 生成结果图 S3 对象键
+        result_object_key = (
             f"private/tenants/{safe_tenant_id}/ai_edited/images/"
             f"{safe_user_id}/{task_id}.png"
         )
@@ -264,17 +294,31 @@ class ModelScopeClient:
         storage = S3StorageService()
         storage.upload_bytes(
             data=image_bytes,
-            object_key=object_key,
+            object_key=result_object_key,
             content_type="image/png",
         )
-        expires_in = int(os.getenv("S3_PRESIGNED_URL_EXPIRE_SECONDS", "300"))
-        presigned_url = storage.get_presigned_url(object_key, expires_in=expires_in)
+        logger.info(f"[3/5] 上传 S3 完成 | 对象键: {result_object_key} | 大小: {len(image_bytes):,} bytes")
+
+        # 生成 30 天有效的长期 URL
+        result_image_url = storage.get_long_term_url(result_object_key, expires_days=30)
+        public_domain = storage.get_file_url(result_object_key)
+
+        logger.info(
+            f"[4/5] URL 生成完成\n"
+            f"    S3 对象键: {result_object_key}\n"
+            f"    Presigned URL: {result_image_url[:100]}...\n"
+            f"    公共域名 URL: {public_domain}\n"
+            f"[5/5] 图片编辑完成 | 模式: {mode_str} | task_id: {task_id}"
+        )
 
         return {
-            "image_url": presigned_url,
+            "image_url": result_image_url,
             "image_base64": image_base64,
             "task_id": task_id,
             "status": "completed",
+            "is_dual": is_dual,
+            "result_object_key": result_object_key,
+            "public_url": public_domain,
         }
 
 

@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
+from loguru import logger
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
@@ -62,6 +63,9 @@ def _create_image_record(
     is_guest: bool,
     tenant_id: str,
     source_image_url: str = "",
+    source_image_url_2: str = "",
+    source_image_object_key: str = "",
+    source_image_object_key_2: str = "",
     width: int = 1024,
     height: int = 1024,
     steps: int = 25,
@@ -82,6 +86,9 @@ def _create_image_record(
         is_guest=is_guest,
         tenant_id=tenant_id,
         source_image_url=source_image_url,
+        source_image_url_2=source_image_url_2,
+        source_image_object_key=source_image_object_key,
+        source_image_object_key_2=source_image_object_key_2,
         width=width,
         height=height,
         steps=steps,
@@ -129,6 +136,7 @@ def _send_image_edited_notify(
     user_name: str,
     prompt: str,
     source_image_url: str,
+    source_image_url_2: str,
     result_image_url: str,
     model: str,
     task_id: str,
@@ -147,6 +155,7 @@ def _send_image_edited_notify(
             user_name=user_name,
             prompt=prompt,
             source_image_url=source_image_url,
+            source_image_url_2=source_image_url_2,
             result_image_url=result_image_url,
             model=model,
             task_id=task_id,
@@ -191,8 +200,10 @@ class ImageGenerationResponse(BaseModel):
 
     task_id: str = Field(description="任务 ID")
     status: str = Field(description="任务状态")
-    image_url: str | None = Field(default=None, description="生成的图片 URL（远程 API）")
+    image_url: str | None = Field(default=None, description="生成的图片 URL（远程 API / S3 Presigned）")
     image_base64: str | None = Field(default=None, description="生成的图片 base64（本地模型）")
+    object_key: str | None = Field(default=None, description="S3 对象键")
+    public_url: str | None = Field(default=None, description="S3 公共域名 URL")
     error: str | None = Field(default=None, description="错误信息")
 
 
@@ -217,9 +228,10 @@ class ImageStatusRequest(BaseModel):
 
 
 class ImageEditRequest(BaseModel):
-    """图片编辑请求"""
+    """图片编辑请求（支持单图和双图联动编辑）"""
 
     image_url: Annotated[str, Field(min_length=1, max_length=10000000, description="原图片 URL 或 base64（最大约 7.5MB）")]
+    image_url_2: Annotated[str | None, Field(default=None, max_length=10000000, description="第二张图片 URL 或 base64（双图联动编辑模式）")] = None
     prompt: Annotated[str, Field(min_length=1, max_length=2000, description="编辑描述")]
     mask: Annotated[str | None, Field(default=None, max_length=2000000, description="蒙版图片 URL 或 base64")] = None
     model: Annotated[str, Field(default="Qwen/Qwen-Image-Edit-2511", description="模型名称")] = "Qwen/Qwen-Image-Edit-2511"
@@ -229,12 +241,12 @@ class ImageEditRequest(BaseModel):
     seed: Annotated[int, Field(default=-1, ge=-1, description="随机种子,-1 表示随机")] = -1
 
 
-@router.post("/image", response_model=ImageGenerationResponse, tags=["AI"])
+@router.post("/image", response_model=None, tags=["AI"])
 async def generate_image(
     request_http: Request,
     request: ImageGenerationRequest,
+    background_tasks: BackgroundTasks,
     current_user: CurrentUserOptional = None,
-    background_tasks: BackgroundTasks | None = None,
 ) -> ImageGenerationResponse:
     """AI 图片生成接口（文生图）
 
@@ -299,6 +311,7 @@ async def generate_image(
                 height=request.height,
                 steps=request.steps,
                 seed=request.seed if request.seed >= 0 else -1,
+                task_id=task_id,
             )
             result = await use_case.execute(input_data)
 
@@ -311,23 +324,19 @@ async def generate_image(
                 )
                 db.commit()
 
-                if background_tasks is not None:
-                    background_tasks.add_task(
-                        _send_image_generated_notify,
-                        user_id, username, request.prompt, result.image_url,
-                        request.model, task_id, request.width, request.height,
-                    )
-                else:
-                    _send_image_generated_notify(
-                        user_id, username, request.prompt, result.image_url,
-                        request.model, task_id, request.width, request.height,
-                    )
+                background_tasks.add_task(
+                    _send_image_generated_notify,
+                    user_id, username, request.prompt, result.image_url,
+                    request.model, task_id, request.width, request.height,
+                )
 
             return ImageGenerationResponse(
                 task_id=result.task_id,
                 status=result.status,
                 image_url=result.image_url,
                 image_base64=result.image_base64,
+                object_key=result.object_key,
+                public_url=result.public_url,
                 error=result.error,
             )
 
@@ -504,14 +513,17 @@ async def list_image_models(
     }
 
 
-@router.post("/image/edit", response_model=ImageGenerationResponse, tags=["AI"])
+@router.post("/image/edit", response_model=None, tags=["AI"])
 async def edit_image(
     request_http: Request,
     request: ImageEditRequest,
+    background_tasks: BackgroundTasks,
     current_user: CurrentUserOptional = None,
-    background_tasks: BackgroundTasks | None = None,
 ) -> ImageGenerationResponse:
-    """AI 图片编辑接口（Qwen-Image-Edit-2511）
+    """AI 图片编辑接口（Qwen-Image-Edit-2511，支持单图/双图联动编辑）
+
+    - 单图模式：传入 image_url，第二张图为空
+    - 双图联动：传入 image_url + image_url_2，两张图会融合生成新图
 
     Args:
         request_http: HTTP 请求（用于获取 IP）
@@ -524,7 +536,10 @@ async def edit_image(
     Raises:
         HTTPException: AI 服务错误（502）
     """
+    import base64
+
     from domain.entities.image_record import ImageRecordStatus
+    from infrastructure.storage.s3_storage import S3StorageService
 
     user_id = current_user.get("user_id", "") if current_user else ""
     tenant_id = current_user.get("tenant_id") if current_user else ""
@@ -532,10 +547,71 @@ async def edit_image(
     is_guest = current_user is None
     client_ip = _get_client_ip(request_http)
     user_agent = request_http.headers.get("User-Agent", "")[:500]
+    safe_tenant_id = tenant_id or "default"
+    safe_user_id = user_id or "anonymous"
 
     task_id = str(uuid.uuid4())
     actual_width = request.width or 1024
     actual_height = request.height or 1024
+    is_dual = request.image_url_2 is not None
+
+    # 上传原图到 S3，记录对象键
+    storage = S3StorageService()
+
+    def _decode_base64(data_url: str) -> bytes:
+        if data_url.startswith("data:"):
+            b64_part = data_url.split(",", 1)[1]
+        else:
+            b64_part = data_url
+        return base64.b64decode(b64_part)
+
+    def _detect_ext(b64_data: str) -> tuple[str, str]:
+        try:
+            raw = _decode_base64(b64_data[:100])
+            if raw.startswith(b"\xff\xd8\xff"):
+                return "jpg", "image/jpeg"
+            if raw.startswith(b"\x89PNG"):
+                return "png", "image/png"
+            if raw.startswith(b"GIF"):
+                return "gif", "image/gif"
+        except Exception:
+            pass
+        return "png", "image/png"
+
+    source_object_key = ""
+    source_object_key_2 = ""
+
+    try:
+        # 上传第一张原图
+        img1_bytes = _decode_base64(request.image_url)
+        ext1, mime1 = _detect_ext(request.image_url)
+        source_object_key = (
+            f"private/tenants/{safe_tenant_id}/ai_source/images/"
+            f"{safe_user_id}/{task_id}_1.{ext1}"
+        )
+        storage.upload_bytes(img1_bytes, source_object_key, mime1)
+
+        # 上传第二张原图（双图模式）
+        if is_dual and request.image_url_2:
+            img2_bytes = _decode_base64(request.image_url_2)
+            ext2, mime2 = _detect_ext(request.image_url_2)
+            source_object_key_2 = (
+                f"private/tenants/{safe_tenant_id}/ai_source/images/"
+                f"{safe_user_id}/{task_id}_2.{ext2}"
+            )
+            storage.upload_bytes(img2_bytes, source_object_key_2, mime2)
+
+    except Exception as e:
+        logger.warning(f"原图 S3 上传失败，继续处理: {e}")
+        source_object_key = ""
+        source_object_key_2 = ""
+
+    # 飞书通知使用 S3 URL（而非原始 base64）
+    source_image_url = storage.get_file_url(source_object_key) if source_object_key else request.image_url
+    source_image_url_2 = storage.get_file_url(source_object_key_2) if source_object_key_2 else (request.image_url_2 or "")
+
+    # 构建记录类型
+    record_type = ImageRecordType.IMAGE_EDIT_DUAL if is_dual else ImageRecordType.IMAGE_EDIT
 
     try:
         with get_session() as db:
@@ -543,7 +619,7 @@ async def edit_image(
 
             _create_image_record(
                 repo=image_record_repo,
-                record_type=ImageRecordType.IMAGE_EDIT,
+                record_type=record_type,
                 prompt=request.prompt,
                 model=request.model,
                 user_id=user_id,
@@ -553,7 +629,10 @@ async def edit_image(
                 user_agent=user_agent,
                 is_guest=is_guest,
                 tenant_id=tenant_id,
-                source_image_url=request.image_url,
+                source_image_url=source_image_url,
+                source_image_url_2=source_image_url_2,
+                source_image_object_key=source_object_key,
+                source_image_object_key_2=source_object_key_2,
                 width=actual_width,
                 height=actual_height,
                 steps=request.steps,
@@ -571,6 +650,7 @@ async def edit_image(
             seed=request.seed if request.seed >= 0 else None,
             user_id=user_id,
             tenant_id=tenant_id,
+            image_input_2=request.image_url_2,
         )
 
         result_task_id = result.get("task_id", task_id)
@@ -592,7 +672,7 @@ async def edit_image(
                 background_tasks.add_task(
                     _send_image_edited_notify,
                     user_id, username, request.prompt,
-                    request.image_url, result_url,
+                    source_image_url, source_image_url_2, result_url,
                     request.model, task_id,
                     actual_width, actual_height,
                     request.steps, request.seed,
@@ -600,7 +680,7 @@ async def edit_image(
             else:
                 _send_image_edited_notify(
                     user_id, username, request.prompt,
-                    request.image_url, result_url,
+                    source_image_url, source_image_url_2, result_url,
                     request.model, task_id,
                     actual_width, actual_height,
                     request.steps, request.seed,

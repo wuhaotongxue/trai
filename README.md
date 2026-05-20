@@ -46,6 +46,33 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_20_1644
+- **修复**: local_image_edit_client 子进程推理 post-processing 阶段 CUDA OOM（enable_model_cpu_offload 未显式 set_device，模型偷偷加载到 GPU 0 而非目标卡）
+- **修复**: local_video_client 复制模式同步保留 `torch.cuda.set_device(0)`
+- **新增**: test_image_edit.py 独立测试脚本（子进程推理 vs 主进程直接推理双模式）
+- **新增**: image_generation.py 视频生成用例（frame 生成 + 字幕烧录 + S3 上传 + 多端通知）
+- **新增**: feishu_ai_notify 支持视频生成飞书通知（卡片含 S3 视频预览）
+- **优化**: image_edit/image_edit_dual 统一日志和异常处理，video.py 生成进度流式推送
+
+### 🛠️ 前端_2026_05_20_1642
+- **界面（前端）**: 图片编辑模式支持双图联动，上传两张图片融合生成新图
+- **界面（前端）**: 编辑表单改为左右分栏，右侧原图+结果对比展示
+- **界面（前端）**: 新增双图快捷指令（合成/拼接/风格迁移/全景合成）
+- **新增（前端）**: ToastItem 接口导出，chat_panel.tsx 依赖此类型
+- **优化（前端）**: agent.store editImage 支持 sourceImage2 参数，压缩后发送到后端
+- **优化（前端）**: agent.store generateVideo 参数对齐后端（frames 替代 duration）
+- **优化（前端）**: api_client generateVideo 路由改为 /ai/video/generate
+
+### 🛠️ 后端_2026_05_20_1642
+- **新增（后端）**: 双图联动编辑（image_edit_dual），支持同时传入两张图片融合生成
+- **新增（后端）**: local_image_edit_client 生成双图联动推理脚本（QwenImageEditPlusPipeline image 列表模式）
+- **新增（后端）**: /ai/video/generate Wan2.1-T2V-1.3B 文生视频 API（S3 存储 + 域名/IP 双 URL + 飞书+企微通知）
+- **新增（后端）**: local_video_client.py Wan2.1 本地视频生成客户端（推理耗时统计 + 分辨率/帧数支持）
+- **新增（后端）**: delete_sessions.py 会话批量删除脚本（按标题/时间/用户等条件）
+- **新增（后端）**: 数据库迁移脚本 migrate_add_image_edit_dual_fields（新增字段 source_image_url_2 等）
+- **优化（后端）**: uvicorn 新增 timeout_keep_alive=300 / limit_concurrency=50 / limit_max_requests=1000
+- **优化（后端）**: FastAPI startup 事件初始化数据库单例，触发自动建表
+
 ### 🛠️ 前端_2026_05_20_0857
 - **界面（前端）**: 绘图/图片编辑模式改为左右分栏布局，表单靠左，结果图显示在右侧面板
 - **界面（前端）**: 右侧图片廊合并显示当前生成结果（generatedImageUrl + editedImageUrl）和历史记录

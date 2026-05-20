@@ -188,8 +188,8 @@ interface AgentState {
   generateImage: (prompt: string, model?: string, width?: number, height?: number) => Promise<void>;
   /** 清除生成的图片 */
   clearGeneratedImage: () => void;
-  /** 编辑图片 */
-  editImage: (sourceImage: string, editPrompt: string) => Promise<void>;
+  /** 编辑图片（单图/双图联动） */
+  editImage: (sourceImage: string, editPrompt: string, sourceImage2?: string | null) => Promise<void>;
   /** 清除编辑结果 */
   clearEditedImage: () => void;
   /** 取消图片编辑 */
@@ -652,7 +652,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ generatedImageUrl: null, imageGenerateError: null });
   },
 
-  editImage: async (sourceImage: string, editPrompt: string) => {
+  editImage: async (sourceImage: string, editPrompt: string, sourceImage2?: string | null) => {
     const abortCtrl = new AbortController();
     set({ isEditingImage: true, imageEditError: null, editedImageUrl: null, editingSourceImage: sourceImage, editAbortController: abortCtrl });
     try {
@@ -675,7 +675,35 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         }
       }
 
-      const res = await api.agent.editImage({ image_url: imageToSend, prompt: editPrompt, steps: 25, seed: -1, signal: abortCtrl.signal });
+      // 压缩第二张图（如有）
+      let image2ToSend: string | undefined;
+      if (sourceImage2) {
+        image2ToSend = sourceImage2;
+        if (sourceImage2.startsWith("data:image/")) {
+          const base64_2 = sourceImage2.split(",", 2)[1] || sourceImage2;
+          if (base64_2.length > 5 * 1024 * 1024) {
+            const img2 = new Image();
+            img2.src = sourceImage2;
+            await new Promise((resolve) => { img2.onload = resolve; });
+            const canvas2 = document.createElement("canvas");
+            const scale2 = Math.sqrt((5 * 1024 * 1024) / base64_2.length);
+            canvas2.width = Math.floor(img2.width * scale2 * 0.8);
+            canvas2.height = Math.floor(img2.height * scale2 * 0.8);
+            const ctx2 = canvas2.getContext("2d")!;
+            ctx2.drawImage(img2, 0, 0, canvas2.width, canvas2.height);
+            image2ToSend = canvas2.toDataURL("image/jpeg", 0.85);
+          }
+        }
+      }
+
+      const res = await api.agent.editImage({
+        image_url: imageToSend,
+        prompt: editPrompt,
+        steps: 25,
+        seed: -1,
+        signal: abortCtrl.signal,
+        ...(image2ToSend ? { image_url_2: image2ToSend } : {}),
+      });
       set({ isEditingImage: false, editAbortController: null });
       if (res.image_url) {
         set({ editedImageUrl: res.image_url });
@@ -688,6 +716,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         }
         const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
         set({ editedImageUrl: blobUrl });
+        get().addToImageGallery(blobUrl, editPrompt);
       } else {
         set({ imageEditError: res.error || "图片编辑失败" });
       }
@@ -768,7 +797,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   generateVideo: async (prompt: string, model?: string, duration?: number, resolution?: string) => {
     set({ isGeneratingVideo: true, videoGenerateError: null, generatedVideoUrl: null });
     try {
-      const res = await api.agent.generateVideo({ prompt, model, duration, resolution });
+      const res = await api.agent.generateVideo({ prompt, model, frames: duration, resolution });
       if (res.video_url) {
         set({ generatedVideoUrl: res.video_url, isGeneratingVideo: false });
         // 将生成的视频添加到视频廊

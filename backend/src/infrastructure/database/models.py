@@ -550,6 +550,15 @@ class ImageRecordModel(Base):
     t_source_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     """源图片 URL（图生图/图片编辑）"""
 
+    t_source_image_url_2: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """第二张源图片 URL（双图联动编辑）"""
+
+    t_source_image_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """源图片 S3 对象键"""
+
+    t_source_image_object_key_2: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """第二张源图片 S3 对象键（双图联动编辑）"""
+
     t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     """结果图片 S3 URL"""
 

@@ -64,6 +64,7 @@ export function ChatPanel() {
     cancelEditImage,
     isEditingImage,
     editedImageUrl,
+    editingSourceImage,
     imageEditError,
     imageGallery,
     removeFromImageGallery,
@@ -103,6 +104,7 @@ export function ChatPanel() {
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍, 阳光明媚, 花朵盛开');
   const [editPrompt, setEditPrompt] = useState('将背景替换为城市夜景');
   const [editingImagePreview, setEditingImagePreview] = useState<string | null>(null);
+  const [editingImagePreview2, setEditingImagePreview2] = useState<string | null>(null);
   const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海, 海浪拍打着礁石, 天空中乌云密布');
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光');
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -562,48 +564,61 @@ export function ChatPanel() {
                         </div>
                       </div>
 
-                      {/* 图片上传区 */}
+                      {/* 图片上传区 - 单图/双图模式 */}
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">上传原图</p>
-                        {editingImagePreview ? (
-                          <div className="relative group">
-                            <img
-                              src={editingImagePreview}
-                              alt="待编辑图片"
-                              className="w-full max-h-60 object-contain rounded-xl border bg-white"
-                            />
-                            <Button
-                              size="icon"
-                              variant="destructive"
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7"
-                              disabled={isEditingImage}
-                              onClick={() => setEditingImagePreview(null)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">上传原图 {editingImagePreview2 ? "(双图联动)" : ""}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* 第一张原图 */}
+                          <div>
+                            <p className="text-[10px] text-muted-foreground mb-1">图1</p>
+                            {editingImagePreview ? (
+                              <div className="relative group">
+                                <img src={editingImagePreview} alt="原图1" className="w-full h-28 object-contain rounded-xl border bg-white" />
+                                <Button size="icon" variant="destructive" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5" disabled={isEditingImage} onClick={() => { setEditingImagePreview(null); setEditingImagePreview2(null); }}>
+                                  <X className="h-2.5 w-2.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <label className={`flex flex-col items-center justify-center h-28 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isEditingImage ? "border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed" : "border-violet-200 dark:border-violet-700 hover:border-violet-400 dark:hover:border-violet-500"}`}>
+                                <Upload className="h-4 w-4 text-violet-400 mb-0.5" />
+                                <span className="text-[10px] text-muted-foreground">点击上传</span>
+                                <input type="file" accept="image/*" className="hidden" disabled={isEditingImage} onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => { setEditingImagePreview(ev.target?.result as string); };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }} />
+                              </label>
+                            )}
                           </div>
-                        ) : (
-                          <label className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl transition-colors bg-violet-50/30 dark:bg-violet-500/5 ${isEditingImage ? "border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50" : "border-violet-200 dark:border-violet-700 cursor-pointer hover:border-violet-400 dark:hover:border-violet-500"}`}>
-                            <Upload className="h-6 w-6 text-violet-400 mb-1" />
-                            <span className="text-xs text-muted-foreground">点击上传 / 拖拽图片</span>
-                            <span className="text-[10px] text-muted-foreground">JPG、PNG、WebP</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = (ev) => {
-                                    setEditingImagePreview(ev.target?.result as string);
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                          </label>
-                        )}
+                          {/* 第二张原图（双图联动） */}
+                          <div>
+                            <p className="text-[10px] text-muted-foreground mb-1">图2（双图联动）</p>
+                            {editingImagePreview2 ? (
+                              <div className="relative group">
+                                <img src={editingImagePreview2} alt="原图2" className="w-full h-28 object-contain rounded-xl border bg-white" />
+                                <Button size="icon" variant="destructive" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5" disabled={isEditingImage} onClick={() => setEditingImagePreview2(null)}>
+                                  <X className="h-2.5 w-2.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <label className={`flex flex-col items-center justify-center h-28 border-2 border-dashed rounded-xl transition-colors cursor-pointer ${isEditingImage ? "border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed" : "border-violet-200 dark:border-violet-700 hover:border-violet-400 dark:hover:border-violet-500"}`}>
+                                <Upload className="h-4 w-4 text-violet-400 mb-0.5" />
+                                <span className="text-[10px] text-muted-foreground">点击上传</span>
+                                <input type="file" accept="image/*" className="hidden" disabled={isEditingImage} onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => { setEditingImagePreview2(ev.target?.result as string); };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }} />
+                              </label>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                       {/* 编辑提示词 */}
@@ -621,21 +636,28 @@ export function ChatPanel() {
                       {/* 快捷指令 */}
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">快捷指令</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <div className="grid grid-cols-1 gap-1.5">
                           {[
-                            "将背景替换为星空",
-                            "给人物添加眼镜",
-                            "调整光线为夕阳暖色",
-                            "背景替换为室内咖啡馆",
-                          ].map((tip) => (
-                            <button
-                              key={tip}
-                              onClick={() => setEditPrompt(tip)}
-                              disabled={isEditingImage}
-                              className="text-left px-3 py-1.5 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-xs text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {tip}
-                            </button>
+                            // 单图快捷指令
+                            { tag: "单图", tips: ["将背景替换为星空", "给人物添加眼镜", "调整光线为夕阳暖色", "背景替换为室内咖啡馆"] },
+                            // 双图快捷指令
+                            { tag: "双图", tips: ["将两个人物同框合成", "将两张图无缝拼接融合", "将图1风格迁移到图2", "将两图合成全景画面"] },
+                          ].map(({ tag, tips }) => (
+                            <div key={tag} className="space-y-1">
+                              <p className="text-[10px] text-violet-500 font-medium">{tag}指令</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                {tips.map((tip) => (
+                                  <button
+                                    key={tip}
+                                    onClick={() => setEditPrompt(tip)}
+                                    disabled={isEditingImage}
+                                    className="text-left px-2.5 py-1.5 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-xs text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {tip}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -651,7 +673,7 @@ export function ChatPanel() {
                       {/* 开始编辑按钮 */}
                       {!isEditingImage && (
                         <Button
-                          onClick={() => editImage(editingImagePreview!, editPrompt)}
+                        onClick={() => editImage(editingImagePreview!, editPrompt, editingImagePreview2)}
                           disabled={!editPrompt.trim() || !editingImagePreview}
                           className="w-full"
                         >
@@ -672,7 +694,7 @@ export function ChatPanel() {
                       )}
                     </div>
 
-                    {/* 右侧：结果预览区 */}
+                    {/* 右侧：原图 + 结果对比展示 */}
                     <div className="w-80 shrink-0 flex flex-col gap-3 overflow-y-auto">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">编辑结果</p>
                       {/* 加载状态 */}
@@ -680,30 +702,47 @@ export function ChatPanel() {
                         <div className="flex flex-col items-center gap-3 py-8 rounded-xl border border-dashed border-violet-200 dark:border-violet-700">
                           <Loader2 className="h-7 w-7 text-violet-500 animate-spin" />
                           <p className="text-xs text-muted-foreground">正在编辑中...</p>
+                          <p className="text-[10px] text-muted-foreground/60 text-center px-4">模型加载与推理中，<br />请查看后端日志了解详细进度</p>
                         </div>
                       )}
-                      {/* 编辑结果 */}
+                      {/* 原图 + 结果对比 */}
                       {!isEditingImage && editedImageUrl && (
-                        <div className="relative group rounded-xl overflow-hidden border bg-white">
-                          <img
-                            src={editedImageUrl}
-                            alt="编辑结果"
-                            width={512}
-                            className="w-full object-contain cursor-pointer"
-                            onClick={() => window.open(editedImageUrl, "_blank")}
-                          />
-                          <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => navigator.clipboard.writeText(editedImageUrl)} title="复制链接">
-                              <Copy className="h-3 w-3" />
-                            </Button>
-                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => window.open(editedImageUrl, "_blank")} title="新窗口打开">
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                            <Button size="icon" variant="secondary" className="h-6 w-6 bg-white/90 hover:bg-white" onClick={() => { const a = document.createElement("a"); a.href = editedImageUrl; a.download = "edited-image.png"; a.click(); }} title="下载">
-                              <ArrowDownToLine className="h-3 w-3" />
-                            </Button>
+                        <>
+                          {/* 对比栏：原图 | 结果图 */}
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col gap-1">
+                              <p className="text-[10px] font-medium text-muted-foreground">原图</p>
+                              <div className="relative rounded-xl overflow-hidden border bg-white">
+                                <img src={editingSourceImage || editingImagePreview || ""} alt="原图" className="w-full object-contain cursor-pointer" onClick={() => { const src = editingSourceImage || editingImagePreview; if (src) window.open(src, "_blank"); }} />
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <p className="text-[10px] font-medium text-muted-foreground">结果</p>
+                              <div className="relative group rounded-xl overflow-hidden border bg-white">
+                                <img src={editedImageUrl} alt="编辑结果" className="w-full object-contain cursor-pointer" onClick={() => window.open(editedImageUrl, "_blank")} />
+                                <div className="absolute bottom-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button size="icon" variant="secondary" className="h-5 w-5 bg-white/90 hover:bg-white" onClick={() => navigator.clipboard.writeText(editedImageUrl)} title="复制">
+                                    <Copy className="h-2.5 w-2.5" />
+                                  </Button>
+                                  <Button size="icon" variant="secondary" className="h-5 w-5 bg-white/90 hover:bg-white" onClick={() => window.open(editedImageUrl, "_blank")} title="打开">
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                  </Button>
+                                  <Button size="icon" variant="secondary" className="h-5 w-5 bg-white/90 hover:bg-white" onClick={() => { const a = document.createElement("a"); a.href = editedImageUrl; a.download = "edited-image.png"; a.click(); }} title="下载">
+                                    <ArrowDownToLine className="h-2.5 w-2.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                          {editingImagePreview2 && (
+                            <div className="flex flex-col gap-1">
+                              <p className="text-[10px] font-medium text-muted-foreground">原图2（双图联动）</p>
+                              <div className="rounded-xl overflow-hidden border bg-white">
+                                <img src={editingImagePreview2} alt="原图2" className="w-full object-contain" />
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                       {/* 无结果占位 */}
                       {!isEditingImage && !editedImageUrl && (

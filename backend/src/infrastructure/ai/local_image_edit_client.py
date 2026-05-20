@@ -137,91 +137,214 @@ class LocalImageEditClient:
         height: int | None,
         width: int | None,
         steps: int,
+        is_dual: bool = False,
     ) -> str:
-        """构建推理脚本内容"""
-        return f"""
-import base64
-import io
-import json
-import sys
-import numpy as np
-import torch
-from accelerate.hooks import remove_hook_from_module
+        """构建推理脚本内容
 
-from modelscope import QwenImageEditPlusPipeline
-from PIL import Image
+        Args:
+            is_dual: 是否为双图联动编辑模式（True=两张图，False=单图）
+        """
+        model_path = self._model_path
 
-# 加载 pipeline
-pipe = QwenImageEditPlusPipeline.from_pretrained(
-    "{self._model_path}",
-    torch_dtype=torch.bfloat16,
-)
+        if is_dual:
+            # 双图联动编辑模式（QwenImageEditPlusPipeline 原生支持）
+            script = (
+                "import base64\n"
+                "import io\n"
+                "import json\n"
+                "import sys\n"
+                "import traceback\n"
+                "import numpy as np\n"
+                "import torch\n"
+                "from accelerate.hooks import remove_hook_from_module\n"
+                "\n"
+                "from modelscope import QwenImageEditPlusPipeline\n"
+                "from PIL import Image\n"
+                "\n"
+                "def _main():\n"
+                "    print(\"[1/7] 初始化完成 | GPU数量: \" + str(torch.cuda.device_count()), flush=True)\n"
+                "\n"
+                "    pipe = QwenImageEditPlusPipeline.from_pretrained(\n"
+                "        \"" + model_path + "\",\n"
+                "        torch_dtype=torch.bfloat16,\n"
+                "    )\n"
+                "    print(\"[2/7] 模型加载完成\", flush=True)\n"
+                "\n"
+                "    for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                "        obj = getattr(pipe, name, None)\n"
+                "        if obj is not None:\n"
+                "            remove_hook_from_module(obj)\n"
+                "\n"
+                "    pipe.enable_model_cpu_offload()\n"
+                "\n"
+                "    def _pipe_eval():\n"
+                "        for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                "            obj = getattr(pipe, name, None)\n"
+                "            if obj is not None and callable(getattr(obj, \"eval\", None)):\n"
+                "                obj.eval()\n"
+                "    pipe.eval = _pipe_eval\n"
+                "\n"
+                "    img_path_1 = sys.argv[1]\n"
+                "    img_path_2 = sys.argv[2]\n"
+                "    image1 = Image.open(img_path_1)\n"
+                "    image2 = Image.open(img_path_2)\n"
+                "    image1.load()\n"
+                "    image2.load()\n"
+                "    print(\"[3/7] 图片加载完成 | 图1: \" + str(image1.size) + \" | 图2: \" + str(image2.size), flush=True)\n"
+                "\n"
+                "    generator = None\n"
+                "    _seed = " + repr(seed) + "\n"
+                "    if _seed is not None and _seed >= 0:\n"
+                "        generator = torch.Generator(device=\"cuda\").manual_seed(_seed)\n"
+                "\n"
+                "    _seed_str = str(_seed) if _seed is not None else \"随机\"\n"
+                "    print(\"[4/7] 开始推理 | 步数: " + str(steps) + " | seed: \" + _seed_str, flush=True)\n"
+                "\n"
+                "    result = pipe(\n"
+                "        image=[image1, image2],\n"
+                "        prompt=sys.stdin.read().strip(),\n"
+                "        height=" + repr(height) + ",\n"
+                "        width=" + repr(width) + ",\n"
+                "        num_inference_steps=" + repr(steps) + ",\n"
+                "        generator=generator,\n"
+                "        true_cfg_scale=4.0,\n"
+                "        negative_prompt=\"bad quality, blurry, deformed\",\n"
+                "        num_images_per_prompt=1,\n"
+                "    )\n"
+                "    print(\"[5/7] 推理完成，开始后处理\", flush=True)\n"
+                "\n"
+                "    output_image = result.images[0] if hasattr(result, \"images\") else result[0]\n"
+                "\n"
+                "    arr = np.array(output_image)\n"
+                "    if arr.max() == 0 and arr.min() == 0:\n"
+                "        print(\"WARNING: output is all black/zero!\", file=sys.stderr)\n"
+                "        sys.stderr.flush()\n"
+                "\n"
+                "    print(\"[6/7] 图片编码中 | 尺寸: \" + str(output_image.width) + \"x\" + str(output_image.height), flush=True)\n"
+                "\n"
+                "    buf = io.BytesIO()\n"
+                "    output_image.save(buf, format=\"PNG\")\n"
+                "    output_b64 = base64.b64encode(buf.getvalue()).decode(\"utf-8\")\n"
+                "\n"
+                "    print(json.dumps({\n"
+                "        \"image_base64\": output_b64,\n"
+                "        \"width\": output_image.width,\n"
+                "        \"height\": output_image.height,\n"
+                "        \"steps\": " + repr(steps) + ",\n"
+                "        \"seed\": " + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
+                "        \"is_dual\": True,\n"
+                "        \"stats\": {\"min\": int(arr.min()), \"max\": int(arr.max()), \"mean\": float(arr.mean())},\n"
+                "    }))\n"
+                "    print(\"[7/7] 完成\", flush=True)\n"
+                "\n"
+                "if __name__ == \"__main__\":\n"
+                "    try:\n"
+                "        _main()\n"
+                "    except Exception:\n"
+                "        traceback.print_exc()\n"
+                "        sys.stderr.flush()\n"
+                "        sys.exit(1)\n"
+            )
+            return script
+        else:
+            # 单图编辑模式
+            script = (
+                "import base64\n"
+                "import io\n"
+                "import json\n"
+                "import sys\n"
+                "import traceback\n"
+                "import numpy as np\n"
+                "import torch\n"
+                "from accelerate.hooks import remove_hook_from_module\n"
+                "\n"
+                "from modelscope import QwenImageEditPlusPipeline\n"
+                "from PIL import Image\n"
+                "\n"
+                "def _main():\n"
+                "    print(\"[1/7] 初始化完成 | GPU数量: \" + str(torch.cuda.device_count()), flush=True)\n"
+                "\n"
+                "    pipe = QwenImageEditPlusPipeline.from_pretrained(\n"
+                "        \"" + model_path + "\",\n"
+                "        torch_dtype=torch.bfloat16,\n"
+                "    )\n"
+                "    print(\"[2/7] 模型加载完成\", flush=True)\n"
+                "\n"
+                "    for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                "        obj = getattr(pipe, name, None)\n"
+                "        if obj is not None:\n"
+                "            remove_hook_from_module(obj)\n"
+                "\n"
+                "    pipe.enable_model_cpu_offload()\n"
+                "\n"
+                "    def _pipe_eval():\n"
+                "        for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                "            obj = getattr(pipe, name, None)\n"
+                "            if obj is not None and callable(getattr(obj, \"eval\", None)):\n"
+                "                obj.eval()\n"
+                "    pipe.eval = _pipe_eval\n"
+                "\n"
+                "    img_path = sys.argv[1]\n"
+                "    image = Image.open(img_path)\n"
+                "    image.load()\n"
+                "    print(\"[3/7] 图片加载完成 | 尺寸: \" + str(image.size), flush=True)\n"
+                "\n"
+                "    generator = None\n"
+                "    _seed = " + repr(seed) + "\n"
+                "    if _seed is not None and _seed >= 0:\n"
+                "        generator = torch.Generator(device=\"cuda\").manual_seed(_seed)\n"
+                "\n"
+                "    _seed_str = str(_seed) if _seed is not None else \"随机\"\n"
+                "    print(\"[4/7] 开始推理 | 步数: " + str(steps) + " | seed: \" + _seed_str, flush=True)\n"
+                "\n"
+                "    result = pipe(\n"
+                "        image=image,\n"
+                "        prompt=sys.stdin.read().strip(),\n"
+                "        height=" + repr(height) + ",\n"
+                "        width=" + repr(width) + ",\n"
+                "        num_inference_steps=" + repr(steps) + ",\n"
+                "        generator=generator,\n"
+                "        true_cfg_scale=4.0,\n"
+                "        negative_prompt=\"bad quality, blurry, deformed\",\n"
+                "        num_images_per_prompt=1,\n"
+                "    )\n"
+                "    print(\"[5/7] 推理完成，开始后处理\", flush=True)\n"
+                "\n"
+                "    output_image = result.images[0] if hasattr(result, \"images\") else result[0]\n"
+                "\n"
+                "    arr = np.array(output_image)\n"
+                "    if arr.max() == 0 and arr.min() == 0:\n"
+                "        print(\"WARNING: output is all black/zero!\", file=sys.stderr)\n"
+                "        sys.stderr.flush()\n"
+                "\n"
+                "    print(\"[6/7] 图片编码中 | 尺寸: \" + str(output_image.width) + \"x\" + str(output_image.height), flush=True)\n"
+                "\n"
+                "    buf = io.BytesIO()\n"
+                "    output_image.save(buf, format=\"PNG\")\n"
+                "    output_b64 = base64.b64encode(buf.getvalue()).decode(\"utf-8\")\n"
+                "\n"
+                "    print(json.dumps({\n"
+                "        \"image_base64\": output_b64,\n"
+                "        \"width\": output_image.width,\n"
+                "        \"height\": output_image.height,\n"
+                "        \"steps\": " + repr(steps) + ",\n"
+                "        \"seed\": " + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
+                "        \"is_dual\": False,\n"
+                "        \"stats\": {\"min\": int(arr.min()), \"max\": int(arr.max()), \"mean\": float(arr.mean())},\n"
+                "    }))\n"
+                "    print(\"[7/7] 完成\", flush=True)\n"
+                "\n"
+                "if __name__ == \"__main__\":\n"
+                "    try:\n"
+                "        _main()\n"
+                "    except Exception:\n"
+                "        traceback.print_exc()\n"
+                "        sys.stderr.flush()\n"
+                "        sys.exit(1)\n"
+            )
+            return script
 
-# 强制把所有组件移到 cuda:0，移除 accelerate hooks，
-# 然后启用 CPU offload 减少显存占用
-for name in ("transformer", "vae", "text_encoder"):
-    obj = getattr(pipe, name, None)
-    if obj is not None:
-        remove_hook_from_module(obj)
-
-pipe.enable_model_cpu_offload()
-
-# QwenImageEditPlusPipeline 缺少 eval() 方法，
-# modelscope 1.36.3 + diffusers 0.38.0 兼容补丁
-def _pipe_eval():
-    for name in ("transformer", "vae", "text_encoder"):
-        obj = getattr(pipe, name, None)
-        if obj is not None and callable(getattr(obj, "eval", None)):
-            obj.eval()
-pipe.eval = _pipe_eval
-
-# 从命令行参数读取图片路径
-img_path = sys.argv[1]
-image = Image.open(img_path)
-image.load()  # 强制加载到内存，避免文件关闭后崩溃
-
-# 随机种子
-generator = None
-if {seed!r} is not None and {seed!r} >= 0:
-    generator = torch.Generator(device="cuda").manual_seed({seed!r})
-
-# 推理
-result = pipe(
-    image=image,
-    prompt=sys.stdin.read().strip(),
-    height={height!r},
-    width={width!r},
-    num_inference_steps={steps!r},
-    generator=generator,
-    true_cfg_scale=4.0,
-    negative_prompt="bad quality, blurry, deformed",
-    num_images_per_prompt=1,
-)
-
-output_image = result.images[0] if hasattr(result, "images") else result[0]
-
-# 验证输出
-arr = np.array(output_image)
-if arr.max() == 0 and arr.min() == 0:
-    print("WARNING: output is all black/zero!", file=sys.stderr)
-    sys.stderr.flush()
-
-# 编码返回
-buf = io.BytesIO()
-output_image.save(buf, format="PNG")
-output_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-
-print(json.dumps({{
-    "image_base64": output_b64,
-    "width": output_image.width,
-    "height": output_image.height,
-    "steps": {steps!r},
-    "seed": {seed!r} if {seed!r} is not None else -1,
-    "stats": {{"min": int(arr.min()), "max": int(arr.max()), "mean": float(arr.mean())}},
-}}))
-"""
-
-    def _run_edit_subprocess(
+    async def _run_edit_subprocess(
         self,
         device: int,
         image_path: str,
@@ -230,9 +353,11 @@ print(json.dumps({{
         height: int | None,
         steps: int,
         seed: int | None,
+        image_path_2: str | None = None,
     ) -> dict[str, Any]:
-        """在独立子进程中执行一次图片编辑，进程退出后显存自动释放"""
-        script_content = self._build_script(seed, height, width, steps)
+        """在独立子进程中执行一次图片编辑，实时流式读取输出日志"""
+        is_dual = image_path_2 is not None
+        script_content = self._build_script(seed, height, width, steps, is_dual=is_dual)
         script_fd, script_path = tempfile.mkstemp(suffix=".py", prefix="edit_")
         os.close(script_fd)
         try:
@@ -243,28 +368,129 @@ print(json.dumps({{
             env["CUDA_VISIBLE_DEVICES"] = str(device)
             env["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-            result = subprocess.run(
-                [sys.executable, script_path, image_path],
-                capture_output=True,
-                text=True,
-                timeout=600,
-                input=prompt,
-                env=env,
+            if is_dual:
+                cmd = [sys.executable, script_path, image_path, image_path_2]
+            else:
+                cmd = [sys.executable, script_path, image_path]
+
+            # 完全同步版本：子进程创建 + IO 全部在 _sync_run_process 内，通过 asyncio.to_thread 调用
+            def _sync_run_process() -> tuple[str, str, int]:
+                import select as _select
+
+                proc = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    close_fds=True,
+                    env=env,
+                )
+
+                input_data = (prompt + "\n").encode("utf-8")
+                proc.stdin.write(input_data)
+                proc.stdin.close()
+
+                stdout_buf: list[bytes] = []
+                stderr_buf: list[bytes] = []
+                stdout_done = False
+                stderr_done = False
+
+                while not (stdout_done and stderr_done):
+                    ready_r, _, _ = _select.select(
+                        [proc.stdout, proc.stderr], [], [], 0.5
+                    )
+                    if proc.stdout in ready_r:
+                        chunk = os.read(proc.stdout.fileno(), 16384)
+                        if not chunk:
+                            stdout_done = True
+                        else:
+                            stdout_buf.append(chunk)
+                            for ln in chunk.decode("utf-8", errors="replace").splitlines():
+                                ln = ln.strip()
+                                if ln:
+                                    logger.info(f"[子进程] {ln}")
+                    if proc.stderr in ready_r:
+                        chunk = os.read(proc.stderr.fileno(), 4096)
+                        if not chunk:
+                            stderr_done = True
+                        else:
+                            stderr_buf.append(chunk)
+                            # 实时记录 stderr 供调试
+                            for ln in chunk.decode("utf-8", errors="replace").splitlines():
+                                ln = ln.strip()
+                                if ln:
+                                    logger.warning(f"[子进程 stderr] {ln}")
+
+                    if proc.poll() is not None and not stdout_done:
+                        try:
+                            remaining = os.read(proc.stdout.fileno(), 65536)
+                            if remaining:
+                                stdout_buf.append(remaining)
+                        except OSError:
+                            pass
+                        stdout_done = True
+                    if proc.poll() is not None and not stderr_done:
+                        try:
+                            remaining = os.read(proc.stderr.fileno(), 65536)
+                            if remaining:
+                                stderr_buf.append(remaining)
+                        except OSError:
+                            pass
+                        stderr_done = True
+
+                # 进程已退出，但 select 可能已错过最后一小段，再做一次最终 drain
+                try:
+                    remaining_out = os.read(proc.stdout.fileno(), 65536)
+                    if remaining_out:
+                        stdout_buf.append(remaining_out)
+                except OSError:
+                    pass
+                try:
+                    remaining_err = os.read(proc.stderr.fileno(), 65536)
+                    if remaining_err:
+                        stderr_buf.append(remaining_err)
+                except OSError:
+                    pass
+
+                proc.wait()  # 确保完全结束
+                return (
+                    b"".join(stdout_buf).decode("utf-8", errors="replace"),
+                    b"".join(stderr_buf).decode("utf-8", errors="replace"),
+                    proc.returncode,
+                )
+
+            stdout_str, stderr_str, rc = await asyncio.to_thread(_sync_run_process)
+
+            # proc.poll() 返回 None 说明进程还没完全退出，用 wait() 同步获取退出码
+            if rc is None:
+                rc = os.waitstatus_to_exitcode(proc.wait())
+
+            # 打印完整输出，方便排查静默崩溃
+            logger.info(f"[子进程 stdout 共 {len(stdout_str)} 字符] {stdout_str[:500]}")
+            if stderr_str:
+                logger.warning(f"[子进程 stderr 共 {len(stderr_str)} 字符] {stderr_str[:2000]}")
+
+            if rc != 0:
+                if "OutOfMemoryError" in stderr_str or "CUDA out of memory" in stderr_str:
+                    raise torch.cuda.OutOfMemoryError(stderr_str)
+                raise RuntimeError(
+                    f"图片编辑子进程失败(returncode={rc}):\n--- stdout ---\n{stdout_str[:3000]}\n--- stderr ---\n{stderr_str[:3000]}"
+                )
+
+            lines = [l.strip() for l in stdout_str.strip().splitlines() if l.strip()]
+            for line in reversed(lines):
+                if line.startswith("{"):
+                    return json.loads(line)
+
+            raise RuntimeError(
+                f"图片编辑未返回有效 JSON 输出(returncode={rc}):\n--- stdout ---\n{stdout_str[:3000]}\n--- stderr ---\n{stderr_str[:3000]}"
             )
+
         finally:
             try:
                 os.unlink(script_path)
             except OSError:
                 pass
-
-        if result.returncode != 0:
-            stderr = result.stderr
-            if "OutOfMemoryError" in stderr or "CUDA out of memory" in stderr:
-                raise torch.cuda.OutOfMemoryError(stderr)
-            raise RuntimeError(f"图片编辑子进程失败: {stderr[:1000]}")
-
-        output = json.loads(result.stdout.strip())
-        return output
 
     def _load_image(self, image_input: str | bytes) -> Any:
         """加载图片为 PIL.Image"""
@@ -301,22 +527,53 @@ print(json.dumps({{
         height: int | None = None,
         steps: int | None = None,
         seed: int | None = None,
+        image_input_2: str | bytes | None = None,
     ) -> dict[str, Any]:
-        """异步编辑图片，自动选择最空闲的 GPU，OOM 时自动换 GPU 重试"""
-        image = self._load_image(image_input)
+        """异步编辑图片，自动选择最空闲的 GPU，OOM 时自动换 GPU 重试
+
+        Args:
+            image_input: 第一张图片（base64 / data URL / 文件路径 / URL）
+            image_input_2: 第二张图片（双图联动编辑模式，为 None 时使用单图模式）
+            prompt: 编辑提示词
+            width: 输出宽度
+            height: 输出高度
+            steps: 采样步数
+            seed: 随机种子（-1 表示随机）
+
+        Returns:
+            dict: {"image_base64": ..., "width": ..., "height": ..., "is_dual": bool, ...}
+        """
+        image1 = self._load_image(image_input)
+        image2 = self._load_image(image_input_2) if image_input_2 else None
         actual_steps = steps or self._default_steps
 
         devices = self._get_devices_by_free_memory()
         last_error: Exception | None = None
 
         # 将图片写入临时文件，subprocess 通过路径读取
-        img_fd, img_path = tempfile.mkstemp(suffix=".png", prefix="edit_input_")
-        os.close(img_fd)
+        img1_fd, img1_path = tempfile.mkstemp(suffix=".png", prefix="edit_input1_")
+        img2_fd: int | None = None
+        img2_path: str | None = None
+
+        os.close(img1_fd)
+        logger.info(f"[1/6] 图片加载完成 | 第一张: {image1.size}px | 双图模式: {image2 is not None}")
         try:
-            image.save(img_path, format="PNG")
+            image1.save(img1_path, format="PNG")
+            logger.info(f"[2/6] 图片写入临时文件 | 路径: {img1_path} | 大小: {os.path.getsize(img1_path):,} bytes")
+
+            if image2 is not None:
+                img2_fd, img2_path = tempfile.mkstemp(suffix=".png", prefix="edit_input2_")
+                os.close(img2_fd)
+                image2.save(img2_path, format="PNG")
+                logger.info(f"[2/6] 图片写入临时文件 | 路径2: {img2_path} | 大小: {os.path.getsize(img2_path):,} bytes")
+            else:
+                logger.info(f"[2/6] 单图模式，跳过第二张图片")
         except Exception as error:
-            if os.path.exists(img_path):
-                os.unlink(img_path)
+            if os.path.exists(img1_path):
+                os.unlink(img1_path)
+            if img2_path and os.path.exists(img2_path):
+                os.unlink(img2_path)
+            logger.error(f"图片加载失败: {error}")
             raise
 
         try:
@@ -336,29 +593,28 @@ print(json.dumps({{
                             continue
 
                     logger.info(
-                        f"编辑图片 | {device_name} | 提示词: {prompt[:30]}... | 步数: {actual_steps} | seed: {seed}"
+                        f"[3/6] 启动推理 | {device_name} | 双图模式: {image2 is not None} "
+                        f"| 提示词: {prompt[:30]}... | 步数: {actual_steps} | seed: {seed}"
                     )
 
                     for attempt in range(2):
                         try:
-                            loop = asyncio.get_event_loop()
-                            result = await loop.run_in_executor(
-                                None,
-                                self._run_edit_subprocess,
+                            result = await self._run_edit_subprocess(
                                 device,
-                                img_path,
+                                img1_path,
                                 prompt,
                                 width,
                                 height,
                                 actual_steps,
                                 seed,
+                                img2_path,
                             )
                             stats = result.get("stats", {})
                             if stats.get("max", 255) == 0:
                                 logger.warning(f"{device_name} 输出全黑，跳过")
                                 last_error = RuntimeError("输出全黑")
                                 break
-                            logger.info(f"{device_name} 编辑成功")
+                            logger.info(f"{device_name} 编辑成功 | 双图模式: {result.get('is_dual', False)}")
                             return result
                         except torch.cuda.OutOfMemoryError:
                             logger.warning(f"{device_name} OOM（尝试 {attempt + 1}/2），换 GPU")
@@ -369,8 +625,10 @@ print(json.dumps({{
                             last_error = error
                             break
         finally:
-            if os.path.exists(img_path):
-                os.unlink(img_path)
+            if os.path.exists(img1_path):
+                os.unlink(img1_path)
+            if img2_path and os.path.exists(img2_path):
+                os.unlink(img2_path)
 
         raise ExternalServiceError(
             message="所有 GPU 均不可用或显存不足，图片编辑失败",

@@ -469,6 +469,9 @@ def register_routers(app: FastAPI) -> None:
     @app.on_event("startup")
     async def startup_event() -> None:
         init_telemetry()
+        # 初始化数据库(单例)，触发建表
+        from infrastructure.database import get_database
+        _ = get_database()
         logger.info("TRAI API 服务启动")
 
     @app.on_event("shutdown")

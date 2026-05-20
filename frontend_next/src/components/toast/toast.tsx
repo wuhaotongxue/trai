@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
 import type { ToastVariant } from "./use_toast";
 
-interface ToastItem {
+export interface ToastItem {
   id: string;
   message: string;
   title?: string;

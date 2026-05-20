@@ -79,6 +79,20 @@ class Database:
 
     def __init__(self) -> None:
         self._config = DatabaseConfig()
+        # 先导入所有模型，确保 Base.metadata 注册了所有表
+        from infrastructure.database.models import (
+            ChatSessionModel,
+            ImageRecordModel,
+            UserModel,
+            DepartmentModel,
+            UserDepartmentMappingModel,
+        )  # noqa: F401,F403
+        from infrastructure.database.i18n_model import (
+            I18nStringModel,
+            SystemSettingModel,
+        )  # noqa: F401,F403
+        del ChatSessionModel, ImageRecordModel, UserModel, DepartmentModel, UserDepartmentMappingModel  # 仅触发导入副作用
+        del I18nStringModel, SystemSettingModel
         self._engine = self._config.create_engine(
             pool_size=10,
             max_overflow=20,
@@ -92,6 +106,7 @@ class Database:
 
         self._session_factory = self._config.create_session_factory(self._engine)
         self._ensure_postgres_user_schema()
+        self.create_tables()
         self._ensure_default_admin()
 
     @property

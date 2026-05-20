@@ -25,7 +25,10 @@ class ImageRecordType(StrEnum):
     """图生图"""
 
     IMAGE_EDIT = "image_edit"
-    """图片编辑"""
+    """单图编辑"""
+
+    IMAGE_EDIT_DUAL = "image_edit_dual"
+    """双图联动编辑"""
 
 
 class ImageRecordStatus(StrEnum):
@@ -65,7 +68,16 @@ class ImageRecord:
     tenant_id: str = ""
 
     source_image_url: str = ""
-    """源图片 URL（图生图/图片编辑）"""
+    """源图片 URL（图生图/单图编辑）"""
+
+    source_image_url_2: str = ""
+    """第二张源图片 URL（双图联动编辑）"""
+
+    source_image_object_key: str = ""
+    """源图片 S3 对象键（便于追溯上传路径）"""
+
+    source_image_object_key_2: str = ""
+    """第二张源图片 S3 对象键（双图联动编辑）"""
 
     result_url: str = ""
     """结果图片 S3 URL"""
@@ -132,6 +144,9 @@ class ImageRecord:
             "tenant_id": self.tenant_id,
             "prompt": self.prompt,
             "source_image_url": self.source_image_url,
+            "source_image_url_2": self.source_image_url_2,
+            "source_image_object_key": self.source_image_object_key,
+            "source_image_object_key_2": self.source_image_object_key_2,
             "result_url": self.result_url,
             "model": self.model,
             "status": self.status.value,
