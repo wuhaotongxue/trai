@@ -61,6 +61,7 @@ export function ChatPanel() {
     clearGeneratedImage,
     editImage,
     clearEditedImage,
+    cancelEditImage,
     isEditingImage,
     editedImageUrl,
     imageEditError,
@@ -575,13 +576,14 @@ export function ChatPanel() {
                               size="icon"
                               variant="destructive"
                               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7"
+                              disabled={isEditingImage}
                               onClick={() => setEditingImagePreview(null)}
                             >
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
                         ) : (
-                          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-violet-200 dark:border-violet-700 rounded-xl cursor-pointer hover:border-violet-400 dark:hover:border-violet-500 transition-colors bg-violet-50/30 dark:bg-violet-500/5">
+                          <label className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl transition-colors bg-violet-50/30 dark:bg-violet-500/5 ${isEditingImage ? "border-slate-200 dark:border-slate-700 cursor-not-allowed opacity-50" : "border-violet-200 dark:border-violet-700 cursor-pointer hover:border-violet-400 dark:hover:border-violet-500"}`}>
                             <Upload className="h-6 w-6 text-violet-400 mb-1" />
                             <span className="text-xs text-muted-foreground">点击上传 / 拖拽图片</span>
                             <span className="text-[10px] text-muted-foreground">JPG、PNG、WebP</span>
@@ -611,7 +613,8 @@ export function ChatPanel() {
                           value={editPrompt}
                           onChange={(e) => setEditPrompt(e.target.value)}
                           placeholder="例如：将背景替换为城市夜景，给人物换一套衣服"
-                          className="w-full h-16 px-3 py-2 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                          disabled={isEditingImage}
+                          className="w-full h-16 px-3 py-2 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -628,7 +631,8 @@ export function ChatPanel() {
                             <button
                               key={tip}
                               onClick={() => setEditPrompt(tip)}
-                              className="text-left px-3 py-1.5 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-xs text-foreground transition-colors"
+                              disabled={isEditingImage}
+                              className="text-left px-3 py-1.5 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-xs text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {tip}
                             </button>
@@ -642,6 +646,29 @@ export function ChatPanel() {
                           <X className="h-3 w-3 shrink-0" />
                           {imageEditError}
                         </div>
+                      )}
+
+                      {/* 开始编辑按钮 */}
+                      {!isEditingImage && (
+                        <Button
+                          onClick={() => editImage(editingImagePreview!, editPrompt)}
+                          disabled={!editPrompt.trim() || !editingImagePreview}
+                          className="w-full"
+                        >
+                          开始编辑
+                        </Button>
+                      )}
+
+                      {/* 取消编辑按钮 */}
+                      {isEditingImage && (
+                        <Button
+                          variant="outline"
+                          onClick={cancelEditImage}
+                          className="w-full text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-500/10"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          取消编辑
+                        </Button>
                       )}
                     </div>
 
@@ -1197,7 +1224,7 @@ export function ChatPanel() {
                       handleSend();
                     } else if (activeTab === "image" && imagePrompt.trim()) {
                       generateImage(imagePrompt);
-                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview) {
+                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview && !isEditingImage) {
                       editImage(editingImagePreview, editPrompt);
                     } else if (activeTab === "video" && videoPrompt.trim()) {
                       generateVideo(videoPrompt);
@@ -1211,7 +1238,8 @@ export function ChatPanel() {
                              activeTab === "image_edit" ? "描述你想要的修改..." :
                              activeTab === "video" ? "描述你想要的视频..." :
                              "描述你想要的音乐..."}
-                className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
+                disabled={isEditingImage}
+                className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 rows={1}
               />
 
@@ -1232,7 +1260,7 @@ export function ChatPanel() {
                       handleSend();
                     } else if (activeTab === "image" && imagePrompt.trim()) {
                       generateImage(imagePrompt);
-                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview) {
+                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview && !isEditingImage) {
                       editImage(editingImagePreview, editPrompt);
                     } else if (activeTab === "video" && videoPrompt.trim()) {
                       generateVideo(videoPrompt);

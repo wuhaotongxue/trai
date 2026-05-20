@@ -41,6 +41,8 @@ interface ApiOptions {
   headers?: Record<string, string>;
   /** 是否为重试请求 */
   _retry?: boolean;
+  /** AbortSignal，可用于取消请求 */
+  signal?: AbortSignal;
 }
 
 let isRefreshing = false;
@@ -495,8 +497,8 @@ export const agentApi = {
     request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
 
   /** 图生图 / 图片编辑 */
-  editImage: (data: { image_url: string; prompt: string; mask?: string; width?: number; height?: number; steps?: number; seed?: number }) =>
-    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image/edit", { method: "POST", body: JSON.stringify(data) }),
+  editImage: (data: { image_url: string; prompt: string; mask?: string; width?: number; height?: number; steps?: number; seed?: number; signal?: AbortSignal }) =>
+    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image/edit", { method: "POST", body: JSON.stringify(data), signal: data.signal }),
 
   /** 文生视频 */
   generateVideo: (data: { prompt: string; model?: string; duration?: number; resolution?: string }) =>

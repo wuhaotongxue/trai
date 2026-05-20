@@ -161,6 +161,8 @@ interface AgentState {
   imageEditError: string | null;
   /** 当前编辑的原图 base64 */
   editingSourceImage: string | null;
+  /** 图片编辑 AbortController */
+  editAbortController: AbortController | null;
 
   /** 开始会话 */
   startSession: () => Promise<void>;
@@ -190,6 +192,8 @@ interface AgentState {
   editImage: (sourceImage: string, editPrompt: string) => Promise<void>;
   /** 清除编辑结果 */
   clearEditedImage: () => void;
+  /** 取消图片编辑 */
+  cancelEditImage: () => void;
   /** 添加图片到图片廊 */
   addToImageGallery: (url: string, prompt: string) => void;
   /** 从图片廊删除图片 */
@@ -266,6 +270,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   editedImageUrl: null,
   imageEditError: null,
   editingSourceImage: null,
+  editAbortController: null,
 
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
   hydrateGalleries: () => {
@@ -648,7 +653,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   editImage: async (sourceImage: string, editPrompt: string) => {
-    set({ isEditingImage: true, imageEditError: null, editedImageUrl: null, editingSourceImage: sourceImage });
+    const abortCtrl = new AbortController();
+    set({ isEditingImage: true, imageEditError: null, editedImageUrl: null, editingSourceImage: sourceImage, editAbortController: abortCtrl });
     try {
       // 压缩图片：base64 图片压缩到 5M 以内（避免超过后端 10M 限制）
       let imageToSend = sourceImage;
@@ -669,9 +675,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         }
       }
 
-      const res = await api.agent.editImage({ image_url: imageToSend, prompt: editPrompt, steps: 25, seed: -1 });
+      const res = await api.agent.editImage({ image_url: imageToSend, prompt: editPrompt, steps: 25, seed: -1, signal: abortCtrl.signal });
+      set({ isEditingImage: false, editAbortController: null });
       if (res.image_url) {
-        set({ editedImageUrl: res.image_url, isEditingImage: false });
+        set({ editedImageUrl: res.image_url });
         get().addToImageGallery(res.image_url, editPrompt);
       } else if (res.image_base64) {
         const byteString = atob(res.image_base64);
@@ -680,13 +687,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           bytes[i] = byteString.charCodeAt(i);
         }
         const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
-        set({ editedImageUrl: blobUrl, isEditingImage: false });
+        set({ editedImageUrl: blobUrl });
       } else {
-        set({ imageEditError: res.error || "图片编辑失败", isEditingImage: false });
+        set({ imageEditError: res.error || "图片编辑失败" });
       }
     } catch (e: unknown) {
+      if (e instanceof Error && e.name === "AbortError") {
+        set({ isEditingImage: false, editAbortController: null });
+        return;
+      }
       const msg = e instanceof Error ? e.message : "图片编辑失败";
-      set({ imageEditError: msg, isEditingImage: false });
+      set({ imageEditError: msg, isEditingImage: false, editAbortController: null });
     }
   },
 
@@ -699,6 +710,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       }
     }
     set({ editedImageUrl: null, imageEditError: null, editingSourceImage: null });
+  },
+
+  cancelEditImage: () => {
+    const { editAbortController } = get();
+    if (editAbortController) {
+      editAbortController.abort();
+    }
+    set({ isEditingImage: false, imageEditError: null, editAbortController: null });
   },
 
   addToImageGallery: (url: string, prompt: string) => {
