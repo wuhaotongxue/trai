@@ -8,6 +8,8 @@ import Cookies from "js-cookie";
 
 import { create } from "zustand";
 import { api, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
+import { globalToast } from "@/components/toast/toast";
+import { toastMessages } from "@/components/toast/use_toast";
 
 /**
  * 消息接口
@@ -149,6 +151,14 @@ interface AgentState {
     prompt: string;
     timestamp: number;
   }>;
+  /** 是否正在编辑图片 */
+  isEditingImage: boolean;
+  /** 编辑后的图片 URL */
+  editedImageUrl: string | null;
+  /** 图片编辑错误信息 */
+  imageEditError: string | null;
+  /** 当前编辑的原图 base64 */
+  editingSourceImage: string | null;
 
   /** 开始会话 */
   startSession: () => Promise<void>;
@@ -174,6 +184,10 @@ interface AgentState {
   generateImage: (prompt: string, model?: string, width?: number, height?: number) => Promise<void>;
   /** 清除生成的图片 */
   clearGeneratedImage: () => void;
+  /** 编辑图片 */
+  editImage: (sourceImage: string, editPrompt: string) => Promise<void>;
+  /** 清除编辑结果 */
+  clearEditedImage: () => void;
   /** 添加图片到图片廊 */
   addToImageGallery: (url: string, prompt: string) => void;
   /** 从图片廊删除图片 */
@@ -246,6 +260,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateError: null,
   musicGallery: [],
 
+  isEditingImage: false,
+  editedImageUrl: null,
+  imageEditError: null,
+  editingSourceImage: null,
+
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
   hydrateGalleries: () => {
     try {
@@ -267,12 +286,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   startSession: async () => {
+    const existingEmpty = get().sessions.find((s) => s.message_count === 0);
+    if (existingEmpty) {
+      await get().switchSession(existingEmpty.session_id);
+      return;
+    }
     set({ isLoading: true, error: null });
     try {
       const res = await api.session.create({ model: "deepseek-v4-flash" });
+      if (!res.session_id) throw new Error("创建会话返回异常");
       set({ sessionId: res.session_id, messages: [], isLoading: false });
       await get().loadSessions();
-    } catch {
+    } catch (e) {
+      console.error("会话创建失败:", e);
       set({ error: "会话创建失败, 请检查网络后重试", isLoading: false });
     }
   },
@@ -472,12 +498,24 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (!targetId) return;
     try {
       await api.session.delete(targetId);
+      // 延迟 1 秒后提示，让用户看到删除效果
+      setTimeout(() => {
+        globalToast({ message: toastMessages.deleted, variant: "success" });
+      }, 1000);
       if (targetId === get().sessionId) {
         set({ sessionId: null, messages: [] });
       }
+      // 从会话列表中移除已删除的会话，避免 404
+      set((state) => ({
+        sessions: state.sessions.filter((s) => s.session_id !== targetId),
+      }));
       await get().loadSessions();
-    } catch {
-      // ignore
+    } catch (e) {
+      // 删除失败时也移除本地会话（乐观更新），避免 UI 与后端不一致
+      set((state) => ({
+        sessions: state.sessions.filter((s) => s.session_id !== targetId),
+      }));
+      console.warn("删除会话失败:", e);
     }
   },
 
@@ -488,13 +526,27 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   loadSessions: async () => {
     try {
       const res = await api.session.list();
-      set({ sessions: res.sessions });
+      // 合并更新：API 返回的标题优先，避免竞态导致旧数据覆盖新标题
+      set((state) => {
+        const freshIds = new Set(res.sessions.map((s: { session_id: string }) => s.session_id));
+        const merged = res.sessions.map((fresh: { session_id: string; title: string | null; [key: string]: unknown }) => {
+          const local = state.sessions.find((s) => s.session_id === fresh.session_id);
+          // API 返回的标题为准；null 说明后端尚未更新（旧缓存），保留本地已知标题
+          return { ...local, ...fresh, title: fresh.title ?? local?.title };
+        });
+        // 保留 API 未返回的会话（正常情况下不应出现）
+        const others = state.sessions.filter((s) => !freshIds.has(s.session_id));
+        return { sessions: [...merged, ...others] };
+      });
     } catch {
       // ignore
     }
   },
 
   switchSession: async (sessionId: string) => {
+    // 如果已经是当前会话，不重复切换
+    if (sessionId === get().sessionId) return;
+
     set({ isLoading: true, error: null });
     try {
       const res = await api.session.get(sessionId);
@@ -503,8 +555,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         messages: res.messages,
         isLoading: false,
       });
-    } catch {
-      set({ error: "切换会话失败", isLoading: false });
+    } catch (e) {
+      // 会话不存在（404）时，静默从列表移除，避免反复报错
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      const is404 = errorMsg.includes("不存在") || errorMsg.includes("404") || errorMsg.includes("会话");
+
+      set({ isLoading: false });
+      set((state) => ({
+        sessions: state.sessions.filter((s) => s.session_id !== sessionId),
+        sessionId: state.sessionId === sessionId ? null : state.sessionId,
+      }));
+
+      if (!is404) {
+        console.warn("切换会话失败:", sessionId, e);
+      }
     }
   },
 
@@ -551,6 +615,59 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       }
     }
     set({ generatedImageUrl: null, imageGenerateError: null });
+  },
+
+  editImage: async (sourceImage: string, editPrompt: string) => {
+    set({ isEditingImage: true, imageEditError: null, editedImageUrl: null, editingSourceImage: sourceImage });
+    try {
+      // 压缩图片：base64 图片压缩到 5M 以内（避免超过后端 10M 限制）
+      let imageToSend = sourceImage;
+      if (sourceImage.startsWith("data:image/")) {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const base64 = sourceImage.split(",", 2)[1] || sourceImage;
+        if (base64.length > maxSize) {
+          const img = new Image();
+          img.src = sourceImage;
+          await new Promise((resolve) => { img.onload = resolve; });
+          const canvas = document.createElement("canvas");
+          const scale = Math.sqrt(maxSize / base64.length);
+          canvas.width = Math.floor(img.width * scale * 0.8);
+          canvas.height = Math.floor(img.height * scale * 0.8);
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          imageToSend = canvas.toDataURL("image/jpeg", 0.85);
+        }
+      }
+
+      const res = await api.agent.editImage({ image_url: imageToSend, prompt: editPrompt, steps: 25, seed: -1 });
+      if (res.image_url) {
+        set({ editedImageUrl: res.image_url, isEditingImage: false });
+      } else if (res.image_base64) {
+        const byteString = atob(res.image_base64);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+          bytes[i] = byteString.charCodeAt(i);
+        }
+        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+        set({ editedImageUrl: blobUrl, isEditingImage: false });
+      } else {
+        set({ imageEditError: res.error || "图片编辑失败", isEditingImage: false });
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "图片编辑失败";
+      set({ imageEditError: msg, isEditingImage: false });
+    }
+  },
+
+  clearEditedImage: () => {
+    const current = get().editedImageUrl;
+    if (current && current.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(current);
+      } catch {
+      }
+    }
+    set({ editedImageUrl: null, imageEditError: null, editingSourceImage: null });
   },
 
   addToImageGallery: (url: string, prompt: string) => {

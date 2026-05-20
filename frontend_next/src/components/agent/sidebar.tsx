@@ -58,8 +58,10 @@ export function Sidebar() {
     await startSession();
   };
 
-  // 按日期分组
-  const groupedSessions = sessions.reduce((acc, session) => {
+  // 按日期分组（过滤掉空会话）
+  const groupedSessions = sessions
+    .filter((s) => s.message_count > 0)
+    .reduce((acc, session) => {
     const date = new Date(session.updated_at || session.created_at || Date.now());
     const now = new Date();
     let group = "更早以前";

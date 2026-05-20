@@ -526,7 +526,7 @@ async def get_sessions_grouped_by_user(
 
     user_stats: dict[str, dict[str, Any]] = {}
     for s in sessions:
-        uid = s.t_user_id or "guest"
+        uid = s.user_id or "guest"
         if uid not in user_stats:
             user_stats[uid] = {
                 "user_id": uid,
@@ -540,11 +540,11 @@ async def get_sessions_grouped_by_user(
                 "status": "inactive",
             }
         user_stats[uid]["sessions_count"] += 1
-        if s.t_updated_at:
+        if s.updated_at:
             last = user_stats[uid]["last_active"]
-            if not last or s.t_updated_at.isoformat() > last:
-                user_stats[uid]["last_active"] = s.t_updated_at.isoformat()
-            if s.t_updated_at >= datetime.now() - timedelta(days=30):
+            if not last or s.updated_at.isoformat() > last:
+                user_stats[uid]["last_active"] = s.updated_at.isoformat()
+            if s.updated_at >= datetime.now() - timedelta(days=30):
                 user_stats[uid]["status"] = "active"
 
     items = [

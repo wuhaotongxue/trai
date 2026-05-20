@@ -1,19 +1,27 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # 文件名: feishu_ai_notify.py
 # 作者: wuhao
-# 日期: 2026_04_23
-# 描述: 飞书 AI 事件通知服务 (文生图 + AI 对话)
-# 支持格式化卡片消息, 包含图片预览、对话摘要等富文本内容
+# 日期: 2026_05_20_0815
+# 描述: 飞书 AI 事件通知服务（文生图 + 图生图 + AI 对话）
+# 支持格式化卡片消息，包含图片预览、对话摘要等富文本内容
+# 图片通过 S3 Presigned URL 下载后上传至飞书，获得 image_key 后嵌入卡片
+
 
 from __future__ import annotations
 
+import base64
+import io
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
+
+if TYPE_CHECKING:
+    pass
 
 
 class AINotifyEvent(Enum):
@@ -21,6 +29,9 @@ class AINotifyEvent(Enum):
 
     IMAGE_GENERATED = "image_generated"
     """文生图完成"""
+
+    IMAGE_EDITED = "image_edited"
+    """图生图（图片编辑）完成"""
 
     IMAGE_FAILED = "image_failed"
     """文生图失败"""
@@ -41,6 +52,23 @@ class ImageGeneratedEvent:
     task_id: str
     width: int = 1024
     height: int = 1024
+
+
+@dataclass
+class ImageEditedEvent:
+    """图生图（图片编辑）事件数据"""
+
+    user_id: str
+    user_name: str
+    prompt: str
+    source_image_url: str = ""
+    result_image_url: str = ""
+    model: str = "Qwen/Qwen-Image-Edit-2511"
+    task_id: str = ""
+    width: int = 1024
+    height: int = 1024
+    steps: int = 25
+    seed: int = -1
 
 
 @dataclass
@@ -70,8 +98,8 @@ class ImageFailedEvent:
 class FeishuAINotifyService:
     """飞书 AI 事件通知服务
 
-    将 AI 事件（文生图、AI 对话）通过飞书卡片消息推送到指定 Webhook
-    需配合 notify/notify.py 中的 FeishuWebhookUrlProvider 使用
+    将 AI 事件（文生图、图生图、AI 对话）通过飞书卡片消息推送到指定 Webhook
+    图片内容通过 S3 Presigned URL 下载后，上传至飞书获得 image_key，再嵌入卡片
     """
 
     def __init__(
@@ -79,7 +107,9 @@ class FeishuAINotifyService:
         webhook_url: str | None = None,
         timeout: int = 30,
     ) -> None:
-        self._webhook_url = webhook_url or os.getenv("FEISHU_AI_WEBHOOK_URL", "") or os.getenv("FEISHU_WEBHOOK_URL", "")
+        self._webhook_url = webhook_url or os.getenv("NOTIFY_FEISHU_IMAGE_WEBHOOK", "") or os.getenv(
+            "FEISHU_AI_WEBHOOK_URL", ""
+        )
         self._timeout = timeout
 
     def _get_client(self) -> httpx.Client:
@@ -88,13 +118,96 @@ class FeishuAINotifyService:
     def _send_card(self, card: dict[str, Any]) -> dict[str, Any]:
         """发送飞书卡片消息"""
         if not self._webhook_url:
-            return {"success": False, "code": -1, "msg": "FEISHU_AI_WEBHOOK_URL not configured"}
+            return {"success": False, "code": -1, "msg": "NOTIFY_FEISHU_IMAGE_WEBHOOK not configured"}
         try:
             client = self._get_client()
             response = client.post(self._webhook_url, json=card)
             return response.json()
         except Exception as e:
             return {"success": False, "code": -2, "msg": str(e)}
+
+    def _download_image(self, image_url: str) -> bytes:
+        """从 S3 Presigned URL 下载图片数据
+
+        Args:
+            image_url: S3 Presigned URL 或 data URL
+
+        Returns:
+            bytes: 图片二进制数据
+        """
+        if not image_url:
+            return b""
+
+        if image_url.startswith("data:"):
+            b64_part = image_url.split(",", 1)[1] if "," in image_url else image_url.split(";base64,", 1)[-1]
+            return base64.b64decode(b64_part)
+
+        if len(image_url) > 200 and not image_url.startswith("http"):
+            try:
+                return base64.b64decode(image_url)
+            except Exception:
+                pass
+
+        try:
+            response = httpx.get(image_url, timeout=30)
+            response.raise_for_status()
+            return response.content
+        except Exception:
+            return b""
+
+    def _upload_image_to_feishu(self, image_data: bytes, image_type: str = "message") -> str:
+        """上传图片到飞书并获取 image_key
+
+        飞书 img 标签必须使用 image_key，不能直接用 URL。
+        流程：下载 S3 图片 → base64 编码 → POST 到飞书上传接口 → 提取 image_key
+
+        Args:
+            image_data: 图片二进制数据
+            image_type: 图片类型，message|avatar
+
+        Returns:
+            str: 飞书 image_key，失败时返回空字符串
+        """
+        feishu_token_url = os.getenv("FEISHU_UPLOAD_TOKEN_URL", "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal")
+        feishu_upload_url = os.getenv("FEISHU_UPLOAD_URL", "https://open.feishu.cn/open-apis/im/v1/images")
+
+        app_id = os.getenv("FEISHU_APP_ID", "")
+        app_secret = os.getenv("FEISHU_APP_SECRET", "")
+
+        if not app_id or not app_secret:
+            return ""
+
+        try:
+            client = self._get_client()
+
+            token_resp = client.post(
+                feishu_token_url,
+                json={"app_id": app_id, "app_secret": app_secret},
+            )
+            token_resp.raise_for_status()
+            token_data = token_resp.json()
+            access_token = token_data.get("tenant_access_token", "")
+            if not access_token:
+                return ""
+        except Exception:
+            return ""
+
+        try:
+            b64_data = base64.b64encode(image_data).decode("utf-8")
+            upload_resp = client.post(
+                feishu_upload_url,
+                headers={"Authorization": f"Bearer {access_token}"},
+                data={"image_type": image_type},
+                files={"image": ("image.png", io.BytesIO(image_data), "image/png")},
+            )
+            upload_resp.raise_for_status()
+            upload_result = upload_resp.json()
+            if upload_result.get("code") == 0:
+                return upload_result.get("data", {}).get("image_key", "")
+        except Exception:
+            pass
+
+        return ""
 
     def notify_image_generated(self, event: ImageGeneratedEvent) -> dict[str, Any]:
         """通知文生图完成事件
@@ -107,6 +220,12 @@ class FeishuAINotifyService:
         """
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         prompt_preview = event.prompt[:200] + ("..." if len(event.prompt) > 200 else "")
+
+        image_key = ""
+        if event.image_url and event.image_url.startswith("http"):
+            image_bytes = self._download_image(event.image_url)
+            if image_bytes:
+                image_key = self._upload_image_to_feishu(image_bytes)
 
         card = {
             "msg_type": "interactive",
@@ -152,26 +271,34 @@ class FeishuAINotifyService:
                             "content": "**Prompt**\n" + prompt_preview,
                         },
                     },
-                    {
-                        "tag": "img",
-                        "img_key": self._upload_image(event.image_url) if event.image_url.startswith("http") else "",
-                        "alt": {"tag": "plain_text", "content": "generated image"},
-                        "width": 300,
-                    },
-                    {"tag": "hr"},
-                    {
-                        "tag": "note",
-                        "elements": [
-                            {"tag": "plain_text", "content": f"TRAI AI \u901a\u77e5 \u00b7 {now_str}"},
-                        ],
-                    },
                 ],
             },
         }
 
-        if event.image_url and event.image_url.startswith("http"):
+        if image_key:
             card["card"]["elements"].insert(
-                len(card["card"]["elements"]) - 2,
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "img",
+                    "img_key": image_key,
+                    "alt": {"tag": "plain_text", "content": "AI \u751f\u6210\u56fe\u7247"},
+                    "width": 300,
+                },
+            )
+        elif event.image_url:
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": "**\u56fe\u7247\u94fe\u63a5**\n[" + event.image_url[:80] + "...\u94fe\u63a5](" + event.image_url + ")",
+                    },
+                },
+            )
+
+        if event.image_url and event.image_url.startswith("http"):
+            card["card"]["elements"].append(
                 {
                     "tag": "action",
                     "actions": [
@@ -184,6 +311,199 @@ class FeishuAINotifyService:
                     ],
                 },
             )
+
+        card["card"]["elements"].append(
+            {
+                "tag": "note",
+                "elements": [
+                    {"tag": "plain_text", "content": f"TRAI AI \u901a\u77e5 \u00b7 {now_str}"},
+                ],
+            },
+        )
+
+        return self._send_card(card)
+
+    def notify_image_edited(self, event: ImageEditedEvent) -> dict[str, Any]:
+        """通知图生图（图片编辑）完成事件
+
+        Args:
+            event: 图片编辑事件数据
+
+        Returns:
+            dict: 飞书 API 响应
+        """
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        prompt_preview = event.prompt[:200] + ("..." if len(event.prompt) > 200 else "")
+
+        result_image_key = ""
+        if event.result_image_url and event.result_image_url.startswith("http"):
+            result_bytes = self._download_image(event.result_image_url)
+            if result_bytes:
+                result_image_key = self._upload_image_to_feishu(result_bytes)
+
+        source_image_key = ""
+        if event.source_image_url and event.source_image_url.startswith("http"):
+            source_bytes = self._download_image(event.source_image_url)
+            if source_bytes:
+                source_image_key = self._upload_image_to_feishu(source_bytes)
+
+        card = {
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": "\u2705 AI \u56fe\u7247\u7f16\u8f91\u5b8c\u6210"},
+                    "template": "blue",
+                },
+                "elements": [
+                    {
+                        "tag": "div",
+                        "fields": [
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u7528\u6237**\n" + event.user_name},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": "**\u6a21\u578b**\n" + event.model},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u5c3a\u5bf8**\n" + f"{event.width}x{event.height}",
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u6b65\u6570**\n" + str(event.steps),
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**Seed**\n" + (str(event.seed) if event.seed >= 0 else "\u968f\u673a"),
+                                },
+                            },
+                            {
+                                "is_short": True,
+                                "text": {
+                                    "tag": "lark_md",
+                                    "content": "**\u4efb\u52a1ID**\n" + event.task_id[:16] + "..."
+                                    if event.task_id
+                                    else "**\u4efb\u52a1ID**\n—",
+                                },
+                            },
+                        ],
+                    },
+                    {"tag": "hr"},
+                    {
+                        "tag": "div",
+                        "text": {
+                            "tag": "lark_md",
+                            "content": "**Edit Prompt**\n" + prompt_preview,
+                        },
+                    },
+                ],
+            },
+        }
+
+        if source_image_key:
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "fields": [
+                        {
+                            "is_short": True,
+                            "text": {
+                                "tag": "lark_md",
+                                "content": "**\u539f\u56fe**",
+                            },
+                        },
+                        {
+                            "is_short": True,
+                            "text": {
+                                "tag": "lark_md",
+                                "content": "**\u7ed3\u679c\u56fe**",
+                            },
+                        },
+                    ],
+                },
+            )
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "fields": [
+                        {
+                            "is_short": True,
+                            "text": {
+                                "tag": "lark_md",
+                                "content": "",
+                            },
+                            "img": {"img_key": source_image_key, "width": 150},
+                        },
+                        {
+                            "is_short": True,
+                            "text": {
+                                "tag": "lark_md",
+                                "content": "",
+                            },
+                            "img": {"img_key": result_image_key, "width": 150} if result_image_key else None,
+                        },
+                    ],
+                },
+            )
+        elif result_image_key:
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "img",
+                    "img_key": result_image_key,
+                    "alt": {"tag": "plain_text", "content": "AI \u7f16\u8f91\u7ed3\u679c"},
+                    "width": 300,
+                },
+            )
+        elif event.result_image_url:
+            card["card"]["elements"].insert(
+                len(card["card"]["elements"]) - 1,
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content": "**\u56fe\u7247\u94fe\u63a5**\n[" + event.result_image_url[:80] + "...\u94fe\u63a5]("
+                        + event.result_image_url + ")",
+                    },
+                },
+            )
+
+        if event.result_image_url and event.result_image_url.startswith("http"):
+            card["card"]["elements"].append(
+                {
+                    "tag": "action",
+                    "actions": [
+                        {
+                            "tag": "button",
+                            "text": {"tag": "plain_text", "content": "\u6253\u5f00\u56fe\u7247"},
+                            "type": "primary",
+                            "url": event.result_image_url,
+                        }
+                    ],
+                },
+            )
+
+        card["card"]["elements"].append(
+            {
+                "tag": "note",
+                "elements": [
+                    {"tag": "plain_text", "content": f"TRAI AI \u901a\u77e5 \u00b7 {now_str}"},
+                ],
+            },
+        )
 
         return self._send_card(card)
 
@@ -318,20 +638,6 @@ class FeishuAINotifyService:
         }
         return self._send_card(card)
 
-    def _upload_image(self, image_url: str) -> str:
-        """上传图片到飞书获取 image_key
-
-        由于飞书卡片中的 img 标签需要先上传图片获取 image_key
-        此处返回空字符串, 由调用方在外部上传图片后替换
-
-        Args:
-            image_url: 图片 URL
-
-        Returns:
-            str: 飞书图片 key, 失败时返回空字符串
-        """
-        return ""
-
     def send_custom_card(
         self,
         title: str,
@@ -388,6 +694,7 @@ def get_feishu_ai_notify_service() -> FeishuAINotifyService:
 __all__ = [
     "AINotifyEvent",
     "ImageGeneratedEvent",
+    "ImageEditedEvent",
     "ImageFailedEvent",
     "ChatCompletedEvent",
     "FeishuAINotifyService",

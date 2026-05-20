@@ -207,5 +207,75 @@ class ModelScopeClient:
                 details={"error": str(e)},
             )
 
+    async def image_edit(
+        self,
+        image_input: str,
+        prompt: str,
+        width: int | None = None,
+        height: int | None = None,
+        steps: int | None = None,
+        seed: int | None = None,
+        user_id: str | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
+        """编辑图片（使用 Qwen-Image-Edit-2511 本地模型）
+
+        Args:
+            image_input: 图片（URL / base64 / 字节）
+            prompt: 编辑描述
+            width: 宽度
+            height: 高度
+            steps: 采样步数
+            seed: 随机种子
+            user_id: 用户 ID
+            tenant_id: 租户 ID
+
+        Returns:
+            dict: 编辑结果
+        """
+        from infrastructure.ai.local_image_edit_client import LocalImageEditClient
+
+        client = LocalImageEditClient()
+        result = await client.edit(
+            image_input=image_input,
+            prompt=prompt,
+            width=width,
+            height=height,
+            steps=steps,
+            seed=seed,
+        )
+
+        image_base64 = result.get("image_base64", "")
+        if not image_base64:
+            raise ExternalServiceError(
+                message="图片编辑失败: 未返回 image_base64",
+                details={},
+            )
+
+        image_bytes = base64.b64decode(image_base64)
+        task_id = f"edit_{seed or -1}_{hash(prompt) % 100000}"
+        safe_tenant_id = tenant_id or "default"
+        safe_user_id = user_id or "anonymous"
+        object_key = (
+            f"private/tenants/{safe_tenant_id}/ai_edited/images/"
+            f"{safe_user_id}/{task_id}.png"
+        )
+
+        storage = S3StorageService()
+        storage.upload_bytes(
+            data=image_bytes,
+            object_key=object_key,
+            content_type="image/png",
+        )
+        expires_in = int(os.getenv("S3_PRESIGNED_URL_EXPIRE_SECONDS", "300"))
+        presigned_url = storage.get_presigned_url(object_key, expires_in=expires_in)
+
+        return {
+            "image_url": presigned_url,
+            "image_base64": image_base64,
+            "task_id": task_id,
+            "status": "completed",
+        }
+
 
 __all__ = ["ModelScopeClient"]

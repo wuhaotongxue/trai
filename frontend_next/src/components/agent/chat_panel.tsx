@@ -12,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -24,7 +24,7 @@ import { type UploadedFileInfo } from "./multimodal_upload";
 import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
 
-type TabId = "chat" | "image" | "video" | "music";
+type TabId = "chat" | "image" | "video" | "music" | "image_edit";
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
 
@@ -59,6 +59,11 @@ export function ChatPanel() {
     imageGenerateError,
     generateImage,
     clearGeneratedImage,
+    editImage,
+    clearEditedImage,
+    isEditingImage,
+    editedImageUrl,
+    imageEditError,
     imageGallery,
     removeFromImageGallery,
     clearImageGallery,
@@ -95,6 +100,8 @@ export function ChatPanel() {
   const [input, setInput] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍, 阳光明媚, 花朵盛开');
+  const [editPrompt, setEditPrompt] = useState('将背景替换为城市夜景');
+  const [editingImagePreview, setEditingImagePreview] = useState<string | null>(null);
   const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海, 海浪拍打着礁石, 天空中乌云密布');
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光');
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -387,6 +394,7 @@ export function ChatPanel() {
           {[
             { id: "chat" as TabId, label: "对话", icon: Bot, color: "text-blue-500" },
             { id: "image" as TabId, label: "绘图", icon: ImageIcon, color: "text-emerald-500" },
+            { id: "image_edit" as TabId, label: "编辑", icon: Pencil, color: "text-violet-500" },
             { id: "video" as TabId, label: "视频", icon: Video, color: "text-orange-500" },
             { id: "music" as TabId, label: "音乐", icon: Music, color: "text-indigo-500" },
           ].map((tab) => (
@@ -552,6 +560,173 @@ export function ChatPanel() {
                         </div>
                         <div className="w-48 h-1.5 bg-muted rounded-full overflow-hidden">
                           <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full animate-pulse" style={{ width: "60%" }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 图片编辑模式 */}
+                {activeTab === "image_edit" && (
+                  <div className="space-y-8">
+                    {/* 头部 */}
+                    <div className="flex items-start gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-400/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/10">
+                        <Pencil className="h-7 w-7 text-violet-500" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground mt-1">AI 图片编辑</h2>
+                        <p className="text-sm text-muted-foreground mt-1">上传图片并描述修改内容，AI 智能编辑</p>
+                      </div>
+                    </div>
+
+                    {/* 图片上传区 */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">上传原图</p>
+                      {editingImagePreview ? (
+                        <div className="relative group">
+                          <img
+                            src={editingImagePreview}
+                            alt="待编辑图片"
+                            className="w-full max-h-80 object-contain rounded-xl border bg-white"
+                          />
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => setEditingImagePreview(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-violet-200 dark:border-violet-700 rounded-xl cursor-pointer hover:border-violet-400 dark:hover:border-violet-500 transition-colors bg-violet-50/30 dark:bg-violet-500/5">
+                          <Upload className="h-8 w-8 text-violet-400 mb-2" />
+                          <span className="text-sm text-muted-foreground">点击上传图片或拖拽到此处</span>
+                          <span className="text-xs text-muted-foreground mt-1">支持 JPG、PNG、WebP</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (ev) => {
+                                  setEditingImagePreview(ev.target?.result as string);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* 编辑提示词 */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">编辑指令</p>
+                      <textarea
+                        value={editPrompt}
+                        onChange={(e) => setEditPrompt(e.target.value)}
+                        placeholder="例如：将背景替换为城市夜景，给人物换一套衣服"
+                        className="w-full h-20 px-4 py-3 rounded-xl border border-border bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                      />
+                    </div>
+
+                    {/* 快捷指令 */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">快捷指令</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          "将背景替换为星空",
+                          "给人物添加眼镜",
+                          "调整光线为夕阳暖色",
+                          "背景替换为室内咖啡馆",
+                        ].map((tip) => (
+                          <button
+                            key={tip}
+                            onClick={() => setEditPrompt(tip)}
+                            className="text-left px-3 py-2 rounded-lg border border-border hover:border-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-sm text-foreground transition-colors"
+                          >
+                            {tip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 错误提示 */}
+                    {imageEditError && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm">
+                        <X className="h-4 w-4 shrink-0" />
+                        {imageEditError}
+                      </div>
+                    )}
+
+                    {/* 编辑结果 */}
+                    {editedImageUrl && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-foreground">编辑结果</p>
+                        </div>
+                        <div className="relative group rounded-xl overflow-hidden border bg-white">
+                          <img
+                            src={editedImageUrl}
+                            alt="编辑结果"
+                            width={1024}
+                            className="w-full object-contain cursor-pointer"
+                            onClick={() => window.open(editedImageUrl, "_blank")}
+                          />
+                          <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-8 w-8 bg-white/80 hover:bg-white"
+                              onClick={() => navigator.clipboard.writeText(editedImageUrl)}
+                              title="复制链接"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-8 w-8 bg-white/80 hover:bg-white"
+                              onClick={() => window.open(editedImageUrl, "_blank")}
+                              title="新窗口打开"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-8 w-8 bg-white/80 hover:bg-white"
+                              onClick={() => {
+                                const a = document.createElement("a");
+                                a.href = editedImageUrl;
+                                a.download = "edited-image.png";
+                                a.click();
+                              }}
+                              title="下载图片"
+                            >
+                              <ArrowDownToLine className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 加载状态 */}
+                    {isEditingImage && (
+                      <div className="flex flex-col items-center gap-4 py-12">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-violet-500/10 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 text-violet-500 animate-spin" />
+                          </div>
+                          <div className="absolute -inset-2 rounded-full border-2 border-violet-500/20 animate-ping" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-foreground">正在编辑图片...</p>
+                          <p className="text-xs text-muted-foreground mt-1">Qwen-Image-Edit-2511 智能处理中</p>
                         </div>
                       </div>
                     )}
@@ -733,11 +908,13 @@ export function ChatPanel() {
                 <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                   {activeTab === "chat" ? "开始对话" :
                    activeTab === "image" ? "AI 创意绘图" :
+                   activeTab === "image_edit" ? "AI 图片编辑" :
                    activeTab === "video" ? "AI 视频合成" : "AI 音乐创作"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mb-4">
                   {activeTab === "chat" ? "输入消息与 AI 助手对话, 支持上传图片和调用工具." :
                    activeTab === "image" ? "描述你想要的画面, AI 将为你生成精美的图像." :
+                   activeTab === "image_edit" ? "上传图片并描述修改内容, AI 智能编辑." :
                    activeTab === "video" ? "提供视频描述或参考图, 开启电影级 AI 视频创作." : "输入歌词或风格描述, 创作属于你的 AI 音乐."}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -746,6 +923,8 @@ export function ChatPanel() {
                       ? ["北京天气怎么样", "帮我翻译 Hello World", "1+1等于多少", "搜索 AI 发展趋势", "写一首关于春天的诗", "如何学习编程", "今天是什么日期", "推荐一部好看的电影"]
                       : activeTab === "image"
                       ? ["一只可爱的猫在花园里", "赛博朋克风格的城市夜景", "写实风格的山水画", "宇航员在火星漫步", "童话故事里的城堡", "未来科技感的机器人", "美丽的日落海滩", "中国传统水墨画风格"]
+                      : activeTab === "image_edit"
+                      ? ["将背景替换为星空", "给人物添加眼镜", "调整光线为夕阳暖色", "背景替换为室内咖啡馆"]
                       : activeTab === "video"
                       ? ["波涛汹涌的大海", "宇航员在火星漫步", "城市夜景延时摄影", "森林中阳光透过树叶", "流星划过夜空", "瀑布从悬崖倾泻而下", "城市交通繁忙景象", "雪花飘落的冬季场景"]
                       : ["轻快的爵士乐", "抒情的钢琴曲", "电子舞曲", "古典交响乐", "中国传统古筝曲", "摇滚乐队演出", "ambient 环境音乐", "电影配乐风格"];
@@ -757,6 +936,8 @@ export function ChatPanel() {
                             setInput(tip);
                           } else if (activeTab === "image") {
                             setImagePrompt(tip);
+                          } else if (activeTab === "image_edit") {
+                            setEditPrompt(tip);
                           } else if (activeTab === "video") {
                             setVideoPrompt(tip);
                           } else if (activeTab === "music") {
@@ -776,8 +957,8 @@ export function ChatPanel() {
             {/* 消息列表 - 固定高度，可滚动 */}
             <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4 overflow-y-auto">
               <div ref={messagesStartRef}>
-                {/* API Error Display */}
-                {apiError && (
+                <>
+                  {apiError && (
                   <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
                     <X className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
                     <div className="flex-1">
@@ -921,6 +1102,7 @@ export function ChatPanel() {
                     )}
                   </div>
                 )}
+                </>
               </div>
               <div ref={bottomRef} />
             </ScrollArea>
@@ -943,7 +1125,7 @@ export function ChatPanel() {
         )}
 
         {/* 输入区域 - 固定在底部 */}
-        {activeTab === "chat" || activeTab === "image" || activeTab === "video" || activeTab === "music" ? (
+        {activeTab === "chat" || activeTab === "image" || activeTab === "image_edit" || activeTab === "video" || activeTab === "music" ? (
           <div className="px-4 py-3 border-t border-border bg-background shrink-0">
             {activeTab === "chat" && images.length > 0 && (
               <div className="flex gap-2 mb-2 flex-wrap">
@@ -1034,14 +1216,17 @@ export function ChatPanel() {
 
               <textarea
                 ref={inputRef}
-                value={activeTab === "chat" ? input : 
-                       activeTab === "image" ? imagePrompt : 
+                value={activeTab === "chat" ? input :
+                       activeTab === "image" ? imagePrompt :
+                       activeTab === "image_edit" ? editPrompt :
                        activeTab === "video" ? videoPrompt : musicPrompt}
                 onChange={(e) => {
                   if (activeTab === "chat") {
                     setInput(e.target.value);
                   } else if (activeTab === "image") {
                     setImagePrompt(e.target.value);
+                  } else if (activeTab === "image_edit") {
+                    setEditPrompt(e.target.value);
                   } else if (activeTab === "video") {
                     setVideoPrompt(e.target.value);
                   } else if (activeTab === "music") {
@@ -1055,6 +1240,8 @@ export function ChatPanel() {
                       handleSend();
                     } else if (activeTab === "image" && imagePrompt.trim()) {
                       generateImage(imagePrompt);
+                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview) {
+                      editImage(editingImagePreview, editPrompt);
                     } else if (activeTab === "video" && videoPrompt.trim()) {
                       generateVideo(videoPrompt);
                     } else if (activeTab === "music" && musicPrompt.trim()) {
@@ -1063,9 +1250,10 @@ export function ChatPanel() {
                   }
                 }}
                 placeholder={activeTab === "chat" ? "输入消息..." :
-                         activeTab === "image" ? "描述你想要的画面..." :
-                         activeTab === "video" ? "描述你想要的视频..." :
-                         "描述你想要的音乐..."}
+                             activeTab === "image" ? "描述你想要的画面..." :
+                             activeTab === "image_edit" ? "描述你想要的修改..." :
+                             activeTab === "video" ? "描述你想要的视频..." :
+                             "描述你想要的音乐..."}
                 className="flex-1 min-h-[44px] max-h-32 resize-none rounded-lg border border-input bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
                 rows={1}
               />
@@ -1087,6 +1275,8 @@ export function ChatPanel() {
                       handleSend();
                     } else if (activeTab === "image" && imagePrompt.trim()) {
                       generateImage(imagePrompt);
+                    } else if (activeTab === "image_edit" && editPrompt.trim() && editingImagePreview) {
+                      editImage(editingImagePreview, editPrompt);
                     } else if (activeTab === "video" && videoPrompt.trim()) {
                       generateVideo(videoPrompt);
                     } else if (activeTab === "music" && musicPrompt.trim()) {
@@ -1095,10 +1285,12 @@ export function ChatPanel() {
                   }}
                   disabled={activeTab === "chat" ? !input.trim() && images.length === 0 :
                           activeTab === "image" ? !imagePrompt.trim() || isGeneratingImage :
+                          activeTab === "image_edit" ? !editPrompt.trim() || !editingImagePreview || isEditingImage :
                           activeTab === "video" ? !videoPrompt.trim() || isGeneratingVideo :
                           !musicPrompt.trim() || isGeneratingMusic}
                   title={activeTab === "chat" ? "发送消息" :
                          activeTab === "image" ? "生成图片" :
+                         activeTab === "image_edit" ? "编辑图片" :
                          activeTab === "video" ? "生成视频" :
                          "生成音乐"}
                 >
