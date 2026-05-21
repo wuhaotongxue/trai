@@ -46,6 +46,57 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 功能（技能）_2026_05_21_0821
+- **新增（技能）**: local_image_edit_client 子进程 stderr drain 修复（proc.poll 后加最终 os.read）
+- **新增（技能）**: 修脚本模板中 {{torch.cuda.device_count()}} 双括号字面量问题
+- **新增（技能）**: 修 seed=None 时脚本内 str(seed) 报 NameError，改为 _seed 本地变量
+- **新增（技能）**: 修脚本缺少 try/except 兜底，静默 crash 问题
+- **新增（技能）**: 修 proc.poll() 返回 None 被误处理为 0 的问题
+- **新增（技能）**: 修 QwenImageEditPlusPipeline 不支持 progress_callback 参数
+- **优化（前端）**: 改 h-screen 为 min-h-screen 适配浏览器缩放，侧边栏/主内容区加 min-h-0
+- **优化（前端）**: 新增 viewport.tsx 确保浏览器正确缩放，加 -webkit-text-size-adjust 兜底
+- **优化（项目）**: .gitignore 新增大模型文件过滤（*.safetensors / backend/models/ / src/models/）
+
+### 🛠️ 后端_2026_05_20_1644
+- **修复**: local_image_edit_client 子进程推理 post-processing 阶段 CUDA OOM（enable_model_cpu_offload 未显式 set_device，模型偷偷加载到 GPU 0 而非目标卡）
+- **修复**: local_video_client 复制模式同步保留 `torch.cuda.set_device(0)`
+- **新增**: test_image_edit.py 独立测试脚本（子进程推理 vs 主进程直接推理双模式）
+- **新增**: image_generation.py 视频生成用例（frame 生成 + 字幕烧录 + S3 上传 + 多端通知）
+- **新增**: feishu_ai_notify 支持视频生成飞书通知（卡片含 S3 视频预览）
+- **优化**: image_edit/image_edit_dual 统一日志和异常处理，video.py 生成进度流式推送
+
+### 🛠️ 前端_2026_05_20_1642
+- **界面（前端）**: 图片编辑模式支持双图联动，上传两张图片融合生成新图
+- **界面（前端）**: 编辑表单改为左右分栏，右侧原图+结果对比展示
+- **界面（前端）**: 新增双图快捷指令（合成/拼接/风格迁移/全景合成）
+- **新增（前端）**: ToastItem 接口导出，chat_panel.tsx 依赖此类型
+- **优化（前端）**: agent.store editImage 支持 sourceImage2 参数，压缩后发送到后端
+- **优化（前端）**: agent.store generateVideo 参数对齐后端（frames 替代 duration）
+- **优化（前端）**: api_client generateVideo 路由改为 /ai/video/generate
+
+### 🛠️ 后端_2026_05_20_1642
+- **新增（后端）**: 双图联动编辑（image_edit_dual），支持同时传入两张图片融合生成
+- **新增（后端）**: local_image_edit_client 生成双图联动推理脚本（QwenImageEditPlusPipeline image 列表模式）
+- **新增（后端）**: /ai/video/generate Wan2.1-T2V-1.3B 文生视频 API（S3 存储 + 域名/IP 双 URL + 飞书+企微通知）
+- **新增（后端）**: local_video_client.py Wan2.1 本地视频生成客户端（推理耗时统计 + 分辨率/帧数支持）
+- **新增（后端）**: delete_sessions.py 会话批量删除脚本（按标题/时间/用户等条件）
+- **新增（后端）**: 数据库迁移脚本 migrate_add_image_edit_dual_fields（新增字段 source_image_url_2 等）
+- **优化（后端）**: uvicorn 新增 timeout_keep_alive=300 / limit_concurrency=50 / limit_max_requests=1000
+- **优化（后端）**: FastAPI startup 事件初始化数据库单例，触发自动建表
+
+### 🛠️ 前端_2026_05_20_0857
+- **界面（前端）**: 绘图/图片编辑模式改为左右分栏布局，表单靠左，结果图显示在右侧面板
+- **界面（前端）**: 右侧图片廊合并显示当前生成结果（generatedImageUrl + editedImageUrl）和历史记录
+- **界面（前端）**: 会话列表标题改为显示第一条用户消息，过长省略+悬停预览
+- **优化（前端）**: editImage 成功后自动添加到图片廊
+
+### 🛠️ 后端_2026_05_20_0839
+- **新增（后端）**: t_image_records 表统一存储文生图/图生图/图片编辑记录，含 IP 追溯、游客标识、飞书通知状态
+- **新增（后端）**: ImageRecordModel + ImageRecordRepository + image_records.py 管理后台接口（列表/详情/删除/批量删除/统计）
+- **新增（后端）**: 飞书图片编辑通知（ImageEditedEvent + S3 下载 + 飞书 image_key 上传，图片直接在卡片内预览）
+- **新增（后端）**: notify_robot.env 新增 NOTIFY_FEISHU_IMAGE_WEBHOOK 和启用开关
+- **优化（后端）**: image.py 文生图/编辑成功后自动写入数据库，后台触发飞书卡片通知
+
 ### 🛠️ 后端_2026_05_15_1703
 - **新增（文档）**: 新增第10期总结文档（md/issue_10/index.md）
 - **新增（后端）**: infrastructure/utils/ 本地图片生成和视觉推理基础设施

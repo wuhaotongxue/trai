@@ -14,6 +14,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from core.logger import get_logger
+from infrastructure.middleware.request_context import set_client_ip
 
 if TYPE_CHECKING:
     from starlette.middleware.base import RequestResponseEndpoint
@@ -29,6 +30,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         method = request.method
         path = request.url.path
         client_host = request.client.host if request.client else "unknown"
+
+        # 设置客户端IP到上下文变量
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+        else:
+            client_ip = client_host
+        set_client_ip(client_ip)
 
         start_time = time.perf_counter()
 

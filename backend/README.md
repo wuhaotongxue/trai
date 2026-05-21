@@ -37,6 +37,35 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_20_1642
+- **新增**: 双图联动编辑（image_edit_dual），image.py 支持同时传入两张图片融合生成
+- **新增**: local_image_edit_client 生成双图联动推理脚本（QwenImageEditPlusPipeline image=[img1,img2] 列表模式）
+- **新增**: /ai/video/generate Wan2.1-T2V-1.3B 文生视频 API（S3 存储 + 域名/IP 双 URL + 飞书+企微通知）
+- **新增**: local_video_client.py Wan2.1 本地视频生成客户端（推理耗时统计 + 分辨率/帧数支持）
+- **新增**: delete_sessions.py 会话批量删除脚本（按标题/时间/用户等条件，支持 dry-run）
+- **新增**: 数据库迁移脚本 migrate_add_image_edit_dual_fields（新增字段 source_image_url_2 等）
+- **优化**: uvicorn 新增 timeout_keep_alive=300 / limit_concurrency=50 / limit_max_requests=1000
+- **优化**: FastAPI startup 事件初始化数据库单例，触发自动建表
+- **优化**: image.py 文生图返回 S3 object_key + public_url
+- **优化**: image_edit 支持 task_id 外部传入，保持 ID 一致性
+
+### 🛠️ 后端_2026_05_20_1644
+- **修复**: local_image_edit_client 子进程 CUDA OOM（enable_model_cpu_offload 前未显式 set_device(0)，模型偷偷加载到被占用的 GPU 0）
+- **修复**: local_video_client 同步保留 `torch.cuda.set_device(0)`
+- **新增**: test_image_edit.py 独立测试脚本（子进程 vs 主进程双模式）
+- **新增**: image_generation.py 视频生成用例（frame 生成 + 字幕烧录 + S3 上传 + 多端通知）
+- **新增**: feishu_ai_notify 支持视频生成通知（卡片含 S3 视频预览）
+- **优化**: image_edit/image_edit_dual 统一日志异常，video.py 进度流式推送
+
+### 🛠️ 后端_2026_05_20_0839
+- **新增**: t_image_records 表统一存储文生图/图生图/图片编辑记录，含 IP 追溯、游客标识、飞书通知状态
+- **新增**: ImageRecordModel + ImageRecordRepository，支持完整 CRUD 和管理后台多条件查询
+- **新增**: image_records.py 管理后台接口（列表/详情/删除/批量删除/统计）
+- **新增**: image_record.py Entity + Interface（ImageRecordType/ImageRecordStatus）
+- **新增**: 飞书图片编辑通知（ImageEditedEvent + S3 图片下载 + 飞书 image_key 上传）
+- **新增**: notify_robot.env 新增 NOTIFY_FEISHU_IMAGE_WEBHOOK 和启用开关
+- **优化**: image.py 文生图/编辑成功后自动写入数据库，后台触发飞书卡片通知
+
 ### 🛠️ 后端_2026_05_15_1703
 - **新增**: infrastructure/utils/ 本地图片生成和视觉推理基础设施
 

@@ -44,6 +44,7 @@ class SessionRepository:
             created_at=model.t_created_at,
             updated_at=model.t_updated_at,
             metadata={
+                "title": model.t_title,
                 "extra_data": model.t_extra_data,
                 "created_by": model.t_created_by,
                 "updated_by": model.t_updated_by,
@@ -177,6 +178,10 @@ class SessionRepository:
 
         if title is not None:
             model.t_title = title
+            # 同步更新 metadata，保持与 t_title 一致（会话列表读 metadata.title）
+            current_metadata = dict(model.t_metadata) if model.t_metadata else {}
+            current_metadata["title"] = title
+            model.t_metadata = current_metadata
         if messages is not None:
             model.t_messages = messages
         if extra_data is not None:

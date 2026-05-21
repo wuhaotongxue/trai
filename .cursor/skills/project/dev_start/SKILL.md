@@ -9,10 +9,11 @@ description: "启动 TRAI 项目的前后端和客户端服务，包含后端、
 
 ## 强制规则（优先级最高）
 
-### 1. 两条命令分开写，分两个 Shell 调用
+### 1. 三步分开写，分三个 Shell 调用
 
-- 第一个调用：`conda activate trai31313`
-- 第二个调用：`python run.py`
+- 调用 1：`cd /home/qyjgylc_whf/code/trai/backend`
+- 调用 2：`conda activate trai31313`
+- 调用 3：`python run.py`
 - **禁止**用 `&&`、`;`、`&` 任何符号把命令拼成一行
 - **禁止**用分号串起来
 
@@ -41,19 +42,25 @@ description: "启动 TRAI 项目的前后端和客户端服务，包含后端、
 
 ### 后端（conda env: trai31313，端口: 5666）
 
-**调用 1：**
+**标准三步启动（三个 Shell 调用）：**
+
+调用 1（切换目录）：
+```bash
+cd /home/qyjgylc_whf/code/trai/backend
+```
+
+调用 2（激活环境）：
 ```bash
 conda activate trai31313
 ```
 
-**调用 2：**
+调用 3（启动服务）：
 ```bash
-cd /home/qyjgylc_whf/code/trai/backend
 python run.py
 ```
 
 **后台运行方式：**
-使用 `block_until_ms: 0` 参数启动后台进程，不使用 nohup 或重定向。
+使用 `block_until_ms: 0` 参数让服务后台运行。
 
 ### 前端（端口: 3000）
 
@@ -74,7 +81,7 @@ pnpm dev
 1. 检查是否有已经在运行的终端（读取 terminals 文件夹）
 2. 如果服务已经在运行，直接告知用户「已在运行」
 3. 如果需要启动：
-   - 后端分两条命令写，两个 Shell 调用
+   - 后端分三个 Shell 调用（cd → activate → python）
    - 前端和客户端各一个 Shell 调用
 4. 使用 `block_until_ms: 0` 参数让服务后台运行
 5. 启动后告诉用户：
@@ -82,12 +89,20 @@ pnpm dev
    - 前端地址：http://localhost:3000
    - 客户端：Electron 窗口
 
+## 测试命令格式
+
+测试或验证后端时，也使用同样的三步格式：
+
+调用 1：`cd /home/qyjgylc_whf/code/trai/backend`
+调用 2：`conda activate trai31313`
+调用 3：`python run.py`
+
 ## 已知问题与规避
 
 ### conda activate 卡住
 
 - **原因**：`&&` / `;` / `&` 等符号在 PowerShell 中触发语法解析导致挂起
-- **规避**：分两个 Shell 调用写，先 activate，确认后再 python
+- **规避**：分三个 Shell 调用写，先 cd，再 activate，确认后再 python
 
 ### 启动后出现 ConnectionResetError
 

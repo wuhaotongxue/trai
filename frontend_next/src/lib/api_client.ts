@@ -41,6 +41,8 @@ interface ApiOptions {
   headers?: Record<string, string>;
   /** 是否为重试请求 */
   _retry?: boolean;
+  /** AbortSignal，可用于取消请求 */
+  signal?: AbortSignal;
 }
 
 let isRefreshing = false;
@@ -147,7 +149,10 @@ export async function request<T>(
     }
 
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    const errorMessage = error.detail?.message || error.message || "Request failed";
+    const errorMessage = error.detail?.message || error.message || `HTTP ${res.status}: ${res.statusText}`;
+    if (res.status === 422) {
+      console.error("[API 422]", error);
+    }
 
     // 游客免费额度用完特殊处理
     if (res.status === 401 && errorMessage.includes("免费额度")) {
@@ -156,7 +161,9 @@ export async function request<T>(
       }
     }
 
-    throw new Error(errorMessage);
+    const err = new Error(errorMessage);
+    (err as unknown as { status: number }).status = res.status;
+    throw err;
   }
 
   return res.json();
@@ -489,9 +496,13 @@ export const agentApi = {
   generateImage: (data: { prompt: string; model?: string; width?: number; height?: number; steps?: number; seed?: number }) =>
     request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
 
-  /** 文生视频 */
-  generateVideo: (data: { prompt: string; model?: string; duration?: number; resolution?: string }) =>
-    request<{ task_id: string; status: string; video_url?: string; error?: string }>("/ai/video", { method: "POST", body: JSON.stringify(data) }),
+  /** 图生图 / 图片编辑 */
+  editImage: (data: { image_url: string; prompt: string; mask?: string; width?: number; height?: number; steps?: number; seed?: number; signal?: AbortSignal; image_url_2?: string }) =>
+    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image/edit", { method: "POST", body: JSON.stringify(data), signal: data.signal }),
+
+  /** 文生视频 (Wan2.1-T2V-1.3B) */
+  generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string }) =>
+    request<{ task_id: string; status: string; video_url?: string; video_base64?: string; object_key?: string; public_url?: string; error?: string }>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),
 
   /** 文生音乐 */
   generateMusic: (data: { prompt: string; model?: string; duration?: number; style?: string }) =>

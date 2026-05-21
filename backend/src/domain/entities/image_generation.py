@@ -64,6 +64,13 @@ class ImageGeneration:
     created_at: datetime = field(default_factory=datetime.now)
     completed_at: datetime | None = None
 
+    @classmethod
+    def with_task_id(cls, task_id: str, **kwargs: Any) -> "ImageGeneration":
+        """使用外部指定的 task_id 创建实体（避免内部自动生成导致 ID 不一致）"""
+        entity = cls(**kwargs)
+        entity.task_id = task_id
+        return entity
+
     def mark_completed(self, image_url: str) -> None:
         """标记完成"""
         self.status = ImageStatus.COMPLETED

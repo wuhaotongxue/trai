@@ -185,7 +185,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex min-h-screen overflow-hidden bg-background">
       {/* 侧边栏 */}
       <aside className={cn("flex-shrink-0 flex flex-col bg-sidebar border-r border-border transition-all duration-300", (sidebarCollapsed ?? false) ? "w-20" : "w-64")}>
         {/* Logo */}
@@ -222,7 +222,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* 导航菜单 */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-5 scrollbar-thin">
+        <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-5 scrollbar-thin">
           {menuGroups.map((group) => {
             return (
               <div key={group.label} className={(sidebarCollapsed ?? false) ? "space-y-1" : "space-y-0.5"}>
@@ -363,7 +363,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-6 bg-background">{children}</main>
+        <main className="flex-1 min-h-0 overflow-auto p-6 bg-background">{children}</main>
       </div>
 
       {/* 全局 Toast */}

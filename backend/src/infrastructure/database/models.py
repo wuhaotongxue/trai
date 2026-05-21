@@ -501,6 +501,131 @@ class ChatLogModel(Base):
     """日志记录时间"""
 
 
+class ImageRecordModel(Base):
+    """AI 图片记录模型
+
+    统一存储文生图、图生图、图片编辑三种类型任务的完整信息，
+    支持追溯：请求人 IP、登录用户/游客、操作人、任务参数、结果 URL。
+    """
+
+    __tablename__ = "t_image_records"
+    __comment__ = (
+        "AI 图片记录表，统一存储文生图/图生图/图片编辑任务的完整信息。"
+        "支持追溯：请求 IP、登录用户/游客、操作人、任务参数、结果 URL、通知状态。"
+    )
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
+
+    t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """任务唯一标识 UUID"""
+
+    t_record_type: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    """记录类型: text_to_image / image_to_image / image_edit"""
+
+    t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    """用户 ID（游客为空字符串）"""
+
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """用户名/昵称"""
+
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    """客户端 IP 地址"""
+
+    t_request_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """请求来源 IP（可能与 client_ip 不同）"""
+
+    t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """浏览器 User-Agent"""
+
+    t_is_guest: Mapped[bool] = mapped_column(default=False, nullable=False)
+    """是否为游客"""
+
+    t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """租户 ID"""
+
+    t_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    """图片生成/编辑提示词"""
+
+    t_source_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """源图片 URL（图生图/图片编辑）"""
+
+    t_source_image_url_2: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """第二张源图片 URL（双图联动编辑）"""
+
+    t_source_image_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """源图片 S3 对象键"""
+
+    t_source_image_object_key_2: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """第二张源图片 S3 对象键（双图联动编辑）"""
+
+    t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """结果图片 S3 URL"""
+
+    t_result_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """结果图片 base64（临时存储，存入 S3 后清空）"""
+
+    t_status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False, index=True)
+    """任务状态: pending / processing / completed / failed"""
+
+    t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """错误信息"""
+
+    t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """使用的模型"""
+
+    t_width: Mapped[int] = mapped_column(Integer, default=1024, nullable=False)
+    """图片宽度"""
+
+    t_height: Mapped[int] = mapped_column(Integer, default=1024, nullable=False)
+    """图片高度"""
+
+    t_steps: Mapped[int] = mapped_column(Integer, default=25, nullable=False)
+    """采样步数"""
+
+    t_seed: Mapped[int] = mapped_column(Integer, default=-1, nullable=False)
+    """随机种子，-1 表示随机"""
+
+    t_session_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """关联会话 session_id"""
+
+    t_trace_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """链路追踪 ID"""
+
+    t_feishu_notified: Mapped[bool] = mapped_column(default=False, nullable=False)
+    """是否已发送飞书通知"""
+
+    t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    """通知状态: pending / success / failed"""
+
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展数据字段（JSON）"""
+
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """创建时间"""
+
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
+
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """最后更新时间"""
+
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """最后修改人 user_id"""
+
+    t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """任务完成时间"""
+
+    t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """软删除时间，为空表示未删除"""
+
+    t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """删除操作人 user_id"""
+
+    t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """删除时的客户端 IP 地址"""
+
+
 class LoginLogModel(Base):
     """用户登录日志模型"""
 
@@ -560,6 +685,7 @@ __all__ = [
     "ContactMessageModel",
     "EmailConfigModel",
     "AgentRoleModel",
+    "ImageRecordModel",
     "ChatLogModel",
     "LoginLogModel",
 ]
