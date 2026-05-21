@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -739,7 +739,7 @@ async def stream_message(
 )
 async def create_session(
     request: CreateSessionRequest,
-    current_user_opt: CurrentUserOptional,
+    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
     request_obj: Annotated[Request, Depends()],
 ) -> CreateSessionResponse:
@@ -747,15 +747,15 @@ async def create_session(
 
     Args:
         request: 创建会话参数
-        current_user_opt: 可选当前登录用户
+        current_user: 当前登录用户
         session: 数据库会话
         request_obj: FastAPI Request 对象，用于获取客户端IP
 
     Returns:
         CreateSessionResponse: 创建的会话信息
     """
-    user_id = current_user_opt.get("user_id") if current_user_opt else None
-    username = current_user_opt.get("username") if current_user_opt else None
+    user_id = current_user.get("user_id")
+    username = current_user.get("username")
     
     # 获取客户端IP地址
     client_ip = request_obj.client.host if request_obj.client else None
@@ -794,18 +794,18 @@ async def create_session(
     response_model=SessionListResponse,
     tags=["会话"],
     summary="会话列表",
-    description="获取会话列表，支持游客模式（未登录用户）.",
+    description="获取当前用户的会话列表.",
 )
 async def list_sessions(
-    current_user: CurrentUserOptional,
+    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionListResponse:
-    """获取会话列表 - 支持游客模式
+    """获取会话列表 - 需要登录
 
     Args:
-        current_user: 当前用户（可选，支持游客）
+        current_user: 当前登录用户（必填）
         session: 数据库会话
         limit: 每页数量
         offset: 偏移量
@@ -813,7 +813,7 @@ async def list_sessions(
     Returns:
         SessionListResponse: 会话列表
     """
-    user_id = current_user.get("user_id") if current_user else None
+    user_id = current_user.get("user_id")
 
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)
@@ -973,7 +973,6 @@ async def delete_session(
     session_id: str,
     current_user: CurrentUser,
     db_session: Annotated[Session, Depends(get_db_session)],
-    request: Annotated[Request, Depends()],
 ) -> ActionResponse:
     """删除会话 - 使用 ChatHistoryService
 
@@ -992,12 +991,11 @@ async def delete_session(
     user_id = current_user.get("user_id")
     username = current_user.get("username")
     role = current_user.get("role", "normal")
-    
-    # 获取客户端IP地址
-    client_ip = request.client.host if request.client else None
-    x_forwarded_for = request.headers.get("X-Forwarded-For")
-    if x_forwarded_for:
-        client_ip = x_forwarded_for.split(",")[0].strip()
+
+    # 客户端IP地址从请求上下文获取(通过上下文变量)
+    client_ip = None
+    from infrastructure.middleware.request_context import get_client_ip
+    client_ip = get_client_ip()
 
     session_repo = SessionRepository(db_session)
     message_repo = MessageRepository(db_session)

@@ -375,6 +375,9 @@ def main() -> None:
                     port=config["port"],
                     reload=config["reload"],
                     log_level=config["log_level"],
+                    timeout_keep_alive=300,
+                    limit_concurrency=50,
+                    limit_max_requests=1000,
                 )
                 server = uvicorn.Server(server_config)
                 await server.serve()

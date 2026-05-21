@@ -144,6 +144,49 @@
 
 ---
 
+### t_image_records（AI 图片记录表）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| t_id | BIGINT | 自增主键 ID |
+| t_task_id | VARCHAR(64) | 任务唯一标识 UUID，唯一索引 |
+| t_record_type | VARCHAR(32) | 记录类型：text_to_image / image_to_image / image_edit |
+| t_user_id | VARCHAR(64) | 用户 ID（游客为空字符串） |
+| t_username | VARCHAR(100) | 用户名/昵称 |
+| t_client_ip | VARCHAR(50) | 客户端 IP 地址，索引 |
+| t_request_ip | VARCHAR(50) | 请求来源 IP（可能与 client_ip 不同） |
+| t_user_agent | VARCHAR(500) | 浏览器 User-Agent |
+| t_is_guest | BOOLEAN | 是否为游客 |
+| t_tenant_id | VARCHAR(64) | 租户 ID |
+| t_prompt | TEXT | 图片生成/编辑提示词 |
+| t_source_image_url | TEXT | 源图片 URL（图生图/图片编辑） |
+| t_result_url | TEXT | 结果图片 S3 URL |
+| t_result_base64 | TEXT | 结果图片 base64（临时，存入 S3 后清空） |
+| t_status | VARCHAR(32) | 任务状态：pending / processing / completed / failed |
+| t_error_message | TEXT | 错误信息 |
+| t_model | VARCHAR(64) | 使用的模型 |
+| t_width | INTEGER | 图片宽度 |
+| t_height | INTEGER | 图片高度 |
+| t_steps | INTEGER | 采样步数 |
+| t_seed | INTEGER | 随机种子（-1=随机） |
+| t_session_id | VARCHAR(64) | 关联会话 session_id |
+| t_trace_id | VARCHAR(64) | 链路追踪 ID |
+| t_feishu_notified | BOOLEAN | 是否已发送飞书通知 |
+| t_notify_status | VARCHAR(20) | 通知状态：pending / success / failed |
+| t_extra_data | JSON | 扩展数据字段 |
+| t_created_at | TIMESTAMP | 创建时间，索引 |
+| t_created_by | VARCHAR(64) | 创建人 user_id |
+| t_updated_at | TIMESTAMP | 更新时间 |
+| t_updated_by | VARCHAR(64) | 最后修改人 user_id |
+| t_completed_at | TIMESTAMP | 任务完成时间 |
+| t_deleted_at | TIMESTAMP | 软删除时间（空=未删） |
+| t_deleted_by | VARCHAR(64) | 删除操作人 user_id |
+| t_deleted_ip | VARCHAR(50) | 删除时的客户端 IP 地址 |
+
+**说明**：统一存储文生图、图生图、图片编辑三种类型任务的完整信息，支持追溯：请求 IP、登录用户/游客、操作人、任务参数、结果 URL、通知状态。
+
+---
+
 ### t_image_generations（图片生成表）
 
 | 字段 | 类型 | 说明 |
@@ -209,6 +252,7 @@ t_users (用户)
   │     └── t_quota_transaction_log (N:1) 配额流水
   ├── t_quota_plans (N:1) 配额套餐（按角色）
   ├── t_image_generations (1:N) 图片生成任务
+  ├── t_image_records (1:N) AI 图片记录（统一记录，含图片编辑）
   └── t_upload_tasks (1:N) 上传任务
 ```
 
@@ -270,6 +314,7 @@ t_users (用户)
 
 | 版本 | 日期 | 更新内容 |
 |------|------|---------|
+| v2.3 | 2026-05-20 | 新增 t_image_records 表，统一存储文生图/图生图/图片编辑记录，含 IP 追溯、游客标识、飞书通知状态 |
 | v2.2 | 2026-04-13 | 补充完整表说明、软删除规范、主键规范、保留字禁止 |
 | v2.1 | 2026-04-13 | 所有字段改用 t_ 前缀，与表名前缀保持一致 |
 | v2.0 | 2026-04-13 | 所有表改用 t_ 前缀，新增 created_by/updated_by/deleted_by 审计字段 |

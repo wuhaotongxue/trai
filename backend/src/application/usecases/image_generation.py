@@ -37,6 +37,8 @@ class ImageGenerationInput:
     size: ImageSize = ImageSize.SQUARE_1K
     session_id: str | None = None
     trace_id: str | None = None
+    task_id: str | None = None
+    """外部传入的 task_id，若不传则由实体自动生成（保持向后兼容）"""
 
 
 @dataclass
@@ -48,6 +50,10 @@ class ImageGenerationOutput:
     image_base64: str | None = None
     status: str = "pending"
     error: str | None = None
+    object_key: str | None = None
+    """S3 对象键"""
+    public_url: str | None = None
+    """S3 公共域名 URL"""
 
 
 class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput]):
@@ -63,20 +69,37 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
 
     async def execute(self, input_data: ImageGenerationInput) -> ImageGenerationOutput:
         """执行图片生成"""
-        generation = ImageGeneration(
-            prompt=input_data.prompt,
-            user_id=input_data.user_id,
-            model=input_data.model,
-            width=input_data.width,
-            height=input_data.height,
-            steps=input_data.steps,
-            seed=input_data.seed,
-            negative_prompt=input_data.negative_prompt,
-            style=input_data.style,
-            size=input_data.size,
-            session_id=input_data.session_id,
-            trace_id=input_data.trace_id,
-        )
+        if input_data.task_id:
+            generation = ImageGeneration.with_task_id(
+                task_id=input_data.task_id,
+                prompt=input_data.prompt,
+                user_id=input_data.user_id,
+                model=input_data.model,
+                width=input_data.width,
+                height=input_data.height,
+                steps=input_data.steps,
+                seed=input_data.seed,
+                negative_prompt=input_data.negative_prompt,
+                style=input_data.style,
+                size=input_data.size,
+                session_id=input_data.session_id,
+                trace_id=input_data.trace_id,
+            )
+        else:
+            generation = ImageGeneration(
+                prompt=input_data.prompt,
+                user_id=input_data.user_id,
+                model=input_data.model,
+                width=input_data.width,
+                height=input_data.height,
+                steps=input_data.steps,
+                seed=input_data.seed,
+                negative_prompt=input_data.negative_prompt,
+                style=input_data.style,
+                size=input_data.size,
+                session_id=input_data.session_id,
+                trace_id=input_data.trace_id,
+            )
 
         if self._repository:
             self._repository.create(generation)
@@ -93,12 +116,14 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
             )
             image_url = result.get("image_url")
             image_base64 = result.get("image_base64")
-            
+            result_object_key = result.get("object_key", "")
+            result_public_url = result.get("public_url", "")
+
             if image_url:
                 generation.mark_completed(image_url)
             elif image_base64:
                 generation.mark_completed(f"data:image/png;base64,{image_base64[:50]}...")
-            
+
             if self._repository:
                 self._repository.update_status(
                     generation.task_id,
@@ -111,6 +136,8 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
                 image_url=image_url,
                 image_base64=image_base64,
                 status="completed",
+                object_key=result_object_key,
+                public_url=result_public_url,
             )
         except Exception as e:
             generation.mark_failed(str(e))

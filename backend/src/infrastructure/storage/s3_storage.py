@@ -115,7 +115,7 @@ class S3StorageService:
 
         Args:
             object_key: S3 对象键
-            expires_in: 过期时间(秒)
+            expires_in: 过期时间(秒)，默认 5 分钟
 
         Returns:
             str: 预签名 URL
@@ -134,6 +134,20 @@ class S3StorageService:
                 message=f"S3 预签名 URL 生成失败: {str(e)}",
                 details={"error": str(e)},
             )
+
+    def get_long_term_url(self, object_key: str, expires_days: int = 30) -> str:
+        """获取长期有效的访问 URL（用于生成的图片等需要长期分享的内容）
+
+        默认 30 天有效期，生成的图片存入 S3 后可通过此 URL 永久访问。
+
+        Args:
+            object_key: S3 对象键
+            expires_days: 过期天数，默认 30 天
+
+        Returns:
+            str: 长期预签名 URL
+        """
+        return self.get_presigned_url(object_key, expires_in=expires_days * 24 * 3600)
 
     def _rewrite_presigned_url(self, url: str) -> str:
         if not self._presign_public_base:

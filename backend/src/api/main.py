@@ -397,6 +397,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.client_release import router as admin_client_release_router
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
+    from api.routers.admin.image_records import router as admin_image_records_router
     from api.routers.ai import agent, chat, comfyui, image, management, music, report, video
     from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
@@ -433,6 +434,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(backup.router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
     app.include_router(schema_doc_router, prefix=f"{api_prefix}/admin", tags=["系统管理"])
     app.include_router(image_gen_config_router, prefix=f"{api_prefix}/admin", tags=["管理"])
+    app.include_router(admin_image_records_router, prefix=f"{api_prefix}/admin", tags=["管理"])
     app.include_router(admin_monitor.router, prefix=f"{api_prefix}", tags=["管理"])
     app.include_router(client_update_router, prefix=f"{api_prefix}/client", tags=["客户端更新"])
     app.include_router(chat.router, prefix=f"{api_prefix}/ai", tags=["AI"])
@@ -441,12 +443,12 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(video.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(comfyui.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(report.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
     app.include_router(multimodal_agent_router, prefix=api_prefix, tags=["Multimodal Agent"])
     app.include_router(websocket_router.router, tags=["WebSocket"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
-    app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
     app.include_router(contact_router, prefix=api_prefix, tags=["公开接口"])
     app.include_router(i18n_public_router, prefix=api_prefix, tags=["翻译"])
@@ -467,6 +469,9 @@ def register_routers(app: FastAPI) -> None:
     @app.on_event("startup")
     async def startup_event() -> None:
         init_telemetry()
+        # 初始化数据库(单例)，触发建表
+        from infrastructure.database import get_database
+        _ = get_database()
         logger.info("TRAI API 服务启动")
 
     @app.on_event("shutdown")
