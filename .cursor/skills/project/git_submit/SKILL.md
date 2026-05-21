@@ -198,6 +198,30 @@ description: >-
 - ⚠️ **重要**：无论用户指定推送到哪个分支，推送完成后必须切换回 `wuhao` 分支
 - 例如：用户说"推送到 develop 和 main"，执行完后必须 `git checkout wuhao`
 
+**多分支同步推送（wuhao → develop → main）**：
+- ⚠️ **重要**：每次推送到 wuhao 后，必须自动同步到 develop 和 main 分支
+- 同步顺序：`wuhao` → `develop` → `main`（单向流水线，不逆向）
+- 同步流程：
+  1. 推送 wuhao 到 origin
+  2. 切换到 develop，执行 `git merge wuhao`，推送 develop
+  3. 切换到 main，执行 `git merge develop`，推送 main
+  4. 处理可能出现的冲突：优先使用 develop 版本的代码解决冲突
+     - 冲突时执行 `git checkout --theirs <file>` 解决单个文件
+     - 多个冲突文件统一用 develop 版本后 `git add . && git commit`
+  5. 完成后切换回 wuhao
+- 远端仓库地址：`https://gitee.com/no5689/trai`
+- 如果 develop 或 main 合并时出现大量冲突，在 commit message 中注明"解决合并冲突"
+
+**禁止提交的临时文件**：
+- ⚠️ **严禁提交以下类型的文件**，提交前必须检查并排除：
+  - 测试图片（`*.png`、`*.jpg`、`*.jpeg`、`*.gif`、`*.bmp`）
+  - 临时脚本（根目录的 `test_*.py`、`debug*.py`、`temp*.py`、`tmp*.py`）
+  - 日志文件（`nohup.out`、`*.log`）
+  - 模型文件（`backend/src/models/` 整个目录）
+  - 其他临时输出文件（`output_*.png`、`gold_glasses_result.png` 等）
+- 使用 `git add .` 前，建议先检查是否有上述文件，或使用 `.gitignore` 规则排除
+- 如果发现已误提交这些文件，立即在下一个 commit 中撤销
+
 **网络问题重试策略**：
 - ⚠️ 推送时如遇网络错误（Connection reset / Timeout / Failed to connect）
 - 🔄 **最少重试 3 次**，每次间隔 2-3 秒
