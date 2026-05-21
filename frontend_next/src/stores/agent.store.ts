@@ -211,7 +211,7 @@ interface AgentState {
   /** 清空视频廊 */
   clearVideoGallery: () => void;
   /** 生成音乐 */
-  generateMusic: (prompt: string, model?: string, duration?: number, style?: string) => Promise<void>;
+  generateMusic: (prompt: string, duration?: number, steps?: number, guidance_scale?: number) => Promise<void>;
   /** 清除生成的音乐 */
   clearGeneratedMusic: () => void;
   /** 添加音乐到音乐廊 */
@@ -857,16 +857,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-  generateMusic: async (prompt: string, model?: string, duration?: number, style?: string) => {
+  generateMusic: async (prompt: string, duration?: number, steps?: number, guidance_scale?: number) => {
     set({ isGeneratingMusic: true, musicGenerateError: null, generatedMusicUrl: null });
     try {
-      const res = await api.agent.generateMusic({ prompt, model, duration, style });
-      if (res.music_url) {
+      const res = await api.agent.generateMusic({ prompt, duration, steps, guidance_scale });
+      if (res.success && res.music_url) {
+        // 后端返回的是完整 URL，直接使用
         set({ generatedMusicUrl: res.music_url, isGeneratingMusic: false });
         // 将生成的音乐添加到音乐廊
         get().addToMusicGallery(res.music_url, prompt);
       } else {
-        set({ musicGenerateError: res.error || "音乐生成失败", isGeneratingMusic: false });
+        set({ musicGenerateError: res.error || res.message || "音乐生成失败", isGeneratingMusic: false });
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "音乐生成失败";
