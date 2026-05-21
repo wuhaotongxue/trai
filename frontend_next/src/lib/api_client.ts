@@ -504,9 +504,17 @@ export const agentApi = {
   generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string }) =>
     request<{ task_id: string; status: string; video_url?: string; video_base64?: string; object_key?: string; public_url?: string; error?: string }>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),
 
-  /** 文生音乐 */
-  generateMusic: (data: { prompt: string; model?: string; duration?: number; style?: string }) =>
-    request<{ task_id: string; status: string; music_url?: string; error?: string }>("/ai/music", { method: "POST", body: JSON.stringify(data) }),
+  /** 文生音乐 (ACE-Step) */
+  generateMusic: (data: { prompt: string; duration?: number; steps?: number; guidance_scale?: number }) =>
+    request<{
+      success: boolean;
+      task_id: string;
+      message: string;
+      music_url?: string;
+      file_path?: string;
+      duration?: number;
+      error?: string;
+    }>("/ai/music/generate", { method: "POST", body: JSON.stringify(data) }),
 };
 
 // ============================================================
