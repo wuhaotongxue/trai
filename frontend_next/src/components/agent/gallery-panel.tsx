@@ -1,0 +1,300 @@
+/**
+ * gallery-panel.tsx
+ * 作者: wuhao
+ * 日期: 2026-05-21
+ * 描述: 画廊面板组件 - 右侧画廊容器
+ */
+
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll_area";
+import { Video, Image as ImageIcon, Music, Trash2, ExternalLink } from "lucide-react";
+import { MediaGallery } from "./media-gallery";
+import { MusicGallery } from "./music-gallery";
+
+type GalleryViewMode = "grid" | "list";
+type GallerySortType = "latest" | "oldest";
+type TabId = "chat" | "image" | "video" | "music" | "image_edit";
+
+interface GalleryPanelProps {
+  activeTab: TabId;
+  showGallery: boolean;
+  isGalleryMaximized: boolean;
+  galleryViewMode: GalleryViewMode;
+  gallerySortType: GallerySortType;
+  gallerySearchQuery: string;
+  imageGallery: Array<{ id: string; url: string; prompt: string; timestamp: number }>;
+  videoGallery: Array<{ id: string; url: string; prompt: string; timestamp: number }>;
+  musicGallery: Array<{ id: string; url: string; prompt: string; timestamp: number }>;
+  generatedImageUrl: string | null;
+  imagePrompt: string;
+  editedImageUrl: string | null;
+  editPrompt: string;
+  generatedVideoUrl: string | null;
+  videoPrompt: string;
+  generatedMusicUrl: string | null;
+  musicPrompt: string;
+  onToggleGallery: () => void;
+  onToggleViewMode: () => void;
+  onToggleMaximize: () => void;
+  onClearGallery: () => void;
+  onRemoveFromImageGallery: (id: string) => void;
+  onRemoveFromVideoGallery: (id: string) => void;
+  onRemoveFromMusicGallery: (id: string) => void;
+  onPreviewImage: (url: string) => void;
+  onDownloadImage: (url: string) => void;
+  onSetSearchQuery: (query: string) => void;
+  onSetSortType: (type: GallerySortType) => void;
+}
+
+/**
+ * 画廊头部组件
+ */
+function GalleryHeader({
+  activeTab,
+  itemCount,
+  viewMode,
+  isMaximized,
+  onToggleViewMode,
+  onToggleMaximize,
+  onClear,
+}: {
+  activeTab: TabId;
+  itemCount: number;
+  viewMode: GalleryViewMode;
+  isMaximized: boolean;
+  onToggleViewMode: () => void;
+  onToggleMaximize: () => void;
+  onClear: () => void;
+}) {
+  const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : "音乐廊";
+
+  return (
+    <div className="flex items-center justify-between p-3 border-b border-border">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold text-foreground">{title}</span>
+        <span className="text-xs text-muted-foreground">({itemCount})</span>
+      </div>
+      <div className="flex items-center gap-1">
+        {itemCount > 0 && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onToggleViewMode}
+              title={viewMode === "grid" ? "列表视图" : "网格视图"}
+            >
+              {viewMode === "grid" ? (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onToggleMaximize}
+              title={isMaximized ? "还原大小" : "最大化"}
+            >
+              {isMaximized ? (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClear}
+              className="text-xs text-muted-foreground hover:text-red-500 h-7"
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              清空
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 搜索和排序组件（仅图片廊）
+ */
+function GallerySearchBar({
+  searchQuery,
+  sortType,
+  itemCount,
+  onSearchChange,
+  onSortChange,
+}: {
+  searchQuery: string;
+  sortType: GallerySortType;
+  itemCount: number;
+  onSearchChange: (query: string) => void;
+  onSortChange: (type: GallerySortType) => void;
+}) {
+  return (
+    <div className="p-3 border-b border-border">
+      <div className="relative mb-2">
+        <svg className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="搜索提示词..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        />
+      </div>
+      <div className="flex items-center justify-between">
+        <select
+          value={sortType}
+          onChange={(e) => onSortChange(e.target.value as GallerySortType)}
+          className="text-xs rounded-md border border-input bg-background px-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="latest">最新</option>
+          <option value="oldest">最早</option>
+        </select>
+        <span className="text-xs text-muted-foreground">{itemCount} 张图片</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 画廊面板组件
+ */
+export function GalleryPanel({
+  activeTab,
+  showGallery,
+  isGalleryMaximized,
+  galleryViewMode,
+  gallerySortType,
+  gallerySearchQuery,
+  imageGallery,
+  videoGallery,
+  musicGallery,
+  generatedImageUrl,
+  imagePrompt,
+  editedImageUrl,
+  editPrompt,
+  generatedVideoUrl,
+  videoPrompt,
+  generatedMusicUrl,
+  musicPrompt,
+  onToggleGallery,
+  onToggleViewMode,
+  onToggleMaximize,
+  onClearGallery,
+  onRemoveFromImageGallery,
+  onRemoveFromVideoGallery,
+  onRemoveFromMusicGallery,
+  onPreviewImage,
+  onDownloadImage,
+  onSetSearchQuery,
+  onSetSortType,
+}: GalleryPanelProps) {
+  const isImageTab = activeTab === "image" || activeTab === "image_edit";
+  const isVideoTab = activeTab === "video";
+  const isMusicTab = activeTab === "music";
+
+  // 获取当前画廊数据
+  const currentGallery = isImageTab ? imageGallery : isVideoTab ? videoGallery : musicGallery;
+
+  return (
+    <div className={`border-l border-border bg-background transition-all duration-300 ease-in-out ${showGallery ? "w-80" : "w-0 overflow-hidden"} ${isGalleryMaximized ? "fixed inset-4 z-50 w-auto !top-[100px] rounded-xl shadow-2xl" : ""}`}>
+      <div className="flex flex-col h-full">
+        <GalleryHeader
+          activeTab={activeTab}
+          itemCount={currentGallery.length}
+          viewMode={galleryViewMode}
+          isMaximized={isGalleryMaximized}
+          onToggleViewMode={onToggleViewMode}
+          onToggleMaximize={onToggleMaximize}
+          onClear={onClearGallery}
+        />
+
+        {isImageTab && currentGallery.length > 0 && (
+          <GallerySearchBar
+            searchQuery={gallerySearchQuery}
+            sortType={gallerySortType}
+            itemCount={currentGallery.length}
+            onSearchChange={onSetSearchQuery}
+            onSortChange={onSetSortType}
+          />
+        )}
+
+        <ScrollArea className="flex-1">
+          {(isImageTab || isVideoTab) && (
+            (() => {
+              const isVideo = activeTab === "video";
+              const currentItems: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
+              const historyItems: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
+
+              if (isVideo) {
+                if (generatedVideoUrl) {
+                  currentItems.push({ id: "current-video", url: generatedVideoUrl, prompt: videoPrompt, timestamp: 0, isCurrent: true });
+                }
+                historyItems.push(...videoGallery.map((vid) => ({ ...vid, isCurrent: false })));
+              } else {
+                if (generatedImageUrl) {
+                  currentItems.push({ id: "current-generated", url: generatedImageUrl, prompt: imagePrompt, timestamp: 0, isCurrent: true });
+                }
+                if (editedImageUrl) {
+                  currentItems.push({ id: "current-edited", url: editedImageUrl, prompt: editPrompt, timestamp: 1, isCurrent: true });
+                }
+                historyItems.push(...imageGallery.map((img) => ({ ...img, isCurrent: false })));
+              }
+
+              return (
+                <MediaGallery
+                  currentItems={currentItems}
+                  historyItems={historyItems}
+                  viewMode={galleryViewMode}
+                  isVideo={isVideo}
+                  searchQuery={gallerySearchQuery}
+                  sortType={gallerySortType}
+                  onDelete={isVideo ? onRemoveFromVideoGallery : onRemoveFromImageGallery}
+                  onPreview={onPreviewImage}
+                  onDownload={onDownloadImage}
+                />
+              );
+            })()
+          )}
+
+          {isMusicTab && (
+            (() => {
+              const currentMusic: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
+              if (generatedMusicUrl) {
+                currentMusic.push({ id: "current-music", url: generatedMusicUrl, prompt: musicPrompt, timestamp: 0, isCurrent: true });
+              }
+              const historyMusic = musicGallery.map((m) => ({ ...m, isCurrent: false }));
+
+              return (
+                <MusicGallery
+                  currentMusic={currentMusic}
+                  historyMusic={historyMusic}
+                  viewMode={galleryViewMode}
+                  onDelete={onRemoveFromMusicGallery}
+                />
+              );
+            })()
+          )}
+        </ScrollArea>
+      </div>
+    </div>
+  );
+}
