@@ -1,30 +1,187 @@
 #!/usr/bin/env python
-# 文件名: music.py
-# 作者: wuhao
-# 日期: 2026-04-14 09:00:00
-# 描述: 音乐生成 API
+"""音乐生成 API"""
+import os
+import uuid
+from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from pydantic import BaseModel, Field
+
+from infrastructure.ai.local_music_client import get_music_client
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
 
 
+class MusicGenerateRequest(BaseModel):
+    """音乐生成请求"""
+    prompt: str = Field(..., description="音乐描述/提示词", min_length=1, max_length=500)
+    duration: Optional[float] = Field(30.0, description="音频时长（秒）", ge=5, le=300)
+    steps: Optional[int] = Field(27, description="推理步数", ge=1, le=100)
+    guidance_scale: Optional[float] = Field(7.0, description="引导强度", ge=1.0, le=20.0)
+    model: Optional[str] = Field("ace-step", description="模型名称 (ace-step)")
+
+
+class MusicGenerateResponse(BaseModel):
+    """音乐生成响应"""
+    success: bool
+    task_id: str
+    message: str
+    music_url: Optional[str] = None
+    file_path: Optional[str] = None
+    duration: Optional[float] = None
+    error: Optional[str] = None
+
+
 class MusicController:
-    """音乐生成控制器."""
+    """音乐生成控制器"""
 
     @staticmethod
-    @router.post("/generate")
-    async def generate_music():
+    @router.post("/generate", response_model=MusicGenerateResponse)
+    async def generate_music(
+        request: MusicGenerateRequest,
+        background_tasks: BackgroundTasks,
+    ):
         """
-        生成音乐.
+        生成音乐
 
         参数:
-            无.
+            prompt: 音乐描述/提示词
+            duration: 音频时长（秒）
+            steps: 推理步数
+            guidance_scale: 引导强度
+            model: 模型名称
 
         返回:
-            dict: 成功消息.
-
-        异常:
-            无.
+            MusicGenerateResponse: 生成结果
         """
-        return {"success": True, "message": "音乐生成请求已提交"}
+        # 生成任务 ID
+        task_id = f"music_{uuid.uuid4().hex[:12]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+        try:
+            client = get_music_client()
+
+            # 同步生成（阻塞调用）
+            result = client.generate(
+                prompt=request.prompt,
+                duration=request.duration,
+                steps=request.steps,
+                guidance_scale=request.guidance_scale,
+            )
+
+            if result.success:
+                # 构建音乐 URL - 返回完整可访问的 URL
+                filename = os.path.basename(result.file_path)
+                music_url = f"http://localhost:5666/api_trai/v1/ai/music/files/{filename}"
+
+                return MusicGenerateResponse(
+                    success=True,
+                    task_id=task_id,
+                    message="音乐生成成功",
+                    music_url=music_url,
+                    file_path=result.file_path,
+                    duration=result.duration,
+                )
+            else:
+                return MusicGenerateResponse(
+                    success=False,
+                    task_id=task_id,
+                    message="音乐生成失败",
+                    error=result.error,
+                )
+
+        except Exception as e:
+            return MusicGenerateResponse(
+                success=False,
+                task_id=task_id,
+                message="音乐生成异常",
+                error=str(e),
+            )
+
+    @staticmethod
+    @router.get("/files/{filename}")
+    async def get_music_file(filename: str):
+        """
+        获取音乐文件
+
+        参数:
+            filename: 文件名
+
+        返回:
+            FileResponse: 音频文件
+        """
+        from fastapi.responses import FileResponse
+        from urllib.parse import unquote
+
+        # 解码 URL 编码的文件名
+        filename = unquote(filename)
+
+        # 安全检查：只允许字母、数字、中文、空格、常见符号
+        import re
+        # 匹配: 中文、字母、数字、空格、下划线、连字符、括号、点号(用于扩展名)
+        if not re.match(r'^[\w\s\-\(\)（）\.]+\.(wav|mp3|ogg)$', filename, re.UNICODE):
+            raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
+
+        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+        file_path = os.path.join(output_dir, filename)
+
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="文件不存在")
+
+        # 确定 MIME 类型
+        mime_type = "audio/wav"
+        if filename.endswith(".mp3"):
+            mime_type = "audio/mpeg"
+        elif filename.endswith(".ogg"):
+            mime_type = "audio/ogg"
+
+        return FileResponse(
+            path=file_path,
+            media_type=mime_type,
+            filename=filename,
+        )
+
+    @staticmethod
+    @router.get("/list")
+    async def list_music_files(
+        limit: int = 20,
+        offset: int = 0,
+    ):
+        """
+        列出最近生成的音乐文件
+
+        参数:
+            limit: 返回数量
+            offset: 跳过数量
+
+        返回:
+            dict: 文件列表
+        """
+        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+
+        if not os.path.exists(output_dir):
+            return {"files": [], "total": 0}
+
+        # 获取所有 wav 文件，按修改时间排序
+        files = []
+        for f in os.listdir(output_dir):
+            if f.endswith(".wav"):
+                fpath = os.path.join(output_dir, f)
+                stat = os.stat(fpath)
+                files.append({
+                    "name": f,
+                    "size": stat.st_size,
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                })
+
+        files.sort(key=lambda x: x["modified"], reverse=True)
+
+        total = len(files)
+        paginated = files[offset:offset + limit]
+
+        return {
+            "files": paginated,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
