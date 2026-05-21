@@ -46,6 +46,17 @@ cd trai
 
 ## 更新日志 (Changelog)
 
+### 🛠️ 功能（技能）_2026_05_21_0821
+- **新增（技能）**: local_image_edit_client 子进程 stderr drain 修复（proc.poll 后加最终 os.read）
+- **新增（技能）**: 修脚本模板中 {{torch.cuda.device_count()}} 双括号字面量问题
+- **新增（技能）**: 修 seed=None 时脚本内 str(seed) 报 NameError，改为 _seed 本地变量
+- **新增（技能）**: 修脚本缺少 try/except 兜底，静默 crash 问题
+- **新增（技能）**: 修 proc.poll() 返回 None 被误处理为 0 的问题
+- **新增（技能）**: 修 QwenImageEditPlusPipeline 不支持 progress_callback 参数
+- **优化（前端）**: 改 h-screen 为 min-h-screen 适配浏览器缩放，侧边栏/主内容区加 min-h-0
+- **优化（前端）**: 新增 viewport.tsx 确保浏览器正确缩放，加 -webkit-text-size-adjust 兜底
+- **优化（项目）**: .gitignore 新增大模型文件过滤（*.safetensors / backend/models/ / src/models/）
+
 ### 🛠️ 后端_2026_05_20_1644
 - **修复**: local_image_edit_client 子进程推理 post-processing 阶段 CUDA OOM（enable_model_cpu_offload 未显式 set_device，模型偷偷加载到 GPU 0 而非目标卡）
 - **修复**: local_video_client 复制模式同步保留 `torch.cuda.set_device(0)`

@@ -1,6 +1,33 @@
 # 默认风格：爆炸吧（超级角色）
 # TRAI_对话风格规范
 
+# TRAI 全局强制规则
+
+## ⚠️ Shell 命令强制规则（CRITICAL - 任何情况下禁止绕过）
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">🚫 绝对禁止在 Shell 命令中使用 2>&1 或任何重定向符号</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>禁止使用</strong>：<code>2>&1</code>、<code>> /tmp/xxx.log</code>、<code>> output.txt</code>、<code>&> file</code> 等所有 IO 重定向</li>
+    <li><strong>正确做法</strong>：直接写命令，不加任何重定向，Cursor Shell 会自动捕获输出</li>
+    <li><strong>允许参数</strong>：<code>block_until_ms</code>（超时控制）、<code>working_directory</code>（工作目录）</li>
+    <li><strong>Windows PowerShell 注意</strong>：PowerShell 不支持 heredoc，Linux/Mac 可用 heredoc</li>
+    <li><strong>例外</strong>：只有在用户明确要求将输出写入文件时，才可以添加重定向</li>
+  </ul>
+</div>
+
+**错误示例**：
+- ❌ `python run.py 2>&1`
+- ❌ `npm run dev > /tmp/dev.log 2>&1`
+- ❌ `conda run -n trai31313 python run.py 2>&1 | tee output.log`
+
+**正确示例**：
+- ✅ `python run.py`
+- ✅ `conda run -n trai31313 python run.py`
+- ✅ `pnpm dev`
+
+---
+
 ## ⚠️ 对话启动强制规则（每次对话最开始必须执行）
 
 **每次新对话开始后，在发出第一条回复之前，必须按顺序执行以下操作：**
