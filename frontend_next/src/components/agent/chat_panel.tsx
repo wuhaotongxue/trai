@@ -23,6 +23,9 @@ import { type Message as AgentMessage } from "@/stores/agent.store";
 import { type UploadedFileInfo } from "./multimodal_upload";
 import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
+import { MusicGallery } from "./music-gallery";
+import { MediaGallery } from "./media-gallery";
+import { GalleryPanel } from "./gallery-panel";
 
 type TabId = "chat" | "image" | "video" | "music" | "image_edit";
 type GalleryViewMode = "grid" | "list";
@@ -421,7 +424,7 @@ export function ChatPanel() {
             size="icon"
             className="h-8 w-8 shrink-0"
             onClick={() => setShowGallery(!showGallery)}
-            title={showGallery ? "隐藏图片廊" : "显示图片廊"}
+            title={showGallery ? "隐藏画廊" : "显示画廊"}
           >
             {showGallery ? <ChevronRight className="h-4 w-4" /> : <PanelRight className="h-4 w-4" />}
           </Button>
@@ -1359,227 +1362,40 @@ export function ChatPanel() {
         ) : null}
       </div>
 
-      {/* 右侧图片廊面板 */}
-      <div className={`border-l border-border bg-background transition-all duration-300 ease-in-out ${showGallery ? 'w-80' : 'w-0 overflow-hidden'} ${isGalleryMaximized ? 'fixed inset-4 z-50 w-auto !top-[100px] rounded-xl shadow-2xl' : ''}`}>
-        <div className="flex flex-col h-full">
-          {/* 图片廊头部 */}
-          <div className="flex items-center justify-between p-3 border-b border-border">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">图片廊</span>
-              <span className="text-xs text-muted-foreground">({imageGallery.length})</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {imageGallery.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setGalleryViewMode(galleryViewMode === 'grid' ? 'list' : 'grid')}
-                  title={galleryViewMode === 'grid' ? '列表视图' : '网格视图'}
-                >
-                  {galleryViewMode === 'grid' ? (
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                  ) : (
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                  )}
-                </Button>
-              )}
-              {imageGallery.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setIsGalleryMaximized(!isGalleryMaximized)}
-                  title={isGalleryMaximized ? '还原大小' : '最大化'}
-                >
-                  {isGalleryMaximized ? (
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                  ) : (
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  )}
-                </Button>
-              )}
-              {imageGallery.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearImageGallery}
-                  className="text-xs text-muted-foreground hover:text-red-500 h-7"
-                >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  清空
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* 搜索和排序 */}
-          {imageGallery.length > 0 && (
-            <div className="p-3 border-b border-border">
-              <div className="relative mb-2">
-                <svg className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="搜索提示词..."
-                  value={gallerySearchQuery}
-                  onChange={(e) => setGallerySearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <select
-                  value={gallerySortType}
-                  onChange={(e) => setGallerySortType(e.target.value as GallerySortType)}
-                  className="text-xs rounded-md border border-input bg-background px-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="latest">最新</option>
-                  <option value="oldest">最早</option>
-                </select>
-                <span className="text-xs text-muted-foreground">
-                  {imageGallery.length} 张图片
-                </span>
-              </div>
-            </div>
-          )}
-
-          <ScrollArea className="flex-1">
-            {(() => {
-              // 构造统一图片列表：当前结果优先 + 历史记录
-              const currentImages: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
-              if (generatedImageUrl) {
-                currentImages.push({ id: "current-generated", url: generatedImageUrl, prompt: imagePrompt, timestamp: 0, isCurrent: true });
-              }
-              if (editedImageUrl) {
-                currentImages.push({ id: "current-edited", url: editedImageUrl, prompt: editPrompt, timestamp: 1, isCurrent: true });
-              }
-              const historyImages = imageGallery.map((img) => ({ ...img, isCurrent: false }));
-
-              // 搜索过滤
-              const filterImages = (imgs: typeof currentImages) => {
-                if (!gallerySearchQuery) return imgs;
-                const q = gallerySearchQuery.toLowerCase();
-                return imgs.filter((img) => img.prompt.toLowerCase().includes(q));
-              };
-              const filteredCurrent = filterImages(currentImages);
-              let filteredHistory = filterImages(historyImages);
-              if (gallerySortType === "latest") {
-                filteredHistory = filteredHistory.sort((a, b) => b.timestamp - a.timestamp);
-              } else {
-                filteredHistory = filteredHistory.sort((a, b) => a.timestamp - b.timestamp);
-              }
-
-              const allImages = [...filteredCurrent, ...filteredHistory];
-
-              if (allImages.length === 0) {
-                return (
-                  <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                      <svg className="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-muted-foreground">还没有生成过图片</p>
-                    <p className="text-xs text-muted-foreground mt-1">在绘图或编辑模式下生成图片</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div className={`p-2 ${galleryViewMode === "grid" ? "space-y-2" : "space-y-1"}`}>
-                  {/* 当前结果区 */}
-                  {filteredCurrent.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider px-1 mb-2">
-                        当前结果
-                      </p>
-                      <div className={galleryViewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-1"}>
-                        {filteredCurrent.map((img) => (
-                          <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-emerald-300 dark:border-emerald-700 shadow-sm hover:shadow-md transition-all ${galleryViewMode === "grid" ? "" : "flex items-center gap-3"}`}>
-                            <div className="overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
-                              <Image src={img.url} alt={img.id === "current-generated" ? "生成的图片" : "编辑结果"} width={galleryViewMode === "grid" ? 512 : 64} height={galleryViewMode === "grid" ? 512 : 64} unoptimized className={`object-cover hover:scale-105 transition-transform ${galleryViewMode === "grid" ? "w-full aspect-square" : "w-16 h-16"}`} />
-                            </div>
-                            {galleryViewMode === "list" && (
-                              <div className="flex-1 min-w-0 p-2">
-                                <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
-                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">{img.id === "current-generated" ? "绘图生成" : "图片编辑"}</p>
-                              </div>
-                            )}
-                            <div className={`absolute ${galleryViewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
-                              <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => downloadImage(img.url)} title="下载"><Trash2 className="h-3 w-3" /></Button>
-                              <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(img.url, "_blank")} title="打开"><ExternalLink className="h-3 w-3" /></Button>
-                            </div>
-                            {galleryViewMode === "grid" && (
-                              <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
-                                <p className="text-[10px] text-white truncate" title={img.prompt}>{img.prompt}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 历史记录区 */}
-                  {filteredHistory.length > 0 && (
-                    <div>
-                      {filteredCurrent.length > 0 && (
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
-                          历史记录 ({filteredHistory.length})
-                        </p>
-                      )}
-                      {filteredHistory.map((img) => (
-                        <div key={img.id} className={`group relative rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all ${galleryViewMode === "grid" ? "" : "flex items-center gap-3"}`}>
-                          {galleryViewMode === "grid" ? (
-                            <div className="overflow-hidden cursor-pointer" onClick={() => setSelectedImageForPreview(img.url)}>
-                              <Image src={img.url} alt="Generated image" width={512} height={512} unoptimized className="w-full aspect-square object-cover hover:scale-105 transition-transform" />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-16 rounded overflow-hidden cursor-pointer flex-shrink-0" onClick={() => setSelectedImageForPreview(img.url)}>
-                              <Image src={img.url} alt="Generated image" width={64} height={64} unoptimized className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          {galleryViewMode === "list" && (
-                            <div className="flex-1 min-w-0 p-2">
-                              <p className="text-xs text-foreground truncate" title={img.prompt}>{img.prompt}</p>
-                              <p className="text-xs text-muted-foreground">{new Date(img.timestamp).toLocaleString()}</p>
-                            </div>
-                          )}
-                          <div className={`absolute ${galleryViewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
-                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => downloadImage(img.url)} title="下载">
-                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </Button>
-                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(img.url, "_blank")} title="打开">
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                            <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors" onClick={() => removeFromImageGallery(img.id)} title="删除">
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          {galleryViewMode === "grid" && (
-                            <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
-                              <p className="text-[10px] text-white/80 truncate" title={img.prompt}>{img.prompt}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </ScrollArea>
-        </div>
-      </div>
+      {/* 右侧画廊面板 - 根据 tab 显示图片/视频/音乐廊 */}
+      <GalleryPanel
+        activeTab={activeTab}
+        showGallery={showGallery}
+        isGalleryMaximized={isGalleryMaximized}
+        galleryViewMode={galleryViewMode}
+        gallerySortType={gallerySortType}
+        gallerySearchQuery={gallerySearchQuery}
+        imageGallery={imageGallery}
+        videoGallery={videoGallery}
+        musicGallery={musicGallery}
+        generatedImageUrl={generatedImageUrl}
+        imagePrompt={imagePrompt}
+        editedImageUrl={editedImageUrl}
+        editPrompt={editPrompt}
+        generatedVideoUrl={generatedVideoUrl}
+        videoPrompt={videoPrompt}
+        generatedMusicUrl={generatedMusicUrl}
+        musicPrompt={musicPrompt}
+        onToggleGallery={() => setShowGallery(!showGallery)}
+        onToggleViewMode={() => setGalleryViewMode(galleryViewMode === "grid" ? "list" : "grid")}
+        onToggleMaximize={() => setIsGalleryMaximized(!isGalleryMaximized)}
+        onClearGallery={
+          activeTab === "image" || activeTab === "image_edit" ? clearImageGallery :
+          activeTab === "video" ? clearVideoGallery : clearMusicGallery
+        }
+        onRemoveFromImageGallery={removeFromImageGallery}
+        onRemoveFromVideoGallery={removeFromVideoGallery}
+        onRemoveFromMusicGallery={removeFromMusicGallery}
+        onPreviewImage={setSelectedImageForPreview}
+        onDownloadImage={downloadImage}
+        onSetSearchQuery={setGallerySearchQuery}
+        onSetSortType={setGallerySortType}
+      />
 
       {/* 图片预览弹窗 */}
       {selectedImageForPreview && (
