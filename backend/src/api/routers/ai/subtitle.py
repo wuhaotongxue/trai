@@ -118,6 +118,92 @@ async def separate_audio(
     )
 
 @router.post(
+    "/video/lipsync",
+    response_model=SubtitleGenerationResponse,
+    tags=["AI"],
+    summary="口型同步",
+    description="上传视频和音频文件, 使用 Wav2Lip 等模型将视频人物的口型与新音频同步.",
+)
+async def lipsync_video(
+    request_http: Request,
+    background_tasks: BackgroundTasks,
+    video_file: UploadFile = File(..., description="上传原始视频文件"),
+    audio_file: UploadFile = File(..., description="上传需要同步的音频文件"),
+    current_user: CurrentUserOptional = None,
+    session=Depends(get_db_session),
+) -> SubtitleGenerationResponse:
+    """
+    口型同步接口.
+
+    参数:
+        request_http: Request, 请求对象.
+        background_tasks: BackgroundTasks, 后台任务对象.
+        video_file: UploadFile, 视频文件.
+        audio_file: UploadFile, 音频文件.
+        current_user: CurrentUserOptional, 当前用户.
+        session: 数据库会话.
+
+    返回值:
+        SubtitleGenerationResponse: 任务响应.
+
+    异常:
+        无.
+    """
+    import uuid
+    from pathlib import Path
+
+    import aiofiles
+    from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
+
+    from application.ai.dubbing.lipsync_usecase import LipSyncUseCase
+    from domain.entities.subtitle_record import SubtitleRecord, SubtitleTaskType
+
+    task_id = str(uuid.uuid4())
+    user_id_str = current_user.user_id if current_user else "anonymous"
+
+    record = SubtitleRecord(
+        id=task_id,
+        user_id=user_id_str,
+        task_type=SubtitleTaskType.LIPSYNC if hasattr(SubtitleTaskType, "LIPSYNC") else "lipsync",
+        status="pending",
+        input_type="video",
+        target_lang="none",
+        burn_mode="none",
+        object_prefix="none",
+    )
+
+    repo = SubtitleRecordRepositoryImpl(session)
+    await repo.save(record)
+
+    # 异步保存文件
+    tmp_dir = Path("/tmp/trai_workspace")
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+
+    v_ext = Path(video_file.filename or "video.mp4").suffix
+    local_video_path = tmp_dir / f"{task_id}_video{v_ext}"
+    async with aiofiles.open(local_video_path, "wb") as f:
+        while chunk := await video_file.read(8192):
+            await f.write(chunk)
+
+    a_ext = Path(audio_file.filename or "audio.wav").suffix
+    local_audio_path = tmp_dir / f"{task_id}_audio{a_ext}"
+    async with aiofiles.open(local_audio_path, "wb") as f:
+        while chunk := await audio_file.read(8192):
+            await f.write(chunk)
+
+    usecase = LipSyncUseCase(repo)
+    background_tasks.add_task(usecase.execute, record, local_video_path, local_audio_path)
+
+    return SubtitleGenerationResponse(
+        task_id=task_id,
+        status="processing",
+        input_type="video",
+        target_lang="none",
+        burn_mode="none",
+        object_prefix="none",
+    )
+
+@router.post(
     "/video/clone",
     response_model=SubtitleGenerationResponse,
     tags=["AI"],
@@ -128,16 +214,22 @@ async def clone_voice(
     request_http: Request,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="上传视频或音频文件"),
+    target_lang: str = Form("英文", description="目标语言"),
+    source_lang: str = Form("auto", description="源语言"),
     current_user: CurrentUserOptional = None,
+    session=Depends(get_db_session),
 ) -> SubtitleGenerationResponse:
     """
-    声音克隆接口 (占位).
+    声音克隆接口.
 
     参数:
         request_http: Request, 请求对象.
         background_tasks: BackgroundTasks, 后台任务对象.
         file: UploadFile, 上传的文件.
+        target_lang: str, 目标语言.
+        source_lang: str, 源语言.
         current_user: CurrentUserOptional, 当前用户.
+        session: 数据库会话.
 
     返回值:
         SubtitleGenerationResponse: 任务响应.
@@ -145,13 +237,50 @@ async def clone_voice(
     异常:
         无.
     """
-    # 占位接口, 先返回模拟失败
+    import uuid
+    from pathlib import Path
+
+    import aiofiles
+    from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
+
+    from application.ai.dubbing.clone_usecase import CloneVoiceUseCase
+    from domain.entities.subtitle_record import SubtitleRecord, SubtitleTaskType
+
     task_id = str(uuid.uuid4())
+    user_id_str = current_user.user_id if current_user else "anonymous"
+
+    record = SubtitleRecord(
+        id=task_id,
+        user_id=user_id_str,
+        task_type=SubtitleTaskType.CLONE,
+        status="pending",
+        input_type="video",
+        target_lang=target_lang,
+        burn_mode="none",
+        object_prefix="none",
+    )
+
+    repo = SubtitleRecordRepositoryImpl(session)
+    await repo.save(record)
+
+    # 异步保存文件
+    tmp_dir = Path("/tmp/trai_workspace")
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    ext = Path(file.filename or "test.mp4").suffix
+    local_file_path = tmp_dir / f"{task_id}{ext}"
+
+    async with aiofiles.open(local_file_path, "wb") as f:
+        while chunk := await file.read(8192):
+            await f.write(chunk)
+
+    usecase = CloneVoiceUseCase(repo)
+    background_tasks.add_task(usecase.execute, record, local_file_path)
+
     return SubtitleGenerationResponse(
         task_id=task_id,
-        status="failed",
+        status="processing",
         input_type="video",
-        target_lang="clone_stub",
+        target_lang=target_lang,
         burn_mode="none",
         object_prefix="none",
     )
