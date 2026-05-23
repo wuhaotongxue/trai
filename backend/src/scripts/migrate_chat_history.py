@@ -186,30 +186,30 @@ def show_table_stats() -> None:
 
 def main():
     """主函数"""
-    print("=" * 60)
-    print("🔄 对话历史数据库迁移工具")
-    print("=" * 60)
-    print()
+    logger.info("=" * 60)
+    logger.info("🔄 对话历史数据库迁移工具")
+    logger.info("=" * 60)
+    logger.info()
 
     try:
         # 1. 检查并创建表
-        print("📋 步骤 1/3: 检查表结构...")
+        logger.info("📋 步骤 1/3: 检查表结构...")
         check_and_create_chat_tables()
-        print()
+        logger.info()
 
         # 2. 验证索引
-        print("📋 步骤 2/3: 验证索引...")
+        logger.info("📋 步骤 2/3: 验证索引...")
         verify_indexes()
-        print()
+        logger.info()
 
         # 3. 显示统计信息
-        print("📋 步骤 3/3: 显示统计信息...")
+        logger.info("📋 步骤 3/3: 显示统计信息...")
         show_table_stats()
-        print()
+        logger.info()
 
-        print("=" * 60)
-        print("✅ 数据库迁移完成!")
-        print("=" * 60)
+        logger.info("=" * 60)
+        logger.info("✅ 数据库迁移完成!")
+        logger.info("=" * 60)
 
     except Exception as e:
         logger.error(f"❌ 迁移失败: {e}")

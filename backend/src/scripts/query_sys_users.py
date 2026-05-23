@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import psycopg2
+from loguru import logger
 
 
 class SysUsersQueryScript:
@@ -113,4 +114,4 @@ class SysUsersQueryScript:
 
 if __name__ == "__main__":
     data = SysUsersQueryScript().run()
-    print(data)
+    logger.info(data)

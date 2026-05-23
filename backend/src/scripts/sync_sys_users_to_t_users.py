@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import select, text
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -211,4 +212,4 @@ class SyncSysUsersToTUsersScript:
 
 if __name__ == "__main__":
     result = SyncSysUsersToTUsersScript().run(source="wecom")
-    print(result)
+    logger.info(result)

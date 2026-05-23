@@ -484,7 +484,7 @@ def main():
     elif args.action == "stats":
         result = archiver.get_stats()
 
-    print(json.dumps(result, indent=2, default=str))
+    logger.info(json.dumps(result, indent=2, default=str))
 
 
 if __name__ == "__main__":

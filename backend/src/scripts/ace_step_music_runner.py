@@ -14,6 +14,8 @@ import os
 import sys
 import time
 
+from loguru import logger
+
 # === sys.path 隔离 ===
 for p in list(sys.path):
     if p.startswith("/home/qyjgylc_whf/code/trai/backend"):
@@ -27,21 +29,21 @@ CKPT_DIR = os.path.join(OUT_DIR, "checkpoints")
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(CKPT_DIR, exist_ok=True)
 
-print("[1] 导入 pipeline...")
+logger.info("[1] 导入 pipeline...")
 import soundfile as sf
 from acestep.pipeline_ace_step import ACEStepPipeline
 
-print("[2] 创建 pipe...")
+logger.info("[2] 创建 pipe...")
 pipe = ACEStepPipeline(
     checkpoint_dir=CKPT_DIR,
     dtype="bfloat16",
     cpu_offload=True,
     torch_compile=False,
 )
-print("[3] 加载 checkpoint...")
+logger.info("[3] 加载 checkpoint...")
 pipe.load_checkpoint(CKPT_DIR)
 pipe.loaded = True
-print("[4] 模型加载完成")
+logger.info("[4] 模型加载完成")
 
 
 def generate_music(
@@ -69,7 +71,7 @@ def generate_music(
         safe_prompt = "".join(c for c in prompt if c.isalnum() or c in (" ", "_", "-")).strip()[:30]
         output_path = os.path.join(OUT_DIR, f"{safe_prompt}_{timestamp}.wav")
 
-    print(f"[5] 生成音乐 | prompt: {prompt} | duration: {duration}s | steps: {steps}...")
+    logger.info(f"[5] 生成音乐 | prompt: {prompt} | duration: {duration}s | steps: {steps}...")
 
     t0 = time.time()
 
@@ -115,7 +117,7 @@ def generate_music(
     )
 
     elapsed = time.time() - t0
-    print(f"[6] 生成完成! 耗时: {elapsed:.1f}s")
+    logger.info(f"[6] 生成完成! 耗时: {elapsed:.1f}s")
 
     # result 是 AudioResult 对象
     audio = result.audios[0]
@@ -131,7 +133,7 @@ def generate_music(
         sf.write(output_path, audio.T, sr)
 
     file_size = os.path.getsize(output_path)
-    print(f"[7] 已保存: {output_path} ({file_size // 1024}KB)")
+    logger.info(f"[7] 已保存: {output_path} ({file_size // 1024}KB)")
 
     return output_path
 
@@ -139,8 +141,8 @@ def generate_music(
 # === 命令行入口 ===
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("用法: python ace_step_music_runner.py <prompt> <duration> <steps> [guidance_scale] [output_path]")
-        print("示例: python ace_step_music_runner.py '古风音乐' 30 27 7.0 /path/to/output.wav")
+        logger.info("用法: python ace_step_music_runner.py <prompt> <duration> <steps> [guidance_scale] [output_path]")
+        logger.info("示例: python ace_step_music_runner.py '古风音乐' 30 27 7.0 /path/to/output.wav")
         sys.exit(1)
 
     prompt = sys.argv[1]
@@ -151,10 +153,10 @@ if __name__ == "__main__":
 
     try:
         result_path = generate_music(prompt, duration, steps, guidance_scale, output_path)
-        print(f"SUCCESS: {result_path}")
+        logger.info(f"SUCCESS: {result_path}")
         sys.exit(0)
     except Exception as e:
-        print(f"ERROR: {str(e)}")
+        logger.info(f"ERROR: {str(e)}")
         import traceback
 
         traceback.print_exc()

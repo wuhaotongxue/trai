@@ -10,6 +10,8 @@ import os
 import sys
 import uuid
 
+from loguru import logger
+
 # 添加 src 目录到 sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
@@ -27,7 +29,7 @@ def create_admin_user(username: str, password: str, display_name: str):
         existing = session.scalar(query)
 
         if existing:
-            print(f"用户 {username} 已存在，跳过创建")
+            logger.info(f"用户 {username} 已存在，跳过创建")
             return
 
         # 创建密码哈希
@@ -48,14 +50,14 @@ def create_admin_user(username: str, password: str, display_name: str):
 
         session.add(user)
         session.commit()
-        print(f"已创建管理员用户: {username}")
+        logger.info(f"已创建管理员用户: {username}")
     finally:
         session.close()
 
 
 def main():
     """主函数"""
-    print("开始初始化管理员用户...")
+    logger.info("开始初始化管理员用户...")
 
     # 创建 admin 用户
     create_admin_user("admin", "Tuoren@@2026", "系统管理员")
@@ -63,7 +65,7 @@ def main():
     # 创建 wuhao 用户
     create_admin_user("wuhao", "Tuoren@@2026", "吴浩")
 
-    print("管理员用户初始化完成!")
+    logger.info("管理员用户初始化完成!")
 
 
 if __name__ == "__main__":

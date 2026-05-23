@@ -272,38 +272,38 @@ def main() -> None:
         oldest = min(s["created_at"] for s in sessions) if sessions else None
         newest = max(s["created_at"] for s in sessions) if sessions else None
 
-        print(f"\n{'=' * 60}")
-        print("查询结果预览")
-        print(f"{'=' * 60}")
-        print(f"  符合条件的会话: {total} 个")
-        print(f"  其中空会话: {empty_count} 个")
-        print(f"  涉及用户: {len(users)} 个")
+        logger.info(f"\n{'=' * 60}")
+        logger.info("查询结果预览")
+        logger.info(f"{'=' * 60}")
+        logger.info(f"  符合条件的会话: {total} 个")
+        logger.info(f"  其中空会话: {empty_count} 个")
+        logger.info(f"  涉及用户: {len(users)} 个")
         if oldest:
-            print(f"  最早创建: {oldest.strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(f"  最早创建: {oldest.strftime('%Y-%m-%d %H:%M:%S')}")
         if newest:
-            print(f"  最新创建: {newest.strftime('%Y-%m-%d %H:%M:%S')}")
+            logger.info(f"  最新创建: {newest.strftime('%Y-%m-%d %H:%M:%S')}")
 
         # 显示前 20 条
-        print(f"\n前 {min(20, total)} 条会话:")
-        print(f"  {'会话ID':<40} | {'标题':<20} | {'消息数':>5} | {'用户':<15} | {'创建时间'}")
-        print(f"  {'-' * 40} | {'-' * 20} | {'-' * 5} | {'-' * 15} | {'-' * 20}")
+        logger.info(f"\n前 {min(20, total)} 条会话:")
+        logger.info(f"  {'会话ID':<40} | {'标题':<20} | {'消息数':>5} | {'用户':<15} | {'创建时间'}")
+        logger.info(f"  {'-' * 40} | {'-' * 20} | {'-' * 5} | {'-' * 15} | {'-' * 20}")
         for s in sessions[:20]:
             title = (s["title"] or "（无标题）")[:18]
             uid = (s["user_id"] or "anonymous")[:13]
             created = s["created_at"].strftime("%Y-%m-%d %H:%M") if s["created_at"] else "—"
-            print(f"  {s['session_id']:<40} | {title:<20} | {s['message_count']:>5} | {uid:<15} | {created}")
+            logger.info(f"  {s['session_id']:<40} | {title:<20} | {s['message_count']:>5} | {uid:<15} | {created}")
 
         if total > 20:
-            print(f"  ... 还有 {total - 20} 条")
+            logger.info(f"  ... 还有 {total - 20} 条")
 
-        print(f"{'=' * 60}")
+        logger.info(f"{'=' * 60}")
 
         if is_dry_run:
-            print(f"\n[预览模式] 以上 {total} 个会话将被删除")
-            print("[预览模式] 添加 --confirm 参数以确认删除")
-            print("[预览模式] 示例: python -m scripts.delete_sessions --title '新对话' --confirm")
+            logger.info(f"\n[预览模式] 以上 {total} 个会话将被删除")
+            logger.info("[预览模式] 添加 --confirm 参数以确认删除")
+            logger.info("[预览模式] 示例: python -m scripts.delete_sessions --title '新对话' --confirm")
         else:
-            print(f"\n[确认删除] 即将删除 {total} 个会话...")
+            logger.info(f"\n[确认删除] 即将删除 {total} 个会话...")
             session_ids = [s["session_id"] for s in sessions]
             deleted_count = delete_sessions_batch(
                 db_session=session,

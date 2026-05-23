@@ -9,6 +9,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from loguru import logger
+
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
@@ -73,13 +75,13 @@ def add_performance_indexes():
 
             try:
                 conn.execute(text(sql))
-                print(f"✅ Created index: {idx['name']} | {idx['description']}")
+                logger.info(f"✅ Created index: {idx['name']} | {idx['description']}")
             except Exception as e:
-                print(f"❌ Failed to create index {idx['name']}: {e}")
+                logger.error(f"❌ Failed to create index {idx['name']}: {e}")
 
         conn.commit()
 
-    print("\n🎉 Performance indexes created successfully!")
+    logger.info("\n🎉 Performance indexes created successfully!")
 
 
 if __name__ == "__main__":

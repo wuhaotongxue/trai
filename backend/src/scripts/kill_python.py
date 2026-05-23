@@ -1,9 +1,11 @@
 import os
 import subprocess
 
+from loguru import logger
+
 # Get current Python process PID
 current_pid = os.getpid()
-print(f"Current PID: {current_pid}")
+logger.info(f"Current PID: {current_pid}")
 
 # Get all Python PIDs via PowerShell
 result = subprocess.run(
@@ -19,13 +21,13 @@ for line in result.stdout.strip().split("\n"):
         if pid != current_pid:
             pids.append(pid)
 
-print(f"Found {len(pids)} other Python processes: {pids}")
+logger.info(f"Found {len(pids)} other Python processes: {pids}")
 
 for pid in pids:
     try:
         os.kill(pid, 9)
-        print(f"Killed PID {pid}")
+        logger.info(f"Killed PID {pid}")
     except Exception as e:
-        print(f"Failed to kill PID {pid}: {e}")
+        logger.error(f"Failed to kill PID {pid}: {e}")
 
-print("Done")
+logger.info("Done")

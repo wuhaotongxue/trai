@@ -89,7 +89,7 @@ if __name__ == "__main__":
         from dotenv import load_dotenv
 
         env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
-        print("Loading env from:", env_path)
+        logger.info("Loading env from:", env_path)
         load_dotenv(env_path)
     except ImportError:
         pass
