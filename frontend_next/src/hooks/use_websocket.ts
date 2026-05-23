@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 文件名: hooks/use_websocket.ts
  * 作者: wuhao

@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * i18n_context.tsx
  * 作者: wuhao

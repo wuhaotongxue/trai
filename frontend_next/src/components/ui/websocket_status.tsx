@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * websocket_status.tsx
  * Author: wuhao

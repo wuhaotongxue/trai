@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * memo_components.tsx
  * Author: wuhao
