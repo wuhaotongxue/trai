@@ -1,34 +1,35 @@
 ---
 name: "weekend_proactive_cleanup"
-description: "MANDATORY BEHAVIOR: Proactively clean up ALL garbage/test files without being asked. Invoke when doing ANY cleanup or weekend work to ensure extreme thoroughness."
+description: "强制行为: 在被要求清理垃圾或在周末工作时主动调用. 全局搜索并清理所有遗留的测试脚本、媒体文件及其他临时文件, 确保项目极致整洁."
 ---
 
 # Weekend Proactive Cleanup (周末不加班/极致主动清理法则)
 
-**CRITICAL: NEVER MAKE THE USER POINT OUT GARBAGE FILES ONE BY ONE.**
+**CRITICAL: 永远不要让用户逐一指出垃圾文件在哪里.**
 
-## When to Apply
-- Any time the user asks to "clean up" or "delete unused files".
-- Any time it is a weekend (or the user mentions "周末", "不想上班").
-- Any time the user expresses frustration about incomplete work ("怎么没有清理完整").
+## 适用场景 (When to Apply)
+- 任何时候用户要求 "清理" 或 "删除无用文件".
+- 任何时候是周末 (或用户提到 "周末", "不想上班").
+- 任何时候用户对清理不彻底表达不满 ("怎么没有清理完整").
 
-## Rules
+## 规则 (Rules)
 
-### 1. Extreme Thoroughness (极致彻底)
-Do not just look at one specific directory (e.g., `tests/`). You MUST globally search the entire project (`find .`) for:
-- Loose temporary scripts (`test_*.py`, `check_*.py`, `temp_*.py`, `run_*.py`).
-- Audio/Video test files (`*.wav`, `*.mp4`, `*.mp3`).
-- Image test files (`*.png`, `*.jpg`).
-- Temporary archives (`*.tar.gz`, `*.zip`).
-- Local SQLite dev DBs (`*.sqlite3`, `*.db`) unless explicitly allowed.
-- Any output files (`output.txt`, `*.html`).
+### 1. 极致彻底 (Extreme Thoroughness)
+不要只盯着特定目录 (例如 `tests/`). 你必须全局搜索整个项目 (`find .`) 以查找:
+- 散落的临时脚本 (`test_*.py`, `check_*.py`, `temp_*.py`, `run_*.py`).
+- 音视频测试文件 (`*.wav`, `*.mp4`, `*.mp3`).
+- 图片测试文件 (`*.png`, `*.jpg`).
+- 临时压缩包 (`*.tar.gz`, `*.zip`).
+- 本地 SQLite 开发数据库 (`*.sqlite3`, `*.db`) 除非明确允许保留.
+- 任何输出文件 (`output.txt`, `*.html`).
 
-### 2. Proactive Discovery (主动发现)
-If the user mentions 1 file, assume there are 10 more like it. Use `find` or `ls` with wildcards to hunt them down. 
-**NEVER say:** "I deleted X. Let me know if there's anything else."
-**INSTEAD do:** "I deleted X, and I proactively searched for similar files and also deleted Y, Z, and W."
+### 2. 主动发现 (Proactive Discovery)
+如果用户提到 1 个文件, 假定还有 10 个类似文件. 使用带有通配符的 `find` 或 `ls` 将它们揪出来.
+**绝对禁止说:** "我删除了 X. 如果还有其他文件请告诉我."
+**必须这样做:** "我删除了 X, 并且我主动搜索了类似文件, 一并清理了 Y, Z 和 W."
 
-### 3. Empathy and Efficiency (共情与高效)
-- Remember that the user does not want to work on weekends. 
-- Get it right the FIRST time. Do not make the user repeat instructions.
-- Ensure no syntax errors or incomplete code are left behind (run `ruff` and `compileall`).
+### 3. 共情与高效 (Empathy and Efficiency)
+- 记住用户不想在周末加班.
+- 一次性做对. 不要让用户重复指令.
+- 确保没有留下语法错误或不完整的代码 (清理后运行 `ruff` 和 `compileall`).
+

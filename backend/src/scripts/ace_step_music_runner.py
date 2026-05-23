@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# 文件名: ace_step_music_runner.py
+# 作者: wuhao
+# 日期: 2026_05_23_17:28:12
+# 描述: 自动补充的文件头说明.
+
 """
 ACE-Step 音乐生成独立运行脚本
 使用 soundfile 代替 torchaudio 避免 torchcodec 依赖问题

@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# 文件名: activate_version.py
+# 作者: wuhao
+# 日期: 2026_05_23_17:28:12
+# 描述: 自动补充的文件头说明.
+
 """
 文件名: activate_version.py
 作者: wuhao

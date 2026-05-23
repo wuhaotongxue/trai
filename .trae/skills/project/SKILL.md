@@ -144,6 +144,7 @@ TRAI 项目管理相关规范的统一入口。
     <li>尤其是全局性的规范（如 <code>project_management</code>、<code>backend_code_check_wuhao</code> 等），必须将其作为行为准则。</li>
     <li><strong>日志规范统一</strong>：写入 <code>md/error_logs</code> 或其他周报/日志时，必须首先查阅同级目录下的历史文件，<strong>完整复刻已有的文件结构、标题格式、层级标签</strong>，严禁自创格式（如随意使用 "错误日志: AI 行为异常与对话复盘分析" 作为标题）。</li>
     <li><strong>图片资源管理</strong>：涉及到问题截图、复盘截图时，必须将图片移动至其对应的文档同级目录（如 <code>md/error_logs/2026_W22/</code> 下），并使用英文/拼音进行规范化重命名（如 <code>error_delete_md_warning.png</code>），禁止将图片随意散落在根目录或使用纯中文命名。</li>
+    <li><strong>语言与标点红线</strong>：创建/修改 Skills 文件、编写代码注释和文档说明时，<strong>能用中文就用中文</strong>。但在所有中文表述中，<strong>绝对禁止使用全角中文标点</strong>，必须统一使用半角英文标点（<code>, . ! ? :</code>）。</li>
   </ul>
 </div>
 
