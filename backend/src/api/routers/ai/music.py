@@ -3,9 +3,8 @@
 import os
 import uuid
 from datetime import datetime
-from typing import Optional
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from infrastructure.ai.local_music_client import get_music_client
@@ -16,10 +15,10 @@ router = APIRouter(prefix="/music", tags=["ai", "music"])
 class MusicGenerateRequest(BaseModel):
     """音乐生成请求"""
     prompt: str = Field(..., description="音乐描述/提示词", min_length=1, max_length=500)
-    duration: Optional[float] = Field(30.0, description="音频时长（秒）", ge=5, le=300)
-    steps: Optional[int] = Field(27, description="推理步数", ge=1, le=100)
-    guidance_scale: Optional[float] = Field(7.0, description="引导强度", ge=1.0, le=20.0)
-    model: Optional[str] = Field("ace-step", description="模型名称 (ace-step)")
+    duration: float | None = Field(30.0, description="音频时长（秒）", ge=5, le=300)
+    steps: int | None = Field(27, description="推理步数", ge=1, le=100)
+    guidance_scale: float | None = Field(7.0, description="引导强度", ge=1.0, le=20.0)
+    model: str | None = Field("ace-step", description="模型名称 (ace-step)")
 
 
 class MusicGenerateResponse(BaseModel):
@@ -27,10 +26,10 @@ class MusicGenerateResponse(BaseModel):
     success: bool
     task_id: str
     message: str
-    music_url: Optional[str] = None
-    file_path: Optional[str] = None
-    duration: Optional[float] = None
-    error: Optional[str] = None
+    music_url: str | None = None
+    file_path: str | None = None
+    duration: float | None = None
+    error: str | None = None
 
 
 class MusicController:
@@ -110,8 +109,9 @@ class MusicController:
         返回:
             FileResponse: 音频文件
         """
-        from fastapi.responses import FileResponse
         from urllib.parse import unquote
+
+        from fastapi.responses import FileResponse
 
         # 解码 URL 编码的文件名
         filename = unquote(filename)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: error_log_recorder.py
 # 作者: wuhao
 # 日期: 2026_05_22_17:29:22

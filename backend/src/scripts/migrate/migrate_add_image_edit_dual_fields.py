@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: migrate_add_image_edit_dual_fields.py
 # 作者: wuhao
 # 日期: 2026_05_20

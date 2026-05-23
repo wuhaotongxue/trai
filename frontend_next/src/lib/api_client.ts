@@ -1,5 +1,4 @@
 import Cookies from "js-cookie";
-import Cookies from "js-cookie";
 /**
  * api_client.ts
  * 作者: wuhao

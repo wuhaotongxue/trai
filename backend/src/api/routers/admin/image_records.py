@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_records.py
 # 作者: wuhao
 # 日期: 2026_05_20_0830
@@ -8,7 +7,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -18,7 +16,6 @@ from sqlalchemy.orm import Session
 from api.deps import CurrentUser, CurrentUserOptional
 from infrastructure.database import get_db_session
 from infrastructure.repositories.image_record_repository import ImageRecordRepository
-
 
 router = APIRouter()
 

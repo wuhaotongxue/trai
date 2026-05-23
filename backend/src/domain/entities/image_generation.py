@@ -65,7 +65,7 @@ class ImageGeneration:
     completed_at: datetime | None = None
 
     @classmethod
-    def with_task_id(cls, task_id: str, **kwargs: Any) -> "ImageGeneration":
+    def with_task_id(cls, task_id: str, **kwargs: Any) -> ImageGeneration:
         """使用外部指定的 task_id 创建实体（避免内部自动生成导致 ID 不一致）"""
         entity = cls(**kwargs)
         entity.task_id = task_id

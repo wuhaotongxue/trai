@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: video.py
 # 作者: wuhao
 # 日期: 2026_05_20
@@ -10,21 +9,18 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
-from infrastructure.database import get_session
 from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
     get_feishu_ai_notify_service,
 )
-from infrastructure.repositories.session_repository import SessionRepository
 from infrastructure.storage.s3_storage import S3StorageService
-
 
 router = APIRouter()
 
@@ -116,22 +112,22 @@ def _send_video_generated_notify(
 
             prompt_short = prompt[:100] + ("..." if len(prompt) > 100 else "")
             content_lines = [
-                f"\U0001f3ac AI 视频生成完成",
-                f"",
+                "\U0001f3ac AI 视频生成完成",
+                "",
                 f"\U0001f389 用户: {user_name}",
                 f"\U0001f3a5 模型: {model}",
                 f"\U0001f3a5 分辨率: {resolution}",
                 f"\U0001f4ca 帧数: {frames}",
                 f"\U0001f517 任务ID: {task_id[:16]}...",
-                f"",
+                "",
                 f"\U0001f4d7 Prompt: {prompt_short}",
-                f"",
-                f"\U0001f517 Presigned URL (30天有效期):",
+                "",
+                "\U0001f517 Presigned URL (30天有效期):",
                 f"{video_url}",
-                f"",
-                f"\U0001f517 公共域名 URL:",
+                "",
+                "\U0001f517 公共域名 URL:",
                 f"{public_url}",
-                f"",
+                "",
                 f"\U0001f4e6 S3对象键: {object_key}",
             ]
             wecom_content = "\n".join(content_lines)
@@ -210,10 +206,9 @@ async def generate_video(
     )
 
     try:
-        import time as _time
-
         # Step 0: 环境检查
         import socket
+        import time as _time
         hostname = socket.gethostname()
         try:
             host_ip = socket.gethostbyname(hostname)

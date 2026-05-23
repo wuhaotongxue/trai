@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: delete_sessions.py
 # 作者: wuhao
 # 日期: 2026_05_20
@@ -17,7 +16,6 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -26,14 +24,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from loguru import logger
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 
 from infrastructure.database.database import get_database
 from infrastructure.database.models import ChatSessionModel, MessageModel
 
 
 def get_session_count_filter(
-    db_session: "Session",
+    db_session: Session,
     session_ids: list[str],
 ) -> dict[str, int]:
     """获取每个会话的消息数量
@@ -60,7 +58,7 @@ def get_session_count_filter(
 
 
 def query_sessions(
-    db_session: "Session",
+    db_session: Session,
     title: str | None = None,
     title_prefix: str | None = None,
     older_than_days: int | None = None,
@@ -111,7 +109,7 @@ def query_sessions(
 
 
 def delete_sessions_batch(
-    db_session: "Session",
+    db_session: Session,
     session_ids: list[str],
     operator_id: str = "script",
     operator_name: str = "delete_sessions.py",
@@ -281,7 +279,7 @@ def main() -> None:
         newest = max(s["created_at"] for s in sessions) if sessions else None
 
         print(f"\n{'=' * 60}")
-        print(f"查询结果预览")
+        print("查询结果预览")
         print(f"{'=' * 60}")
         print(f"  符合条件的会话: {total} 个")
         print(f"  其中空会话: {empty_count} 个")
@@ -308,8 +306,8 @@ def main() -> None:
 
         if is_dry_run:
             print(f"\n[预览模式] 以上 {total} 个会话将被删除")
-            print(f"[预览模式] 添加 --confirm 参数以确认删除")
-            print(f"[预览模式] 示例: python -m scripts.delete_sessions --title '新对话' --confirm")
+            print("[预览模式] 添加 --confirm 参数以确认删除")
+            print("[预览模式] 示例: python -m scripts.delete_sessions --title '新对话' --confirm")
         else:
             print(f"\n[确认删除] 即将删除 {total} 个会话...")
             session_ids = [s["session_id"] for s in sessions]

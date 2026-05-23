@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: local_asr_client.py
 # 作者: wuhao
 # 日期: 2026_05_22_17:29:22
@@ -80,21 +79,21 @@ class LocalASRClient:
             model = self._get_model()
             logger.info(f"开始本地 ASR 识别: {audio_path}")
             res = model.generate(input=str(audio_path), batch_size_s=300)
-            
+
             if not res or not isinstance(res, list):
                 return ""
-                
+
             text = res[0].get("text", "")
             timestamp = res[0].get("timestamp", [])
-            
+
             if not text:
                 return ""
-                
+
             # 获取音频时长
             duration_s = 0
             try:
-                import wave
                 import contextlib
+                import wave
                 with contextlib.closing(wave.open(str(audio_path), 'rb')) as f:
                     frames = f.getnframes()
                     rate = f.getframerate()
@@ -102,7 +101,7 @@ class LocalASRClient:
             except Exception as e:
                 logger.warning(f"无法获取音频时长, 将使用默认估算: {e}")
                 duration_s = len(text) * 0.3  # 粗略估算: 约 3 字/秒
-                
+
             # 如果有时间戳, 生成真实 SRT
             if timestamp and len(timestamp) > 0:
                 return self._build_srt_from_timestamp(text, timestamp)
@@ -130,10 +129,10 @@ class LocalASRClient:
         # 这里做简化处理, 把整个句子当作一句, 使用开始和结束时间
         start_ms = timestamp[0][0]
         end_ms = timestamp[-1][1]
-        
+
         start_str = self._format_time_ms(start_ms)
         end_str = self._format_time_ms(end_ms)
-        
+
         lines = [
             "1",
             f"{start_str} --> {end_str}",
@@ -159,32 +158,32 @@ class LocalASRClient:
         lines = []
         chunk_size = 20
         total_chunks = (len(text) + chunk_size - 1) // chunk_size
-        
+
         # 如果没有获取到时长或文本极短, 默认每块 3 秒
         if duration_s <= 0:
             duration_s = total_chunks * 3.0
-            
+
         time_per_chunk = duration_s / total_chunks if total_chunks > 0 else 3.0
-        
+
         idx = 1
         for i in range(0, len(text), chunk_size):
             chunk = text[i : i + chunk_size]
             start_s = (idx - 1) * time_per_chunk
             end_s = idx * time_per_chunk
-            
+
             # 最后一块对齐到总时长
             if idx == total_chunks:
                 end_s = duration_s
-                
+
             start_str = self._format_time_s(start_s)
             end_str = self._format_time_s(end_s)
-            
+
             lines.append(str(idx))
             lines.append(f"{start_str} --> {end_str}")
             lines.append(chunk)
             lines.append("")
             idx += 1
-            
+
         return "\n".join(lines)
 
     def _format_time_s(self, seconds: float) -> str:
@@ -205,7 +204,7 @@ class LocalASRClient:
         s = int(seconds % 60)
         ms = int((seconds - int(seconds)) * 1000)
         return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
-        
+
     def _format_time_ms(self, ms: int) -> str:
         """
         格式化毫秒数为 SRT 时间字符串.
