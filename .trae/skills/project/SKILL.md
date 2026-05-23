@@ -122,6 +122,33 @@ TRAI 项目管理相关规范的统一入口。
 
 ---
 
+## 4. 文档保护红线 (CRITICAL)
+
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 绝对禁止删除文档</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li>当被要求清理"非代码文件"或"无用文件"时, <strong>绝对禁止</strong>删除 <code>.md</code> 文件夹、<code>README.md</code>、项目期数总结以及任何说明性文档.</li>
+    <li>文档是项目的"地基", 除非明确指名道姓要求删除某个特定的 md 文件, 否则默认永久保留.</li>
+    <li>任何删除操作前, 必须仔细甄别文件类型, 避免误伤重要文档资产.</li>
+  </ul>
+</div>
+
+---
+
+## 5. Agent 行为规范与 Skills 强制检查 (CRITICAL)
+
+<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#E65100;">&#x26A0; 强制先决条件</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>每次执行代码修改、命令执行或撰写重要文档前，必须首先调用相关的 Skills 进行上下文同步。</strong></li>
+    <li>尤其是全局性的规范（如 <code>project_management</code>、<code>backend_code_check_wuhao</code> 等），必须将其作为行为准则。</li>
+    <li><strong>日志规范统一</strong>：写入 <code>md/error_logs</code> 或其他周报/日志时，必须首先查阅同级目录下的历史文件，<strong>完整复刻已有的文件结构、标题格式、层级标签</strong>，严禁自创格式（如随意使用 "错误日志: AI 行为异常与对话复盘分析" 作为标题）。</li>
+    <li><strong>图片资源管理</strong>：涉及到问题截图、复盘截图时，必须将图片移动至其对应的文档同级目录（如 <code>md/error_logs/2026_W22/</code> 下），并使用英文/拼音进行规范化重命名（如 <code>error_delete_md_warning.png</code>），禁止将图片随意散落在根目录或使用纯中文命名。</li>
+  </ul>
+</div>
+
+---
+
 ## 版本历史
 
 | 版本 | 日期 | 更新内容 |
