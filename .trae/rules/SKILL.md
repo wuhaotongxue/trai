@@ -70,5 +70,5 @@ TRAI 项目开发规范文档，按领域解耦为四个子目录。
 - 必须使用英文半角标点 (`,`, `.`, `!`, `:`)
 
 ### 5. 隐私与安全
-- **禁止**提交 `.env`、`config.json` 等包含真实密码的配置文件
+- **禁止**提交 `backend/env/*.env`、`config.json` 等包含真实密码的配置文件
 - `.env.example` 必须脱敏（Token 替换为 `YOUR_TOKEN_HERE`）

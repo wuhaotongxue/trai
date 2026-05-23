@@ -239,7 +239,7 @@ TRAI 项目共有 **16 个 Skills**, 按功能分为 **5 大类**:
 - **snake_case 强制**: 所有标识符, 文件名, 目录名
 - **禁止 kebab-case**: `add-num` 这种用横杠连接的形式绝对禁止
 - **全局 .gitignore**: 只允许在项目根目录存在一个, 子模块规则统一提升
-- **禁止上传依赖包/构建产物**: node_modules, .venv, __pycache__, dist, release
+- **禁止上传依赖包/构建产物**: node_modules, .venv, __pycache__, dist, release, 以及 `backend/env/*.env` 等敏感配置
 - **前端/客户端强制 pnpm**: 禁止 npm/yarn
 - **国内镜像源**: `--registry=https://registry.npmmirror.com`
 - **禁止上传 >500MB 文件**

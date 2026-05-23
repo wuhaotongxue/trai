@@ -142,12 +142,14 @@ async def create_session(req: CreateSessionRequest) -> CreateSessionResponse:
 # 描述: {该文件的用途/功能简述，一句话概括}
 ```
 
-#### .env.example 文件模板
+#### env 文件夹下配置文件模板 (如 notify_robot.env)
+
+> **注意：** 环境变量已不再使用单一的 `.env` 文件，而是按模块拆分到 `backend/env/` 目录下（例如 `notify_robot.env`, `llm.env` 等）。修改或新增配置必须在此目录下进行。
 
 ```bash
 # ============================================================
 # TRAI Backend Environment Configuration
-# 文件名: .env
+# 文件名: {对应的.env文件名，如 notify_robot.env}
 # 作者: wuhao
 # 日期: 2026_04_09_10:47:12  ← 当前时间（每次修改配置时刷新）
 # 描述: {配置文件用途简述}
