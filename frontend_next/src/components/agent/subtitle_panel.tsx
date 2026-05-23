@@ -56,8 +56,9 @@ const TARGET_LANG_OPTIONS: Array<{ label: string; value: string }> = [
 ];
 
 export function SubtitlePanel() {
-  const [taskType, setTaskType] = useState<"subtitle" | "separate" | "clone">("subtitle");
+  const [taskType, setTaskType] = useState<"subtitle" | "separate" | "clone" | "lipsync">("subtitle");
   const [file, setFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [targetLang, setTargetLang] = useState<string>("en");
   const [sourceLang, setSourceLang] = useState<string>("");
   const [includeZh, setIncludeZh] = useState<boolean>(true);
@@ -129,22 +130,38 @@ export function SubtitlePanel() {
   const currentHistory = history.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE);
 
   const handleSubmit = async () => {
-    if (!file) return;
+    if (!file) {
+      setError("请先上传文件");
+      return;
+    }
+    
+    if (taskType === "lipsync" && !audioFile) {
+      setError("口型同步需要上传目标音频文件");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
     setCurrentTask(null);
     try {
       const form = new FormData();
-      form.append("file", file);
       
-      let endpoint = "/ai/subtitle/generate";
+      let endpoint = "/ai/video/subtitle";
       if (taskType === "separate") {
         endpoint = "/ai/video/separate";
+        form.append("file", file);
       } else if (taskType === "clone") {
         endpoint = "/ai/video/clone";
+        form.append("file", file);
+      } else if (taskType === "lipsync") {
+        endpoint = "/ai/video/lipsync";
+        form.append("video_file", file);
+        form.append("audio_file", audioFile!);
+      } else {
+        form.append("file", file);
       }
 
-      if (taskType === "subtitle" || taskType === "clone") {
+      if (taskType === "subtitle" || taskType === "clone" || taskType === "lipsync") {
         form.append("target_lang", targetLang);
         form.append("source_lang", sourceLang.trim());
         form.append("include_zh_subtitle", String(includeZh));
@@ -201,10 +218,18 @@ export function SubtitlePanel() {
                     🎵 人声分离
                   </button>
                   <button
+                    type="button"
                     className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "clone" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
                     onClick={() => setTaskType("clone")}
                   >
                     🗣️ 声音克隆
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "lipsync" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    onClick={() => setTaskType("lipsync")}
+                  >
+                    👄 口型同步
                   </button>
                 </div>
               </div>
@@ -231,13 +256,42 @@ export function SubtitlePanel() {
                       <Upload className="h-6 w-6 text-muted-foreground" />
                     )}
                     <span className="text-sm font-medium text-foreground line-clamp-1 break-all">
-                      {file ? file.name : "点击或拖拽文件"}
+                      {file ? file.name : "点击或拖拽原始视频/音频"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "支持视频与音频格式"}
+                      {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "支持 MP4, MOV, WAV, MP3 等"}
                     </span>
                   </div>
                 </div>
+
+                {taskType === "lipsync" && (
+                  <div className="relative border-2 border-dashed border-border hover:border-primary/50 transition-colors rounded-lg p-6 text-center cursor-pointer bg-background mt-2">
+                    <input
+                      aria-label="上传目标音频"
+                      title="上传目标音频"
+                      type="file"
+                      accept="audio/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) setAudioFile(f);
+                      }}
+                    />
+                    <div className="flex flex-col items-center justify-center gap-2 pointer-events-none">
+                      {audioFile ? (
+                        <FileAudio className="h-6 w-6 text-primary" />
+                      ) : (
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      )}
+                      <span className="text-sm font-medium text-foreground line-clamp-1 break-all">
+                        {audioFile ? audioFile.name : "点击或拖拽目标音频至此"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {audioFile ? `${(audioFile.size / 1024 / 1024).toFixed(2)} MB` : "Wav2Lip 需要目标配音 (支持 WAV, MP3)"}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 参数设置 */}
@@ -405,7 +459,7 @@ export function SubtitlePanel() {
                       {activeRecord.status === "completed" ? "已完成" : activeRecord.status === "failed" ? "失败" : "处理中"}
                     </span>
                     <span className="bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded font-medium ml-auto">
-                      {activeRecord.task_type === "separate" ? "🎵 人声分离" : activeRecord.task_type === "clone" ? "🗣️ 声音克隆" : "📝 字幕生成"}
+                      {activeRecord.task_type === "separate" ? "🎵 人声分离" : activeRecord.task_type === "clone" ? "🗣️ 声音克隆" : activeRecord.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
                     </span>
                   </div>
                 </div>
@@ -444,9 +498,14 @@ export function SubtitlePanel() {
                         <ExternalLink className="h-3 w-3 mr-1" /> 成品视频
                       </Button>
                     )}
-                    {!activeRecord.zh_srt_url && !activeRecord.target_srt_url && !activeRecord.output_video_url && !activeRecord.vocal_url && !activeRecord.bgm_url && activeRecord.status === "completed" && (
-                      <span className="text-xs text-muted-foreground py-1">无生成文件</span>
-                    )}
+                    {!activeRecord.zh_srt_url &&
+                      !activeRecord.target_srt_url &&
+                      !activeRecord.output_video_url &&
+                      !activeRecord.vocal_url &&
+                      !activeRecord.bgm_url &&
+                      activeRecord.status === "completed" && (
+                        <span className="text-xs text-muted-foreground py-1">无生成文件</span>
+                      )}
                   </div>
                 </div>
               </div>
@@ -501,7 +560,7 @@ export function SubtitlePanel() {
                   </span>
                 </div>
                 <div className="mt-2 text-[10px] text-blue-600 bg-blue-500/10 inline-block px-1.5 py-0.5 rounded">
-                  {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : "📝 字幕生成"}
+                  {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : record.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
                 </div>
               </div>
             ))}
