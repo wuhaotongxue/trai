@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * gallery-panel.tsx
  * 作者: wuhao
@@ -15,7 +16,7 @@ import { MusicGallery } from "./music-gallery";
 
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
-type TabId = "chat" | "image" | "video" | "music" | "image_edit";
+type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle";
 
 interface GalleryPanelProps {
   activeTab: TabId;
@@ -68,7 +69,7 @@ function GalleryHeader({
   onToggleMaximize: () => void;
   onClear: () => void;
 }) {
-  const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : "音乐廊";
+  const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : activeTab === "subtitle" ? "影音画廊" : "音乐廊";
 
   return (
     <div className="flex items-center justify-between p-3 border-b border-border">

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: feishu_ai_notify.py
 # 作者: wuhao
 # 日期: 2026_05_20_0815
@@ -13,7 +12,7 @@ from __future__ import annotations
 import base64
 import io
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
@@ -41,6 +40,26 @@ class AINotifyEvent(Enum):
 
     VIDEO_GENERATED = "video_generated"
     """视频生成完成"""
+
+    SUBTITLE_GENERATED = "subtitle_generated"
+    """字幕生成完成"""
+
+
+@dataclass
+class SubtitleGeneratedEvent:
+    """字幕生成完成事件数据"""
+
+    user_id: str
+    user_name: str
+    file_name: str
+    target_lang: str
+    burn_mode: str
+    status: str
+    error_message: str = ""
+    task_id: str = ""
+    zh_srt_url: str = ""
+    target_srt_url: str = ""
+    output_video_url: str = ""
 
 
 @dataclass
@@ -214,7 +233,7 @@ class FeishuAINotifyService:
             return ""
 
         try:
-            b64_data = base64.b64encode(image_data).decode("utf-8")
+            _ = base64.b64encode(image_data).decode("utf-8")
             upload_resp = client.post(
                 feishu_upload_url,
                 headers={"Authorization": f"Bearer {access_token}"},
@@ -543,6 +562,96 @@ class FeishuAINotifyService:
                 "tag": "note",
                 "elements": [
                     {"tag": "plain_text", "content": f"TRAI AI \u901a\u77e5 \u00b7 {now_str}"},
+                ],
+            },
+        )
+
+        return self._send_card(card)
+
+    def notify_subtitle_generated(self, event: SubtitleGeneratedEvent) -> dict[str, Any]:
+        """通知字幕生成完成或失败事件"""
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        status_text = "✅ 成功" if event.status == "completed" else "❌ 失败"
+        template_color = "green" if event.status == "completed" else "red"
+
+        card = {
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": f"🎬 AI 字幕生成通知 ({status_text})"},
+                    "template": template_color,
+                },
+                "elements": [
+                    {
+                        "tag": "div",
+                        "fields": [
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**发起用户**\n{event.user_name}"},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**原文件名**\n{event.file_name}"},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**目标语言**\n{event.target_lang}"},
+                            },
+                            {
+                                "is_short": True,
+                                "text": {"tag": "lark_md", "content": f"**烧录模式**\n{event.burn_mode}"},
+                            },
+                        ],
+                    },
+                    {"tag": "hr"},
+                ],
+            },
+        }
+
+        if event.error_message:
+            card["card"]["elements"].append(
+                {
+                    "tag": "div",
+                    "text": {"tag": "lark_md", "content": f"**错误信息**\n{event.error_message}"},
+                }
+            )
+
+        actions = []
+        if event.zh_srt_url:
+            actions.append({
+                "tag": "button",
+                "text": {"tag": "plain_text", "content": "⬇️ 下载 1"},
+                "type": "default",
+                "url": event.zh_srt_url,
+            })
+        if event.target_srt_url:
+            actions.append({
+                "tag": "button",
+                "text": {"tag": "plain_text", "content": "⬇️ 下载 2"},
+                "type": "default",
+                "url": event.target_srt_url,
+            })
+        if event.output_video_url:
+            actions.append({
+                "tag": "button",
+                "text": {"tag": "plain_text", "content": "▶️ 播放 / 下载 3"},
+                "type": "primary",
+                "url": event.output_video_url,
+            })
+
+        if actions:
+            card["card"]["elements"].append({
+                "tag": "action",
+                "actions": actions,
+            })
+
+        card["card"]["elements"].append(
+            {
+                "tag": "note",
+                "elements": [
+                    {"tag": "plain_text", "content": f"TRAI AI 通知 · Task ID: {event.task_id} · {now_str}"},
                 ],
             },
         )

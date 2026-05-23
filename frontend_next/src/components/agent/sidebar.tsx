@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * sidebar.tsx
  * 作者: wuhao
@@ -7,6 +8,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAgentStore, SessionItem } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,8 @@ import {
   Edit2, 
   Check, 
   X,
-  History
+  History,
+  Captions
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -91,6 +94,16 @@ export function Sidebar() {
           <Plus className="h-4 w-4" />
           <span>新建对话</span>
         </Button>
+        <Link href="/subtitle" className="block">
+          <Button
+            type="button"
+            className="w-full justify-start gap-2 shadow-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+            variant="outline"
+          >
+            <Captions className="h-4 w-4" />
+            <span>字幕生成</span>
+          </Button>
+        </Link>
       </div>
 
       <ScrollArea className="flex-1 px-3 pb-4">

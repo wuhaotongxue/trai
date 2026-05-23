@@ -15,6 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from infrastructure.database.database import Base
 from infrastructure.database.department_model import DepartmentModel, UserDepartmentMappingModel
 from infrastructure.database.user_model import UserModel
+from infrastructure.database.subtitle_record_model import SubtitleRecordModel
 
 
 class ChatSessionModel(Base):

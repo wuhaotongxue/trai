@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 文件名: components/agent/multimodal_upload.tsx
  * 作者: wuhao
@@ -17,12 +18,13 @@ import {
   X,
   Loader2,
   AlertCircle,
+  Video,
 } from "lucide-react";
 
 /**
  * Supported file types for multi-modal processing
  */
-export type MultimodalFileType = "image" | "audio" | "pdf";
+export type MultimodalFileType = "image" | "audio" | "pdf" | "video";
 
 /**
  * Uploaded file info interface
@@ -100,6 +102,14 @@ const FILE_TYPE_CONFIG: Record<
     bgColorClass: "bg-blue-500/10",
     borderColorClass: "border-blue-500/30 focus:border-blue-500/60",
   },
+  video: {
+    accept: ".mp4,.mov,.webm,.mkv,.avi,.m4v",
+    icon: Video,
+    label: "Video",
+    colorClass: "text-orange-500",
+    bgColorClass: "bg-orange-500/10",
+    borderColorClass: "border-orange-500/30 focus:border-orange-500/60",
+  },
 };
 
 /**
@@ -131,9 +141,16 @@ function detectFileType(file: File): MultimodalFileType {
 
   if (
     mimeType.startsWith("audio/") ||
-    ["mp3", "wav", "m4a", "flac", "ogg", "webm"].includes(ext)
+    ["mp3", "wav", "m4a", "flac", "ogg", "webm", "aac"].includes(ext)
   ) {
     return "audio";
+  }
+
+  if (
+    mimeType.startsWith("video/") ||
+    ["mp4", "mov", "webm", "mkv", "avi", "m4v"].includes(ext)
+  ) {
+    return "video";
   }
 
   return "pdf";

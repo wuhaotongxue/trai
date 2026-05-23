@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import Cookies from "js-cookie";
 /**
  * api_client.ts
  * 作者: wuhao
@@ -108,12 +109,13 @@ export async function request<T>(
   options: RequestInit & ApiOptions = {}
 ): Promise<T> {
   const token = typeof window !== "undefined" ? Cookies.get("token") : null;
+  const isFormDataBody = typeof FormData !== "undefined" && options.body instanceof FormData;
 
   let res = await fetch(`${getApiBase()}${path}`, {
     ...options,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormDataBody ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -134,7 +136,7 @@ export async function request<T>(
         ...options,
         credentials: "include",
         headers: {
-          "Content-Type": "application/json",
+          ...(isFormDataBody ? {} : { "Content-Type": "application/json" }),
           Authorization: `Bearer ${newToken}`,
           ...options.headers,
         },
@@ -759,7 +761,7 @@ export const multimodalApi = {
 
     const token =
       typeof window !== "undefined"
-        ? require("js-cookie").get("token")
+        ? Cookies.get("token")
         : null;
 
     const res = await fetch(`${getApiBase()}/agent/multimodal/vision/analyze`, {
@@ -824,7 +826,7 @@ export const multimodalApi = {
 
     const token =
       typeof window !== "undefined"
-        ? require("js-cookie").get("token")
+        ? Cookies.get("token")
         : null;
 
     const res = await fetch(
@@ -862,7 +864,7 @@ export const multimodalApi = {
   ): Promise<Blob> => {
     const token =
       typeof window !== "undefined"
-        ? require("js-cookie").get("token")
+        ? Cookies.get("token")
         : null;
 
     const res = await fetch(
@@ -909,7 +911,7 @@ export const multimodalApi = {
 
     const token =
       typeof window !== "undefined"
-        ? require("js-cookie").get("token")
+        ? Cookies.get("token")
         : null;
 
     const res = await fetch(
@@ -942,7 +944,7 @@ export const multimodalApi = {
 
     const token =
       typeof window !== "undefined"
-        ? require("js-cookie").get("token")
+        ? Cookies.get("token")
         : null;
 
     const res = await fetch(
