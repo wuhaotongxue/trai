@@ -25,33 +25,54 @@ from infrastructure.database import get_session
 from infrastructure.database.models import ClientReleaseModel
 
 
-def main():
-    version = sys.argv[1] if len(sys.argv) > 1 else input("Enter version to activate: ")
-
-    session = get_session()
-    try:
-        # 先取消所有版本的激活状态
-        session.execute(
-            update(ClientReleaseModel).where(ClientReleaseModel.t_is_active == True).values(t_is_active=False)
-        )
-
-        # 激活指定版本
-        result = session.execute(
-            update(ClientReleaseModel).where(ClientReleaseModel.t_version == version).values(t_is_active=True)
-        )
-
-        if result.rowcount > 0:
-            session.commit()
-            print(f"[OK] Version {version} activated!")
-        else:
-            print(f"[ERROR] Version {version} not found")
-
-    except Exception as e:
-        session.rollback()
-        print(f"[ERROR] {e}")
-    finally:
-        session.close()
+class ActivateVersionRunner:
+    """
+    执行版本激活任务的封装类.
+    
+    参数:
+        无
+        
+    返回:
+        None: 无返回值
+        
+    异常:
+        Exception: 捕获并记录所有执行异常
+    """
+    
+    @staticmethod
+    def main():
+        """
+        激活指定版本的主函数.
+        
+        参数:
+            无
+            
+        返回:
+            None: 无返回值
+            
+        异常:
+            Exception: 捕获并记录所有执行异常
+        """
+        version = sys.argv[1] if len(sys.argv) > 1 else input("Enter version to activate: ")
+        
+        with get_session() as session:
+            # 先取消所有版本的激活状态
+            session.execute(
+                update(ClientReleaseModel).where(ClientReleaseModel.t_is_active == True).values(t_is_active=False)
+            )
+            
+            # 激活目标版本
+            result = session.execute(
+                update(ClientReleaseModel).where(ClientReleaseModel.t_version == version).values(t_is_active=True)
+            )
+            
+            if result.rowcount > 0:
+                session.commit()
+                print(f"✅ Successfully activated version {version}")
+            else:
+                session.rollback()
+                print(f"❌ Version {version} not found in database")
 
 
 if __name__ == "__main__":
-    main()
+    ActivateVersionRunner.main()
