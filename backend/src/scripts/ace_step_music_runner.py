@@ -4,8 +4,8 @@ ACE-Step 音乐生成独立运行脚本
 使用 soundfile 代替 torchaudio 避免 torchcodec 依赖问题
 进程隔离，绕过 Python 3.13 keyword 参数限制
 """
-import sys
 import os
+import sys
 import time
 
 # === sys.path 隔离 ===
@@ -22,9 +22,8 @@ os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(CKPT_DIR, exist_ok=True)
 
 print("[1] 导入 pipeline...")
-from acestep.pipeline_ace_step import ACEStepPipeline
-from acestep.cpu_offload import CpuOffloader
 import soundfile as sf
+from acestep.pipeline_ace_step import ACEStepPipeline
 
 print("[2] 创建 pipe...")
 pipe = ACEStepPipeline(

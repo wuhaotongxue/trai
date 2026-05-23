@@ -5,7 +5,6 @@
 # 描述: 数据库表结构文档 API
 
 from datetime import datetime
-
 from typing import Any
 
 from fastapi import APIRouter, Depends

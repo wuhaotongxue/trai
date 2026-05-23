@@ -124,10 +124,10 @@ async def login(
     x_forwarded_for = fastapi_request.headers.get("X-Forwarded-For")
     if x_forwarded_for:
         client_ip = x_forwarded_for.split(",")[0].strip()
-    
+
     user_agent = fastapi_request.headers.get("User-Agent")
     ua_info = UserAgentParser.parse(user_agent)
-    
+
     # 从数据库查询用户
     user_repo = UserRepository(session)
     user = user_repo.get_by_username(request.username)
@@ -149,7 +149,7 @@ async def login(
             os=ua_info.get("os"),
             failure_reason="用户名不存在",
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": 401, "message": "用户名或密码错误"},
@@ -180,7 +180,7 @@ async def login(
                 os=ua_info.get("os"),
                 failure_reason="密码哈希不存在",
             )
-            
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"code": 401, "message": "用户名或密码错误"},
@@ -204,7 +204,7 @@ async def login(
                 os=ua_info.get("os"),
                 failure_reason="密码错误",
             )
-            
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"code": 401, "message": "用户名或密码错误"},
@@ -228,7 +228,7 @@ async def login(
             os=ua_info.get("os"),
             failure_reason="账户已被禁用",
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "账户已被禁用,请联系管理员"},
@@ -245,7 +245,7 @@ async def login(
 
     # 记录登录 IP
     user_repo.update(user.user_id, last_login_ip=client_ip)
-    
+
     # 记录登录成功日志
     login_log_repo = LoginLogRepository(session)
     login_log_repo.create_log(

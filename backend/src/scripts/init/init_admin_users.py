@@ -25,15 +25,15 @@ def create_admin_user(username: str, password: str, display_name: str):
         # 检查用户是否已存在
         query = session.query(UserModel).filter(UserModel.t_username == username)
         existing = session.scalar(query)
-        
+
         if existing:
             print(f"用户 {username} 已存在，跳过创建")
             return
-        
+
         # 创建密码哈希
         password_service = PasswordService()
         password_hash = password_service.hash(password)
-        
+
         # 创建用户
         user = UserModel(
             t_user_id=str(uuid.uuid4()),
@@ -45,7 +45,7 @@ def create_admin_user(username: str, password: str, display_name: str):
             t_status="active",
             t_created_by="system",
         )
-        
+
         session.add(user)
         session.commit()
         print(f"已创建管理员用户: {username}")
@@ -56,13 +56,13 @@ def create_admin_user(username: str, password: str, display_name: str):
 def main():
     """主函数"""
     print("开始初始化管理员用户...")
-    
+
     # 创建 admin 用户
     create_admin_user("admin", "Tuoren@@2026", "系统管理员")
-    
+
     # 创建 wuhao 用户
     create_admin_user("wuhao", "Tuoren@@2026", "吴浩")
-    
+
     print("管理员用户初始化完成!")
 
 

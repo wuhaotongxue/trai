@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image.py
 # 作者: wuhao
 # 日期: 2026_05_20_0830
@@ -10,7 +9,6 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
@@ -32,7 +30,6 @@ from infrastructure.notify.feishu_ai_notify import (
     get_feishu_ai_notify_service,
 )
 from infrastructure.repositories.image_record_repository import ImageRecordRepository
-
 
 router = APIRouter()
 

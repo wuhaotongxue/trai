@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
 # 日期: 2026_05_19
@@ -22,7 +21,6 @@ import torch
 from loguru import logger
 
 from core.exceptions import ExternalServiceError
-
 
 # Qwen-Image-Edit-2511 约需 ~30GB 显存（bf16），预留 2GB 余量
 _MIN_FREE_GB = 30
@@ -494,8 +492,8 @@ class LocalImageEditClient:
 
     def _load_image(self, image_input: str | bytes) -> Any:
         """加载图片为 PIL.Image"""
-        from PIL import Image
         import requests
+        from PIL import Image
 
         if isinstance(image_input, bytes):
             return Image.open(io.BytesIO(image_input))
@@ -567,7 +565,7 @@ class LocalImageEditClient:
                 image2.save(img2_path, format="PNG")
                 logger.info(f"[2/6] 图片写入临时文件 | 路径2: {img2_path} | 大小: {os.path.getsize(img2_path):,} bytes")
             else:
-                logger.info(f"[2/6] 单图模式，跳过第二张图片")
+                logger.info("[2/6] 单图模式，跳过第二张图片")
         except Exception as error:
             if os.path.exists(img1_path):
                 os.unlink(img1_path)

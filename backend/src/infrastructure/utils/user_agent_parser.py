@@ -7,14 +7,14 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class UserAgentParser:
     """User-Agent 解析器"""
 
     @staticmethod
-    def parse(user_agent: Optional[str]) -> Dict[str, Any]:
+    def parse(user_agent: str | None) -> dict[str, Any]:
         """
         解析 User-Agent 字符串，提取设备类型、浏览器和操作系统信息
 
@@ -27,7 +27,7 @@ class UserAgentParser:
         if not user_agent:
             return {"device_type": None, "browser": None, "os": None}
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "device_type": None,
             "browser": None,
             "os": None,
@@ -48,7 +48,7 @@ class UserAgentParser:
         return result
 
     @staticmethod
-    def _parse_os(user_agent: str) -> Optional[str]:
+    def _parse_os(user_agent: str) -> str | None:
         """解析操作系统"""
         os_patterns = [
             (r"Windows NT 10\.0", "Windows 10"),
@@ -73,7 +73,7 @@ class UserAgentParser:
         return None
 
     @staticmethod
-    def _parse_browser(user_agent: str) -> Optional[str]:
+    def _parse_browser(user_agent: str) -> str | None:
         """解析浏览器"""
         browser_patterns = [
             (r"Edg/", "Microsoft Edge"),
@@ -98,7 +98,7 @@ class UserAgentParser:
         return None
 
     @staticmethod
-    def _parse_device_type(user_agent: str) -> Optional[str]:
+    def _parse_device_type(user_agent: str) -> str | None:
         """解析设备类型"""
         device_patterns = [
             (r"Mobile|Android.*Mobile|iPhone|iPad|iPod", "Mobile"),
