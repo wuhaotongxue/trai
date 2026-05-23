@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: video_generation_client.py
 # 作者: wuhao
 # 日期: 2026_05_23_14:00:00
@@ -10,14 +9,14 @@ from __future__ import annotations
 import asyncio
 import os
 import urllib.request
-from typing import Any
-
-from loguru import logger
 
 import dashscope
 from dashscope import VideoSynthesis
+from loguru import logger
+
 from core.exceptions import ExternalServiceError
 from infrastructure.storage.s3_storage import S3StorageService
+
 
 class VideoGenerationClient:
     """视频生成客户端 (基于 DashScope API)."""
@@ -39,7 +38,7 @@ class VideoGenerationClient:
         model: str = "cogvideox",
         task_id: str = "default_task",
         user_id: str = "anonymous",
-        tenant_id: str = "default"
+        tenant_id: str = "default",
     ) -> str:
         """
         调用模型生成视频.
@@ -60,9 +59,9 @@ class VideoGenerationClient:
         """
         try:
             logger.info(f"开始视频生成 | model: {model} | prompt: {prompt} | image: {image_url}")
-            
+
             loop = asyncio.get_running_loop()
-            
+
             # 使用同步方法包装成异步
             def _call_api():
                 if image_url:
@@ -80,48 +79,48 @@ class VideoGenerationClient:
                     )
 
             response = await loop.run_in_executor(None, _call_api)
-            
+
             if response.status_code != 200:
                 raise ExternalServiceError(f"视频生成提交失败: {response.code} - {response.message}")
-            
+
             task_id_remote = response.output.task_id
             logger.info(f"视频生成任务已提交 | task_id: {task_id_remote}, 正在轮询状态...")
-            
+
             # 轮询获取结果
             def _wait_api():
                 return VideoSynthesis.wait(task_id_remote)
-                
+
             result = await loop.run_in_executor(None, _wait_api)
-            
+
             if result.status_code != 200:
                 raise ExternalServiceError(f"视频生成获取失败: {result.code} - {result.message}")
-            
+
             if result.output.task_status == "SUCCEEDED":
                 video_url_remote = result.output.video_url
                 logger.info(f"视频生成成功 | 远程 URL: {video_url_remote}")
-                
+
                 # 下载到本地并上传至 S3 (以满足平台统一管控和持久化规范)
                 logger.info("开始下载生成的视频并转存 S3")
                 local_path = f"/tmp/trai_workspace/{task_id}_gen.mp4"
                 os.makedirs("/tmp/trai_workspace", exist_ok=True)
-                
+
                 def _download():
                     urllib.request.urlretrieve(video_url_remote, local_path)
-                
+
                 await loop.run_in_executor(None, _download)
-                
+
                 s3_key = f"private/tenants/{tenant_id}/ai_generated/videos/{user_id}/{task_id}.mp4"
                 self._s3.upload_file(local_path, s3_key)
-                
+
                 final_url = self._s3.get_long_term_url(s3_key)
-                
+
                 if os.path.exists(local_path):
                     os.remove(local_path)
-                    
+
                 return final_url
             else:
                 raise ExternalServiceError(f"视频生成状态异常: {result.output.task_status} - {result.output.message}")
-                
+
         except Exception as e:
             logger.error(f"视频生成失败: {e}")
             raise ExternalServiceError(str(e))

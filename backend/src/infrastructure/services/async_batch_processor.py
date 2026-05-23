@@ -10,13 +10,13 @@ import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from loguru import logger
 
 
-class BatchStatus(str, Enum):
+class BatchStatus(StrEnum):
     """批处理任务状态"""
 
     PENDING = "pending"

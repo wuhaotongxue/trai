@@ -363,7 +363,6 @@ class SessionSearchRouter:
             UnifiedResponse: 统一响应格式
         """
         try:
-
             user_id = current_user.get("user_id")
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)

@@ -73,7 +73,10 @@ def load_all_tools() -> list[ToolDefinition]:
     """
     get_tool_registry()
 
-    enabled_str = os.getenv("TOOL_ENABLED_LIST", "weather,calculator,search,translate,wecom_contact,video_dubbing,music_creator,video_generator")
+    enabled_str = os.getenv(
+        "TOOL_ENABLED_LIST",
+        "weather,calculator,search,translate,wecom_contact,video_dubbing,music_creator,video_generator",
+    )
     tool_names = [t.strip() for t in enabled_str.split(",") if t.strip()]
 
     registered: list[ToolDefinition] = []

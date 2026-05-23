@@ -160,15 +160,15 @@ class LocalImageEditClient:
                 "from PIL import Image\n"
                 "\n"
                 "def _main():\n"
-                "    print(\"[1/7] 初始化完成 | GPU数量: \" + str(torch.cuda.device_count()), flush=True)\n"
+                '    print("[1/7] 初始化完成 | GPU数量: " + str(torch.cuda.device_count()), flush=True)\n'
                 "\n"
                 "    pipe = QwenImageEditPlusPipeline.from_pretrained(\n"
-                "        \"" + model_path + "\",\n"
+                '        "' + model_path + '",\n'
                 "        torch_dtype=torch.bfloat16,\n"
                 "    )\n"
-                "    print(\"[2/7] 模型加载完成\", flush=True)\n"
+                '    print("[2/7] 模型加载完成", flush=True)\n'
                 "\n"
-                "    for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                '    for name in ("transformer", "vae", "text_encoder"):\n'
                 "        obj = getattr(pipe, name, None)\n"
                 "        if obj is not None:\n"
                 "            remove_hook_from_module(obj)\n"
@@ -176,9 +176,9 @@ class LocalImageEditClient:
                 "    pipe.enable_model_cpu_offload()\n"
                 "\n"
                 "    def _pipe_eval():\n"
-                "        for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                '        for name in ("transformer", "vae", "text_encoder"):\n'
                 "            obj = getattr(pipe, name, None)\n"
-                "            if obj is not None and callable(getattr(obj, \"eval\", None)):\n"
+                '            if obj is not None and callable(getattr(obj, "eval", None)):\n'
                 "                obj.eval()\n"
                 "    pipe.eval = _pipe_eval\n"
                 "\n"
@@ -188,15 +188,15 @@ class LocalImageEditClient:
                 "    image2 = Image.open(img_path_2)\n"
                 "    image1.load()\n"
                 "    image2.load()\n"
-                "    print(\"[3/7] 图片加载完成 | 图1: \" + str(image1.size) + \" | 图2: \" + str(image2.size), flush=True)\n"
+                '    print("[3/7] 图片加载完成 | 图1: " + str(image1.size) + " | 图2: " + str(image2.size), flush=True)\n'
                 "\n"
                 "    generator = None\n"
                 "    _seed = " + repr(seed) + "\n"
                 "    if _seed is not None and _seed >= 0:\n"
-                "        generator = torch.Generator(device=\"cuda\").manual_seed(_seed)\n"
+                '        generator = torch.Generator(device="cuda").manual_seed(_seed)\n'
                 "\n"
-                "    _seed_str = str(_seed) if _seed is not None else \"随机\"\n"
-                "    print(\"[4/7] 开始推理 | 步数: " + str(steps) + " | seed: \" + _seed_str, flush=True)\n"
+                '    _seed_str = str(_seed) if _seed is not None else "随机"\n'
+                '    print("[4/7] 开始推理 | 步数: ' + str(steps) + ' | seed: " + _seed_str, flush=True)\n'
                 "\n"
                 "    result = pipe(\n"
                 "        image=[image1, image2],\n"
@@ -206,36 +206,36 @@ class LocalImageEditClient:
                 "        num_inference_steps=" + repr(steps) + ",\n"
                 "        generator=generator,\n"
                 "        true_cfg_scale=4.0,\n"
-                "        negative_prompt=\"bad quality, blurry, deformed\",\n"
+                '        negative_prompt="bad quality, blurry, deformed",\n'
                 "        num_images_per_prompt=1,\n"
                 "    )\n"
-                "    print(\"[5/7] 推理完成，开始后处理\", flush=True)\n"
+                '    print("[5/7] 推理完成，开始后处理", flush=True)\n'
                 "\n"
-                "    output_image = result.images[0] if hasattr(result, \"images\") else result[0]\n"
+                '    output_image = result.images[0] if hasattr(result, "images") else result[0]\n'
                 "\n"
                 "    arr = np.array(output_image)\n"
                 "    if arr.max() == 0 and arr.min() == 0:\n"
-                "        print(\"WARNING: output is all black/zero!\", file=sys.stderr)\n"
+                '        print("WARNING: output is all black/zero!", file=sys.stderr)\n'
                 "        sys.stderr.flush()\n"
                 "\n"
-                "    print(\"[6/7] 图片编码中 | 尺寸: \" + str(output_image.width) + \"x\" + str(output_image.height), flush=True)\n"
+                '    print("[6/7] 图片编码中 | 尺寸: " + str(output_image.width) + "x" + str(output_image.height), flush=True)\n'
                 "\n"
                 "    buf = io.BytesIO()\n"
-                "    output_image.save(buf, format=\"PNG\")\n"
-                "    output_b64 = base64.b64encode(buf.getvalue()).decode(\"utf-8\")\n"
+                '    output_image.save(buf, format="PNG")\n'
+                '    output_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")\n'
                 "\n"
                 "    print(json.dumps({\n"
-                "        \"image_base64\": output_b64,\n"
-                "        \"width\": output_image.width,\n"
-                "        \"height\": output_image.height,\n"
-                "        \"steps\": " + repr(steps) + ",\n"
-                "        \"seed\": " + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
-                "        \"is_dual\": True,\n"
-                "        \"stats\": {\"min\": int(arr.min()), \"max\": int(arr.max()), \"mean\": float(arr.mean())},\n"
+                '        "image_base64": output_b64,\n'
+                '        "width": output_image.width,\n'
+                '        "height": output_image.height,\n'
+                '        "steps": ' + repr(steps) + ",\n"
+                '        "seed": ' + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
+                '        "is_dual": True,\n'
+                '        "stats": {"min": int(arr.min()), "max": int(arr.max()), "mean": float(arr.mean())},\n'
                 "    }))\n"
-                "    print(\"[7/7] 完成\", flush=True)\n"
+                '    print("[7/7] 完成", flush=True)\n'
                 "\n"
-                "if __name__ == \"__main__\":\n"
+                'if __name__ == "__main__":\n'
                 "    try:\n"
                 "        _main()\n"
                 "    except Exception:\n"
@@ -260,15 +260,15 @@ class LocalImageEditClient:
                 "from PIL import Image\n"
                 "\n"
                 "def _main():\n"
-                "    print(\"[1/7] 初始化完成 | GPU数量: \" + str(torch.cuda.device_count()), flush=True)\n"
+                '    print("[1/7] 初始化完成 | GPU数量: " + str(torch.cuda.device_count()), flush=True)\n'
                 "\n"
                 "    pipe = QwenImageEditPlusPipeline.from_pretrained(\n"
-                "        \"" + model_path + "\",\n"
+                '        "' + model_path + '",\n'
                 "        torch_dtype=torch.bfloat16,\n"
                 "    )\n"
-                "    print(\"[2/7] 模型加载完成\", flush=True)\n"
+                '    print("[2/7] 模型加载完成", flush=True)\n'
                 "\n"
-                "    for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                '    for name in ("transformer", "vae", "text_encoder"):\n'
                 "        obj = getattr(pipe, name, None)\n"
                 "        if obj is not None:\n"
                 "            remove_hook_from_module(obj)\n"
@@ -276,24 +276,24 @@ class LocalImageEditClient:
                 "    pipe.enable_model_cpu_offload()\n"
                 "\n"
                 "    def _pipe_eval():\n"
-                "        for name in (\"transformer\", \"vae\", \"text_encoder\"):\n"
+                '        for name in ("transformer", "vae", "text_encoder"):\n'
                 "            obj = getattr(pipe, name, None)\n"
-                "            if obj is not None and callable(getattr(obj, \"eval\", None)):\n"
+                '            if obj is not None and callable(getattr(obj, "eval", None)):\n'
                 "                obj.eval()\n"
                 "    pipe.eval = _pipe_eval\n"
                 "\n"
                 "    img_path = sys.argv[1]\n"
                 "    image = Image.open(img_path)\n"
                 "    image.load()\n"
-                "    print(\"[3/7] 图片加载完成 | 尺寸: \" + str(image.size), flush=True)\n"
+                '    print("[3/7] 图片加载完成 | 尺寸: " + str(image.size), flush=True)\n'
                 "\n"
                 "    generator = None\n"
                 "    _seed = " + repr(seed) + "\n"
                 "    if _seed is not None and _seed >= 0:\n"
-                "        generator = torch.Generator(device=\"cuda\").manual_seed(_seed)\n"
+                '        generator = torch.Generator(device="cuda").manual_seed(_seed)\n'
                 "\n"
-                "    _seed_str = str(_seed) if _seed is not None else \"随机\"\n"
-                "    print(\"[4/7] 开始推理 | 步数: " + str(steps) + " | seed: \" + _seed_str, flush=True)\n"
+                '    _seed_str = str(_seed) if _seed is not None else "随机"\n'
+                '    print("[4/7] 开始推理 | 步数: ' + str(steps) + ' | seed: " + _seed_str, flush=True)\n'
                 "\n"
                 "    result = pipe(\n"
                 "        image=image,\n"
@@ -303,36 +303,36 @@ class LocalImageEditClient:
                 "        num_inference_steps=" + repr(steps) + ",\n"
                 "        generator=generator,\n"
                 "        true_cfg_scale=4.0,\n"
-                "        negative_prompt=\"bad quality, blurry, deformed\",\n"
+                '        negative_prompt="bad quality, blurry, deformed",\n'
                 "        num_images_per_prompt=1,\n"
                 "    )\n"
-                "    print(\"[5/7] 推理完成，开始后处理\", flush=True)\n"
+                '    print("[5/7] 推理完成，开始后处理", flush=True)\n'
                 "\n"
-                "    output_image = result.images[0] if hasattr(result, \"images\") else result[0]\n"
+                '    output_image = result.images[0] if hasattr(result, "images") else result[0]\n'
                 "\n"
                 "    arr = np.array(output_image)\n"
                 "    if arr.max() == 0 and arr.min() == 0:\n"
-                "        print(\"WARNING: output is all black/zero!\", file=sys.stderr)\n"
+                '        print("WARNING: output is all black/zero!", file=sys.stderr)\n'
                 "        sys.stderr.flush()\n"
                 "\n"
-                "    print(\"[6/7] 图片编码中 | 尺寸: \" + str(output_image.width) + \"x\" + str(output_image.height), flush=True)\n"
+                '    print("[6/7] 图片编码中 | 尺寸: " + str(output_image.width) + "x" + str(output_image.height), flush=True)\n'
                 "\n"
                 "    buf = io.BytesIO()\n"
-                "    output_image.save(buf, format=\"PNG\")\n"
-                "    output_b64 = base64.b64encode(buf.getvalue()).decode(\"utf-8\")\n"
+                '    output_image.save(buf, format="PNG")\n'
+                '    output_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")\n'
                 "\n"
                 "    print(json.dumps({\n"
-                "        \"image_base64\": output_b64,\n"
-                "        \"width\": output_image.width,\n"
-                "        \"height\": output_image.height,\n"
-                "        \"steps\": " + repr(steps) + ",\n"
-                "        \"seed\": " + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
-                "        \"is_dual\": False,\n"
-                "        \"stats\": {\"min\": int(arr.min()), \"max\": int(arr.max()), \"mean\": float(arr.mean())},\n"
+                '        "image_base64": output_b64,\n'
+                '        "width": output_image.width,\n'
+                '        "height": output_image.height,\n'
+                '        "steps": ' + repr(steps) + ",\n"
+                '        "seed": ' + repr(seed) + " if " + repr(seed) + " is not None else -1,\n"
+                '        "is_dual": False,\n'
+                '        "stats": {"min": int(arr.min()), "max": int(arr.max()), "mean": float(arr.mean())},\n'
                 "    }))\n"
-                "    print(\"[7/7] 完成\", flush=True)\n"
+                '    print("[7/7] 完成", flush=True)\n'
                 "\n"
-                "if __name__ == \"__main__\":\n"
+                'if __name__ == "__main__":\n'
                 "    try:\n"
                 "        _main()\n"
                 "    except Exception:\n"
@@ -394,9 +394,7 @@ class LocalImageEditClient:
                 stderr_done = False
 
                 while not (stdout_done and stderr_done):
-                    ready_r, _, _ = _select.select(
-                        [proc.stdout, proc.stderr], [], [], 0.5
-                    )
+                    ready_r, _, _ = _select.select([proc.stdout, proc.stderr], [], [], 0.5)
                     if proc.stdout in ready_r:
                         chunk = os.read(proc.stdout.fileno(), 16384)
                         if not chunk:

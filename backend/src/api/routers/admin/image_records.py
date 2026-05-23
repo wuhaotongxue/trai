@@ -139,7 +139,9 @@ async def list_image_records(
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
     keyword: Annotated[str | None, Query(description="搜索关键词（task_id/用户名/prompt）")] = None,
-    record_type: Annotated[str | None, Query(description="记录类型: text_to_image/image_to_image/image_edit/image_edit_dual")] = None,
+    record_type: Annotated[
+        str | None, Query(description="记录类型: text_to_image/image_to_image/image_edit/image_edit_dual")
+    ] = None,
     status: Annotated[str | None, Query(description="任务状态: pending/processing/completed/failed")] = None,
     user_id: Annotated[str | None, Query(description="用户 ID")] = None,
     start_date: Annotated[str | None, Query(description="开始日期 ISO 格式")] = None,
@@ -205,19 +207,17 @@ async def get_image_record_stats(
     if role != "admin":
         raise HTTPException(status_code=403, detail={"code": 403, "message": "无权访问"})
 
-    stmt = (
-        select(
-            func.count(ImageRecordModel.t_id).label("total"),
-            func.sum(func.case((ImageRecordModel.t_status == "completed", 1), else_=0)).label("completed"),
-            func.sum(func.case((ImageRecordModel.t_status == "failed", 1), else_=0)).label("failed"),
-            func.sum(func.case((ImageRecordModel.t_status == "pending", 1), else_=0)).label("pending"),
-            func.sum(func.case((ImageRecordModel.t_status == "processing", 1), else_=0)).label("processing"),
-            func.sum(func.case((ImageRecordModel.t_record_type == "text_to_image", 1), else_=0)).label("text_to_image"),
-            func.sum(func.case((ImageRecordModel.t_record_type == "image_to_image", 1), else_=0)).label("image_to_image"),
-            func.sum(func.case((ImageRecordModel.t_record_type == "image_edit", 1), else_=0)).label("image_edit"),
-            func.sum(func.case((ImageRecordModel.t_record_type == "image_edit_dual", 1), else_=0)).label("image_edit_dual"),
-        ).where(ImageRecordModel.t_deleted_at.is_(None))
-    )
+    stmt = select(
+        func.count(ImageRecordModel.t_id).label("total"),
+        func.sum(func.case((ImageRecordModel.t_status == "completed", 1), else_=0)).label("completed"),
+        func.sum(func.case((ImageRecordModel.t_status == "failed", 1), else_=0)).label("failed"),
+        func.sum(func.case((ImageRecordModel.t_status == "pending", 1), else_=0)).label("pending"),
+        func.sum(func.case((ImageRecordModel.t_status == "processing", 1), else_=0)).label("processing"),
+        func.sum(func.case((ImageRecordModel.t_record_type == "text_to_image", 1), else_=0)).label("text_to_image"),
+        func.sum(func.case((ImageRecordModel.t_record_type == "image_to_image", 1), else_=0)).label("image_to_image"),
+        func.sum(func.case((ImageRecordModel.t_record_type == "image_edit", 1), else_=0)).label("image_edit"),
+        func.sum(func.case((ImageRecordModel.t_record_type == "image_edit_dual", 1), else_=0)).label("image_edit_dual"),
+    ).where(ImageRecordModel.t_deleted_at.is_(None))
 
     result = session.execute(stmt).first()
 

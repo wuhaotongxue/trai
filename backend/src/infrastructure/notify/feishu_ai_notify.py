@@ -147,8 +147,8 @@ class FeishuAINotifyService:
         webhook_url: str | None = None,
         timeout: int = 30,
     ) -> None:
-        self._webhook_url = webhook_url or os.getenv("NOTIFY_FEISHU_IMAGE_WEBHOOK", "") or os.getenv(
-            "FEISHU_AI_WEBHOOK_URL", ""
+        self._webhook_url = (
+            webhook_url or os.getenv("NOTIFY_FEISHU_IMAGE_WEBHOOK", "") or os.getenv("FEISHU_AI_WEBHOOK_URL", "")
         )
         self._timeout = timeout
 
@@ -208,7 +208,9 @@ class FeishuAINotifyService:
         Returns:
             str: 飞书 image_key，失败时返回空字符串
         """
-        feishu_token_url = os.getenv("FEISHU_UPLOAD_TOKEN_URL", "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal")
+        feishu_token_url = os.getenv(
+            "FEISHU_UPLOAD_TOKEN_URL", "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
+        )
         feishu_upload_url = os.getenv("FEISHU_UPLOAD_URL", "https://open.feishu.cn/open-apis/im/v1/images")
 
         app_id = os.getenv("FEISHU_APP_ID", "")
@@ -332,7 +334,11 @@ class FeishuAINotifyService:
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": "**\u56fe\u7247\u94fe\u63a5**\n[" + event.image_url[:80] + "...\u94fe\u63a5](" + event.image_url + ")",
+                        "content": "**\u56fe\u7247\u94fe\u63a5**\n["
+                        + event.image_url[:80]
+                        + "...\u94fe\u63a5]("
+                        + event.image_url
+                        + ")",
                     },
                 },
             )
@@ -394,7 +400,11 @@ class FeishuAINotifyService:
             if source2_bytes:
                 source2_key = self._upload_image_to_feishu(source2_bytes)
 
-        header_title = "\u2705 AI \u53cc\u56fe\u8054\u52a8\u7f16\u8f91\u5b8c\u6210" if is_dual else "\u2705 AI \u56fe\u7247\u7f16\u8f91\u5b8c\u6210"
+        header_title = (
+            "\u2705 AI \u53cc\u56fe\u8054\u52a8\u7f16\u8f91\u5b8c\u6210"
+            if is_dual
+            else "\u2705 AI \u56fe\u7247\u7f16\u8f91\u5b8c\u6210"
+        )
         template = "purple" if is_dual else "blue"
 
         card = {
@@ -486,12 +496,21 @@ class FeishuAINotifyService:
                 {
                     "tag": "div",
                     "fields": [
-                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
-                         "img": {"img_key": source1_key, "width": 120} if source1_key else None},
-                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
-                         "img": {"img_key": source2_key, "width": 120} if source2_key else None},
-                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
-                         "img": {"img_key": result_image_key, "width": 120} if result_image_key else None},
+                        {
+                            "is_short": True,
+                            "text": {"tag": "lark_md", "content": ""},
+                            "img": {"img_key": source1_key, "width": 120} if source1_key else None,
+                        },
+                        {
+                            "is_short": True,
+                            "text": {"tag": "lark_md", "content": ""},
+                            "img": {"img_key": source2_key, "width": 120} if source2_key else None,
+                        },
+                        {
+                            "is_short": True,
+                            "text": {"tag": "lark_md", "content": ""},
+                            "img": {"img_key": result_image_key, "width": 120} if result_image_key else None,
+                        },
                     ],
                 },
             )
@@ -512,10 +531,16 @@ class FeishuAINotifyService:
                 {
                     "tag": "div",
                     "fields": [
-                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
-                         "img": {"img_key": source1_key, "width": 150}},
-                        {"is_short": True, "text": {"tag": "lark_md", "content": ""},
-                         "img": {"img_key": result_image_key, "width": 150} if result_image_key else None},
+                        {
+                            "is_short": True,
+                            "text": {"tag": "lark_md", "content": ""},
+                            "img": {"img_key": source1_key, "width": 150},
+                        },
+                        {
+                            "is_short": True,
+                            "text": {"tag": "lark_md", "content": ""},
+                            "img": {"img_key": result_image_key, "width": 150} if result_image_key else None,
+                        },
                     ],
                 },
             )
@@ -536,8 +561,11 @@ class FeishuAINotifyService:
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content": "**\u56fe\u7247\u94fe\u63a5**\n[" + event.result_image_url[:80] + "...\u94fe\u63a5]("
-                        + event.result_image_url + ")",
+                        "content": "**\u56fe\u7247\u94fe\u63a5**\n["
+                        + event.result_image_url[:80]
+                        + "...\u94fe\u63a5]("
+                        + event.result_image_url
+                        + ")",
                     },
                 },
             )
@@ -620,32 +648,40 @@ class FeishuAINotifyService:
 
         actions = []
         if event.zh_srt_url:
-            actions.append({
-                "tag": "button",
-                "text": {"tag": "plain_text", "content": "⬇️ 下载 1"},
-                "type": "default",
-                "url": event.zh_srt_url,
-            })
+            actions.append(
+                {
+                    "tag": "button",
+                    "text": {"tag": "plain_text", "content": "⬇️ 下载 1"},
+                    "type": "default",
+                    "url": event.zh_srt_url,
+                }
+            )
         if event.target_srt_url:
-            actions.append({
-                "tag": "button",
-                "text": {"tag": "plain_text", "content": "⬇️ 下载 2"},
-                "type": "default",
-                "url": event.target_srt_url,
-            })
+            actions.append(
+                {
+                    "tag": "button",
+                    "text": {"tag": "plain_text", "content": "⬇️ 下载 2"},
+                    "type": "default",
+                    "url": event.target_srt_url,
+                }
+            )
         if event.output_video_url:
-            actions.append({
-                "tag": "button",
-                "text": {"tag": "plain_text", "content": "▶️ 播放 / 下载 3"},
-                "type": "primary",
-                "url": event.output_video_url,
-            })
+            actions.append(
+                {
+                    "tag": "button",
+                    "text": {"tag": "plain_text", "content": "▶️ 播放 / 下载 3"},
+                    "type": "primary",
+                    "url": event.output_video_url,
+                }
+            )
 
         if actions:
-            card["card"]["elements"].append({
-                "tag": "action",
-                "actions": actions,
-            })
+            card["card"]["elements"].append(
+                {
+                    "tag": "action",
+                    "actions": actions,
+                }
+            )
 
         card["card"]["elements"].append(
             {
@@ -829,7 +865,6 @@ class FeishuAINotifyService:
             },
         }
         return self._send_card(card)
-
 
     def notify_video_generated(self, event: VideoGeneratedEvent) -> dict[str, Any]:
         """通知视频生成完成事件

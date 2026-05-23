@@ -472,6 +472,7 @@ def register_routers(app: FastAPI) -> None:
         init_telemetry()
         # 初始化数据库(单例)，触发建表
         from infrastructure.database import get_database
+
         _ = get_database()
         logger.info("TRAI API 服务启动")
 

@@ -137,11 +137,7 @@ class OpenAIClient:
 
     def _get_stt_model(self) -> str:
         if self._provider == "modelscope":
-            return (
-                os.getenv("STT_MODEL", "")
-                or os.getenv("MODELSCOPE_STT_MODEL", "")
-                or "sensevoice-v1"
-            )
+            return os.getenv("STT_MODEL", "") or os.getenv("MODELSCOPE_STT_MODEL", "") or "sensevoice-v1"
         return (
             os.getenv("STT_MODEL", "")
             or os.getenv("OPENAI_STT_MODEL", "")
@@ -150,11 +146,7 @@ class OpenAIClient:
         )
 
     def _get_tts_model(self) -> str:
-        return (
-            os.getenv("TTS_MODEL", "")
-            or os.getenv("OPENAI_TTS_MODEL", "")
-            or "gpt-4o-mini-tts"
-        )
+        return os.getenv("TTS_MODEL", "") or os.getenv("OPENAI_TTS_MODEL", "") or "gpt-4o-mini-tts"
 
     async def transcribe_audio(
         self,

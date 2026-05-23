@@ -21,12 +21,12 @@ class CosyVoiceClient:
     def clone_and_synthesize(self, text: str, reference_audio_url: str, language: str = "zh") -> bytes:
         """
         零样本声音克隆并合成
-        
+
         Args:
             text: 要合成的文本
             reference_audio_url: 参考音频(原声)的公网可访问URL
             language: 语言提示 (zh, en, ja, ko, 等)
-            
+
         Returns:
             合成后的音频字节数据 (WAV格式)
         """
@@ -44,9 +44,7 @@ class CosyVoiceClient:
             # 2. 合成语音
             logger.info(f"开始语音合成 | 文本长度: {len(text)}")
             synthesizer = SpeechSynthesizer(
-                model="cosyvoice-v1",
-                voice=voice_id,
-                format=AudioFormat.WAV_24000HZ_MONO_16BIT
+                model="cosyvoice-v1", voice=voice_id, format=AudioFormat.WAV_24000HZ_MONO_16BIT
             )
 
             audio_bytes = synthesizer.call(text)

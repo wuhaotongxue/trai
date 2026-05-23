@@ -245,6 +245,7 @@ class AudioSeparateUseCase:
             # 清理临时文件
             try:
                 import shutil
+
                 shutil.rmtree(tmp_dir, ignore_errors=True)
             except Exception:
                 pass
@@ -264,7 +265,7 @@ class AudioSeparateUseCase:
                     error_message=record.error_message or "",
                     task_id=record.task_id,
                     zh_srt_url=record.vocal_url or "",  # hack: 借用字段展示下载按钮
-                    target_srt_url=record.bgm_url or "", # hack
+                    target_srt_url=record.bgm_url or "",  # hack
                     output_video_url="",
                 )
                 self._notifier.notify_subtitle_generated(event)

@@ -44,9 +44,7 @@ class VideoGenerationRequest(BaseModel):
     """视频生成请求"""
 
     prompt: Annotated[str, Field(min_length=1, max_length=2000, description="视频描述")]
-    model: Annotated[str, Field(default="Wan-AI/Wan2.1-T2V-1.3B", description="模型名称")] = (
-        "Wan-AI/Wan2.1-T2V-1.3B"
-    )
+    model: Annotated[str, Field(default="Wan-AI/Wan2.1-T2V-1.3B", description="模型名称")] = "Wan-AI/Wan2.1-T2V-1.3B"
     frames: Annotated[int, Field(default=81, ge=1, le=200, description="视频帧数（约 5fps，81帧约 16 秒）")] = 81
     resolution: Annotated[str, Field(default="1280x720", description="分辨率，如 1280x720 / 1920x1080")] = "1280x720"
 
@@ -161,6 +159,7 @@ def _update_notify_status(task_id: str, notified: bool, notify_status: str) -> N
     try:
         from infrastructure.database import get_session
         from infrastructure.repositories.session_repository import SessionRepository
+
         with get_session() as db:
             repo = SessionRepository(db)
             repo.update_session_extra_data(
@@ -209,6 +208,7 @@ async def generate_video(
         # Step 0: 环境检查
         import socket
         import time as _time
+
         hostname = socket.gethostname()
         try:
             host_ip = socket.gethostbyname(hostname)
@@ -227,8 +227,11 @@ async def generate_video(
         # Step 1: 调用本地模型生成视频
         logger.info(f"[1/5] === 开始调用 Wan2.1-T2V-1.3B 生成视频 === | task_id={task_id}")
         from infrastructure.ai.local_video_client import LocalVideoClient
+
         client = LocalVideoClient()
-        logger.info(f"[1/5] LocalVideoClient 实例化完成 | model={request.model} | frames={request.frames} | resolution={request.resolution}")
+        logger.info(
+            f"[1/5] LocalVideoClient 实例化完成 | model={request.model} | frames={request.frames} | resolution={request.resolution}"
+        )
 
         result = await client.generate(
             prompt=request.prompt,
@@ -249,7 +252,7 @@ async def generate_video(
         size_bytes = len(video_bytes)
         logger.info(
             f"[2/5] === 视频生成完成，等待上传 === | task_id={task_id} | "
-            f"大小: {size_bytes:,} bytes ({size_bytes/1024/1024:.2f} MB) | "
+            f"大小: {size_bytes:,} bytes ({size_bytes / 1024 / 1024:.2f} MB) | "
             f"帧数: {result.get('frames')} | 分辨率: {result.get('resolution')}"
         )
 
@@ -282,10 +285,16 @@ async def generate_video(
         logger.info(f"[5/5] === 发送飞书通知 === | task_id={task_id}")
         background_tasks.add_task(
             _send_video_generated_notify,
-            user_id, username, request.prompt,
-            video_url, object_key, public_url,
-            request.model, task_id,
-            request.frames, request.resolution,
+            user_id,
+            username,
+            request.prompt,
+            video_url,
+            object_key,
+            public_url,
+            request.model,
+            task_id,
+            request.frames,
+            request.resolution,
         )
 
         logger.info(

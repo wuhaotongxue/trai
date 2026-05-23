@@ -20,17 +20,22 @@ from infrastructure.repositories.subtitle_record_repository import SubtitleRecor
 
 router = APIRouter()
 
+
 class SubtitleGenerationResponse(BaseModel):
     """字幕生成/音视频处理的响应模型"""
+
     task_id: str = Field(description="任务 ID")
     status: str = Field(description="任务状态")
     input_type: Literal["video", "audio"] = Field(description="输入类型")
     target_lang: str = Field(description="目标语言代码")
-    burn_mode: Literal["none", "zh", "target", "bilingual", "vocal_separate", "clone_stub"] = Field(description="烧录模式")
+    burn_mode: Literal["none", "zh", "target", "bilingual", "vocal_separate", "clone_stub"] = Field(
+        description="烧录模式"
+    )
     zh_srt_url: str | None = Field(default=None, description="中文字幕 SRT URL")
     target_srt_url: str | None = Field(default=None, description="目标语言 SRT URL")
     output_video_url: str | None = Field(default=None, description="输出视频 URL(仅视频输入且 burn_mode!=none)")
     object_prefix: str = Field(description="S3 对象前缀")
+
 
 def get_separate_usecase(session=Depends(get_db_session)) -> AudioSeparateUseCase:
     """
@@ -47,6 +52,7 @@ def get_separate_usecase(session=Depends(get_db_session)) -> AudioSeparateUseCas
     """
     repo = SubtitleRecordRepository(session)
     return AudioSeparateUseCase(repo)
+
 
 @router.post(
     "/video/separate",
@@ -116,6 +122,7 @@ async def separate_audio(
         burn_mode="none",
         object_prefix=object_prefix,
     )
+
 
 @router.post(
     "/video/lipsync",
@@ -202,6 +209,7 @@ async def lipsync_video(
         burn_mode="none",
         object_prefix="none",
     )
+
 
 @router.post(
     "/video/clone",
@@ -444,12 +452,16 @@ def list_subtitles(
     user_id = current_user.get("user_id", "") if current_user else ""
     safe_user_id = user_id or "anonymous"
 
-    records = session.execute(
-        select(SubtitleRecordModel)
-        .where(SubtitleRecordModel.user_id == safe_user_id)
-        .order_by(desc(SubtitleRecordModel.created_at))
-        .limit(50)
-    ).scalars().all()
+    records = (
+        session.execute(
+            select(SubtitleRecordModel)
+            .where(SubtitleRecordModel.user_id == safe_user_id)
+            .order_by(desc(SubtitleRecordModel.created_at))
+            .limit(50)
+        )
+        .scalars()
+        .all()
+    )
 
     out = []
     for r in records:

@@ -9,14 +9,14 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from fastapi import WebSocket
 from loguru import logger
 
 
-class MessageType(str, Enum):
+class MessageType(StrEnum):
     """消息类型"""
 
     # 系统消息

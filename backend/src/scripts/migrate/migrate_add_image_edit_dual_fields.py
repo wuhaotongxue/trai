@@ -96,6 +96,7 @@ class ImageEditDualMigration:
 if __name__ == "__main__":
     try:
         from dotenv import load_dotenv
+
         env_path = backend_dir / ".env"
         print("Loading env from:", env_path)
         load_dotenv(env_path)

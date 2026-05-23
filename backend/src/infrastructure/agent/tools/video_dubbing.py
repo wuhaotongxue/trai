@@ -50,7 +50,7 @@ class VideoDubbingTool(BaseTool):
                     type="string",
                     description="任务类型：'clone'表示声音克隆，'lipsync'表示口型同步",
                     required=True,
-                    enum=["clone", "lipsync"]
+                    enum=["clone", "lipsync"],
                 ),
                 ToolParameter(
                     name="target_lang",
@@ -63,8 +63,8 @@ class VideoDubbingTool(BaseTool):
                     type="string",
                     description="口型同步需要的目标音频路径 (仅在 lipsync 模式下必填)",
                     required=False,
-                )
-            ]
+                ),
+            ],
         )
 
     @property
@@ -104,7 +104,7 @@ class VideoDubbingTool(BaseTool):
                         target_lang=target_lang,
                         burn_mode="none",
                         object_prefix="none",
-                        file_name=video_path.name
+                        file_name=video_path.name,
                     )
                     await repo.save(record)
                     usecase = CloneVoiceUseCase(repo)
@@ -113,11 +113,7 @@ class VideoDubbingTool(BaseTool):
 
                     return ToolCallResult(
                         success=True,
-                        data={
-                            "task_id": task_id,
-                            "video_url": record.output_video_url,
-                            "message": "声音克隆完成！"
-                        }
+                        data={"task_id": task_id, "video_url": record.output_video_url, "message": "声音克隆完成！"},
                     )
 
                 elif task_type == "lipsync":
@@ -136,7 +132,7 @@ class VideoDubbingTool(BaseTool):
                         target_lang="none",
                         burn_mode="none",
                         object_prefix="none",
-                        file_name=video_path.name
+                        file_name=video_path.name,
                     )
                     await repo.save(record)
                     usecase = LipSyncUseCase(repo)
@@ -144,11 +140,7 @@ class VideoDubbingTool(BaseTool):
 
                     return ToolCallResult(
                         success=True,
-                        data={
-                            "task_id": task_id,
-                            "video_url": record.output_video_url,
-                            "message": "口型同步完成！"
-                        }
+                        data={"task_id": task_id, "video_url": record.output_video_url, "message": "口型同步完成！"},
                     )
 
                 else:

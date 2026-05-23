@@ -22,18 +22,14 @@ class ModelScopeClient:
     """ModelScope 图片生成客户端"""
 
     def __init__(self) -> None:
-        self._base_url: str = os.getenv(
-            "MODELSCOPE_API_BASE",
-            "https://api.modelscope.cn/v1"
-        )
+        self._base_url: str = os.getenv("MODELSCOPE_API_BASE", "https://api.modelscope.cn/v1")
         self._model: str = os.getenv("MODELSCOPE_IMAGE_MODEL", "AI-ModelScope/FLUX.1-dev")
         self._steps: int = int(os.getenv("MODELSCOPE_IMAGE_STEPS", "25"))
         self._default_width: int = int(os.getenv("MODELSCOPE_IMAGE_WIDTH", "1024"))
         self._default_height: int = int(os.getenv("MODELSCOPE_IMAGE_HEIGHT", "1024"))
         self._default_seed: int = int(os.getenv("MODELSCOPE_IMAGE_SEED", "-1"))
         self._local_model_path: str = os.getenv(
-            "MODELSCOPE_IMAGE_MODEL_PATH",
-            "/home/qyjgylc_whf/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
+            "MODELSCOPE_IMAGE_MODEL_PATH", "/home/qyjgylc_whf/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
         )
         self._use_local: bool = self._should_use_local()
 
@@ -107,7 +103,9 @@ class ModelScopeClient:
         """
         from infrastructure.ai.local_image_client import LocalImageClient
 
-        logger.info(f"[1/4] 开始本地图片生成 | 提示词: {prompt[:50]}... | 宽高: {width}x{height} | 步数: {steps} | seed: {seed}")
+        logger.info(
+            f"[1/4] 开始本地图片生成 | 提示词: {prompt[:50]}... | 宽高: {width}x{height} | 步数: {steps} | seed: {seed}"
+        )
 
         client = LocalImageClient()
         result = await client.generate(
@@ -285,10 +283,7 @@ class ModelScopeClient:
         safe_user_id = user_id or "anonymous"
 
         # 生成结果图 S3 对象键
-        result_object_key = (
-            f"private/tenants/{safe_tenant_id}/ai_edited/images/"
-            f"{safe_user_id}/{task_id}.png"
-        )
+        result_object_key = f"private/tenants/{safe_tenant_id}/ai_edited/images/{safe_user_id}/{task_id}.png"
 
         storage = S3StorageService()
         storage.upload_bytes(
