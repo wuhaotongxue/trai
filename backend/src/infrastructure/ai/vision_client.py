@@ -81,8 +81,7 @@ class _VisionModelManager:
 
     def _load_model(self) -> None:
         """懒加载模型，自动选择显存空闲最多的 GPU"""
-        from transformers import Qwen2VLForConditionalGeneration
-        from transformers import Qwen2VLProcessor
+        from transformers import Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 
         model_path = os.getenv(
             "MODELSCOPE_VISION_MODEL_PATH",
@@ -135,24 +134,24 @@ class LocalModelScopeVisionClient:
                 {"type": "text", "text": prompt}
             ]}
         ]
-        
+
         # 使用 apply_chat_template 生成包含 <|image_pad|> 的模板
         prompt_text = processor.tokenizer.apply_chat_template(
-            messages, 
-            tokenize=False, 
+            messages,
+            tokenize=False,
             add_generation_prompt=True
         )
-        
+
         # 使用 Qwen2VLProcessor 处理
         inputs = processor(
             images=[image],
             text=[prompt_text],
             return_tensors="pt",
         )
-        
+
         # 移到模型设备
         device = self._manager._model.device
-        inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v 
+        inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v
                   for k, v in inputs.items()}
         return inputs
 
@@ -255,7 +254,7 @@ class LocalModelScopeVisionClient:
             # 生成
             max_new_tokens = kwargs.get("max_tokens", 2048)
             temperature = kwargs.get("temperature", 0.7)
-            
+
             gen_kwargs = {
                 "max_new_tokens": max_new_tokens,
                 "do_sample": temperature > 0,

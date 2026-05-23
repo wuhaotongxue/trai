@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: image_record_repository.py
 # 作者: wuhao
 # 日期: 2026_05_20_0830

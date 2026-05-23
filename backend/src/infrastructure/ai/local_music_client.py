@@ -1,11 +1,10 @@
 """ACE-Step 音乐生成客户端 - 进程隔离执行"""
 import asyncio
-import sys
 import os
+import subprocess
+import sys
 import time
 import uuid
-import subprocess
-from typing import Optional
 from dataclasses import dataclass
 
 
@@ -13,8 +12,8 @@ from dataclasses import dataclass
 class MusicGenerateResult:
     """音乐生成结果"""
     success: bool
-    file_path: Optional[str] = None
-    error: Optional[str] = None
+    file_path: str | None = None
+    error: str | None = None
     duration: float = 0.0
 
 
@@ -40,8 +39,8 @@ class LocalMusicClient:
     def generate(
         self,
         prompt: str,
-        duration: Optional[float] = None,
-        steps: Optional[int] = None,
+        duration: float | None = None,
+        steps: int | None = None,
         guidance_scale: float = 7.0,
         task: str = "text2music",
     ) -> MusicGenerateResult:
@@ -139,8 +138,8 @@ class LocalMusicClient:
     async def generate_async(
         self,
         prompt: str,
-        duration: Optional[float] = None,
-        steps: Optional[int] = None,
+        duration: float | None = None,
+        steps: int | None = None,
         guidance_scale: float = 7.0,
         task: str = "text2music",
     ) -> MusicGenerateResult:
@@ -158,7 +157,7 @@ class LocalMusicClient:
 
 
 # 全局客户端实例
-_music_client: Optional[LocalMusicClient] = None
+_music_client: LocalMusicClient | None = None
 
 
 def get_music_client() -> LocalMusicClient:

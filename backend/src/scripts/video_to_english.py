@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import annotations
 
@@ -334,7 +333,7 @@ class VideoToEnglishRunner:
         blocks = [b.strip() for b in srt.split("\n\n") if b.strip()]
         entries: list[SrtEntry] = []
         for block in blocks:
-            lines = [l.rstrip() for l in block.split("\n")]
+            lines = [line.rstrip() for line in block.split("\n")]
             if len(lines) < 3:
                 continue
             try:

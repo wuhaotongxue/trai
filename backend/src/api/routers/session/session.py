@@ -13,12 +13,12 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser, CurrentUserOptional
+from api.deps import CurrentUser
 from core.context_manager import ContextManager, get_context_manager
 from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
@@ -375,7 +375,7 @@ async def send_message(
             # 使用本地视觉模型处理图片
             from infrastructure.ai.vision_client import LocalModelScopeVisionClient
             vision_client = LocalModelScopeVisionClient()
-            
+
             # 构建带图片的消息
             user_message = {"role": "user", "content": []}
             if request.content:
@@ -395,13 +395,13 @@ async def send_message(
                     {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
                 )
             managed_messages.append(user_message)
-            
+
             # 调用本地视觉模型
             result = await vision_client.chat(messages=managed_messages)
-            
+
             if result.error:
                 raise Exception(result.error)
-            
+
             ai_content = result.content
         else:
             from infrastructure.ai.openai_client import OpenAIClient
@@ -467,6 +467,7 @@ async def stream_message(
         StreamingResponse: SSE流
     """
     from fastapi.responses import StreamingResponse
+
     from infrastructure.ai.openai_client import OpenAIClient
 
     body = await request.json()
@@ -500,17 +501,17 @@ async def stream_message(
 
     image_object_keys: list[str] = []
     has_new_images = bool(msg.images and len(msg.images) > 0)
-    
+
     if has_new_images:
         logger.info(f"收到新图片上传 | session_id={session_id} | 图片数量={len(msg.images)}")
         valid_image_count = 0
-        
+
         for idx, img_base64 in enumerate(msg.images):
             # 验证图片数据
             if not img_base64 or len(img_base64.strip()) == 0:
                 logger.warning(f"图片 {idx+1} 数据为空")
                 continue
-                
+
             logger.info(f"图片 {idx+1} 原始数据长度={len(img_base64)} 字符")
             if img_base64.startswith("data:"):
                 logger.info(f"图片 {idx+1} 包含 data: 前缀")
@@ -520,7 +521,7 @@ async def stream_message(
                 else:
                     logger.warning(f"图片 {idx+1} 格式异常，无法拆分 base64")
                     continue
-            
+
             raw = img_base64
             if raw.startswith("data:"):
                 parts = raw.split("base64,", 1)
@@ -531,14 +532,14 @@ async def stream_message(
             except Exception as e:
                 logger.warning(f"图片 {idx+1} base64 解码失败: {e}")
                 continue
-                
+
             image_size = len(image_bytes)
-            
+
             # 验证解码后的图片数据
             if image_size == 0:
                 logger.warning(f"图片 {idx+1} 解码后为空")
                 continue
-                
+
             logger.info(f"处理图片 {idx+1} | 解码后大小={image_size} bytes")
 
             ext = "png"
@@ -561,7 +562,7 @@ async def stream_message(
             image_object_keys.append(object_key)
             valid_image_count += 1
             logger.info(f"图片 {idx+1} 已上传 | object_key={object_key}")
-        
+
         # 如果所有图片都无效，返回错误
         if valid_image_count == 0:
             logger.error(f"所有图片数据都无效 | session_id={session_id}")
@@ -585,20 +586,20 @@ async def stream_message(
 
     if image_object_keys:
         logger.info(f"开始处理图片消息 | session_id={session_id} | 图片数量={len(image_object_keys)} | 原始内容='{msg.content[:50]}...'")
-        
+
         # 如果内容为空，自动描述图片
         if not msg.content.strip():
             logger.info("内容为空，开始自动分析图片")
             from infrastructure.ai.vision_client import LocalModelScopeVisionClient
             vision_client = LocalModelScopeVisionClient()
-            
+
             # 获取第一张图片进行分析
             first_image_key = image_object_keys[0]
             logger.info(f"分析图片 | object_key={first_image_key}")
-            
+
             image_bytes = storage.get_object_bytes(first_image_key)
             logger.info(f"读取图片完成 | 大小={len(image_bytes)} bytes")
-            
+
             # 检查图片格式
             if image_bytes.startswith(b"\xff\xd8\xff"):
                 logger.info("图片格式: JPEG")
@@ -610,10 +611,10 @@ async def stream_message(
                 logger.info("图片格式: GIF")
             else:
                 logger.info(f"未知图片格式 | 前20字节: {image_bytes[:20].hex()}")
-            
+
             b64 = base64.b64encode(image_bytes).decode("utf-8")
             logger.info(f"Base64编码后长度: {len(b64)} 字符")
-            
+
             # 使用视觉模型分析图片内容
             try:
                 logger.info("调用视觉模型分析图片...")
@@ -626,10 +627,10 @@ async def stream_message(
             except Exception as e:
                 logger.warning(f"图片分析失败: {e}")
                 auto_description = "分析图片内容"
-            
+
             msg.content = auto_description
             logger.info(f"自动描述已设置 | 内容='{msg.content[:100]}...'")
-        
+
         user_message = {"role": msg.role, "content": [{"type": "text", "text": msg.content}]}
         for object_key in image_object_keys:
             image_bytes = storage.get_object_bytes(object_key)
@@ -657,19 +658,19 @@ async def stream_message(
     async def generate_sse():
         try:
             full_response = ""
-            
+
             if use_local_vision:
                 # 使用本地 Qwen2.5-VL 视觉模型
                 from infrastructure.ai.vision_client import LocalModelScopeVisionClient
                 vision_client = LocalModelScopeVisionClient()
-                
+
                 async for chunk in vision_client.chat_stream(
                     messages=managed_messages,
                 ):
                     full_response += chunk
                     data_json = json.dumps({"event": "token", "data": chunk})
                     yield f"event: token\ndata: {data_json}\n\n"
-                
+
                 # 发送 done 事件
                 data_json = json.dumps({"event": "done", "data": full_response})
                 yield f"event: done\ndata: {data_json}\n\n"
@@ -756,7 +757,7 @@ async def create_session(
     """
     user_id = current_user.get("user_id")
     username = current_user.get("username")
-    
+
     # 获取客户端IP地址
     client_ip = request_obj.client.host if request_obj.client else None
     # 处理代理情况下的真实IP

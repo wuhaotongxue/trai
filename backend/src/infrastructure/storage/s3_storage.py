@@ -7,8 +7,8 @@
 from __future__ import annotations
 
 import os
-from urllib.parse import urlparse, urlunparse
 from typing import Any
+from urllib.parse import urlparse, urlunparse
 
 import boto3
 from botocore.exceptions import ClientError

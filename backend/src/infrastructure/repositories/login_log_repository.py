@@ -137,9 +137,9 @@ class LoginLogRepository:
         Returns:
             dict[str, Any]: 统计信息
         """
-        from sqlalchemy import func, select
-
         from datetime import timedelta
+
+        from sqlalchemy import func, select
 
         since = datetime.now() - timedelta(days=days)
 

@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python
 # 文件名: multimodal_processor.py
 # 作者: wuhao

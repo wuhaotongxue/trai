@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: local_video_client.py
 # 作者: wuhao
 # 日期: 2026_05_20
@@ -17,14 +16,12 @@ import select
 import subprocess
 import sys
 import tempfile
-import threading
 from typing import Any
 
 import torch
 from loguru import logger
 
 from core.exceptions import ExternalServiceError
-
 
 # Wan2.1-T2V-1.3B 约需 ~10GB 显存，预留余量
 _MIN_FREE_GB = 10

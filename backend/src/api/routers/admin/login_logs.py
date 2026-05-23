@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -157,14 +157,15 @@ async def get_login_stats(
         )
 
     login_log_repo = LoginLogRepository(session)
-    
+
     # 如果指定了用户ID，获取该用户的统计
     if user_id:
         stats = login_log_repo.get_user_login_stats(user_id, days)
     else:
         # 获取所有用户的统计(简化版)
-        from sqlalchemy import func, select
         from datetime import timedelta
+
+        from sqlalchemy import func, select
 
         since = datetime.now() - timedelta(days=days)
 

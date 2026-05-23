@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: local_image_client.py
 # 作者: wuhao
 # 日期: 2026_05_14_2022
