@@ -11,7 +11,7 @@ import platform
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import psutil
@@ -19,7 +19,7 @@ from fastapi import APIRouter
 from loguru import logger
 
 
-class HealthStatus(str, Enum):
+class HealthStatus(StrEnum):
     """健康状态"""
 
     HEALTHY = "healthy"

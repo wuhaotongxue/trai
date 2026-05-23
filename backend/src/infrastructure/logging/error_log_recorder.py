@@ -33,6 +33,7 @@ class ErrorLogRecord:
     异常:
         无.
     """
+
     feature: str
     task_id: str
     step: str
@@ -53,6 +54,7 @@ class ErrorLogRecorder:
     异常:
         无.
     """
+
     _SK_RE = re.compile(r"\bsk-[A-Za-z0-9]{8,}\b")
     _BEARER_RE = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._-]{8,}\b")
     _PASSWORD_RE = re.compile(r"(?i)\b(password|secret|token|api_key)\s*=\s*[^,\s]{4,}")

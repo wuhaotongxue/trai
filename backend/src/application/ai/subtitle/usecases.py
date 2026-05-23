@@ -256,6 +256,7 @@ class SubtitleGenerateUseCase:
             if not stt_success:
                 logger.info("[字幕生成] 尝试使用本地 FunASR 模型进行 STT...")
                 from infrastructure.ai.local_asr_client import LocalASRClient
+
                 local_client = LocalASRClient()
                 stt_srt = await local_client.transcribe(audio_path)
                 stt_success = True
@@ -277,7 +278,9 @@ class SubtitleGenerateUseCase:
                     raise RuntimeError("translate returned wrong length")
                 out_entries = []
                 for i, e in enumerate(entries):
-                    out_entries.append({"index": e["index"], "start": e["start"], "end": e["end"], "text": translated[i]})
+                    out_entries.append(
+                        {"index": e["index"], "start": e["start"], "end": e["end"], "text": translated[i]}
+                    )
                 target_srt = self._build_srt(out_entries)
                 target_srt_path.write_text(target_srt, encoding="utf-8")
 

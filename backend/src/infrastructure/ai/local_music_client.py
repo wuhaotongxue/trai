@@ -1,4 +1,5 @@
 """ACE-Step 音乐生成客户端 - 进程隔离执行"""
+
 import asyncio
 import os
 import subprocess
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 @dataclass
 class MusicGenerateResult:
     """音乐生成结果"""
+
     success: bool
     file_path: str | None = None
     error: str | None = None

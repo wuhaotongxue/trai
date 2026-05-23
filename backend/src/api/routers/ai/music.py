@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """音乐生成 API"""
+
 import os
 import uuid
 from datetime import datetime
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/music", tags=["ai", "music"])
 
 class MusicGenerateRequest(BaseModel):
     """音乐生成请求"""
+
     prompt: str = Field(..., description="音乐描述/提示词", min_length=1, max_length=500)
     duration: float | None = Field(30.0, description="音频时长（秒）", ge=5, le=300)
     steps: int | None = Field(27, description="推理步数", ge=1, le=100)
@@ -23,6 +25,7 @@ class MusicGenerateRequest(BaseModel):
 
 class MusicGenerateResponse(BaseModel):
     """音乐生成响应"""
+
     success: bool
     task_id: str
     message: str
@@ -118,8 +121,9 @@ class MusicController:
 
         # 安全检查：只允许字母、数字、中文、空格、常见符号
         import re
+
         # 匹配: 中文、字母、数字、空格、下划线、连字符、括号、点号(用于扩展名)
-        if not re.match(r'^[\w\s\-\(\)（）\.]+\.(wav|mp3|ogg)$', filename, re.UNICODE):
+        if not re.match(r"^[\w\s\-\(\)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
             raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
 
         output_dir = "/home/qyjgylc_whf/code/trai/output_music"
@@ -168,16 +172,18 @@ class MusicController:
             if f.endswith(".wav"):
                 fpath = os.path.join(output_dir, f)
                 stat = os.stat(fpath)
-                files.append({
-                    "name": f,
-                    "size": stat.st_size,
-                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                })
+                files.append(
+                    {
+                        "name": f,
+                        "size": stat.st_size,
+                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    }
+                )
 
         files.sort(key=lambda x: x["modified"], reverse=True)
 
         total = len(files)
-        paginated = files[offset:offset + limit]
+        paginated = files[offset : offset + limit]
 
         return {
             "files": paginated,

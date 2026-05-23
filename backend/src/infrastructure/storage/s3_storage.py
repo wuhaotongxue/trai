@@ -34,11 +34,12 @@ class S3StorageService:
     def _create_client(self, endpoint: str) -> Any:
         """创建 S3 客户端"""
         from botocore.config import Config
+
         # 配置更高的超时和重试以处理大文件
         config = Config(
             connect_timeout=10,
             read_timeout=300,  # 5分钟读取超时
-            retries={'max_attempts': 3}
+            retries={"max_attempts": 3},
         )
         return boto3.client(
             "s3",
@@ -70,20 +71,17 @@ class S3StorageService:
 
         try:
             from boto3.s3.transfer import TransferConfig
+
             # 对大文件(如视频)使用分片上传，提升稳定性和速度
             # 设定门槛为 5MB
             config = TransferConfig(
                 multipart_threshold=1024 * 1024 * 5,
                 max_concurrency=5,
                 multipart_chunksize=1024 * 1024 * 5,
-                use_threads=True
+                use_threads=True,
             )
             self._client.upload_file(
-                file_path,
-                self._bucket,
-                object_key,
-                ExtraArgs={"ContentType": content_type},
-                Config=config
+                file_path, self._bucket, object_key, ExtraArgs={"ContentType": content_type}, Config=config
             )
             return self.get_file_url(object_key)
 

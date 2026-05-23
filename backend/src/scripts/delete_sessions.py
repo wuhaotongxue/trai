@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from loguru import logger
 from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from infrastructure.database.database import get_database
 from infrastructure.database.models import ChatSessionModel, MessageModel
@@ -82,11 +83,7 @@ def query_sessions(
     elif user_id:
         conditions.append(ChatSessionModel.t_user_id == user_id)
 
-    stmt = (
-        select(ChatSessionModel)
-        .where(*conditions)
-        .order_by(ChatSessionModel.t_created_at.desc())
-    )
+    stmt = select(ChatSessionModel).where(*conditions).order_by(ChatSessionModel.t_created_at.desc())
     result = db_session.execute(stmt)
     sessions = result.scalars().all()
 
@@ -131,12 +128,9 @@ def delete_sessions_batch(
     now = datetime.now()
 
     # 软删除会话
-    stmt = (
-        select(ChatSessionModel)
-        .where(
-            ChatSessionModel.t_session_id.in_(session_ids),
-            ChatSessionModel.t_deleted_at.is_(None),
-        )
+    stmt = select(ChatSessionModel).where(
+        ChatSessionModel.t_session_id.in_(session_ids),
+        ChatSessionModel.t_deleted_at.is_(None),
     )
     result = db_session.execute(stmt)
     models = result.scalars().all()

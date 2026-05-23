@@ -264,9 +264,7 @@ class LocalVideoClient:
                 stderr_done = False
 
                 while not (stdout_done and stderr_done):
-                    ready_r, _, _ = select.select(
-                        [proc.stdout, proc.stderr], [], [], 0.5
-                    )
+                    ready_r, _, _ = select.select([proc.stdout, proc.stderr], [], [], 0.5)
                     if proc.stdout in ready_r:
                         chunk = os.read(proc.stdout.fileno(), 16384)
                         if not chunk:
@@ -363,7 +361,7 @@ class LocalVideoClient:
         logger.info(
             f"[===== 视频生成任务开始 =====] task_id={task_id_hash} | "
             f"提示词: {prompt_short}... | frames: {actual_frames} | resolution: {actual_resolution} | "
-            f"可用GPU: {[f'GPU{d}({g:.1f}GB)' for d,g in devices]}"
+            f"可用GPU: {[f'GPU{d}({g:.1f}GB)' for d, g in devices]}"
         )
 
         for device, free_gb in devices:
@@ -378,7 +376,9 @@ class LocalVideoClient:
                 if device >= 0:
                     free_now = self._get_gpu_free_memory(device)
                     if free_now >= 0 and free_now < _MIN_FREE_GB:
-                        logger.warning(f"[{task_id_hash}] {device_name} 当前空闲 {free_now:.2f}GB < {_MIN_FREE_GB}GB，跳过")
+                        logger.warning(
+                            f"[{task_id_hash}] {device_name} 当前空闲 {free_now:.2f}GB < {_MIN_FREE_GB}GB，跳过"
+                        )
                         continue
 
                 logger.info(f"[{task_id_hash}] 选择 {device_name} | 空闲显存: {free_gb:.2f}GB | 准备启动推理进程")
@@ -403,7 +403,7 @@ class LocalVideoClient:
 
                         logger.info(
                             f"[{task_id_hash}] {device_name} {attempt_label} === 视频生成成功 === | "
-                            f"大小: {size:,} bytes ({size/1024/1024:.2f} MB) | "
+                            f"大小: {size:,} bytes ({size / 1024 / 1024:.2f} MB) | "
                             f"帧数: {result.get('frames')} | "
                             f"分辨率: {result.get('resolution')} | "
                             f"frame_count: {result.get('frame_count')}"
@@ -416,7 +416,9 @@ class LocalVideoClient:
                             logger.error(f"[{task_id_hash}] {device_name} | OOM两次，放弃 | error={last_error}")
                             break
                     except Exception as error:
-                        logger.error(f"[{task_id_hash}] {device_name} {attempt_label} | 异常: {type(error).__name__}: {error}")
+                        logger.error(
+                            f"[{task_id_hash}] {device_name} {attempt_label} | 异常: {type(error).__name__}: {error}"
+                        )
                         last_error = error
                         break
 

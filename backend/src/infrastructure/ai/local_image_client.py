@@ -33,8 +33,7 @@ class LocalImageClient:
 
     def __init__(self) -> None:
         self._model_path: str = os.getenv(
-            "MODELSCOPE_IMAGE_MODEL_PATH",
-            "/home/qyjgylc_whf/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
+            "MODELSCOPE_IMAGE_MODEL_PATH", "/home/qyjgylc_whf/.cache/modelscope/hub/models/Tongyi-MAI/Z-Image-Turbo"
         )
         self._default_steps: int = int(os.getenv("MODELSCOPE_IMAGE_STEPS", "4"))
         self._default_width: int = int(os.getenv("MODELSCOPE_IMAGE_WIDTH", "1024"))
@@ -132,8 +131,7 @@ class LocalImageClient:
             generator = torch.Generator(device=self._device).manual_seed(seed)
 
         logger.info(
-            f"生成图片 | 提示词: {prompt[:30]}... | "
-            f"尺寸: {actual_width}x{actual_height} | 步数: {actual_steps}"
+            f"生成图片 | 提示词: {prompt[:30]}... | 尺寸: {actual_width}x{actual_height} | 步数: {actual_steps}"
         )
 
         image = LocalImageClient._pipe(

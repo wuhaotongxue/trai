@@ -71,7 +71,9 @@ class VideoToEnglishRunner:
             os.environ.setdefault(key, value)
 
     def _parse_args(self) -> argparse.Namespace:
-        parser = argparse.ArgumentParser(description="Convert a local video to an English version (subs + optional TTS).")
+        parser = argparse.ArgumentParser(
+            description="Convert a local video to an English version (subs + optional TTS)."
+        )
         parser.add_argument("input_video", type=str, help="Input video path (mp4/mov/webm).")
         parser.add_argument(
             "--output-video",
@@ -157,8 +159,10 @@ class VideoToEnglishRunner:
         if not input_video.exists():
             raise FileNotFoundError(f"input video not found: {input_video}")
 
-        output_video = Path(args.output_video).expanduser().resolve() if args.output_video else input_video.with_name(
-            f"{input_video.stem}_en.mp4"
+        output_video = (
+            Path(args.output_video).expanduser().resolve()
+            if args.output_video
+            else input_video.with_name(f"{input_video.stem}_en.mp4")
         )
         output_video.parent.mkdir(parents=True, exist_ok=True)
 
@@ -258,8 +262,7 @@ class VideoToEnglishRunner:
         if len(translated_texts) != len(entries):
             raise RuntimeError(f"translation size mismatch: {len(translated_texts)} != {len(entries)}")
         return [
-            SrtEntry(index=e.index, start=e.start, end=e.end, text=translated_texts[i])
-            for i, e in enumerate(entries)
+            SrtEntry(index=e.index, start=e.start, end=e.end, text=translated_texts[i]) for i, e in enumerate(entries)
         ]
 
     async def _translate_texts(self, client: OpenAIClient, texts: list[str], target_lang: str) -> list[str]:

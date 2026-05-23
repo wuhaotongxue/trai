@@ -171,6 +171,7 @@ def _update_notify_status(task_id: str, notified: bool, notify_status: str) -> N
     """更新通知状态到数据库"""
     try:
         from infrastructure.database import get_session
+
         with get_session() as db:
             repo = ImageRecordRepository(db)
             repo.update_notify_status(task_id, notified, notify_status)
@@ -227,11 +228,17 @@ class ImageStatusRequest(BaseModel):
 class ImageEditRequest(BaseModel):
     """图片编辑请求（支持单图和双图联动编辑）"""
 
-    image_url: Annotated[str, Field(min_length=1, max_length=10000000, description="原图片 URL 或 base64（最大约 7.5MB）")]
-    image_url_2: Annotated[str | None, Field(default=None, max_length=10000000, description="第二张图片 URL 或 base64（双图联动编辑模式）")] = None
+    image_url: Annotated[
+        str, Field(min_length=1, max_length=10000000, description="原图片 URL 或 base64（最大约 7.5MB）")
+    ]
+    image_url_2: Annotated[
+        str | None, Field(default=None, max_length=10000000, description="第二张图片 URL 或 base64（双图联动编辑模式）")
+    ] = None
     prompt: Annotated[str, Field(min_length=1, max_length=2000, description="编辑描述")]
     mask: Annotated[str | None, Field(default=None, max_length=2000000, description="蒙版图片 URL 或 base64")] = None
-    model: Annotated[str, Field(default="Qwen/Qwen-Image-Edit-2511", description="模型名称")] = "Qwen/Qwen-Image-Edit-2511"
+    model: Annotated[str, Field(default="Qwen/Qwen-Image-Edit-2511", description="模型名称")] = (
+        "Qwen/Qwen-Image-Edit-2511"
+    )
     width: Annotated[int | None, Field(default=None, ge=256, le=2048, description="输出宽度")] = None
     height: Annotated[int | None, Field(default=None, ge=256, le=2048, description="输出高度")] = None
     steps: Annotated[int, Field(default=25, ge=1, le=100, description="采样步数")] = 25
@@ -323,8 +330,14 @@ async def generate_image(
 
                 background_tasks.add_task(
                     _send_image_generated_notify,
-                    user_id, username, request.prompt, result.image_url,
-                    request.model, task_id, request.width, request.height,
+                    user_id,
+                    username,
+                    request.prompt,
+                    result.image_url,
+                    request.model,
+                    task_id,
+                    request.width,
+                    request.height,
                 )
 
             return ImageGenerationResponse(
@@ -582,20 +595,14 @@ async def edit_image(
         # 上传第一张原图
         img1_bytes = _decode_base64(request.image_url)
         ext1, mime1 = _detect_ext(request.image_url)
-        source_object_key = (
-            f"private/tenants/{safe_tenant_id}/ai_source/images/"
-            f"{safe_user_id}/{task_id}_1.{ext1}"
-        )
+        source_object_key = f"private/tenants/{safe_tenant_id}/ai_source/images/{safe_user_id}/{task_id}_1.{ext1}"
         storage.upload_bytes(img1_bytes, source_object_key, mime1)
 
         # 上传第二张原图（双图模式）
         if is_dual and request.image_url_2:
             img2_bytes = _decode_base64(request.image_url_2)
             ext2, mime2 = _detect_ext(request.image_url_2)
-            source_object_key_2 = (
-                f"private/tenants/{safe_tenant_id}/ai_source/images/"
-                f"{safe_user_id}/{task_id}_2.{ext2}"
-            )
+            source_object_key_2 = f"private/tenants/{safe_tenant_id}/ai_source/images/{safe_user_id}/{task_id}_2.{ext2}"
             storage.upload_bytes(img2_bytes, source_object_key_2, mime2)
 
     except Exception as e:
@@ -605,7 +612,9 @@ async def edit_image(
 
     # 飞书通知使用 S3 URL（而非原始 base64）
     source_image_url = storage.get_file_url(source_object_key) if source_object_key else request.image_url
-    source_image_url_2 = storage.get_file_url(source_object_key_2) if source_object_key_2 else (request.image_url_2 or "")
+    source_image_url_2 = (
+        storage.get_file_url(source_object_key_2) if source_object_key_2 else (request.image_url_2 or "")
+    )
 
     # 构建记录类型
     record_type = ImageRecordType.IMAGE_EDIT_DUAL if is_dual else ImageRecordType.IMAGE_EDIT
@@ -668,19 +677,33 @@ async def edit_image(
             if background_tasks is not None:
                 background_tasks.add_task(
                     _send_image_edited_notify,
-                    user_id, username, request.prompt,
-                    source_image_url, source_image_url_2, result_url,
-                    request.model, task_id,
-                    actual_width, actual_height,
-                    request.steps, request.seed,
+                    user_id,
+                    username,
+                    request.prompt,
+                    source_image_url,
+                    source_image_url_2,
+                    result_url,
+                    request.model,
+                    task_id,
+                    actual_width,
+                    actual_height,
+                    request.steps,
+                    request.seed,
                 )
             else:
                 _send_image_edited_notify(
-                    user_id, username, request.prompt,
-                    source_image_url, source_image_url_2, result_url,
-                    request.model, task_id,
-                    actual_width, actual_height,
-                    request.steps, request.seed,
+                    user_id,
+                    username,
+                    request.prompt,
+                    source_image_url,
+                    source_image_url_2,
+                    result_url,
+                    request.model,
+                    task_id,
+                    actual_width,
+                    actual_height,
+                    request.steps,
+                    request.seed,
                 )
 
         return ImageGenerationResponse(

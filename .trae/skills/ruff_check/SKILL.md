@@ -16,28 +16,34 @@ description: "Run astral's ruff tool to format and lint Python code in the backe
 
 当调用此技能时，必须执行以下步骤：
 
-1. **环境检查与安装**：
-   确保后端虚拟环境中已安装 `ruff`。如果没有，先执行 `pip install ruff`。
-   当前项目虚拟环境推荐路径：`backend/.venv/Scripts/pip` 或通过 conda 环境。
+<div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:12px 16px;margin:12px 0;">
+  <strong style="color:#C62828;">&#x274C; 环境红线 (CRITICAL)</strong>
+  <ul style="margin:8px 0 0 0;padding-left:20px;font-size:13px;">
+    <li><strong>绝对禁止使用 <code>.venv</code></strong>！严禁执行任何带有 <code>.venv/bin/</code> 或 <code>.venv\Scripts\</code> 的命令。</li>
+    <li>必须且只能使用 <strong>Conda 环境 <code>trai31313</code></strong> 进行所有 Python 命令的调用。</li>
+  </ul>
+</div>
 
-2. **执行格式化 (Format)**：
-   在 `backend` 目录下执行：
-   ```powershell
-   .venv\Scripts\ruff.exe format src/
-   # 或如果使用 conda:
-   # conda run -n trai ruff format src/
+1. **执行格式化 (Format)**：
+   在项目根目录或 `backend` 目录下执行：
+   ```bash
+   conda run -n trai31313 ruff format backend/src/
    ```
 
-3. **执行代码检查 (Check / Lint)**：
-   在 `backend` 目录下执行并自动修复可安全修复的问题：
-   ```powershell
-   .venv\Scripts\ruff.exe check src/ --fix
-   # 或使用 conda:
-   # conda run -n trai ruff check src/ --fix
+2. **执行代码检查 (Check / Lint)**：
+   执行并自动修复可安全修复的问题：
+   ```bash
+   conda run -n trai31313 ruff check backend/src/ --fix
+   ```
+
+3. **执行语法编译检查 (Compileall)**：
+   确保没有低级语法错误：
+   ```bash
+   conda run -n trai31313 python -m compileall backend/src/
    ```
 
 4. **处理报错**：
-   如果 `ruff check` 报出了无法自动修复的 Error，必须仔细阅读报错信息，**并使用 Trae 代码编辑工具手动修复这些问题**，直到 `ruff check` 完全通过。
+   如果报出了无法自动修复的 Error，必须仔细阅读报错信息，**并使用 Trae 代码编辑工具手动修复这些问题**，直到检查完全通过。
 
 5. **总结**：
    修复完成后，告知用户代码已通过 Ruff 检查并格式化完毕。

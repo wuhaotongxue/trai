@@ -169,14 +169,11 @@ async def get_login_stats(
 
         since = datetime.now() - timedelta(days=days)
 
-        stmt = (
-            select(
-                func.count(LoginLogModel.t_id).label("total"),
-                func.sum(func.case((LoginLogModel.t_login_status == "success", 1), else_=0)).label("success"),
-                func.sum(func.case((LoginLogModel.t_login_status == "failure", 1), else_=0)).label("failure"),
-            )
-            .where(LoginLogModel.t_created_at >= since)
-        )
+        stmt = select(
+            func.count(LoginLogModel.t_id).label("total"),
+            func.sum(func.case((LoginLogModel.t_login_status == "success", 1), else_=0)).label("success"),
+            func.sum(func.case((LoginLogModel.t_login_status == "failure", 1), else_=0)).label("failure"),
+        ).where(LoginLogModel.t_created_at >= since)
 
         result = session.execute(stmt).first()
 

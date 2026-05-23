@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: clone_usecase.py
 # 作者: wuhao
 # 日期: 2026_05_23_11:00:00
@@ -8,12 +7,12 @@
 import subprocess
 from pathlib import Path
 
+from infrastructure.ai.llm_client_factory import LLMClientFactory
 from loguru import logger
 
 from application.ai.dubbing.separate_usecase import AudioSeparateUseCase
 from domain.entities.subtitle_record import SubtitleRecord
 from infrastructure.ai.cosyvoice_client import CosyVoiceClient
-from infrastructure.ai.llm_client_factory import LLMClientFactory
 from infrastructure.ai.local_asr_client import LocalASRClient
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -87,9 +86,7 @@ class CloneVoiceUseCase:
             logger.info("[Clone] Step 5: 声音克隆 (CosyVoice)")
             lang_hint = "en" if record.target_lang == "英文" else "zh"
             cloned_audio_bytes = self._cosyvoice.clone_and_synthesize(
-                text=translated_text,
-                reference_audio_url=vocal_url,
-                language=lang_hint
+                text=translated_text, reference_audio_url=vocal_url, language=lang_hint
             )
 
             cloned_path = Path(f"/tmp/trai_workspace/{record.id}_cloned.wav")
@@ -99,18 +96,36 @@ class CloneVoiceUseCase:
             logger.info("[Clone] Step 6: 合并伴奏与克隆人声")
             merged_audio = Path(f"/tmp/trai_workspace/{record.id}_merged.wav")
             cmd_mix = [
-                "ffmpeg", "-y", "-i", str(cloned_path), "-i", str(bgm_path),
-                "-filter_complex", "amix=inputs=2:duration=longest",
-                str(merged_audio)
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(cloned_path),
+                "-i",
+                str(bgm_path),
+                "-filter_complex",
+                "amix=inputs=2:duration=longest",
+                str(merged_audio),
             ]
             subprocess.run(cmd_mix, check=True, capture_output=True)
 
             logger.info("[Clone] Step 7: 替换视频原声")
             final_video = Path(f"/tmp/trai_workspace/{record.id}_cloned_output.mp4")
             cmd_merge = [
-                "ffmpeg", "-y", "-i", str(local_file), "-i", str(merged_audio),
-                "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map", "1:a:0",
-                str(final_video)
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(local_file),
+                "-i",
+                str(merged_audio),
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0",
+                str(final_video),
             ]
             subprocess.run(cmd_merge, check=True, capture_output=True)
 

@@ -4,15 +4,16 @@ ACE-Step 音乐生成独立运行脚本
 使用 soundfile 代替 torchaudio 避免 torchcodec 依赖问题
 进程隔离，绕过 Python 3.13 keyword 参数限制
 """
+
 import os
 import sys
 import time
 
 # === sys.path 隔离 ===
 for p in list(sys.path):
-    if p.startswith('/home/qyjgylc_whf/code/trai/backend'):
+    if p.startswith("/home/qyjgylc_whf/code/trai/backend"):
         sys.path.remove(p)
-_site_idx = next((i for i, p in enumerate(sys.path) if 'site-packages' in p), len(sys.path))
+_site_idx = next((i for i, p in enumerate(sys.path) if "site-packages" in p), len(sys.path))
 sys.path.insert(_site_idx, "/home/qyjgylc_whf/code/trai/backend/acestep_lib")
 sys.path.insert(_site_idx + 1, "/home/qyjgylc_whf/code/trai/backend/acestep_lib/acestep")
 
@@ -69,43 +70,43 @@ def generate_music(
 
     # 使用纯 positional args 绕过 Python 3.13 keyword 参数限制
     result = pipe(
-        duration,        # 1  audio_duration
-        prompt,          # 2  prompt
-        "",             # 3  o3ics
-        steps,          # 4  infer_step
-        guidance_scale, # 5  guidance_scale
-        "euler",        # 6  scheduler_type
-        "apg",          # 7  cfg_type
-        10.0,           # 8  omega_scale
-        None,           # 9  manual_seeds
-        0.5,            # 10 guidance_interval
-        0.0,            # 11 guidance_interval_decay
-        1.0,            # 12 min_guidance_scale
-        False,          # 13 use_erg_tag
-        False,          # 14 use_erg_o3ic
-        False,          # 15 use_erg_diffusion
-        "",             # 16 oss_steps
-        0.0,            # 17 guidance_scale_text
-        0.0,            # 18 guidance_scale_o3ic
-        False,          # 19 audio2audio_enable
-        0.5,            # 20 ref_audio_strength
-        None,           # 21 ref_audio_input
-        "none",         # 22 lora_name_or_path
-        1.0,            # 23 lora_weight
-        None,           # 24 retake_seeds
-        0.5,            # 25 retake_variance
-        "text2music",   # 26 task
-        0,              # 27 repaint_start
-        0,              # 28 repaint_end
-        None,           # 29 src_audio_path
-        None,           # 30 edit_target_prompt
-        None,           # 31 edit_target_o3ics
-        0.0,            # 32 edit_n_min
-        1.0,            # 33 edit_n_max
-        1,              # 34 edit_n_avg
-        output_path,    # 35 save_path
-        1,              # 36 batch_size
-        False,          # 37 debug
+        duration,  # 1  audio_duration
+        prompt,  # 2  prompt
+        "",  # 3  o3ics
+        steps,  # 4  infer_step
+        guidance_scale,  # 5  guidance_scale
+        "euler",  # 6  scheduler_type
+        "apg",  # 7  cfg_type
+        10.0,  # 8  omega_scale
+        None,  # 9  manual_seeds
+        0.5,  # 10 guidance_interval
+        0.0,  # 11 guidance_interval_decay
+        1.0,  # 12 min_guidance_scale
+        False,  # 13 use_erg_tag
+        False,  # 14 use_erg_o3ic
+        False,  # 15 use_erg_diffusion
+        "",  # 16 oss_steps
+        0.0,  # 17 guidance_scale_text
+        0.0,  # 18 guidance_scale_o3ic
+        False,  # 19 audio2audio_enable
+        0.5,  # 20 ref_audio_strength
+        None,  # 21 ref_audio_input
+        "none",  # 22 lora_name_or_path
+        1.0,  # 23 lora_weight
+        None,  # 24 retake_seeds
+        0.5,  # 25 retake_variance
+        "text2music",  # 26 task
+        0,  # 27 repaint_start
+        0,  # 28 repaint_end
+        None,  # 29 src_audio_path
+        None,  # 30 edit_target_prompt
+        None,  # 31 edit_target_o3ics
+        0.0,  # 32 edit_n_min
+        1.0,  # 33 edit_n_max
+        1,  # 34 edit_n_avg
+        output_path,  # 35 save_path
+        1,  # 36 batch_size
+        False,  # 37 debug
     )
 
     elapsed = time.time() - t0
@@ -116,7 +117,7 @@ def generate_music(
     sr = result.sample_rate
 
     # 从音频张量保存
-    if hasattr(audio, 'cpu'):
+    if hasattr(audio, "cpu"):
         audio_np = audio.cpu().numpy()
         if audio_np.ndim == 2:
             audio_np = audio_np.T  # (channels, samples) -> (samples, channels)
@@ -150,5 +151,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"ERROR: {str(e)}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

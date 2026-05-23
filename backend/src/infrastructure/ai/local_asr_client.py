@@ -48,6 +48,7 @@ class LocalASRClient:
             try:
                 logger.info(f"加载本地 ASR 模型: {self._model_id}")
                 from funasr import AutoModel
+
                 self._model = AutoModel(
                     model=self._model_id,
                     vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
@@ -94,7 +95,8 @@ class LocalASRClient:
             try:
                 import contextlib
                 import wave
-                with contextlib.closing(wave.open(str(audio_path), 'rb')) as f:
+
+                with contextlib.closing(wave.open(str(audio_path), "rb")) as f:
                     frames = f.getnframes()
                     rate = f.getframerate()
                     duration_s = frames / float(rate)
@@ -133,12 +135,7 @@ class LocalASRClient:
         start_str = self._format_time_ms(start_ms)
         end_str = self._format_time_ms(end_ms)
 
-        lines = [
-            "1",
-            f"{start_str} --> {end_str}",
-            text,
-            ""
-        ]
+        lines = ["1", f"{start_str} --> {end_str}", text, ""]
         return "\n".join(lines)
 
     def _build_fake_srt(self, text: str, duration_s: float = 0) -> str:
@@ -224,5 +221,6 @@ class LocalASRClient:
         m = (seconds % 3600) // 60
         s = seconds % 60
         return f"{h:02d}:{m:02d}:{s:02d},{milli:03d}"
+
 
 __all__ = ["LocalASRClient"]

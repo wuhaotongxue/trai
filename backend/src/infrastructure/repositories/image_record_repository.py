@@ -239,13 +239,10 @@ class ImageRecordRepository(IImageRecordRepository):
     ) -> int:
         """管理后台批量删除"""
         now = datetime.now()
-        stmt = (
-            select(ImageRecordModel)
-            .where(
-                and_(
-                    ImageRecordModel.t_task_id.in_(task_ids),
-                    ImageRecordModel.t_deleted_at.is_(None),
-                )
+        stmt = select(ImageRecordModel).where(
+            and_(
+                ImageRecordModel.t_task_id.in_(task_ids),
+                ImageRecordModel.t_deleted_at.is_(None),
             )
         )
         result = self._session.execute(stmt)

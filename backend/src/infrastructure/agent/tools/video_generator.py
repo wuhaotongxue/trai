@@ -49,7 +49,7 @@ class VideoGeneratorTool(BaseTool):
                     type="string",
                     description="如果用户提供了参考图片，或者你想让某张特定的图动起来，传入该图的公网 URL。如果没有则留空。",
                     required=False,
-                )
+                ),
             ],
         )
 
@@ -77,7 +77,7 @@ class VideoGeneratorTool(BaseTool):
                 model="cogvideox",
                 task_id=task_id,
                 user_id=context.user_id if context else "anonymous",
-                tenant_id=context.tenant_id if context else "default"
+                tenant_id=context.tenant_id if context else "default",
             )
 
             return ToolCallResult(

@@ -125,9 +125,7 @@ class LoginLogRepository:
         stmt = select(LoginLogModel).where(LoginLogModel.t_log_id == log_id)
         return self._session.scalar(stmt)
 
-    def get_user_login_stats(
-        self, user_id: str, days: int = 30
-    ) -> dict[str, Any]:
+    def get_user_login_stats(self, user_id: str, days: int = 30) -> dict[str, Any]:
         """获取用户登录统计
 
         Args:

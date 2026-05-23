@@ -353,8 +353,7 @@ async def send_message(
                 content_type = "image/gif"
 
             object_key = (
-                f"private/tenants/{tenant_id}/attachments/chat_images/"
-                f"{user_id or 'anonymous'}/{uuid.uuid4().hex}.{ext}"
+                f"private/tenants/{tenant_id}/attachments/chat_images/{user_id or 'anonymous'}/{uuid.uuid4().hex}.{ext}"
             )
             storage.upload_bytes(data=image_bytes, object_key=object_key, content_type=content_type)
             image_object_keys.append(object_key)
@@ -374,6 +373,7 @@ async def send_message(
         if use_local_vision:
             # 使用本地视觉模型处理图片
             from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+
             vision_client = LocalModelScopeVisionClient()
 
             # 构建带图片的消息
@@ -391,9 +391,7 @@ async def send_message(
                     mime = "image/gif"
 
                 b64 = base64.b64encode(image_bytes).decode("utf-8")
-                user_message["content"].append(
-                    {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
-                )
+                user_message["content"].append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
             managed_messages.append(user_message)
 
             # 调用本地视觉模型
@@ -405,6 +403,7 @@ async def send_message(
             ai_content = result.content
         else:
             from infrastructure.ai.openai_client import OpenAIClient
+
             ai_client = OpenAIClient()
             ai_response = await ai_client.chat(
                 messages=managed_messages,
@@ -424,8 +423,7 @@ async def send_message(
             history_service.update_session_title(session_id=session_id, title=title)
 
         logger.info(
-            f"消息发送成功 | session_id={session_id} | "
-            f"user_len={len(request.content)} | ai_len={len(ai_content)}"
+            f"消息发送成功 | session_id={session_id} | user_len={len(request.content)} | ai_len={len(ai_content)}"
         )
 
         return SendMessageResponse(
@@ -509,17 +507,17 @@ async def stream_message(
         for idx, img_base64 in enumerate(msg.images):
             # 验证图片数据
             if not img_base64 or len(img_base64.strip()) == 0:
-                logger.warning(f"图片 {idx+1} 数据为空")
+                logger.warning(f"图片 {idx + 1} 数据为空")
                 continue
 
-            logger.info(f"图片 {idx+1} 原始数据长度={len(img_base64)} 字符")
+            logger.info(f"图片 {idx + 1} 原始数据长度={len(img_base64)} 字符")
             if img_base64.startswith("data:"):
-                logger.info(f"图片 {idx+1} 包含 data: 前缀")
+                logger.info(f"图片 {idx + 1} 包含 data: 前缀")
                 parts = img_base64.split("base64,", 1)
                 if len(parts) == 2:
-                    logger.info(f"图片 {idx+1} base64 数据长度={len(parts[1])} 字符")
+                    logger.info(f"图片 {idx + 1} base64 数据长度={len(parts[1])} 字符")
                 else:
-                    logger.warning(f"图片 {idx+1} 格式异常，无法拆分 base64")
+                    logger.warning(f"图片 {idx + 1} 格式异常，无法拆分 base64")
                     continue
 
             raw = img_base64
@@ -530,17 +528,17 @@ async def stream_message(
             try:
                 image_bytes = base64.b64decode(raw)
             except Exception as e:
-                logger.warning(f"图片 {idx+1} base64 解码失败: {e}")
+                logger.warning(f"图片 {idx + 1} base64 解码失败: {e}")
                 continue
 
             image_size = len(image_bytes)
 
             # 验证解码后的图片数据
             if image_size == 0:
-                logger.warning(f"图片 {idx+1} 解码后为空")
+                logger.warning(f"图片 {idx + 1} 解码后为空")
                 continue
 
-            logger.info(f"处理图片 {idx+1} | 解码后大小={image_size} bytes")
+            logger.info(f"处理图片 {idx + 1} | 解码后大小={image_size} bytes")
 
             ext = "png"
             content_type = "image/png"
@@ -555,21 +553,17 @@ async def stream_message(
                 content_type = "image/gif"
 
             object_key = (
-                f"private/tenants/{safe_tenant_id}/attachments/chat_images/"
-                f"{safe_user_id}/{uuid.uuid4().hex}.{ext}"
+                f"private/tenants/{safe_tenant_id}/attachments/chat_images/{safe_user_id}/{uuid.uuid4().hex}.{ext}"
             )
             storage.upload_bytes(data=image_bytes, object_key=object_key, content_type=content_type)
             image_object_keys.append(object_key)
             valid_image_count += 1
-            logger.info(f"图片 {idx+1} 已上传 | object_key={object_key}")
+            logger.info(f"图片 {idx + 1} 已上传 | object_key={object_key}")
 
         # 如果所有图片都无效，返回错误
         if valid_image_count == 0:
             logger.error(f"所有图片数据都无效 | session_id={session_id}")
-            raise HTTPException(
-                status_code=400,
-                detail="图片数据无效，请上传有效的图片文件"
-            )
+            raise HTTPException(status_code=400, detail="图片数据无效，请上传有效的图片文件")
 
         history_service.update_session_extra_data(
             session_id=session_id,
@@ -585,12 +579,15 @@ async def stream_message(
         logger.info(f"无图片且无内容 | session_id={session_id}")
 
     if image_object_keys:
-        logger.info(f"开始处理图片消息 | session_id={session_id} | 图片数量={len(image_object_keys)} | 原始内容='{msg.content[:50]}...'")
+        logger.info(
+            f"开始处理图片消息 | session_id={session_id} | 图片数量={len(image_object_keys)} | 原始内容='{msg.content[:50]}...'"
+        )
 
         # 如果内容为空，自动描述图片
         if not msg.content.strip():
             logger.info("内容为空，开始自动分析图片")
             from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+
             vision_client = LocalModelScopeVisionClient()
 
             # 获取第一张图片进行分析
@@ -619,8 +616,7 @@ async def stream_message(
             try:
                 logger.info("调用视觉模型分析图片...")
                 analyze_result = await vision_client.analyze_image(
-                    b64,
-                    prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等，用中文回答"
+                    b64, prompt="请详细描述这张图片的内容，包括主题、颜色、风格、人物或物体等，用中文回答"
                 )
                 auto_description = f"图片内容: {analyze_result.content}"
                 logger.info(f"图片分析成功 | 完整描述='{analyze_result.content}'")
@@ -643,9 +639,7 @@ async def stream_message(
                 mime = "image/gif"
 
             b64 = base64.b64encode(image_bytes).decode("utf-8")
-            user_message["content"].append(
-                {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
-            )
+            user_message["content"].append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
     else:
         user_message = {"role": msg.role, "content": msg.content}
 
@@ -662,6 +656,7 @@ async def stream_message(
             if use_local_vision:
                 # 使用本地 Qwen2.5-VL 视觉模型
                 from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+
                 vision_client = LocalModelScopeVisionClient()
 
                 async for chunk in vision_client.chat_stream(
@@ -996,6 +991,7 @@ async def delete_session(
     # 客户端IP地址从请求上下文获取(通过上下文变量)
     client_ip = None
     from infrastructure.middleware.request_context import get_client_ip
+
     client_ip = get_client_ip()
 
     session_repo = SessionRepository(db_session)

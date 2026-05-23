@@ -48,9 +48,21 @@ class LipSyncUseCase:
             # 由于当前环境可能没有下载数GB的模型，我们暂时使用 ffmpeg 将新音频强行替换进去作为降级演示
             logger.warning("[LipSync] 检测到未完全配置 Wav2Lip 环境，降级为使用 FFmpeg 进行音视频合并")
             cmd_merge = [
-                "ffmpeg", "-y", "-i", str(local_video), "-i", str(local_audio),
-                "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map", "1:a:0",
-                str(output_video)
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(local_video),
+                "-i",
+                str(local_audio),
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0",
+                str(output_video),
             ]
             subprocess.run(cmd_merge, check=True, capture_output=True)
 

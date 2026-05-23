@@ -22,6 +22,7 @@ from PIL import Image
 @dataclass
 class VisionResult:
     """视觉模型结果"""
+
     content: str = ""
     reasoning_content: str = ""
     model: str = ""
@@ -32,6 +33,7 @@ class VisionResult:
 
 class _VisionModelManager:
     """线程安全的视觉模型单例管理器"""
+
     _instance: _VisionModelManager | None = None
     _lock = threading.Lock()
 
@@ -84,8 +86,7 @@ class _VisionModelManager:
         from transformers import Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 
         model_path = os.getenv(
-            "MODELSCOPE_VISION_MODEL_PATH",
-            "/home/qyjgylc_whf/.cache/modelscope/hub/models/Qwen/Qwen2-VL-7B-Instruct"
+            "MODELSCOPE_VISION_MODEL_PATH", "/home/qyjgylc_whf/.cache/modelscope/hub/models/Qwen/Qwen2-VL-7B-Instruct"
         )
 
         device_str = "cpu"
@@ -129,18 +130,14 @@ class LocalModelScopeVisionClient:
         """准备模型输入"""
         # 构建消息，使用 chat template
         messages = [
-            {"role": "user", "content": [
-                {"type": "image_url", "image_url": {"url": ""}},
-                {"type": "text", "text": prompt}
-            ]}
+            {
+                "role": "user",
+                "content": [{"type": "image_url", "image_url": {"url": ""}}, {"type": "text", "text": prompt}],
+            }
         ]
 
         # 使用 apply_chat_template 生成包含 <|image_pad|> 的模板
-        prompt_text = processor.tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True
-        )
+        prompt_text = processor.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         # 使用 Qwen2VLProcessor 处理
         inputs = processor(
@@ -151,8 +148,7 @@ class LocalModelScopeVisionClient:
 
         # 移到模型设备
         device = self._manager._model.device
-        inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v
-                  for k, v in inputs.items()}
+        inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in inputs.items()}
         return inputs
 
     async def analyze_image(
@@ -163,6 +159,7 @@ class LocalModelScopeVisionClient:
     ) -> VisionResult:
         """图像理解/分析"""
         import time
+
         start_time = time.perf_counter()
 
         try:
@@ -191,7 +188,7 @@ class LocalModelScopeVisionClient:
             generated_ids = model.generate(**inputs, **gen_kwargs)
 
             # 解码
-            generated_ids_trimmed = generated_ids[:, inputs["input_ids"].shape[1]:]
+            generated_ids_trimmed = generated_ids[:, inputs["input_ids"].shape[1] :]
             response = processor.batch_decode(generated_ids_trimmed, skip_special_tokens=True)[0]
 
             return VisionResult(
@@ -208,6 +205,7 @@ class LocalModelScopeVisionClient:
         except Exception as e:
             logger.error(f"视觉模型分析失败: {e}")
             import traceback
+
             traceback.print_exc()
             return VisionResult(error=str(e), content="")
 
@@ -235,6 +233,7 @@ class LocalModelScopeVisionClient:
                                 image = Image.open(io.BytesIO(image_bytes))
                             elif image_url.startswith("http"):
                                 import requests
+
                                 response = requests.get(image_url)
                                 image = Image.open(io.BytesIO(response.content))
                         elif item.get("type") == "text":
@@ -266,7 +265,7 @@ class LocalModelScopeVisionClient:
             generated_ids = model.generate(**inputs, **gen_kwargs)
 
             # 解码
-            generated_ids_trimmed = generated_ids[:, inputs["input_ids"].shape[1]:]
+            generated_ids_trimmed = generated_ids[:, inputs["input_ids"].shape[1] :]
             response = processor.batch_decode(generated_ids_trimmed, skip_special_tokens=True)[0]
 
             # 流式输出
