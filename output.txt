@@ -1,1 +1,0 @@
-Would you like conda to send this report to the core maintainers? [y/N]: 
