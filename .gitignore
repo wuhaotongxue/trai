@@ -125,4 +125,7 @@ client_pyqt6/
 *.pth
 *.onnx
 backend/models/
-src/models/
+src/models/backend/src/models/
+output_music/
+backend/acestep_lib/models/
+*.wav
