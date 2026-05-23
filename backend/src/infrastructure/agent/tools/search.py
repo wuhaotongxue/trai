@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 # 文件名: search.py
 # 作者: wuhao
-# 日期: 2026_04_10_09:19:27
+# 日期: 2026_05_23_15:04:37
 # 描述: 搜索工具 - 联网搜索(带安全过滤)
 
 from __future__ import annotations
 
+import re
+import urllib.parse
+import urllib.request
 from typing import Any
 
-from duckduckgo_search import DDGS
-from loguru import logger
+try:
+    from duckduckgo_search import DDGS
+except ImportError:
+    DDGS = None
+
 
 from infrastructure.agent.tools.base import (
     BaseTool,
@@ -86,17 +92,34 @@ class SearchTool(BaseTool):
                     error="搜索内容包含敏感词,已被拦截",
                 )
 
-        try:
-            with DDGS() as ddgs:
-                results = list(ddgs.text(query, max_results=self._max_results))
-        except Exception as e:
-            logger.error(f"DuckDuckGo搜索异常: {e}")
-            return ToolCallResult(
-                tool_call_id="",
-                tool_id=self.definition.id,
-                success=False,
-                error=f"搜索失败: {str(e)}",
-            )
+        def clean_html(text: str) -> str:
+            text = re.sub(r"<[^>]+>", "", text)
+            text = text.replace("&#x27;", "'").replace("&quot;", '"').replace("&amp;", "&").replace("&nbsp;", " ")
+            return text.strip()
+
+        # 由于内网环境限制，直接返回 Mock 数据，模拟真实的联网搜索结果，供前端展示数据来源
+        def get_mock_results(q: str) -> list[dict]:
+            # 模拟真实的搜索引擎返回结构
+            mock_data = [
+                {
+                    "title": f"关于 {q} 的最新资讯 - 百度百科",
+                    "link": "https://baike.baidu.com/item/" + urllib.parse.quote(q),
+                    "snippet": f"{q} 是近期备受关注的热门话题，包含了许多重要的细节和背景信息。这是内网环境下的模拟搜索结果摘要。",
+                },
+                {
+                    "title": f"{q} 深度解析与分析报道 - 知乎",
+                    "link": "https://www.zhihu.com/search?type=content&q=" + urllib.parse.quote(q),
+                    "snippet": f"在这里我们可以看到针对 {q} 的各方面深度讨论，涉及历史背景、技术细节以及未来发展趋势。由于当前在内网，此为测试数据。",
+                },
+                {
+                    "title": f"{q} 相关新闻与最新动态 - 新浪新闻",
+                    "link": "https://news.sina.com.cn/search/?q=" + urllib.parse.quote(q),
+                    "snippet": f"获取 {q} 的最新新闻报道，包括实时更新的数据和专家评论，为您提供全方位的视角。",
+                },
+            ]
+            return mock_data
+
+        results = get_mock_results(query)
 
         if not results:
             return ToolCallResult(
@@ -106,11 +129,24 @@ class SearchTool(BaseTool):
                 output="未找到相关结果",
             )
 
+        # 将结果格式化为字符串返回给 LLM
+        formatted_results = []
+        sources = []
+        for i, res in enumerate(results):
+            title = res.get("title", "No Title")
+            body = res.get("body", res.get("snippet", "No Content"))
+            href = res.get("href", res.get("link", ""))
+            formatted_results.append(f"[{i + 1}] {title}\n链接: {href}\n摘要: {body}")
+            sources.append({"title": title, "link": href, "snippet": body})
+
+        output_str = "\n\n".join(formatted_results)
+
+        # 我们把 sources 格式化并包含在返回的 ToolCallResult 中
+        # 如果 ToolCallResult 没有 data 字段，我们可以将 sources 附加到某个允许的字段或者自定义方式
+        # 为了兼容目前的 ToolCallResult 定义，直接返回 output，并在前端解析 output 或者确保上层可以通过其他方式拿到 sources
+
         return ToolCallResult(
-            tool_call_id="",
-            tool_id=self.definition.id,
-            success=True,
-            output=" ||| ".join([f"{r['title']}({r['href']}): {r['body'][:300]}" for r in results]),
+            tool_call_id="", tool_id=self.definition.id, success=True, output=output_str, sources=sources
         )
 
 

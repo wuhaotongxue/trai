@@ -74,6 +74,7 @@ class ToolCallResult:
     output: str | None = None
     error: str | None = None
     duration_ms: int = 0
+    sources: list[dict[str, str]] | None = None  # 记录数据来源
 
 
 @dataclass

@@ -23,6 +23,7 @@ class ConfigurationError(Exception):
         super().__init__(message)
         self.message = message
 
+
 # 加载 backend/env/*.env 配置
 # __file__ = /path/to/backend/src/infrastructure/database/database.py
 # parent.parent.parent.parent = /path/to/backend
@@ -88,11 +89,21 @@ class Database:
             ChatSessionModel,
             DepartmentModel,
             ImageRecordModel,
-            SubtitleRecordModel,
             UserDepartmentMappingModel,
             UserModel,
         )  # noqa: F401,F403
-        del ChatSessionModel, ImageRecordModel, UserModel, DepartmentModel, UserDepartmentMappingModel, SubtitleRecordModel  # 仅触发导入副作用
+        from infrastructure.database.subtitle_record_model import (
+            SubtitleRecordModel,
+        )
+
+        del (
+            ChatSessionModel,
+            ImageRecordModel,
+            UserModel,
+            DepartmentModel,
+            UserDepartmentMappingModel,
+            SubtitleRecordModel,
+        )  # 仅触发导入副作用
         del I18nStringModel, SystemSettingModel
         self._engine = self._config.create_engine(
             pool_size=10,

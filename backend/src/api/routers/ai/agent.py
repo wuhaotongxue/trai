@@ -292,7 +292,26 @@ async def agent_chat(
 
             try:
                 async for event in result:
-                    yield f"data: {json.dumps(event)}\n\n"
+                    if isinstance(event, dict):
+                        # 如果有 sources，也返回给前端
+                        if "data" in event and isinstance(event["data"], dict) and "sources" in event["data"]:
+                            yield f"data: {json.dumps({'type': 'sources', 'sources': event['data']['sources']})}\n\n"
+                        # 构造和旧格式类似的对象，避免改动过大
+                        # 但前端现在是按照 event.type 还是 parsed.event 处理？
+                        # store.ts 处理 parsed.event: 'token', 'reasoning', 'tool_call_end', 'usage'
+                        # 所以需要映射一下
+                        if event.get("type") == "token":
+                            yield f"data: {json.dumps({'event': 'token', 'data': event.get('content', '')})}\n\n"
+                        elif event.get("type") == "reasoning":
+                            yield f"data: {json.dumps({'event': 'reasoning', 'data': event.get('content', '')})}\n\n"
+                        elif event.get("type") == "tool_execution_result":
+                            yield f"data: {json.dumps({'event': 'tool_call_end', 'data': {'arguments': event.get('content', ''), 'tool_call_id': event.get('tool_call_id', ''), 'tool_name': event.get('tool_name', '')}})}\n\n"
+                        elif event.get("type") == "tool_execution_start":
+                            # 前端目前不处理，但可以发送
+                            pass
+                    else:
+                        yield f"data: {json.dumps(event)}\n\n"
+
                 if rag_sources:
                     yield f"data: {json.dumps({'type': 'sources', 'sources': rag_sources})}\n\n"
                 yield "data: [DONE]\n\n"

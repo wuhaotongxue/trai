@@ -390,13 +390,17 @@ class AgentExecutor:
                 )
 
                 # 通知客户端工具执行结果
-                yield {
+                res_payload = {
                     "type": "tool_execution_result",
                     "tool_call_id": tool_call_id,
                     "tool_name": tool_id,
                     "content": tool_content,
                     "success": tool_result.success,
                 }
+                if hasattr(tool_result, "sources") and tool_result.sources:
+                    res_payload["data"] = {"sources": tool_result.sources}
+
+                yield res_payload
 
                 current_messages.append(
                     {
