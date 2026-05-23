@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import mimetypes
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any
@@ -53,8 +54,8 @@ class OpenAIClient:
                 return name, value
         return "", ""
 
-    def __init__(self) -> None:
-        self._provider = os.getenv("LLM_PROVIDER", "openai")
+    def __init__(self, provider: str | None = None) -> None:
+        self._provider = provider or (os.getenv("LLM_PROVIDER", "openai") or "openai").strip()
         if self._provider == "modelscope":
             self._api_key_env: str = "DASHSCOPE_API_KEY"
             self._api_key_source_env, self._api_key = self._first_env(
@@ -62,12 +63,14 @@ class OpenAIClient:
                 "AI_DASHSCOPE_API_KEY",
                 "MODELSCOPE_API_KEY",
             )
+            self._api_key = (self._api_key or "").strip()
             self._base_url: str = (
                 os.getenv("DASHSCOPE_API_BASE", "")
                 or os.getenv("MODELSCOPE_API_BASE", "")
                 or os.getenv("AI_DASHSCOPE_API_BASE", "")
                 or "https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
+            self._base_url = (self._base_url or "").strip()
             self._model: str = os.getenv("DASHSCOPE_CHAT_MODEL", "") or os.getenv("MODELSCOPE_CHAT_MODEL", "qwen-plus")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "120"))
         elif self._provider == "qwen_vl":
@@ -77,27 +80,29 @@ class OpenAIClient:
                 "AI_DASHSCOPE_API_KEY",
                 "MODELSCOPE_API_KEY",
             )
+            self._api_key = (self._api_key or "").strip()
             self._base_url: str = (
                 os.getenv("DASHSCOPE_API_BASE", "")
                 or os.getenv("MODELSCOPE_API_BASE", "")
                 or os.getenv("AI_DASHSCOPE_API_BASE", "")
                 or "https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
+            self._base_url = (self._base_url or "").strip()
             self._model: str = os.getenv("MODELSCOPE_VISION_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
             self._timeout: int = int(os.getenv("MODELSCOPE_TIMEOUT", "300"))
         elif self._provider == "deepseek":
             self._api_key_env = "DEEPSEEK_API_KEY"
-            self._api_key: str = os.getenv("DEEPSEEK_API_KEY", "")
+            self._api_key: str = (os.getenv("DEEPSEEK_API_KEY", "") or "").strip()
             self._api_key_source_env = "DEEPSEEK_API_KEY" if self._api_key else ""
-            self._base_url: str = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1")
-            self._model: str = os.getenv("DEEPSEEK_CHAT_MODEL", "deepseek-reasoner")
+            self._base_url: str = (os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1") or "").strip()
+            self._model: str = (os.getenv("DEEPSEEK_CHAT_MODEL", "deepseek-reasoner") or "").strip()
             self._timeout: int = int(os.getenv("DEEPSEEK_TIMEOUT", "120"))
         else:
             self._api_key_env = "OPENAI_API_KEY"
-            self._api_key: str = os.getenv("OPENAI_API_KEY", "")
+            self._api_key: str = (os.getenv("OPENAI_API_KEY", "") or "").strip()
             self._api_key_source_env = "OPENAI_API_KEY" if self._api_key else ""
-            self._base_url: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-            self._model: str = os.getenv("OPENAI_MODEL", "gpt-4o")
+            self._base_url: str = (os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1") or "").strip()
+            self._model: str = (os.getenv("OPENAI_MODEL", "gpt-4o") or "").strip()
             self._timeout: int = int(os.getenv("OPENAI_TIMEOUT", "120"))
 
     def _ensure_api_key(self) -> None:
@@ -123,6 +128,144 @@ class OpenAIClient:
                 "base_url": self._base_url,
             },
         )
+
+    def _build_auth_headers(self) -> dict[str, str]:
+        self._ensure_api_key()
+        return {
+            "Authorization": f"Bearer {self._api_key}",
+        }
+
+    def _get_stt_model(self) -> str:
+        if self._provider == "modelscope":
+            return (
+                os.getenv("STT_MODEL", "")
+                or os.getenv("MODELSCOPE_STT_MODEL", "")
+                or "sensevoice-v1"
+            )
+        return (
+            os.getenv("STT_MODEL", "")
+            or os.getenv("OPENAI_STT_MODEL", "")
+            or os.getenv("OPENAI_WHISPER_MODEL", "")
+            or "whisper-1"
+        )
+
+    def _get_tts_model(self) -> str:
+        return (
+            os.getenv("TTS_MODEL", "")
+            or os.getenv("OPENAI_TTS_MODEL", "")
+            or "gpt-4o-mini-tts"
+        )
+
+    async def transcribe_audio(
+        self,
+        file,
+        language: str | None = None,
+        response_format: str = "json",
+        model: str | None = None,
+    ) -> dict[str, Any] | str:
+        """语音转文字(STT), OpenAI 兼容接口: /audio/transcriptions"""
+        headers = self._build_auth_headers()
+        url = f"{self._base_url}/audio/transcriptions"
+
+        filename = getattr(file, "name", "") or "audio.wav"
+        content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+
+        try:
+            file_bytes = file.read() if hasattr(file, "read") else file
+            if not isinstance(file_bytes, (bytes, bytearray)):
+                raise TypeError("audio file must be bytes or a file-like object")
+
+            data: dict[str, Any] = {
+                "model": model or self._get_stt_model(),
+                "response_format": response_format,
+            }
+            if language:
+                data["language"] = language
+
+            files = {
+                "file": (os.path.basename(filename), file_bytes, content_type),
+            }
+
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.post(url, headers=headers, data=data, files=files)
+                response.raise_for_status()
+
+                if response_format in {"json", "verbose_json"}:
+                    return response.json()
+                return response.text
+
+        except httpx.HTTPStatusError as e:
+            logger.warning(f"STT HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            raise ExternalServiceError(
+                message=f"STT 请求失败: status_code={e.response.status_code} - {e.response.text}",
+                details={
+                    "provider": self._provider,
+                    "base_url": self._base_url,
+                    "status_code": e.response.status_code,
+                },
+            )
+        except ExternalServiceError:
+            raise
+        except Exception as e:
+            err_msg = str(e) or repr(e)
+            logger.warning(f"STT 请求异常 | 错误: {err_msg}")
+            raise ExternalServiceError(
+                message=f"STT 请求异常: {err_msg}",
+                details={
+                    "provider": self._provider,
+                    "base_url": self._base_url,
+                    "error": err_msg,
+                },
+            )
+
+    async def synthesize_speech(
+        self,
+        text: str,
+        voice: str = "alloy",
+        response_format: str = "mp3",
+        speed: float = 1.0,
+        model: str | None = None,
+    ) -> bytes:
+        """文字转语音(TTS), OpenAI 兼容接口: /audio/speech"""
+        headers = self._build_auth_headers()
+        url = f"{self._base_url}/audio/speech"
+
+        payload: dict[str, Any] = {
+            "model": model or self._get_tts_model(),
+            "input": text,
+            "voice": voice,
+            "response_format": response_format,
+            "speed": speed,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.post(url, headers=headers, json=payload)
+                response.raise_for_status()
+                return response.content
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"TTS HTTP 错误 | 状态码: {e.response.status_code} | 响应: {e.response.text}")
+            raise ExternalServiceError(
+                message=f"TTS 请求失败: status_code={e.response.status_code} - {e.response.text}",
+                details={
+                    "provider": self._provider,
+                    "base_url": self._base_url,
+                    "status_code": e.response.status_code,
+                },
+            )
+        except ExternalServiceError:
+            raise
+        except Exception as e:
+            logger.error(f"TTS 请求异常 | 错误: {str(e)}")
+            raise ExternalServiceError(
+                message=f"TTS 请求异常: {str(e)}",
+                details={
+                    "provider": self._provider,
+                    "base_url": self._base_url,
+                    "error": str(e),
+                },
+            )
 
     async def chat(
         self,

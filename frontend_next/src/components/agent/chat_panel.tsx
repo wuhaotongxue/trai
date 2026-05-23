@@ -12,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2 } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2, Captions } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -26,8 +26,9 @@ import type { AgentTypeValue } from "@/lib/api_client";
 import { MusicGallery } from "./music-gallery";
 import { MediaGallery } from "./media-gallery";
 import { GalleryPanel } from "./gallery-panel";
+import { SubtitlePanel } from "./subtitle_panel";
 
-type TabId = "chat" | "image" | "video" | "music" | "image_edit";
+type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle";
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
 
@@ -410,6 +411,7 @@ export function ChatPanel() {
             { id: "image_edit" as TabId, label: "编辑", icon: Pencil, color: "text-violet-500" },
             { id: "video" as TabId, label: "视频", icon: Video, color: "text-orange-500" },
             { id: "music" as TabId, label: "音乐", icon: Music, color: "text-indigo-500" },
+            { id: "subtitle" as TabId, label: "字幕", icon: Captions, color: "text-pink-500" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -445,7 +447,11 @@ export function ChatPanel() {
         )}
 
         {/* 主内容区域 - 绘图 / 视频 / 音乐模式 */}
-        {activeTab !== "chat" ? (
+        {activeTab === "subtitle" ? (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <SubtitlePanel />
+          </div>
+        ) : activeTab !== "chat" ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             <ScrollArea className="flex-1">
               <div ref={topRef} />
@@ -1214,7 +1220,7 @@ export function ChatPanel() {
                         onClick={() => {
                           const input = document.createElement("input");
                           input.type = "file";
-                          input.accept = ".jpg,.jpeg,.png,.gif,.webp,.bmp,.mp3,.wav,.m4a,.flac,.ogg,.webm,.pdf";
+                          input.accept = ".jpg,.jpeg,.png,.gif,.webp,.bmp,.mp3,.wav,.m4a,.flac,.ogg,.webm,.pdf,.mp4,.mov,.mkv,.avi,.m4v";
                           input.multiple = true;
                           input.onchange = (e) => {
                             const files = (e.target as HTMLInputElement).files;
@@ -1223,7 +1229,9 @@ export function ChatPanel() {
                                 id: Math.random().toString(36).slice(2),
                                 file,
                                 previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-                                fileType: file.type.startsWith("image/") ? "image" as const : file.type.startsWith("audio/") ? "audio" as const : "pdf" as const,
+                                fileType: file.type.startsWith("image/") ? "image" as const : 
+                                          file.type.startsWith("audio/") ? "audio" as const : 
+                                          file.type.startsWith("video/") ? "video" as const : "pdf" as const,
                                 displaySize: file.size > 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(1)}MB` : `${(file.size / 1024).toFixed(1)}KB`,
                               }));
                               setUploadedFiles([...uploadedFiles, ...processed]);
@@ -1365,39 +1373,41 @@ export function ChatPanel() {
       </div>
 
       {/* 右侧画廊面板 - 根据 tab 显示图片/视频/音乐廊 */}
-      <GalleryPanel
-        activeTab={activeTab}
-        showGallery={showGallery}
-        isGalleryMaximized={isGalleryMaximized}
-        galleryViewMode={galleryViewMode}
-        gallerySortType={gallerySortType}
-        gallerySearchQuery={gallerySearchQuery}
-        imageGallery={imageGallery}
-        videoGallery={videoGallery}
-        musicGallery={musicGallery}
-        generatedImageUrl={generatedImageUrl}
-        imagePrompt={imagePrompt}
-        editedImageUrl={editedImageUrl}
-        editPrompt={editPrompt}
-        generatedVideoUrl={generatedVideoUrl}
-        videoPrompt={videoPrompt}
-        generatedMusicUrl={generatedMusicUrl}
-        musicPrompt={musicPrompt}
-        onToggleGallery={() => setShowGallery(!showGallery)}
-        onToggleViewMode={() => setGalleryViewMode(galleryViewMode === "grid" ? "list" : "grid")}
-        onToggleMaximize={() => setIsGalleryMaximized(!isGalleryMaximized)}
-        onClearGallery={
-          activeTab === "image" || activeTab === "image_edit" ? clearImageGallery :
-          activeTab === "video" ? clearVideoGallery : clearMusicGallery
-        }
-        onRemoveFromImageGallery={removeFromImageGallery}
-        onRemoveFromVideoGallery={removeFromVideoGallery}
-        onRemoveFromMusicGallery={removeFromMusicGallery}
-        onPreviewImage={setSelectedImageForPreview}
-        onDownloadImage={downloadImage}
-        onSetSearchQuery={setGallerySearchQuery}
-        onSetSortType={setGallerySortType}
-      />
+      {activeTab !== "subtitle" && (
+        <GalleryPanel
+          activeTab={activeTab}
+          showGallery={showGallery}
+          isGalleryMaximized={isGalleryMaximized}
+          galleryViewMode={galleryViewMode}
+          gallerySortType={gallerySortType}
+          gallerySearchQuery={gallerySearchQuery}
+          imageGallery={imageGallery}
+          videoGallery={videoGallery}
+          musicGallery={musicGallery}
+          generatedImageUrl={generatedImageUrl}
+          imagePrompt={imagePrompt}
+          editedImageUrl={editedImageUrl}
+          editPrompt={editPrompt}
+          generatedVideoUrl={generatedVideoUrl}
+          videoPrompt={videoPrompt}
+          generatedMusicUrl={generatedMusicUrl}
+          musicPrompt={musicPrompt}
+          onToggleGallery={() => setShowGallery(!showGallery)}
+          onToggleViewMode={() => setGalleryViewMode(galleryViewMode === "grid" ? "list" : "grid")}
+          onToggleMaximize={() => setIsGalleryMaximized(!isGalleryMaximized)}
+          onClearGallery={
+            activeTab === "image" || activeTab === "image_edit" ? clearImageGallery :
+            activeTab === "video" ? clearVideoGallery : clearMusicGallery
+          }
+          onRemoveFromImageGallery={removeFromImageGallery}
+          onRemoveFromVideoGallery={removeFromVideoGallery}
+          onRemoveFromMusicGallery={removeFromMusicGallery}
+          onPreviewImage={setSelectedImageForPreview}
+          onDownloadImage={downloadImage}
+          onSetSearchQuery={setGallerySearchQuery}
+          onSetSortType={setGallerySortType}
+        />
+      )}
 
       {/* 图片预览弹窗 */}
       {selectedImageForPreview && (

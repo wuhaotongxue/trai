@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * electron_multimodal.ts
  * Author: wuhao

@@ -86,12 +86,13 @@ class Database:
             UserModel,
             DepartmentModel,
             UserDepartmentMappingModel,
+            SubtitleRecordModel,
         )  # noqa: F401,F403
         from infrastructure.database.i18n_model import (
             I18nStringModel,
             SystemSettingModel,
         )  # noqa: F401,F403
-        del ChatSessionModel, ImageRecordModel, UserModel, DepartmentModel, UserDepartmentMappingModel  # 仅触发导入副作用
+        del ChatSessionModel, ImageRecordModel, UserModel, DepartmentModel, UserDepartmentMappingModel, SubtitleRecordModel  # 仅触发导入副作用
         del I18nStringModel, SystemSettingModel
         self._engine = self._config.create_engine(
             pool_size=10,

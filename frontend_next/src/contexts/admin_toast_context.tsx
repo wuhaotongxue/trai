@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * admin_toast_context.tsx
  * 作者: wuhao

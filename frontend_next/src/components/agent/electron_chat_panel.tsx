@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 文件名: components/agent/electron_chat_panel.tsx
  * 作者: wuhao

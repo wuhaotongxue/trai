@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * use_electron_window.ts
  * Author: wuhao

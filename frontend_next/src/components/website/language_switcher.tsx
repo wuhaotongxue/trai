@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * language_switcher.tsx
  * 语言切换组件

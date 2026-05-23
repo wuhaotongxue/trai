@@ -37,6 +37,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_23_1024
+- **重构(subtitle)**: 移除OpenAI的STT依赖，首选魔塔社区API，并支持降级至本地FunASR模型。
+- **优化(s3_storage)**: 启用boto3的分片并发上传，解决大文件（视频）上传超时卡死的问题。
+
 ### 🛠️ 后端_2026_05_20_1642
 - **新增**: 双图联动编辑（image_edit_dual），image.py 支持同时传入两张图片融合生成
 - **新增**: local_image_edit_client 生成双图联动推理脚本（QwenImageEditPlusPipeline image=[img1,img2] 列表模式）

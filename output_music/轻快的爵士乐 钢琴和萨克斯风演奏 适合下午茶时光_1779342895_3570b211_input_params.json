@@ -1,0 +1,47 @@
+{
+    "format": "wav",
+    "lora_name_or_path": "none",
+    "lora_weight": 1.0,
+    "task": "text2music",
+    "prompt": "轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光",
+    "lyrics": "",
+    "audio_duration": 30.0,
+    "infer_step": 27,
+    "guidance_scale": 7.0,
+    "scheduler_type": "euler",
+    "cfg_type": "apg",
+    "omega_scale": 10.0,
+    "guidance_interval": 0.5,
+    "guidance_interval_decay": 0.0,
+    "min_guidance_scale": 1.0,
+    "use_erg_tag": false,
+    "use_erg_lyric": false,
+    "use_erg_diffusion": false,
+    "oss_steps": [],
+    "timecosts": {
+        "preprocess": 1.338770866394043,
+        "diffusion": 11.461198806762695,
+        "latent2audio": 1.9784824848175049
+    },
+    "actual_seeds": [
+        3904163917
+    ],
+    "retake_seeds": [
+        3132400071
+    ],
+    "retake_variance": 0.5,
+    "guidance_scale_text": 0.0,
+    "guidance_scale_lyric": 0.0,
+    "repaint_start": 0,
+    "repaint_end": 0,
+    "edit_n_min": 0.0,
+    "edit_n_max": 1.0,
+    "edit_n_avg": 1,
+    "src_audio_path": null,
+    "edit_target_prompt": null,
+    "edit_target_lyrics": null,
+    "audio2audio_enable": false,
+    "ref_audio_strength": 0.5,
+    "ref_audio_input": null,
+    "audio_path": "/home/qyjgylc_whf/code/trai/output_music/轻快的爵士乐 钢琴和萨克斯风演奏 适合下午茶时光_1779342895_3570b211.wav"
+}
