@@ -12,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2, Captions } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2, Captions, UserRound } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -27,8 +27,9 @@ import { MusicGallery } from "./music-gallery";
 import { MediaGallery } from "./media-gallery";
 import { GalleryPanel } from "./gallery-panel";
 import { SubtitlePanel } from "./subtitle_panel";
+import { DigitalHumanPanel } from "./digital_human_panel";
 
-type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle";
+type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle" | "digital_human";
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
 
@@ -148,10 +149,13 @@ export function ChatPanel() {
   useEffect(() => {
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.thinking && lastMsg.role === "assistant") {
-      setExpandedThinking(prev => ({
-        ...prev,
-        [lastMsg.id]: true
-      }));
+      // Avoid synchronous setState in effect
+      setTimeout(() => {
+        setExpandedThinking(prev => ({
+          ...prev,
+          [lastMsg.id]: true
+        }));
+      }, 0);
     }
   }, [messages]);
 
@@ -406,10 +410,11 @@ export function ChatPanel() {
           {[
             { id: "chat" as TabId, label: "对话", icon: Bot, color: "text-blue-500" },
             { id: "image" as TabId, label: "绘图", icon: ImageIcon, color: "text-emerald-500" },
-            { id: "image_edit" as TabId, label: "编辑", icon: Pencil, color: "text-violet-500" },
+            { id: "image_edit" as TabId, label: "编辑", icon: Pencil, color: "text-indigo-500" },
             { id: "video" as TabId, label: "视频", icon: Video, color: "text-orange-500" },
             { id: "music" as TabId, label: "音乐", icon: Music, color: "text-indigo-500" },
             { id: "subtitle" as TabId, label: "字幕", icon: Captions, color: "text-pink-500" },
+            { id: "digital_human" as TabId, label: "数字人", icon: UserRound, color: "text-teal-500" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -448,6 +453,10 @@ export function ChatPanel() {
         {activeTab === "subtitle" ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             <SubtitlePanel />
+          </div>
+        ) : activeTab === "digital_human" ? (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <DigitalHumanPanel />
           </div>
         ) : activeTab !== "chat" ? (
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -1074,6 +1083,29 @@ export function ChatPanel() {
                             {preprocessMarkdown(msg.content)}
                           </ReactMarkdown>
                         </div>
+                        
+                        {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50">
+                            <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              数据来源
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              {msg.sources.map((src, i) => (
+                                <a 
+                                  key={i} 
+                                  href={src.link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="group flex flex-col p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                                >
+                                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:underline line-clamp-1">{src.title}</span>
+                                  <span className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{src.snippet}</span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {msg.role === "assistant" && !isStreaming && msg.content && (
                           <button

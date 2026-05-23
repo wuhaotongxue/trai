@@ -93,6 +93,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
       items: [
         { label: translate("admin.dashboard"), href: "/admin", icon: LayoutDashboard, desc: translate("admin.dashboard.desc") },
         { label: translate("admin.analytics"), href: "/admin/analytics", icon: BarChart3, desc: translate("admin.analytics.desc") },
+        { label: "实时大屏", href: "/admin/analytics/bigscreen", icon: Activity, desc: "实时数据监控大屏" },
         { label: translate("admin.monitor"), href: "/admin/monitor", icon: Activity, desc: translate("admin.monitor.desc") },
       ],
     },

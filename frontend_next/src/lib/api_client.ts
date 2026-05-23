@@ -542,7 +542,8 @@ export type AgentTypeValue =
   | "summarizer"
   | "data_analyst"
   | "chart_generator"
-  | "excel_processor";
+  | "excel_processor"
+  | "digital_human";
 
 /**
  * Agent 模态类型

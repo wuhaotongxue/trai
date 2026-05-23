@@ -1,4 +1,3 @@
-import os
 #!/usr/bin/env python
 # 文件名: multimodal_processor.py
 # 作者: wuhao
@@ -10,6 +9,7 @@ from __future__ import annotations
 import base64
 import io
 import mimetypes
+import os
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, BinaryIO

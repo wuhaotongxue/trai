@@ -41,6 +41,8 @@ export interface Message {
   timestamp: number;
   /** 思考过程 */
   thinking?: string;
+  /** 引用来源 */
+  sources?: { title: string; link: string; snippet: string }[];
 }
 
 /**
@@ -456,6 +458,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 completionTokens: parsed.data.completion_tokens,
                 totalTokens: parsed.data.total_tokens,
               });
+            } else if (parsed.type === "sources") {
+              set((state) => ({
+                messages: state.messages.map((m) =>
+                  m.id === assistantMsgId ? { ...m, sources: parsed.sources } : m
+                ),
+              }));
             }
           } catch {
             // ignore parse errors
