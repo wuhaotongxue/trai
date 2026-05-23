@@ -41,6 +41,10 @@ def _import_tool_module(tool_name: str) -> Any | None:
             from infrastructure.agent.tools.translate import TranslateTool
 
             return TranslateTool
+        if tool_name == "video_dubbing":
+            from infrastructure.agent.tools.video_dubbing import VideoDubbingTool
+
+            return VideoDubbingTool
         if tool_name == "wecom_contact":
             from infrastructure.agent.tools.wecom_contact_tool import WeComContactTool
 
@@ -61,7 +65,7 @@ def load_all_tools() -> list[ToolDefinition]:
     """
     get_tool_registry()
 
-    enabled_str = os.getenv("TOOL_ENABLED_LIST", "weather,calculator,search,translate,wecom_contact")
+    enabled_str = os.getenv("TOOL_ENABLED_LIST", "weather,calculator,search,translate,wecom_contact,video_dubbing")
     tool_names = [t.strip() for t in enabled_str.split(",") if t.strip()]
 
     registered: list[ToolDefinition] = []
