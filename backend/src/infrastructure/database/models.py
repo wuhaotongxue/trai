@@ -17,6 +17,9 @@ from infrastructure.database.department_model import DepartmentModel, UserDepart
 from infrastructure.database.user_model import UserModel
 
 
+from infrastructure.database.extension_models import AgentModel, KnowledgeBaseModel, AITraceLogModel
+
+
 class ChatSessionModel(Base):
     """AI 对话会话模型"""
 

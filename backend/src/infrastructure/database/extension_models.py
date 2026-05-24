@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+# 文件名: extension_models.py
+# 作者: wuhao
+# 日期: 2026_05_24_13:01:17
+# 描述: 多智能体与知识库及追踪模型
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import JSON, Boolean, DateTime, String, Text, func
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from infrastructure.database.database import Base
+
+
+class AgentModel(Base):
+    """
+    用户自建智能体数据库模型.
+
+    参数:
+        无
+
+    返回:
+        None: 无返回值
+
+    异常:
+        Exception: 捕获并记录所有执行异常
+    """
+
+    __tablename__ = "agents"
+    __table_args__ = {"comment": "用户自建智能体表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    name: Mapped[str] = mapped_column(String(255), nullable=False, comment="智能体名称")
+    prompt: Mapped[str] = mapped_column(Text, nullable=False, comment="系统提示词")
+    tools: Mapped[dict] = mapped_column(JSON, nullable=False, default=list, comment="挂载的工具列表")
+    creator_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="创建者 ID")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(0),
+        server_default=func.current_timestamp(0),
+        onupdate=func.current_timestamp(0),
+        nullable=False,
+        comment="更新时间",
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
+
+
+class KnowledgeBaseModel(Base):
+    """
+    用户自建知识库数据库模型.
+
+    参数:
+        无
+
+    返回:
+        None: 无返回值
+
+    异常:
+        Exception: 捕获并记录所有执行异常
+    """
+
+    __tablename__ = "knowledge_bases"
+    __table_args__ = {"comment": "知识库表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    name: Mapped[str] = mapped_column(String(255), nullable=False, comment="知识库名称")
+    description: Mapped[str] = mapped_column(Text, nullable=True, comment="知识库描述")
+    creator_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="创建者 ID")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(0),
+        server_default=func.current_timestamp(0),
+        onupdate=func.current_timestamp(0),
+        nullable=False,
+        comment="更新时间",
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
+
+
+class AITraceLogModel(Base):
+    """
+    AI 调用全链路追踪日志模型.
+
+    参数:
+        无
+
+    返回:
+        None: 无返回值
+
+    异常:
+        Exception: 捕获并记录所有执行异常
+    """
+
+    __tablename__ = "ai_trace_logs"
+    __table_args__ = {"comment": "AI调用追踪日志表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    session_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="关联会话 ID")
+    prompt_tokens: Mapped[int] = mapped_column(nullable=False, default=0, comment="提示词消耗 Tokens")
+    completion_tokens: Mapped[int] = mapped_column(nullable=False, default=0, comment="生成消耗 Tokens")
+    duration_ms: Mapped[int] = mapped_column(nullable=False, default=0, comment="耗时毫秒")
+    tools_used: Mapped[dict] = mapped_column(JSON, nullable=False, default=list, comment="调用的工具列表")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(0),
+        server_default=func.current_timestamp(0),
+        onupdate=func.current_timestamp(0),
+        nullable=False,
+        comment="更新时间",
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
