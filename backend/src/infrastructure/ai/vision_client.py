@@ -160,7 +160,7 @@ class LocalModelScopeVisionClient:
         """图像理解/分析"""
         import time
 
-        start_time = time.perf_counter()
+        time.perf_counter()
 
         try:
             model, processor = self._manager.get_model()

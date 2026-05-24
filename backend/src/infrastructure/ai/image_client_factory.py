@@ -189,8 +189,8 @@ class LocalModelScopeImageClient(IImageGenerationClient):
             logger.info(f"加载本地 ModelScope 模型: {self._model_path} | 设备: {device_str} | 精度: {dtype}")
 
             try:
-                from diffusers import AutoPipelineForText2Image
                 import torch
+                from diffusers import AutoPipelineForText2Image
 
                 self._pipe = AutoPipelineForText2Image.from_pretrained(
                     self._model_path,
@@ -206,8 +206,8 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                 logger.warning("尝试使用 CPU 加载模型")
                 device_str = "cpu"
                 dtype = torch.float32
-                from diffusers import AutoPipelineForText2Image
                 import torch
+                from diffusers import AutoPipelineForText2Image
 
                 self._pipe = AutoPipelineForText2Image.from_pretrained(
                     self._model_path,

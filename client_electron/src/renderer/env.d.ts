@@ -76,6 +76,10 @@ interface Window {
     // 国际化相关
     i18n_get_translations?: (locale: 'zh' | 'en') => Promise<{ success: boolean; data?: Record<string, string>; error?: string }>;
     i18n_get_all_translations?: () => Promise<{ success: boolean; data?: { zh: Record<string, string>; en: Record<string, string> }; error?: string }>;
+    
+    // Auth and App lifecycle
+    on_auth_need_login?: (callback: () => void) => () => void;
+    on_app_quit_with_animation?: (callback: () => void) => () => void;
   }
 }
 

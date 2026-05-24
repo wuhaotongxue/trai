@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from infrastructure.repositories.message_repository import MessageRepository
+from infrastructure.repositories.session_repository import MessageRepository
 from loguru import logger
 from sqlalchemy.orm import Session
 

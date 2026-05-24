@@ -1,0 +1,148 @@
+# ============================================
+# Trai 全栈项目 - Docker Compose 配置
+# 作者: wuhao
+# 日期: 2026_05_24_15:15:00
+# 描述: 包含前端(Next.js), 客户端Web版, 后端(Python)以及数据库等中间件
+# ============================================
+
+version: '3.8'
+
+services:
+  # ====================
+  # 前端 Web 应用 (Next.js)
+  # ====================
+  frontend:
+    build:
+      context: ./frontend_next
+      dockerfile: Dockerfile
+    container_name: trai-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:5666/api
+    networks:
+      - trai-network
+    depends_on:
+      - backend
+
+  # ====================
+  # 后端 API 服务 (FastAPI)
+  # ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trai-backend
+    restart: unless-stopped
+    ports:
+      - "5666:5666"
+    environment:
+      - DATABASE_URL=postgresql://trai:trai123@postgres:5432/trai
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/data:/app/data
+    networks:
+      - trai-network
+    depends_on:
+      - postgres
+      - redis
+      - milvus
+
+  # ====================
+  # PostgreSQL 数据库
+  # ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: trai-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: trai
+      POSTGRES_PASSWORD: trai123
+      POSTGRES_DB: trai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - trai-network
+
+  # ====================
+  # Redis 缓存
+  # ====================
+  redis:
+    image: redis:7-alpine
+    container_name: trai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - trai-network
+
+  # ====================
+  # Milvus 向量数据库 (Standalone)
+  # ====================
+  milvus:
+    image: milvusdb/milvus:v2.6.0
+    container_name: trai-milvus
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvus_data:/var/lib/milvus
+    networks:
+      - trai-network
+    depends_on:
+      - etcd
+      - minio
+
+  # Milvus 依赖: etcd
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: trai-etcd
+    restart: unless-stopped
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    volumes:
+      - etcd_data:/etcd
+    networks:
+      - trai-network
+
+  # Milvus 依赖: minio
+  minio:
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    container_name: trai-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    command: minio server /minio_data
+    volumes:
+      - minio_data:/minio_data
+    networks:
+      - trai-network
+
+networks:
+  trai-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  milvus_data:
+  etcd_data:
+  minio_data:

@@ -33,9 +33,9 @@ class AgentModel(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
     name: Mapped[str] = mapped_column(String(255), nullable=False, comment="智能体名称")
-    prompt: Mapped[str] = mapped_column(Text, nullable=False, comment="系统提示词")
+    creator_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="创建者 ID (企微 UserID)")
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=True, comment="系统提示词")
     tools: Mapped[dict] = mapped_column(JSON, nullable=False, default=list, comment="挂载的工具列表")
-    creator_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="创建者 ID")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
     )
@@ -102,6 +102,7 @@ class AITraceLogModel(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
     session_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="关联会话 ID")
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="调用者 ID (用于追溯企业微信员工)")
     prompt_tokens: Mapped[int] = mapped_column(nullable=False, default=0, comment="提示词消耗 Tokens")
     completion_tokens: Mapped[int] = mapped_column(nullable=False, default=0, comment="生成消耗 Tokens")
     duration_ms: Mapped[int] = mapped_column(nullable=False, default=0, comment="耗时毫秒")
@@ -138,6 +139,7 @@ class KnowledgeBaseDocumentModel(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
     kb_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="所属知识库 ID")
+    creator_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="创建者 ID (用于追溯)")
     file_name: Mapped[str] = mapped_column(String(255), nullable=False, comment="原始文件名")
     file_type: Mapped[str] = mapped_column(String(50), nullable=False, comment="文件类型如 PDF, Word")
     s3_object_key: Mapped[str] = mapped_column(String(500), nullable=False, comment="S3存储对象键")
