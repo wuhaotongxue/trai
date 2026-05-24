@@ -83,6 +83,23 @@ class KnowledgeBaseModel(Base):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
 
 
+class SystemLogModel(Base):
+    """
+    系统全局运行日志表.
+    用于存储 loguru 拦截的各类 ERROR/WARNING 级别日志, 方便排查.
+    """
+    __tablename__ = "system_logs"
+    __table_args__ = {"comment": "系统全局运行日志表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    level: Mapped[str] = mapped_column(String(20), nullable=False, index=True, comment="日志级别(INFO, ERROR, WARNING)")
+    module: Mapped[str] = mapped_column(String(100), nullable=False, comment="产生日志的模块/文件")
+    message: Mapped[str] = mapped_column(Text, nullable=False, comment="日志正文内容")
+    traceback: Mapped[str] = mapped_column(Text, nullable=True, comment="异常堆栈信息")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间")
+
+
 class APIKeyModel(Base):
     """
     平台分发的 API Key 模型表.

@@ -41,15 +41,35 @@ async function fetchWithAuth<T>(url: string, options: RequestInit = {}): Promise
 
 export const ExtensionAPI = {
   /**
-   * 创建自定义多智能体
+   * 创建自定义多智能体 (支持本地存储作为降级)
    * @param req 创建参数
    * @returns 包含新智能体信息的响应
    */
   createAgent: async (req: CreateAgentRequest): Promise<BaseResponse<CreateAgentData>> => {
-    return fetchWithAuth<CreateAgentData>('/apps/extensions/agents/create', {
-      method: 'POST',
-      body: JSON.stringify(req),
-    });
+    try {
+      const res = await fetchWithAuth<CreateAgentData>('/apps/extensions/agents/create', {
+        method: 'POST',
+        body: JSON.stringify(req),
+      });
+      // 成功后，同步备份到本地 localStorage 以支持离线与自我进化
+      const localAgents = JSON.parse(localStorage.getItem('trai_local_agents') || '[]');
+      localAgents.push({ ...req, created_at: Date.now() });
+      localStorage.setItem('trai_local_agents', JSON.stringify(localAgents));
+      return res;
+    } catch (e) {
+      // 离线模式降级处理
+      const localAgents = JSON.parse(localStorage.getItem('trai_local_agents') || '[]');
+      localAgents.push({ ...req, created_at: Date.now() });
+      localStorage.setItem('trai_local_agents', JSON.stringify(localAgents));
+      
+      return {
+        code: 200,
+        msg: "OK (Offline fallback)",
+        data: { agent_name: req.name },
+        req_id: "local-" + Date.now(),
+        ts: String(Date.now())
+      };
+    }
   },
 
   /**

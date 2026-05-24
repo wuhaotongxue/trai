@@ -118,6 +118,10 @@ class StructuredLogger:
                 serialize=True,  # JSON序列化
             )
 
+        # 注册 DB Sink (异步入库)
+        from infrastructure.logging.db_sink import db_sink
+        logger.add(db_sink, level="WARNING", enqueue=True)
+
         self._request_context: dict[str, Any] = {}
 
         logger.info("StructuredLogger initialized")

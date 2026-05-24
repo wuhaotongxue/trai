@@ -44,7 +44,30 @@ cd trai
 
 提交 Issue / PR?
 
-## 更新日志 (Changelog)
+## 🏗️ 整体架构 (Architecture)
+
+本项目采用全栈微服务架构，基于 Domain-Driven Design (DDD) 设计理念，包含以下核心模块与五层架构：
+
+### 五层架构 (Backend)
+1. **Domain (领域层)**：纯 Python 实体和接口定义，如 `interfaces.py`、`entities.py`，绝对禁止引入第三方框架。
+2. **Application (应用层)**：用例编排、Service 层（如 `api_key_service.py`），负责业务流程与大屏数据聚合。
+3. **Infrastructure (基础设施层)**：数据库 ORM (`database/`)、AI 客户端 (`ai/`)、S3 存储 (`storage/`)、日志拦截 (`logging/`)。
+4. **API (接口层)**：FastAPI 路由组 (`routers/`)，负责 HTTP 协议转换与 Pydantic 校验。
+5. **Scripts (运维脚本)**：数据修复、本地测试等。
+
+### 客户端结构 (Electron)
+采用 `UI -> Preload (Controller) -> Main (Service) -> Platform` 结构。
+- 引入了 Framer Motion 与 Tailwind 进行全局玻璃拟态动画。
+- 内置插件市场 (`PluginMarketplace`) 与 Dify 风格拖拽工作流画布 (`WorkflowEditor`)。
+- 支持企业微信 OAuth 登录与本地离线角色降级策略。
+
+### 前端结构 (Next.js)
+基于 App Router 的 React 19 服务端组件体系，提供管理后台 (Admin) 功能。
+
+### 部署体系
+统一由根目录的 `docker-compose.yml` 驱动，一键编排 `FastAPI` + `Next.js` + `Postgres` + `Redis` + `Milvus` + `MinIO`。
+
+## 📝 更新日志 (Changelog)
 
 ### 🛠️ 全栈架构与客户端升级_2026_05_24_1356
 - **架构升级**：在项目根目录新增统一的 `docker-compose.yml`，支持一键拉起后端 API、Next.js 前端、PostgreSQL、Redis、Milvus、MinIO 等全量服务。

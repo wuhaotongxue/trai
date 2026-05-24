@@ -13,22 +13,26 @@ import { create } from 'zustand'
  * @property role 角色
  */
 export interface UserInfo {
+  id: string
   username: string
   email: string
-  role: string
+  role: 'admin' | 'user'
+  avatar?: string
 }
 
 /**
  * 认证状态接口
  * @property is_authenticated 是否已认证
  * @property user 用户信息
+ * @property token JWT 鉴权令牌
  * @property login 登录
  * @property logout 登出
  */
 interface AuthState {
   is_authenticated: boolean
   user: UserInfo | null
-  login: (user_info: UserInfo) => void
+  token: string | null
+  login: (user_info: UserInfo, token: string) => void
   logout: () => void
 }
 
@@ -38,13 +42,21 @@ interface AuthState {
 export const use_auth_store = create<AuthState>((set) => ({
   is_authenticated: false,
   user: null,
+  token: localStorage.getItem('trai_access_token') || null,
   /**
    * 登录
    * @param user_info 用户信息
+   * @param token JWT
    */
-  login: (user_info) => set({ is_authenticated: true, user: user_info }),
+  login: (user_info, token) => {
+    localStorage.setItem('trai_access_token', token)
+    set({ is_authenticated: true, user: user_info, token })
+  },
   /**
    * 登出
    */
-  logout: () => set({ is_authenticated: false, user: null })
+  logout: () => {
+    localStorage.removeItem('trai_access_token')
+    set({ is_authenticated: false, user: null, token: null })
+  }
 }))
