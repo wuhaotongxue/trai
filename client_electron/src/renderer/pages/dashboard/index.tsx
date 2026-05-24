@@ -5,7 +5,7 @@
  * 描述: 仪表盘页面组件 - 自适应三段式布局
  */
 import React, { useState, useEffect } from 'react'
-import { Monitor, Cpu, HardDrive, ChevronRight, LayoutDashboard, Activity } from 'lucide-react'
+import { Monitor, Cpu, HardDrive, ChevronRight, LayoutDashboard, Activity, Key } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
 import { should_ellipsis } from '@/utils/ui_text'
 import { translate } from '@/i18n'
@@ -123,15 +123,17 @@ const MiniLineChart: React.FC<{ values: number[]; stroke: string; seq: number }>
 }
 
 const Dashboard: React.FC = () => {
-  const [active_category, set_active_category] = useState<string>('system')
-  const [active_item, set_active_item] = useState<string>('overview')
+  const [active_category, set_active_category] = useState<string>('api_quota')
+  const [active_item, set_active_item] = useState<string>('api_usage')
   const [sys_info, set_sys_info] = useState<SystemInfo | null>(null)
   const [metrics, set_metrics] = useState<SystemMetrics | null>(null)
+  const [api_usage, set_api_usage] = useState<any>(null)
   const [cpu_series, set_cpu_series] = useState<number[]>([])
   const [mem_series, set_mem_series] = useState<number[]>([])
   const [chart_seq, set_chart_seq] = useState<number>(0)
 
   const dashboard_items: DashboardItem[] = [
+    { id: 'api_usage', name: 'API 用量与统计', icon: <Key size={16} />, category: 'api_quota' },
     { id: 'overview', name: translate('system_overview'), icon: <Monitor size={16} />, category: 'system' },
     { id: 'performance', name: translate('performance_monitor'), icon: <Activity size={16} />, category: 'system' },
     { id: 'hardware', name: translate('hardware_info'), icon: <Cpu size={16} />, category: 'system' },
@@ -148,6 +150,15 @@ const Dashboard: React.FC = () => {
         console.error('获取系统信息失败')
       }
     })
+    
+    // Fetch API usage data
+    if (window.electron_api.admin_dashboard_api_usage) {
+      window.electron_api.admin_dashboard_api_usage().then((res) => {
+        if (res.success && res.data) {
+          set_api_usage(res.data)
+        }
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -180,7 +191,32 @@ const Dashboard: React.FC = () => {
   const left_panel = (
     <>
       <button
-        onClick={() => set_active_category('system')}
+        onClick={() => { set_active_category('api_quota'); set_active_item('api_usage'); }}
+        style={{
+          width: '100%',
+          padding: '10px 12px',
+          backgroundColor: active_category === 'api_quota' ? 'var(--ui_panel)' : 'transparent',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          color: active_category === 'api_quota' ? 'var(--ui_accent)' : 'var(--ui_text)',
+          fontWeight: active_category === 'api_quota' ? '600' : 'normal',
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'nowrap',
+          whiteSpace: 'nowrap',
+          gap: '8px',
+          marginBottom: '4px',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      >
+        <Key size={16} />
+        <span style={{ whiteSpace: 'nowrap' }}>API 统计</span>
+      </button>
+      <button
+        onClick={() => { set_active_category('system'); set_active_item('overview'); }}
         style={{
           width: '100%',
           padding: '10px 12px',
@@ -251,6 +287,85 @@ const Dashboard: React.FC = () => {
 
   const render_content = () => {
     switch (active_item) {
+      case 'api_usage':
+        return (
+          <div style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>API 用量与统计</h2>
+            {api_usage ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+                  {[
+                    { label: '今日 Tokens', value: api_usage.summary?.today_tokens?.toLocaleString() || '0' },
+                    { label: '昨日 Tokens', value: api_usage.summary?.yesterday_tokens?.toLocaleString() || '0' },
+                    { label: '本周 Tokens', value: api_usage.summary?.week_tokens?.toLocaleString() || '0' },
+                    { label: '活跃 Keys', value: api_usage.summary?.active_keys || '0' },
+                    { label: '预估成本 (CNY)', value: `¥ ${api_usage.summary?.cost_estimate_cny || '0.00'}` },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="ui-card"
+                      style={{
+                        padding: '20px',
+                        background: 'var(--ui_panel)',
+                        border: '1px solid var(--ui_border)',
+                        borderRadius: '12px',
+                        animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.06}s both`,
+                        boxShadow: 'var(--ui_shadow_sm)'
+                      }}
+                    >
+                      <div style={{ color: 'var(--ui_text_muted)', fontSize: '13px', fontWeight: 500, marginBottom: '8px' }}>{item.label}</div>
+                      <div style={{ color: 'var(--ui_accent)', fontSize: '24px', fontWeight: 700 }}>{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--ui_border)' }}>
+                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)' }}>模型使用分布</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {(api_usage.models_distribution || []).map((m: any, i: number) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '13px', color: 'var(--ui_text_secondary)' }}>{m.model}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, margin: '0 16px' }}>
+                            <div style={{ flex: 1, height: '6px', background: 'var(--ui_border)', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${m.percentage}%`, height: '100%', background: 'var(--ui_accent)', borderRadius: '3px' }} />
+                            </div>
+                          </div>
+                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)', minWidth: '40px', textAlign: 'right' }}>{m.percentage}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--ui_border)' }}>
+                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)' }}>用户调用排行</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {(api_usage.top_users || []).map((u: any, i: number) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--ui_panel_alt)', borderRadius: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '12px', background: 'var(--ui_accent_light)', color: 'var(--ui_accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600 }}>{i + 1}</div>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>{u.user_id}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)' }}>{u.department}</div>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ui_accent)' }}>{u.tokens.toLocaleString()} <span style={{ fontSize: '10px', color: 'var(--ui_text_muted)', fontWeight: 'normal' }}>Tokens</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--ui_text_muted)' }}>
+                <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '16px', backgroundColor: 'var(--ui_panel)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Key size={32} color="var(--ui_text_muted)" />
+                </div>
+                <p style={{ fontSize: '15px', margin: '0 0 8px 0' }}>{translate('loading_data')}</p>
+              </div>
+            )}
+          </div>
+        )
       case 'overview':
         return (
           <div style={{ padding: '24px' }}>

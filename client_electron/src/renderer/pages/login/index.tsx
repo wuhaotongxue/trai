@@ -433,10 +433,11 @@ const Login: React.FC = () => {
         }
         add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
         login({
+          id: 'offline',
           username: DEFAULT_OFFLINE_USER.username,
           email: `${DEFAULT_OFFLINE_USER.username}@trai.local`,
           role: 'user'
-        })
+        }, 'offline_token')
         // 保存离线登录状态
         window.electron_api.config_set('offline_mode', true)
         window.electron_api.config_set('remember_me', true)
@@ -517,7 +518,7 @@ const Login: React.FC = () => {
     if (res.success && res.data) {
       await window.electron_api.config_set('remember_me', remember_me)
       const user_info = res.data.user
-      login({ username: user_info.username || u, email: user_info.email || `${u}@trai.local`, role: user_info.role || 'user' })
+      login({ id: user_info.id || '', username: user_info.username || u, email: user_info.email || `${u}@trai.local`, role: user_info.role || 'user' }, res.data.access_token || 'dummy_token')
       add_log(`登录成功: ${u}`)
       navigate('/')
     } else {
@@ -541,10 +542,11 @@ const Login: React.FC = () => {
     // 离线模式下直接用离线角色登录，不走后端认证
     if (offline_mode) {
       login({
+        id: 'offline',
         username: DEFAULT_OFFLINE_USER.username,
         email: `${DEFAULT_OFFLINE_USER.username}@trai.local`,
         role: 'user'
-      })
+      }, 'offline_token')
       window.electron_api.config_set('offline_mode', true).catch(() => {})
       window.electron_api.config_set('remember_me', true).catch(() => {})
       add_log(`离线模式登录: ${DEFAULT_OFFLINE_USER.username}`)
@@ -976,6 +978,28 @@ const Login: React.FC = () => {
 
                 {/* 企业微信登录 */}
                 <button type="button"
+                  onClick={async () => {
+                    if (Date.now() - last_submit_time.current < 1000) return;
+                    last_submit_time.current = Date.now();
+                    try {
+                      set_is_logging_in(true);
+                      const res = await window.electron_api.auth_wecom_login();
+                      if (res.success && res.data) {
+                        await window.electron_api.config_set('remember_me', remember_me);
+                        const user_info = res.data.user;
+                        login({ id: user_info.id || '', username: user_info.username || 'wecom_user', email: user_info.email || 'wecom@trai.local', role: user_info.role || 'user' }, res.data.access_token || 'wecom_token');
+                        add_log(`企微登录成功: ${user_info.username}`);
+                        navigate('/');
+                      } else {
+                        set_error_msg(res.error || translate('login_error'));
+                        add_log(`企微登录失败: ${res.error}`);
+                      }
+                    } catch (err: unknown) {
+                      set_error_msg(String((err as Error)?.message || translate('login_error')));
+                    } finally {
+                      set_is_logging_in(false);
+                    }
+                  }}
                   style={{
                     background: 'var(--ui_panel_alt)', color: 'var(--ui_accent)', padding: '12px',
                     borderRadius: '10px', border: '1.5px solid var(--ui_border)',

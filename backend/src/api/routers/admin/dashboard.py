@@ -21,6 +21,7 @@ from infrastructure.database.models import (
     QuotaTransactionLogModel,
     UploadTaskModel,
 )
+from application.admin.api_key_service import APIKeyDashboardService
 from infrastructure.database.user_model import UserModel
 
 router = APIRouter()
@@ -187,5 +188,11 @@ async def get_dashboard(admin: AdminUser) -> DashboardResponse:
 
     return DashboardResponse(stats=stats, trends=trends, top_models=top_models)
 
+@router.get("/dashboard/api_usage", tags=["管理后台"])
+async def get_api_usage(admin: AdminUser) -> dict:
+    """
+    获取大屏 API 调用量统计
+    """
+    return await APIKeyDashboardService.get_usage_statistics("all")
 
 __all__ = ["router"]

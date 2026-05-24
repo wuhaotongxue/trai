@@ -36,6 +36,18 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 /**
+ * 管理员路由守卫
+ * @param children 子组件
+ */
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const is_authenticated = use_auth_store((state) => state.is_authenticated)
+  const user = use_auth_store((state) => state.user)
+  if (!is_authenticated) return <Navigate to="/login" replace />
+  if (user?.role !== 'admin') return <Navigate to="/knowledge_base" replace />
+  return <>{children}</>
+}
+
+/**
  * 路由配置
  */
 export const router = createHashRouter([
@@ -61,7 +73,11 @@ export const router = createHashRouter([
       },
       {
         path: '/dashboard',
-        element: <Dashboard />
+        element: (
+          <AdminRoute>
+            <Dashboard />
+          </AdminRoute>
+        )
       },
       {
         path: '/knowledge_base',
@@ -97,7 +113,11 @@ export const router = createHashRouter([
       },
       {
         path: '/agent/management',
-        element: <AgentManagement />
+        element: (
+          <AdminRoute>
+            <AgentManagement />
+          </AdminRoute>
+        )
       },
       {
         path: '/knowledge_base',

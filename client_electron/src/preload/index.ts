@@ -45,6 +45,7 @@ contextBridge.exposeInMainWorld('electron_api', {
   kb_delete_index: (index_id: string) => ipcRenderer.invoke('kb:delete_index', index_id),
   kb_delete_index_file: (index_id: string, file_id: string) => ipcRenderer.invoke('kb:delete_index_file', index_id, file_id),
   kb_upload_text: (index_id: string, file_name: string, content: string) => ipcRenderer.invoke('kb:upload_text', index_id, file_name, content),
+  admin_dashboard_api_usage: () => ipcRenderer.invoke('admin:dashboard_api_usage'),
   app_check_update: () => ipcRenderer.invoke('app:check_update'),
   app_download_update: () => ipcRenderer.invoke('app:download_update'),
   app_install_update: () => ipcRenderer.invoke('app:install_update'),

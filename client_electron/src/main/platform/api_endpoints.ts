@@ -44,6 +44,7 @@ export class ApiEndpoints {
   static readonly admin_knowledge_base_demo_create = `${ApiEndpoints.api_prefix}/admin/knowledge_base/demo_create`
   static readonly admin_knowledge_base_categories = `${ApiEndpoints.api_prefix}/admin/knowledge_base/categories`
   static readonly admin_knowledge_base_indices = `${ApiEndpoints.api_prefix}/admin/knowledge_base/indices`
+  static readonly admin_dashboard_api_usage = `${ApiEndpoints.api_prefix}/admin/dashboard/api_usage`
 
   static admin_knowledge_base_index_files(index_id: string) {
     return `${ApiEndpoints.api_prefix}/admin/knowledge_base/indices/${encodeURIComponent(index_id)}/files`

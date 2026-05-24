@@ -45,6 +45,7 @@ interface Window {
     kb_delete_index: (index_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_delete_index_file: (index_id: string, file_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_upload_text?: (index_id: string, file_name: string, content: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    admin_dashboard_api_usage: () => Promise<{ success: boolean; data?: any; error?: string }>;
     // 媒体播放相关
     media_select_files: () => Promise<{ success: boolean; files?: Array<{ path: string; name: string }>; error?: string }>;
     media_select_folder: () => Promise<{ success: boolean; files?: Array<{ path: string; name: string }>; error?: string }>;

@@ -292,7 +292,7 @@ const Sidebar: React.FC = () => {
 
       {/* 导航列表 */}
       <div style={SIDEBAR_STYLES.navSection}>
-        {NAV_ITEMS.map((item, nav_idx) => {
+        {NAV_ITEMS.filter(item => user?.role === 'admin' || (item.id !== 'dashboard' && item.id !== 'agent')).map((item, nav_idx) => {
           if (item.children) {
             const is_group_active = item.children.some((child) => location.pathname === child.path)
             const is_expanded = expanded_groups[item.id]

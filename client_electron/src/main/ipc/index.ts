@@ -14,6 +14,7 @@ import { agent_service } from '../services/agent'
 import { feedback_service } from '../services/feedback'
 import { knowledge_base_service } from '../services/knowledge_base'
 import { i18n_service } from '../services/i18n'
+import { admin_service } from '../services/admin'
 import { main_window } from '../index'
 
 import { on_renderer_quit_confirm } from '../index'
@@ -531,4 +532,9 @@ export const register_ipc_handlers = (): void => {
       return { success: false, error: 'Failed to fetch translations' }
     }
   }))
+
+  // ===================== Admin =====================
+  ipcMain.handle('admin:dashboard_api_usage', async () => {
+    return await admin_service.get_api_usage()
+  })
 }

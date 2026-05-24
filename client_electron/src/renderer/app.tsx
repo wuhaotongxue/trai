@@ -141,10 +141,11 @@ const App: React.FC = () => {
                 if (me_res.success && me_res.data) {
                   const user_data = me_res.data.user || me_res.data
                   login({
+                    id: 'current_user',
                     username: user_data.username || 'user',
                     email: user_data.email || 'user@trai.local',
-                    role: user_data.role || 'user'
-                  })
+                    role: (user_data.role === 'admin' ? 'admin' : 'user')
+                  }, String(token_res.data))
                   console.log('[app] 自动登录成功')
                 }
               } catch (auth_error) {
@@ -156,10 +157,11 @@ const App: React.FC = () => {
                     console.log('[app] 离线模式：auth_me 失败但保持登录状态')
                     // 离线模式下不需要验证，直接使用已有状态
                     login({
+                      id: 'offline_user',
                       username: 'wuhaotongxue',
                       email: 'wuhaotongxue@trai.local',
                       role: 'user'
-                    })
+                    }, 'offline_token')
                   } else {
                     console.warn('[app] 自动登录失败，将显示登录页面:', auth_error)
                     await window.electron_api.config_set('access_token', null).catch(() => {})

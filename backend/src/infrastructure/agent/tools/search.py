@@ -97,29 +97,32 @@ class SearchTool(BaseTool):
             text = text.replace("&#x27;", "'").replace("&quot;", '"').replace("&amp;", "&").replace("&nbsp;", " ")
             return text.strip()
 
-        # 由于内网环境限制，直接返回 Mock 数据，模拟真实的联网搜索结果，供前端展示数据来源
-        def get_mock_results(q: str) -> list[dict]:
-            # 模拟真实的搜索引擎返回结构
-            mock_data = [
-                {
-                    "title": f"关于 {q} 的最新资讯 - 百度百科",
-                    "link": "https://baike.baidu.com/item/" + urllib.parse.quote(q),
-                    "snippet": f"{q} 是近期备受关注的热门话题，包含了许多重要的细节和背景信息。这是内网环境下的模拟搜索结果摘要。",
-                },
-                {
-                    "title": f"{q} 深度解析与分析报道 - 知乎",
-                    "link": "https://www.zhihu.com/search?type=content&q=" + urllib.parse.quote(q),
-                    "snippet": f"在这里我们可以看到针对 {q} 的各方面深度讨论，涉及历史背景、技术细节以及未来发展趋势。由于当前在内网，此为测试数据。",
-                },
-                {
-                    "title": f"{q} 相关新闻与最新动态 - 新浪新闻",
-                    "link": "https://news.sina.com.cn/search/?q=" + urllib.parse.quote(q),
-                    "snippet": f"获取 {q} 的最新新闻报道，包括实时更新的数据和专家评论，为您提供全方位的视角。",
-                },
-            ]
-            return mock_data
+        # 使用 DDGS 进行真实搜索
+        def get_real_results(q: str) -> list[dict]:
+            if DDGS is None:
+                # 降级处理
+                return [
+                    {
+                        "title": f"关于 {q} (模拟数据，因为未安装 duckduckgo_search)",
+                        "link": "https://example.com",
+                        "snippet": "请安装 duckduckgo_search 包以启用真实的联网搜索。"
+                    }
+                ]
+            
+            try:
+                with DDGS() as ddgs:
+                    results = list(ddgs.text(q, max_results=self._max_results))
+                return results
+            except Exception as e:
+                return [
+                    {
+                        "title": f"搜索出错: {q}",
+                        "link": "",
+                        "snippet": f"执行真实搜索时发生异常: {str(e)}"
+                    }
+                ]
 
-        results = get_mock_results(query)
+        results = get_real_results(query)
 
         if not results:
             return ToolCallResult(
