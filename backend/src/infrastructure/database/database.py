@@ -95,6 +95,18 @@ class Database:
         from infrastructure.database.subtitle_record_model import (
             SubtitleRecordModel,
         )
+        from infrastructure.database.extension_models import (
+            APIKeyModel,
+            APIUsageLogModel,
+            SystemLogModel,
+            AgentModel,
+            KnowledgeBaseModel,
+            KnowledgeBaseDocumentModel,
+            AITraceLogModel,
+        )
+        from infrastructure.database.transcribe_model import (
+            AudioTranscribeRecordModel,
+        )
 
         del (
             ChatSessionModel,
@@ -103,6 +115,14 @@ class Database:
             DepartmentModel,
             UserDepartmentMappingModel,
             SubtitleRecordModel,
+            APIKeyModel,
+            APIUsageLogModel,
+            SystemLogModel,
+            AgentModel,
+            KnowledgeBaseModel,
+            KnowledgeBaseDocumentModel,
+            AITraceLogModel,
+            AudioTranscribeRecordModel,
         )  # 仅触发导入副作用
         del I18nStringModel, SystemSettingModel
         self._engine = self._config.create_engine(
