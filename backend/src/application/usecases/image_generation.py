@@ -17,7 +17,7 @@ from domain.entities.image_generation import (
 from domain.interfaces.image_generation_interfaces import (
     IImageGenerationRepository,
 )
-from infrastructure.ai.modelscope_client import ModelScopeClient
+from infrastructure.ai.core.modelscope_client import ModelScopeClient
 
 
 @dataclass

@@ -27,7 +27,7 @@ from infrastructure.agent.tools.loader import (
     load_all_tools,
 )
 from infrastructure.agent.tools.registry import get_tool_registry
-from infrastructure.ai.openai_client import OpenAIClient, StreamEvent
+from infrastructure.ai.core.openai_client import OpenAIClient, StreamEvent
 
 
 @dataclass

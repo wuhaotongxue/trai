@@ -26,7 +26,7 @@ if str(_SRC_DIR) not in sys.path:
 
 from loguru import logger
 
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 
 
 @dataclass(frozen=True)

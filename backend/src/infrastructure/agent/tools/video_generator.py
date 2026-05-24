@@ -20,7 +20,7 @@ from infrastructure.agent.tools.base import (
     ToolDefinition,
     ToolParameter,
 )
-from infrastructure.ai.video_generation_client import VideoGenerationClient
+from infrastructure.ai.video.video_generation_client import VideoGenerationClient
 
 
 class VideoGeneratorTool(BaseTool):

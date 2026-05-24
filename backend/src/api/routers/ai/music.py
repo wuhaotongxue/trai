@@ -8,7 +8,7 @@ from datetime import datetime
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
-from infrastructure.ai.local_music_client import get_music_client
+from infrastructure.ai.audio.local_music_client import get_music_client
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
 

@@ -66,7 +66,8 @@ class DBSink:
                 await session.commit()
                 break # 只用一次 session
         except Exception as e:
-            # 入库失败不能再调 logger.error 否则会死循环
-            print(f"Failed to save log to DB: {e}")
+            # Fallback to sys.stderr to avoid recursive logging errors
+            import sys
+            sys.stderr.write(f"Failed to save log to DB: {e}\n")
 
 db_sink = DBSink()

@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 
 router = APIRouter(prefix="/report", tags=["AI"])
 

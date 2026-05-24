@@ -13,7 +13,7 @@ from loguru import logger
 from application.ai.dubbing.separate_usecase import AudioSeparateUseCase
 from domain.entities.subtitle_record import SubtitleRecord
 from infrastructure.ai.cosyvoice_client import CosyVoiceClient
-from infrastructure.ai.local_asr_client import LocalASRClient
+from infrastructure.ai.audio.local_asr_client import LocalASRClient
 from infrastructure.storage.s3_storage import S3StorageService
 
 

@@ -94,7 +94,7 @@ async def generate_ai_report(admin: AdminUser) -> ReportResponse:
     import uuid
     from datetime import datetime
 
-    from infrastructure.ai.openai_client import OpenAIClient
+    from infrastructure.ai.core.openai_client import OpenAIClient
 
     # 1. 获取最新企微分析数据
     analytics_data = await get_wecom_analytics(admin)

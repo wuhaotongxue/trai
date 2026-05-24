@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
 from application.usecases.chat import ChatInput, ChatUseCase
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.database import get_db_session
 from infrastructure.services.chat_history_service import get_chat_history_service
 

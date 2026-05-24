@@ -101,8 +101,8 @@ class AppConfig:
     使用示例:
         config = AppConfig.load()
 
-        print(config.database.url)
-        print(config.ai_service.api_key)
+        # logger.info(config.database.url)
+        # logger.info(config.ai_service.api_key)
     """
 
     # 基础配置

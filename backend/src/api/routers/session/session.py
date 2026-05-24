@@ -372,7 +372,7 @@ async def send_message(
     try:
         if use_local_vision:
             # 使用本地视觉模型处理图片
-            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+            from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 
             vision_client = LocalModelScopeVisionClient()
 
@@ -402,7 +402,7 @@ async def send_message(
 
             ai_content = result.content
         else:
-            from infrastructure.ai.openai_client import OpenAIClient
+            from infrastructure.ai.core.openai_client import OpenAIClient
 
             ai_client = OpenAIClient()
             ai_response = await ai_client.chat(
@@ -466,7 +466,7 @@ async def stream_message(
     """
     from fastapi.responses import StreamingResponse
 
-    from infrastructure.ai.openai_client import OpenAIClient
+    from infrastructure.ai.core.openai_client import OpenAIClient
 
     body = await request.json()
     msg = StreamMessageRequest(**body)
@@ -586,7 +586,7 @@ async def stream_message(
         # 如果内容为空，自动描述图片
         if not msg.content.strip():
             logger.info("内容为空，开始自动分析图片")
-            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+            from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 
             vision_client = LocalModelScopeVisionClient()
 
@@ -655,7 +655,7 @@ async def stream_message(
 
             if use_local_vision:
                 # 使用本地 Qwen2.5-VL 视觉模型
-                from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+                from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 
                 vision_client = LocalModelScopeVisionClient()
 

@@ -226,7 +226,7 @@ async def generate_video(
 
         # Step 1: 调用本地模型生成视频
         logger.info(f"[1/5] === 开始调用 Wan2.1-T2V-1.3B 生成视频 === | task_id={task_id}")
-        from infrastructure.ai.local_video_client import LocalVideoClient
+        from infrastructure.ai.video.local_video_client import LocalVideoClient
 
         client = LocalVideoClient()
         logger.info(

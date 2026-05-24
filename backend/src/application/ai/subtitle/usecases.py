@@ -18,7 +18,7 @@ from loguru import logger
 
 from domain.entities.subtitle_record import SubtitleRecord
 from domain.interfaces.subtitle_record_interfaces import ISubtitleRecordRepository
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.notify.feishu_ai_notify import FeishuAINotifyService, SubtitleGeneratedEvent
 from infrastructure.storage.s3_storage import S3StorageService
 
@@ -255,7 +255,7 @@ class SubtitleGenerateUseCase:
 
             if not stt_success:
                 logger.info("[字幕生成] 尝试使用本地 FunASR 模型进行 STT...")
-                from infrastructure.ai.local_asr_client import LocalASRClient
+                from infrastructure.ai.audio.local_asr_client import LocalASRClient
 
                 local_client = LocalASRClient()
                 stt_srt = await local_client.transcribe(audio_path)

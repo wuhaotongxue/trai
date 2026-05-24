@@ -101,7 +101,7 @@ class ModelScopeClient:
         Returns:
             dict: 生成结果（包含 base64 图片）
         """
-        from infrastructure.ai.local_image_client import LocalImageClient
+        from infrastructure.ai.vision.local_image_client import LocalImageClient
 
         logger.info(
             f"[1/4] 开始本地图片生成 | 提示词: {prompt[:50]}... | 宽高: {width}x{height} | 步数: {steps} | seed: {seed}"
@@ -249,7 +249,7 @@ class ModelScopeClient:
         Returns:
             dict: 编辑结果
         """
-        from infrastructure.ai.local_image_edit_client import LocalImageEditClient
+        from infrastructure.ai.vision.local_image_edit_client import LocalImageEditClient
 
         is_dual = image_input_2 is not None
         mode_str = "双图联动" if is_dual else "单图"

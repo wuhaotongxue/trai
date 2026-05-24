@@ -162,7 +162,7 @@ class ContextManager:
         prompt = summary_instruction + history_text
 
         try:
-            from infrastructure.ai.openai_client import OpenAIClient
+            from infrastructure.ai.core.openai_client import OpenAIClient
 
             client = OpenAIClient()
             response = await client.chat(

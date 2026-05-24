@@ -107,7 +107,7 @@ class MultimodalProcessor:
     def _get_ai_client(self):
         """延迟初始化AI客户端"""
         if self._ai_client is None:
-            from infrastructure.ai.openai_client import OpenAIClient
+            from infrastructure.ai.core.openai_client import OpenAIClient
 
             self._ai_client = OpenAIClient()
         return self._ai_client
@@ -115,7 +115,7 @@ class MultimodalProcessor:
     def _get_vision_client(self):
         """延迟初始化本地视觉客户端"""
         if self._vision_client is None:
-            from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+            from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 
             self._vision_client = LocalModelScopeVisionClient()
         return self._vision_client

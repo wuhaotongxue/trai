@@ -2,7 +2,9 @@
 """Verify S3 upload"""
 import boto3
 import os
+import sys
 from pathlib import Path
+from loguru import logger
 
 _env_file = Path('backend/.env')
 if _env_file.exists():
@@ -22,16 +24,16 @@ s3 = boto3.client(
     config=boto3.session.Config(signature_version='s3v4')
 )
 
-print('S3 releases/ content:')
-resp = s3.list_objects_v2(Bucket='trai', Prefix='releases/')
+logger.info('S3 releases/ content:')
+resp = s3.list_objects_v2(Bucket=os.environ.get('S3_BUCKET_NAME', 'trai'), Prefix='releases/')
 for obj in resp.get('Contents', []):
     size_mb = obj['Size'] / 1024 / 1024
-    print(f'  {obj["Key"]} - {size_mb:.2f} MB')
+    logger.info(f'  {obj["Key"]} - {size_mb:.2f} MB')
 
 # 获取 latest.yml 内容
-print('\nlatest.yml content:')
+logger.info('\nlatest.yml content:')
 try:
-    resp = s3.get_object(Bucket='trai', Key='releases/latest.yml')
-    print(resp['Body'].read().decode('utf-8'))
+    resp = s3.get_object(Bucket=os.environ.get('S3_BUCKET_NAME', 'trai'), Key='releases/latest.yml')
+    logger.info(resp['Body'].read().decode('utf-8'))
 except Exception as e:
-    print(f'Error: {e}')
+    logger.error(f'Error: {e}')

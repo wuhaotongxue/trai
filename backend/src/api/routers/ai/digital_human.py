@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from api.deps import CurrentUserOptional
 from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.digital_human_chat import DigitalHumanChatTool
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 
 router = APIRouter(prefix="/ai/digital_human", tags=["AI Digital Human"])
 

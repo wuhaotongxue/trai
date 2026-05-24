@@ -21,8 +21,8 @@ from application.usecases.image_generation import (
     ImageGenerationUseCase,
 )
 from domain.entities.image_record import ImageRecord, ImageRecordType
-from infrastructure.ai.modelscope_client import ModelScopeClient
-from infrastructure.ai.vision_client import LocalModelScopeVisionClient
+from infrastructure.ai.core.modelscope_client import ModelScopeClient
+from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 from infrastructure.database import get_session
 from infrastructure.notify.feishu_ai_notify import (
     ImageEditedEvent,

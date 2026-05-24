@@ -10,7 +10,7 @@ from typing import Any
 
 from loguru import logger
 
-from infrastructure.ai.openai_client import OpenAIClient
+from infrastructure.ai.core.openai_client import OpenAIClient
 
 
 class AgentRouter:
