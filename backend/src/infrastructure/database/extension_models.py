@@ -117,3 +117,42 @@ class AITraceLogModel(Base):
         comment="更新时间",
     )
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
+
+
+class KnowledgeBaseDocumentModel(Base):
+    """
+    知识库关联文档模型.
+
+    参数:
+        无
+
+    返回:
+        None: 无返回值
+
+    异常:
+        Exception: 捕获并记录所有执行异常
+    """
+
+    __tablename__ = "kb_documents"
+    __table_args__ = {"comment": "知识库上传文档记录表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    kb_id: Mapped[str] = mapped_column(String(255), nullable=False, comment="所属知识库 ID")
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False, comment="原始文件名")
+    file_type: Mapped[str] = mapped_column(String(50), nullable=False, comment="文件类型如 PDF, Word")
+    s3_object_key: Mapped[str] = mapped_column(String(500), nullable=False, comment="S3存储对象键")
+    status: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="pending", comment="解析状态: pending, parsing, completed, failed"
+    )
+    chunk_count: Mapped[int] = mapped_column(nullable=False, default=0, comment="切片总数")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(0),
+        server_default=func.current_timestamp(0),
+        onupdate=func.current_timestamp(0),
+        nullable=False,
+        comment="更新时间",
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
