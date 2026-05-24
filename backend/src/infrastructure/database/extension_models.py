@@ -7,7 +7,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, String, Text, func
+from sqlalchemy import JSON, BigInteger, Boolean, DateTime, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -83,11 +83,56 @@ class KnowledgeBaseModel(Base):
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, comment="软删除标记")
 
 
+class APIKeyModel(Base):
+    """
+    平台分发的 API Key 模型表.
+    用于统一包装底层模型(DeepSeek/OpenAI/本地文生图等), 实现额度控制与追溯.
+    """
+    __tablename__ = "api_keys"
+    __table_args__ = {"comment": "API Key 秘钥管理表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    key_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, comment="Key的哈希值(不可逆)")
+    key_prefix: Mapped[str] = mapped_column(String(20), nullable=False, comment="Key前缀(如 sk-trai-1234)")
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True, comment="所属用户/企微ID")
+    organization_id: Mapped[str] = mapped_column(String(255), nullable=True, index=True, comment="所属组织/部门ID")
+
+    # 配额与状态控制
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active", comment="状态: active, disabled, deleted")
+    quota_limit: Mapped[int] = mapped_column(BigInteger, nullable=False, default=1000000, comment="配额上限(Tokens或次数)")
+    quota_used: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, comment="已使用配额")
+
+    # 模型权限 (支持 JSON 数组存储允许访问的模型: deepseek-chat, local-sdxl 等)
+    allowed_models: Mapped[dict] = mapped_column(JSON, nullable=False, default=lambda: ["*"], comment="允许访问的模型列表")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间")
+    expires_at: Mapped[datetime] = mapped_column(DateTime(0), nullable=True, comment="过期时间")
+
+
+class APIUsageLogModel(Base):
+    """
+    API 消耗流水大屏统计表.
+    """
+    __tablename__ = "api_usage_logs"
+    __table_args__ = {"comment": "API 调用消耗流水表"}
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
+    api_key_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False, comment="关联的 Key ID")
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True, comment="调用者")
+    organization_id: Mapped[str] = mapped_column(String(255), nullable=True, index=True, comment="所属组织")
+
+    model_name: Mapped[str] = mapped_column(String(100), nullable=False, comment="调用的底层模型")
+    request_type: Mapped[str] = mapped_column(String(50), nullable=False, comment="请求类型: chat, text2img, img2video")
+
+    tokens_prompt: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="提示词消耗")
+    tokens_completion: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="生成消耗")
+    cost_amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="折算费用(厘)")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间")
+
 class AITraceLogModel(Base):
     """
     AI 调用全链路追踪日志模型.
-
-    参数:
         无
 
     返回:

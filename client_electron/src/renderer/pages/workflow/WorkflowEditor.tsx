@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 // 定义节点类型
 interface Node {
@@ -46,6 +47,10 @@ export const WorkflowEditor: React.FC = () => {
 
     setNodes((nds) => [...nds, newNode]);
     setDraggedType(null);
+    toast.success(`已添加 ${type} 节点`, {
+      description: `新节点位置: (${Math.round(position.x)}, ${Math.round(position.y)})`,
+      duration: 2000,
+    });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -95,10 +100,47 @@ export const WorkflowEditor: React.FC = () => {
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
+        {/* SVG 连线层 */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+          <defs>
+            <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(34, 211, 238, 0.2)" />
+              <stop offset="50%" stopColor="rgba(34, 211, 238, 0.8)" />
+              <stop offset="100%" stopColor="rgba(34, 211, 238, 0.2)" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          
+          {nodes.length >= 2 && (
+            <g filter="url(#glow)">
+              <path 
+                d={`M ${nodes[0].position.x + 220} ${nodes[0].position.y + 40} C ${nodes[0].position.x + 300} ${nodes[0].position.y + 40}, ${nodes[1].position.x - 80} ${nodes[1].position.y + 40}, ${nodes[1].position.x} ${nodes[1].position.y + 40}`}
+                fill="none"
+                stroke="url(#line-gradient)"
+                strokeWidth="3"
+                className="opacity-70"
+              />
+              <circle r="4" fill="#22D3EE">
+                <animateMotion 
+                  dur="3s" 
+                  repeatCount="indefinite"
+                  path={`M ${nodes[0].position.x + 220} ${nodes[0].position.y + 40} C ${nodes[0].position.x + 300} ${nodes[0].position.y + 40}, ${nodes[1].position.x - 80} ${nodes[1].position.y + 40}, ${nodes[1].position.x} ${nodes[1].position.y + 40}`}
+                />
+              </circle>
+            </g>
+          )}
+        </svg>
+
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-4 left-4 text-slate-500 text-sm pointer-events-none backdrop-blur-sm bg-[#0F172A]/50 px-4 py-2 rounded-full border border-slate-800"
+          className="absolute top-4 left-4 text-slate-500 text-sm pointer-events-none backdrop-blur-sm bg-[#0F172A]/50 px-4 py-2 rounded-full border border-slate-800 z-10"
         >
           ✨ 将左侧节点拖拽到此处进行工作流编排
         </motion.div>
@@ -141,7 +183,10 @@ export const WorkflowEditor: React.FC = () => {
                 </span>
                 <button 
                   className="text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-full w-6 h-6 flex items-center justify-center transition-colors"
-                  onClick={() => setNodes(nodes.filter(n => n.id !== node.id))}
+                  onClick={() => {
+                    setNodes(nodes.filter(n => n.id !== node.id));
+                    toast.info(`节点已删除`, { duration: 1500 });
+                  }}
                   aria-label="删除节点"
                   title="删除节点"
                 >
