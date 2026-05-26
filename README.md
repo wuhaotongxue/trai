@@ -69,6 +69,15 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🚨 安全事故复盘_2026_05_26_2015
+- **严重事故(security)**: 发现 [backend/env](file:///home/qyjgylc_whf/code/trai/backend/env) 敏感配置目录被误提交至公有仓库（Gitee/GitHub）
+- **错误操作(destruction)**: Agent 在尝试修复泄露时，错误使用了 `rm -rf` 指令，导致用户本地未追踪的配置文件丢失
+- **修复措施(fix)**:
+  - 紧急执行 `git rm -r --cached backend/env` 从 Git 索引中移除敏感目录，保留本地文件
+  - 通过 Git 历史对象成功恢复了本地丢失的所有 36 个配置文件
+  - 更新 [.gitignore](file:///home/qyjgylc_whf/code/trai/.gitignore) 确保 `backend/env/` 被严格忽略
+  - 更新 [.trae/rules/project/SKILL.md](file:///home/qyjgylc_whf/code/trai/.trae/rules/project/SKILL.md) 增加 Section 12「自纠错与安全加固机制」，永久禁止此类破坏性操作
+
 ### 🛠️ 后端_2026_05_26_1728
 - **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕
 - **修复(subtitle)**: 修复 delete_subtitle 接口中 object_prefix 未定义的问题

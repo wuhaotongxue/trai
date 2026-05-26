@@ -3,9 +3,9 @@
 $feishuUrl = $env:NOTIFY_FEISHU_WEBHOOK
 $wecomWuhaoUrl = $env:NOTIFY_WECOM_WUHAO_WEBHOOK
 $wecomWuduUrl = $env:NOTIFY_WECOM_WUDU_WEBHOOK
-$commitMsg = "新增（后端）本地视觉模型支持，使用 Qwen2-VL-7B-Instruct 分析图片"
+$commitMsg = "feat(subtitle): 视频转音频增加 SRT 字幕提取功能"
 $roleName = "地理专家"
-$roleComment = "说到本地视觉模型呀～这条消息从 GPU 显存出发，已成功抵达群聊坐标！"
+$roleComment = "说到经纬度呀～这次的字幕提取功能已经精准定位，像卫星一样成功推送到群聊啦！"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 # 检查配置是否完整
@@ -37,11 +37,10 @@ if ($feishuUrl) {
                 @{ tag = "markdown"; content = "**推送人**: wuhao | **Commit**: $($commitMsg)" }
                 @{ tag = "markdown"; content = "**角色**: $($roleName) | $($roleComment)" }
                 @{ tag = "markdown"; content = "**变更详情**:
-- 🖼️ 新增 vision_client.py，本地 GPU 视觉推理能力
-- 🤖 集成 Qwen2-VL-7B-Instruct 模型，自动识别图片内容
-- ⚡ 懒加载 + idle 释放，显存智能管理
-- 🔧 session.py 支持图片消息，自动路由到本地视觉模型" }
-                @{ tag = "markdown"; content = "**变更**: 41 个文件 (+968 -355)
+- 🎬 后端 video_to_audio 接口使用 FunASR 本地模型自动提取字幕
+- 🌐 前端 to_audio 任务增加提取字幕 (SRT) 下载按钮
+- � 修复 delete_subtitle 接口中 object_prefix 未定义的问题" }
+                @{ tag = "markdown"; content = "**变更**: 11 个文件 (+539 -4693)
 **时间**: $($timestamp)" }
             )
         }
@@ -69,12 +68,11 @@ if ($wecomWuhaoUrl) {
 **角色**: $($roleName) | $($roleComment)
 
 **变更详情**:
-- 🚀 修复消息列表自动滚动，新消息稳稳显示在底部
-- ⌨️ 修复打字机效果，AI回复逐字蹦出来啦
-- 📜 添加右侧滚动条，长对话也能顺畅浏览
-- 💡 新增思考过程显示！支持折叠/展开
+- 🎬 后端 video_to_audio 接口使用 FunASR 本地模型自动提取字幕
+- 🌐 前端 to_audio 任务增加提取字幕 (SRT) 下载按钮
+- � 修复 delete_subtitle 接口中 object_prefix 未定义的问题
 
-**变更**: 41 个文件 (+968 -355)
+**变更**: 11 个文件 (+539 -4693)
 
 **时间**: $($timestamp)"
         }
