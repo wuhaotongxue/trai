@@ -7,8 +7,6 @@
 from __future__ import annotations
 
 import re
-import urllib.parse
-import urllib.request
 from typing import Any
 
 try:
@@ -105,22 +103,16 @@ class SearchTool(BaseTool):
                     {
                         "title": f"关于 {q} (模拟数据，因为未安装 duckduckgo_search)",
                         "link": "https://example.com",
-                        "snippet": "请安装 duckduckgo_search 包以启用真实的联网搜索。"
+                        "snippet": "请安装 duckduckgo_search 包以启用真实的联网搜索。",
                     }
                 ]
-            
+
             try:
                 with DDGS() as ddgs:
                     results = list(ddgs.text(q, max_results=self._max_results))
                 return results
             except Exception as e:
-                return [
-                    {
-                        "title": f"搜索出错: {q}",
-                        "link": "",
-                        "snippet": f"执行真实搜索时发生异常: {str(e)}"
-                    }
-                ]
+                return [{"title": f"搜索出错: {q}", "link": "", "snippet": f"执行真实搜索时发生异常: {str(e)}"}]
 
         results = get_real_results(query)
 

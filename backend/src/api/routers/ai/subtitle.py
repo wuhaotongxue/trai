@@ -515,10 +515,11 @@ def delete_subtitle(
     user_id = current_user.get("user_id", "") if current_user else ""
     safe_user_id = user_id or "anonymous"
 
-    record = session.query(SubtitleRecordModel).filter(
-        SubtitleRecordModel.task_id == task_id,
-        SubtitleRecordModel.user_id == safe_user_id
-    ).first()
+    record = (
+        session.query(SubtitleRecordModel)
+        .filter(SubtitleRecordModel.task_id == task_id, SubtitleRecordModel.user_id == safe_user_id)
+        .first()
+    )
 
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")

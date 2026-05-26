@@ -81,6 +81,15 @@ class Database:
     def __init__(self) -> None:
         self._config = DatabaseConfig()
         # 先导入所有模型，确保 Base.metadata 注册了所有表
+        from infrastructure.database.extension_models import (
+            AgentModel,
+            AITraceLogModel,
+            APIKeyModel,
+            APIUsageLogModel,
+            KnowledgeBaseDocumentModel,
+            KnowledgeBaseModel,
+            SystemLogModel,
+        )
         from infrastructure.database.i18n_model import (
             I18nStringModel,
             SystemSettingModel,
@@ -94,15 +103,6 @@ class Database:
         )  # noqa: F401,F403
         from infrastructure.database.subtitle_record_model import (
             SubtitleRecordModel,
-        )
-        from infrastructure.database.extension_models import (
-            APIKeyModel,
-            APIUsageLogModel,
-            SystemLogModel,
-            AgentModel,
-            KnowledgeBaseModel,
-            KnowledgeBaseDocumentModel,
-            AITraceLogModel,
         )
         from infrastructure.database.transcribe_model import (
             AudioTranscribeRecordModel,

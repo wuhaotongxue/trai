@@ -5,46 +5,42 @@
 # 描述: 多模态媒体生成客户端（音乐/MV克隆、唇形同步、视频拼接）
 
 import asyncio
+
 from loguru import logger
+
 from infrastructure.ai.audio.local_music_client import get_music_client
 from infrastructure.ai.video.local_lipsync_client import get_lipsync_client
 
+
 class MediaGeneratorAgent:
     """处理音乐、视频、唇形同步的高级生成任务"""
-    
+
     def __init__(self):
         self.music_client = get_music_client()
         self.lipsync_client = get_lipsync_client()
-        
+
     async def clone_music(self, reference_audio_path: str, new_lyrics: str = "") -> str:
         """克隆参考音乐的曲风，可替换歌词"""
         logger.info(f"正在克隆音乐曲风: {reference_audio_path}")
-        
+
         # 使用 ACE-Step 音乐生成客户端进行 audio2music 克隆
         # 实际调用中需要传入 src_audio_path
         prompt = new_lyrics if new_lyrics else "克隆参考音频的风格"
-        result = await self.music_client.generate_async(
-            prompt=prompt,
-            duration=30.0,
-            task="audio2music"
-        )
-        
+        result = await self.music_client.generate_async(prompt=prompt, duration=30.0, task="audio2music")
+
         if result.success:
             logger.info(f"音乐克隆成功: {result.file_path}")
             return result.file_path
         else:
             logger.error(f"音乐克隆失败: {result.error}")
             return f"生成失败: {result.error}"
-        
+
     async def lip_sync(self, video_path: str, audio_path: str) -> str:
         """唇形同步 (Wav2Lip / SadTalker)"""
         logger.info(f"正在进行唇形同步: 视频/图片={video_path} 音频={audio_path}")
-        
-        result = await self.lipsync_client.generate_lipsync(
-            source_image=video_path,
-            driven_audio=audio_path
-        )
-        
+
+        result = await self.lipsync_client.generate_lipsync(source_image=video_path, driven_audio=audio_path)
+
         if result.get("success"):
             output_path = result.get("output_path")
             logger.info(f"唇形同步成功: {output_path}")

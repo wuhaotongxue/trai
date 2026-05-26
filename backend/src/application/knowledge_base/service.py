@@ -88,7 +88,9 @@ class KnowledgeBaseService:
 
         return chunks
 
-    async def add_document(self, collection_name: str, document_text: str, metadata: dict[str, Any] | None = None) -> int:
+    async def add_document(
+        self, collection_name: str, document_text: str, metadata: dict[str, Any] | None = None
+    ) -> int:
         """
         处理文档并添加到知识库集合中.
         流程: 切片 -> 生成向量 -> 入库.
@@ -121,12 +123,7 @@ class KnowledgeBaseService:
             # 3. 构造领域实体
             doc_metadata = metadata or {}
             chunk_entities = [
-                DocumentChunk(
-                    chunk_id=str(uuid.uuid4()),
-                    text=text,
-                    metadata=doc_metadata
-                )
-                for text in text_chunks
+                DocumentChunk(chunk_id=str(uuid.uuid4()), text=text, metadata=doc_metadata) for text in text_chunks
             ]
 
             # 4. 生成向量

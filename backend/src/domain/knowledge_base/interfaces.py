@@ -24,6 +24,7 @@ class DocumentChunk:
     异常:
         无
     """
+
     chunk_id: str
     text: str
     metadata: dict[str, Any]
@@ -46,6 +47,7 @@ class SearchResult:
     异常:
         无
     """
+
     chunk_id: str
     text: str
     score: float

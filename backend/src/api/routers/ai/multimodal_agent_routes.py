@@ -8,13 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
-
-from api.deps import get_current_user
-from infrastructure.database.database import get_database, get_db_session
-from infrastructure.database.transcribe_model import AudioTranscribeRecordModel
 
 from infrastructure.agent.multimodal.multimodal_processor import (
     MultimodalProcessor,
@@ -30,6 +25,7 @@ from infrastructure.agent.types.agent_types import (
     get_agent_template,
     get_all_agent_types,
 )
+from infrastructure.database.transcribe_model import AudioTranscribeRecordModel
 
 router = APIRouter(prefix="/agent/multimodal", tags=["Multimodal Agent"])
 
@@ -495,46 +491,47 @@ async def ocr_recognize(
 async def _process_transcribe_result(record_id: uuid.UUID, text: str, file_path: str, file_name: str, creator_id: str):
     """后台处理转写结果：保存到 S3、数据库，发送飞书通知"""
     try:
-        from datetime import datetime
-        import uuid
         import os
         import tempfile
-        from infrastructure.storage.s3_storage import get_s3_storage
+        import uuid
+        from datetime import datetime
+
         from infrastructure.database.database import get_database
-        
+        from infrastructure.storage.s3_storage import get_s3_storage
+
         s3_storage = get_s3_storage()
         base_name = os.path.splitext(file_name)[0]
-        
+
         # 1. 生成下载文件
         md_content = f"# {base_name} - 语音转写报告\n\n**转写时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n---\n\n{text}"
         txt_content = f"语音转写结果：{base_name}\n时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n{text}"
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             md_path = os.path.join(tmpdir, f"{base_name}.md")
             txt_path = os.path.join(tmpdir, f"{base_name}.txt")
             pdf_path = os.path.join(tmpdir, f"{base_name}.pdf")
-            
+
             with open(md_path, "w", encoding="utf-8") as f:
                 f.write(md_content)
             with open(txt_path, "w", encoding="utf-8") as f:
                 f.write(txt_content)
             with open(pdf_path, "wb") as f:
                 f.write(md_content.encode("utf-8"))
-            
+
             # 2. 上传到 S3
             date_prefix = datetime.now().strftime("%Y%m")
             md_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.md"
             txt_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.txt"
             pdf_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.pdf"
-            
+
             await s3_storage.upload_file_async(md_path, md_key)
             await s3_storage.upload_file_async(txt_path, txt_key)
             await s3_storage.upload_file_async(pdf_path, pdf_key)
-            
+
             md_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{md_key}"
             txt_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{txt_key}"
             pdf_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{pdf_key}"
-            
+
             # 3. 更新数据库
             db = get_database().get_session()
             try:
@@ -548,16 +545,17 @@ async def _process_transcribe_result(record_id: uuid.UUID, text: str, file_path:
                     db.commit()
             finally:
                 db.close()
-            
+
             # 4. 发送飞书通知
             _send_transcribe_notify(creator_id, file_name, text, md_url, txt_url, pdf_url)
-            
+
         logger.info(f"转写结果处理完成：{record_id}")
-        
+
     except Exception as e:
         logger.error(f"处理转写结果异常：{e}")
         # 更新状态为失败
         from infrastructure.database.database import get_database
+
         db = get_database().get_session()
         try:
             record = db.query(AudioTranscribeRecordModel).filter(AudioTranscribeRecordModel.id == record_id).first()
@@ -578,6 +576,7 @@ def _send_transcribe_notify(user_id: str, file_name: str, text: str, md_url: str
         return
     try:
         from infrastructure.notify.feishu_ai_notify import get_feishu_ai_notify_service
+
         service = get_feishu_ai_notify_service()
         card_content = f"""**📝 音频转写完成**
 
@@ -585,18 +584,14 @@ def _send_transcribe_notify(user_id: str, file_name: str, text: str, md_url: str
 **文件**: {file_name}
 
 **转写内容预览**:
-{text[:200]}{'...' if len(text) > 200 else ''}
+{text[:200]}{"..." if len(text) > 200 else ""}
 
 **下载链接**:
 - 📝 [Markdown]({md_url})
 - 📄 [TXT]({txt_url})
 - 📑 [PDF]({pdf_url})"""
-        
-        service.send_card(
-            title="🎙️ 音频转写完成通知",
-            content=card_content,
-            extra={"level": "INFO"}
-        )
+
+        service.send_card(title="🎙️ 音频转写完成通知", content=card_content, extra={"level": "INFO"})
         logger.info(f"飞书通知发送成功：{user_id} - {file_name}")
     except Exception as e:
         logger.error(f"发送飞书通知失败：{e}")

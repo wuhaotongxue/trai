@@ -88,6 +88,7 @@ class SystemLogModel(Base):
     系统全局运行日志表.
     用于存储 loguru 拦截的各类 ERROR/WARNING 级别日志, 方便排查.
     """
+
     __tablename__ = "system_logs"
     __table_args__ = {"comment": "系统全局运行日志表"}
 
@@ -97,7 +98,9 @@ class SystemLogModel(Base):
     message: Mapped[str] = mapped_column(Text, nullable=False, comment="日志正文内容")
     traceback: Mapped[str] = mapped_column(Text, nullable=True, comment="异常堆栈信息")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间"
+    )
 
 
 class APIKeyModel(Base):
@@ -105,6 +108,7 @@ class APIKeyModel(Base):
     平台分发的 API Key 模型表.
     用于统一包装底层模型(DeepSeek/OpenAI/本地文生图等), 实现额度控制与追溯.
     """
+
     __tablename__ = "api_keys"
     __table_args__ = {"comment": "API Key 秘钥管理表"}
 
@@ -115,14 +119,22 @@ class APIKeyModel(Base):
     organization_id: Mapped[str] = mapped_column(String(255), nullable=True, index=True, comment="所属组织/部门ID")
 
     # 配额与状态控制
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active", comment="状态: active, disabled, deleted")
-    quota_limit: Mapped[int] = mapped_column(BigInteger, nullable=False, default=1000000, comment="配额上限(Tokens或次数)")
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="active", comment="状态: active, disabled, deleted"
+    )
+    quota_limit: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, default=1000000, comment="配额上限(Tokens或次数)"
+    )
     quota_used: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, comment="已使用配额")
 
     # 模型权限 (支持 JSON 数组存储允许访问的模型: deepseek-chat, local-sdxl 等)
-    allowed_models: Mapped[dict] = mapped_column(JSON, nullable=False, default=lambda: ["*"], comment="允许访问的模型列表")
+    allowed_models: Mapped[dict] = mapped_column(
+        JSON, nullable=False, default=lambda: ["*"], comment="允许访问的模型列表"
+    )
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), nullable=False, comment="创建时间"
+    )
     expires_at: Mapped[datetime] = mapped_column(DateTime(0), nullable=True, comment="过期时间")
 
 
@@ -130,11 +142,14 @@ class APIUsageLogModel(Base):
     """
     API 消耗流水大屏统计表.
     """
+
     __tablename__ = "api_usage_logs"
     __table_args__ = {"comment": "API 调用消耗流水表"}
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="主键 ID")
-    api_key_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False, comment="关联的 Key ID")
+    api_key_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), index=True, nullable=False, comment="关联的 Key ID"
+    )
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True, comment="调用者")
     organization_id: Mapped[str] = mapped_column(String(255), nullable=True, index=True, comment="所属组织")
 
@@ -145,7 +160,10 @@ class APIUsageLogModel(Base):
     tokens_completion: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="生成消耗")
     cost_amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="折算费用(厘)")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(0), server_default=func.current_timestamp(0), index=True, nullable=False, comment="发生时间"
+    )
+
 
 class AITraceLogModel(Base):
     """

@@ -9,8 +9,7 @@ import os
 from loguru import logger
 
 from domain.knowledge_base.interfaces import IEmbeddingService, IRerankService
-from infrastructure.ai.embeddings.embedding_client import EmbeddingClient
-from infrastructure.ai.embeddings.embedding_client import LocalEmbeddingClient
+from infrastructure.ai.embeddings.embedding_client import EmbeddingClient, LocalEmbeddingClient
 from infrastructure.ai.rerankers.local_rerank_client import LocalRerankClient
 
 

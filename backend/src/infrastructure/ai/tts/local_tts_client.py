@@ -56,7 +56,7 @@ class LocalTTSClient(ITTSClient):
 
             # 模拟本地推理生成的 WAV 头部及空数据
             logger.info("模拟本地合成成功")
-            mock_wav_header = b'RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x80>\x00\x00\x00}\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00'
+            mock_wav_header = b"RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x80>\x00\x00\x00}\x00\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
             return mock_wav_header
 
         except Exception as e:

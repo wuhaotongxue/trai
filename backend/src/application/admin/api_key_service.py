@@ -48,15 +48,15 @@ class APIKeyDashboardService:
                 "yesterday_tokens": 980000,
                 "week_tokens": 5600000,
                 "active_keys": 45,
-                "cost_estimate_cny": 12.5
+                "cost_estimate_cny": 12.5,
             },
             "models_distribution": [
                 {"model": "deepseek-chat", "percentage": 65},
                 {"model": "local-sdxl", "percentage": 25},
-                {"model": "gpt-4o", "percentage": 10}
+                {"model": "gpt-4o", "percentage": 10},
             ],
             "top_users": [
                 {"user_id": "wuhao", "tokens": 450000, "department": "AIGC 架构组"},
-                {"user_id": "zhangsan", "tokens": 120000, "department": "前端组"}
-            ]
+                {"user_id": "zhangsan", "tokens": 120000, "department": "前端组"},
+            ],
         }

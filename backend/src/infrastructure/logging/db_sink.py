@@ -56,18 +56,15 @@ class DBSink:
         """异步保存日志到数据库"""
         try:
             async for session in get_db_session():
-                log = SystemLogModel(
-                    level=level,
-                    module=module,
-                    message=message,
-                    traceback=traceback
-                )
+                log = SystemLogModel(level=level, module=module, message=message, traceback=traceback)
                 session.add(log)
                 await session.commit()
-                break # 只用一次 session
+                break  # 只用一次 session
         except Exception as e:
             # Fallback to sys.stderr to avoid recursive logging errors
             import sys
+
             sys.stderr.write(f"Failed to save log to DB: {e}\n")
+
 
 db_sink = DBSink()

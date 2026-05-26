@@ -8,14 +8,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from infrastructure.repositories.session_repository import MessageRepository
 from loguru import logger
 from sqlalchemy.orm import Session
 
 from domain.entities.chat_session import ChatSession
 from domain.entities.message import Message
 from infrastructure.database.database import get_session
-from infrastructure.repositories.session_repository import SessionRepository
+from infrastructure.repositories.session_repository import MessageRepository, SessionRepository
 
 
 class ChatHistoryService:

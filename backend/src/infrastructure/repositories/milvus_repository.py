@@ -69,9 +69,7 @@ class MilvusRepository(IVectorStore):
             if not self.client.has_collection(collection_name=collection_name):
                 logger.info(f"正在创建 Milvus 集合: {collection_name}, 维度: {dimension}")
                 self.client.create_collection(
-                    collection_name=collection_name,
-                    dimension=dimension,
-                    metric_type="COSINE"
+                    collection_name=collection_name, dimension=dimension, metric_type="COSINE"
                 )
         except Exception as e:
             logger.error(f"创建 Milvus 集合失败: {e}")
@@ -128,15 +126,12 @@ class MilvusRepository(IVectorStore):
                 "vector": vec,
                 "chunk_id": chunk.chunk_id,
                 "text": chunk.text,
-                "metadata": chunk.metadata
+                "metadata": chunk.metadata,
             }
             data.append(doc)
 
         try:
-            res = self.client.insert(
-                collection_name=collection_name,
-                data=data
-            )
+            res = self.client.insert(collection_name=collection_name, data=data)
             count = int(res.get("insert_count", 0))
             logger.info(f"向集合 {collection_name} 成功插入 {count} 条数据")
             return count
@@ -164,7 +159,7 @@ class MilvusRepository(IVectorStore):
                 collection_name=collection_name,
                 data=[query_vector],
                 limit=limit,
-                output_fields=["chunk_id", "text", "metadata"]
+                output_fields=["chunk_id", "text", "metadata"],
             )
 
             results = []
@@ -176,7 +171,7 @@ class MilvusRepository(IVectorStore):
                             chunk_id=entity.get("chunk_id", ""),
                             text=entity.get("text", ""),
                             score=hit.get("distance", 0.0),
-                            metadata=entity.get("metadata", {})
+                            metadata=entity.get("metadata", {}),
                         )
                     )
             return results

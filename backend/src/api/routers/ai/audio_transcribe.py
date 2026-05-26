@@ -13,7 +13,7 @@ from api.deps import get_current_user
 from infrastructure.ai.audio.local_asr_client import get_asr_client
 from infrastructure.database.database import get_db_session
 from infrastructure.database.transcribe_model import AudioTranscribeRecordModel
-from infrastructure.notify.feishu_ai_notify import FeishuAINotifyService, get_feishu_ai_notify_service
+from infrastructure.notify.feishu_ai_notify import get_feishu_ai_notify_service
 from infrastructure.storage.s3_storage import get_s3_storage
 
 router = APIRouter()
@@ -32,7 +32,7 @@ def _extract_text_from_srt(srt_content: str) -> str:
     """从 SRT 格式字符串中提取纯文本"""
     lines = srt_content.strip().split("\n")
     text_parts = []
-    
+
     for line in lines:
         line = line.strip()
         # 跳过数字序号、时间戳行、空行
@@ -43,7 +43,7 @@ def _extract_text_from_srt(srt_content: str) -> str:
         if "-->" in line:
             continue
         text_parts.append(line)
-    
+
     return "".join(text_parts)
 
 
@@ -86,33 +86,33 @@ async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: st
 
             # 使用 fpdf2 生成真正的 PDF
             from fpdf import FPDF
-            
+
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("SimSun", size=12)
-            
+
             # 处理标题
             title = f"{base_name} - 语音转写报告"
-            pdf.set_font("SimSun", style='B', size=16)
-            pdf.cell(200, 15, txt=title, ln=True, align='C')
-            
+            pdf.set_font("SimSun", style="B", size=16)
+            pdf.cell(200, 15, txt=title, ln=True, align="C")
+
             pdf.set_font("SimSun", size=12)
-            pdf.cell(200, 10, txt=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ln=True, align='C')
+            pdf.cell(200, 10, txt=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ln=True, align="C")
             pdf.ln(10)
-            
+
             # 添加分隔线
             pdf.line(10, pdf.get_y(), 200, pdf.get_y())
             pdf.ln(10)
-            
+
             # 添加正文内容，自动换行
             pdf.set_font("SimSun", size=12)
-            for line in text.split('\n'):
+            for line in text.split("\n"):
                 # 按固定宽度分割长行
                 while len(line) > 0:
                     pdf.cell(0, 10, txt=line[:40], ln=True)
                     line = line[40:]
                 pdf.ln(2)
-            
+
             pdf.output(pdf_path)
 
             # 3. 上传到 S3
@@ -180,18 +180,14 @@ def _send_transcribe_notify(user_id: str, file_name: str, text: str, md_url: str
 **文件**: {file_name}
 
 **转写内容预览**:
-{text[:200]}{'...' if len(text) > 200 else ''}
+{text[:200]}{"..." if len(text) > 200 else ""}
 
 **下载链接**:
 - 📝 [Markdown]({md_url})
 - 📄 [TXT]({txt_url})
 - 📑 [PDF]({pdf_url})"""
-        
-        service.send_card(
-            title="🎙️ 音频转写完成通知",
-            content=card_content,
-            extra={"level": "INFO"}
-        )
+
+        service.send_card(title="🎙️ 音频转写完成通知", content=card_content, extra={"level": "INFO"})
         logger.info(f"飞书通知发送成功: {user_id} - {file_name}")
     except Exception as e:
         logger.error(f"发送飞书通知失败: {e}")

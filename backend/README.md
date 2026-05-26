@@ -37,6 +37,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_26_1402
+- **修复(audio_transcribe)**: 使用 fpdf2 库生成真正的 PDF 格式，解决 PDF 文件损坏无法打开的问题
+- **修复(s3_storage)**: 修改 `get_file_url` 方法，优先使用 `S3_PRESIGNED_PUBLIC_BASE` 配置，确保返回正确的 S3 公共域名 URL
+
 ### 🛠️ 后端_2026_05_23_1024
 - **重构(subtitle)**: 移除OpenAI的STT依赖，首选魔塔社区API，并支持降级至本地FunASR模型。
 - **优化(s3_storage)**: 启用boto3的分片并发上传，解决大文件（视频）上传超时卡死的问题。

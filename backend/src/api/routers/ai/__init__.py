@@ -7,12 +7,12 @@
 from fastapi import APIRouter
 
 from .agent import router as agent_router
+from .audio_transcribe import router as transcribe_router
 from .comfyui import router as comfyui_router
 from .image import router as image_router
 from .management import router as management_router
 from .music import router as music_router
 from .video import router as video_router
-from .audio_transcribe import router as transcribe_router
 
 router = APIRouter()
 

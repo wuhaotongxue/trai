@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import base64
-import io
 import mimetypes
 import os
 from dataclasses import dataclass, field
@@ -337,11 +336,11 @@ class MultimodalProcessor:
         Returns:
             ProcessingResult: 包含转录文本
         """
-        import time
-        import tempfile
+        import asyncio
         import os
         import subprocess
-        import asyncio
+        import tempfile
+        import time
 
         start_time = time.perf_counter()
 
@@ -352,7 +351,7 @@ class MultimodalProcessor:
             # 检测是否为视频文件
             is_video = False
             if filename:
-                video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.webm', '.flv']
+                video_extensions = [".mp4", ".mov", ".mkv", ".avi", ".webm", ".flv"]
                 is_video = any(filename.lower().endswith(ext) for ext in video_extensions)
 
             # 将数据保存到临时文件
@@ -367,28 +366,27 @@ class MultimodalProcessor:
             if is_video:
                 logger.info(f"检测到视频文件：{filename}, 开始提取音频")
                 audio_path = tmp_path + ".extracted.wav"
-                
+
                 cmd = [
                     "ffmpeg",
                     "-y",
-                    "-i", tmp_path,
+                    "-i",
+                    tmp_path,
                     "-vn",
-                    "-ac", "1",
-                    "-ar", "16000",
+                    "-ac",
+                    "1",
+                    "-ar",
+                    "16000",
                     audio_path,
                 ]
-                
-                process = await asyncio.create_subprocess_exec(
-                    *cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-                
+
+                process = await asyncio.create_subprocess_exec(*cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
                 stdout, stderr = await process.communicate()
-                
+
                 if process.returncode != 0:
                     raise RuntimeError(f"音频提取失败：{stderr.decode('utf-8', errors='ignore')}")
-                
+
                 # 使用提取的音频文件
                 tmp_path = audio_path
                 logger.info(f"音频提取完成：{audio_path}")
@@ -443,7 +441,7 @@ class MultimodalProcessor:
         """从 SRT 格式字符串中提取纯文本"""
         lines = srt_content.strip().split("\n")
         text_parts = []
-        
+
         for line in lines:
             line = line.strip()
             # 跳过数字序号、时间戳行、空行
@@ -454,7 +452,7 @@ class MultimodalProcessor:
             if "-->" in line:
                 continue
             text_parts.append(line)
-        
+
         return "".join(text_parts)
 
     async def text_to_speech(

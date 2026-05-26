@@ -21,10 +21,7 @@ class EmbeddingClient(IEmbeddingService):
 
         if self._provider == "modelscope" or self._provider == "dashscope":
             self._api_key = os.getenv("DASHSCOPE_API_KEY", "") or os.getenv("MODELSCOPE_API_KEY", "")
-            self._base_url = (
-                os.getenv("DASHSCOPE_API_BASE", "")
-                or "https://dashscope.aliyuncs.com/compatible-mode/v1"
-            )
+            self._base_url = os.getenv("DASHSCOPE_API_BASE", "") or "https://dashscope.aliyuncs.com/compatible-mode/v1"
             self._model = os.getenv("EMBEDDING_MODEL", "text-embedding-v3")
             self._dimension = 1536
         else:
@@ -72,10 +69,7 @@ class EmbeddingClient(IEmbeddingService):
             "Content-Type": "application/json",
         }
 
-        payload = {
-            "model": self._model,
-            "input": texts
-        }
+        payload = {"model": self._model, "input": texts}
 
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:

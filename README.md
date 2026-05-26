@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_26_1402
+- **修复(audio_transcribe)**: 使用 fpdf2 库生成真正的 PDF 格式，解决 PDF 文件损坏无法打开的问题
+- **修复(s3_storage)**: 修改 `get_file_url` 方法，优先使用 `S3_PRESIGNED_PUBLIC_BASE` 配置，确保返回正确的 S3 公共域名 URL
+
 ### 🛠️ 全栈架构与客户端升级_2026_05_24_1356
 - **架构升级**：在项目根目录新增统一的 `docker-compose.yml`，支持一键拉起后端 API、Next.js 前端、PostgreSQL、Redis、Milvus、MinIO 等全量服务。
 - **配置优化**：确认并优化 `backend/env/` 下所有零散 `.env` 配置文件的自动化装载链路。

@@ -178,7 +178,7 @@ class FeishuAINotifyService:
             dict: 飞书 API 响应
         """
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
+
         card = {
             "msg_type": "interactive",
             "card": {
@@ -202,7 +202,7 @@ class FeishuAINotifyService:
                 ],
             },
         }
-        
+
         return self._send_card(card)
 
     def _download_image(self, image_url: str) -> bytes:
