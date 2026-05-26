@@ -35,10 +35,11 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
-### 🛠️ 2026_05_26_2145
-- **规范修复**: 按照 `wuhao` 专属规范修复了 [downloader.py](file:///home/qyjgylc_whf/code/trai/backend/src/api/routers/tools/downloader.py) 和 [video_downloader.py](file:///home/qyjgylc_whf/code/trai/backend/src/infrastructure/tools/video_downloader.py)。
-- **强制要求**: 补齐了文件头模板、类封装（禁止孤立函数）、详细的 Docstring 以及类型提示。
-- **安全日志**: 引入 `loguru` 替换 `print`，确保生产环境日志可追踪。
+### 🛠️ 2026_05_26_2200
+- **全局规范重构**: 启动了后端代码库的全面规范化治理，重点修复了 API 路由、存储基础设施、数据库配置等核心模块。
+- **强制类封装**: 严格执行 `wuhao` 规范，所有孤立辅助函数已封装入对应的 `Utils` 或 `Router` 类中。
+- **文档与元数据**: 为核心文件补齐了标准文件头（作者、日期、描述）以及符合规范的中文 Docstring。
+- **模块优化**: 优化了 [video.py](file:///home/qyjgylc_whf/code/trai/backend/src/api/routers/ai/video.py)、[audio_transcribe.py](file:///home/qyjgylc_whf/code/trai/backend/src/api/routers/ai/audio_transcribe.py)、[s3_storage.py](file:///home/qyjgylc_whf/code/trai/backend/src/infrastructure/storage/s3_storage.py) 及 [database.py](file:///home/qyjgylc_whf/code/trai/backend/src/infrastructure/database/database.py)。
 
 ### 🛠️ 后端_2026_05_26_1728
 - **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕

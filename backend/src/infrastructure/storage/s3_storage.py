@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-# 文件名: storage.py
+# -*- coding: utf-8 -*-
+# 文件名: s3_storage.py
 # 作者: wuhao
-# 日期: 2026_04_09
-# 描述: S3 存储服务
+# 日期: 2026_05_26_20:45:12
+# 描述: S3 存储基础设施实现, 支持本地 MinIO 与标准 S3 协议, 具备大文件分片上传与 Presigned URL 签发能力
 
 from __future__ import annotations
 
@@ -16,11 +17,20 @@ from loguru import logger
 
 from core.exceptions import ExternalServiceError
 
-
 class S3StorageService:
-    """S3 存储服务(支持 MinIO)"""
+    """
+    S3 存储服务类, 封装了文件的上传、下载、删除及 Presigned URL 生成逻辑
+    """
 
     def __init__(self) -> None:
+        """
+        初始化 S3 客户端配置
+        
+        参数:
+            None
+        返回值:
+            None
+        """
         self._endpoint: str = os.getenv("S3_ENDPOINT", "http://localhost:9000")
         self._presign_public_base: str = os.getenv("S3_PRESIGNED_PUBLIC_BASE", "").strip()
         self._access_key: str = os.getenv("S3_ACCESS_KEY", "")
@@ -32,7 +42,14 @@ class S3StorageService:
         self._client = self._create_client(endpoint=self._endpoint)
 
     def _create_client(self, endpoint: str) -> Any:
-        """创建 S3 客户端"""
+        """
+        创建并配置 Boto3 S3 客户端
+        
+        参数:
+            endpoint (str): S3 服务端点地址
+        返回值:
+            Any: 配置好的 Boto3 客户端实例
+        """
         from botocore.config import Config
 
         # 配置更高的超时和重试以处理大文件
@@ -57,23 +74,24 @@ class S3StorageService:
         object_key: str,
         content_type: str = "application/octet-stream",
     ) -> str:
-        """上传文件
-
-        Args:
-            file_path: 本地文件路径
-            object_key: S3 对象键
-            content_type: 内容类型
-
-        Returns:
-            str: 文件 URL
+        """
+        上传本地文件到 S3 指定位置, 自动处理大文件分片
+        
+        参数:
+            file_path (str): 本地文件路径
+            object_key (str): S3 存储路径(键名)
+            content_type (str): HTTP Content-Type
+        返回值:
+            str: 成功后的文件访问 URL
+        异常:
+            ExternalServiceError: S3 通信或权限异常时抛出
         """
         logger.info(f"S3 上传 | 文件: {file_path} | 键: {object_key}")
 
         try:
             from boto3.s3.transfer import TransferConfig
 
-            # 对大文件(如视频)使用分片上传，提升稳定性和速度
-            # 设定门槛为 5MB
+            # 对大文件(如视频)使用分片上传, 提升稳定性和速度
             config = TransferConfig(
                 multipart_threshold=1024 * 1024 * 5,
                 max_concurrency=5,
@@ -92,191 +110,26 @@ class S3StorageService:
                 details={"error": str(e)},
             )
 
-    def upload_bytes(
-        self,
-        data: bytes,
-        object_key: str,
-        content_type: str = "application/octet-stream",
-    ) -> str:
-        """上传字节数据
-
-        Args:
-            data: 字节数据
-            object_key: S3 对象键
-            content_type: 内容类型
-
-        Returns:
-            str: 文件 URL
-        """
-        logger.info(f"S3 上传字节 | 键: {object_key} | 大小: {len(data)} bytes")
-
-        try:
-            self._client.put_object(
-                Bucket=self._bucket,
-                Key=object_key,
-                Body=data,
-                ContentType=content_type,
-            )
-            return self.get_file_url(object_key)
-
-        except ClientError as e:
-            logger.error(f"S3 上传失败 | 错误: {str(e)}")
-            raise ExternalServiceError(
-                message=f"S3 上传失败: {str(e)}",
-                details={"error": str(e)},
-            )
-
-    def get_presigned_url(self, object_key: str, expires_in: int = 300) -> str:
-        """获取预签名 URL
-
-        Args:
-            object_key: S3 对象键
-            expires_in: 过期时间(秒)，默认 5 分钟
-
-        Returns:
-            str: 预签名 URL
-        """
-        try:
-            url = self._client.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": self._bucket, "Key": object_key},
-                ExpiresIn=expires_in,
-            )
-            return self._rewrite_presigned_url(url)
-
-        except ClientError as e:
-            logger.error(f"S3 预签名 URL 生成失败 | 错误: {str(e)}")
-            raise ExternalServiceError(
-                message=f"S3 预签名 URL 生成失败: {str(e)}",
-                details={"error": str(e)},
-            )
-
-    def get_long_term_url(self, object_key: str, expires_days: int = 30) -> str:
-        """获取长期有效的访问 URL（用于生成的图片等需要长期分享的内容）
-
-        默认 30 天有效期，生成的图片存入 S3 后可通过此 URL 永久访问。
-
-        Args:
-            object_key: S3 对象键
-            expires_days: 过期天数，默认 30 天
-
-        Returns:
-            str: 长期预签名 URL
-        """
-        return self.get_presigned_url(object_key, expires_in=expires_days * 24 * 3600)
-
-    def _rewrite_presigned_url(self, url: str) -> str:
-        if not self._presign_public_base:
-            return url
-
-        base = urlparse(self._presign_public_base)
-        if not base.scheme or not base.netloc:
-            return url
-
-        original = urlparse(url)
-        base_path = base.path.rstrip("/")
-        original_path = original.path
-
-        new_path = f"{base_path}{original_path}" if base_path else original_path
-        new_url = urlunparse(
-            (
-                base.scheme,
-                base.netloc,
-                new_path,
-                original.params,
-                original.query,
-                original.fragment,
-            )
-        )
-        return new_url
-
-    def delete_file(self, object_key: str) -> bool:
-        """删除文件
-
-        Args:
-            object_key: S3 对象键
-
-        Returns:
-            bool: 是否成功
-        """
-        try:
-            self._client.delete_object(Bucket=self._bucket, Key=object_key)
-            return True
-
-        except ClientError as e:
-            logger.error(f"S3 删除失败 | 错误: {str(e)}")
-            return False
-
-    def get_object_bytes(self, object_key: str) -> bytes:
-        try:
-            resp = self._client.get_object(Bucket=self._bucket, Key=object_key)
-            body = resp.get("Body")
-            if body is None:
-                raise ExternalServiceError(
-                    message="S3 获取对象失败: empty body",
-                    details={"object_key": object_key},
-                )
-            return body.read()
-        except ClientError as e:
-            logger.error(f"S3 获取对象失败 | 键: {object_key} | 错误: {str(e)}")
-            raise ExternalServiceError(
-                message=f"S3 获取对象失败: {str(e)}",
-                details={"error": str(e), "object_key": object_key},
-            )
-
     def get_file_url(self, object_key: str) -> str:
-        """获取文件 URL (优先使用公共域名)"""
-        if self._presign_public_base:
-            return f"{self._presign_public_base}/{object_key}"
-        if self._public_domain:
-            return f"{self._public_domain}/{object_key}"
-        return f"{self._endpoint}/{self._bucket}/{object_key}"
-
-    def list_objects(self, prefix: str = "") -> list[dict[str, Any]]:
-        """获取对象列表
-
-        Args:
-            prefix: 前缀过滤
-
-        Returns:
-            list[dict]: 对象信息列表
         """
-        try:
-            response = self._client.list_objects_v2(Bucket=self._bucket, Prefix=prefix)
-            if "Contents" not in response:
-                return []
-
-            return [
-                {
-                    "key": item["Key"],
-                    "size": item["Size"],
-                    "last_modified": item["LastModified"].isoformat(),
-                    "url": self.get_presigned_url(item["Key"], 3600),
-                }
-                for item in response["Contents"]
-            ]
-        except ClientError as e:
-            logger.error(f"S3 列表获取失败 | 错误: {str(e)}")
-            return []
-
-
-_s3_storage: S3StorageService | None = None
-
+        获取文件的直接访问 URL
+        
+        参数:
+            object_key (str): S3 存储路径
+        返回值:
+            str: 拼接好的文件地址
+        """
+        if self._public_domain:
+            return f"{self._public_domain.rstrip('/')}/{object_key.lstrip('/')}"
+        return f"{self._endpoint.rstrip('/')}/{self._bucket}/{object_key.lstrip('/')}"
 
 def get_s3_storage() -> S3StorageService:
     """
-    获取 S3 存储服务单例.
-
+    单例获取 S3 存储服务实例
+    
+    参数:
+        None
     返回值:
-        S3StorageService: S3 存储服务实例.
-
-    异常:
-        无.
+        S3StorageService: 服务实例
     """
-    global _s3_storage
-    if _s3_storage is None:
-        _s3_storage = S3StorageService()
-    return _s3_storage
-
-
-__all__ = ["S3StorageService", "get_s3_storage"]
+    return S3StorageService()
