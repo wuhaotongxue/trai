@@ -12,7 +12,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from domain.system.entities import Department, UserDepartmentMapping
-from domain.interfaces.department_interfaces import IDepartmentRepository
+from domain.system.interfaces import IDepartmentRepository
 from infrastructure.database.department_model import DepartmentModel, UserDepartmentMappingModel
 
 

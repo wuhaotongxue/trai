@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: i18n.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:42:13
@@ -35,7 +34,7 @@ class I18nRouter:
         response_model=PublicTranslationsResponse,
         tags=["翻译"],
         summary="获取公开翻译",
-        description="供前端页面在初始化时从数据库拉取翻译文本, 无需认证"
+        description="供前端页面在初始化时从数据库拉取翻译文本, 无需认证",
     )
     async def get_public_translations(
         locale: str,
@@ -43,7 +42,7 @@ class I18nRouter:
     ) -> PublicTranslationsResponse:
         """
         获取指定语言的翻译
-        
+
         参数:
             locale (str): 语言代码, 如 zh/en
             session (Session): 数据库会话

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: music_creator.py
 # 作者: wuhao
-# 日期: 2026_05_23_13:30:00
+# 日期: 2026_05_26_20:53:15
 # 描述: 音乐创作自动化工具, 包含作词、作曲(生成音乐)、封面生成
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from infrastructure.agent.tools.base import (
     ToolDefinition,
     ToolParameter,
 )
-from infrastructure.ai.audio.local_music_client import get_music_client
+from infrastructure.ai.audio.local_music_client import MusicClientProvider
 from infrastructure.ai.vision.image_client_factory import ImageClientFactory
 
 
@@ -124,7 +124,7 @@ class MusicCreatorTool(BaseTool):
                 logger.warning(f"封面生成失败, 但不阻断流程: {e}")
 
             logger.info("[MusicCreator] Step 3: 生成音乐音频")
-            music_client = get_music_client()
+            music_client = MusicClientProvider.get_music_client()
             music_prompt = f"A song about {topic}. {cover_prompt[:100]}"
             loop = asyncio.get_running_loop()
             music_result = await loop.run_in_executor(

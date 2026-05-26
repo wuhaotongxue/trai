@@ -1,26 +1,50 @@
 #!/usr/bin/env python
 # 文件名: media_generator.py
 # 作者: wuhao
-# 日期: 2026-05-24
+# 日期: 2026_05_26_20:53:15
 # 描述: 多模态媒体生成客户端（音乐/MV克隆、唇形同步、视频拼接）
 
 import asyncio
 
 from loguru import logger
 
-from infrastructure.ai.audio.local_music_client import get_music_client
-from infrastructure.ai.video.local_lipsync_client import get_lipsync_client
+from infrastructure.ai.audio.local_music_client import MusicClientProvider
+from infrastructure.ai.video.local_lipsync_client import LipSyncClientProvider
 
 
 class MediaGeneratorAgent:
-    """处理音乐、视频、唇形同步的高级生成任务"""
+    """处理音乐、视频、唇形同步的高级生成任务."""
 
-    def __init__(self):
-        self.music_client = get_music_client()
-        self.lipsync_client = get_lipsync_client()
+    def __init__(self) -> None:
+        """
+        初始化媒体生成代理.
+
+        参数:
+            无.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
+        self.music_client = MusicClientProvider.get_music_client()
+        self.lipsync_client = LipSyncClientProvider.get_lipsync_client()
 
     async def clone_music(self, reference_audio_path: str, new_lyrics: str = "") -> str:
-        """克隆参考音乐的曲风，可替换歌词"""
+        """
+        克隆参考音乐的曲风，可替换歌词.
+
+        参数:
+            reference_audio_path: str, 参考音频路径.
+            new_lyrics: str, 新歌词.
+
+        返回值:
+            str: 生成的音乐路径或错误信息.
+
+        异常:
+            无.
+        """
         logger.info(f"正在克隆音乐曲风: {reference_audio_path}")
 
         # 使用 ACE-Step 音乐生成客户端进行 audio2music 克隆
@@ -30,13 +54,25 @@ class MediaGeneratorAgent:
 
         if result.success:
             logger.info(f"音乐克隆成功: {result.file_path}")
-            return result.file_path
+            return result.file_path or ""
         else:
             logger.error(f"音乐克隆失败: {result.error}")
             return f"生成失败: {result.error}"
 
     async def lip_sync(self, video_path: str, audio_path: str) -> str:
-        """唇形同步 (Wav2Lip / SadTalker)"""
+        """
+        唇形同步 (Wav2Lip / SadTalker).
+
+        参数:
+            video_path: str, 视频/图片路径.
+            audio_path: str, 驱动音频路径.
+
+        返回值:
+            str: 生成的视频路径或错误信息.
+
+        异常:
+            无.
+        """
         logger.info(f"正在进行唇形同步: 视频/图片={video_path} 音频={audio_path}")
 
         result = await self.lipsync_client.generate_lipsync(source_image=video_path, driven_audio=audio_path)
@@ -44,7 +80,7 @@ class MediaGeneratorAgent:
         if result.get("success"):
             output_path = result.get("output_path")
             logger.info(f"唇形同步成功: {output_path}")
-            return output_path
+            return str(output_path)
         else:
             error_msg = result.get("error", "Unknown error")
             logger.error(f"唇形同步失败: {error_msg}")
@@ -55,7 +91,16 @@ class MediaGeneratorAgent:
         根据提示词生成完整 MV：
         1. 文本生成音乐(含专辑名、封面、不同调调)
         2. 生成 5s 视频切片
-        3. 根据歌词循环生成并拼接完整 MV
+        3. 根据歌词循环生成并拼接完整 MV.
+
+        参数:
+            prompt: str, 提示词.
+
+        返回值:
+            str: MV 访问链接.
+
+        异常:
+            无.
         """
         logger.info(f"收到生成完整 MV 的请求: {prompt}")
 

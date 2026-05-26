@@ -17,8 +17,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from domain.system.entities import Department, UserDepartmentMapping
+from domain.system.interfaces import IDepartmentRepository
 from domain.user.entities import User, UserRole, UserStatus
-from domain.interfaces.department_interfaces import IDepartmentRepository
 from domain.user.interfaces import IUserRepository
 from infrastructure.agent.tools.wecom_contact import WeComContactClient
 

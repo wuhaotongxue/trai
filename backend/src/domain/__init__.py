@@ -1,6 +1,7 @@
 # 领域层
-from domain.user.entities import User, UserRole, UserStatus
 from domain.interfaces import IMessageRepository, ISessionRepository, IUserRepository
+
+from domain.user.entities import User, UserRole, UserStatus
 
 __all__ = [
     "User",

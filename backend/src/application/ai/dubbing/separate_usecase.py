@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -136,7 +135,7 @@ class AudioSeparateUseCase:
         device = "cpu"
         if torch.cuda.is_available():
             gpu_count = torch.cuda.device_count()
-            min_memory = float('inf')
+            min_memory = float("inf")
             best_gpu = 0
             for i in range(gpu_count):
                 memory_used = torch.cuda.memory_allocated(i)
@@ -145,10 +144,10 @@ class AudioSeparateUseCase:
                     best_gpu = i
             device = f"cuda:{best_gpu}"
             logger.info(f"选择 GPU {best_gpu} (占用: {min_memory / 1024**2:.0f} MiB)")
-        
+
         # 使用正确的 conda 环境路径
         demucs_path = "/home/qyjgylc_whf/miniconda3/envs/trai31313/bin/demucs"
-        
+
         cmd = [
             demucs_path,
             "-n",

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""音乐生成 API"""
+# 文件名: music.py
+# 作者: wuhao
+# 日期: 2026_05_26_20:53:15
+# 描述: 音乐生成 API, 提供基于 ACE-Step 模型的音乐生成、下载及列表查询接口.
 
 import os
 import uuid
@@ -8,13 +11,15 @@ from datetime import datetime
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
-from infrastructure.ai.audio.local_music_client import get_music_client
+from infrastructure.ai.audio.local_music_client import MusicClientProvider
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
 
 
 class MusicGenerateRequest(BaseModel):
-    """音乐生成请求"""
+    """
+    音乐生成请求模型.
+    """
 
     prompt: str = Field(..., description="音乐描述/提示词", min_length=1, max_length=500)
     duration: float | None = Field(30.0, description="音频时长（秒）", ge=5, le=300)
@@ -24,7 +29,9 @@ class MusicGenerateRequest(BaseModel):
 
 
 class MusicGenerateResponse(BaseModel):
-    """音乐生成响应"""
+    """
+    音乐生成响应模型.
+    """
 
     success: bool
     task_id: str
@@ -36,32 +43,32 @@ class MusicGenerateResponse(BaseModel):
 
 
 class MusicController:
-    """音乐生成控制器"""
+    """音乐生成控制器类."""
 
     @staticmethod
     @router.post("/generate", response_model=MusicGenerateResponse)
     async def generate_music(
         request: MusicGenerateRequest,
         background_tasks: BackgroundTasks,
-    ):
+    ) -> MusicGenerateResponse:
         """
-        生成音乐
+        生成音乐接口.
 
         参数:
-            prompt: 音乐描述/提示词
-            duration: 音频时长（秒）
-            steps: 推理步数
-            guidance_scale: 引导强度
-            model: 模型名称
+            request: MusicGenerateRequest, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务管理器.
 
-        返回:
-            MusicGenerateResponse: 生成结果
+        返回值:
+            MusicGenerateResponse: 生成结果.
+
+        异常:
+            无.
         """
         # 生成任务 ID
         task_id = f"music_{uuid.uuid4().hex[:12]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
         try:
-            client = get_music_client()
+            client = MusicClientProvider.get_music_client()
 
             # 同步生成（阻塞调用）
             result = client.generate(
@@ -73,7 +80,7 @@ class MusicController:
 
             if result.success:
                 # 构建音乐 URL - 返回完整可访问的 URL
-                filename = os.path.basename(result.file_path)
+                filename = os.path.basename(result.file_path or "")
                 music_url = f"http://localhost:5666/api_trai/v1/ai/music/files/{filename}"
 
                 return MusicGenerateResponse(
@@ -104,13 +111,16 @@ class MusicController:
     @router.get("/files/{filename}")
     async def get_music_file(filename: str):
         """
-        获取音乐文件
+        获取音乐文件接口.
 
         参数:
-            filename: 文件名
+            filename: str, 文件名.
 
-        返回:
-            FileResponse: 音频文件
+        返回值:
+            FileResponse: 音频文件响应.
+
+        异常:
+            HTTPException: 400/404 错误.
         """
         from urllib.parse import unquote
 
@@ -123,7 +133,7 @@ class MusicController:
         import re
 
         # 匹配: 中文、字母、数字、空格、下划线、连字符、括号、点号(用于扩展名)
-        if not re.match(r"^[\w\s\-\(\)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
+        if not re.match(r"^[\w\s\-\( \)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
             raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
 
         output_dir = "/home/qyjgylc_whf/code/trai/output_music"
@@ -150,16 +160,19 @@ class MusicController:
     async def list_music_files(
         limit: int = 20,
         offset: int = 0,
-    ):
+    ) -> dict:
         """
-        列出最近生成的音乐文件
+        列出最近生成的音乐文件接口.
 
         参数:
-            limit: 返回数量
-            offset: 跳过数量
+            limit: int, 返回数量.
+            offset: int, 跳过数量.
 
-        返回:
-            dict: 文件列表
+        返回值:
+            dict: 文件列表及统计信息.
+
+        异常:
+            无.
         """
         output_dir = "/home/qyjgylc_whf/code/trai/output_music"
 

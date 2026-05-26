@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: entities.py
 # 作者: wuhao
 # 日期: 2026_05_26_21:05:00
@@ -44,7 +43,7 @@ class Message:
     def to_dict(self) -> dict[str, Any]:
         """
         将消息实体转换为可序列化的字典格式
-        
+
         参数:
             None
         返回值:
@@ -61,7 +60,7 @@ class Message:
     def from_dict(cls, data: dict[str, Any]) -> Message:
         """
         从字典数据重建消息实体对象
-        
+
         参数:
             data (dict[str, Any]): 包含消息属性的字典
         返回值:
@@ -94,7 +93,7 @@ class ChatSession:
     def add_message(self, role: str, content: str) -> None:
         """
         向当前会话历史中追加一条新消息并更新活跃时间
-        
+
         参数:
             role (str): 消息发送者的角色 (system/user/assistant)
             content (str): 消息文本内容
@@ -113,7 +112,7 @@ class ChatSession:
     def get_last_messages(self, count: int = 10) -> list[dict[str, Any]]:
         """
         获取会话中最近的 N 条历史消息
-        
+
         参数:
             count (int): 需要返回的消息条数
         返回值:
@@ -125,7 +124,7 @@ class ChatSession:
     def message_count(self) -> int:
         """
         获取当前会话包含的消息总数
-        
+
         返回值:
             int: 消息总数
         """
@@ -134,7 +133,7 @@ class ChatSession:
     def clear_messages(self) -> None:
         """
         清空当前会话的所有历史消息记录
-        
+
         参数:
             None
         返回值:
@@ -146,7 +145,7 @@ class ChatSession:
     def to_ai_format(self) -> list[dict[str, str]]:
         """
         转换为符合 AI 模型 API (如 OpenAI/LLM) 要求的标准消息格式列表
-        
+
         返回值:
             list[dict[str, str]]: 仅包含 role 和 content 的精简消息列表
         """
@@ -155,7 +154,7 @@ class ChatSession:
     def to_dict(self) -> dict[str, Any]:
         """
         将整个会话实体转换为可序列化的字典
-        
+
         返回值:
             dict[str, Any]: 会话完整属性字典
         """
@@ -173,7 +172,7 @@ class ChatSession:
     def from_dict(cls, data: dict[str, Any]) -> ChatSession:
         """
         从字典数据恢复会话实体对象
-        
+
         参数:
             data (dict[str, Any]): 包含会话属性的字典
         返回值:

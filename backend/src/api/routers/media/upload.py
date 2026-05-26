@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
+from application.usecases.upload import FileUploadUseCase, UploadInput
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUser
-from application.usecases.upload import FileUploadUseCase, UploadInput
 from infrastructure.repositories.upload_task_repository import UploadTaskRepository
 from infrastructure.storage.s3_storage import S3StorageService
 

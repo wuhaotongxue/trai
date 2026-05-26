@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_video_client.py
 # 作者: wuhao
-# 日期: 2026_05_20
+# 日期: 2026_05_26_20:53:15
 # 描述: 本地视频生成客户端，使用 Wan-AI/Wan2.1-T2V-1.3B 模型 + DiffSynth Pipeline
 # 模型下载: modelscope download --model Wan-AI/Wan2.1-T2V-1.3B
 # DiffSynth 安装: pip install diffsynth
@@ -117,33 +117,49 @@ class LocalVideoClient:
         resolution: str,
         model_path: str = "",
     ) -> str:
-        """构建推理脚本内容（纯字符串模板，不用 f-string 避免插值问题）"""
+        """
+        构建推理脚本内容.
+
+        参数:
+            prompt: str, 提示词.
+            frames: int, 帧数.
+            resolution: str, 分辨率.
+            model_path: str, 模型路径.
+
+        返回值:
+            str: 脚本内容.
+        """
         width, height = resolution.split("x")
 
         # 预定义的本地模型路径（~/.cache/modelscope 已完整下载）
         local_path = model_path or os.path.expanduser("~/.cache/modelscope/hub/models/Wan-AI/Wan2.1-T2V-1.3B")
 
         # 用 7 个步骤，清晰的进度输出
-        # 生成的脚本使用 print(..., flush=True) 强制刷新，用 PYTHONUNBUFFERED=1 + -u 标志
+        # 生成的脚本使用 sys.stdout.write(...) 强制刷新
         script = [
             "import json, sys, os, base64, torch",
             f"base_path = r'{local_path}'",
             "",
             "device = 'cuda'",
-            "print('[1/7] 初始化 | GPU数量: ' + str(torch.cuda.device_count()), flush=True)",
+            "sys.stdout.write('[1/7] 初始化 | GPU数量: ' + str(torch.cuda.device_count()) + '\\n')",
+            "sys.stdout.flush()",
             "",
             "try:",
             "    from diffsynth.pipelines.wan_video import WanVideoPipeline, ModelConfig",
             "    from diffsynth.utils.data import save_video",
-            "    print('[2/7] DiffSynth 已安装', flush=True)",
+            "    sys.stdout.write('[2/7] DiffSynth 已安装\\n')",
+            "    sys.stdout.flush()",
             "except ImportError:",
-            "    print('[2/7] 安装 DiffSynth...', flush=True)",
+            "    sys.stdout.write('[2/7] 安装 DiffSynth...\\n')",
+            "    sys.stdout.flush()",
             "    os.system('pip install diffsynth -q')",
             "    from diffsynth.pipelines.wan_video import WanVideoPipeline, ModelConfig",
             "    from diffsynth.utils.data import save_video",
-            "    print('[2/7] DiffSynth 安装完成', flush=True)",
+            "    sys.stdout.write('[2/7] DiffSynth 安装完成\\n')",
+            "    sys.stdout.flush()",
             "",
-            "print('[3/7] 加载模型: Wan2.1-T2V-1.3B (本地)', flush=True)",
+            "sys.stdout.write('[3/7] 加载模型: Wan2.1-T2V-1.3B (本地)\\n')",
+            "sys.stdout.flush()",
             "",
             "pipe = WanVideoPipeline.from_pretrained(",
             "    torch_dtype=torch.bfloat16,",
@@ -156,11 +172,13 @@ class LocalVideoClient:
             "    tokenizer_config=ModelConfig(path=base_path + '/google/umt5-xxl/'),",
             ")",
             "",
-            "print('[4/7] 模型加载完成', flush=True)",
+            "sys.stdout.write('[4/7] 模型加载完成\\n')",
+            "sys.stdout.flush()",
             "",
             "prompt_input = sys.stdin.read().strip()",
-            "print('[5/7] 开始推理 | frames: " + str(frames) + " | res: " + width + "x" + height + "', flush=True)",
-            "print('[推理中] 已开始 | " + str(frames) + " 帧推理中，每30秒心跳...', flush=True)",
+            "sys.stdout.write('[5/7] 开始推理 | frames: " + str(frames) + " | res: " + width + "x" + height + "\\n')",
+            "sys.stdout.write('[推理中] 已开始 | " + str(frames) + " 帧推理中，每30秒心跳...\\n')",
+            "sys.stdout.flush()",
             "",
             "import time as _time",
             "_start_ts = _time.time()",
@@ -171,7 +189,8 @@ class LocalVideoClient:
             "    global _last_hb",
             "    now = _time.time()",
             "    elapsed = int(now - _start_ts)",
-            "    print('[推理心跳] " + str(frames) + "帧推理中 | 已用 ' + str(elapsed) + ' 秒', flush=True)",
+            "    sys.stdout.write('[推理心跳] " + str(frames) + "帧推理中 | 已用 ' + str(elapsed) + ' 秒\\n')",
+            "    sys.stdout.flush()",
             "    _last_hb = now",
             "",
             # 用 tqdm 或简单线程做心跳（不阻塞 pipe）
@@ -195,9 +214,11 @@ class LocalVideoClient:
             "_stop_hb = True",
             "_hb_thread.join(timeout=1)",
             "_elapsed_total = int(_time.time() - _start_ts)",
-            "print('[推理心跳] 推理完成 | 共用时 ' + str(_elapsed_total) + ' 秒', flush=True)",
+            "sys.stdout.write('[推理心跳] 推理完成 | 共用时 ' + str(_elapsed_total) + ' 秒\\n')",
+            "sys.stdout.flush()",
             "",
-            "print('[6/7] 视频生成完成 | 帧数: ' + str(len(video)), flush=True)",
+            "sys.stdout.write('[6/7] 视频生成完成 | 帧数: ' + str(len(video)) + '\\n')",
+            "sys.stdout.flush()",
             "",
             'tmp_out = "/tmp/wan2_1_output.mp4"',
             "save_video(video, tmp_out, fps=15, quality=5)",
@@ -206,15 +227,16 @@ class LocalVideoClient:
             "os.unlink(tmp_out)",
             "",
             "output_b64 = base64.b64encode(video_bytes).decode('utf-8')",
-            "print('[7/7] 视频编码完成，准备返回...', flush=True)",
-            "print(json.dumps({",
+            "sys.stdout.write('[7/7] 视频编码完成，准备返回...\\n')",
+            "sys.stdout.write(json.dumps({",
             "    'video_base64': output_b64,",
             "    'size_bytes': len(video_bytes),",
             "    'frames': " + str(frames) + ",",
             "    'resolution': '" + width + "x" + height + "',",
             "    'frame_count': len(video),",
             "    'inference_time_seconds': _elapsed_total,",
-            "}))",
+            "}) + '\\n')",
+            "sys.stdout.flush()",
         ]
         return "\n".join(script)
 

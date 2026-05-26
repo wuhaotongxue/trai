@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: database.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:45:12
@@ -16,14 +15,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
+
 class ConfigurationError(Exception):
     """
     配置错误异常类, 用于处理环境变量或数据库配置缺失的情况
     """
+
     def __init__(self, message: str = "配置错误") -> None:
         """
         初始化异常
-        
+
         参数:
             message (str): 错误描述
         返回值:
@@ -32,16 +33,17 @@ class ConfigurationError(Exception):
         super().__init__(message)
         self.message = message
 
+
 class EnvLoader:
     """
     环境配置加载类, 负责从 backend/env 目录自动读取 .env 文件并注入环境变量
     """
-    
+
     @staticmethod
     def load_all() -> None:
         """
         扫描并加载所有配置文件
-        
+
         参数:
             None
         返回值:
@@ -62,14 +64,18 @@ class EnvLoader:
                             os.environ[_key.strip()] = _val.strip()
         logger.info("环境配置加载完成")
 
+
 # 启动即加载配置
 EnvLoader.load_all()
+
 
 class Base(DeclarativeBase):
     """
     SQLAlchemy 声明式基类, 所有 ORM 模型均需继承此类
     """
+
     pass
+
 
 class DatabaseConfig:
     """
@@ -79,7 +85,7 @@ class DatabaseConfig:
     def __init__(self) -> None:
         """
         初始化配置项, 优先读取 POSTGRES 环境变量
-        
+
         参数:
             None
         返回值:
@@ -95,7 +101,7 @@ class DatabaseConfig:
     def url(self) -> URL:
         """
         获取编码后的数据库连接 URL
-        
+
         参数:
             None
         返回值:
@@ -113,7 +119,7 @@ class DatabaseConfig:
     def create_engine(self, **kwargs: Any) -> Any:
         """
         创建数据库引擎
-        
+
         参数:
             **kwargs: 透传给 create_engine 的参数
         返回值:
@@ -124,13 +130,14 @@ class DatabaseConfig:
     def create_session_factory(self, engine: Any) -> sessionmaker[Session]:
         """
         创建会话工厂
-        
+
         参数:
             engine (Any): 数据库引擎
         返回值:
             sessionmaker[Session]: 会话工厂
         """
         return sessionmaker(bind=engine, expire_on_commit=False)
+
 
 class Database:
     """
@@ -140,7 +147,7 @@ class Database:
     def __init__(self) -> None:
         """
         初始化管理器并预注册所有模型
-        
+
         参数:
             None
         返回值:
@@ -155,7 +162,7 @@ class Database:
     def _import_models(self) -> None:
         """
         内部方法: 导入所有业务模型
-        
+
         参数:
             None
         返回值:
@@ -164,6 +171,7 @@ class Database:
         try:
             from infrastructure.database.extension_models import AgentModel, AITraceLogModel  # noqa: F401
             from infrastructure.database.models import ChatSessionModel, DepartmentModel  # noqa: F401
+
             logger.debug("数据库模型注册完成")
         except ImportError as e:
             logger.error(f"模型导入失败: {e}")
@@ -171,7 +179,7 @@ class Database:
     def get_session(self) -> Session:
         """
         获取一个新的数据库会话
-        
+
         参数:
             None
         返回值:
@@ -179,10 +187,11 @@ class Database:
         """
         return self._session_factory()
 
+
 def get_db_session() -> Session:
     """
     FastAPI 依赖注入使用的获取会话函数
-    
+
     参数:
         None
     返回值:

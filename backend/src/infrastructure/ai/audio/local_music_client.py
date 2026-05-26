@@ -1,4 +1,8 @@
-"""ACE-Step 音乐生成客户端 - 进程隔离执行"""
+#!/usr/bin/env python
+# 文件名: local_music_client.py
+# 作者: wuhao
+# 日期: 2026_05_26_20:53:15
+# 描述: ACE-Step 音乐生成客户端 - 进程隔离执行
 
 import asyncio
 import os
@@ -11,7 +15,15 @@ from dataclasses import dataclass
 
 @dataclass
 class MusicGenerateResult:
-    """音乐生成结果"""
+    """
+    音乐生成结果数据类.
+
+    属性:
+        success: bool, 是否成功.
+        file_path: str | None, 文件路径.
+        error: str | None, 错误信息.
+        duration: float, 耗时.
+    """
 
     success: bool
     file_path: str | None = None
@@ -20,15 +32,27 @@ class MusicGenerateResult:
 
 
 class LocalMusicClient:
-    """本地音乐生成客户端 - 使用 ACE-Step 模型"""
+    """本地音乐生成客户端 - 使用 ACE-Step 模型."""
 
     def __init__(
         self,
         output_dir: str = "/home/qyjgylc_whf/code/trai/output_music",
-        checkpoint_dir: str = None,
+        checkpoint_dir: str | None = None,
         default_steps: int = 27,
         default_duration: int = 30,
-    ):
+    ) -> None:
+        """
+        初始化音乐生成客户端.
+
+        参数:
+            output_dir: str, 输出目录.
+            checkpoint_dir: str | None, 权重目录.
+            default_steps: int, 默认步数.
+            default_duration: int, 默认时长.
+
+        返回值:
+            None.
+        """
         self.output_dir = output_dir
         self.checkpoint_dir = checkpoint_dir or os.path.join(output_dir, "checkpoints")
         self.default_steps = default_steps
@@ -47,20 +71,23 @@ class LocalMusicClient:
         task: str = "text2music",
     ) -> MusicGenerateResult:
         """
-        生成音乐（同步调用）
+        生成音乐（同步调用）.
 
-        Args:
-            prompt: 音乐描述提示词
-            duration: 音频时长（秒）
-            steps: 推理步数
-            guidance_scale: 引导强度
-            task: 任务类型 (text2music, audio2music)
+        参数:
+            prompt: str, 音乐描述提示词.
+            duration: float | None, 音频时长（秒）.
+            steps: int | None, 推理步数.
+            guidance_scale: float, 引导强度.
+            task: str, 任务类型 (text2music, audio2music).
 
-        Returns:
-            MusicGenerateResult: 生成结果
+        返回值:
+            MusicGenerateResult: 生成结果.
+
+        异常:
+            无.
         """
-        duration = duration or self.default_duration
-        steps = steps or self.default_steps
+        actual_duration = duration or self.default_duration
+        actual_steps = steps or self.default_steps
 
         # 生成唯一文件名
         timestamp = int(time.time())
@@ -77,8 +104,8 @@ class LocalMusicClient:
                 sys.executable,
                 self.script_path,
                 prompt,
-                str(int(duration)),
-                str(steps),
+                str(int(actual_duration)),
+                str(actual_steps),
                 str(guidance_scale),
                 output_path,
             ]
@@ -145,7 +172,22 @@ class LocalMusicClient:
         guidance_scale: float = 7.0,
         task: str = "text2music",
     ) -> MusicGenerateResult:
-        """异步生成音乐"""
+        """
+        异步生成音乐.
+
+        参数:
+            prompt: str, 音乐描述提示词.
+            duration: float | None, 音频时长（秒）.
+            steps: int | None, 推理步数.
+            guidance_scale: float, 引导强度.
+            task: str, 任务类型.
+
+        返回值:
+            MusicGenerateResult: 生成结果.
+
+        异常:
+            无.
+        """
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             None,
@@ -158,13 +200,25 @@ class LocalMusicClient:
         )
 
 
-# 全局客户端实例
-_music_client: LocalMusicClient | None = None
+class MusicClientProvider:
+    """音乐生成客户端提供者类."""
 
+    _music_client: LocalMusicClient | None = None
 
-def get_music_client() -> LocalMusicClient:
-    """获取音乐生成客户端单例"""
-    global _music_client
-    if _music_client is None:
-        _music_client = LocalMusicClient()
-    return _music_client
+    @classmethod
+    def get_music_client(cls) -> LocalMusicClient:
+        """
+        获取音乐生成客户端单例.
+
+        参数:
+            无.
+
+        返回值:
+            LocalMusicClient: 客户端实例.
+
+        异常:
+            无.
+        """
+        if cls._music_client is None:
+            cls._music_client = LocalMusicClient()
+        return cls._music_client

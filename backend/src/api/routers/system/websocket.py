@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: websocket.py
 # 作者: wuhao
 # 日ly: 2026_05_26_20:42:13
@@ -16,6 +15,7 @@ from infrastructure.websocket.websocket_manager import (
 
 router = APIRouter()
 
+
 class WebSocketRouter:
     """
     WebSocket 路由处理器类, 封装所有实时通信端点逻辑
@@ -29,7 +29,7 @@ class WebSocketRouter:
     ) -> None:
         """
         主 WebSocket 连接端点
-        
+
         参数:
             websocket (WebSocket): WebSocket 连接对象
             user_id (str): 用户唯一标识
@@ -68,7 +68,7 @@ class WebSocketRouter:
     ) -> None:
         """
         会话级 WebSocket 连接端点, 自动订阅指定会话
-        
+
         参数:
             websocket (WebSocket): WebSocket 连接对象
             user_id (str): 用户唯一标识

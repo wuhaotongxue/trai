@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: video_downloader.py
 # 作者: wuhao
 # 日期: 2026_05_26_21:05:00
@@ -7,11 +6,12 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 from pathlib import Path
 from typing import Any
+
 from loguru import logger
+
 
 class VideoDownloader:
     """
@@ -21,7 +21,7 @@ class VideoDownloader:
     def __init__(self, download_path: str = "temp/downloads") -> None:
         """
         初始化下载器并确保存储目录存在
-        
+
         参数:
             download_path (str): 下载文件存储的本地路径
         返回值:
@@ -36,7 +36,7 @@ class VideoDownloader:
     async def download_bilibili(self, url: str) -> dict[str, Any]:
         """
         使用 yt-dlp 工具高清下载 Bilibili 视频
-        
+
         参数:
             url (str): Bilibili 视频播放链接
         返回值:
@@ -51,58 +51,50 @@ class VideoDownloader:
         """
         try:
             # 第一步: 获取视频元数据
-            info_cmd = [
-                "yt-dlp",
-                "--print", "%(title)s|%(ext)s|%(id)s",
-                "--no-playlist",
-                url
-            ]
-            
+            info_cmd = ["yt-dlp", "--print", "%(title)s|%(ext)s|%(id)s", "--no-playlist", url]
+
             result = subprocess.run(info_cmd, capture_output=True, text=True)
             if result.returncode != 0:
                 logger.error(f"Failed to fetch video info: {result.stderr}")
                 return {"success": False, "error": result.stderr}
-            
-            output = result.stdout.strip().split('|')
+
+            output = result.stdout.strip().split("|")
             if len(output) < 3:
                 return {"success": False, "error": "Invalid video info format from yt-dlp"}
-                
+
             title, ext, video_id = output
             output_template = str(self.download_path / f"{video_id}.%(ext)s")
-            
+
             # 第二步: 执行高清下载与合并
             download_cmd = [
                 "yt-dlp",
-                "-f", "bestvideo+bestaudio/best",
-                "--merge-output-format", "mp4",
-                "-o", output_template,
-                url
+                "-f",
+                "bestvideo+bestaudio/best",
+                "--merge-output-format",
+                "mp4",
+                "-o",
+                output_template,
+                url,
             ]
-            
+
             logger.info(f"Downloading video from {url}...")
             process = subprocess.run(download_cmd, capture_output=True, text=True)
-            
+
             if process.returncode == 0:
                 file_path = str(self.download_path / f"{video_id}.mp4")
-                return {
-                    "success": True,
-                    "title": title,
-                    "file_path": file_path,
-                    "video_id": video_id
-                }
+                return {"success": True, "title": title, "file_path": file_path, "video_id": video_id}
             else:
                 logger.error(f"Download process failed: {process.stderr}")
-                return {
-                    "success": False,
-                    "error": process.stderr
-                }
-                
+                return {"success": False, "error": process.stderr}
+
         except Exception as e:
             logger.error(f"Unexpected error during Bilibili download: {str(e)}")
             return {"success": False, "error": str(e)}
+
 
 class BilibiliDownloader(VideoDownloader):
     """
     Bilibili 专用下载器实现类
     """
+
     pass

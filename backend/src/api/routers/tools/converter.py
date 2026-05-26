@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: converter.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:42:13
@@ -18,10 +17,10 @@ from pathlib import Path
 from typing import Annotated
 
 import markdown
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from loguru import logger
 from PIL import Image
 from pydantic import BaseModel, Field
-from loguru import logger
 
 from api.deps import CurrentUser
 from infrastructure.storage.s3_storage import S3StorageService
@@ -56,7 +55,7 @@ class PDFGenerator:
     async def generate_pdf(self, html_content: str) -> bytes:
         """
         将 HTML 内容转换为 PDF 字节流
-        
+
         参数:
             html_content (str): 待转换的 HTML 字符串
         返回值:
@@ -267,14 +266,18 @@ class ToolsUtils:
         """提取数学公式块并在 Markdown 中替换为占位符"""
         math_blocks: list[dict[str, str]] = []
         display_pattern = r"\$\$([\s\S]*?)\$\$"
+
         def _replace_display(match: re.Match) -> str:
             math_blocks.append({"kind": "block", "text": f"$${match.group(1)}$$"})
             return f'<div data-math-placeholder="{len(math_blocks) - 1}"></div>'
+
         processed = re.sub(display_pattern, _replace_display, md_text, flags=re.DOTALL)
         inline_pattern = r"(?<!\\)\$(?!\$)([^\n]*?)(?<!\\)\$(?!\$)"
+
         def _replace_inline(match: re.Match) -> str:
             math_blocks.append({"kind": "inline", "text": f"${match.group(1)}$"})
             return f'<span data-math-placeholder="{len(math_blocks) - 1}"></span>'
+
         return re.sub(inline_pattern, _replace_inline, processed), math_blocks
 
     @staticmethod
@@ -312,11 +315,18 @@ class ToolsAPI:
             html_with_images = ToolsUtils.convert_images_to_base64(html_text, base_path)
             html_with_font = f"<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body {{ font-family: sans-serif; font-size: 14px; padding: 20px; }} pre, code {{ background-color: #f5f5f5; border-radius: 4px; }} table {{ border-collapse: collapse; width: 100%; }} th, td {{ border: 1px solid #ddd; padding: 8px; }} img {{ max-width: 100%; height: auto; }} .mermaid {{ text-align: center; margin: 20px 0; }}</style></head><body>{html_with_images}</body></html>"
             pdf_bytes = await _pdf_generator.generate_pdf(html_with_font)
-            if not pdf_bytes: raise ValueError("PDF 生成为空")
+            if not pdf_bytes:
+                raise ValueError("PDF 生成为空")
             object_key = f"tools/pdf/{current_user['user_id']}/{uuid.uuid4().hex}.pdf"
             s3_service.upload_bytes(pdf_bytes, object_key, content_type="application/pdf")
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            return ToolResultResponse(url=presigned_url, expires_in=300, file_name=file.filename.replace(".md", ".pdf"), original_size=len(content), converted_size=len(pdf_bytes))
+            return ToolResultResponse(
+                url=presigned_url,
+                expires_in=300,
+                file_name=file.filename.replace(".md", ".pdf"),
+                original_size=len(content),
+                converted_size=len(pdf_bytes),
+            )
         except Exception as e:
             logger.error(f"MD转PDF失败: {e}")
             raise HTTPException(status_code=500, detail={"code": 500, "message": str(e)})
@@ -333,14 +343,21 @@ class ToolsAPI:
         try:
             content = await file.read()
             image = Image.open(BytesIO(content))
-            if image.mode in ("RGBA", "P"): image = image.convert("RGB")
+            if image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
             output_buffer = BytesIO()
             image.save(output_buffer, format="JPEG", quality=quality)
             compressed_bytes = output_buffer.getvalue()
             object_key = f"tools/images/{current_user['user_id']}/{uuid.uuid4().hex}.jpg"
             s3_service.upload_bytes(compressed_bytes, object_key, content_type="image/jpeg")
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            return ToolResultResponse(url=presigned_url, expires_in=300, file_name=f"compressed_{file.filename}", original_size=len(content), converted_size=len(compressed_bytes))
+            return ToolResultResponse(
+                url=presigned_url,
+                expires_in=300,
+                file_name=f"compressed_{file.filename}",
+                original_size=len(content),
+                converted_size=len(compressed_bytes),
+            )
         except Exception as e:
             logger.error(f"图片压缩失败: {e}")
             raise HTTPException(status_code=500, detail={"code": 500, "message": "图片压缩失败"})
@@ -361,7 +378,9 @@ class ToolsAPI:
             object_key = f"tools/zip/{current_user['user_id']}/{uuid.uuid4().hex}.zip"
             s3_service.upload_bytes(zip_bytes, object_key, content_type="application/zip")
             presigned_url = s3_service.get_presigned_url(object_key, expires_in=300)
-            return ToolResultResponse(url=presigned_url, expires_in=300, file_name="archive.zip", converted_size=len(zip_bytes))
+            return ToolResultResponse(
+                url=presigned_url, expires_in=300, file_name="archive.zip", converted_size=len(zip_bytes)
+            )
         except Exception as e:
             logger.error(f"ZIP 压缩失败: {e}")
             raise HTTPException(status_code=500, detail={"code": 500, "message": "ZIP 压缩失败"})

@@ -11,15 +11,15 @@ import os
 import uuid
 from typing import Annotated, Any
 
+from application.usecases.image_generation import (
+    ImageGenerationInput,
+    ImageGenerationUseCase,
+)
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 from loguru import logger
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
-from application.usecases.image_generation import (
-    ImageGenerationInput,
-    ImageGenerationUseCase,
-)
 from domain.media.entities import ImageRecord, ImageRecordType
 from infrastructure.ai.core.modelscope_client import ModelScopeClient
 from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient

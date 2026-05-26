@@ -192,15 +192,16 @@ class SubtitleGenerateUseCase:
     ) -> SubtitleRecord:
         """执行字幕生成业务逻辑"""
         import asyncio
-        
+
         # 注册取消事件
         from api.routers.ai.subtitle import _active_cancel_events
+
         cancel_event = asyncio.Event()
         _active_cancel_events[task_id] = cancel_event
-        
+
         tmp_dir = None
         record = None
-        
+
         try:
             input_is_video = self.is_video(filename, content_type)
             input_is_audio = self.is_audio(filename, content_type)

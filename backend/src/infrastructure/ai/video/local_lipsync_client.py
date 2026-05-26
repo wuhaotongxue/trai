@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_lipsync_client.py
 # 作者: wuhao
-# 日期: 2026-05-24
+# 日期: 2026_05_26_20:53:15
 # 描述: 唇形同步(SadTalker/Wav2Lip)进程隔离客户端
 
 import asyncio
@@ -13,13 +13,37 @@ from loguru import logger
 
 
 class LocalLipSyncClient:
-    """本地唇形同步客户端 - 进程隔离"""
+    """本地唇形同步客户端 - 进程隔离."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        初始化本地唇形同步客户端.
+
+        参数:
+            无.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
         self.script_path = "/home/qyjgylc_whf/code/trai/backend/src/scripts/local_lipsync_runner.py"
 
     async def generate_lipsync(self, source_image: str, driven_audio: str) -> dict:
-        """异步生成唇形同步视频"""
+        """
+        异步生成唇形同步视频.
+
+        参数:
+            source_image: str, 源图片路径.
+            driven_audio: str, 驱动音频路径.
+
+        返回值:
+            dict: 推理结果字典.
+
+        异常:
+            无.
+        """
         logger.info(f"启动唇形同步子进程: image={source_image}, audio={driven_audio}")
 
         cmd = [
@@ -57,11 +81,25 @@ class LocalLipSyncClient:
             return {"success": False, "error": str(e)}
 
 
-_lipsync_client = None
+class LipSyncClientProvider:
+    """唇形同步客户端提供者类."""
 
+    _lipsync_client: LocalLipSyncClient | None = None
 
-def get_lipsync_client() -> LocalLipSyncClient:
-    global _lipsync_client
-    if _lipsync_client is None:
-        _lipsync_client = LocalLipSyncClient()
-    return _lipsync_client
+    @classmethod
+    def get_lipsync_client(cls) -> LocalLipSyncClient:
+        """
+        获取本地唇形同步客户端单例.
+
+        参数:
+            无.
+
+        返回值:
+            LocalLipSyncClient: 客户端实例.
+
+        异常:
+            无.
+        """
+        if cls._lipsync_client is None:
+            cls._lipsync_client = LocalLipSyncClient()
+        return cls._lipsync_client

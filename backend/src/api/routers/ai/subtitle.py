@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# 文件名：subtitle.py
-# 作者：wuhao
-# 日期：2026_05_23_10:00:00
-# 描述：提供 AI 影音工作室相关的路由接口，包含字幕生成、人声分离和声音克隆.
+# 文件名: subtitle.py
+# 作者: wuhao
+# 日期: 2026_05_26_20:53:15
+# 描述: 提供 AI 影音工作室相关的路由接口, 包含字幕生成、人声分离和声音克隆.
 
 from __future__ import annotations
 
@@ -51,153 +51,160 @@ class VideoToAudioResponse(BaseModel):
     object_key: str = Field(description="S3 对象键")
 
 
-def get_separate_usecase(session=Depends(get_db_session)) -> AudioSeparateUseCase:
-    """
-    获取人声分离应用层用例实例.
+class SubtitleRouterUtils:
+    """字幕路由工具类."""
 
-    参数:
-        session: 数据库会话.
+    @staticmethod
+    def get_separate_usecase(session=Depends(get_db_session)) -> AudioSeparateUseCase:
+        """
+        获取人声分离应用层用例实例.
 
-    返回值:
-        AudioSeparateUseCase: 实例.
+        参数:
+            session: 数据库会话.
 
-    异常:
-        无.
-    """
-    repo = SubtitleRecordRepository(session)
-    return AudioSeparateUseCase(repo)
+        返回值:
+            AudioSeparateUseCase: 实例.
+
+        异常:
+            无.
+        """
+        repo = SubtitleRecordRepository(session)
+        return AudioSeparateUseCase(repo)
 
 
-@router.post(
-    "/video/separate",
-    response_model=SubtitleGenerationResponse,
-    tags=["AI"],
-    summary="视频人声分离",
-    description="上传音视频文件, 使用 Demucs 进行人声和伴奏分离.",
-)
-async def separate_audio(
-    request_http: Request,
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(..., description="上传视频或音频文件"),
-    current_user: CurrentUserOptional = None,
-    usecase: AudioSeparateUseCase = Depends(get_separate_usecase),
-) -> SubtitleGenerationResponse:
-    """
-    视频人声分离接口.
+class SubtitleApiRouter:
+    """字幕相关 API 路由类."""
 
-    参数:
-        request_http: Request, 请求对象.
-        background_tasks: BackgroundTasks, 后台任务对象.
-        file: UploadFile, 上传的文件.
-        current_user: CurrentUserOptional, 当前用户.
-        usecase: AudioSeparateUseCase, 用例实例.
-
-    返回值:
-        SubtitleGenerationResponse: 任务响应.
-
-    异常:
-        HTTPException: 处理异常.
-    """
-    user_id = current_user.get("user_id", "") if current_user else ""
-    user_name = current_user.get("display_name", "") if current_user else "anonymous"
-    tenant_id = current_user.get("tenant_id") if current_user else ""
-
-    task_id = str(uuid.uuid4())
-    filename = file.filename or "upload"
-    content_type = file.content_type or ""
-
-    try:
-        file_bytes = await file.read()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail={"code": 500, "message": str(e)})
-
-    background_tasks.add_task(
-        usecase.execute,
-        task_id=task_id,
-        user_id=user_id,
-        user_name=user_name,
-        tenant_id=tenant_id,
-        file_bytes=file_bytes,
-        filename=filename,
-        content_type=content_type,
+    @staticmethod
+    @router.post(
+        "/video/separate",
+        response_model=SubtitleGenerationResponse,
+        tags=["AI"],
+        summary="视频人声分离",
+        description="上传音视频文件, 使用 Demucs 进行人声和伴奏分离.",
     )
+    async def separate_audio(
+        request_http: Request,
+        background_tasks: BackgroundTasks,
+        file: UploadFile = File(..., description="上传视频或音频文件"),
+        current_user: CurrentUserOptional = None,
+        usecase: AudioSeparateUseCase = Depends(SubtitleRouterUtils.get_separate_usecase),
+    ) -> SubtitleGenerationResponse:
+        """
+        视频人声分离接口.
 
-    safe_tenant_id = tenant_id or "default"
-    safe_user_id = user_id or "anonymous"
-    safe_task_id = task_id.replace("-", "")
-    object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+        参数:
+            request_http: Request, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务对象.
+            file: UploadFile, 上传的文件.
+            current_user: CurrentUserOptional, 当前用户.
+            usecase: AudioSeparateUseCase, 用例实例.
 
-    input_is_video = AudioSeparateUseCase.is_video(filename, content_type)
-    return SubtitleGenerationResponse(
-        task_id=task_id,
-        status="processing",
-        input_type="video" if input_is_video else "audio",
-        target_lang="vocal_separate",
-        burn_mode="none",
-        object_prefix=object_prefix,
+        返回值:
+            SubtitleGenerationResponse: 任务响应.
+
+        异常:
+            HTTPException: 处理异常.
+        """
+        user_id = current_user.get("user_id", "") if current_user else ""
+        user_name = current_user.get("display_name", "") if current_user else "anonymous"
+        tenant_id = current_user.get("tenant_id") if current_user else ""
+
+        task_id = str(uuid.uuid4())
+        filename = file.filename or "upload"
+        content_type = file.content_type or ""
+
+        try:
+            file_bytes = await file.read()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail={"code": 500, "message": str(e)})
+
+        background_tasks.add_task(
+            usecase.execute,
+            task_id=task_id,
+            user_id=user_id,
+            user_name=user_name,
+            tenant_id=tenant_id,
+            file_bytes=file_bytes,
+            filename=filename,
+            content_type=content_type,
+        )
+
+        safe_tenant_id = tenant_id or "default"
+        safe_user_id = user_id or "anonymous"
+        safe_task_id = task_id.replace("-", "")
+        object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+
+        input_is_video = AudioSeparateUseCase.is_video(filename, content_type)
+        return SubtitleGenerationResponse(
+            task_id=task_id,
+            status="processing",
+            input_type="video" if input_is_video else "audio",
+            target_lang="vocal_separate",
+            burn_mode="none",
+            object_prefix=object_prefix,
+        )
+
+    @staticmethod
+    @router.post(
+        "/video/lipsync",
+        response_model=SubtitleGenerationResponse,
+        tags=["AI"],
+        summary="口型同步",
+        description="上传视频和音频文件, 使用 Wav2Lip 等模型将视频人物的口型与新音频同步.",
     )
+    async def lipsync_video(
+        request_http: Request,
+        background_tasks: BackgroundTasks,
+        video_file: UploadFile = File(..., description="上传原始视频文件"),
+        audio_file: UploadFile = File(..., description="上传需要同步的音频文件"),
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> SubtitleGenerationResponse:
+        """
+        口型同步接口.
 
+        参数:
+            request_http: Request, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务对象.
+            video_file: UploadFile, 视频文件.
+            audio_file: UploadFile, 音频文件.
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
 
-@router.post(
-    "/video/lipsync",
-    response_model=SubtitleGenerationResponse,
-    tags=["AI"],
-    summary="口型同步",
-    description="上传视频和音频文件, 使用 Wav2Lip 等模型将视频人物的口型与新音频同步.",
-)
-async def lipsync_video(
-    request_http: Request,
-    background_tasks: BackgroundTasks,
-    video_file: UploadFile = File(..., description="上传原始视频文件"),
-    audio_file: UploadFile = File(..., description="上传需要同步的音频文件"),
-    current_user: CurrentUserOptional = None,
-    session=Depends(get_db_session),
-) -> SubtitleGenerationResponse:
-    """
-    口型同步接口.
+        返回值:
+            SubtitleGenerationResponse: 任务响应.
 
-    参数:
-        request_http: Request, 请求对象.
-        background_tasks: BackgroundTasks, 后台任务对象.
-        video_file: UploadFile, 视频文件.
-        audio_file: UploadFile, 音频文件.
-        current_user: CurrentUserOptional, 当前用户.
-        session: 数据库会话.
+        异常:
+            无.
+        """
+        import uuid
+        from pathlib import Path
 
-    返回值:
-        SubtitleGenerationResponse: 任务响应.
+        from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
 
-    异常:
-        无.
-    """
-    import uuid
-    from pathlib import Path
+        from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
-    import aiofiles
-    from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
+        task_id = str(uuid.uuid4())
+        user_id_str = current_user.user_id if current_user else "anonymous"
 
-    from application.ai.dubbing.lipsync_usecase import LipSyncUseCase
-    from domain.ai.entities import SubtitleRecord, SubtitleTaskType
+        record = SubtitleRecord(
+            id=task_id,
+            user_id=user_id_str,
+            task_type=SubtitleTaskType.LIPSYNC if hasattr(SubtitleTaskType, "LIPSYNC") else "lipsync",
+            status="pending",
+            input_type="video",
+            target_lang="none",
+            burn_mode="none",
+            object_prefix="none",
+        )
 
-    task_id = str(uuid.uuid4())
-    user_id_str = current_user.user_id if current_user else "anonymous"
+        repo = SubtitleRecordRepositoryImpl(session)
+        await repo.save(record)
 
-    record = SubtitleRecord(
-        id=task_id,
-        user_id=user_id_str,
-        task_type=SubtitleTaskType.LIPSYNC if hasattr(SubtitleTaskType, "LIPSYNC") else "lipsync",
-        status="pending",
-        input_type="video",
-        target_lang="none",
-        burn_mode="none",
-        object_prefix="none",
-    )
+        # 异步保存文件
+        tmp_dir = Path("/tmp/trai_workspace")
 
-    repo = SubtitleRecordRepositoryImpl(session)
-    await repo.save(record)
-
-    # 异步保存文件
-    tmp_dir = Path("/tmp/trai_workspace")
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
     v_ext = Path(video_file.filename or "video.mp4").suffix

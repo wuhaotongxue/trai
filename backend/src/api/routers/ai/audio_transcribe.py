@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: audio_transcribe.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:45:12
@@ -26,15 +25,18 @@ from infrastructure.storage.s3_storage import get_s3_storage
 router = APIRouter()
 s3_storage = get_s3_storage()
 
+
 class TranscribeListResponse(BaseModel):
     """
     转写历史列表响应模型
     """
+
     code: int = 200
     msg: str = "OK"
     data: dict
     req_id: str = "N/A"
     ts: str = Field(default_factory=lambda: datetime.now().isoformat())
+
 
 class AudioTranscribeUtils:
     """
@@ -45,7 +47,7 @@ class AudioTranscribeUtils:
     def extract_text_from_srt(srt_content: str) -> str:
         """
         从 SRT 格式字符串中提取纯文本
-        
+
         参数:
             srt_content (str): SRT 格式内容
         返回值:
@@ -68,10 +70,12 @@ class AudioTranscribeUtils:
         return "".join(text_parts)
 
     @staticmethod
-    def send_transcribe_notify(user_id: str, file_name: str, text: str, md_url: str, txt_url: str, pdf_url: str) -> None:
+    def send_transcribe_notify(
+        user_id: str, file_name: str, text: str, md_url: str, txt_url: str, pdf_url: str
+    ) -> None:
         """
         发送音频转写完成飞书通知 (不阻塞主请求)
-        
+
         参数:
             user_id (str): 用户 ID
             file_name (str): 原始文件名
@@ -104,6 +108,7 @@ class AudioTranscribeUtils:
         except Exception as e:
             logger.error(f"发送飞书通知失败: {e}")
 
+
 class AudioTranscribeTask:
     """
     音频转写后台任务处理类
@@ -113,7 +118,7 @@ class AudioTranscribeTask:
     async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: str, creator_id: str) -> None:
         """
         后台处理音频转写及文件生成
-        
+
         参数:
             record_id (uuid.UUID): 数据库记录 ID
             file_path (str): 临时文件路径
@@ -240,6 +245,7 @@ class AudioTranscribeTask:
             if os.path.exists(file_path):
                 os.remove(file_path)
 
+
 class AudioTranscribeRouter:
     """
     音频转写 API 路由处理器类, 封装上传及历史查询接口
@@ -260,7 +266,7 @@ class AudioTranscribeRouter:
     ):
         """
         上传音频并创建转写任务
-        
+
         参数:
             background_tasks (BackgroundTasks): 后台任务管理器
             file (UploadFile): 上传的音频文件
@@ -314,7 +320,7 @@ class AudioTranscribeRouter:
     ):
         """
         获取转写历史列表 (支持分页)
-        
+
         参数:
             page (int): 页码
             page_size (int): 每页数量
@@ -352,5 +358,6 @@ class AudioTranscribeRouter:
             )
 
         return TranscribeListResponse(data={"items": items, "total": total, "page": page, "page_size": page_size})
+
 
 __all__ = ["router"]

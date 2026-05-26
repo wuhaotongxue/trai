@@ -9,8 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
-    from domain.chat.entities import ChatSession
-    from domain.chat.entities import Message
+    from domain.chat.entities import ChatSession, Message
 
 
 class ISessionRepository(Protocol):

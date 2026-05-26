@@ -64,6 +64,8 @@ class IDepartmentRepository(ABC):
             Department | None: 部门实体
         """
         pass
+
+
 #!/usr/bin/env python
 # 文件名: i18n_interfaces.py
 # 作者: wuhao

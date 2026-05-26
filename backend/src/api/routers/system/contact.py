@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: contact.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:42:13
@@ -8,7 +7,7 @@
 from __future__ import annotations
 
 import re
-from typing import Annotated, Any
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from pydantic import BaseModel, Field, field_validator
@@ -102,7 +101,7 @@ class ContactUtils:
     ) -> None:
         """
         后台异步发送联系我们通知邮件
-        
+
         参数:
             email_service (EmailService): 邮件服务实例
             contact_data (dict): 联系人信息字典
@@ -125,7 +124,7 @@ class ContactRouter:
         "/contact/submit",
         response_model=ContactFormResponse,
         summary="提交联系表单",
-        description="接收用户咨询信息并触发后台邮件通知"
+        description="接收用户咨询信息并触发后台邮件通知",
     )
     async def submit_contact_form(
         req: ContactFormRequest,
@@ -135,7 +134,7 @@ class ContactRouter:
     ) -> ContactFormResponse:
         """
         处理联系表单提交
-        
+
         参数:
             req (ContactFormRequest): 表单数据
             background_tasks (BackgroundTasks): 后台任务管理器
@@ -150,12 +149,7 @@ class ContactRouter:
             contact_data["username"] = current_user.username
 
         # 异步发送邮件通知
-        background_tasks.add_task(
-            ContactUtils.send_contact_email,
-            email_service,
-            contact_data,
-            req.attachment_urls
-        )
+        background_tasks.add_task(ContactUtils.send_contact_email, email_service, contact_data, req.attachment_urls)
 
         return ContactFormResponse()
 

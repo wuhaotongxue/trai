@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: settings.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:42:13
@@ -34,14 +33,14 @@ class SettingsRouter:
         response_model=PublicSettingsResponse,
         tags=["配置"],
         summary="获取公开配置",
-        description="获取所有标记为公开的系统配置项, 无需认证"
+        description="获取所有标记为公开的系统配置项, 无需认证",
     )
     async def get_public_settings(
         session: Annotated[Session, Depends(get_db_session)],
     ) -> PublicSettingsResponse:
         """
         获取所有公开配置
-        
+
         参数:
             session (Session): 数据库会话
         返回值:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: s3_storage.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:45:12
@@ -9,13 +8,13 @@ from __future__ import annotations
 
 import os
 from typing import Any
-from urllib.parse import urlparse, urlunparse
 
 import boto3
 from botocore.exceptions import ClientError
 from loguru import logger
 
 from core.exceptions import ExternalServiceError
+
 
 class S3StorageService:
     """
@@ -25,7 +24,7 @@ class S3StorageService:
     def __init__(self) -> None:
         """
         初始化 S3 客户端配置
-        
+
         参数:
             None
         返回值:
@@ -44,7 +43,7 @@ class S3StorageService:
     def _create_client(self, endpoint: str) -> Any:
         """
         创建并配置 Boto3 S3 客户端
-        
+
         参数:
             endpoint (str): S3 服务端点地址
         返回值:
@@ -76,7 +75,7 @@ class S3StorageService:
     ) -> str:
         """
         上传本地文件到 S3 指定位置, 自动处理大文件分片
-        
+
         参数:
             file_path (str): 本地文件路径
             object_key (str): S3 存储路径(键名)
@@ -113,7 +112,7 @@ class S3StorageService:
     def get_file_url(self, object_key: str) -> str:
         """
         获取文件的直接访问 URL
-        
+
         参数:
             object_key (str): S3 存储路径
         返回值:
@@ -123,10 +122,11 @@ class S3StorageService:
             return f"{self._public_domain.rstrip('/')}/{object_key.lstrip('/')}"
         return f"{self._endpoint.rstrip('/')}/{self._bucket}/{object_key.lstrip('/')}"
 
+
 def get_s3_storage() -> S3StorageService:
     """
     单例获取 S3 存储服务实例
-    
+
     参数:
         None
     返回值:

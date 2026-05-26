@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: entities.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:45:12

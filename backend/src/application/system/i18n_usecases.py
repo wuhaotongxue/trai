@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from domain.interfaces.i18n_interfaces import I18nRepository
+from domain.system.interfaces import I18nRepository
 
 
 class I18nUseCase:

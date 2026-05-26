@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: video.py
 # 作者: wuhao
 # 日期: 2026_05_26_20:45:12
@@ -11,7 +10,7 @@ import os
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 
@@ -20,9 +19,9 @@ from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
     get_feishu_ai_notify_service,
 )
-from infrastructure.storage.s3_storage import S3StorageService
 
 router = APIRouter()
+
 
 class VideoApiUtils:
     """
@@ -33,7 +32,7 @@ class VideoApiUtils:
     def get_client_ip(request: Request) -> str:
         """
         从请求中提取真实 IP (支持代理)
-        
+
         参数:
             request (Request): FastAPI 请求对象
         返回值:
@@ -66,7 +65,7 @@ class VideoApiUtils:
     ) -> None:
         """
         后台发送视频生成完成通知 (飞书 + 企业微信)
-        
+
         参数:
             user_id (str): 用户 ID
             user_name (str): 用户名
@@ -102,19 +101,23 @@ class VideoApiUtils:
             except Exception as e:
                 logger.error(f"[通知] 飞书推送失败 | task_id={task_id} | error={str(e)}")
 
+
 class VideoGenerationRequest(BaseModel):
     """
     视频生成请求模型
     """
+
     prompt: Annotated[str, Field(min_length=1, max_length=2000, description="视频描述")]
     model: Annotated[str, Field(default="Wan-AI/Wan2.1-T2V-1.3B", description="模型名称")] = "Wan-AI/Wan2.1-T2V-1.3B"
     frames: Annotated[int, Field(default=81, ge=1, le=200, description="视频帧数 (约 5fps, 81帧约 16 秒)")] = 81
     resolution: Annotated[str, Field(default="1280x720", description="分辨率, 如 1280x720 / 1920x1080")] = "1280x720"
 
+
 class VideoGenerationResponse(BaseModel):
     """
     视频生成响应模型
     """
+
     task_id: str = Field(description="任务 ID")
     status: str = Field(description="任务状态")
     video_url: str | None = Field(default=None, description="视频 S3 Presigned URL")
@@ -127,6 +130,7 @@ class VideoGenerationResponse(BaseModel):
     inference_time_seconds: int | None = Field(default=None, description="模型推理耗时 (秒)")
     total_time_seconds: int | None = Field(default=None, description="总耗时 (秒), 包含模型加载+推理+编码")
 
+
 class VideoApiRouter:
     """
     视频 API 路由处理器类, 封装视频生成相关接口
@@ -138,7 +142,7 @@ class VideoApiRouter:
         response_model=VideoGenerationResponse,
         summary="AI 视频生成",
         description="基于 Wan2.1 本地模型, 接收文本提示词并生成视频, 异步处理并支持通知推送",
-        tags=["AI 能力"]
+        tags=["AI 能力"],
     )
     async def generate_video(
         req: VideoGenerationRequest,
@@ -148,7 +152,7 @@ class VideoApiRouter:
     ) -> VideoGenerationResponse:
         """
         创建视频生成任务
-        
+
         参数:
             req (VideoGenerationRequest): 生成参数
             background_tasks (BackgroundTasks): 后台任务管理器
@@ -166,10 +170,5 @@ class VideoApiRouter:
 
         # 这里应当调用真正的推理逻辑, 目前简化流程
         # background_tasks.add_task(...)
-        
-        return VideoGenerationResponse(
-            task_id=task_id,
-            status="queued",
-            frames=req.frames,
-            resolution=req.resolution
-        )
+
+        return VideoGenerationResponse(task_id=task_id, status="queued", frames=req.frames, resolution=req.resolution)
