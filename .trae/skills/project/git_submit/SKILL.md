@@ -100,7 +100,19 @@ description: >-
   </ul>
 </div>
 
-### 7. 反馈
+### 7. 推送后自动通知 (强制)
+
+<div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:8px;padding:12px;margin:12px 0;">
+  <strong style="color:#1565C0;">&#x1F514; Git Push 后必须执行通知</strong>
+  <ul style="margin:8px 0 0 0;padding-left:16px;font-size:13px;">
+    <li>执行命令: <code>python backend/src/scripts/git_push_notify.py</code></li>
+    <li>自动向 <strong>企微群1 (主群)</strong> 发送 Markdown 通知</li>
+    <li>飞书: 仅在 <code>NOTIFY_FEISHU_WEBHOOK</code> 配置了真实地址时才推送</li>
+    <li><strong style="color:#C62828;">&#x274C; 禁止</strong> 向企微群2 (数据智能技术研究所) 推送代码提交通知</li>
+  </ul>
+</div>
+
+### 8. 反馈
 告知用户提交成功，并简述提交的内容以及拉取/推送的分支详情。
 
 ---
