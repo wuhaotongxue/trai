@@ -35,7 +35,10 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
-## 📝 更新日志 (Changelog)
+### 🛠️ 2026_05_26_2145
+- **规范修复**: 按照 `wuhao` 专属规范修复了 [downloader.py](file:///home/qyjgylc_whf/code/trai/backend/src/api/routers/tools/downloader.py) 和 [video_downloader.py](file:///home/qyjgylc_whf/code/trai/backend/src/infrastructure/tools/video_downloader.py)。
+- **强制要求**: 补齐了文件头模板、类封装（禁止孤立函数）、详细的 Docstring 以及类型提示。
+- **安全日志**: 引入 `loguru` 替换 `print`，确保生产环境日志可追踪。
 
 ### 🛠️ 后端_2026_05_26_1728
 - **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕
