@@ -20,7 +20,7 @@ from application.usecases.image_generation import (
     ImageGenerationInput,
     ImageGenerationUseCase,
 )
-from domain.entities.image_record import ImageRecord, ImageRecordType
+from domain.media.entities import ImageRecord, ImageRecordType
 from infrastructure.ai.core.modelscope_client import ModelScopeClient
 from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 from infrastructure.database import get_session
@@ -265,7 +265,7 @@ async def generate_image(
     Raises:
         HTTPException: AI 服务错误（502）
     """
-    from domain.entities.image_record import ImageRecordStatus
+    from domain.media.entities import ImageRecordStatus
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,
     )
@@ -387,7 +387,7 @@ async def generate_image_to_image(
     Raises:
         HTTPException: AI 服务错误（502）
     """
-    from domain.entities.image_record import ImageRecordStatus
+    from domain.media.entities import ImageRecordStatus
     from infrastructure.repositories.image_generation_repository import (
         ImageGenerationRepository,
     )
@@ -548,7 +548,7 @@ async def edit_image(
     """
     import base64
 
-    from domain.entities.image_record import ImageRecordStatus
+    from domain.media.entities import ImageRecordStatus
     from infrastructure.storage.s3_storage import S3StorageService
 
     user_id = current_user.get("user_id", "") if current_user else ""

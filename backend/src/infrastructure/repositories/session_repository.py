@@ -13,8 +13,8 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from domain.entities.chat_session import ChatSession, SessionStatus
-from domain.entities.message import Message, MessageRole
+from domain.chat.entities import ChatSession, SessionStatus
+from domain.chat.entities import Message, MessageRole
 from infrastructure.database.models import ChatSessionModel, MessageModel
 from infrastructure.services.query_cache_service import query_cache
 

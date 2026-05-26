@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from fastapi import UploadFile
 
 from application.usecases.base import UseCase
-from domain.entities.upload_task import FileType, UploadTask
+from domain.media.entities import FileType, UploadTask
 from infrastructure.storage.s3_storage import S3StorageService
 
 

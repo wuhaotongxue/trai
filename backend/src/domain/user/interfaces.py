@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
-    from domain.entities.user import User
+    from domain.user.entities import User
 
 
 class IUserRepository(Protocol):

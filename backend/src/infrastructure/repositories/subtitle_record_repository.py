@@ -11,8 +11,8 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from domain.entities.subtitle_record import SubtitleRecord
-from domain.interfaces.subtitle_record_interfaces import ISubtitleRecordRepository
+from domain.ai.entities import SubtitleRecord
+from domain.ai.interfaces import ISubtitleRecordRepository
 from infrastructure.database.subtitle_record_model import SubtitleRecordModel
 
 

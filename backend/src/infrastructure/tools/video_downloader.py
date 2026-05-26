@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 # 文件名: video_downloader.py
 # 作者: wuhao
-# 日期: 2026_05_26_20:31:37
+# 日期: 2026_05_26_21:05:00
 # 描述: 视频下载基础设施实现, 支持 Bilibili 等主流平台的高清解析与下载
+
+from __future__ import annotations
 
 import os
 import subprocess
 from pathlib import Path
+from typing import Any
 from loguru import logger
 
 class VideoDownloader:
@@ -17,10 +20,10 @@ class VideoDownloader:
 
     def __init__(self, download_path: str = "temp/downloads") -> None:
         """
-        初始化下载器
+        初始化下载器并确保存储目录存在
         
         参数:
-            download_path (str): 下载文件存储路径
+            download_path (str): 下载文件存储的本地路径
         返回值:
             None
         异常:
@@ -30,19 +33,24 @@ class VideoDownloader:
         if not self.download_path.exists():
             self.download_path.mkdir(parents=True, exist_ok=True)
 
-    async def download_bilibili(self, url: str) -> dict[str, any]:
+    async def download_bilibili(self, url: str) -> dict[str, Any]:
         """
-        使用 yt-dlp 下载 Bilibili 视频
+        使用 yt-dlp 工具高清下载 Bilibili 视频
         
         参数:
-            url (str): 视频播放链接
+            url (str): Bilibili 视频播放链接
         返回值:
-            dict[str, any]: 包含 success, title, file_path, video_id 的结果字典
+            dict[str, Any]: 包含以下字段的结果字典:
+                - success (bool): 是否成功
+                - title (str): 视频标题
+                - file_path (str): 本地存储路径
+                - video_id (str): 视频 ID
+                - error (str, optional): 错误详情
         异常:
-            Exception: 下载过程中的各种异常捕获
+            Exception: 捕获下载过程中的进程执行或文件系统异常
         """
         try:
-            # 获取视频信息
+            # 第一步: 获取视频元数据
             info_cmd = [
                 "yt-dlp",
                 "--print", "%(title)s|%(ext)s|%(id)s",
@@ -57,12 +65,12 @@ class VideoDownloader:
             
             output = result.stdout.strip().split('|')
             if len(output) < 3:
-                return {"success": False, "error": "Invalid video info format"}
+                return {"success": False, "error": "Invalid video info format from yt-dlp"}
                 
             title, ext, video_id = output
             output_template = str(self.download_path / f"{video_id}.%(ext)s")
             
-            # 执行下载
+            # 第二步: 执行高清下载与合并
             download_cmd = [
                 "yt-dlp",
                 "-f", "bestvideo+bestaudio/best",
@@ -83,18 +91,18 @@ class VideoDownloader:
                     "video_id": video_id
                 }
             else:
-                logger.error(f"Download failed: {process.stderr}")
+                logger.error(f"Download process failed: {process.stderr}")
                 return {
                     "success": False,
                     "error": process.stderr
                 }
                 
         except Exception as e:
-            logger.error(f"Error downloading Bilibili video: {str(e)}")
+            logger.error(f"Unexpected error during Bilibili download: {str(e)}")
             return {"success": False, "error": str(e)}
 
 class BilibiliDownloader(VideoDownloader):
     """
-    Bilibili 专用下载器实现
+    Bilibili 专用下载器实现类
     """
     pass

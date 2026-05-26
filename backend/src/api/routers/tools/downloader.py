@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 # 文件名: downloader.py
 # 作者: wuhao
-# 日期: 2026_05_26_20:31:37
+# 日期: 2026_05_26_21:05:00
 # 描述: 视频下载工具路由, 提供 Bilibili 视频下载接口
 
-from fastapi import APIRouter, HTTPException
+from __future__ import annotations
+
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from src.infrastructure.tools.video_downloader import BilibiliDownloader
 from src.application.common.result import Result
@@ -34,9 +36,11 @@ class VideoDownloaderRouter:
         执行视频下载任务
         
         参数:
-            req (DownloadRequest): 包含 url 的请求对象
+            req (DownloadRequest): 包含视频 URL 的请求对象
         返回值:
-            Result: 包含下载结果、标题及文件路径的统一响应格式
+            Result: 包含下载结果、标题及文件路径的统一响应对象
+        异常:
+            None: 错误信息封装在 Result 对象中返回
         """
         downloader = BilibiliDownloader()
         result = await downloader.download_bilibili(req.url)
@@ -49,3 +53,5 @@ class VideoDownloaderRouter:
             })
         else:
             return Result.error(msg=result["error"])
+
+__all__ = ["VideoDownloaderRouter", "router"]

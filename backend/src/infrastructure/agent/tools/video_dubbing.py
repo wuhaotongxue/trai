@@ -15,7 +15,7 @@ from loguru import logger
 
 from application.ai.dubbing.clone_usecase import CloneVoiceUseCase
 from application.ai.dubbing.lipsync_usecase import LipSyncUseCase
-from domain.entities.subtitle_record import SubtitleRecord
+from domain.ai.entities import SubtitleRecord
 from infrastructure.agent.tools.base import (
     BaseTool,
     ExecutionContext,

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# 文件名: image_record.py
+# -*- coding: utf-8 -*-
+# 文件名: entities.py
 # 作者: wuhao
-# 日期: 2026_05_20_0830
-# 描述: AI 图片记录实体，统一存储文生图和图生图任务
-
+# 日期: 2026_05_26_20:45:12
+# 描述: 媒体领域实体定义, 包含图片记录(ImageRecord)与上传任务(UploadTask)
 
 from __future__ import annotations
 
@@ -15,43 +15,51 @@ from typing import Any
 
 
 class ImageRecordType(StrEnum):
-    """图片记录类型"""
+    """图片记录类型枚举"""
 
     TEXT_TO_IMAGE = "text_to_image"
-    """文生图"""
-
     IMAGE_TO_IMAGE = "image_to_image"
-    """图生图"""
-
     IMAGE_EDIT = "image_edit"
-    """单图编辑"""
-
     IMAGE_EDIT_DUAL = "image_edit_dual"
-    """双图联动编辑"""
 
 
 class ImageRecordStatus(StrEnum):
-    """图片记录状态"""
+    """图片记录状态枚举"""
 
     PENDING = "pending"
-    """等待中"""
-
     PROCESSING = "processing"
-    """处理中"""
-
     COMPLETED = "completed"
-    """已完成"""
-
     FAILED = "failed"
-    """失败"""
+
+
+class FileType(StrEnum):
+    """文件类型枚举"""
+
+    IMAGE = "image"
+    VIDEO = "video"
+    AUDIO = "audio"
+    DOCUMENT = "document"
+    ARCHIVE = "archive"
+    CODE = "code"
+    FONT = "font"
+    MODEL3D = "3d"
+    OTHER = "other"
+
+
+class UploadStatus(StrEnum):
+    """上传状态枚举"""
+
+    PENDING = "pending"
+    UPLOADING = "uploading"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 @dataclass
 class ImageRecord:
-    """AI 图片记录实体
-
-    统一存储文生图、图生图、图片编辑三种类型任务的完整信息，
-    支持追溯：请求人 IP、登录用户/游客、操作人、任务参数、结果 URL。
+    """
+    AI 图片处理记录实体
     """
 
     record_type: ImageRecordType
@@ -65,53 +73,31 @@ class ImageRecord:
     request_ip: str = ""
     is_guest: bool = False
     tenant_id: str = ""
-
     source_image_url: str = ""
-    """源图片 URL（图生图/单图编辑）"""
-
     source_image_url_2: str = ""
-    """第二张源图片 URL（双图联动编辑）"""
-
     source_image_object_key: str = ""
-    """源图片 S3 对象键（便于追溯上传路径）"""
-
     source_image_object_key_2: str = ""
-    """第二张源图片 S3 对象键（双图联动编辑）"""
-
     result_url: str = ""
-    """结果图片 S3 URL"""
-
     result_base64: str = ""
-    """结果图片 base64（临时，存入 S3 后清空）"""
-
     status: ImageRecordStatus = ImageRecordStatus.PENDING
     error_message: str = ""
-
     width: int = 1024
     height: int = 1024
     steps: int = 25
     seed: int = -1
-
     session_id: str = ""
     trace_id: str = ""
-
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     completed_at: datetime | None = None
-
     created_by: str = ""
     updated_by: str = ""
-
     feishu_notified: bool = False
-    """是否已发送飞书通知"""
-
     notify_status: str = "pending"
-    """通知状态: pending/success/failed"""
-
     extra_data: dict[str, Any] = field(default_factory=dict)
 
     def mark_completed(self, result_url: str, result_base64: str = "") -> None:
-        """标记任务完成"""
+        """标记任务为完成"""
         self.status = ImageRecordStatus.COMPLETED
         self.result_url = result_url
         self.result_base64 = result_base64
@@ -119,14 +105,14 @@ class ImageRecord:
         self.updated_at = datetime.now()
 
     def mark_failed(self, error_message: str) -> None:
-        """标记任务失败"""
+        """标记任务为失败"""
         self.status = ImageRecordStatus.FAILED
         self.error_message = error_message
         self.updated_at = datetime.now()
         self.completed_at = datetime.now()
 
     def mark_processing(self) -> None:
-        """标记处理中"""
+        """标记任务为处理中"""
         self.status = ImageRecordStatus.PROCESSING
         self.updated_at = datetime.now()
 
@@ -167,4 +153,55 @@ class ImageRecord:
         }
 
 
-__all__ = ["ImageRecord", "ImageRecordType", "ImageRecordStatus"]
+@dataclass
+class UploadTask:
+    """
+    文件上传任务实体
+    """
+
+    filename: str
+    file_size: int
+    content_type: str
+    file_type: FileType = FileType.OTHER
+    task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    status: UploadStatus = UploadStatus.PENDING
+    file_url: str | None = None
+    error_message: str | None = None
+    session_id: str | None = None
+    trace_id: str | None = None
+    created_at: datetime = field(default_factory=datetime.now)
+    completed_at: datetime | None = None
+
+    def mark_completed(self, file_path: str, file_url: str) -> None:
+        """标记上传任务完成"""
+        self.status = UploadStatus.COMPLETED
+        self.file_url = file_url
+        self.completed_at = datetime.now()
+
+    def mark_failed(self, error: str) -> None:
+        """标记上传任务失败"""
+        self.status = UploadStatus.FAILED
+        self.error_message = error
+        self.completed_at = datetime.now()
+
+    def to_dict(self) -> dict[str, Any]:
+        """转换为字典"""
+        return {
+            "task_id": self.task_id,
+            "user_id": self.user_id,
+            "filename": self.filename,
+            "file_size": self.file_size,
+            "content_type": self.content_type,
+            "file_type": self.file_type.value,
+            "status": self.status.value,
+            "file_url": self.file_url,
+            "error_message": self.error_message,
+            "session_id": self.session_id,
+            "trace_id": self.trace_id,
+            "created_at": self.created_at.isoformat(),
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+        }
+
+
+__all__ = ["ImageRecord", "ImageRecordType", "ImageRecordStatus", "UploadTask", "FileType", "UploadStatus"]

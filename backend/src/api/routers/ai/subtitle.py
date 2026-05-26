@@ -177,7 +177,7 @@ async def lipsync_video(
     from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
 
     from application.ai.dubbing.lipsync_usecase import LipSyncUseCase
-    from domain.entities.subtitle_record import SubtitleRecord, SubtitleTaskType
+    from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
     task_id = str(uuid.uuid4())
     user_id_str = current_user.user_id if current_user else "anonymous"
@@ -266,7 +266,7 @@ async def clone_voice(
     from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
 
     from application.ai.dubbing.clone_usecase import CloneVoiceUseCase
-    from domain.entities.subtitle_record import SubtitleRecord, SubtitleTaskType
+    from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
     task_id = str(uuid.uuid4())
     user_id_str = current_user.user_id if current_user else "anonymous"
@@ -603,7 +603,7 @@ async def video_to_audio(
     import tempfile
     from pathlib import Path
 
-    from domain.entities.subtitle_record import SubtitleRecord
+    from domain.ai.entities import SubtitleRecord
     from infrastructure.repositories.subtitle_record_repository import SubtitleRecordRepository
     from infrastructure.storage.s3_storage import S3StorageService
 

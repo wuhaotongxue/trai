@@ -10,8 +10,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from core.logger import logger
-from domain.entities.upload_task import FileType, UploadStatus, UploadTask
-from domain.interfaces.upload_task_interfaces import IUploadTaskRepository
+from domain.media.entities import FileType, UploadStatus, UploadTask
+from domain.media.interfaces import IUploadTaskRepository
 from infrastructure.database.models import UploadTaskModel
 
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-# 文件名: image_generation.py
+# -*- coding: utf-8 -*-
+# 文件名: entities.py
 # 作者: wuhao
-# 日期: 2026_04_10_09:22:00
-# 描述: 图片生成实体
+# 日期: 2026_05_26_20:45:12
+# 描述: AI 领域实体定义, 包含图片生成(ImageGeneration)与字幕处理(SubtitleRecord)
 
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from typing import Any
 
 
 class ImageStyle(StrEnum):
-    """图片风格"""
+    """图片风格枚举"""
 
     REALISTIC = "realistic"
     ARTISTIC = "artistic"
@@ -25,7 +26,7 @@ class ImageStyle(StrEnum):
 
 
 class ImageSize(StrEnum):
-    """图片尺寸"""
+    """图片尺寸枚举"""
 
     SQUARE_1K = "1024x1024"
     PORTRAIT_1K = "1024x1792"
@@ -33,7 +34,7 @@ class ImageSize(StrEnum):
 
 
 class ImageStatus(StrEnum):
-    """图片生成状态"""
+    """生成状态枚举"""
 
     PENDING = "pending"
     PROCESSING = "processing"
@@ -43,7 +44,9 @@ class ImageStatus(StrEnum):
 
 @dataclass
 class ImageGeneration:
-    """图片生成实体"""
+    """
+    图片生成任务实体
+    """
 
     prompt: str
     model: str = "AI-ModelScope/FLUX.1-dev"
@@ -66,25 +69,25 @@ class ImageGeneration:
 
     @classmethod
     def with_task_id(cls, task_id: str, **kwargs: Any) -> ImageGeneration:
-        """使用外部指定的 task_id 创建实体（避免内部自动生成导致 ID 不一致）"""
+        """使用指定的任务 ID 创建实体"""
         entity = cls(**kwargs)
         entity.task_id = task_id
         return entity
 
     def mark_completed(self, image_url: str) -> None:
-        """标记完成"""
+        """标记任务为完成状态"""
         self.status = ImageStatus.COMPLETED
         self.result_url = image_url
         self.completed_at = datetime.now()
 
     def mark_failed(self, error: str) -> None:
-        """标记失败"""
+        """标记任务为失败状态"""
         self.status = ImageStatus.FAILED
         self.error_message = error
         self.completed_at = datetime.now()
 
     def to_dict(self) -> dict[str, Any]:
-        """转换为字典"""
+        """转换为字典格式"""
         return {
             "task_id": self.task_id,
             "user_id": self.user_id,
@@ -107,4 +110,28 @@ class ImageGeneration:
         }
 
 
-__all__ = ["ImageGeneration", "ImageStyle", "ImageSize", "ImageStatus"]
+@dataclass
+class SubtitleRecord:
+    """
+    字幕生成与多媒体处理记录实体
+    """
+
+    id: str
+    task_id: str
+    user_id: str
+    file_name: str
+    target_lang: str
+    burn_mode: str
+    status: str
+    task_type: str = "subtitle"
+    zh_srt_url: str | None = None
+    target_srt_url: str | None = None
+    output_video_url: str | None = None
+    vocal_url: str | None = None
+    bgm_url: str | None = None
+    error_message: str | None = None
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+
+
+__all__ = ["ImageGeneration", "ImageStyle", "ImageSize", "ImageStatus", "SubtitleRecord"]

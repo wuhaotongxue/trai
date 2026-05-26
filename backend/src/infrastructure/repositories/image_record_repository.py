@@ -14,8 +14,8 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from core.logger import logger
-from domain.entities.image_record import ImageRecord, ImageRecordStatus, ImageRecordType
-from domain.interfaces.image_record_interfaces import IImageRecordRepository
+from domain.media.entities import ImageRecord, ImageRecordStatus, ImageRecordType
+from domain.media.interfaces import IImageRecordRepository
 from infrastructure.database.models import ImageRecordModel
 
 

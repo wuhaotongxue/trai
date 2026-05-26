@@ -14,8 +14,8 @@ from loguru import logger
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from domain.entities.user import User, UserRole, UserStatus
-from domain.interfaces.user_interfaces import IUserRepository
+from domain.user.entities import User, UserRole, UserStatus
+from domain.user.interfaces import IUserRepository
 from infrastructure.database.user_model import UserModel
 
 

@@ -10,8 +10,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from core.logger import logger
-from domain.entities.image_generation import ImageGeneration
-from domain.interfaces.image_generation_interfaces import (
+from domain.ai.entities import ImageGeneration
+from domain.ai.interfaces import (
     IImageGenerationRepository,
 )
 from infrastructure.database.models import ImageGenerationModel
@@ -100,7 +100,7 @@ class ImageGenerationRepository(IImageGenerationRepository):
         return result.scalar() or 0
 
     def _model_to_entity(self, model: ImageGenerationModel) -> ImageGeneration:
-        from domain.entities.image_generation import (
+        from domain.ai.entities import (
             ImageGeneration,
             ImageSize,
             ImageStatus,

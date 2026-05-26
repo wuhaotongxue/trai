@@ -11,8 +11,8 @@ from typing import Any
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from domain.entities.chat_session import ChatSession
-from domain.entities.message import Message
+from domain.chat.entities import ChatSession
+from domain.chat.entities import Message
 from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import MessageRepository, SessionRepository
 

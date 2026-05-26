@@ -14,8 +14,8 @@ from pathlib import Path
 import torch
 from loguru import logger
 
-from domain.entities.subtitle_record import SubtitleRecord
-from domain.interfaces.subtitle_record_interfaces import ISubtitleRecordRepository
+from domain.ai.entities import SubtitleRecord
+from domain.ai.interfaces import ISubtitleRecordRepository
 from infrastructure.notify.feishu_ai_notify import FeishuAINotifyService, SubtitleGeneratedEvent
 from infrastructure.storage.s3_storage import S3StorageService
 

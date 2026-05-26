@@ -400,7 +400,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.image_records import router as admin_image_records_router
     from api.routers.ai import agent, chat, comfyui, digital_human, image, management, music, report, subtitle, video
     from api.routers.ai.audio_transcribe import router as audio_transcribe_router
-    from api.routers.tools import downloader
+    from api.routers.tools import converter as tools, downloader
     from api.routers.apps.extensions import router as extensions_router
 
     app.include_router(extensions_router, prefix=f"{api_prefix}/apps", tags=["应用扩展"])
@@ -408,13 +408,13 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router
-    from api.routers.contact import router as contact_router
-    from api.routers.i18n_public import router as i18n_public_router
+    from api.routers.system.contact import router as contact_router
+    from api.routers.system.i18n import router as i18n_public_router
     from api.routers.media import upload
     from api.routers.session import session
     from api.routers.system import feedback, health, notify
     from api.routers.system import monitor as system_monitor
-    from api.routers.websocket_routes import websocket_router
+    from api.routers.system.websocket import websocket_router
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])

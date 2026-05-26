@@ -9,7 +9,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from domain.entities.subtitle_record import SubtitleRecord
+from domain.ai.entities import SubtitleRecord
 from infrastructure.storage.s3_storage import S3StorageService
 
 

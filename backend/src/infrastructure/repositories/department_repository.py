@@ -11,7 +11,7 @@ from datetime import datetime
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from domain.entities.department import Department, UserDepartmentMapping
+from domain.system.entities import Department, UserDepartmentMapping
 from domain.interfaces.department_interfaces import IDepartmentRepository
 from infrastructure.database.department_model import DepartmentModel, UserDepartmentMappingModel
 

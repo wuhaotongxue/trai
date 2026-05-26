@@ -9,12 +9,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from application.usecases.base import UseCase
-from domain.entities.image_generation import (
+from domain.ai.entities import (
     ImageGeneration,
     ImageSize,
     ImageStyle,
 )
-from domain.interfaces.image_generation_interfaces import (
+from domain.ai.interfaces import (
     IImageGenerationRepository,
 )
 from infrastructure.ai.core.modelscope_client import ModelScopeClient

@@ -80,7 +80,7 @@ async def upload_file(
             result = await use_case.execute(input_data)
 
             if repo:
-                from domain.entities.upload_task import UploadStatus, UploadTask
+                from domain.media.entities import UploadStatus, UploadTask
 
                 task = UploadTask(
                     filename=result.filename,

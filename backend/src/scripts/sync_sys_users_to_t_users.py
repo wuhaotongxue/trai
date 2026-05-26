@@ -19,7 +19,7 @@ from sqlalchemy import select, text
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.logger import get_logger
-from domain.entities.user import UserRole, UserStatus
+from domain.user.entities import UserRole, UserStatus
 from infrastructure.database import get_database
 from infrastructure.database.user_model import UserModel
 

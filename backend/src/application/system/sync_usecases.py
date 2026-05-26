@@ -16,10 +16,10 @@ from loguru import logger
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from domain.entities.department import Department, UserDepartmentMapping
-from domain.entities.user import User, UserRole, UserStatus
+from domain.system.entities import Department, UserDepartmentMapping
+from domain.user.entities import User, UserRole, UserStatus
 from domain.interfaces.department_interfaces import IDepartmentRepository
-from domain.interfaces.user_interfaces import IUserRepository
+from domain.user.interfaces import IUserRepository
 from infrastructure.agent.tools.wecom_contact import WeComContactClient
 
 FEISHU_SYNC_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/1210fc93-997c-475d-bb80-189330d8be8e"
