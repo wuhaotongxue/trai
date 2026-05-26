@@ -10,9 +10,11 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { request } from "@/lib/api_client";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video, Trash2 } from "lucide-react";
+import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video, Trash2, Captions, Music, Languages, MonitorPlay, Type } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { globalToast } from "@/components/toast/toast";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type BurnMode = "none" | "zh" | "target" | "bilingual";
 
@@ -79,6 +81,14 @@ export function SubtitlePanel() {
 
   const [activeRecord, setActiveRecord] = useState<SubtitleRecordDTO | null>(null);
   const [showGallery, setShowGallery] = useState(true);
+
+  const toolCategories = [
+    { id: "subtitle", label: "字幕生成", icon: Captions, color: "text-pink-500", desc: "自动识别并生成多语种字幕" },
+    { id: "separate", label: "人声分离", icon: Music, color: "text-blue-500", desc: "分离背景音乐与人声" },
+    { id: "clone", label: "声音克隆", icon: Languages, color: "text-purple-500", desc: "克隆音色并翻译内容" },
+    { id: "lipsync", label: "口型同步", icon: MonitorPlay, color: "text-orange-500", desc: "根据音频同步视频口型" },
+    { id: "to_audio", label: "视频转音频", icon: Type, color: "text-teal-500", desc: "提取视频中的音频轨道" },
+  ];
 
   const fetchHistory = async () => {
     try {
@@ -297,55 +307,38 @@ export function SubtitlePanel() {
     <div className="flex h-full w-full overflow-hidden bg-background relative">
       {/* 左侧配置栏 */}
       <div className="w-80 flex-shrink-0 border-r border-border flex flex-col bg-card relative z-10">
+        <div className="p-4 border-b bg-slate-50/50 dark:bg-slate-900/50">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-4">工具箱</h2>
+          <div className="space-y-2">
+            {toolCategories.map((tool) => (
+              <button
+                key={tool.id}
+                onClick={() => setTaskType(tool.id as any)}
+                className={cn(
+                  "w-full flex items-start gap-3 p-3 rounded-xl transition-all text-left group",
+                  taskType === tool.id 
+                    ? "bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700" 
+                    : "hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent"
+                )}
+              >
+                <div className={cn(
+                  "p-2 rounded-lg shrink-0",
+                  taskType === tool.id ? "bg-slate-100 dark:bg-slate-900" : "bg-slate-50 dark:bg-slate-900/50"
+                )}>
+                  <tool.icon className={cn("w-4 h-4", tool.color)} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">{tool.label}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{tool.desc}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-foreground">AI 影音工作室</h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                支持字幕生成、人声分离、视频转音频与高级声音克隆.
-              </p>
-            </div>
-
             <div className="space-y-4">
-              {/* 任务类型选择 */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">1. 选择功能</label>
-                <div className="flex bg-muted p-1 rounded-lg">
-                  <button
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "subtitle" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => setTaskType("subtitle")}
-                  >
-                    📝 字幕生成
-                  </button>
-                  <button
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "separate" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => setTaskType("separate")}
-                  >
-                    🎵 人声分离
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "clone" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => setTaskType("clone")}
-                  >
-                    🗣️ 声音克隆
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "lipsync" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => setTaskType("lipsync")}
-                  >
-                    👄 口型同步
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "to_audio" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                    onClick={() => setTaskType("to_audio")}
-                  >
-                    🎬 视频转音频
-                  </button>
-                </div>
-              </div>
 
               {/* 上传区域 */}
               <div className="space-y-2">

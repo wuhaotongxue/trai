@@ -5,7 +5,7 @@
  * 描述: 多智能体与知识库相关扩展能力接口封装
  */
 
-import { BaseResponse, CreateAgentData, CreateAgentRequest, CreateKnowledgeBaseData, CreateKnowledgeBaseRequest } from '../types/extensions';
+import { BaseResponse, CreateAgentData, CreateAgentRequest, CreateKnowledgeBaseData, CreateKnowledgeBaseRequest, TranscribeHistoryResponse, VideoGenerationData, VideoGenerationRequest } from '../types/extensions';
 import { use_auth_store } from '../store/auth';
 
 const API_BASE = 'http://127.0.0.1:5666/api';
@@ -81,6 +81,30 @@ export const ExtensionAPI = {
     return fetchWithAuth<CreateKnowledgeBaseData>('/apps/extensions/knowledge_bases/create', {
       method: 'POST',
       body: JSON.stringify(req),
+    });
+  },
+
+  /**
+   * AI 视频生成
+   * @param req 生成参数
+   * @returns 视频任务信息
+   */
+  generateVideo: async (req: VideoGenerationRequest): Promise<BaseResponse<VideoGenerationData>> => {
+    return fetchWithAuth<VideoGenerationData>('/ai/video/generate', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  },
+
+  /**
+   * 获取音频/视频转写历史
+   * @param page 页码
+   * @param page_size 每页数量
+   * @returns 转写历史列表
+   */
+  getTranscribeHistory: async (page: number = 1, page_size: number = 10): Promise<BaseResponse<TranscribeHistoryResponse>> => {
+    return fetchWithAuth<TranscribeHistoryResponse>(`/ai/audio/transcribe/history?page=${page}&page_size=${page_size}`, {
+      method: 'GET',
     });
   },
 };

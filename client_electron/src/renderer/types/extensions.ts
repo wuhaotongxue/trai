@@ -31,3 +31,40 @@ export interface CreateAgentData {
 export interface CreateKnowledgeBaseData {
   kb_name: string;
 }
+
+/**
+ * 视频生成与字幕处理相关类型
+ */
+export interface VideoGenerationRequest {
+  prompt: string;
+  model?: string;
+  frames?: number;
+  resolution?: string;
+}
+
+export interface VideoGenerationData {
+  task_id: string;
+  status: string;
+  video_url?: string;
+  public_url?: string;
+  object_key?: string;
+}
+
+export interface TranscribeHistoryItem {
+  id: string;
+  file_name: string;
+  status: string;
+  created_at: string;
+  source_audio_url: string;
+  md_url?: string;
+  txt_url?: string;
+  pdf_url?: string;
+  result_text?: string;
+}
+
+export interface TranscribeHistoryResponse {
+  items: TranscribeHistoryItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}

@@ -400,9 +400,11 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.image_records import router as admin_image_records_router
     from api.routers.ai import agent, chat, comfyui, digital_human, image, management, music, report, subtitle, video
     from api.routers.ai.audio_transcribe import router as audio_transcribe_router
+    from api.routers.tools import downloader
     from api.routers.apps.extensions import router as extensions_router
 
     app.include_router(extensions_router, prefix=f"{api_prefix}/apps", tags=["应用扩展"])
+    app.include_router(downloader.router, prefix=f"{api_prefix}", tags=["工具"])
     from api.routers.ai.multimodal_agent_routes import router as multimodal_agent_router
     from api.routers.auth import login, logout, me, password, refresh, register, wecom
     from api.routers.client.update import router as client_update_router

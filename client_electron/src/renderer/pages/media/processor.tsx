@@ -5,8 +5,10 @@
  * 描述：媒体处理页面，支持音频转文本、字幕生成、双语字幕等功能
  */
 import React, { useState, useRef } from 'react'
-import { Upload, FileAudio, FileVideo, FileText, FileCode, Languages, Settings, Download, Play, Loader2, CheckCircle2, AlertCircle, X, Plus, Trash2, Edit2, Save, Film, MonitorPlay, Type } from 'lucide-react'
+import { Upload, FileAudio, FileVideo, FileText, FileCode, Languages, Settings, Download, Play, Loader2, CheckCircle2, AlertCircle, X, Plus, Trash2, Edit2, Save, Film, MonitorPlay, Type, History } from 'lucide-react'
 import ThreePanelLayout from '@/components/layout/ThreePanelLayout'
+import { ExtensionAPI } from '@/api/extensions_api'
+import { TranscribeHistoryItem } from '@/types/extensions'
 
 /**
  * 音频处理任务接口
@@ -40,8 +42,10 @@ interface SubtitleEntry {
  */
 const MediaProcessorPage: React.FC = () => {
   // 状态管理
-  const [active_tab, set_active_tab] = useState<'audio_transcript' | 'subtitle_generator' | 'bilingual_subtitles'>('audio_transcript')
+  const [active_tab, set_active_tab] = useState<'audio_transcript' | 'subtitle_generator' | 'bilingual_subtitles' | 'history'>('audio_transcript')
   const [audio_tasks, set_audio_tasks] = useState<AudioTask[]>([])
+  const [history_tasks, set_history_tasks] = useState<TranscribeHistoryItem[]>([])
+  const [history_loading, set_history_loading] = useState<boolean>(false)
   const [selected_video_orientation, set_selected_video_orientation] = useState<'vertical' | 'horizontal'>('horizontal')
   const [source_language, set_source_language] = useState<string>('zh')
   const [target_language, set_target_language] = useState<string>('en')
@@ -394,6 +398,28 @@ trailer
   const handle_delete_task = (task_id: string) => {
     set_audio_tasks(audio_tasks.filter(t => t.id !== task_id))
   }
+
+  // 加载历史记录
+  const fetch_history = async () => {
+    set_history_loading(true)
+    try {
+      const res = await ExtensionAPI.getTranscribeHistory(1, 20)
+      if (res.code === 200 && res.data?.items) {
+        set_history_tasks(res.data.items)
+      }
+    } catch (error) {
+      console.error('加载历史记录失败:', error)
+    } finally {
+      set_history_loading(false)
+    }
+  }
+
+  // 当切换到历史标签页时自动加载
+  React.useEffect(() => {
+    if (active_tab === 'history') {
+      fetch_history()
+    }
+  }, [active_tab])
   
   // 左侧任务列表面板
   const left_panel = (
@@ -651,6 +677,37 @@ trailer
             <Languages size={16} />
             双语字幕
           </button>
+
+          <button
+            onClick={() => set_active_tab('history')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: active_tab === 'history' ? 'var(--ui_accent)' : 'transparent',
+              color: active_tab === 'history' ? 'white' : 'var(--ui_text)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (active_tab !== 'history') {
+                e.currentTarget.style.backgroundColor = 'var(--ui_border)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (active_tab !== 'history') {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }
+            }}
+          >
+            <History size={16} />
+            处理历史
+          </button>
         </div>
         
         {/* 内容区域 */}
@@ -689,9 +746,159 @@ trailer
               is_processing={is_processing}
             />
           )}
+
+          {active_tab === 'history' && (
+            <HistoryTab
+              tasks={history_tasks}
+              loading={history_loading}
+              on_refresh={fetch_history}
+            />
+          )}
         </div>
       </div>
     </ThreePanelLayout>
+  )
+}
+
+/**
+ * 历史记录标签页组件
+ */
+const HistoryTab: React.FC<{
+  tasks: TranscribeHistoryItem[]
+  loading: boolean
+  on_refresh: () => void
+}> = ({ tasks, loading, on_refresh }) => {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--ui_text)', marginBottom: '8px' }}>处理历史</h2>
+          <p style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>
+            查看和下载之前处理过的音视频识别结果
+          </p>
+        </div>
+        <button
+          onClick={on_refresh}
+          disabled={loading}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '6px',
+            border: '1px solid var(--ui_border)',
+            backgroundColor: 'transparent',
+            color: 'var(--ui_text)',
+            cursor: 'pointer',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          {loading ? <Loader2 size={16} className="anim_spin" /> : <Plus size={16} style={{ transform: 'rotate(45deg)' }} />}
+          刷新
+        </button>
+      </div>
+
+      {loading ? (
+        <div style={{ padding: '100px', textAlign: 'center' }}>
+          <Loader2 size={48} className="anim_spin" color="var(--ui_accent)" />
+          <p style={{ marginTop: '16px', color: 'var(--ui_text_muted)' }}>加载中...</p>
+        </div>
+      ) : tasks.length === 0 ? (
+        <div style={{ padding: '60px 40px', textAlign: 'center', color: 'var(--ui_text_muted)' }}>
+          <History size={64} style={{ marginBottom: '16px', opacity: 0.5 }} />
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>暂无历史记录</h3>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: '16px' }}>
+          {tasks.map(task => (
+            <div
+              key={task.id}
+              style={{
+                padding: '20px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--ui_panel)',
+                border: '1px solid var(--ui_border)'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <FileAudio size={24} color="var(--ui_accent)" />
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--ui_text)' }}>{task.file_name}</h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'var(--ui_text_muted)' }}>
+                      识别于 {new Date(task.created_at).toLocaleString('zh-CN')} · 状态: {task.status}
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {task.md_url && (
+                    <a
+                      href={task.md_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--ui_border)',
+                        backgroundColor: 'transparent',
+                        color: 'var(--ui_text)',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <Download size={14} />
+                      MD
+                    </a>
+                  )}
+                  {task.pdf_url && (
+                    <a
+                      href={task.pdf_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--ui_border)',
+                        backgroundColor: 'transparent',
+                        color: 'var(--ui_text)',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      <Download size={14} />
+                      PDF
+                    </a>
+                  )}
+                </div>
+              </div>
+              
+              {task.result_text && (
+                <div style={{
+                  marginTop: '16px',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  backgroundColor: 'var(--ui_panel_alt)',
+                  fontSize: '13px',
+                  color: 'var(--ui_text)',
+                  maxHeight: '100px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {task.result_text}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

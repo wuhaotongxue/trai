@@ -88,22 +88,14 @@ export function Sidebar() {
       <div className="p-4">
         <Button 
           onClick={handleStartNew}
-          className="w-full justify-start gap-2 shadow-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+          className="w-full justify-start gap-2 shadow-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl py-6"
           variant="outline"
         >
-          <Plus className="h-4 w-4" />
-          <span>新建对话</span>
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <Plus className="h-4 w-4 text-blue-600" />
+          </div>
+          <span className="font-semibold">新建对话</span>
         </Button>
-        <Link href="/subtitle" className="block">
-          <Button
-            type="button"
-            className="w-full justify-start gap-2 shadow-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
-            variant="outline"
-          >
-            <Captions className="h-4 w-4" />
-            <span>字幕生成</span>
-          </Button>
-        </Link>
       </div>
 
       <ScrollArea className="flex-1 px-3 pb-4">

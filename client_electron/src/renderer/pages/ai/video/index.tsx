@@ -8,6 +8,8 @@ import React, { useState } from 'react'
 import { Video, Loader2, ChevronRight, Film, Clapperboard, Camera, Tv, Rocket, TreePine } from 'lucide-react'
 import ThreePanelLayout from '../../../components/layout/ThreePanelLayout'
 import { should_ellipsis, to_fixed_chars } from '@/utils/ui_text'
+import { ExtensionAPI } from '@/api/extensions_api'
+import { VideoGenerationData } from '@/types/extensions'
 
 interface VideoStyle {
   id: string
@@ -71,11 +73,17 @@ const AiVideo: React.FC = () => {
     set_result_url('')
     
     try {
-      const res = await window.electron_api.ai_generate_video(prompt)
-      if (res.success && res.data?.video_url) {
+      const res = await ExtensionAPI.generateVideo({
+        prompt: prompt,
+        model: 'Wan-AI/Wan2.1-T2V-1.3B',
+        frames: 81,
+        resolution: '1280x720'
+      })
+      
+      if (res.code === 200 && res.data?.video_url) {
         set_result_url(res.data.video_url)
       } else {
-        set_error(res.error || '生成失败, 请重试')
+        set_error(res.msg || '生成失败, 请重试')
       }
     } catch (err: any) {
       set_error(err.message || '网络异常')
