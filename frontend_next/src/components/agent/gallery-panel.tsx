@@ -16,7 +16,7 @@ import { MusicGallery } from "./music-gallery";
 
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
-type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle" | "digital_human";
+type TabId = "chat" | "image" | "video" | "music" | "audio" | "image_edit" | "subtitle" | "digital_human";
 
 interface GalleryPanelProps {
   activeTab: TabId;

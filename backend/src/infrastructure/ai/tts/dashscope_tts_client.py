@@ -40,6 +40,32 @@ class DashScopeTTSClient(ITTSClient):
         dashscope.api_key = api_key
         self.enrollment_service = VoiceEnrollmentService()
 
+    def generate_speech(self, text: str, voice: str = "longxiaochun") -> bytes:
+        """
+        使用预设音色合成语音.
+
+        参数:
+            text: 要合成的文本.
+            voice: 预设音色名称, 默认 longxiaochun (龙小纯).
+
+        返回:
+            bytes: 合成后的音频字节数据 (WAV格式).
+
+        异常:
+            ExternalServiceError: API 调用失败时抛出.
+        """
+        try:
+            logger.info(f"开始 DashScope TTS 合成 | voice: {voice} | 文本长度: {len(text)}")
+            synthesizer = SpeechSynthesizer(
+                model="cosyvoice-v1", voice=voice, format=AudioFormat.WAV_24000HZ_MONO_16BIT
+            )
+            audio_bytes = synthesizer.call(text)
+            logger.info(f"语音合成成功 | 音频大小: {len(audio_bytes)} bytes")
+            return audio_bytes
+        except Exception as e:
+            logger.error(f"DashScope TTS 合成失败: {str(e)}")
+            raise ExternalServiceError(f"语音合成失败: {str(e)}")
+
     def clone_and_synthesize(self, text: str, reference_audio_url: str, language: str = "zh") -> bytes:
         """
         零样本声音克隆并合成 (通过云端 API).

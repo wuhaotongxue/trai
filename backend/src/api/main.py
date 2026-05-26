@@ -398,7 +398,8 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.admin.image_records import router as admin_image_records_router
-    from api.routers.ai import agent, chat, comfyui, image, management, music, report, subtitle, video
+    from api.routers.ai import agent, chat, comfyui, digital_human, image, management, music, report, subtitle, video
+    from api.routers.ai.audio_transcribe import router as audio_transcribe_router
     from api.routers.apps.extensions import router as extensions_router
 
     app.include_router(extensions_router, prefix=f"{api_prefix}/apps", tags=["应用扩展"])
@@ -445,8 +446,10 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(music.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(video.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(subtitle.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(digital_human.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(comfyui.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(report.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(audio_transcribe_router, prefix=f"{api_prefix}/ai", tags=["AI 语音分析"])
     app.include_router(session.router, prefix=api_prefix, tags=["会话"])
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])

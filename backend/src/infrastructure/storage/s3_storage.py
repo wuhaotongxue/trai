@@ -226,6 +226,8 @@ class S3StorageService:
 
     def get_file_url(self, object_key: str) -> str:
         """获取文件 URL (优先使用公共域名)"""
+        if self._presign_public_base:
+            return f"{self._presign_public_base}/{object_key}"
         if self._public_domain:
             return f"{self._public_domain}/{object_key}"
         return f"{self._endpoint}/{self._bucket}/{object_key}"
@@ -258,4 +260,23 @@ class S3StorageService:
             return []
 
 
-__all__ = ["S3StorageService"]
+_s3_storage: S3StorageService | None = None
+
+
+def get_s3_storage() -> S3StorageService:
+    """
+    获取 S3 存储服务单例.
+
+    返回值:
+        S3StorageService: S3 存储服务实例.
+
+    异常:
+        无.
+    """
+    global _s3_storage
+    if _s3_storage is None:
+        _s3_storage = S3StorageService()
+    return _s3_storage
+
+
+__all__ = ["S3StorageService", "get_s3_storage"]

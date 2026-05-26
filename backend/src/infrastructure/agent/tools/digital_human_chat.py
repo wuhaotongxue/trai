@@ -22,7 +22,7 @@ from infrastructure.agent.tools.base import (
     ToolDefinition,
     ToolParameter,
 )
-from infrastructure.ai.cosyvoice_client import CosyVoiceClient
+from infrastructure.ai.tts.dashscope_tts_client import DashScopeTTSClient
 from infrastructure.system.gpu_manager import GPUManager
 
 
@@ -81,7 +81,7 @@ class DigitalHumanChatTool(BaseTool):
         try:
             task_id = str(uuid.uuid4())
             # 2. TTS 生成音频 (CosyVoice)
-            tts_client = CosyVoiceClient()
+            tts_client = DashScopeTTSClient()
             audio_output_path = Path(f"/tmp/digital_human_{task_id}.wav")
 
             # 由于 CosyVoiceClient 是同步的，我们用 run_in_executor 包装

@@ -223,4 +223,23 @@ class LocalASRClient:
         return f"{h:02d}:{m:02d}:{s:02d},{milli:03d}"
 
 
-__all__ = ["LocalASRClient"]
+_asr_client: LocalASRClient | None = None
+
+
+def get_asr_client() -> LocalASRClient:
+    """
+    获取本地 ASR 客户端单例.
+
+    返回值:
+        LocalASRClient: 本地语音识别客户端实例.
+
+    异常:
+        无.
+    """
+    global _asr_client
+    if _asr_client is None:
+        _asr_client = LocalASRClient()
+    return _asr_client
+
+
+__all__ = ["LocalASRClient", "get_asr_client"]

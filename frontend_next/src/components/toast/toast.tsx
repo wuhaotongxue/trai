@@ -16,6 +16,9 @@ export interface ToastItem {
   title?: string;
   variant: ToastVariant;
   onDismiss: () => void;
+  onConfirm?: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 const variantConfig: Record<
@@ -86,15 +89,38 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
           <p className={`text-sm font-semibold ${config.titleColor}`}>{toast.title}</p>
         )}
         <p className="text-sm text-muted-foreground leading-relaxed">{toast.message}</p>
+        {toast.onConfirm && (
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                toast.onConfirm?.();
+                onDismiss();
+              }}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            >
+              {toast.confirmText || "确认"}
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+            >
+              {toast.cancelText || "取消"}
+            </button>
+          </div>
+        )}
       </div>
-      <button
-        type="button"
-        onClick={onDismiss}
-        aria-label="关闭通知"
-        className="flex-shrink-0 p-1 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      {!toast.onConfirm && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="关闭通知"
+          className="flex-shrink-0 p-1 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 
@@ -141,11 +167,15 @@ export function globalToast(opts: {
   message: string;
   variant?: ToastVariant;
   duration?: number;
+  onConfirm?: () => void;
+  confirmText?: string;
+  cancelText?: string;
 }) {
   if (!globalSetToasts) return;
   const id = `toast-${Date.now()}`;
-  globalSetToasts((prev) => [...prev, { ...opts, variant: opts.variant || 'info', id, onDismiss: () => globalSetToasts!((p) => p.filter((t) => t.id !== id)) }]);
-  setTimeout(() => {
-    globalSetToasts!((p) => p.filter((t) => t.id !== id));
-  }, opts.duration ?? 3500);
+  const dismiss = () => globalSetToasts!((p) => p.filter((t) => t.id !== id));
+  globalSetToasts((prev) => [...prev, { ...opts, variant: opts.variant || 'info', id, onDismiss: dismiss }]);
+  if (!opts.onConfirm && (opts.duration ?? 3500) > 0) {
+    setTimeout(dismiss, opts.duration ?? 3500);
+  }
 }

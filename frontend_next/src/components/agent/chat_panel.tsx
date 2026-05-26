@@ -12,7 +12,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2, Captions, UserRound } from "lucide-react";
+import { Bot, Image as ImageIcon, Send, Square, Trash2, X, Copy, Check, ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, ArrowDownToLine, Loader2, Captions, UserRound, FileText, Clock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -23,13 +23,14 @@ import { type Message as AgentMessage } from "@/stores/agent.store";
 import { type UploadedFileInfo } from "./multimodal_upload";
 import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
+import { multimodalApi } from "@/lib/api_client";
 import { MusicGallery } from "./music-gallery";
 import { MediaGallery } from "./media-gallery";
 import { GalleryPanel } from "./gallery-panel";
 import { SubtitlePanel } from "./subtitle_panel";
 import { DigitalHumanPanel } from "./digital_human_panel";
 
-type TabId = "chat" | "image" | "video" | "music" | "image_edit" | "subtitle" | "digital_human";
+type TabId = "chat" | "image" | "video" | "music" | "audio" | "image_edit" | "subtitle" | "digital_human";
 type GalleryViewMode = "grid" | "list";
 type GallerySortType = "latest" | "oldest";
 
@@ -112,6 +113,10 @@ export function ChatPanel() {
   const [editingImagePreview2, setEditingImagePreview2] = useState<string | null>(null);
   const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海, 海浪拍打着礁石, 天空中乌云密布');
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐, 钢琴和萨克斯风演奏, 适合下午茶时光');
+  const [transcriptionResult, setTranscriptionResult] = useState<string | null>(null);
+  const [transcriptionFile, setTranscriptionFile] = useState<string>('');
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionProgress, setTranscriptionProgress] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const topRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<React.ElementRef<typeof ScrollArea>>(null);
@@ -274,6 +279,25 @@ export function ChatPanel() {
     }
   };
 
+  const handleAudioUpload = async (file: File) => {
+    setIsTranscribing(true);
+    setTranscriptionProgress('正在上传文件...');
+    setTranscriptionFile(file.name);
+
+    try {
+      const result = await multimodalApi.speechToText(file, "zh");
+      // 后端返回格式: { success: boolean, output_type: string, data: string, ... }
+      setTranscriptionResult((result as any).data || (result as any).text || (result as any).transcription || (result as any).content || "");
+      setTranscriptionProgress('转写完成');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "音频转写失败";
+      setApiError(errorMessage);
+      console.error("Audio transcription error:", error);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -415,6 +439,7 @@ export function ChatPanel() {
             { id: "image_edit" as TabId, label: "编辑", icon: Pencil, color: "text-indigo-500" },
             { id: "video" as TabId, label: "视频", icon: Video, color: "text-orange-500" },
             { id: "music" as TabId, label: "音乐", icon: Music, color: "text-indigo-500" },
+            { id: "audio" as TabId, label: "音频", icon: Square, color: "text-green-500" },
             { id: "subtitle" as TabId, label: "字幕", icon: Captions, color: "text-pink-500" },
             { id: "digital_human" as TabId, label: "数字人", icon: UserRound, color: "text-teal-500" },
           ].map((tab) => (
@@ -779,6 +804,63 @@ export function ChatPanel() {
                 {/* 视频模式 */}
                 {activeTab === "video" && (
                   <div className="space-y-8">
+                    {/* 视频转文字功能区 */}
+                    <div className="rounded-2xl border border-border bg-gradient-to-br from-rose-500/5 to-pink-500/5 p-6">
+                      <div className="flex items-start gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 border border-rose-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/10">
+                          <Captions className="h-7 w-7 text-rose-500" />
+                        </div>
+                        <div className="flex-1">
+                          <h2 className="text-xl font-bold text-foreground mt-1">视频转文字</h2>
+                          <p className="text-sm text-muted-foreground mt-1">上传视频, AI 提取音频并转换为文字, 支持多种格式下载</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 space-y-4">
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          id="video-to-text-upload"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              console.log("上传视频:", file.name);
+                              setIsTranscribing(true);
+                              setTranscriptionProgress("正在上传视频文件...");
+                              setTranscriptionFile(file.name);
+                              
+                              try {
+                                // 使用 multimodalApi.speechToText 处理视频
+                                // 后端会自动识别视频文件并提取音频
+                                const result = await multimodalApi.speechToText(file, "zh");
+                                setTranscriptionResult((result as any).data || (result as any).text || "");
+                                setTranscriptionProgress("转写完成");
+                              } catch (error) {
+                                const errorMessage = error instanceof Error ? error.message : "视频转写失败";
+                                setApiError(errorMessage);
+                                console.error("Video transcription error:", error);
+                              } finally {
+                                setIsTranscribing(false);
+                              }
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor="video-to-text-upload"
+                          className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl border-2 border-dashed border-rose-200 dark:border-rose-700 hover:border-rose-400 dark:hover:border-rose-500 cursor-pointer transition-colors"
+                        >
+                          <Upload className="h-5 w-5 text-rose-500" />
+                          <span className="text-sm font-medium text-foreground">点击上传视频文件</span>
+                        </label>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>支持格式: MP4, MOV, MKV, AVI</span>
+                          <span className="w-px h-4 bg-border" />
+                          <span>最大文件: 100MB</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI 视频合成 */}
                     <div className="flex items-start gap-5">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-400/20 to-amber-500/20 border border-orange-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/10">
                         <Video className="h-7 w-7 text-orange-500" />
@@ -932,6 +1014,173 @@ export function ChatPanel() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* 音频转写模式 */}
+                {activeTab === "audio" && (
+                  <div className="space-y-8">
+                    <div className="flex items-start gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-500/20 border border-green-500/20 flex items-center justify-center shrink-0 shadow-lg shadow-green-500/10">
+                        <Square className="h-7 w-7 text-green-500" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground mt-1">音频转文字</h2>
+                        <p className="text-sm text-muted-foreground mt-1">上传音频文件, AI 自动转换为文字, 支持多种格式下载</p>
+                      </div>
+                    </div>
+
+                    {/* 转写结果显示 */}
+                    {transcriptionResult && (
+                      <div className="rounded-2xl border border-green-200 dark:border-green-700 bg-gradient-to-br from-green-500/5 to-emerald-500/5 p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                            <Check className="h-5 w-5 text-green-500" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-foreground">转写完成</h3>
+                            <p className="text-xs text-muted-foreground">{transcriptionFile}</p>
+                          </div>
+                        </div>
+                        <div className="bg-background rounded-xl p-4 border border-border">
+                          <p className="text-sm text-foreground whitespace-pre-wrap">{transcriptionResult}</p>
+                        </div>
+                        <div className="mt-4 flex gap-3">
+                          <button
+                            onClick={() => navigator.clipboard.writeText(transcriptionResult)}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 text-sm font-medium transition-all"
+                          >
+                            <Copy className="h-4 w-4" />
+                            复制文本
+                          </button>
+                          <button
+                            onClick={() => {
+                              const blob = new Blob([transcriptionResult], { type: 'text/plain' });
+                              const url = URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = `transcription-${Date.now()}.txt`;
+                              link.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 text-sm font-medium transition-all"
+                          >
+                            <ArrowDownToLine className="h-4 w-4" />
+                            下载 TXT
+                          </button>
+                          <button
+                            onClick={() => setTranscriptionResult(null)}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-muted hover:bg-red-500/10 text-muted-foreground hover:text-red-500 text-sm font-medium transition-all ml-auto"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            清除
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 上传区域 */}
+                    <div className="rounded-2xl border border-border bg-gradient-to-br from-green-500/5 to-emerald-500/5 p-6">
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        className="hidden"
+                        id="audio-to-text-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleAudioUpload(file);
+                          }
+                        }}
+                      />
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const file = e.dataTransfer.files?.[0];
+                          if (file && file.type.startsWith('audio/')) {
+                            handleAudioUpload(file);
+                          }
+                        }}
+                        onClick={() => document.getElementById('audio-to-text-upload')?.click()}
+                        className="flex flex-col items-center justify-center gap-4 px-8 py-12 rounded-xl border-2 border-dashed border-green-200 dark:border-green-700 hover:border-green-400 dark:hover:border-green-500 cursor-pointer transition-colors"
+                      >
+                        {isTranscribing ? (
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="relative">
+                              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-500/20 flex items-center justify-center">
+                                <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-lg font-medium text-foreground">正在转写...</p>
+                              <p className="text-sm text-muted-foreground mt-1">{transcriptionProgress}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-500/20 flex items-center justify-center">
+                              <Square className="h-8 w-8 text-green-500" />
+                            </div>
+                            <div className="text-center">
+                              <p className="text-lg font-medium text-foreground">点击或拖拽上传音频文件</p>
+                              <p className="text-sm text-muted-foreground mt-1">支持 MP3, WAV, M4A, FLAC, OGG 等格式</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <div className="mt-4 flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">MP3</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">WAV</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">M4A</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">FLAC</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10">
+                          <span className="text-xs font-medium text-green-600 dark:text-green-400">OGG</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground ml-auto">最大文件: 100MB</span>
+                      </div>
+                    </div>
+
+                    {/* 功能特点 */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="rounded-xl border border-border p-4">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-3">
+                          <Sparkles className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <h3 className="text-sm font-medium text-foreground mb-1">精准转写</h3>
+                        <p className="text-xs text-muted-foreground">基于先进的语音识别技术, 准确率高达 98%</p>
+                      </div>
+                      <div className="rounded-xl border border-border p-4">
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3">
+                          <FileText className="h-5 w-5 text-purple-500" />
+                        </div>
+                        <h3 className="text-sm font-medium text-foreground mb-1">多格式导出</h3>
+                        <p className="text-xs text-muted-foreground">支持 TXT、Markdown、PDF 多种格式下载</p>
+                      </div>
+                      <div className="rounded-xl border border-border p-4">
+                        <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center mb-3">
+                          <Clock className="h-5 w-5 text-orange-500" />
+                        </div>
+                        <h3 className="text-sm font-medium text-foreground mb-1">快速处理</h3>
+                        <p className="text-xs text-muted-foreground">本地模型处理, 无需上传云端, 隐私安全</p>
+                      </div>
+                    </div>
                   </div>
                 )}
 

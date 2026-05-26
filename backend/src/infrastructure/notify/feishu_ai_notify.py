@@ -166,6 +166,45 @@ class FeishuAINotifyService:
         except Exception as e:
             return {"success": False, "code": -2, "msg": str(e)}
 
+    def send_card(self, title: str, content: str, extra: dict | None = None) -> dict[str, Any]:
+        """发送简单的文本卡片消息（用于音频转写等通知）
+
+        Args:
+            title: 卡片标题
+            content: 卡片内容（支持 Larkdown 格式）
+            extra: 额外参数（如 level 等，目前保留）
+
+        Returns:
+            dict: 飞书 API 响应
+        """
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        card = {
+            "msg_type": "interactive",
+            "card": {
+                "config": {"wide_screen_mode": True},
+                "header": {
+                    "title": {"tag": "plain_text", "content": title},
+                    "template": "blue",
+                },
+                "elements": [
+                    {
+                        "tag": "div",
+                        "text": {"tag": "lark_md", "content": content},
+                    },
+                    {"tag": "hr"},
+                    {
+                        "tag": "note",
+                        "elements": [
+                            {"tag": "plain_text", "content": f"TRAI AI 通知 · {now_str}"},
+                        ],
+                    },
+                ],
+            },
+        }
+        
+        return self._send_card(card)
+
     def _download_image(self, image_url: str) -> bytes:
         """从 S3 Presigned URL 下载图片数据
 

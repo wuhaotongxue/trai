@@ -3,6 +3,8 @@
 # 日期: 2026-05-23
 # 描述: 数字人对话接口
 
+from typing import Any
+
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -12,7 +14,7 @@ from infrastructure.agent.tools.base import ExecutionContext
 from infrastructure.agent.tools.digital_human_chat import DigitalHumanChatTool
 from infrastructure.ai.core.openai_client import OpenAIClient
 
-router = APIRouter(prefix="/ai/digital_human", tags=["AI Digital Human"])
+router = APIRouter(prefix="/digital_human", tags=["AI Digital Human"])
 
 
 class DigitalHumanChatRequest(BaseModel):
@@ -22,7 +24,7 @@ class DigitalHumanChatRequest(BaseModel):
 class DigitalHumanChatResponse(BaseModel):
     code: int = 200
     msg: str = "OK"
-    data: dict
+    data: dict[str, Any]
 
 
 @router.post("/chat", response_model=DigitalHumanChatResponse)
@@ -38,7 +40,7 @@ async def digital_human_chat(
 
         # 2. 调用数字人工具生成视频
         tool = DigitalHumanChatTool()
-        user_id = current_user.id if current_user else "anonymous"
+        user_id = current_user.get("user_id", "") if current_user else "anonymous"
         context = ExecutionContext(user_id=str(user_id), tenant_id="default")
         params = {"text": reply_text}
 

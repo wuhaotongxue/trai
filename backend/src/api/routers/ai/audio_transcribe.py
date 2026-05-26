@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 
 from api.deps import get_current_user
 from infrastructure.ai.audio.local_asr_client import get_asr_client
-from infrastructure.database.database import get_db
+from infrastructure.database.database import get_db_session
 from infrastructure.database.transcribe_model import AudioTranscribeRecordModel
+from infrastructure.notify.feishu_ai_notify import FeishuAINotifyService, get_feishu_ai_notify_service
 from infrastructure.storage.s3_storage import get_s3_storage
 
 router = APIRouter()
@@ -27,6 +28,25 @@ class TranscribeListResponse(BaseModel):
     ts: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 
+def _extract_text_from_srt(srt_content: str) -> str:
+    """从 SRT 格式字符串中提取纯文本"""
+    lines = srt_content.strip().split("\n")
+    text_parts = []
+    
+    for line in lines:
+        line = line.strip()
+        # 跳过数字序号、时间戳行、空行
+        if not line:
+            continue
+        if line.isdigit():
+            continue
+        if "-->" in line:
+            continue
+        text_parts.append(line)
+    
+    return "".join(text_parts)
+
+
 async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: str, creator_id: str):
     """后台处理音频转写及文件生成"""
     try:
@@ -35,10 +55,15 @@ async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: st
         logger.info(f"开始转写音频: {file_path}")
         result = await asr_client.transcribe(file_path)
 
-        if not result.get("success"):
-            raise Exception(f"ASR 失败: {result.get('error')}")
+        # 本地 ASR 返回的是 SRT 格式字符串
+        if not result or not isinstance(result, str):
+            raise Exception("ASR 返回空结果")
 
-        text = result.get("text", "")
+        # 从 SRT 格式中提取纯文本
+        text = _extract_text_from_srt(result)
+
+        if not text.strip():
+            raise Exception("转写结果为空")
 
         # 2. 生成 MD, TXT, PDF (这里用临时文件模拟 PDF 生成)
         base_name = os.path.splitext(file_name)[0]
@@ -59,9 +84,36 @@ async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: st
             with open(txt_path, "w", encoding="utf-8") as f:
                 f.write(txt_content)
 
-            # TODO: 真实的 PDF 生成可以使用 reportlab 或 pdfkit，这里先用文本写入充当 PDF
-            with open(pdf_path, "wb") as f:
-                f.write(md_content.encode("utf-8"))
+            # 使用 fpdf2 生成真正的 PDF
+            from fpdf import FPDF
+            
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("SimSun", size=12)
+            
+            # 处理标题
+            title = f"{base_name} - 语音转写报告"
+            pdf.set_font("SimSun", style='B', size=16)
+            pdf.cell(200, 15, txt=title, ln=True, align='C')
+            
+            pdf.set_font("SimSun", size=12)
+            pdf.cell(200, 10, txt=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ln=True, align='C')
+            pdf.ln(10)
+            
+            # 添加分隔线
+            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+            pdf.ln(10)
+            
+            # 添加正文内容，自动换行
+            pdf.set_font("SimSun", size=12)
+            for line in text.split('\n'):
+                # 按固定宽度分割长行
+                while len(line) > 0:
+                    pdf.cell(0, 10, txt=line[:40], ln=True)
+                    line = line[40:]
+                pdf.ln(2)
+            
+            pdf.output(pdf_path)
 
             # 3. 上传到 S3
             date_prefix = datetime.now().strftime("%Y%m")
@@ -69,18 +121,19 @@ async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: st
             txt_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.txt"
             pdf_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.pdf"
 
-            await s3_storage.upload_file_async(md_path, md_key)
-            await s3_storage.upload_file_async(txt_path, txt_key)
-            await s3_storage.upload_file_async(pdf_path, pdf_key)
+            s3_storage.upload_file(md_path, md_key)
+            s3_storage.upload_file(txt_path, txt_key)
+            s3_storage.upload_file(pdf_path, pdf_key)
 
-            md_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{md_key}"
-            txt_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{txt_key}"
-            pdf_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{pdf_key}"
+            md_url = s3_storage.get_file_url(md_key)
+            txt_url = s3_storage.get_file_url(txt_key)
+            pdf_url = s3_storage.get_file_url(pdf_key)
 
         # 4. 更新数据库
-        from infrastructure.database.database import SessionLocal
+        from infrastructure.database.database import get_database
 
-        with SessionLocal() as db:
+        db = get_database().get_session()
+        try:
             record = db.query(AudioTranscribeRecordModel).filter(AudioTranscribeRecordModel.id == record_id).first()
             if record:
                 record.status = "success"
@@ -89,22 +142,59 @@ async def process_audio_task(record_id: uuid.UUID, file_path: str, file_name: st
                 record.txt_url = txt_url
                 record.pdf_url = pdf_url
                 db.commit()
+        finally:
+            db.close()
+
+        # 5. 发送飞书通知
+        _send_transcribe_notify(creator_id, file_name, text, md_url, txt_url, pdf_url)
 
         logger.info(f"音频转写任务完成: {record_id}")
 
     except Exception as e:
         logger.error(f"处理音频转写任务异常: {e}")
-        from infrastructure.database.database import SessionLocal
+        from infrastructure.database.database import get_database
 
-        with SessionLocal() as db:
+        db = get_database().get_session()
+        try:
             record = db.query(AudioTranscribeRecordModel).filter(AudioTranscribeRecordModel.id == record_id).first()
             if record:
                 record.status = "failed"
                 db.commit()
+        finally:
+            db.close()
     finally:
         # 清理原始音频文件
         if os.path.exists(file_path):
             os.remove(file_path)
+
+
+def _send_transcribe_notify(user_id: str, file_name: str, text: str, md_url: str, txt_url: str, pdf_url: str) -> None:
+    """发送音频转写完成飞书通知（不阻塞主请求）"""
+    if not os.getenv("NOTIFY_FEISHU_AUDIO_ENABLED", "true").lower() == "true":
+        return
+    try:
+        service = get_feishu_ai_notify_service()
+        card_content = f"""**📝 音频转写完成**
+
+**用户**: {user_id}
+**文件**: {file_name}
+
+**转写内容预览**:
+{text[:200]}{'...' if len(text) > 200 else ''}
+
+**下载链接**:
+- 📝 [Markdown]({md_url})
+- 📄 [TXT]({txt_url})
+- 📑 [PDF]({pdf_url})"""
+        
+        service.send_card(
+            title="🎙️ 音频转写完成通知",
+            content=card_content,
+            extra={"level": "INFO"}
+        )
+        logger.info(f"飞书通知发送成功: {user_id} - {file_name}")
+    except Exception as e:
+        logger.error(f"发送飞书通知失败: {e}")
 
 
 @router.post("/audio/transcribe", tags=["AI 语音分析"])
@@ -112,7 +202,7 @@ async def create_transcribe_task(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """上传音频并创建转写任务"""
     user_id = current_user.get("username", "anonymous")
@@ -128,8 +218,8 @@ async def create_transcribe_task(
     # 2. 上传源音频到 S3
     date_prefix = datetime.now().strftime("%Y%m")
     s3_key = f"uploads/audio/{date_prefix}/{uuid.uuid4().hex[:8]}_{file.filename}"
-    await s3_storage.upload_file_async(tmp_path, s3_key)
-    source_url = f"{os.getenv('S3_ENDPOINT_URL')}/{os.getenv('S3_BUCKET_NAME')}/{s3_key}"
+    s3_storage.upload_file(tmp_path, s3_key)
+    source_url = s3_storage.get_file_url(s3_key)
 
     # 3. 创建数据库记录
     record = AudioTranscribeRecordModel(
@@ -150,7 +240,7 @@ async def get_transcribe_history(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """获取转写历史列表 (支持分页)"""
     user_id = current_user.get("username", "anonymous")

@@ -86,14 +86,16 @@ class MultimodalProcessor:
     SUPPORTED_FORMATS = {
         "image": ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"],
         "audio": ["mp3", "wav", "m4a", "flac", "ogg", "aac", "webm"],
+        "video": ["mp4", "mov", "mkv", "avi", "webm", "flv"],
         "pdf": ["pdf"],
         "document": ["docx", "doc", "txt", "md", "csv", "xlsx", "xls"],
     }
 
-    # 最大文件大小限制(MB)
+    # 最大文件大小限制 (MB)
     MAX_SIZES = {
         "image": 20,
-        "audio": 25,
+        "audio": 100,
+        "video": 100,
         "pdf": 50,
         "document": 10,
     }
@@ -318,54 +320,113 @@ class MultimodalProcessor:
     async def speech_to_text(
         self,
         audio_data: bytes | BinaryIO,
-        language: str | None = None,  # 自动检测或指定(zh/en/ja等)
+        language: str | None = None,  # 自动检测或指定 (zh/en/ja 等)
         response_format: str = "json",  # json/text/srt/vtt/verbose_json
+        filename: str | None = None,  # 文件名，用于检测是否为视频
         **kwargs,
     ) -> ProcessingResult:
         """
-        语音转文字(STT)
+        语音转文字 (STT) - 支持音频和视频文件
 
         Args:
             audio_data: 音频数据
-            language: 语言代码(可选,自动检测)
+            language: 语言代码 (可选，自动检测)
             response_format: 返回格式
+            filename: 文件名，用于检测是否为视频文件
 
         Returns:
             ProcessingResult: 包含转录文本
         """
         import time
+        import tempfile
+        import os
+        import subprocess
+        import asyncio
 
         start_time = time.perf_counter()
 
         try:
-            if hasattr(audio_data, "read"):
-                file_obj = audio_data
-            else:
-                file_obj = io.BytesIO(audio_data)
+            # 使用本地 ASR 客户端进行语音转文字
+            from infrastructure.ai.audio.local_asr_client import get_asr_client
 
-            client = self._get_ai_client()
+            # 检测是否为视频文件
+            is_video = False
+            if filename:
+                video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.webm', '.flv']
+                is_video = any(filename.lower().endswith(ext) for ext in video_extensions)
 
-            transcription = await client.transcribe_audio(
-                file=file_obj,
-                language=language,
-                response_format=response_format,
-            )
+            # 将数据保存到临时文件
+            with tempfile.NamedTemporaryFile(suffix=".wav" if not is_video else ".mp4", delete=False) as tmp_file:
+                if hasattr(audio_data, "read"):
+                    tmp_file.write(audio_data.read())
+                else:
+                    tmp_file.write(audio_data)
+                tmp_path = tmp_file.name
 
-            duration_ms = (time.perf_counter() - start_time) * 1000
+            # 如果是视频文件，先提取音频
+            if is_video:
+                logger.info(f"检测到视频文件：{filename}, 开始提取音频")
+                audio_path = tmp_path + ".extracted.wav"
+                
+                cmd = [
+                    "ffmpeg",
+                    "-y",
+                    "-i", tmp_path,
+                    "-vn",
+                    "-ac", "1",
+                    "-ar", "16000",
+                    audio_path,
+                ]
+                
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                
+                stdout, stderr = await process.communicate()
+                
+                if process.returncode != 0:
+                    raise RuntimeError(f"音频提取失败：{stderr.decode('utf-8', errors='ignore')}")
+                
+                # 使用提取的音频文件
+                tmp_path = audio_path
+                logger.info(f"音频提取完成：{audio_path}")
 
-            text_content = transcription.get("text", "") if isinstance(transcription, dict) else str(transcription)
+            try:
+                asr_client = get_asr_client()
+                result = await asr_client.transcribe(tmp_path)
 
-            return ProcessingResult(
-                status=ProcessingStatus.SUCCESS,
-                output_type="text",
-                output_data=text_content,
-                processing_time_ms=duration_ms,
-                tokens_used=len(text_content.split()),
-                metadata={
-                    "language": language or "auto-detected",
-                    "format": response_format,
-                },
-            )
+                # 本地 ASR 返回的是 SRT 格式字符串，需要提取纯文本
+                if not result or not isinstance(result, str):
+                    raise Exception("ASR 返回空结果")
+
+                # 从 SRT 格式中提取纯文本
+                text_content = self._extract_text_from_srt(result)
+
+                duration_ms = (time.perf_counter() - start_time) * 1000
+
+                return ProcessingResult(
+                    status=ProcessingStatus.SUCCESS,
+                    output_type="text",
+                    output_data=text_content,
+                    processing_time_ms=duration_ms,
+                    tokens_used=len(text_content.split()),
+                    metadata={
+                        "language": language or "auto-detected",
+                        "format": response_format,
+                        "source": "video" if is_video else "audio",
+                    },
+                )
+            finally:
+                # 清理临时文件
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                # 如果是视频，还要清理提取的音频文件
+                if is_video:
+                    extracted_audio = tmp_path + ".extracted.wav"
+                    if os.path.exists(extracted_audio):
+                        os.remove(extracted_audio)
 
         except Exception as e:
             logger.error(f"Speech-to-text failed: {e}")
@@ -377,6 +438,24 @@ class MultimodalProcessor:
                 output_data=str(e),
                 processing_time_ms=duration_ms,
             )
+
+    def _extract_text_from_srt(self, srt_content: str) -> str:
+        """从 SRT 格式字符串中提取纯文本"""
+        lines = srt_content.strip().split("\n")
+        text_parts = []
+        
+        for line in lines:
+            line = line.strip()
+            # 跳过数字序号、时间戳行、空行
+            if not line:
+                continue
+            if line.isdigit():
+                continue
+            if "-->" in line:
+                continue
+            text_parts.append(line)
+        
+        return "".join(text_parts)
 
     async def text_to_speech(
         self,

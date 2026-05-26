@@ -57,6 +57,10 @@ def _import_tool_module(tool_name: str) -> Any | None:
             from infrastructure.agent.tools.wecom_contact_tool import WeComContactTool
 
             return WeComContactTool
+        if tool_name == "video_to_audio":
+            from infrastructure.agent.tools.video_to_audio import VideoToAudioTool
+
+            return VideoToAudioTool
     except ImportError as e:
         logger.warning(f"工具模块导入失败 | tool={tool_name} | error={e}")
     return None
@@ -75,7 +79,7 @@ def load_all_tools() -> list[ToolDefinition]:
 
     enabled_str = os.getenv(
         "TOOL_ENABLED_LIST",
-        "weather,calculator,search,translate,wecom_contact,video_dubbing,music_creator,video_generator",
+        "weather,calculator,search,translate,wecom_contact,video_dubbing,music_creator,video_generator,video_to_audio",
     )
     tool_names = [t.strip() for t in enabled_str.split(",") if t.strip()]
 

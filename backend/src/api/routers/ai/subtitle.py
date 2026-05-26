@@ -485,4 +485,48 @@ def list_subtitles(
     return out
 
 
+@router.post(
+    "/subtitle/delete",
+    tags=["AI"],
+    summary="删除字幕记录",
+    description="删除指定的字幕处理记录.",
+)
+def delete_subtitle(
+    task_id: str = Form(..., description="任务 ID"),
+    current_user: CurrentUserOptional = None,
+    session=Depends(get_db_session),
+) -> dict:
+    """
+    删除字幕记录.
+
+    参数:
+        task_id: str, 任务 ID.
+        current_user: CurrentUserOptional, 当前用户.
+        session: 数据库会话.
+
+    返回值:
+        dict: 删除结果.
+
+    异常:
+        HTTPException: 记录不存在或无权删除.
+    """
+    from infrastructure.database.subtitle_record_model import SubtitleRecordModel
+
+    user_id = current_user.get("user_id", "") if current_user else ""
+    safe_user_id = user_id or "anonymous"
+
+    record = session.query(SubtitleRecordModel).filter(
+        SubtitleRecordModel.task_id == task_id,
+        SubtitleRecordModel.user_id == safe_user_id
+    ).first()
+
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    session.delete(record)
+    session.commit()
+
+    return {"code": 200, "msg": "Deleted successfully", "data": None}
+
+
 __all__ = ["router"]

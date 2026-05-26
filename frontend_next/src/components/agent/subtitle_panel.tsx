@@ -10,8 +10,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { request } from "@/lib/api_client";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video } from "lucide-react";
+import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video, Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll_area";
+import { globalToast } from "@/components/toast/toast";
 
 type BurnMode = "none" | "zh" | "target" | "bilingual";
 
@@ -91,6 +92,44 @@ export function SubtitlePanel() {
     } finally {
       setIsLoadingHistory(false);
     }
+  };
+
+  const handleDelete = async (taskId: string) => {
+    globalToast({
+      title: "确认删除",
+      message: "确定要删除这条记录吗？此操作不可撤销。",
+      variant: "warning",
+      confirmText: "删除",
+      cancelText: "取消",
+      duration: 0,
+      onConfirm: async () => {
+        try {
+          await request("/ai/subtitle/delete", {
+            method: "POST",
+            body: new URLSearchParams({ task_id: taskId }).toString(),
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          });
+          fetchHistory();
+          if (activeRecord?.task_id === taskId) {
+            setActiveRecord(null);
+          }
+          globalToast({
+            message: "删除成功，资源已移除",
+            variant: "success",
+            duration: 3000,
+          });
+        } catch (e) {
+          console.error("Failed to delete subtitle record:", e);
+          globalToast({
+            message: "删除失败，请稍后重试",
+            variant: "error",
+            duration: 3000,
+          });
+        }
+      },
+    });
   };
 
   useEffect(() => {
@@ -543,24 +582,40 @@ export function SubtitlePanel() {
             {currentHistory.map((record) => (
               <div 
                 key={record.task_id} 
-                onClick={() => setActiveRecord(record)}
-                className={`rounded-lg border p-3 cursor-pointer transition-colors ${activeRecord?.task_id === record.task_id ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-muted/50'}`}
+                className={`rounded-lg border p-3 transition-colors ${activeRecord?.task_id === record.task_id ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}
               >
-                <h4 className="font-medium text-sm text-foreground line-clamp-1 mb-1" title={record.file_name}>
-                  {record.file_name}
-                </h4>
-                <div className="flex items-center justify-between mt-2 text-[10px]">
-                  <span className="text-muted-foreground">{record.created_at.split(' ')[0]}</span>
-                  <span className={`px-1.5 py-0.5 rounded font-medium ${
-                    record.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
-                    record.status === "failed" ? "bg-destructive/10 text-destructive" :
-                    "bg-primary/10 text-primary"
-                  }`}>
-                    {record.status === "completed" ? "已完成" : record.status === "failed" ? "失败" : "处理中"}
-                  </span>
-                </div>
-                <div className="mt-2 text-[10px] text-blue-600 bg-blue-500/10 inline-block px-1.5 py-0.5 rounded">
-                  {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : record.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
+                <div className="flex items-start justify-between gap-2">
+                  <div 
+                    onClick={() => setActiveRecord(record)}
+                    className="flex-1 cursor-pointer hover:bg-muted/30 rounded transition-colors"
+                  >
+                    <h4 className="font-medium text-sm text-foreground line-clamp-1 mb-1" title={record.file_name}>
+                      {record.file_name}
+                    </h4>
+                    <div className="flex items-center justify-between mt-2 text-[10px]">
+                      <span className="text-muted-foreground">{record.created_at.split(' ')[0]}</span>
+                      <span className={`px-1.5 py-0.5 rounded font-medium ${
+                        record.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
+                        record.status === "failed" ? "bg-destructive/10 text-destructive" :
+                        "bg-primary/10 text-primary"
+                      }`}>
+                        {record.status === "completed" ? "已完成" : record.status === "failed" ? "失败" : "处理中"}
+                      </span>
+                    </div>
+                    <div className="mt-2 text-[10px] text-blue-600 bg-blue-500/10 inline-block px-1.5 py-0.5 rounded">
+                      {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : record.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDelete(record.task_id)}
+                    disabled={record.status === "processing"}
+                    title="删除记录"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
