@@ -93,13 +93,13 @@ class LocalASRClient:
             # 获取音频时长
             duration_s = 0
             try:
-                import contextlib
-                import wave
+                from pydub import AudioSegment
 
-                with contextlib.closing(wave.open(str(audio_path), "rb")) as f:
-                    frames = f.getnframes()
-                    rate = f.getframerate()
-                    duration_s = frames / float(rate)
+                audio = AudioSegment.from_file(str(audio_path))
+                duration_s = len(audio) / 1000.0  # pydub 返回毫秒
+            except ImportError:
+                logger.warning("pydub 未安装, 将使用默认估算")
+                duration_s = len(text) * 0.3  # 粗略估算: 约 3 字/秒
             except Exception as e:
                 logger.warning(f"无法获取音频时长, 将使用默认估算: {e}")
                 duration_s = len(text) * 0.3  # 粗略估算: 约 3 字/秒

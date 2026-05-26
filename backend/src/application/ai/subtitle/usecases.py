@@ -191,42 +191,56 @@ class SubtitleGenerateUseCase:
         burn_mode: str,
     ) -> SubtitleRecord:
         """执行字幕生成业务逻辑"""
-        input_is_video = self.is_video(filename, content_type)
-        input_is_audio = self.is_audio(filename, content_type)
-        if not input_is_video and not input_is_audio:
-            raise ValueError(f"unsupported file: {filename}")
-
-        if input_is_audio:
-            burn_mode = "none"
-
-        safe_tenant_id = tenant_id or "default"
-        safe_user_id = user_id or "anonymous"
-        safe_task_id = task_id.replace("-", "")
-        object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
-
-        # 1. 创建初始记录
-        record = SubtitleRecord(
-            id="",
-            task_id=task_id,
-            user_id=safe_user_id,
-            file_name=filename,
-            target_lang=target_lang,
-            burn_mode=burn_mode,
-            status="processing",
-        )
-        record = self._repo.save(record)
-
-        tmp_dir = Path(tempfile.mkdtemp(prefix="subtitle_"))
-        input_path = tmp_dir / f"input{Path(filename).suffix or ('.mp4' if input_is_video else '.wav')}"
-        audio_path = tmp_dir / "audio.wav"
-        zh_srt_path = tmp_dir / "zh.srt"
-        target_srt_path = tmp_dir / f"{target_lang}.srt"
-        burn_srt_path = tmp_dir / "burn.srt"
-        output_video_path = tmp_dir / "output.mp4"
-
+        import asyncio
+        
+        # 注册取消事件
+        from api.routers.ai.subtitle import _active_cancel_events
+        cancel_event = asyncio.Event()
+        _active_cancel_events[task_id] = cancel_event
+        
+        tmp_dir = None
+        record = None
+        
         try:
+            input_is_video = self.is_video(filename, content_type)
+            input_is_audio = self.is_audio(filename, content_type)
+            if not input_is_video and not input_is_audio:
+                raise ValueError(f"unsupported file: {filename}")
+
+            if input_is_audio:
+                burn_mode = "none"
+
+            safe_tenant_id = tenant_id or "default"
+            safe_user_id = user_id or "anonymous"
+            safe_task_id = task_id.replace("-", "")
+            object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+
+            # 1. 创建初始记录
+            record = SubtitleRecord(
+                id="",
+                task_id=task_id,
+                user_id=safe_user_id,
+                file_name=filename,
+                target_lang=target_lang,
+                burn_mode=burn_mode,
+                status="processing",
+            )
+            record = self._repo.save(record)
+
+            tmp_dir = Path(tempfile.mkdtemp(prefix="subtitle_"))
+            input_path = tmp_dir / f"input{Path(filename).suffix or ('.mp4' if input_is_video else '.wav')}"
+            audio_path = tmp_dir / "audio.wav"
+            zh_srt_path = tmp_dir / "zh.srt"
+            target_srt_path = tmp_dir / f"{target_lang}.srt"
+            burn_srt_path = tmp_dir / "burn.srt"
+            output_video_path = tmp_dir / "output.mp4"
+
             # 保存文件
             input_path.write_bytes(file_bytes)
+
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
 
             # 提取音频
             if input_is_video:
@@ -234,12 +248,31 @@ class SubtitleGenerateUseCase:
             else:
                 audio_path.write_bytes(input_path.read_bytes())
 
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
+
             # 语音识别 STT
             stt_srt: str | None = None
             stt_success = False
 
-            # 直接优先尝试魔塔社区 API，跳过可能失败的 OpenAI / DeepSeek 配置
-            if os.getenv("DASHSCOPE_API_KEY") or os.getenv("MODELSCOPE_API_KEY"):
+            # 优先使用本地 FunASR 模型进行 STT
+            try:
+                logger.info("[字幕生成] 尝试使用本地 FunASR 模型进行 STT...")
+                from infrastructure.ai.audio.local_asr_client import LocalASRClient
+
+                local_client = LocalASRClient()
+                stt_srt = await local_client.transcribe(audio_path)
+                stt_success = True
+            except Exception as e:
+                logger.warning(f"[字幕生成] 本地 FunASR STT 失败，准备降级到远程 API: {e}")
+
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
+
+            # 如果本地模型失败，降级到远程 API
+            if not stt_success and (os.getenv("DASHSCOPE_API_KEY") or os.getenv("MODELSCOPE_API_KEY")):
                 try:
                     logger.info("[字幕生成] 尝试使用魔塔社区 (ModelScope) API 进行 STT...")
                     stt_client = OpenAIClient(provider="modelscope")
@@ -251,15 +284,11 @@ class SubtitleGenerateUseCase:
                         )
                     stt_success = True
                 except Exception as e:
-                    logger.warning(f"[字幕生成] 魔塔社区 API STT 失败，准备降级到本地 FunASR: {e}")
+                    logger.warning(f"[字幕生成] 魔塔社区 API STT 失败：{e}")
 
-            if not stt_success:
-                logger.info("[字幕生成] 尝试使用本地 FunASR 模型进行 STT...")
-                from infrastructure.ai.audio.local_asr_client import LocalASRClient
-
-                local_client = LocalASRClient()
-                stt_srt = await local_client.transcribe(audio_path)
-                stt_success = True
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
 
             if not isinstance(stt_srt, str) or not stt_srt.strip():
                 raise RuntimeError("stt returned empty srt")
@@ -283,6 +312,10 @@ class SubtitleGenerateUseCase:
                     )
                 target_srt = self._build_srt(out_entries)
                 target_srt_path.write_text(target_srt, encoding="utf-8")
+
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
 
             # 烧录
             if input_is_video and burn_mode != "none":
@@ -326,40 +359,53 @@ class SubtitleGenerateUseCase:
 
             record.status = "completed"
 
+        except asyncio.CancelledError:
+            logger.info(f"任务被取消：task_id={task_id}")
+            if record:
+                record.status = "cancelled"
+                record.error_message = "任务被用户取消"
         except Exception as e:
             logger.error(f"Subtitle generate failed: {e}")
-            record.status = "failed"
-            record.error_message = str(e)
+            if record:
+                record.status = "failed"
+                record.error_message = str(e)
         finally:
             # 清理临时文件
-            try:
-                for p in tmp_dir.glob("**/*"):
-                    if p.is_file():
-                        p.unlink(missing_ok=True)
-                tmp_dir.rmdir()
-            except Exception:
-                pass
+            if tmp_dir and tmp_dir.exists():
+                try:
+                    for p in tmp_dir.glob("**/*"):
+                        if p.is_file():
+                            p.unlink(missing_ok=True)
+                    tmp_dir.rmdir()
+                except Exception:
+                    pass
+
+            # 从注册表中移除取消事件
+            if task_id in _active_cancel_events:
+                del _active_cancel_events[task_id]
 
             # 保存结果到数据库
-            record = self._repo.save(record)
+            if record:
+                record = self._repo.save(record)
 
-            # 飞书通知
-            try:
-                event = SubtitleGeneratedEvent(
-                    user_id=safe_user_id,
-                    user_name=user_name,
-                    file_name=filename,
-                    target_lang=target_lang,
-                    burn_mode=burn_mode,
-                    status=record.status,
-                    error_message=record.error_message or "",
-                    task_id=record.task_id,
-                    zh_srt_url=record.zh_srt_url or "",
-                    target_srt_url=record.target_srt_url or "",
-                    output_video_url=record.output_video_url or "",
-                )
-                self._notifier.notify_subtitle_generated(event)
-            except Exception as notify_e:
-                logger.error(f"Send feishu notify failed: {notify_e}")
+                # 飞书通知
+                try:
+                    safe_user_id = user_id or "anonymous"
+                    event = SubtitleGeneratedEvent(
+                        user_id=safe_user_id,
+                        user_name=user_name,
+                        file_name=filename,
+                        target_lang=target_lang,
+                        burn_mode=burn_mode,
+                        status=record.status,
+                        error_message=record.error_message or "",
+                        task_id=record.task_id,
+                        zh_srt_url=record.zh_srt_url or "",
+                        target_srt_url=record.target_srt_url or "",
+                        output_video_url=record.output_video_url or "",
+                    )
+                    self._notifier.notify_subtitle_generated(event)
+                except Exception as notify_e:
+                    logger.error(f"Send feishu notify failed: {notify_e}")
 
         return record

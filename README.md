@@ -69,6 +69,13 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_26_1728
+- **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕
+- **修复(subtitle)**: 修复 delete_subtitle 接口中 object_prefix 未定义的问题
+
+### 🎨 前端_2026_05_26_1728
+- **新增(subtitle)**: 视频转音频任务增加提取字幕 (SRT) 下载按钮
+
 ### 🛠️ 后端_2026_05_26_1402
 - **修复(audio_transcribe)**: 使用 fpdf2 库生成真正的 PDF 格式，解决 PDF 文件损坏无法打开的问题
 - **修复(s3_storage)**: 修改 `get_file_url` 方法，优先使用 `S3_PRESIGNED_PUBLIC_BASE` 配置，确保返回正确的 S3 公共域名 URL

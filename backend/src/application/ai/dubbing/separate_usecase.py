@@ -6,10 +6,12 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 from pathlib import Path
 
+import torch
 from loguru import logger
 
 from domain.entities.subtitle_record import SubtitleRecord
@@ -130,20 +132,53 @@ class AudioSeparateUseCase:
         异常:
             RuntimeError: 执行失败时抛出.
         """
+        # 选择占用最少的 GPU
+        device = "cpu"
+        if torch.cuda.is_available():
+            gpu_count = torch.cuda.device_count()
+            min_memory = float('inf')
+            best_gpu = 0
+            for i in range(gpu_count):
+                memory_used = torch.cuda.memory_allocated(i)
+                if memory_used < min_memory:
+                    min_memory = memory_used
+                    best_gpu = i
+            device = f"cuda:{best_gpu}"
+            logger.info(f"选择 GPU {best_gpu} (占用: {min_memory / 1024**2:.0f} MiB)")
+        
+        # 使用正确的 conda 环境路径
+        demucs_path = "/home/qyjgylc_whf/miniconda3/envs/trai31313/bin/demucs"
+        
         cmd = [
-            "demucs",
+            demucs_path,
             "-n",
             "htdemucs",
+            "--device",
+            device,
             "--out",
             str(out_dir),
             str(audio_path),
         ]
         try:
             logger.info(f"执行 Demucs: {' '.join(cmd)}")
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
+            if result.stdout:
+                logger.info(f"Demucs 输出: {result.stdout[:500]}")
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("Demucs 执行超时 (超过 10 分钟)")
         except subprocess.CalledProcessError as e:
             stderr = (e.stderr or "").strip()
-            raise RuntimeError(f"Demucs failed: {stderr[:1000]}") from e
+            stdout = (e.stdout or "").strip()
+            error_msg = f"Demucs 执行失败: {stderr[:1000]}"
+            if stdout:
+                error_msg += f" | 输出: {stdout[:500]}"
+            raise RuntimeError(error_msg) from e
 
         # Demucs 默认输出到: out_dir/htdemucs/{basename}/
         basename = audio_path.stem

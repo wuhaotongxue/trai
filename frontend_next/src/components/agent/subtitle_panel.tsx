@@ -7,7 +7,7 @@
  * 描述: 字幕生成面板, 左右分栏布局
  */
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { request } from "@/lib/api_client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video, Trash2 } from "lucide-react";
@@ -28,6 +28,7 @@ interface SubtitleGenerateResponse {
   vocal_url?: string | null;
   bgm_url?: string | null;
   object_prefix: string;
+  audio_url?: string | null; // 视频转音频的音频 URL
 }
 
 interface SubtitleRecordDTO {
@@ -57,7 +58,7 @@ const TARGET_LANG_OPTIONS: Array<{ label: string; value: string }> = [
 ];
 
 export function SubtitlePanel() {
-  const [taskType, setTaskType] = useState<"subtitle" | "separate" | "clone" | "lipsync">("subtitle");
+  const [taskType, setTaskType] = useState<"subtitle" | "separate" | "clone" | "lipsync" | "to_audio">("subtitle");
   const [file, setFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [targetLang, setTargetLang] = useState<string>("en");
@@ -66,8 +67,10 @@ export function SubtitlePanel() {
   const [includeTarget, setIncludeTarget] = useState<boolean>(true);
   const [burnMode, setBurnMode] = useState<BurnMode>("bilingual");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [error, setError] = useState<string>("");
   const [currentTask, setCurrentTask] = useState<SubtitleGenerateResponse | null>(null);
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   const [history, setHistory] = useState<SubtitleRecordDTO[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -168,6 +171,65 @@ export function SubtitlePanel() {
   const totalPages = Math.max(1, Math.ceil(history.length / PAGE_SIZE));
   const currentHistory = history.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE);
 
+  const getApiBase = () => {
+    if (process.env.NEXT_PUBLIC_API_BASE) return process.env.NEXT_PUBLIC_API_BASE;
+    if (typeof window !== "undefined") {
+      return `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`;
+    }
+    return "http://localhost:5666/api_trai/v1";
+  };
+
+  const uploadFileWithProgress = (
+    endpoint: string,
+    formData: FormData,
+    abortController: AbortController
+  ): Promise<SubtitleGenerateResponse> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const bearerToken = typeof window !== "undefined"
+        ? document.cookie.split("; ").find((r) => r.startsWith("token="))?.split("=")[1]
+        : undefined;
+
+      xhr.open("POST", `${getApiBase()}${endpoint}`);
+
+      if (bearerToken) {
+        xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
+      }
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            resolve(data);
+          } catch {
+            reject(new Error("Invalid response format"));
+          }
+        } else {
+          try {
+            const errData = JSON.parse(xhr.responseText);
+            const msg = errData.detail?.message || errData.message || `HTTP ${xhr.status}`;
+            reject(new Error(msg));
+          } catch {
+            reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+          }
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Network error"));
+      xhr.onabort = () => reject(new Error("Upload cancelled"));
+
+      abortController.signal.addEventListener("abort", () => xhr.abort());
+
+      xhr.send(formData);
+    });
+  };
+
   const handleSubmit = async () => {
     if (!file) {
       setError("请先上传文件");
@@ -180,12 +242,17 @@ export function SubtitlePanel() {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
     setError("");
     setCurrentTask(null);
+
+    const abortController = new AbortController();
+    uploadAbortRef.current = abortController;
+
     try {
       const form = new FormData();
       
-      let endpoint = "/ai/video/subtitle";
+      let endpoint = "/ai/subtitle/generate";
       if (taskType === "separate") {
         endpoint = "/ai/video/separate";
         form.append("file", file);
@@ -196,6 +263,9 @@ export function SubtitlePanel() {
         endpoint = "/ai/video/lipsync";
         form.append("video_file", file);
         form.append("audio_file", audioFile!);
+      } else if (taskType === "to_audio") {
+        endpoint = "/ai/video/to_audio";
+        form.append("file", file);
       } else {
         form.append("file", file);
       }
@@ -208,21 +278,18 @@ export function SubtitlePanel() {
         form.append("burn_mode", inferredType === "audio" ? "none" : burnMode);
       }
 
-      const res = await request<SubtitleGenerateResponse>(endpoint, {
-        method: "POST",
-        body: form,
-      });
+      const res = await uploadFileWithProgress(endpoint, form, abortController);
       setCurrentTask(res);
       // 生成任务提交后, 刷新列表并回到第一页
       fetchHistory();
       setHistoryPage(1);
     } catch (e: unknown) {
-      const err = e as { message?: string; detail?: { message?: string; task_id?: string } };
-      const msg = err?.message || err?.detail?.message || "请求失败, 请稍后再试";
-      const taskId = err?.detail?.task_id || "";
-      setError(`${msg}${taskId ? ` (Task ID: ${taskId})` : ""}`);
+      const msg = e instanceof Error ? e.message : "请求失败, 请稍后再试";
+      setError(msg);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
+      uploadAbortRef.current = null;
     }
   };
 
@@ -235,7 +302,7 @@ export function SubtitlePanel() {
             <div>
               <h2 className="text-lg font-bold text-foreground">AI 影音工作室</h2>
               <p className="text-xs text-muted-foreground mt-1">
-                支持字幕生成、人声分离与高级声音克隆.
+                支持字幕生成、人声分离、视频转音频与高级声音克隆.
               </p>
             </div>
 
@@ -269,6 +336,13 @@ export function SubtitlePanel() {
                     onClick={() => setTaskType("lipsync")}
                   >
                     👄 口型同步
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${taskType === "to_audio" ? "bg-background shadow-sm text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                    onClick={() => setTaskType("to_audio")}
+                  >
+                    🎬 视频转音频
                   </button>
                 </div>
               </div>
@@ -421,11 +495,26 @@ export function SubtitlePanel() {
             onClick={handleSubmit}
           >
             {isSubmitting ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />提交中...</>
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />上传中 {uploadProgress}%</>
             ) : (
               "开始生成"
             )}
           </Button>
+
+          {isSubmitting && (
+            <div className="mt-3 w-full">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-1">
+                {uploadProgress < 100 ? `正在上传文件... ${uploadProgress}%` : "上传完成, 等待处理..."}
+              </p>
+            </div>
+          )}
+
           {error && (
             <div className="mt-3 p-2 rounded-lg bg-destructive/10 text-destructive text-xs break-all">
               {error}
@@ -452,11 +541,11 @@ export function SubtitlePanel() {
             <div className="w-full max-w-3xl rounded-xl border border-border bg-card overflow-hidden shadow-sm flex flex-col">
               {/* 视频/状态预览区 */}
               <div className="w-full bg-muted/30 flex items-center justify-center min-h-[300px] border-b border-border relative">
-                {activeRecord.output_video_url ? (
+                {activeRecord.output_video_url || (activeRecord.zh_srt_url && activeRecord.target_lang === "audio_extract") ? (
                   <video 
                     className="w-full h-full object-contain max-h-[500px] bg-black" 
                     controls 
-                    src={activeRecord.output_video_url} 
+                    src={activeRecord.output_video_url || activeRecord.zh_srt_url || undefined} 
                   />
                 ) : (
                   <div className="text-center p-6">
@@ -498,7 +587,7 @@ export function SubtitlePanel() {
                       {activeRecord.status === "completed" ? "已完成" : activeRecord.status === "failed" ? "失败" : "处理中"}
                     </span>
                     <span className="bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded font-medium ml-auto">
-                      {activeRecord.task_type === "separate" ? "🎵 人声分离" : activeRecord.task_type === "clone" ? "🗣️ 声音克隆" : activeRecord.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
+                      {activeRecord.task_type === "separate" ? "🎵 人声分离" : activeRecord.task_type === "clone" ? "🗣️ 声音克隆" : activeRecord.task_type === "lipsync" ? "👄 口型同步" : activeRecord.task_type === "to_audio" ? "🎬 视频转音频" : "📝 字幕生成"}
                     </span>
                   </div>
                 </div>
@@ -512,14 +601,19 @@ export function SubtitlePanel() {
                 <div className="mt-auto space-y-2">
                   <p className="text-xs font-medium text-foreground mb-2">下载文件</p>
                   <div className="flex flex-wrap gap-2">
-                    {activeRecord.zh_srt_url && (
+                    {activeRecord.zh_srt_url && activeRecord.target_lang !== "audio_extract" && activeRecord.task_type !== "to_audio" && (
                       <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => window.open(activeRecord.zh_srt_url!, "_blank")}>
                         <ExternalLink className="h-3 w-3 mr-1" /> 原字幕
                       </Button>
                     )}
-                    {activeRecord.target_srt_url && (
+                    {activeRecord.target_srt_url && activeRecord.task_type !== "to_audio" && (
                       <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => window.open(activeRecord.target_srt_url!, "_blank")}>
                         <ExternalLink className="h-3 w-3 mr-1" /> 翻译字幕
+                      </Button>
+                    )}
+                    {activeRecord.target_srt_url && activeRecord.task_type === "to_audio" && (
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => window.open(activeRecord.target_srt_url!, "_blank")}>
+                        <ExternalLink className="h-3 w-3 mr-1" /> 提取字幕 (SRT)
                       </Button>
                     )}
                     {activeRecord.vocal_url && (
@@ -535,6 +629,11 @@ export function SubtitlePanel() {
                     {activeRecord.output_video_url && (
                       <Button variant="default" size="sm" className="h-8 text-xs" onClick={() => window.open(activeRecord.output_video_url!, "_blank")}>
                         <ExternalLink className="h-3 w-3 mr-1" /> 成品视频
+                      </Button>
+                    )}
+                    {activeRecord.target_lang === "audio_extract" && activeRecord.zh_srt_url && (
+                      <Button variant="default" size="sm" className="h-8 text-xs" onClick={() => window.open(activeRecord.zh_srt_url!, "_blank")}>
+                        <ExternalLink className="h-3 w-3 mr-1" /> 提取音频
                       </Button>
                     )}
                     {!activeRecord.zh_srt_url &&
@@ -603,7 +702,7 @@ export function SubtitlePanel() {
                       </span>
                     </div>
                     <div className="mt-2 text-[10px] text-blue-600 bg-blue-500/10 inline-block px-1.5 py-0.5 rounded">
-                      {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : record.task_type === "lipsync" ? "👄 口型同步" : "📝 字幕生成"}
+                      {record.task_type === "separate" ? "🎵 人声分离" : record.task_type === "clone" ? "🗣️ 声音克隆" : record.task_type === "lipsync" ? "👄 口型同步" : record.task_type === "to_audio" ? "🎬 视频转音频" : "📝 字幕生成"}
                     </div>
                   </div>
                   <Button 
@@ -611,7 +710,6 @@ export function SubtitlePanel() {
                     size="icon" 
                     className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleDelete(record.task_id)}
-                    disabled={record.status === "processing"}
                     title="删除记录"
                   >
                     <Trash2 className="h-4 w-4" />

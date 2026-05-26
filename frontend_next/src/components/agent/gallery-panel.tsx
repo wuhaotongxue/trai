@@ -211,9 +211,10 @@ export function GalleryPanel({
   const isImageTab = activeTab === "image" || activeTab === "image_edit";
   const isVideoTab = activeTab === "video";
   const isMusicTab = activeTab === "music";
+  const isSubtitleTab = activeTab === "subtitle";
 
   // 获取当前画廊数据
-  const currentGallery = isImageTab ? imageGallery : isVideoTab ? videoGallery : musicGallery;
+  const currentGallery = isImageTab ? imageGallery : isVideoTab ? videoGallery : isSubtitleTab ? videoGallery : musicGallery;
 
   return (
     <div className={`border-l border-border bg-background transition-all duration-300 ease-in-out ${showGallery ? "w-80" : "w-0 overflow-hidden"} ${isGalleryMaximized ? "fixed inset-4 z-50 w-auto !top-[100px] rounded-xl shadow-2xl" : ""}`}>
@@ -239,9 +240,9 @@ export function GalleryPanel({
         )}
 
         <ScrollArea className="flex-1">
-          {(isImageTab || isVideoTab) && (
+          {(isImageTab || isVideoTab || isSubtitleTab) && (
             (() => {
-              const isVideo = activeTab === "video";
+              const isVideo = activeTab === "video" || activeTab === "subtitle";
               const currentItems: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
               const historyItems: Array<{ id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean }> = [];
 

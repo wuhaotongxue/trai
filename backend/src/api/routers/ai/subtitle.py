@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-# 文件名: subtitle.py
-# 作者: wuhao
-# 日期: 2026_05_23_10:00:00
-# 描述: 提供 AI 影音工作室相关的路由接口，包含字幕生成、人声分离和声音克隆.
+# 文件名：subtitle.py
+# 作者：wuhao
+# 日期：2026_05_23_10:00:00
+# 描述：提供 AI 影音工作室相关的路由接口，包含字幕生成、人声分离和声音克隆.
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
+from loguru import logger
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
@@ -19,6 +21,9 @@ from infrastructure.database.database import get_db_session
 from infrastructure.repositories.subtitle_record_repository import SubtitleRecordRepository
 
 router = APIRouter()
+
+# 任务取消事件注册表 - 用于追踪和停止正在处理的任务
+_active_cancel_events: dict[str, asyncio.Event] = {}
 
 
 class SubtitleGenerationResponse(BaseModel):
@@ -35,6 +40,15 @@ class SubtitleGenerationResponse(BaseModel):
     target_srt_url: str | None = Field(default=None, description="目标语言 SRT URL")
     output_video_url: str | None = Field(default=None, description="输出视频 URL(仅视频输入且 burn_mode!=none)")
     object_prefix: str = Field(description="S3 对象前缀")
+
+
+class VideoToAudioResponse(BaseModel):
+    """视频转音频响应模型"""
+
+    task_id: str = Field(description="任务 ID")
+    status: str = Field(description="任务状态")
+    audio_url: str | None = Field(default=None, description="提取的音频文件 URL")
+    object_key: str = Field(description="S3 对象键")
 
 
 def get_separate_usecase(session=Depends(get_db_session)) -> AudioSeparateUseCase:
@@ -489,7 +503,7 @@ def list_subtitles(
     "/subtitle/delete",
     tags=["AI"],
     summary="删除字幕记录",
-    description="删除指定的字幕处理记录.",
+    description="删除指定的字幕处理记录，如果任务正在处理中会先尝试停止任务.",
 )
 def delete_subtitle(
     task_id: str = Form(..., description="任务 ID"),
@@ -524,10 +538,227 @@ def delete_subtitle(
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
+    # 如果任务正在处理中，尝试取消
+    if record.status in ["processing", "pending"]:
+        cancel_event = _active_cancel_events.get(task_id)
+        if cancel_event:
+            cancel_event.set()
+            # 从注册表中移除
+            del _active_cancel_events[task_id]
+
+    # 如果是视频转音频任务，需要删除 S3 文件
+    if record.target_lang == "audio_extract" and record.zh_srt_url:
+        try:
+            from urllib.parse import urlparse
+
+            from infrastructure.storage.s3_storage import S3StorageService
+
+            storage = S3StorageService()
+            audio_url = record.zh_srt_url
+            parsed = urlparse(audio_url)
+            object_key = parsed.path.lstrip("/")
+            if object_key:
+                storage.delete_file(object_key)
+        except Exception as e:
+            logger.warning(f"删除音频文件失败：{e}")
+
     session.delete(record)
     session.commit()
 
     return {"code": 200, "msg": "Deleted successfully", "data": None}
+
+
+@router.post(
+    "/video/to_audio",
+    response_model=VideoToAudioResponse,
+    tags=["AI"],
+    summary="视频转音频",
+    description="上传视频文件，提取并返回音频文件.",
+)
+async def video_to_audio(
+    request_http: Request,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(..., description="上传视频文件"),
+    current_user: CurrentUserOptional = None,
+    session=Depends(get_db_session),
+) -> VideoToAudioResponse:
+    """
+    视频转音频接口 - 从视频中提取音频.
+
+    参数:
+        request_http: Request, 请求对象.
+        background_tasks: BackgroundTasks, 后台任务对象.
+        file: UploadFile, 上传的视频文件.
+        current_user: CurrentUserOptional, 当前用户.
+        session: 数据库会话.
+
+    返回值:
+        VideoToAudioResponse: 任务响应.
+
+    异常:
+        HTTPException: 处理异常.
+    """
+    import asyncio
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    from domain.entities.subtitle_record import SubtitleRecord
+    from infrastructure.repositories.subtitle_record_repository import SubtitleRecordRepository
+    from infrastructure.storage.s3_storage import S3StorageService
+
+    user_id = current_user.get("user_id", "") if current_user else ""
+    _user_name = current_user.get("display_name", "") if current_user else "anonymous"
+    tenant_id = current_user.get("tenant_id") if current_user else ""
+
+    task_id = str(uuid.uuid4())
+    filename = file.filename or "video.mp4"
+    _content_type = file.content_type or ""
+
+    # 验证是否为视频文件
+    ext = Path(filename).suffix.lower()
+    if ext not in [".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"]:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": 400, "message": "仅支持视频文件"},
+        )
+
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"code": 500, "message": f"read file failed: {e}", "task_id": task_id},
+        )
+
+    safe_tenant_id = tenant_id or "default"
+    safe_user_id = user_id or "anonymous"
+    safe_task_id = task_id.replace("-", "")
+    object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+    audio_object_key = f"{object_prefix}/audio.wav"
+
+    # 创建数据库记录
+    record = SubtitleRecord(
+        id="",
+        task_id=task_id,
+        user_id=safe_user_id,
+        file_name=filename,
+        target_lang="audio_extract",
+        burn_mode="none",
+        status="processing",
+        task_type="to_audio",
+    )
+    repo = SubtitleRecordRepository(session)
+    record = repo.save(record)
+
+    # 注册取消事件
+    cancel_event = asyncio.Event()
+    _active_cancel_events[task_id] = cancel_event
+
+    async def extract_audio_task():
+        tmp_dir = None
+        try:
+            # 保存视频到临时文件
+            tmp_dir = Path(tempfile.mkdtemp(prefix="video_"))
+            video_path = tmp_dir / f"input{ext}"
+            audio_path = tmp_dir / "audio.wav"
+
+            video_path.write_bytes(file_bytes)
+
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
+
+            # 使用 ffmpeg 提取音频
+            cmd = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(video_path),
+                "-vn",
+                "-ac",
+                "2",
+                "-ar",
+                "44100",
+                "-acodec",
+                "pcm_s16le",
+                str(audio_path),
+            ]
+            try:
+                subprocess.run(cmd, check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                stderr = (e.stderr or "").strip()
+                raise RuntimeError(f"ffmpeg failed: {stderr[:1000]}") from e
+
+            # 检查是否被取消
+            if cancel_event.is_set():
+                raise asyncio.CancelledError("任务被用户取消")
+
+            # 上传音频到 S3
+            storage = S3StorageService()
+            audio_bytes = audio_path.read_bytes()
+            storage.upload_bytes(audio_bytes, audio_object_key, content_type="audio/wav")
+            audio_url = storage.get_long_term_url(audio_object_key, expires_days=30)
+
+            # 更新记录
+            record.status = "completed"
+            record.zh_srt_url = audio_url
+
+            # 提取 SRT 字幕
+            try:
+                logger.info(f"开始提取视频字幕 (SRT): task_id={task_id}")
+                from infrastructure.ai.audio.local_asr_client import LocalASRClient
+
+                asr_client = LocalASRClient()
+                srt_content = await asr_client.transcribe(audio_path)
+                if srt_content and srt_content.strip():
+                    srt_object_key = f"{object_prefix}/subtitle.srt"
+                    storage.upload_bytes(
+                        srt_content.encode("utf-8"),
+                        srt_object_key,
+                        content_type="text/plain",
+                    )
+                    record.target_srt_url = storage.get_long_term_url(srt_object_key, expires_days=30)
+                    logger.info(f"字幕提取成功: task_id={task_id}")
+            except Exception as srt_err:
+                logger.warning(f"字幕提取失败 (非致命): task_id={task_id}, err={srt_err}")
+
+        except asyncio.CancelledError:
+            logger.info(f"视频转音频任务被取消：task_id={task_id}")
+            if record:
+                record.status = "cancelled"
+                record.error_message = "任务被用户取消"
+        except Exception as e:
+            logger.error(f"视频转音频失败：{e}")
+            if record:
+                record.status = "failed"
+                record.error_message = str(e)
+        finally:
+            # 清理临时文件
+            if tmp_dir and tmp_dir.exists():
+                try:
+                    for p in tmp_dir.glob("**/*"):
+                        if p.is_file():
+                            p.unlink(missing_ok=True)
+                    tmp_dir.rmdir()
+                except Exception:
+                    pass
+
+            # 从注册表中移除取消事件
+            if task_id in _active_cancel_events:
+                del _active_cancel_events[task_id]
+
+            # 保存结果
+            repo.save(record)
+
+    background_tasks.add_task(extract_audio_task)
+
+    return VideoToAudioResponse(
+        task_id=task_id,
+        status="processing",
+        audio_url=None,
+        object_key=audio_object_key,
+    )
 
 
 __all__ = ["router"]
