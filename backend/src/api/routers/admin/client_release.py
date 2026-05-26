@@ -287,7 +287,7 @@ async def release_client(
         logger.info(f"用户 {current_user.get('user_id')} 成功发布客户端新版本 {version}")
 
         # 5. 发送通知 (飞书 & 企微)
-        from application.usecases.release_client import ReleaseClientUseCase
+        from application.system.release_usecases import ReleaseClientUseCase
 
         releaser = ReleaseClientUseCase()
         download_url = s3_service.get_file_url(exe_key)
@@ -455,7 +455,7 @@ async def build_and_release(
 
             # 发送通知
             _build_status["message"] = "正在发送通知..."
-            from application.usecases.release_client import FEISHU_RELEASE_WEBHOOK, ReleaseClientUseCase
+            from application.system.release_usecases import FEISHU_RELEASE_WEBHOOK, ReleaseClientUseCase
 
             logger.info(
                 f"[飞书通知] Webhook 已配置: {bool(FEISHU_RELEASE_WEBHOOK)}, 长度={len(FEISHU_RELEASE_WEBHOOK)}"

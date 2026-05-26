@@ -188,18 +188,93 @@ class Database:
         return self._session_factory()
 
 
-def get_db_session() -> Session:
+def get_db_session() -> Any:
     """
-    FastAPI 依赖注入使用的获取会话函数
+    FastAPI 依赖注入使用的获取会话函数 (Generator).
 
     参数:
-        None
+        无.
+
     返回值:
-        Session: 数据库会话实例
+        Session: 数据库会话实例.
+
+    异常:
+        无.
     """
-    db = Database()
-    session = db.get_session()
+    session = DatabaseProvider.get_session()
     try:
         yield session
     finally:
         session.close()
+
+
+class DatabaseProvider:
+    """数据库实例提供者类."""
+
+    _instance: Database | None = None
+
+    @classmethod
+    def get_database(cls) -> Database:
+        """
+        获取数据库管理器单例.
+
+        参数:
+            无.
+
+        返回值:
+            Database: 数据库管理器实例.
+
+        异常:
+            无.
+        """
+        if cls._instance is None:
+            cls._instance = Database()
+        return cls._instance
+
+    @classmethod
+    def get_session(cls) -> Session:
+        """
+        获取数据库会话.
+
+        参数:
+            无.
+
+        返回值:
+            Session: 数据库会话实例.
+
+        异常:
+            无.
+        """
+        return cls.get_database().get_session()
+
+
+def get_database() -> Database:
+    """
+    获取数据库管理器单例.
+
+    参数:
+        无.
+
+    返回值:
+        Database: 数据库管理器实例.
+
+    异常:
+        无.
+    """
+    return DatabaseProvider.get_database()
+
+
+def get_session() -> Session:
+    """
+    获取数据库会话.
+
+    参数:
+        无.
+
+    返回值:
+        Session: 数据库会话实例.
+
+    异常:
+        无.
+    """
+    return DatabaseProvider.get_session()

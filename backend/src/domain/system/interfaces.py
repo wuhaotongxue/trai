@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-# 文件名: department_interfaces.py
+# 文件名: interfaces.py
 # 作者: wuhao
-# 日期: 2026_04_15
-# 描述: 部门仓储接口定义
+# 日期: 2026_05_26_20:53:15
+# 描述: 部门及国际化仓储接口定义
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Protocol
 
 from domain.system.entities import Department, UserDepartmentMapping
 
@@ -66,17 +67,6 @@ class IDepartmentRepository(ABC):
         pass
 
 
-#!/usr/bin/env python
-# 文件名: i18n_interfaces.py
-# 作者: wuhao
-# 日期: 2026_04_24
-# 描述: 国际化翻译领域接口
-
-from __future__ import annotations
-
-from typing import Protocol
-
-
 class I18nRepository(Protocol):
     """国际化翻译仓储接口"""
 
@@ -98,9 +88,6 @@ class I18nRepository(Protocol):
             locale: 语言代码
             namespace: 命名空间
             key: 翻译键
-
-        Returns:
-            Optional[str]: 翻译值,如果不存在返回 None
         """
         ...
 

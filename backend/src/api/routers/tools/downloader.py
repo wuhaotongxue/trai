@@ -6,11 +6,11 @@
 
 from __future__ import annotations
 
+from application.common.result import Result
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from src.application.common.result import Result
 
-from src.infrastructure.tools.video_downloader import BilibiliDownloader
+from infrastructure.tools.video_downloader import BilibiliDownloader
 
 router = APIRouter(prefix="/tools/video", tags=["工具"])
 

@@ -10,8 +10,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
-from application.usecases.base import UseCase
-
+from application.common.base_usecase import UseCase
 from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.database.database import get_session
 from infrastructure.repositories.session_repository import (

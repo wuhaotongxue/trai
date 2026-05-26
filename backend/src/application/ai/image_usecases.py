@@ -8,8 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from application.usecases.base import UseCase
-
+from application.common.base_usecase import UseCase
 from domain.ai.entities import (
     ImageGeneration,
     ImageSize,

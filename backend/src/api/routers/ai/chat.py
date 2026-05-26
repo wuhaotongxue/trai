@@ -10,7 +10,6 @@ import uuid
 from collections.abc import AsyncIterator
 from typing import Annotated, Any
 
-from application.usecases.chat import ChatInput, ChatUseCase
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from loguru import logger
@@ -18,6 +17,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import CurrentUser
+from application.chat.chat_usecases import ChatInput, ChatUseCase
 from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.database import get_db_session
 from infrastructure.services.chat_history_service import get_chat_history_service

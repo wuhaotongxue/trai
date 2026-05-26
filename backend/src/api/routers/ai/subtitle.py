@@ -51,6 +51,24 @@ class VideoToAudioResponse(BaseModel):
     object_key: str = Field(description="S3 对象键")
 
 
+class SubtitleRecordDTO(BaseModel):
+    """字幕生成记录 DTO"""
+
+    task_id: str
+    task_type: str = "subtitle"
+    file_name: str
+    target_lang: str
+    burn_mode: str
+    status: str
+    zh_srt_url: str | None
+    target_srt_url: str | None
+    output_video_url: str | None
+    vocal_url: str | None = None
+    bgm_url: str | None = None
+    error_message: str | None
+    created_at: str
+
+
 class SubtitleRouterUtils:
     """字幕路由工具类."""
 
@@ -71,6 +89,23 @@ class SubtitleRouterUtils:
         repo = SubtitleRecordRepository(session)
         return AudioSeparateUseCase(repo)
 
+    @staticmethod
+    def get_subtitle_usecase(session=Depends(get_db_session)) -> SubtitleGenerateUseCase:
+        """
+        获取字幕生成应用层用例实例.
+
+        参数:
+            session: 数据库会话.
+
+        返回值:
+            SubtitleGenerateUseCase: 实例.
+
+        异常:
+            无.
+        """
+        repo = SubtitleRecordRepository(session)
+        return SubtitleGenerateUseCase(repo)
+
 
 class SubtitleApiRouter:
     """字幕相关 API 路由类."""
@@ -81,7 +116,7 @@ class SubtitleApiRouter:
         response_model=SubtitleGenerationResponse,
         tags=["AI"],
         summary="视频人声分离",
-        description="上传音视频文件, 使用 Demucs 进行人声和伴奏分离.",
+        description="上传音视频文件, 使用 Demucs 进行人声 and 伴奏分离.",
     )
     async def separate_audio(
         request_http: Request,
@@ -178,11 +213,12 @@ class SubtitleApiRouter:
         异常:
             无.
         """
-        import uuid
         from pathlib import Path
 
+        import aiofiles
         from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
 
+        from application.ai.dubbing.lipsync_usecase import LipSyncUseCase
         from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
         task_id = str(uuid.uuid4())
@@ -204,568 +240,530 @@ class SubtitleApiRouter:
 
         # 异步保存文件
         tmp_dir = Path("/tmp/trai_workspace")
+        tmp_dir.mkdir(parents=True, exist_ok=True)
 
-    tmp_dir.mkdir(parents=True, exist_ok=True)
+        v_ext = Path(video_file.filename or "video.mp4").suffix
+        local_video_path = tmp_dir / f"{task_id}_video{v_ext}"
+        async with aiofiles.open(local_video_path, "wb") as f:
+            while chunk := await video_file.read(8192):
+                await f.write(chunk)
 
-    v_ext = Path(video_file.filename or "video.mp4").suffix
-    local_video_path = tmp_dir / f"{task_id}_video{v_ext}"
-    async with aiofiles.open(local_video_path, "wb") as f:
-        while chunk := await video_file.read(8192):
-            await f.write(chunk)
+        a_ext = Path(audio_file.filename or "audio.wav").suffix
+        local_audio_path = tmp_dir / f"{task_id}_audio{a_ext}"
+        async with aiofiles.open(local_audio_path, "wb") as f:
+            while chunk := await audio_file.read(8192):
+                await f.write(chunk)
 
-    a_ext = Path(audio_file.filename or "audio.wav").suffix
-    local_audio_path = tmp_dir / f"{task_id}_audio{a_ext}"
-    async with aiofiles.open(local_audio_path, "wb") as f:
-        while chunk := await audio_file.read(8192):
-            await f.write(chunk)
+        usecase = LipSyncUseCase(repo)
+        background_tasks.add_task(usecase.execute, record, local_video_path, local_audio_path)
 
-    usecase = LipSyncUseCase(repo)
-    background_tasks.add_task(usecase.execute, record, local_video_path, local_audio_path)
-
-    return SubtitleGenerationResponse(
-        task_id=task_id,
-        status="processing",
-        input_type="video",
-        target_lang="none",
-        burn_mode="none",
-        object_prefix="none",
-    )
-
-
-@router.post(
-    "/video/clone",
-    response_model=SubtitleGenerationResponse,
-    tags=["AI"],
-    summary="声音克隆",
-    description="上传音视频文件, 使用魔塔社区的 CosyVoice 进行零样本声音克隆.",
-)
-async def clone_voice(
-    request_http: Request,
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(..., description="上传视频或音频文件"),
-    target_lang: str = Form("英文", description="目标语言"),
-    source_lang: str = Form("auto", description="源语言"),
-    current_user: CurrentUserOptional = None,
-    session=Depends(get_db_session),
-) -> SubtitleGenerationResponse:
-    """
-    声音克隆接口.
-
-    参数:
-        request_http: Request, 请求对象.
-        background_tasks: BackgroundTasks, 后台任务对象.
-        file: UploadFile, 上传的文件.
-        target_lang: str, 目标语言.
-        source_lang: str, 源语言.
-        current_user: CurrentUserOptional, 当前用户.
-        session: 数据库会话.
-
-    返回值:
-        SubtitleGenerationResponse: 任务响应.
-
-    异常:
-        无.
-    """
-    import uuid
-    from pathlib import Path
-
-    import aiofiles
-    from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
-
-    from application.ai.dubbing.clone_usecase import CloneVoiceUseCase
-    from domain.ai.entities import SubtitleRecord, SubtitleTaskType
-
-    task_id = str(uuid.uuid4())
-    user_id_str = current_user.user_id if current_user else "anonymous"
-
-    record = SubtitleRecord(
-        id=task_id,
-        user_id=user_id_str,
-        task_type=SubtitleTaskType.CLONE,
-        status="pending",
-        input_type="video",
-        target_lang=target_lang,
-        burn_mode="none",
-        object_prefix="none",
-    )
-
-    repo = SubtitleRecordRepositoryImpl(session)
-    await repo.save(record)
-
-    # 异步保存文件
-    tmp_dir = Path("/tmp/trai_workspace")
-    tmp_dir.mkdir(parents=True, exist_ok=True)
-    ext = Path(file.filename or "test.mp4").suffix
-    local_file_path = tmp_dir / f"{task_id}{ext}"
-
-    async with aiofiles.open(local_file_path, "wb") as f:
-        while chunk := await file.read(8192):
-            await f.write(chunk)
-
-    usecase = CloneVoiceUseCase(repo)
-    background_tasks.add_task(usecase.execute, record, local_file_path)
-
-    return SubtitleGenerationResponse(
-        task_id=task_id,
-        status="processing",
-        input_type="video",
-        target_lang=target_lang,
-        burn_mode="none",
-        object_prefix="none",
-    )
-
-
-def get_subtitle_usecase(session=Depends(get_db_session)) -> SubtitleGenerateUseCase:
-    """
-    获取字幕生成应用层用例实例.
-
-    参数:
-        session: 数据库会话.
-
-    返回值:
-        SubtitleGenerateUseCase: 实例.
-
-    异常:
-        无.
-    """
-    repo = SubtitleRecordRepository(session)
-    return SubtitleGenerateUseCase(repo)
-
-
-@router.post(
-    "/subtitle/generate",
-    response_model=SubtitleGenerationResponse,
-    tags=["AI"],
-    summary="字幕生成",
-    description="上传音视频文件, 生成多语言字幕并支持烧录到视频中.",
-)
-async def generate_subtitle(
-    request_http: Request,
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(..., description="上传视频或音频文件"),
-    target_lang: str = Form("en", description="目标语言代码, 如 en"),
-    source_lang: str = Form("", description="源语言代码, 为空则自动识别"),
-    include_zh_subtitle: bool = Form(True, description="是否生成中文字幕(SRT)"),
-    include_target_subtitle: bool = Form(True, description="是否生成目标语言字幕(SRT)"),
-    burn_mode: Literal["none", "zh", "target", "bilingual"] = Form("bilingual", description="烧录模式"),
-    current_user: CurrentUserOptional = None,
-    usecase: SubtitleGenerateUseCase = Depends(get_subtitle_usecase),
-) -> SubtitleGenerationResponse:
-    """
-    视频/音频字幕生成接口.
-
-    参数:
-        request_http: Request, 请求对象.
-        background_tasks: BackgroundTasks, 后台任务对象.
-        file: UploadFile, 上传的文件.
-        target_lang: str, 目标语言代码.
-        source_lang: str, 源语言代码.
-        include_zh_subtitle: bool, 是否生成中文字幕.
-        include_target_subtitle: bool, 是否生成目标语言字幕.
-        burn_mode: Literal, 烧录模式.
-        current_user: CurrentUserOptional, 当前用户.
-        usecase: SubtitleGenerateUseCase, 用例实例.
-
-    返回值:
-        SubtitleGenerationResponse: 任务响应.
-
-    异常:
-        HTTPException: 处理异常.
-    """
-    user_id = current_user.get("user_id", "") if current_user else ""
-    user_name = current_user.get("display_name", "") if current_user else "anonymous"
-    tenant_id = current_user.get("tenant_id") if current_user else ""
-
-    task_id = str(uuid.uuid4())
-    filename = file.filename or "upload"
-    content_type = file.content_type or ""
-
-    try:
-        file_bytes = await file.read()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={"code": 500, "message": f"read file failed: {e}", "task_id": task_id},
+        return SubtitleGenerationResponse(
+            task_id=task_id,
+            status="processing",
+            input_type="video",
+            target_lang="none",
+            burn_mode="none",
+            object_prefix="none",
         )
 
-    # 提交到后台执行
-    background_tasks.add_task(
-        usecase.execute,
-        task_id=task_id,
-        user_id=user_id,
-        user_name=user_name,
-        tenant_id=tenant_id,
-        file_bytes=file_bytes,
-        filename=filename,
-        content_type=content_type,
-        target_lang=target_lang,
-        source_lang=source_lang,
-        include_zh_subtitle=include_zh_subtitle,
-        include_target_subtitle=include_target_subtitle,
-        burn_mode=burn_mode,
+    @staticmethod
+    @router.post(
+        "/video/clone",
+        response_model=SubtitleGenerationResponse,
+        tags=["AI"],
+        summary="声音克隆",
+        description="上传音视频文件, 使用魔塔社区的 CosyVoice 进行零样本声音克隆.",
     )
+    async def clone_voice(
+        request_http: Request,
+        background_tasks: BackgroundTasks,
+        file: UploadFile = File(..., description="上传视频或音频文件"),
+        target_lang: str = Form("英文", description="目标语言"),
+        source_lang: str = Form("auto", description="源语言"),
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> SubtitleGenerationResponse:
+        """
+        声音克隆接口.
 
-    safe_tenant_id = tenant_id or "default"
-    safe_user_id = user_id or "anonymous"
-    safe_task_id = task_id.replace("-", "")
-    object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+        参数:
+            request_http: Request, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务对象.
+            file: UploadFile, 上传的文件.
+            target_lang: str, 目标语言.
+            source_lang: str, 源语言.
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
 
-    input_is_video = SubtitleGenerateUseCase.is_video(filename, content_type)
-    input_type: Literal["video", "audio"] = "video" if input_is_video else "audio"
+        返回值:
+            SubtitleGenerationResponse: 任务响应.
 
-    return SubtitleGenerationResponse(
-        task_id=task_id,
-        status="processing",
-        input_type=input_type,
-        target_lang=target_lang,
-        burn_mode=burn_mode if input_is_video else "none",
-        zh_srt_url=None,
-        target_srt_url=None,
-        output_video_url=None,
-        object_prefix=object_prefix,
-    )
+        异常:
+            无.
+        """
+        from pathlib import Path
 
+        import aiofiles
+        from infrastructure.persistence.repositories.subtitle_repository import SubtitleRecordRepositoryImpl
 
-class SubtitleRecordDTO(BaseModel):
-    task_id: str
-    task_type: str = "subtitle"
-    file_name: str
-    target_lang: str
-    burn_mode: str
-    status: str
-    zh_srt_url: str | None
-    target_srt_url: str | None
-    output_video_url: str | None
-    vocal_url: str | None = None
-    bgm_url: str | None = None
-    error_message: str | None
-    created_at: str
+        from application.ai.dubbing.clone_usecase import CloneVoiceUseCase
+        from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
+        task_id = str(uuid.uuid4())
+        user_id_str = current_user.user_id if current_user else "anonymous"
 
-@router.post(
-    "/subtitle/list",
-    response_model=list[SubtitleRecordDTO],
-    tags=["AI"],
-    summary="查询历史记录",
-    description="获取当前用户的 AI 影音工作室处理记录列表.",
-)
-def list_subtitles(
-    current_user: CurrentUserOptional = None,
-    session=Depends(get_db_session),
-) -> list[SubtitleRecordDTO]:
-    """
-    获取用户的字幕生成历史记录.
-
-    参数:
-        current_user: CurrentUserOptional, 当前用户.
-        session: 数据库会话.
-
-    返回值:
-        list[SubtitleRecordDTO]: 记录列表.
-
-    异常:
-        无.
-    """
-    from sqlalchemy import desc, select
-
-    from infrastructure.database.subtitle_record_model import SubtitleRecordModel
-
-    user_id = current_user.get("user_id", "") if current_user else ""
-    safe_user_id = user_id or "anonymous"
-
-    records = (
-        session.execute(
-            select(SubtitleRecordModel)
-            .where(SubtitleRecordModel.user_id == safe_user_id)
-            .order_by(desc(SubtitleRecordModel.created_at))
-            .limit(50)
+        record = SubtitleRecord(
+            id=task_id,
+            user_id=user_id_str,
+            task_type=SubtitleTaskType.CLONE if hasattr(SubtitleTaskType, "CLONE") else "clone",
+            status="pending",
+            input_type="video",
+            target_lang=target_lang,
+            burn_mode="none",
+            object_prefix="none",
         )
-        .scalars()
-        .all()
-    )
 
-    out = []
-    for r in records:
-        out.append(
-            SubtitleRecordDTO(
-                task_id=r.task_id,
-                task_type=r.task_type,
-                file_name=r.file_name,
-                target_lang=r.target_lang,
-                burn_mode=r.burn_mode,
-                status=r.status,
-                zh_srt_url=r.zh_srt_url,
-                target_srt_url=r.target_srt_url,
-                output_video_url=r.output_video_url,
-                vocal_url=r.vocal_url,
-                bgm_url=r.bgm_url,
-                error_message=r.error_message,
-                created_at=r.created_at.strftime("%Y-%m-%d %H:%M:%S") if r.created_at else "",
+        repo = SubtitleRecordRepositoryImpl(session)
+        await repo.save(record)
+
+        # 异步保存文件
+        tmp_dir = Path("/tmp/trai_workspace")
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        ext = Path(file.filename or "test.mp4").suffix
+        local_file_path = tmp_dir / f"{task_id}{ext}"
+
+        async with aiofiles.open(local_file_path, "wb") as f:
+            while chunk := await file.read(8192):
+                await f.write(chunk)
+
+        usecase = CloneVoiceUseCase(repo)
+        background_tasks.add_task(usecase.execute, record, local_file_path)
+
+        return SubtitleGenerationResponse(
+            task_id=task_id,
+            status="processing",
+            input_type="video",
+            target_lang=target_lang,
+            burn_mode="none",
+            object_prefix="none",
+        )
+
+    @staticmethod
+    @router.post(
+        "/subtitle/generate",
+        response_model=SubtitleGenerationResponse,
+        tags=["AI"],
+        summary="字幕生成",
+        description="上传音视频文件, 生成多语言字幕并支持烧录到视频中.",
+    )
+    async def generate_subtitle(
+        request_http: Request,
+        background_tasks: BackgroundTasks,
+        file: UploadFile = File(..., description="上传视频或音频文件"),
+        target_lang: str = Form("en", description="目标语言代码, 如 en"),
+        source_lang: str = Form("", description="源语言代码, 为空则自动识别"),
+        include_zh_subtitle: bool = Form(True, description="是否生成中文字幕(SRT)"),
+        include_target_subtitle: bool = Form(True, description="是否生成目标语言字幕(SRT)"),
+        burn_mode: Literal["none", "zh", "target", "bilingual"] = Form("bilingual", description="烧录模式"),
+        current_user: CurrentUserOptional = None,
+        usecase: SubtitleGenerateUseCase = Depends(SubtitleRouterUtils.get_subtitle_usecase),
+    ) -> SubtitleGenerationResponse:
+        """
+        视频/音频字幕生成接口.
+
+        参数:
+            request_http: Request, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务对象.
+            file: UploadFile, 上传的文件.
+            target_lang: str, 目标语言代码.
+            source_lang: str, 源语言代码.
+            include_zh_subtitle: bool, 是否生成中文字幕.
+            include_target_subtitle: bool, 是否生成目标语言字幕.
+            burn_mode: Literal, 烧录模式.
+            current_user: CurrentUserOptional, 当前用户.
+            usecase: SubtitleGenerateUseCase, 用例实例.
+
+        返回值:
+            SubtitleGenerationResponse: 任务响应.
+
+        异常:
+            HTTPException: 处理异常.
+        """
+        user_id = current_user.get("user_id", "") if current_user else ""
+        user_name = current_user.get("display_name", "") if current_user else "anonymous"
+        tenant_id = current_user.get("tenant_id") if current_user else ""
+
+        task_id = str(uuid.uuid4())
+        filename = file.filename or "upload"
+        content_type = file.content_type or ""
+
+        try:
+            file_bytes = await file.read()
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": 500, "message": f"read file failed: {e}", "task_id": task_id},
             )
+
+        # 提交到后台执行
+        background_tasks.add_task(
+            usecase.execute,
+            task_id=task_id,
+            user_id=user_id,
+            user_name=user_name,
+            tenant_id=tenant_id,
+            file_bytes=file_bytes,
+            filename=filename,
+            content_type=content_type,
+            target_lang=target_lang,
+            source_lang=source_lang,
+            include_zh_subtitle=include_zh_subtitle,
+            include_target_subtitle=include_target_subtitle,
+            burn_mode=burn_mode,
         )
-    return out
 
+        safe_tenant_id = tenant_id or "default"
+        safe_user_id = user_id or "anonymous"
+        safe_task_id = task_id.replace("-", "")
+        object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
 
-@router.post(
-    "/subtitle/delete",
-    tags=["AI"],
-    summary="删除字幕记录",
-    description="删除指定的字幕处理记录，如果任务正在处理中会先尝试停止任务.",
-)
-def delete_subtitle(
-    task_id: str = Form(..., description="任务 ID"),
-    current_user: CurrentUserOptional = None,
-    session=Depends(get_db_session),
-) -> dict:
-    """
-    删除字幕记录.
+        input_is_video = SubtitleGenerateUseCase.is_video(filename, content_type)
+        input_type: Literal["video", "audio"] = "video" if input_is_video else "audio"
 
-    参数:
-        task_id: str, 任务 ID.
-        current_user: CurrentUserOptional, 当前用户.
-        session: 数据库会话.
+        return SubtitleGenerationResponse(
+            task_id=task_id,
+            status="processing",
+            input_type=input_type,
+            target_lang=target_lang,
+            burn_mode=burn_mode if input_is_video else "none",
+            zh_srt_url=None,
+            target_srt_url=None,
+            output_video_url=None,
+            object_prefix=object_prefix,
+        )
 
-    返回值:
-        dict: 删除结果.
-
-    异常:
-        HTTPException: 记录不存在或无权删除.
-    """
-    from infrastructure.database.subtitle_record_model import SubtitleRecordModel
-
-    user_id = current_user.get("user_id", "") if current_user else ""
-    safe_user_id = user_id or "anonymous"
-
-    record = (
-        session.query(SubtitleRecordModel)
-        .filter(SubtitleRecordModel.task_id == task_id, SubtitleRecordModel.user_id == safe_user_id)
-        .first()
+    @staticmethod
+    @router.post(
+        "/subtitle/list",
+        response_model=list[SubtitleRecordDTO],
+        tags=["AI"],
+        summary="查询历史记录",
+        description="获取当前用户的 AI 影音工作室处理记录列表.",
     )
+    def list_subtitles(
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> list[SubtitleRecordDTO]:
+        """
+        获取用户的字幕生成历史记录.
 
-    if not record:
-        raise HTTPException(status_code=404, detail="Record not found")
+        参数:
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
 
-    # 如果任务正在处理中，尝试取消
-    if record.status in ["processing", "pending"]:
-        cancel_event = _active_cancel_events.get(task_id)
-        if cancel_event:
-            cancel_event.set()
-            # 从注册表中移除
-            del _active_cancel_events[task_id]
+        返回值:
+            list[SubtitleRecordDTO]: 记录列表.
 
-    # 如果是视频转音频任务，需要删除 S3 文件
-    if record.target_lang == "audio_extract" and record.zh_srt_url:
-        try:
-            from urllib.parse import urlparse
+        异常:
+            无.
+        """
+        from sqlalchemy import desc, select
 
-            from infrastructure.storage.s3_storage import S3StorageService
+        from infrastructure.database.subtitle_record_model import SubtitleRecordModel
 
-            storage = S3StorageService()
-            audio_url = record.zh_srt_url
-            parsed = urlparse(audio_url)
-            object_key = parsed.path.lstrip("/")
-            if object_key:
-                storage.delete_file(object_key)
-        except Exception as e:
-            logger.warning(f"删除音频文件失败：{e}")
+        user_id = current_user.get("user_id", "") if current_user else ""
+        safe_user_id = user_id or "anonymous"
 
-    session.delete(record)
-    session.commit()
-
-    return {"code": 200, "msg": "Deleted successfully", "data": None}
-
-
-@router.post(
-    "/video/to_audio",
-    response_model=VideoToAudioResponse,
-    tags=["AI"],
-    summary="视频转音频",
-    description="上传视频文件，提取并返回音频文件.",
-)
-async def video_to_audio(
-    request_http: Request,
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(..., description="上传视频文件"),
-    current_user: CurrentUserOptional = None,
-    session=Depends(get_db_session),
-) -> VideoToAudioResponse:
-    """
-    视频转音频接口 - 从视频中提取音频.
-
-    参数:
-        request_http: Request, 请求对象.
-        background_tasks: BackgroundTasks, 后台任务对象.
-        file: UploadFile, 上传的视频文件.
-        current_user: CurrentUserOptional, 当前用户.
-        session: 数据库会话.
-
-    返回值:
-        VideoToAudioResponse: 任务响应.
-
-    异常:
-        HTTPException: 处理异常.
-    """
-    import asyncio
-    import subprocess
-    import tempfile
-    from pathlib import Path
-
-    from domain.ai.entities import SubtitleRecord
-    from infrastructure.repositories.subtitle_record_repository import SubtitleRecordRepository
-    from infrastructure.storage.s3_storage import S3StorageService
-
-    user_id = current_user.get("user_id", "") if current_user else ""
-    _user_name = current_user.get("display_name", "") if current_user else "anonymous"
-    tenant_id = current_user.get("tenant_id") if current_user else ""
-
-    task_id = str(uuid.uuid4())
-    filename = file.filename or "video.mp4"
-    _content_type = file.content_type or ""
-
-    # 验证是否为视频文件
-    ext = Path(filename).suffix.lower()
-    if ext not in [".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"]:
-        raise HTTPException(
-            status_code=400,
-            detail={"code": 400, "message": "仅支持视频文件"},
+        records = (
+            session.execute(
+                select(SubtitleRecordModel)
+                .where(SubtitleRecordModel.user_id == safe_user_id)
+                .order_by(desc(SubtitleRecordModel.created_at))
+                .limit(50)
+            )
+            .scalars()
+            .all()
         )
 
-    try:
-        file_bytes = await file.read()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={"code": 500, "message": f"read file failed: {e}", "task_id": task_id},
-        )
+        out = []
+        for r in records:
+            out.append(
+                SubtitleRecordDTO(
+                    task_id=r.task_id,
+                    task_type=r.task_type,
+                    file_name=r.file_name,
+                    target_lang=r.target_lang,
+                    burn_mode=r.burn_mode,
+                    status=r.status,
+                    zh_srt_url=r.zh_srt_url,
+                    target_srt_url=r.target_srt_url,
+                    output_video_url=r.output_video_url,
+                    vocal_url=r.vocal_url,
+                    bgm_url=r.bgm_url,
+                    error_message=r.error_message,
+                    created_at=r.created_at.strftime("%Y-%m-%d %H:%M:%S") if r.created_at else "",
+                )
+            )
+        return out
 
-    safe_tenant_id = tenant_id or "default"
-    safe_user_id = user_id or "anonymous"
-    safe_task_id = task_id.replace("-", "")
-    object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
-    audio_object_key = f"{object_prefix}/audio.wav"
-
-    # 创建数据库记录
-    record = SubtitleRecord(
-        id="",
-        task_id=task_id,
-        user_id=safe_user_id,
-        file_name=filename,
-        target_lang="audio_extract",
-        burn_mode="none",
-        status="processing",
-        task_type="to_audio",
+    @staticmethod
+    @router.post(
+        "/subtitle/delete",
+        tags=["AI"],
+        summary="删除字幕记录",
+        description="删除指定的字幕处理记录，如果任务正在处理中会先尝试停止任务.",
     )
-    repo = SubtitleRecordRepository(session)
-    record = repo.save(record)
+    def delete_subtitle(
+        task_id: str = Form(..., description="任务 ID"),
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> dict:
+        """
+        删除字幕记录.
 
-    # 注册取消事件
-    cancel_event = asyncio.Event()
-    _active_cancel_events[task_id] = cancel_event
+        参数:
+            task_id: str, 任务 ID.
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
 
-    async def extract_audio_task():
-        tmp_dir = None
-        try:
-            # 保存视频到临时文件
-            tmp_dir = Path(tempfile.mkdtemp(prefix="video_"))
-            video_path = tmp_dir / f"input{ext}"
-            audio_path = tmp_dir / "audio.wav"
+        返回值:
+            dict: 删除结果.
 
-            video_path.write_bytes(file_bytes)
+        异常:
+            HTTPException: 记录不存在或无权删除.
+        """
+        from infrastructure.database.subtitle_record_model import SubtitleRecordModel
 
-            # 检查是否被取消
-            if cancel_event.is_set():
-                raise asyncio.CancelledError("任务被用户取消")
+        user_id = current_user.get("user_id", "") if current_user else ""
+        safe_user_id = user_id or "anonymous"
 
-            # 使用 ffmpeg 提取音频
-            cmd = [
-                "ffmpeg",
-                "-y",
-                "-i",
-                str(video_path),
-                "-vn",
-                "-ac",
-                "2",
-                "-ar",
-                "44100",
-                "-acodec",
-                "pcm_s16le",
-                str(audio_path),
-            ]
-            try:
-                subprocess.run(cmd, check=True, capture_output=True, text=True)
-            except subprocess.CalledProcessError as e:
-                stderr = (e.stderr or "").strip()
-                raise RuntimeError(f"ffmpeg failed: {stderr[:1000]}") from e
+        record = (
+            session.query(SubtitleRecordModel)
+            .filter(SubtitleRecordModel.task_id == task_id, SubtitleRecordModel.user_id == safe_user_id)
+            .first()
+        )
 
-            # 检查是否被取消
-            if cancel_event.is_set():
-                raise asyncio.CancelledError("任务被用户取消")
+        if not record:
+            raise HTTPException(status_code=404, detail="Record not found")
 
-            # 上传音频到 S3
-            storage = S3StorageService()
-            audio_bytes = audio_path.read_bytes()
-            storage.upload_bytes(audio_bytes, audio_object_key, content_type="audio/wav")
-            audio_url = storage.get_long_term_url(audio_object_key, expires_days=30)
-
-            # 更新记录
-            record.status = "completed"
-            record.zh_srt_url = audio_url
-
-            # 提取 SRT 字幕
-            try:
-                logger.info(f"开始提取视频字幕 (SRT): task_id={task_id}")
-                from infrastructure.ai.audio.local_asr_client import LocalASRClient
-
-                asr_client = LocalASRClient()
-                srt_content = await asr_client.transcribe(audio_path)
-                if srt_content and srt_content.strip():
-                    srt_object_key = f"{object_prefix}/subtitle.srt"
-                    storage.upload_bytes(
-                        srt_content.encode("utf-8"),
-                        srt_object_key,
-                        content_type="text/plain",
-                    )
-                    record.target_srt_url = storage.get_long_term_url(srt_object_key, expires_days=30)
-                    logger.info(f"字幕提取成功: task_id={task_id}")
-            except Exception as srt_err:
-                logger.warning(f"字幕提取失败 (非致命): task_id={task_id}, err={srt_err}")
-
-        except asyncio.CancelledError:
-            logger.info(f"视频转音频任务被取消：task_id={task_id}")
-            if record:
-                record.status = "cancelled"
-                record.error_message = "任务被用户取消"
-        except Exception as e:
-            logger.error(f"视频转音频失败：{e}")
-            if record:
-                record.status = "failed"
-                record.error_message = str(e)
-        finally:
-            # 清理临时文件
-            if tmp_dir and tmp_dir.exists():
-                try:
-                    for p in tmp_dir.glob("**/*"):
-                        if p.is_file():
-                            p.unlink(missing_ok=True)
-                    tmp_dir.rmdir()
-                except Exception:
-                    pass
-
-            # 从注册表中移除取消事件
-            if task_id in _active_cancel_events:
+        # 如果任务正在处理中，尝试取消
+        if record.status in ["processing", "pending"]:
+            cancel_event = _active_cancel_events.get(task_id)
+            if cancel_event:
+                cancel_event.set()
+                # 从注册表中移除
                 del _active_cancel_events[task_id]
 
-            # 保存结果
-            repo.save(record)
+        # 如果是视频转音频任务，需要删除 S3 文件
+        if record.target_lang == "audio_extract" and record.zh_srt_url:
+            try:
+                from urllib.parse import urlparse
 
-    background_tasks.add_task(extract_audio_task)
+                from infrastructure.storage.s3_storage import S3StorageService
 
-    return VideoToAudioResponse(
-        task_id=task_id,
-        status="processing",
-        audio_url=None,
-        object_key=audio_object_key,
+                storage = S3StorageService()
+                audio_url = record.zh_srt_url
+                parsed = urlparse(audio_url)
+                object_key = parsed.path.lstrip("/")
+                if object_key:
+                    storage.delete_file(object_key)
+            except Exception as e:
+                logger.warning(f"删除音频文件失败：{e}")
+
+        session.delete(record)
+        session.commit()
+
+        return {"code": 200, "msg": "Deleted successfully", "data": None}
+
+    @staticmethod
+    @router.post(
+        "/video/to_audio",
+        response_model=VideoToAudioResponse,
+        tags=["AI"],
+        summary="视频转音频",
+        description="上传视频文件，提取并返回音频文件.",
     )
+    async def video_to_audio(
+        request_http: Request,
+        background_tasks: BackgroundTasks,
+        file: UploadFile = File(..., description="上传视频文件"),
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> VideoToAudioResponse:
+        """
+        视频转音频接口 - 从视频中提取音频.
+
+        参数:
+            request_http: Request, 请求对象.
+            background_tasks: BackgroundTasks, 后台任务对象.
+            file: UploadFile, 上传的视频文件.
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
+
+        返回值:
+            VideoToAudioResponse: 任务响应.
+
+        异常:
+            HTTPException: 处理异常.
+        """
+        import subprocess
+        import tempfile
+        from pathlib import Path
+
+        from domain.ai.entities import SubtitleRecord
+        from infrastructure.repositories.subtitle_record_repository import SubtitleRecordRepository
+        from infrastructure.storage.s3_storage import S3StorageService
+
+        user_id = current_user.get("user_id", "") if current_user else ""
+        tenant_id = current_user.get("tenant_id") if current_user else ""
+
+        task_id = str(uuid.uuid4())
+        filename = file.filename or "video.mp4"
+
+        # 验证是否为视频文件
+        ext = Path(filename).suffix.lower()
+        if ext not in [".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"]:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": 400, "message": "仅支持视频文件"},
+            )
+
+        try:
+            file_bytes = await file.read()
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": 500, "message": f"read file failed: {e}", "task_id": task_id},
+            )
+
+        safe_tenant_id = tenant_id or "default"
+        safe_user_id = user_id or "anonymous"
+        safe_task_id = task_id.replace("-", "")
+        object_prefix = f"private/tenants/{safe_tenant_id}/ai_subtitles/{safe_user_id}/{safe_task_id}"
+        audio_object_key = f"{object_prefix}/audio.wav"
+
+        # 创建数据库记录
+        record = SubtitleRecord(
+            id="",
+            task_id=task_id,
+            user_id=safe_user_id,
+            file_name=filename,
+            target_lang="audio_extract",
+            burn_mode="none",
+            status="processing",
+            task_type="to_audio",
+        )
+        repo = SubtitleRecordRepository(session)
+        record = repo.save(record)
+
+        # 注册取消事件
+        cancel_event = asyncio.Event()
+        _active_cancel_events[task_id] = cancel_event
+
+        async def extract_audio_task():
+            tmp_dir = None
+            try:
+                # 保存视频到临时文件
+                tmp_dir = Path(tempfile.mkdtemp(prefix="video_"))
+                video_path = tmp_dir / f"input{ext}"
+                audio_path = tmp_dir / "audio.wav"
+
+                video_path.write_bytes(file_bytes)
+
+                # 检查是否被取消
+                if cancel_event.is_set():
+                    raise asyncio.CancelledError("任务被用户取消")
+
+                # 使用 ffmpeg 提取音频
+                cmd = [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    str(video_path),
+                    "-vn",
+                    "-ac",
+                    "2",
+                    "-ar",
+                    "44100",
+                    "-acodec",
+                    "pcm_s16le",
+                    str(audio_path),
+                ]
+                try:
+                    subprocess.run(cmd, check=True, capture_output=True, text=True)
+                except subprocess.CalledProcessError as e:
+                    stderr = (e.stderr or "").strip()
+                    raise RuntimeError(f"ffmpeg failed: {stderr[:1000]}") from e
+
+                # 检查是否被取消
+                if cancel_event.is_set():
+                    raise asyncio.CancelledError("任务被用户取消")
+
+                # 上传音频到 S3
+                storage = S3StorageService()
+                audio_bytes = audio_path.read_bytes()
+                storage.upload_bytes(audio_bytes, audio_object_key, content_type="audio/wav")
+                audio_url = storage.get_long_term_url(audio_object_key, expires_days=30)
+
+                # 更新记录
+                record.status = "completed"
+                record.zh_srt_url = audio_url
+
+                # 提取 SRT 字幕
+                try:
+                    logger.info(f"开始提取视频字幕 (SRT): task_id={task_id}")
+                    from infrastructure.ai.audio.local_asr_client import LocalASRClient
+
+                    asr_client = LocalASRClient()
+                    srt_content = await asr_client.transcribe(audio_path)
+                    if srt_content and srt_content.strip():
+                        srt_object_key = f"{object_prefix}/subtitle.srt"
+                        storage.upload_bytes(
+                            srt_content.encode("utf-8"),
+                            srt_object_key,
+                            content_type="text/plain",
+                        )
+                        record.target_srt_url = storage.get_long_term_url(srt_object_key, expires_days=30)
+                        logger.info(f"字幕提取成功: task_id={task_id}")
+                except Exception as srt_err:
+                    logger.warning(f"字幕提取失败 (非致命): task_id={task_id}, err={srt_err}")
+
+            except asyncio.CancelledError:
+                logger.info(f"视频转音频任务被取消：task_id={task_id}")
+                if record:
+                    record.status = "cancelled"
+                    record.error_message = "任务被用户取消"
+            except Exception as e:
+                logger.error(f"视频转音频失败：{e}")
+                if record:
+                    record.status = "failed"
+                    record.error_message = str(e)
+            finally:
+                # 清理临时文件
+                if tmp_dir and tmp_dir.exists():
+                    try:
+                        for p in tmp_dir.glob("**/*"):
+                            if p.is_file():
+                                p.unlink(missing_ok=True)
+                        tmp_dir.rmdir()
+                    except Exception:
+                        pass
+
+                # 从注册表中移除取消事件
+                if task_id in _active_cancel_events:
+                    del _active_cancel_events[task_id]
+
+                # 保存结果
+                repo.save(record)
+
+        background_tasks.add_task(extract_audio_task)
+
+        return VideoToAudioResponse(
+            task_id=task_id,
+            status="processing",
+            audio_url=None,
+            object_key=audio_object_key,
+        )
 
 
 __all__ = ["router"]

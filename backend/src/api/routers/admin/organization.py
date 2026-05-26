@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.deps import require_admin
-from application.usecases.organization_sync import SyncOrganizationUseCase
+from application.system.sync_usecases import SyncOrganizationUseCase
 from core.logger import get_logger
 from infrastructure.database.database import get_db_session
 from infrastructure.repositories.department_repository import DepartmentRepository

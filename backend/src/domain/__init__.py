@@ -1,7 +1,7 @@
 # 领域层
-from domain.interfaces import IMessageRepository, ISessionRepository, IUserRepository
-
+from domain.chat.interfaces import IMessageRepository, ISessionRepository
 from domain.user.entities import User, UserRole, UserStatus
+from domain.user.interfaces import IUserRepository
 
 __all__ = [
     "User",

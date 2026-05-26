@@ -15,7 +15,7 @@ from typing import Any
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from application.usecases.organization_sync import SyncOrganizationUseCase
+from application.system.sync_usecases import SyncOrganizationUseCase
 from core.logger import get_logger
 from infrastructure.database import get_database
 from infrastructure.repositories.department_repository import DepartmentRepository

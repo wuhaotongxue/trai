@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from application.usecases.base import UseCase
+from application.common.base_usecase import UseCase
 
 
 @dataclass

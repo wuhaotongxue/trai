@@ -10,9 +10,9 @@ import os
 import uuid
 from dataclasses import dataclass
 
-from application.usecases.base import UseCase
 from fastapi import UploadFile
 
+from application.common.base_usecase import UseCase
 from domain.media.entities import FileType, UploadTask
 from infrastructure.storage.s3_storage import S3StorageService
 
