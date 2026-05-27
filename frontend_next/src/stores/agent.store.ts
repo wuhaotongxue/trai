@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 import { create } from "zustand";
-import { api, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
+import { api, type AgentTypeValue, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
 import { globalToast } from "@/components/toast/toast";
 import { toastMessages } from "@/components/toast/use_toast";
 
@@ -122,6 +122,12 @@ interface AgentState {
   generatedImageUrl: string | null;
   /** 图片生成错误信息 */
   imageGenerateError: string | null;
+  /** 图片生成进度(0-100) */
+  imageGenerateProgress: number;
+  /** 图片生成阶段 */
+  imageGenerateStage: "idle" | "generating" | "done" | "error";
+  /** 图片生成进度定时器 */
+  imageGenerateTimer: number | null;
   /** 图片廊 - 历史生成的图片 */
   imageGallery: Array<{
     id: string;
@@ -169,7 +175,7 @@ interface AgentState {
   /** 开始会话 */
   startSession: () => Promise<void>;
   /** 发送消息 */
-  sendMessage: (content: string, images?: string[]) => Promise<void>;
+  sendMessage: (content: string, images?: string[], options?: { agentType?: AgentTypeValue | null }) => Promise<void>;
   /** 中止流 */
   abortStream: () => void;
   /** 清空消息 */
@@ -258,6 +264,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   isGeneratingImage: false,
   generatedImageUrl: null,
   imageGenerateError: null,
+  imageGenerateProgress: 0,
+  imageGenerateStage: "idle",
+  imageGenerateTimer: null,
   imageGallery: [],
   isGeneratingVideo: false,
   generatedVideoUrl: null,
@@ -312,7 +321,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
-  sendMessage: async (content: string, images?: string[]) => {
+  sendMessage: async (content: string, images?: string[], options?: { agentType?: AgentTypeValue | null }) => {
     let { sessionId } = get();
 
     // Optimistic UI update: Immediately add user message and placeholder assistant message
@@ -370,15 +379,31 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ streamClient: { abort: abortFn }, activeToolCall: null });
 
     try {
+      const agentType = options?.agentType ?? null;
+      const agentId =
+        agentType === "chat"
+          ? "agent-default"
+          : agentType === "code_assistant"
+            ? "agent-001"
+            : agentType === "image_generator"
+              ? "agent-002"
+              : null;
+
       const res = await fetch(
-        `${apiBase}/sessions/${sessionId}/messages/stream`,
+        `${apiBase}/agent/chat`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ content, role: "user", images }),
+          body: JSON.stringify({
+            session_id: sessionId,
+            message: content,
+            role: "user",
+            stream: true,
+            agent_id: agentId || undefined,
+          }),
         }
       );
 
@@ -464,6 +489,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                   m.id === assistantMsgId ? { ...m, sources: parsed.sources } : m
                 ),
               }));
+            } else if (parsed.type === "error") {
+              const errMsg = typeof parsed.content === "string" && parsed.content ? parsed.content : "服务返回错误";
+              set({ error: errMsg });
             }
           } catch {
             // ignore parse errors
@@ -625,11 +653,57 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   generateImage: async (prompt: string, model?: string, width?: number, height?: number) => {
-    set({ isGeneratingImage: true, imageGenerateError: null, generatedImageUrl: null });
+    const current = get().generatedImageUrl;
+    if (current && current.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(current);
+      } catch {
+      }
+    }
+    const existingTimer = get().imageGenerateTimer;
+    if (existingTimer) {
+      try {
+        window.clearInterval(existingTimer);
+      } catch {
+      }
+    }
+
+    const timer =
+      typeof window !== "undefined"
+        ? window.setInterval(() => {
+            set((state) => {
+              if (state.imageGenerateStage !== "generating") return state;
+              const next = Math.min(92, state.imageGenerateProgress + Math.max(1, Math.round(Math.random() * 4)));
+              return { ...state, imageGenerateProgress: next };
+            });
+          }, 450)
+        : null;
+
+    set({
+      isGeneratingImage: true,
+      imageGenerateError: null,
+      generatedImageUrl: null,
+      imageGenerateProgress: 8,
+      imageGenerateStage: "generating",
+      imageGenerateTimer: timer,
+    });
     try {
       const res = await api.agent.generateImage({ prompt, model, width, height, steps: 4, seed: -1 });
       if (res.image_url) {
-        set({ generatedImageUrl: res.image_url, isGeneratingImage: false });
+        if (timer) {
+          try {
+            window.clearInterval(timer);
+          } catch {
+          }
+        }
+        set({
+          generatedImageUrl: res.image_url,
+          isGeneratingImage: false,
+          imageGenerateProgress: 100,
+          imageGenerateStage: "done",
+          imageGenerateTimer: null,
+          imageGenerateError: res.error || null,
+        });
         // 将生成的图片添加到图片廊
         get().addToImageGallery(res.image_url, prompt);
       } else if (res.image_base64) {
@@ -639,13 +713,49 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           bytes[i] = byteString.charCodeAt(i);
         }
         const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
-        set({ generatedImageUrl: blobUrl, isGeneratingImage: false });
+        if (timer) {
+          try {
+            window.clearInterval(timer);
+          } catch {
+          }
+        }
+        set({
+          generatedImageUrl: blobUrl,
+          isGeneratingImage: false,
+          imageGenerateProgress: 100,
+          imageGenerateStage: "done",
+          imageGenerateTimer: null,
+          imageGenerateError: res.error || null,
+        });
+        get().addToImageGallery(blobUrl, prompt);
       } else {
-        set({ imageGenerateError: res.error || "图片生成失败", isGeneratingImage: false });
+        if (timer) {
+          try {
+            window.clearInterval(timer);
+          } catch {
+          }
+        }
+        set({
+          imageGenerateError: res.error || "图片生成失败",
+          isGeneratingImage: false,
+          imageGenerateStage: "error",
+          imageGenerateTimer: null,
+        });
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "图片生成失败";
-      set({ imageGenerateError: msg, isGeneratingImage: false });
+      if (timer) {
+        try {
+          window.clearInterval(timer);
+        } catch {
+        }
+      }
+      set({
+        imageGenerateError: msg,
+        isGeneratingImage: false,
+        imageGenerateStage: "error",
+        imageGenerateTimer: null,
+      });
     }
   },
 
@@ -657,7 +767,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       } catch {
       }
     }
-    set({ generatedImageUrl: null, imageGenerateError: null });
+    const existingTimer = get().imageGenerateTimer;
+    if (existingTimer) {
+      try {
+        window.clearInterval(existingTimer);
+      } catch {
+      }
+    }
+    set({
+      generatedImageUrl: null,
+      imageGenerateError: null,
+      imageGenerateProgress: 0,
+      imageGenerateStage: "idle",
+      imageGenerateTimer: null,
+    });
   },
 
   editImage: async (sourceImage: string, editPrompt: string, sourceImage2?: string | null) => {

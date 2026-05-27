@@ -86,7 +86,7 @@ export function DigitalHumanPanel() {
   };
 
   return (
-    <div className="flex h-full w-full bg-slate-50 dark:bg-[#0d1220] overflow-hidden">
+    <div className="flex w-full overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur shadow-xl shadow-slate-200/40 dark:shadow-none min-h-[560px]">
       {/* 左侧: 数字人视频展示区 */}
       <div className="flex-1 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-black relative">
         {currentVideo ? (
@@ -99,7 +99,7 @@ export function DigitalHumanPanel() {
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+          <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Bot className="w-24 h-24 mb-4 opacity-20" />
             <p>等待数字人接入...</p>
           </div>
@@ -114,7 +114,7 @@ export function DigitalHumanPanel() {
       </div>
 
       {/* 右侧: 聊天记录区 */}
-      <div className="w-96 flex flex-col bg-white dark:bg-slate-900">
+      <div className="w-[420px] flex flex-col bg-white/70 dark:bg-slate-950/30">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 font-semibold flex items-center gap-2">
           <Bot className="w-5 h-5 text-teal-500" />
           数字人对话
@@ -129,10 +129,10 @@ export function DigitalHumanPanel() {
             )}
             {messages.map(msg => (
               <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-100 text-blue-600" : "bg-teal-100 text-teal-600"}`}>
+                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500"}`}>
                   {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                 </div>
-                <div className={`max-w-[75%] p-3 rounded-2xl text-sm ${msg.role === "user" ? "bg-blue-500 text-white rounded-tr-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm"}`}>
+                <div className={`max-w-[75%] p-3 rounded-2xl text-sm shadow-sm ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"}`}>
                   {msg.content}
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function DigitalHumanPanel() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/20">
           <div className="flex items-center gap-2">
             <Input 
               value={input}
@@ -152,14 +152,14 @@ export function DigitalHumanPanel() {
                 }
               }}
               placeholder="输入对话内容..."
-              className="flex-1 rounded-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+              className="flex-1 rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
               disabled={isProcessing}
             />
             <Button 
               onClick={handleSend}
               disabled={!input.trim() || isProcessing}
               size="icon"
-              className="rounded-full bg-teal-500 hover:bg-teal-600 text-white shrink-0"
+              className="rounded-2xl bg-teal-600 hover:bg-teal-700 text-white shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>

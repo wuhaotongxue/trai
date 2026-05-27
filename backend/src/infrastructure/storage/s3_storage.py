@@ -12,7 +12,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import ClientError
 from loguru import logger
-
+dierd
 from core.exceptions import ExternalServiceError
 
 
@@ -121,6 +121,103 @@ class S3StorageService:
         if self._public_domain:
             return f"{self._public_domain.rstrip('/')}/{object_key.lstrip('/')}"
         return f"{self._endpoint.rstrip('/')}/{self._bucket}/{object_key.lstrip('/')}"
+
+    def upload_bytes(self, data: bytes, object_key: str, content_type: str = "application/octet-stream") -> str:
+        """
+        上传字节数据到 S3 指定位置
+
+        参数:
+            data (bytes): 文件字节数据
+            object_key (str): S3 存储路径(键名)
+            content_type (str): HTTP Content-Type
+        返回值:
+            str: 成功后的文件访问 URL
+        异常:
+            ExternalServiceError: S3 通信或权限异常时抛出
+        """
+        logger.info(f"S3 上传 bytes | 键: {object_key} | 大小: {len(data)} bytes")
+        try:
+            self._client.put_object(
+                Bucket=self._bucket,
+                Key=object_key,
+                Body=data,
+                ContentType=content_type
+            )
+            return self.get_file_url(object_key)
+        except ClientError as e:
+            logger.error(f"S3 上传 bytes 失败 | 错误: {str(e)}")
+            raise ExternalServiceError(
+                message=f"S3 上传 bytes 失败: {str(e)}",
+                details={"error": str(e)},
+            )
+
+    def get_long_term_url(self, object_key: str, expires_days: int = 30) -> str:
+        """
+        获取长效 Presigned URL
+
+        参数:
+            object_key (str): S3 存储路径
+            expires_days (int): 过期天数
+        返回值:
+            str: 预签名 URL
+        """
+        try:
+            url = self._client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self._bucket, "Key": object_key},
+                ExpiresIn=expires_days * 24 * 3600,
+            )
+            if self._presign_public_base:
+                from urllib.parse import urlparse
+
+                parsed = urlparse(url)
+                return f"{self._presign_public_base.rstrip('/')}{parsed.path}?{parsed.query}"
+            return url
+        except ClientError as e:
+            logger.error(f"S3 签发长效 URL 失败 | 错误: {str(e)}")
+            return self.get_file_url(object_key)
+
+    def get_presigned_url(self, object_key: str, expires_in: int = 300) -> str:
+        """
+        获取短效 Presigned URL
+
+        参数:
+            object_key (str): S3 存储路径
+            expires_in (int): 过期秒数
+        返回值:
+            str: 预签名 URL
+        """
+        try:
+            url = self._client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self._bucket, "Key": object_key},
+                ExpiresIn=expires_in,
+            )
+            if self._presign_public_base:
+                from urllib.parse import urlparse
+
+                parsed = urlparse(url)
+                return f"{self._presign_public_base.rstrip('/')}{parsed.path}?{parsed.query}"
+            return url
+        except ClientError as e:
+            logger.error(f"S3 签发短效 URL 失败 | 错误: {str(e)}")
+            return self.get_file_url(object_key)
+
+    def delete_file(self, object_key: str) -> bool:
+        """
+        删除 S3 文件
+
+        参数:
+            object_key (str): S3 存储路径
+        返回值:
+            bool: 是否成功
+        """
+        try:
+            self._client.delete_object(Bucket=self._bucket, Key=object_key)
+            return True
+        except ClientError as e:
+            logger.error(f"S3 删除文件失败 | 错误: {str(e)}")
+            return False
 
 
 def get_s3_storage() -> S3StorageService:

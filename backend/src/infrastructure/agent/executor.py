@@ -301,6 +301,7 @@ class AgentExecutor:
                     "content": event.content,
                     "tool_call_id": event.tool_call_id,
                     "tool_name": event.tool_name,
+                    "usage": event.usage,
                 }
 
                 if event.type == "token":

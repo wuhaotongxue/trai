@@ -85,7 +85,7 @@ export function SubtitlePanel() {
   const toolCategories = [
     { id: "subtitle", label: "字幕生成", icon: Captions, color: "text-pink-500", desc: "自动识别并生成多语种字幕" },
     { id: "separate", label: "人声分离", icon: Music, color: "text-blue-500", desc: "分离背景音乐与人声" },
-    { id: "clone", label: "声音克隆", icon: Languages, color: "text-purple-500", desc: "克隆音色并翻译内容" },
+    { id: "clone", label: "声音克隆", icon: Languages, color: "text-indigo-500", desc: "克隆音色并翻译内容" },
     { id: "lipsync", label: "口型同步", icon: MonitorPlay, color: "text-orange-500", desc: "根据音频同步视频口型" },
     { id: "to_audio", label: "视频转音频", icon: Type, color: "text-teal-500", desc: "提取视频中的音频轨道" },
   ];
@@ -304,7 +304,7 @@ export function SubtitlePanel() {
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-background relative">
+    <div className="flex w-full overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur shadow-xl shadow-slate-200/40 dark:shadow-none relative min-h-[640px]">
       {/* 左侧配置栏 */}
       <div className="w-80 flex-shrink-0 border-r border-border flex flex-col bg-card relative z-10">
         <div className="p-4 border-b bg-slate-50/50 dark:bg-slate-900/50">

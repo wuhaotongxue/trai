@@ -306,6 +306,10 @@ async def agent_chat(
                             yield f"data: {json.dumps({'event': 'reasoning', 'data': event.get('content', '')})}\n\n"
                         elif event.get("type") == "tool_execution_result":
                             yield f"data: {json.dumps({'event': 'tool_call_end', 'data': {'arguments': event.get('content', ''), 'tool_call_id': event.get('tool_call_id', ''), 'tool_name': event.get('tool_name', '')}})}\n\n"
+                        elif event.get("type") == "done":
+                            usage = event.get("usage", {}) if isinstance(event.get("usage", {}), dict) else {}
+                            if usage:
+                                yield f"data: {json.dumps({'event': 'usage', 'data': usage})}\n\n"
                         elif event.get("type") == "tool_execution_start":
                             # 前端目前不处理，但可以发送
                             pass

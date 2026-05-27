@@ -116,6 +116,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
             )
             image_url = result.get("image_url")
             image_base64 = result.get("image_base64")
+            warning_error = result.get("error")
             result_object_key = result.get("object_key", "")
             result_public_url = result.get("public_url", "")
 
@@ -136,6 +137,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
                 image_url=image_url,
                 image_base64=image_base64,
                 status="completed",
+                error=warning_error,
                 object_key=result_object_key,
                 public_url=result_public_url,
             )

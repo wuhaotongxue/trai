@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Download, Loader2, Video, CheckCircle2, AlertCircle, ExternalLink } from "lucide-react";
+import { Search, Download, Loader2, Video, CheckCircle2, AlertCircle, ExternalLink, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import { request } from "@/lib/api_client";
 
@@ -40,7 +40,7 @@ export function VideoDownloaderPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-[#0d1220] p-6 overflow-y-auto">
+    <div className="flex flex-col">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

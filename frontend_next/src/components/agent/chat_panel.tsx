@@ -3,6 +3,7 @@
  * 作者: wuhao
  * 日期: 2026-04-23
  * 描述: Agent 对话主面板 - 现代化三栏式布局，集成创作、工具与 AI 前沿功能
+ *       (全新 Neo-Brutalist 设计风格)
  */
 
 "use client";
@@ -17,7 +18,7 @@ import {
   ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, 
   ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, 
   ArrowDownToLine, Loader2, Captions, UserRound, FileText, Clock, 
-  Download, Search, LayoutGrid, Type, Globe, ChevronDown 
+  Download, Search, LayoutGrid, Type, Globe, ChevronDown, AlertCircle 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -41,30 +42,33 @@ type TabId = "chat" | "image" | "video" | "music" | "audio" | "image_edit" | "su
 export function ChatPanel() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [showHistory, setShowHistory] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
   const [input, setInput] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [selectedAgentType, setSelectedAgentType] = useState<AgentTypeValue>("chat");
   const [expandedThinking, setExpandedThinking] = useState<Record<string, boolean>>({});
+  const [imageLinkCopied, setImageLinkCopied] = useState(false);
+  const [videoLinkCopied, setVideoLinkCopied] = useState(false);
+  const [musicLinkCopied, setMusicLinkCopied] = useState(false);
 
   const {
     messages, isStreaming, sendMessage, loadSessions,
     sessions, sessionId: currentSessionId, startSession, switchSession, deleteSession,
-    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage,
-    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo,
-    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic,
-    isEditingImage, editImage, editedImageUrl, cancelEditImage,
+    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage, imageGenerateError, imageGenerateProgress, imageGenerateStage,
+    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError,
+    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError,
+    isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError,
   } = useAgentStore();
 
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍');
   const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海');
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐');
   const [editPrompt, setEditPrompt] = useState('将背景替换为城市夜景');
+  
+  // 新增：支持两张图片上传 (原图 + 参考图/遮罩)
   const [editingImagePreview, setEditingImagePreview] = useState<string | null>(null);
+  const [editingImagePreview2, setEditingImagePreview2] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<React.ElementRef<typeof ScrollArea>>(null);
-  const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { loadSessions(); }, []);
 
@@ -78,58 +82,161 @@ export function ChatPanel() {
     setExpandedThinking(prev => ({ ...prev, [msgId]: !prev[msgId] }));
   };
 
+  const imagePromptPresets: Array<{ label: string; value: string }> = [
+    { label: "可爱猫咪", value: "一只可爱的猫在花园里玩耍, 柔和自然光, 高清细节" },
+    { label: "城市夜景", value: "城市夜景, 霓虹灯与雨后反光, 电影感, 高对比, 广角" },
+    { label: "国风水墨", value: "国风水墨山水, 留白, 远山雾气, 高级质感" },
+    { label: "产品海报", value: "极简产品海报, 纯色背景, 强光影, 商业摄影, 高级质感" },
+    { label: "科幻机甲", value: "科幻机甲战士, 金属细节, 体积光, 史诗场景, 超清" },
+  ];
+
+  const musicPromptPresets: Array<{ label: string; value: string }> = [
+    { label: "轻快爵士", value: "轻快的爵士乐, 鼓点清晰, 轻盈钢琴, 适合工作背景" },
+    { label: "Lo-fi", value: "Lo-fi chill, 温暖磁带质感, 轻微噪声, 慢节奏" },
+    { label: "史诗配乐", value: "史诗电影配乐, 管弦乐, 大气, 渐进式高潮" },
+    { label: "电子舞曲", value: "电子舞曲, 强节奏, 合成器主旋律, 俱乐部氛围" },
+    { label: "国风旋律", value: "国风旋律, 古筝与笛子, 清雅, 现代混音" },
+  ];
+
+  const handleCopyImageLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setImageLinkCopied(true);
+      window.setTimeout(() => setImageLinkCopied(false), 1200);
+    } catch {
+      setImageLinkCopied(false);
+    }
+  };
+
+  const handleCopyVideoLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setVideoLinkCopied(true);
+      window.setTimeout(() => setVideoLinkCopied(false), 1200);
+    } catch {
+      setVideoLinkCopied(false);
+    }
+  };
+
+  const handleCopyMusicLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setMusicLinkCopied(true);
+      window.setTimeout(() => setMusicLinkCopied(false), 1200);
+    } catch {
+      setMusicLinkCopied(false);
+    }
+  };
+
+  const handleGenerateImage = async () => {
+    const p = imagePrompt.trim();
+    if (!p) return;
+    setImageLinkCopied(false);
+    await generateImage(p);
+  };
+
+  const handleGenerateVideo = async () => {
+    const p = videoPrompt.trim();
+    if (!p) return;
+    setVideoLinkCopied(false);
+    await generateVideo(p);
+  };
+
+  const handleGenerateMusic = async () => {
+    const p = musicPrompt.trim();
+    if (!p) return;
+    setMusicLinkCopied(false);
+    await generateMusic(p);
+  };
+
+  const handlePickEditImage = async (file: File | null, isSecond: boolean = false) => {
+    if (!file) return;
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      if (isSecond) setEditingImagePreview2(null);
+      else setEditingImagePreview(null);
+      return;
+    }
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("read failed"));
+        reader.readAsDataURL(file);
+      });
+      if (isSecond) setEditingImagePreview2(dataUrl);
+      else setEditingImagePreview(dataUrl);
+    } catch {
+      if (isSecond) setEditingImagePreview2(null);
+      else setEditingImagePreview(null);
+    }
+  };
+
+  const handleStartEditImage = async () => {
+    if (!editingImagePreview || !editPrompt.trim()) return;
+    await editImage(editingImagePreview, editPrompt.trim(), editingImagePreview2 || undefined);
+  };
+
   const handleSend = async () => {
     if (!input.trim() && images.length === 0) return;
     if (isStreaming) return;
     const content = input.trim();
     setInput("");
     setImages([]);
-    await sendMessage(content, images);
+    await sendMessage(content, images, { agentType: selectedAgentType });
   };
 
   const renderCodeBlock = (className: string, children: React.ReactNode) => {
     const language = /language-(\w+)/.exec(className || "")?.[1] || "text";
     return (
-      <div className="relative group/code rounded-xl overflow-hidden my-4 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between px-4 py-2 bg-slate-100 dark:bg-slate-900 text-slate-500 text-xs">
+      <div className="relative group/code overflow-hidden my-4 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+        <div className="flex items-center justify-between px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider border-b-2 border-slate-900 dark:border-white">
           <span>{language}</span>
-          <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-blue-500 transition-colors">
-            <Copy className="h-3.5 w-3.5" />
+          <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-indigo-600 transition-colors">
+            <Copy className="h-4 w-4" />
           </button>
         </div>
-        <SyntaxHighlighter style={vscDarkPlus as any} language={language} className="!m-0 text-sm !bg-slate-950">
+        <SyntaxHighlighter style={vscDarkPlus as any} language={language} className="!m-0 text-sm !bg-slate-950 !rounded-none">
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       </div>
     );
   };
 
+  // Neo-Brutalist styles
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
+  const brutalShadow = "shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff]";
+  const brutalShadowSm = "shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]";
+  const brutalBtnBase = `font-bold uppercase tracking-wide transition-transform active:translate-x-[4px] active:translate-y-[4px] active:shadow-none ${brutalBorder} ${brutalShadowSm}`;
+
   return (
-    <div className="flex h-full relative bg-white dark:bg-[#0d1220]">
+    <div className="flex h-full relative bg-[#fdfdfc] dark:bg-slate-950 text-slate-900 dark:text-slate-100" style={{ backgroundImage: "radial-gradient(#cbd5e1 1px, transparent 1px)", backgroundSize: "20px 20px" }}>
       {/* 历史对话侧边栏 */}
       <AnimatePresence>
         {showHistory && (
           <motion.div 
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 260, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            className="border-r border-slate-100 dark:border-slate-800 flex flex-col overflow-hidden"
+            initial={{ width: 0, opacity: 0, x: -20 }}
+            animate={{ width: 280, opacity: 1, x: 0 }}
+            exit={{ width: 0, opacity: 0, x: -20 }}
+            className={`flex flex-col overflow-hidden bg-white dark:bg-slate-900 ${brutalBorder} border-l-0 border-t-0 border-b-0 relative z-30`}
           >
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span className="font-bold text-sm">历史对话</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startSession()}><Plus className="h-4 w-4" /></Button>
+            <div className={`p-4 ${brutalBorder} border-l-0 border-t-0 border-r-0 flex items-center justify-between bg-amber-200 dark:bg-amber-500 text-slate-900`}>
+              <span className="font-black text-lg uppercase tracking-tight">历史会话</span>
+              <button onClick={() => startSession()} className={`h-8 w-8 bg-white flex items-center justify-center ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}><Plus className="h-4 w-4" /></button>
             </div>
-            <ScrollArea className="flex-1 p-2">
+            <ScrollArea className="flex-1 p-4 bg-slate-50 dark:bg-slate-900">
               {sessions.map(s => (
                 <div 
                   key={s.session_id}
                   onClick={() => switchSession(s.session_id)}
                   className={cn(
-                    "p-3 rounded-xl mb-1 cursor-pointer transition-all text-sm truncate",
-                    currentSessionId === s.session_id ? "bg-blue-500/10 text-blue-600 font-medium" : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-500"
+                    `p-3 mb-3 cursor-pointer transition-all text-sm font-bold truncate ${brutalBorder}`,
+                    currentSessionId === s.session_id 
+                      ? `bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white ${brutalShadowSm}` 
+                      : "bg-white dark:bg-slate-800 hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
-                  {s.title || "新对话"}
+                  {s.title || "新会话"}
                 </div>
               ))}
             </ScrollArea>
@@ -140,34 +247,34 @@ export function ChatPanel() {
       {/* 主工作区 */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* 顶部导航 */}
-        <div className="flex items-center gap-3 p-3 border-b border-slate-100 dark:border-slate-800 backdrop-blur-md sticky top-0 z-20">
-          <Button variant="ghost" size="icon" onClick={() => setShowHistory(!showHistory)} className="rounded-xl">
+        <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20`}>
+          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-emerald-300 dark:bg-emerald-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
             {showHistory ? <PanelLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-          </Button>
+          </button>
           
-          <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-
-          <ScrollArea className="flex-1" orientation="horizontal">
-            <div className="flex items-center gap-2">
+          <ScrollArea className="flex-1">
+            <div className="flex items-center gap-3 py-1">
               {[
-                { id: "chat", label: "对话", icon: Bot, color: "text-blue-500" },
-                { id: "image", label: "绘图", icon: ImageIcon, color: "text-emerald-500" },
-                { id: "video", label: "视频", icon: Video, color: "text-orange-500" },
-                { id: "music", label: "音乐", icon: Music, color: "text-indigo-500" },
-                { id: "image_edit", label: "编辑", icon: Pencil, color: "text-purple-500" },
-                { id: "subtitle", label: "字幕", icon: Captions, color: "text-pink-500" },
-                { id: "downloader", label: "下载", icon: Download, color: "text-sky-500" },
-                { id: "digital_human", label: "数字人", icon: UserRound, color: "text-teal-500" },
+                { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
+                { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-emerald-300 dark:bg-emerald-600" },
+                { id: "video", label: "视频生成", icon: Video, bg: "bg-orange-300 dark:bg-orange-600" },
+                { id: "music", label: "音乐创作", icon: Music, bg: "bg-indigo-300 dark:bg-indigo-600" },
+                { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-rose-300 dark:bg-rose-600" },
+                { id: "subtitle", label: "智能字幕", icon: Captions, bg: "bg-amber-300 dark:bg-amber-600" },
+                { id: "downloader", label: "视频下载", icon: Download, bg: "bg-sky-300 dark:bg-sky-600" },
+                { id: "digital_human", label: "数字人", icon: UserRound, bg: "bg-teal-300 dark:bg-teal-600" },
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabId)}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shrink-0",
-                    activeTab === tab.id ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    `flex items-center gap-2 px-4 py-2 text-sm font-black transition-all shrink-0 ${brutalBorder}`,
+                    activeTab === tab.id 
+                      ? `${tab.bg} text-slate-900 dark:text-white ${brutalShadowSm} translate-x-[-2px] translate-y-[-2px]` 
+                      : "bg-white dark:bg-slate-800 hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
-                  <tab.icon className={cn("h-4 w-4", tab.color)} />
+                  <tab.icon className="h-4 w-4" />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -180,36 +287,48 @@ export function ChatPanel() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "circOut" }}
               className="flex-1 flex flex-col overflow-hidden"
             >
-              {activeTab === "chat" ? (
+              { activeTab === "chat" ? (
                 <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-                    <AgentTypeSelector value={selectedAgentType} onChange={setSelectedAgentType} compact />
+                  <div className={`p-4 bg-indigo-100 dark:bg-indigo-900 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex justify-center`}>
+                    <div className="w-full max-w-4xl">
+                      <AgentTypeSelector value={selectedAgentType} onChange={setSelectedAgentType} compact />
+                    </div>
                   </div>
                   <ScrollArea className="flex-1">
                     <div className="max-w-4xl mx-auto p-6 space-y-8">
-                      {messages.map(msg => (
+                      {messages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 opacity-70">
+                          <div className={`w-24 h-24 bg-amber-200 dark:bg-amber-600 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                            <MessageSquare className="w-12 h-12 text-slate-900 dark:text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-black uppercase tracking-widest mb-2">新的会话已就绪</h3>
+                            <p className="font-bold text-sm">选择上方的 Agent 类型，输入你的想法，随时开始创造！</p>
+                          </div>
+                        </div>
+                      ) : messages.map(msg => (
                         <div key={msg.id} className={cn("flex gap-4", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
-                          <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 text-slate-500")}>
-                            {msg.role === "user" ? <UserRound className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
+                          <div className={cn(`w-12 h-12 flex items-center justify-center shrink-0 ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-amber-300 dark:bg-amber-500 text-slate-900" : "bg-white dark:bg-slate-800")}>
+                            {msg.role === "user" ? <UserRound className="h-6 w-6 font-black" /> : <Bot className="h-6 w-6 font-black" />}
                           </div>
                           <div className={cn("flex flex-col gap-2 max-w-[80%]", msg.role === "user" ? "items-end" : "items-start")}>
-                            <div className={cn("px-4 py-3 rounded-2xl text-[15px] shadow-sm", msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800")}>
+                            <div className={cn(`px-5 py-4 text-[15px] ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-amber-200 dark:bg-amber-400 text-slate-900" : "bg-white dark:bg-slate-800")}>
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: ({ className, children }) => renderCodeBlock(className || "", children) }}>
                                 {msg.content}
                               </ReactMarkdown>
                             </div>
                             {msg.thinking && (
                               <div className="w-full">
-                                <button onClick={() => toggleThinking(msg.id)} className="flex items-center gap-1.5 text-xs text-slate-400">
+                                <button onClick={() => toggleThinking(msg.id)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 bg-white dark:bg-slate-900 px-3 py-1 border-2 border-slate-900 dark:border-slate-500 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#64748b]">
                                   <Sparkles className="h-3 w-3" /> 思考过程 {expandedThinking[msg.id] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                                 </button>
-                                {expandedThinking[msg.id] && <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-xs text-slate-500 italic border border-slate-100 dark:border-slate-800">{msg.thinking}</div>}
+                                {expandedThinking[msg.id] && <div className={`mt-3 p-4 bg-slate-100 dark:bg-slate-900 font-mono text-sm ${brutalBorder} shadow-[4px_4px_0px_0px_#94a3b8]`}>{msg.thinking}</div>}
                               </div>
                             )}
                           </div>
@@ -219,56 +338,466 @@ export function ChatPanel() {
                     </div>
                   </ScrollArea>
                   {/* 输入框 */}
-                  <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-                    <div className="max-w-4xl mx-auto flex items-end gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className={`p-6 bg-white dark:bg-slate-900 ${brutalBorder} border-b-0 border-l-0 border-r-0`}>
+                    <div className={`max-w-4xl mx-auto flex items-end gap-3 bg-white dark:bg-slate-800 p-2 ${brutalBorder} ${brutalShadow}`}>
                       <textarea 
                         value={input} 
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                        placeholder="想聊点什么呢..."
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm p-2 resize-none max-h-32"
+                        placeholder="输入你的消息，按 Enter 发送，Shift + Enter 换行..."
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-base font-medium p-3 resize-none max-h-40 outline-none"
                       />
-                      <Button onClick={handleSend} disabled={isStreaming || !input.trim()} size="icon" className="rounded-xl h-10 w-10 bg-blue-600 hover:bg-blue-700">
-                        {isStreaming ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowUp className="h-5 w-5" />}
-                      </Button>
+                      <button onClick={handleSend} disabled={isStreaming || !input.trim()} className={`h-12 w-14 flex items-center justify-center bg-blue-500 text-white ${brutalBtnBase} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                        {isStreaming ? <Loader2 className="h-6 w-6 animate-spin" /> : <ArrowUp className="h-6 w-6" />}
+                      </button>
                     </div>
                   </div>
                 </div>
               ) : activeTab === "subtitle" ? (
-                <SubtitlePanel />
+                <ScrollArea className="flex-1 p-8">
+                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">智能字幕提取</h2>
+                    <SubtitlePanel />
+                  </div>
+                </ScrollArea>
               ) : activeTab === "digital_human" ? (
-                <DigitalHumanPanel />
+                <ScrollArea className="flex-1 p-8">
+                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">数字人合成</h2>
+                    <DigitalHumanPanel />
+                  </div>
+                </ScrollArea>
               ) : activeTab === "downloader" ? (
-                <VideoDownloaderPanel />
+                <ScrollArea className="flex-1 p-8">
+                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">全网视频下载</h2>
+                    <VideoDownloaderPanel />
+                  </div>
+                </ScrollArea>
               ) : (
                 <ScrollArea className="flex-1 p-8">
-                  <div className="max-w-5xl mx-auto">
+                  <div className="max-w-6xl mx-auto">
                     {activeTab === "image" && (
-                      <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                          <h2 className="text-2xl font-bold">AI 创意绘图</h2>
-                          <textarea value={imagePrompt} onChange={e => setImagePrompt(e.target.value)} className="w-full h-32 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-none focus:ring-2 focus:ring-emerald-500/20" />
-                          <Button onClick={() => generateImage(imagePrompt)} disabled={isGeneratingImage} className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
-                            {isGeneratingImage ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Sparkles className="h-5 w-5 mr-2" />} 开始生成
-                          </Button>
+                      <div className="grid lg:grid-cols-2 gap-12 items-start">
+                        <div className={`bg-emerald-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                            <h2 className="text-4xl font-black uppercase">创意绘图</h2>
+                            <div className="text-sm font-bold mt-2">将你的想象力转化为视觉杰作。</div>
+                          </div>
+
+                          <div className="space-y-6">
+                            <div className="relative">
+                              <textarea
+                                value={imagePrompt}
+                                onChange={(e) => setImagePrompt(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                                    e.preventDefault();
+                                    void handleGenerateImage();
+                                  }
+                                }}
+                                aria-label="图片描述"
+                                title="图片描述"
+                                placeholder="例如: 一只可爱的猫在花园里玩耍, 电影级光影..."
+                                className={`w-full h-40 p-5 bg-white dark:bg-slate-800 text-lg font-medium resize-none outline-none ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
+                              />
+                              <div className="absolute bottom-4 right-5 text-xs font-bold">
+                                {imagePrompt.trim().length}/2000
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-3">
+                              {imagePromptPresets.map((p) => (
+                                <button
+                                  key={p.label}
+                                  type="button"
+                                  onClick={() => setImagePrompt(p.value)}
+                                  className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            <div className="space-y-4 pt-4">
+                              <button
+                                type="button"
+                                onClick={handleGenerateImage}
+                                disabled={isGeneratingImage || !imagePrompt.trim()}
+                                className={`w-full h-16 bg-emerald-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                              >
+                                {isGeneratingImage ? (
+                                  <><Loader2 className="h-6 w-6 animate-spin" /> 正在生成</>
+                                ) : (
+                                  <><Sparkles className="h-6 w-6" /> 开始生成</>
+                                )}
+                              </button>
+
+                              <AnimatePresence>
+                                {imageGenerateStage === "generating" && (
+                                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-white dark:bg-slate-800 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                    <div className="flex justify-between font-bold text-sm uppercase mb-2">
+                                      <span>生成进度...</span>
+                                      <span>{Math.max(0, Math.min(100, imageGenerateProgress))}%</span>
+                                    </div>
+                                    <div className={`h-4 w-full bg-slate-200 dark:bg-slate-700 ${brutalBorder} p-0.5`}>
+                                      <motion.div
+                                        className="h-full bg-emerald-500 border-r-2 border-slate-900"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${Math.max(0, Math.min(100, imageGenerateProgress))}%` }}
+                                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                                      />
+                                    </div>
+                                  </motion.div>
+                                )}
+                                {imageGenerateError && (
+                                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                    <AlertCircle className="h-6 w-6 shrink-0" />
+                                    <span className="break-words">{imageGenerateError}</span>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-4 flex items-center justify-center min-h-[400px] border border-dashed border-slate-200 dark:border-slate-800">
-                          {generatedImageUrl ? <img src={generatedImageUrl} className="rounded-2xl shadow-2xl max-w-full h-auto" /> : <ImageIcon className="h-12 w-12 text-slate-200" />}
+
+                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <AnimatePresence mode="wait">
+                            {generatedImageUrl ? (
+                              <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
+                                <img src={generatedImageUrl} className={`w-full h-full object-contain ${brutalBorder}`} alt="Generated" />
+                                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                  <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-emerald-300 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                    {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                  </button>
+                                  <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
+                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                  </a>
+                                </div>
+                              </motion.div>
+                            ) : isGeneratingImage ? (
+                              <motion.div key="image-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
+                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在处理...</div>
+                              </motion.div>
+                            ) : (
+                              <motion.div key="image-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
+                                <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                  <ImageIcon className="h-16 w-16 text-slate-900 dark:text-white" />
+                                </div>
+                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                <p className="font-bold text-sm">在左侧输入你的创意描述</p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
                     )}
-                    {/* 其他标签页同理优化... */}
+
                     {activeTab === "video" && (
-                      <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                          <h2 className="text-2xl font-bold">AI 视频合成</h2>
-                          <textarea value={videoPrompt} onChange={e => setVideoPrompt(e.target.value)} className="w-full h-32 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-none focus:ring-2 focus:ring-orange-500/20" />
-                          <Button onClick={() => generateVideo(videoPrompt)} disabled={isGeneratingVideo} className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl">
-                            {isGeneratingVideo ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Video className="h-5 w-5 mr-2" />} 开始合成
-                          </Button>
+                      <div className="grid lg:grid-cols-2 gap-12 items-start">
+                        <div className={`bg-orange-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                            <h2 className="text-4xl font-black uppercase">视频生成</h2>
+                            <div className="text-sm font-bold mt-2">让你的想象力动起来。</div>
+                          </div>
+
+                          <div className="space-y-6">
+                            <textarea
+                              value={videoPrompt}
+                              onChange={(e) => setVideoPrompt(e.target.value)}
+                              onKeyDown={(e) => {
+                                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                                  e.preventDefault();
+                                  void handleGenerateVideo();
+                                }
+                              }}
+                              aria-label="视频描述"
+                              title="视频描述"
+                              placeholder="例如: 波涛汹涌的大海, 电影感打光..."
+                              className={`w-full h-40 p-5 bg-white dark:bg-slate-800 text-lg font-medium resize-none outline-none ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
+                            />
+
+                            <button
+                              type="button"
+                              onClick={handleGenerateVideo}
+                              disabled={isGeneratingVideo || !videoPrompt.trim()}
+                              className={`w-full h-16 bg-orange-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                            >
+                              {isGeneratingVideo ? (
+                                <><Loader2 className="h-6 w-6 animate-spin" /> 正在合成</>
+                              ) : (
+                                <><Video className="h-6 w-6" /> 开始合成视频</>
+                              )}
+                            </button>
+
+                            <AnimatePresence>
+                              {videoGenerateError && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                  <AlertCircle className="h-6 w-6 shrink-0" />
+                                  <span className="break-words">{videoGenerateError}</span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-4 flex items-center justify-center min-h-[400px] border border-dashed border-slate-200 dark:border-slate-800">
-                          {generatedVideoUrl ? <video src={generatedVideoUrl} controls className="rounded-2xl shadow-2xl max-w-full" /> : <Video className="h-12 w-12 text-slate-200" />}
+
+                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <AnimatePresence mode="wait">
+                            {generatedVideoUrl ? (
+                              <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
+                                <video src={generatedVideoUrl} controls className={`w-full h-full object-contain ${brutalBorder}`} />
+                                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                  <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-orange-300 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                    {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                  </button>
+                                  <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
+                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                  </a>
+                                </div>
+                              </motion.div>
+                            ) : isGeneratingVideo ? (
+                              <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
+                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在渲染帧...</div>
+                              </motion.div>
+                            ) : (
+                              <motion.div key="video-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
+                                <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                  <Video className="h-16 w-16 text-slate-900 dark:text-white" />
+                                </div>
+                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                <p className="font-bold text-sm">在左侧输入你的视频分镜描述</p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === "music" && (
+                      <div className="grid lg:grid-cols-2 gap-12 items-start">
+                        <div className={`bg-indigo-200 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                            <h2 className="text-4xl font-black uppercase">音乐创作</h2>
+                            <div className="text-sm font-bold mt-2">从文字到旋律的奇妙转化。</div>
+                          </div>
+
+                          <div className="space-y-6">
+                            <div className="relative">
+                              <textarea
+                                value={musicPrompt}
+                                onChange={(e) => setMusicPrompt(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                                    e.preventDefault();
+                                    void handleGenerateMusic();
+                                  }
+                                }}
+                                aria-label="音乐描述"
+                                title="音乐描述"
+                                placeholder="例如: Lo-fi chill, 温暖的磁带质感..."
+                                className={`w-full h-40 p-5 bg-white dark:bg-slate-800 text-lg font-medium resize-none outline-none ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
+                              />
+                              <div className="absolute bottom-4 right-5 text-xs font-bold">
+                                {musicPrompt.trim().length}/2000
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-3">
+                              {musicPromptPresets.map((p) => (
+                                <button
+                                  key={p.label}
+                                  type="button"
+                                  onClick={() => setMusicPrompt(p.value)}
+                                  className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={handleGenerateMusic}
+                              disabled={isGeneratingMusic || !musicPrompt.trim()}
+                              className={`w-full h-16 bg-indigo-500 text-white text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                            >
+                              {isGeneratingMusic ? (
+                                <><Loader2 className="h-6 w-6 animate-spin" /> 正在谱曲</>
+                              ) : (
+                                <><Music className="h-6 w-6" /> 开始创作音乐</>
+                              )}
+                            </button>
+
+                            <AnimatePresence>
+                              {musicGenerateError && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                  <AlertCircle className="h-6 w-6 shrink-0" />
+                                  <span className="break-words">{musicGenerateError}</span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+
+                        <div className={`bg-white dark:bg-slate-900 p-8 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <AnimatePresence mode="wait">
+                            {generatedMusicUrl ? (
+                              <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full group flex flex-col gap-6">
+                                <div className="border-b-4 border-slate-900 dark:border-white pb-4 flex items-center justify-between">
+                                  <h3 className="text-2xl font-black uppercase">生成完毕</h3>
+                                </div>
+                                <audio src={generatedMusicUrl} controls className={`w-full ${brutalBorder}`} />
+                                <div className="flex gap-4 mt-4">
+                                  <button onClick={clearGeneratedMusic} className={`flex-1 py-3 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                  <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-indigo-300 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
+                                    {musicLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} 复制链接
+                                  </button>
+                                  <a href={generatedMusicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                                    <button className={`w-full py-3 bg-emerald-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                  </a>
+                                </div>
+                              </motion.div>
+                            ) : isGeneratingMusic ? (
+                              <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
+                                <div className={`w-full h-24 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在合成音频...</div>
+                              </motion.div>
+                            ) : (
+                              <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
+                                <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                  <Music className="h-16 w-16 text-slate-900 dark:text-white" />
+                                </div>
+                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                <p className="font-bold text-sm">在左侧输入你的音乐灵感</p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === "image_edit" && (
+                      <div className="grid lg:grid-cols-2 gap-12 items-start">
+                        <div className={`bg-rose-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                            <h2 className="text-4xl font-black uppercase">图像编辑</h2>
+                            <div className="text-sm font-bold mt-2">上传原图与遮罩，通过文字指令重新绘制图像。</div>
+                          </div>
+
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                <div className="font-bold uppercase text-sm">源图片 (SOURCE)</div>
+                                {editingImagePreview ? (
+                                  <div className="relative w-full aspect-square">
+                                    <img src={editingImagePreview} className={`w-full h-full object-cover ${brutalBorder}`} alt="Source" />
+                                    <button onClick={() => setEditingImagePreview(null)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
+                                  </div>
+                                ) : (
+                                  <label className={`w-full aspect-square flex flex-col items-center justify-center cursor-pointer bg-slate-100 dark:bg-slate-900 ${brutalBorder} hover:bg-slate-200 transition-colors`}>
+                                    <Upload className="h-8 w-8 mb-2" />
+                                    <span className="text-xs font-bold uppercase">点击上传</span>
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => void handlePickEditImage(e.target.files?.[0] || null, false)} />
+                                  </label>
+                                )}
+                              </div>
+                              <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                <div className="font-bold uppercase text-sm">参考图/遮罩 (OPTIONAL)</div>
+                                {editingImagePreview2 ? (
+                                  <div className="relative w-full aspect-square">
+                                    <img src={editingImagePreview2} className={`w-full h-full object-cover ${brutalBorder}`} alt="Ref" />
+                                    <button onClick={() => setEditingImagePreview2(null)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
+                                  </div>
+                                ) : (
+                                  <label className={`w-full aspect-square flex flex-col items-center justify-center cursor-pointer bg-slate-100 dark:bg-slate-900 ${brutalBorder} hover:bg-slate-200 transition-colors`}>
+                                    <Upload className="h-8 w-8 mb-2" />
+                                    <span className="text-xs font-bold uppercase">点击上传</span>
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => void handlePickEditImage(e.target.files?.[0] || null, true)} />
+                                  </label>
+                                )}
+                              </div>
+                            </div>
+
+                            <textarea
+                              value={editPrompt}
+                              onChange={(e) => setEditPrompt(e.target.value)}
+                              onKeyDown={(e) => {
+                                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                                  e.preventDefault();
+                                  void handleStartEditImage();
+                                }
+                              }}
+                              aria-label="编辑指令"
+                              title="编辑指令"
+                              placeholder="例如: 将背景替换为赛博朋克城市夜景..."
+                              className={`w-full h-32 p-5 bg-white dark:bg-slate-800 text-lg font-medium resize-none outline-none ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
+                            />
+
+                            <div className="flex gap-4">
+                              <button
+                                type="button"
+                                onClick={handleStartEditImage}
+                                disabled={isEditingImage || !editingImagePreview || !editPrompt.trim()}
+                                className={`flex-1 h-16 bg-rose-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                              >
+                                {isEditingImage ? (
+                                  <><Loader2 className="h-6 w-6 animate-spin" /> 正在处理</>
+                                ) : (
+                                  <><Pencil className="h-6 w-6" /> 开始重绘</>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEditImage}
+                                disabled={!isEditingImage}
+                                className={`px-6 bg-white dark:bg-slate-800 text-slate-900 dark:text-white disabled:opacity-50 ${brutalBtnBase}`}
+                              >
+                                取消
+                              </button>
+                            </div>
+
+                            <AnimatePresence>
+                              {imageEditError && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                  <AlertCircle className="h-6 w-6 shrink-0" />
+                                  <span className="break-words">{imageEditError}</span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+
+                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <AnimatePresence mode="wait">
+                            {editedImageUrl ? (
+                              <motion.div key="edit-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
+                                <img src={editedImageUrl} className={`w-full h-full object-contain ${brutalBorder}`} alt="Edited" />
+                                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={clearEditedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                  <a href={editedImageUrl} target="_blank" rel="noopener noreferrer">
+                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                  </a>
+                                </div>
+                              </motion.div>
+                            ) : isEditingImage ? (
+                              <motion.div key="edit-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
+                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 图像处理中...</div>
+                              </motion.div>
+                            ) : (
+                              <motion.div key="edit-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
+                                <div className={`w-32 h-32 bg-rose-200 dark:bg-rose-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                  <Pencil className="h-16 w-16 text-slate-900 dark:text-white" />
+                                </div>
+                                <div className="font-black uppercase text-2xl tracking-widest">等待上传与指令</div>
+                                <p className="font-bold text-sm">上传图片后在左侧输入修改指令</p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
                     )}

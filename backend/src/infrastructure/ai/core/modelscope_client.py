@@ -131,33 +131,39 @@ class ModelScopeClient:
 
         logger.info(f"[2/4] 图片生成完成 | 大小: {len(image_bytes):,} bytes | task_id: {task_id}")
 
-        storage = S3StorageService()
-        storage.upload_bytes(
-            data=image_bytes,
-            object_key=object_key,
-            content_type="image/png",
-        )
-        logger.info(f"[3/4] 上传 S3 完成 | 对象键: {object_key}")
+        image_url = ""
+        public_domain = ""
+        upload_error: str | None = None
+        try:
+            storage = S3StorageService()
+            storage.upload_bytes(
+                data=image_bytes,
+                object_key=object_key,
+                content_type="image/png",
+            )
+            logger.info(f"[3/4] 上传 S3 完成 | 对象键: {object_key}")
 
-        # 生成 30 天有效的长期 URL，方便前端长期访问
-        image_url = storage.get_long_term_url(object_key, expires_days=30)
-        public_domain = storage.get_file_url(object_key)
-
-        logger.info(
-            f"[4/4] 生成完成!\n"
-            f"    S3 对象键: {object_key}\n"
-            f"    Presigned URL: {image_url[:100]}...\n"
-            f"    公共域名 URL: {public_domain}\n"
-            f"    提示词: {prompt[:50]}..."
-        )
+            image_url = storage.get_long_term_url(object_key, expires_days=30)
+            public_domain = storage.get_file_url(object_key)
+            logger.info(
+                f"[4/4] 生成完成!\n"
+                f"    S3 对象键: {object_key}\n"
+                f"    Presigned URL: {image_url[:100]}...\n"
+                f"    公共域名 URL: {public_domain}\n"
+                f"    提示词: {prompt[:50]}..."
+            )
+        except Exception as e:
+            upload_error = str(e) or repr(e)
+            logger.warning(f"图片生成已完成, 但上传 S3 失败, 将回退使用 base64 | error={upload_error}")
 
         return {
             "image_url": image_url,
             "image_base64": image_base64,
             "task_id": task_id,
             "status": "completed",
-            "object_key": object_key,
-            "public_url": public_domain,
+            "object_key": object_key if image_url else None,
+            "public_url": public_domain if public_domain else None,
+            "error": upload_error,
         }
 
     async def _generate_remote(

@@ -319,26 +319,27 @@ async def generate_image(
             )
             result = await use_case.execute(input_data)
 
-            if result.status == "completed" and result.image_url:
+            if result.status == "completed" and (result.image_url or result.image_base64):
                 image_record_repo.update_status(
                     task_id=task_id,
                     status=ImageRecordStatus.COMPLETED,
-                    result_url=result.image_url,
+                    result_url=result.image_url or "",
                     result_base64=result.image_base64 or "",
                 )
                 db.commit()
 
-                background_tasks.add_task(
-                    _send_image_generated_notify,
-                    user_id,
-                    username,
-                    request.prompt,
-                    result.image_url,
-                    request.model,
-                    task_id,
-                    request.width,
-                    request.height,
-                )
+                if result.image_url:
+                    background_tasks.add_task(
+                        _send_image_generated_notify,
+                        user_id,
+                        username,
+                        request.prompt,
+                        result.image_url,
+                        request.model,
+                        task_id,
+                        request.width,
+                        request.height,
+                    )
 
             return ImageGenerationResponse(
                 task_id=result.task_id,
