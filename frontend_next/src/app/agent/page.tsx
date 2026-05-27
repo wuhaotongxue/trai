@@ -50,7 +50,7 @@ function AgentContent() {
       <Navbar />
       <div className="flex flex-1 overflow-hidden pt-16">
         <Sidebar />
-        <main className="flex-1 relative flex flex-col min-w-0 bg-white dark:bg-[#0b0f1a]">
+        <main className="flex-1 relative flex flex-col min-w-0 bg-white dark:bg-slate-950 p-4 pb-0">
           <div className="flex-1 overflow-hidden">
             <ChatPanel />
           </div>

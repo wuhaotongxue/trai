@@ -354,38 +354,44 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : activeTab === "subtitle" ? (
-                <ScrollArea className="flex-1 p-8">
-                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">智能字幕提取</h2>
-                    <SubtitlePanel />
+                <div className="flex-1 overflow-hidden p-4 lg:p-8">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">智能字幕提取</h2>
+                    <div className="flex-1 min-h-0">
+                      <SubtitlePanel />
+                    </div>
                   </div>
-                </ScrollArea>
+                </div>
               ) : activeTab === "digital_human" ? (
-                <ScrollArea className="flex-1 p-8">
-                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">数字人合成</h2>
-                    <DigitalHumanPanel />
+                <div className="flex-1 overflow-hidden p-4 lg:p-8">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">数字人合成</h2>
+                    <div className="flex-1 min-h-0 overflow-y-auto pr-4">
+                      <DigitalHumanPanel />
+                    </div>
                   </div>
-                </ScrollArea>
+                </div>
               ) : activeTab === "downloader" ? (
-                <ScrollArea className="flex-1 p-8">
-                  <div className={`max-w-6xl mx-auto bg-white dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-8 border-b-4 border-slate-900 dark:border-white pb-4">全网视频下载</h2>
-                    <VideoDownloaderPanel />
+                <div className="flex-1 overflow-hidden p-4 lg:p-8">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">全网视频下载</h2>
+                    <div className="flex-1 min-h-0 overflow-y-auto pr-4">
+                      <VideoDownloaderPanel />
+                    </div>
                   </div>
-                </ScrollArea>
+                </div>
               ) : (
-                <ScrollArea className="flex-1 p-8">
-                  <div className="max-w-6xl mx-auto">
+                <div className="flex-1 overflow-hidden p-4 lg:p-8">
+                  <div className="w-full h-full">
                     {activeTab === "image" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start">
-                        <div className={`bg-emerald-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
+                        <div className={`bg-emerald-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
                             <h2 className="text-4xl font-black uppercase">创意绘图</h2>
                             <div className="text-sm font-bold mt-2">将你的想象力转化为视觉杰作。</div>
                           </div>
 
-                          <div className="space-y-6">
+                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="relative">
                               <textarea
                                 value={imagePrompt}
@@ -461,7 +467,7 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                           <AnimatePresence mode="wait">
                             {generatedImageUrl ? (
                               <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
@@ -496,14 +502,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "video" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start">
-                        <div className={`bg-orange-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
+                        <div className={`bg-orange-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
                             <h2 className="text-4xl font-black uppercase">视频生成</h2>
                             <div className="text-sm font-bold mt-2">让你的想象力动起来。</div>
                           </div>
 
-                          <div className="space-y-6">
+                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <textarea
                               value={videoPrompt}
                               onChange={(e) => setVideoPrompt(e.target.value)}
@@ -543,7 +549,7 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                           <AnimatePresence mode="wait">
                             {generatedVideoUrl ? (
                               <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
@@ -578,14 +584,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "music" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start">
-                        <div className={`bg-indigo-200 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
+                        <div className={`bg-indigo-200 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
                             <h2 className="text-4xl font-black uppercase">音乐创作</h2>
                             <div className="text-sm font-bold mt-2">从文字到旋律的奇妙转化。</div>
                           </div>
 
-                          <div className="space-y-6">
+                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="relative">
                               <textarea
                                 value={musicPrompt}
@@ -643,7 +649,7 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-8 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                        <div className={`bg-white dark:bg-slate-900 p-8 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                           <AnimatePresence mode="wait">
                             {generatedMusicUrl ? (
                               <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full group flex flex-col gap-6">
@@ -681,14 +687,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "image_edit" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start">
-                        <div className={`bg-rose-100 dark:bg-slate-900 p-8 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4">
+                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
+                        <div className={`bg-rose-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
                             <h2 className="text-4xl font-black uppercase">图像编辑</h2>
                             <div className="text-sm font-bold mt-2">上传原图与遮罩，通过文字指令重新绘制图像。</div>
                           </div>
 
-                          <div className="space-y-6">
+                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="grid grid-cols-2 gap-4">
                               <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                 <div className="font-bold uppercase text-sm">源图片 (SOURCE)</div>
@@ -771,7 +777,7 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 min-h-[500px] flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                           <AnimatePresence mode="wait">
                             {editedImageUrl ? (
                               <motion.div key="edit-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
@@ -802,7 +808,7 @@ export function ChatPanel() {
                       </div>
                     )}
                   </div>
-                </ScrollArea>
+                </div>
               )}
             </motion.div>
           </AnimatePresence>

@@ -304,9 +304,9 @@ export function SubtitlePanel() {
   };
 
   return (
-    <div className="flex w-full overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur shadow-xl shadow-slate-200/40 dark:shadow-none relative min-h-[640px]">
+    <div className="flex w-full h-full overflow-hidden border-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-950 relative shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
       {/* 左侧配置栏 */}
-      <div className={`w-80 flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-r-2 border-slate-900 dark:border-white relative z-10`}>
+      <div className={`w-80 h-full flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-r-2 border-slate-900 dark:border-white relative z-10`}>
         <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
           <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">工具箱</h2>
         </div>
@@ -576,7 +576,7 @@ export function SubtitlePanel() {
       </div>
 
       {/* 中间预览区 */}
-      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-950 relative">
+      <div className="flex-1 h-full flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 relative">
         <div className="absolute top-4 right-4 z-20">
           <button 
             onClick={() => setShowGallery(!showGallery)}
@@ -705,12 +705,12 @@ export function SubtitlePanel() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 opacity-50 text-slate-900 dark:text-white">
-              <div className={`w-32 h-32 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]`}>
-                <Captions className="h-16 w-16" />
+            <div className="flex flex-col items-center gap-4 text-slate-900 dark:text-white">
+              <div className={`w-32 h-32 bg-amber-400 dark:bg-amber-500 rounded-none flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transform -rotate-3`}>
+                <Captions className="h-16 w-16 text-slate-900" />
               </div>
-              <div className="font-black uppercase text-2xl tracking-widest mt-4">等待任务执行</div>
-              <p className="font-bold text-sm">在左侧上传文件并提交</p>
+              <div className="font-black uppercase text-3xl tracking-widest mt-6">等待任务执行</div>
+              <p className="font-bold text-sm bg-white dark:bg-slate-800 px-4 py-2 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">在左侧上传文件并提交</p>
             </div>
           )}
         </div>
@@ -722,7 +722,7 @@ export function SubtitlePanel() {
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: 320, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
-          className="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-l-2 border-slate-900 dark:border-white relative z-10"
+          className="w-80 h-full flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-l-2 border-slate-900 dark:border-white relative z-10"
         >
           <div className="p-4 border-b-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 flex justify-between items-center">
             <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">影音长廊</h2>
