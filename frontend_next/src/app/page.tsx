@@ -193,14 +193,14 @@ export default function HomePage() {
       </section>
 
       {/* ===== Stats ===== */}
-      <section className="py-20 bg-slate-100 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white text-slate-900">
+      <section className="py-20 bg-slate-100 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white text-slate-900 dark:text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {stats.map((stat, i) => (
               <Reveal key={stat.key} delay={i * 100}>
-                <div className="border-4 border-slate-900 bg-white p-6 shadow-[8px_8px_0px_0px_#0f172a] transform rotate-1 hover:rotate-0 transition-transform">
-                  <div className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-2">{stat.value}</div>
-                  <div className="text-xl font-bold uppercase tracking-widest">{stat.label}</div>
+                <div className="border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 p-6 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] transform rotate-1 hover:rotate-0 hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+                  <div className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-2 text-slate-900 dark:text-white">{stat.value}</div>
+                  <div className="text-xl font-bold uppercase tracking-widest text-slate-900 dark:text-slate-300">{stat.label}</div>
                 </div>
               </Reveal>
             ))}
@@ -226,7 +226,7 @@ export default function HomePage() {
                   <div className="absolute top-0 left-8 w-16 h-16 bg-slate-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center text-2xl font-black text-slate-900 z-10">
                     {s.num}
                   </div>
-                  <div className="border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 p-8 pt-10 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
+                  <div className="border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 p-8 pt-10 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] transition-all">
                     <h3 className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">{s.title}</h3>
                     <p className="text-lg font-bold text-slate-600 dark:text-slate-400">{s.desc}</p>
                   </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-32 bg-slate-100 border-b-4 border-slate-900 dark:border-white text-slate-900 text-center">
+      <section className="py-32 bg-slate-100 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white text-slate-900 dark:text-white text-center">
         <div className="container mx-auto px-4">
           <Reveal>
             <h2 className="text-5xl md:text-7xl font-black uppercase tracking-widest mb-8">
@@ -249,7 +249,7 @@ export default function HomePage() {
             </p>
             <div className="flex justify-center">
               <Link href="/register">
-                <Button className="h-20 px-12 text-2xl font-black uppercase tracking-widest bg-slate-900 text-white border-4 border-slate-900 shadow-[8px_8px_0px_0px_#ffffff] hover:bg-slate-800 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
+                <Button className="h-20 px-12 text-2xl font-black uppercase tracking-widest bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:bg-slate-800 dark:hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
                   免费注册使用 <ArrowRight className="ml-3 h-8 w-8" />
                 </Button>
               </Link>

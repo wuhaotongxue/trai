@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_05_27_1155
+- **重构(UI)**: 修复 Dark Mode 适配问题，重构官网 Features 页面以适配新粗野主义，并增加 Framer Motion 的 Reveal 视差动画。
+- **优化(Panel)**: 将字幕面板重构为平行双屏结构，增加文件上传进度的动态进度条与加载状态反馈动画，彻底解决大面积突兀的黄色背景问题。
+
 ### 🎨 前端_2026_05_27_1033
 - **重构(UI)**: 将所有主要前端页面（Homepage, Navbar, Footer, Login, Register, Agent Panels, Sidebar）重构为统一的 Neo-Brutalism（新粗野主义）设计风格，并增加完善的中文空白页填充（Empty States）。
 

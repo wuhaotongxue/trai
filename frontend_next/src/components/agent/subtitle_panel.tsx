@@ -566,23 +566,37 @@ export function SubtitlePanel() {
                   <div className="text-center p-6">
                     {activeRecord.status === "processing" || activeRecord.status === "pending" ? (
                       <div className="flex flex-col items-center gap-4">
-                        <Loader2 className="h-10 w-10 text-slate-900 dark:text-white animate-spin" />
-                        <span className="text-lg font-black uppercase tracking-wider">正在处理中...</span>
+                        <motion.div 
+                          animate={{ rotate: 360, scale: [1, 1.2, 1] }} 
+                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                          className={`w-20 h-20 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center`}
+                        >
+                          <Loader2 className="h-10 w-10 text-slate-900 animate-spin" />
+                        </motion.div>
+                        <span className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">正在玩命处理中...</span>
                       </div>
                     ) : activeRecord.status === "failed" ? (
                       <div className="flex flex-col items-center gap-4">
-                        <div className={`w-16 h-16 bg-red-500 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
-                          <Captions className="h-8 w-8 text-white" />
-                        </div>
-                        <span className="text-lg font-black uppercase text-red-500 tracking-wider">处理失败</span>
-                        <span className="text-sm font-bold text-slate-500 mt-2 px-4">{activeRecord.error_message || "未知错误"}</span>
+                        <motion.div 
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className={`w-24 h-24 bg-red-500 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center`}
+                        >
+                          <Captions className="h-12 w-12 text-white" />
+                        </motion.div>
+                        <span className="text-2xl font-black uppercase text-red-500 tracking-widest mt-4">处理失败</span>
+                        <span className="text-sm font-bold text-slate-500 px-4">{activeRecord.error_message || "未知错误"}</span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-4">
-                        <div className={`w-16 h-16 bg-slate-100 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
-                          <Captions className="h-8 w-8 text-slate-900" />
-                        </div>
-                        <span className="text-lg font-black uppercase text-cyan-600 tracking-wider">任务已完成</span>
+                        <motion.div 
+                          initial={{ scale: 0.8, rotate: -10 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          className={`w-24 h-24 bg-emerald-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center`}
+                        >
+                          <Captions className="h-12 w-12 text-slate-900" />
+                        </motion.div>
+                        <span className="text-2xl font-black uppercase text-emerald-600 tracking-widest mt-4">任务已完成</span>
                       </div>
                     )}
                   </div>
@@ -670,12 +684,19 @@ export function SubtitlePanel() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4 text-slate-900 dark:text-white">
-              <div className={`w-32 h-32 bg-slate-100 dark:bg-slate-200 rounded-none flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transform -rotate-3`}>
-                <Captions className="h-16 w-16 text-slate-900" />
-              </div>
-              <div className="font-black uppercase text-3xl tracking-widest mt-6">等待任务执行</div>
-              <p className="font-bold text-sm bg-white dark:bg-slate-800 px-4 py-2 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">在左侧上传文件并提交</p>
+            <div className="m-auto text-center p-12">
+                <motion.div 
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+                  className="flex flex-col items-center justify-center gap-6"
+                >
+                <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center transform -rotate-3">
+                  <Captions className="h-16 w-16 text-slate-900" />
+                </div>
+                <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">等待任务执行</span>
+                <span className="text-sm font-bold bg-white dark:bg-slate-800 px-6 py-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">在左侧上传文件并提交</span>
+              </motion.div>
             </div>
           )}
           </div>

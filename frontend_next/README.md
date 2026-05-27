@@ -2,6 +2,12 @@
 
 基于 Next.js 16 + React 19 + TypeScript 5 的 TRAI 项目前端，采用 App Router 架构。
 
+## 📝 更新日志 (Changelog)
+
+### 🎨 前端_2026_05_27_1155
+- **重构(UI)**: 修复 Dark Mode 适配问题，重构官网 Features 页面以适配新粗野主义，并增加 Framer Motion 的 Reveal 视差动画。
+- **优化(Panel)**: 将字幕面板重构为平行双屏结构，增加文件上传进度的动态进度条与加载状态反馈动画，彻底解决大面积突兀的黄色背景问题。
+
 ## 技术栈
 
 - Next.js 16.2.3（App Router + Turbopack）
