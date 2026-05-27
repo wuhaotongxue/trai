@@ -183,7 +183,7 @@ function LoginForm() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("login.form.password") || "密码"}</Label>
-                <Link href="/forgot_password" className="text-sm font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest transition-colors border-b-2 border-transparent hover:border-rose-500">
+                <Link href="/forgot_password" className="text-sm font-bold text-cyan-500 hover:text-cyan-600 uppercase tracking-widest transition-colors border-b-2 border-transparent hover:border-rose-500">
                   {translate("login.form.forgot_password") || "忘记密码？"}
                 </Link>
               </div>

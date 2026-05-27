@@ -144,7 +144,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-emerald-50 text-emerald-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-emerald-50 text-cyan-600">
                         <Phone className="h-4 w-4" />
                       </div>
                       <div>
@@ -215,7 +215,7 @@ export default function ContactPage() {
               <div className="lg:col-span-3">
                 {sent && (
                   <div className="mb-4 p-4 rounded-none bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-3 animate-pulse">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    <CheckCircle2 className="h-5 w-5 text-cyan-500" />
                     <span className="font-medium">{translate("contact.submit_success")}</span>
                   </div>
                 )}

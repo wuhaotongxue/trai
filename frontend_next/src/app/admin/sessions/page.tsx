@@ -182,7 +182,7 @@ export default function SessionsPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-none-none ${
-                          s.status === "active" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-slate-900 dark:text-white font-bold"
+                          s.status === "active" ? "bg-cyan-500/15 text-emerald-400" : "bg-muted/40 text-slate-900 dark:text-white font-bold"
                         }`}>
                           {s.status === "active" ? translate("admin.sessions.active") : translate("admin.sessions.inactive")}
                         </span>

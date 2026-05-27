@@ -35,7 +35,7 @@ const variantConfig: Record<
     icon: CheckCircle2,
     bg: "bg-card",
     border: "border-l-4 border-l-emerald-500",
-    iconColor: "text-emerald-500",
+    iconColor: "text-cyan-500",
     titleColor: "text-foreground",
   },
   error: {

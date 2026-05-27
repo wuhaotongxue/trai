@@ -238,7 +238,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                         <Link key={item.href} href={item.href} title={item.label}
                           className={cn("group flex items-center transition-all duration-200 border-2 border-slate-900 dark:border-white",
                             (sidebarCollapsed ?? false) ? "justify-center p-3 mb-2" : "gap-3 px-3 py-3 mb-2",
-                            active ? "bg-slate-50 dark:bg-emerald-600 text-slate-900 dark:text-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]")}>
+                            active ? "bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]")}>
                           <item.icon className={cn("h-5 w-5 flex-shrink-0", active ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white")} />
                           {!(sidebarCollapsed ?? false) && (
                             <>
@@ -306,7 +306,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
               <Bot className="h-4 w-4" />
               <span className="text-xs font-black uppercase hidden sm:inline">{translate("admin.topbar.ai_assistant")}</span>
             </button>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a]">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a]">
               <div className="w-2 h-2 border-2 border-slate-900 bg-white animate-pulse" />
               <span className="text-xs font-black uppercase">{translate("admin.systemNormal")}</span>
             </div>
@@ -319,7 +319,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             <button type="button" aria-label={translate("admin.topbar.notifications")} title={translate("admin.topbar.notifications")} onClick={() => router.push("/admin/notifications")}
               className="relative p-2 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[2px_2px_0px_0px_#0f172a] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
               <Bell className="h-4 w-4 text-slate-900 dark:text-white" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-slate-900" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-500 border-2 border-slate-900" />
             </button>
             {/* 用户下拉 */}
             <DropdownMenu>

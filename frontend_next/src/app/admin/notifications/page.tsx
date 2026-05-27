@@ -131,7 +131,7 @@ export default function NotificationsPage() {
                     <td className="px-4 py-3 text-right text-foreground/80">{n.read.toLocaleString()}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-none-none ${
-                        n.status === "sent" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-slate-900 dark:text-white font-bold"
+                        n.status === "sent" ? "bg-cyan-500/15 text-emerald-400" : "bg-muted/40 text-slate-900 dark:text-white font-bold"
                       }`}>
                         {translate(n.status === "sent" ? "admin.notifications.status_sent" : "admin.notifications.status_draft")}
                       </span>

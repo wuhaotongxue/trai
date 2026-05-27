@@ -61,7 +61,7 @@ export default function DocsQuickstartPage() {
                   className="p-6 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-none flex items-center justify-center ${s.done ? "bg-emerald-500/15" : "bg-muted/40"} `}>
+                    <div className={`w-10 h-10 rounded-none flex items-center justify-center ${s.done ? "bg-cyan-500/15" : "bg-muted/40"} `}>
                       <CheckCircle2 className={`h-5 w-5 ${s.done ? "text-emerald-400" : "text-muted-foreground"}`} />
                     </div>
                     <div className="flex-1 min-w-0">

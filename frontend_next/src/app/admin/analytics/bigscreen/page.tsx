@@ -145,7 +145,7 @@ export default function BigScreenAnalytics() {
           <div className="bg-white/5 border border-white/10 rounded-none-none p-4 ">
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="h-5 w-5 text-emerald-400" />
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-none">WEEKLY</span>
+              <span className="text-[10px] bg-cyan-500/20 text-emerald-400 px-2 py-0.5 rounded-none">WEEKLY</span>
             </div>
             <p className="text-xs text-gray-400">New Hires</p>
             <p className="text-4xl font-mono font-bold text-white">

@@ -106,7 +106,7 @@ export default function AIManagementPage() {
       value: stats?.image_count || 0,
       icon: ImageIcon,
       gradient: "from-emerald-500/20 to-teal-500/20",
-      iconColor: "text-emerald-500",
+      iconColor: "text-cyan-500",
       borderColor: "border-emerald-500/20",
     },
     {
@@ -128,7 +128,7 @@ export default function AIManagementPage() {
   ];
 
   const systemMetrics = [
-    { labelKey: "admin.ai.management.gpu_mem", used: 39.66, total: 44.39, color: "bg-emerald-500" },
+    { labelKey: "admin.ai.management.gpu_mem", used: 39.66, total: 44.39, color: "bg-cyan-500" },
     { labelKey: "admin.ai.management.cpu_usage", used: 23, total: 100, color: "bg-blue-500" },
     { labelKey: "admin.ai.management.mem_usage", used: 8.2, total: 32, color: "bg-purple-500" },
   ];
@@ -204,16 +204,16 @@ export default function AIManagementPage() {
                 className="flex items-center gap-4 p-4 rounded-none-none border border-border/50 hover:bg-muted/10 transition-all group"
               >
                 <div className={`w-10 h-10 rounded-none-none flex items-center justify-center transition-colors ${
-                  m.is_active ? "bg-emerald-500/10" : "bg-muted"
+                  m.is_active ? "bg-cyan-500/10" : "bg-muted"
                 }`}>
-                  <Activity className={`h-5 w-5 ${m.is_active ? "text-emerald-500" : "text-slate-900 dark:text-white font-bold"}`} />
+                  <Activity className={`h-5 w-5 ${m.is_active ? "text-cyan-500" : "text-slate-900 dark:text-white font-bold"}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-foreground">{m.name}</p>
                     <span className={`px-2 py-0.5 rounded-none-md text-[10px] font-medium ${
                       m.is_active
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        ? "bg-cyan-500/10 text-cyan-600 dark:text-emerald-400"
                         : "bg-muted text-slate-900 dark:text-white font-bold"
                     }`}>
                       {m.is_active ? translate("admin.ai.management.running") : translate("admin.ai.management.stopped")}
@@ -227,7 +227,7 @@ export default function AIManagementPage() {
                   className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-none-none text-xs font-medium transition-all ${
                     m.is_active
                       ? "bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-500/20"
-                      : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
+                      : "bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 border border-emerald-500/20"
                   }`}
                 >
                   <Power className="h-3 w-3" />
@@ -266,17 +266,17 @@ export default function AIManagementPage() {
             <div className="pt-3 border-t border-border space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
-                  <Zap className="h-3 w-3 text-emerald-500" />
+                  <Zap className="h-3 w-3 text-cyan-500" />
                   {translate("admin.ai.management.model_status")}
                 </span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{translate("admin.ai.model_status.idle")}</span>
+                <span className="text-cyan-600 dark:text-emerald-400 font-medium">{translate("admin.ai.model_status.idle")}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
                   <Cloud className="h-3 w-3 text-blue-500" />
                   {translate("admin.ai.management.backend_service")}
                 </span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">{translate("admin.ai.management.online")}</span>
+                <span className="text-cyan-600 dark:text-emerald-400 font-medium">{translate("admin.ai.management.online")}</span>
               </div>
             </div>
           </div>
@@ -287,9 +287,9 @@ export default function AIManagementPage() {
       <div className="rounded-none-none border border-border bg-background overflow-hidden">
         <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-emerald-500/5 to-teal-500/5">
           <div className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-emerald-500" />
+            <ImageIcon className="h-4 w-4 text-cyan-500" />
             <h2 className="text-sm font-semibold">{translate("admin.ai.management.image_config")}</h2>
-            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-none-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Z-Image-Turbo</span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-none-none bg-cyan-500/10 text-cyan-600 dark:text-emerald-400 font-medium">Z-Image-Turbo</span>
           </div>
         </div>
         <div className="p-6">
@@ -304,14 +304,14 @@ export default function AIManagementPage() {
                     onClick={() => setSelectedProvider(p.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-none-none border transition-all text-left ${
                       selectedProvider === p.id
-                        ? "border-emerald-500/40 bg-emerald-500/5"
+                        ? "border-emerald-500/40 bg-cyan-500/5"
                         : "border-border hover:border-emerald-500/20 hover:bg-muted/20"
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-none-none flex items-center justify-center ${
-                      p.status === "online" ? "bg-emerald-500/10" : "bg-muted"
+                      p.status === "online" ? "bg-cyan-500/10" : "bg-muted"
                     }`}>
-                      <Activity className={`h-4 w-4 ${p.status === "online" ? "text-emerald-500" : "text-slate-900 dark:text-white font-bold"}`} />
+                      <Activity className={`h-4 w-4 ${p.status === "online" ? "text-cyan-500" : "text-slate-900 dark:text-white font-bold"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{p.name}</p>
@@ -319,7 +319,7 @@ export default function AIManagementPage() {
                     </div>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-none-none font-medium ${
                       p.status === "online"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        ? "bg-cyan-500/10 text-cyan-600 dark:text-emerald-400"
                         : "bg-muted text-slate-900 dark:text-white font-bold"
                     }`}>
                       {p.status === "online" ? translate("admin.ai.management.online") : translate("admin.ai.management.offline")}
@@ -337,10 +337,10 @@ export default function AIManagementPage() {
                   <button
                     key={preset.labelKey}
                     onClick={() => handlePreset(translate(preset.promptKey))}
-                    className="flex items-start gap-3 p-3 rounded-none-none border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left group"
+                    className="flex items-start gap-3 p-3 rounded-none-none border border-border hover:border-emerald-500/30 hover:bg-cyan-500/5 transition-all text-left group"
                   >
                     <div className="w-6 h-6 rounded-none-none bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
-                      <Sparkles className="h-3 w-3 text-emerald-500" />
+                      <Sparkles className="h-3 w-3 text-cyan-500" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">{translate(preset.labelKey)}</p>

@@ -173,9 +173,9 @@ export default function DatabasePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { labelKey: "admin.database.total_tables", value: schema?.total_tables?.toString() || "24", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
-          { labelKey: "admin.database.total_rows", value: schema?.total_rows?.toLocaleString(locale === "zh" ? "zh-CN" : "en-US") || "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { labelKey: "admin.database.total_rows", value: schema?.total_rows?.toLocaleString(locale === "zh" ? "zh-CN" : "en-US") || "623,128", icon: Database, color: "text-emerald-400", bg: "bg-cyan-500/15" },
           { labelKey: "admin.database.backups", value: backups.length.toString(), icon: HardDrive, color: "text-cyan-400", bg: "bg-slate-200/15" },
-          { labelKey: "admin.database.status", value: translate("admin.database.ok"), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { labelKey: "admin.database.status", value: translate("admin.database.ok"), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-cyan-500/15" },
         ].map((item) => (
           <Card key={item.labelKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardContent className="p-4 flex items-center gap-3">
@@ -254,7 +254,7 @@ export default function DatabasePage() {
                           {table.columns.map((col) => (
                             <tr key={col.name} className="border-t border-border/50">
                               <td className="px-4 py-2 font-mono text-blue-600">{col.name}</td>
-                              <td className="px-4 py-2 font-mono text-emerald-600">{col.type}</td>
+                              <td className="px-4 py-2 font-mono text-cyan-600">{col.type}</td>
                               <td className="px-4 py-2">{col.nullable ? translate("admin.database.yes") : translate("admin.database.no")}</td>
                               <td className="px-4 py-2 text-slate-900 dark:text-white font-bold">{col.default || "-"}</td>
                             </tr>

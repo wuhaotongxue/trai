@@ -286,7 +286,7 @@ export default function ClientReleasePage() {
                   <span className="text-foreground font-medium">{buildStatus.message || translate("admin.client_release.waiting")}</span>
                 </div>
                 {buildStatus.status === "success" && (
-                  <div className="flex items-center gap-2 text-emerald-600">
+                  <div className="flex items-center gap-2 text-cyan-600">
                     <CheckCircle className="h-4 w-4" />
                     <span className="text-sm font-medium">{translate("admin.client_release.build_success").replace("{version}", buildStatus.version || "")}</span>
                   </div>
@@ -470,7 +470,7 @@ export default function ClientReleasePage() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-indigo-600 dark:text-indigo-400">v{item.version}</span>
                           {idx === 0 && (
-                            <span className="px-1.5 py-0.5 rounded-none-none bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">{translate("admin.client_release.latest")}</span>
+                            <span className="px-1.5 py-0.5 rounded-none-none bg-cyan-500/10 text-cyan-600 text-[10px] font-bold">{translate("admin.client_release.latest")}</span>
                           )}
                         </div>
                       </td>
@@ -498,7 +498,7 @@ export default function ClientReleasePage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-colors"
+                            className="h-8 gap-1.5 text-cyan-600 hover:text-emerald-700 hover:bg-cyan-500/10 transition-colors"
                             onClick={() => item.installer_url && handleCopyUrl(item.installer_url, item.id)}
                             disabled={!item.installer_url}
                             title={translate("admin.client_release.copy")}

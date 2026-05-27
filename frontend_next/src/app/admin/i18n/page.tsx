@@ -344,7 +344,7 @@ export default function I18nPage() {
             <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} /> {translate("admin.i18n.refresh")}
           </Button>
           {hasChanges && (
-            <Button size="sm" className="h-8 gap-1.5 bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveAll} disabled={saving}>
+            <Button size="sm" className="h-8 gap-1.5 bg-cyan-600 hover:bg-cyan-500" onClick={handleSaveAll} disabled={saving}>
               <Save className="h-3 w-3" /> {saving ? translate("admin.i18n.saving") : `${translate("admin.i18n.save")} (${Object.keys(editMap).length})`}
             </Button>
           )}
@@ -413,7 +413,7 @@ export default function I18nPage() {
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               {translate("admin.i18n.translation_list")}
               {hasChanges && (
-                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-500/10 text-xs font-normal">
+                <Badge variant="outline" className="text-cyan-600 border-emerald-500/30 bg-cyan-500/10 text-xs font-normal">
                   {Object.keys(editMap).length} {translate("admin.i18n.pending_save")}
                 </Badge>
               )}
@@ -423,7 +423,7 @@ export default function I18nPage() {
             <div className="mt-3 grid grid-cols-12 gap-3 px-1">
               <div className="col-span-4 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase">{translate("admin.i18n.key")}</div>
               <div className="col-span-4 text-xs font-semibold text-blue-500 uppercase">{translate("admin.i18n.chinese")}</div>
-              <div className="col-span-3 text-xs font-semibold text-emerald-500 uppercase">{translate("admin.i18n.english")}</div>
+              <div className="col-span-3 text-xs font-semibold text-cyan-500 uppercase">{translate("admin.i18n.english")}</div>
               <div className="col-span-1" />
             </div>
           )}

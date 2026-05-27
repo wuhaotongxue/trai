@@ -171,7 +171,7 @@ export default function NewUserPage() {
                           ? plan.value === "free" ? "text-foreground/80" : plan.value === "pro" ? "text-blue-400" : "text-cyan-400"
                           : "text-slate-900 dark:text-white font-bold"
                       }`}>{translate(plan.labelKey)}</p>
-                      {form.plan === plan.value && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                      {form.plan === plan.value && <CheckCircle2 className="h-4 w-4 text-cyan-500" />}
                     </div>
                     <p className="text-xs text-slate-900 dark:text-white font-bold">{translate(plan.descKey)}</p>
                   </button>

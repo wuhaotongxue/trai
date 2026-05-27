@@ -43,7 +43,7 @@ export default function AIAssistantPage() {
       <div className="px-5 py-3 border-b border-border bg-gradient-to-r from-muted/40 to-transparent flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-none-none ${isStreaming ? "bg-blue-500 animate-pulse" : "bg-emerald-500"}`} />
+            <div className={`w-2 h-2 rounded-none-none ${isStreaming ? "bg-blue-500 animate-pulse" : "bg-cyan-500"}`} />
             <span className="text-xs font-medium text-slate-900 dark:text-white font-bold">
               {isStreaming ? translate("admin.ai_assistant.thinking") : translate("admin.ai_assistant.ready")}
             </span>

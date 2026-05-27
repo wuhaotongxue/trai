@@ -169,9 +169,9 @@ export default function MonitorPage() {
           <Card key={svc.cnKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white  group">
             <CardContent className="p-4 flex items-center gap-4">
               <div className={cn("w-11 h-11 rounded-none-none flex items-center justify-center transition-colors",
-                svc.status === "ok" ? "bg-emerald-500/10 group-hover:bg-emerald-500/15" : "bg-slate-200/10 group-hover:bg-slate-200/15")}>
+                svc.status === "ok" ? "bg-cyan-500/10 group-hover:bg-cyan-500/15" : "bg-slate-200/10 group-hover:bg-slate-200/15")}>
                 <svc.icon className={cn("h-5 w-5",
-                  svc.status === "ok" ? "text-emerald-500" : "text-cyan-500")} />
+                  svc.status === "ok" ? "text-cyan-500" : "text-cyan-500")} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -179,7 +179,7 @@ export default function MonitorPage() {
                     <span className="text-sm font-semibold text-foreground">{translate(svc.cnKey)}</span>
                   </div>
                   <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-none-none",
-                    svc.status === "ok" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-slate-200/10 text-cyan-600 dark:text-cyan-400")}>
+                    svc.status === "ok" ? "bg-cyan-500/10 text-cyan-600 dark:text-emerald-400" : "bg-slate-200/10 text-cyan-600 dark:text-cyan-400")}>
                     {svc.status === "ok" ? translate("admin.monitor.normal") : translate("admin.monitor.warning")}
                   </span>
                 </div>
@@ -265,7 +265,7 @@ export default function MonitorPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+                            className="h-8 w-8 text-cyan-500 hover:text-cyan-600 hover:bg-cyan-500/10"
                             onClick={() => void handleDelete(b.key)}
                           >
                             <Trash2 className="h-4 w-4" />

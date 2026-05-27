@@ -97,7 +97,7 @@ export default function I18nSection({
               {/* 英文 */}
               <div className="col-span-3">
                 <textarea
-                  className={`min-h-[36px] max-h-[100px] w-full px-2.5 py-1.5 rounded-none-none border text-sm font-mono resize-none focus:ring-1 ${isEnEditing ? "border-emerald-500/50 bg-emerald-500/5" : "border-border/60 bg-white dark:bg-slate-900 focus:border-emerald-500/30"}`}
+                  className={`min-h-[36px] max-h-[100px] w-full px-2.5 py-1.5 rounded-none-none border text-sm font-mono resize-none focus:ring-1 ${isEnEditing ? "border-emerald-500/50 bg-cyan-500/5" : "border-border/60 bg-white dark:bg-slate-900 focus:border-emerald-500/30"}`}
                   value={enVal}
                   onChange={(e) => onValueChange("en", entry.compositeKey, e.target.value)}
                   placeholder="English..."
@@ -109,7 +109,7 @@ export default function I18nSection({
               <div className="col-span-1 flex items-center gap-1 justify-end pt-0.5">
                 {(isZhEditing || isEnEditing) && (
                   <>
-                    <button onClick={() => { if (isZhEditing) void onSaveOne("zh", entry.compositeKey, zhVal); if (isEnEditing) void onSaveOne("en", entry.compositeKey, enVal); }} className="w-7 h-7 rounded-none-none flex items-center justify-center text-emerald-600 hover:bg-emerald-500/10" title="保存">
+                    <button onClick={() => { if (isZhEditing) void onSaveOne("zh", entry.compositeKey, zhVal); if (isEnEditing) void onSaveOne("en", entry.compositeKey, enVal); }} className="w-7 h-7 rounded-none-none flex items-center justify-center text-cyan-600 hover:bg-cyan-500/10" title="保存">
                       <Check className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => onCancelEdit(zhMapKey, enMapKey)} className="w-7 h-7 rounded-none-none flex items-center justify-center text-slate-900 dark:text-white font-bold hover:bg-muted" title="取消">
@@ -136,7 +136,7 @@ export default function I18nSection({
               </div>
               {(isZhEditing || isEnEditing) && (
                 <>
-                  <button onClick={() => { if (isZhEditing) void onSaveOne("zh", entry.compositeKey, zhVal); if (isEnEditing) void onSaveOne("en", entry.compositeKey, enVal); }} className="w-7 h-7 rounded-none-none flex items-center justify-center text-emerald-600 hover:bg-emerald-500/10">
+                  <button onClick={() => { if (isZhEditing) void onSaveOne("zh", entry.compositeKey, zhVal); if (isEnEditing) void onSaveOne("en", entry.compositeKey, enVal); }} className="w-7 h-7 rounded-none-none flex items-center justify-center text-cyan-600 hover:bg-cyan-500/10">
                     <Check className="h-3.5 w-3.5" />
                   </button>
                   <button onClick={() => onCancelEdit(zhMapKey, enMapKey)} className="w-7 h-7 rounded-none-none flex items-center justify-center text-slate-900 dark:text-white font-bold hover:bg-muted">
@@ -159,9 +159,9 @@ export default function I18nSection({
                 />
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-emerald-500 uppercase mb-1.5">🇺🇸 English</p>
+                <p className="text-[10px] font-semibold text-cyan-500 uppercase mb-1.5">🇺🇸 English</p>
                 <textarea
-                  className={`w-full min-h-[60px] px-3 py-2 rounded-none-none border text-sm font-mono resize-none focus:ring-1 ${isEnEditing ? "border-emerald-500/50 bg-emerald-500/5" : "border-border/60 bg-white dark:bg-slate-900 focus:border-emerald-500/30"}`}
+                  className={`w-full min-h-[60px] px-3 py-2 rounded-none-none border text-sm font-mono resize-none focus:ring-1 ${isEnEditing ? "border-emerald-500/50 bg-cyan-500/5" : "border-border/60 bg-white dark:bg-slate-900 focus:border-emerald-500/30"}`}
                   value={enVal}
                   onChange={(e) => onValueChange("en", entry.compositeKey, e.target.value)}
                   placeholder="English..."

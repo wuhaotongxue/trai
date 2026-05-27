@@ -137,11 +137,11 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={handleSave}>
-                {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
+                {saved ? <CheckCircle2 className="h-4 w-4 text-cyan-500" /> : <Save className="h-4 w-4" />}
                 {saved ? translate("admin.settings.saved") : translate("admin.settings.save_config")}
               </Button>
               {saved && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
+                <span className="text-xs text-cyan-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {translate("admin.settings.saved_cloud")}
                 </span>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
         <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
           <CardHeader className="pb-4 border-b border-border/40">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-              <Shield className="h-4 w-4 text-emerald-500" />
+              <Shield className="h-4 w-4 text-cyan-500" />
               {translate("admin.settings.security")}
             </CardTitle>
           </CardHeader>
@@ -188,11 +188,11 @@ export default function SettingsPage() {
 
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={handleSave}>
-                {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
+                {saved ? <CheckCircle2 className="h-4 w-4 text-cyan-500" /> : <Save className="h-4 w-4" />}
                 {saved ? translate("admin.settings.saved") : translate("admin.settings.save_security")}
               </Button>
               {saved && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
+                <span className="text-xs text-cyan-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {translate("admin.settings.saved_cloud")}
                 </span>
@@ -243,11 +243,11 @@ export default function SettingsPage() {
             ))}
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={handleSave}>
-                {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
+                {saved ? <CheckCircle2 className="h-4 w-4 text-cyan-500" /> : <Save className="h-4 w-4" />}
                 {saved ? translate("admin.settings.saved") : translate("admin.settings.save_notification")}
               </Button>
               {saved && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
+                <span className="text-xs text-cyan-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {translate("admin.settings.saved_cloud")}
                 </span>
@@ -293,11 +293,11 @@ export default function SettingsPage() {
 
             <div className="flex items-center gap-3 pt-4 border-t border-border/40">
               <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={handleSave}>
-                {saved ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Save className="h-4 w-4" />}
+                {saved ? <CheckCircle2 className="h-4 w-4 text-cyan-500" /> : <Save className="h-4 w-4" />}
                 {saved ? translate("admin.settings.saved") : translate("admin.settings.save_advanced")}
               </Button>
               {saved && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1.5 animate-fade-in">
+                <span className="text-xs text-cyan-500 flex items-center gap-1.5 animate-fade-in">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {translate("admin.settings.saved_cloud")}
                 </span>

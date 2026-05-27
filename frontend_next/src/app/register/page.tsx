@@ -185,7 +185,7 @@ export default function RegisterPage() {
                     autoComplete="username"
                   />
                   {fieldErrors.username && (
-                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.username}</p>
+                    <p className="text-sm font-bold text-cyan-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.username}</p>
                   )}
                 </div>
 
@@ -201,7 +201,7 @@ export default function RegisterPage() {
                     autoComplete="email"
                   />
                   {fieldErrors.email && (
-                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.email}</p>
+                    <p className="text-sm font-bold text-cyan-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.email}</p>
                   )}
                 </div>
 
@@ -226,7 +226,7 @@ export default function RegisterPage() {
                     </button>
                   </div>
                   {fieldErrors.password && (
-                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.password}</p>
+                    <p className="text-sm font-bold text-cyan-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.password}</p>
                   )}
                 </div>
 
@@ -242,7 +242,7 @@ export default function RegisterPage() {
                   <div className="space-y-2">
                     <div className="flex gap-2">
                       {validatePassword(form.password) ? (
-                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-500 bg-emerald-100 px-2 py-1 border-2 border-emerald-500 shadow-[2px_2px_0px_0px_#10b981]">
+                        <div className="flex items-center gap-2 text-sm font-bold text-cyan-500 bg-emerald-100 px-2 py-1 border-2 border-emerald-500 shadow-[2px_2px_0px_0px_#10b981]">
                           <CheckCircle2 className="h-4 w-4" />
                           {translate("register.form.password_strong") || "密码强度合格"}
                         </div>

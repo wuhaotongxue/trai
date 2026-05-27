@@ -175,7 +175,7 @@ export function Navbar() {
                   </DropdownMenuGroup>
                   <div className="border-t-4 border-slate-900 dark:border-white p-2">
                     <DropdownMenuItem 
-                      className="p-3 font-bold text-slate-900 uppercase tracking-wider bg-slate-100 hover:bg-rose-500 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] cursor-pointer rounded-none"
+                      className="p-3 font-bold text-slate-900 uppercase tracking-wider bg-slate-100 hover:bg-cyan-500 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] cursor-pointer rounded-none"
                       onClick={() => { 
                         Cookies.remove("token"); 
                         Cookies.remove("refresh_token"); 
@@ -197,7 +197,7 @@ export function Navbar() {
                 </Link>
                 <Link href="/register">
                   <Button
-                    className="h-10 px-6 font-black uppercase tracking-widest bg-rose-500 text-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
+                    className="h-10 px-6 font-black uppercase tracking-widest bg-cyan-500 text-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
                   >
                     免费注册
                   </Button>
@@ -262,7 +262,7 @@ export function Navbar() {
                   </div>
                 </div>
                 <button
-                  className="w-full p-4 font-black text-xl uppercase tracking-widest bg-rose-500 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3"
+                  className="w-full p-4 font-black text-xl uppercase tracking-widest bg-cyan-500 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3"
                   onClick={() => { 
                     Cookies.remove("token"); 
                     Cookies.remove("refresh_token"); 

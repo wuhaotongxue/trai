@@ -39,8 +39,8 @@ export function WebSocketStatusIndicator({
     },
     connected: {
       icon: Wifi,
-      color: "text-emerald-500",
-      bgClass: "bg-emerald-500/10 border-emerald-500/20",
+      color: "text-cyan-500",
+      bgClass: "bg-cyan-500/10 border-emerald-500/20",
       label: "Connected",
       animate: "",
     },

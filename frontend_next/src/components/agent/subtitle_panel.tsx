@@ -264,56 +264,61 @@ export function SubtitlePanel() {
 
   return (
     <div className="flex w-full h-full overflow-hidden border-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-950 relative shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
-      {/* 左侧配置栏 */}
-      <div className={`w-72 h-full flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-r-2 border-slate-900 dark:border-white relative z-10`}>
-        <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
-          <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">工具箱</h2>
-        </div>
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-3 space-y-4">
-            
-            {/* 1. 选择工具类型 */}
-            <div className={`p-3 bg-white dark:bg-slate-800 flex flex-col gap-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]`}>
-              <div className="font-bold uppercase text-sm border-b-2 border-slate-900 dark:border-white pb-2">1. 选择工具类型</div>
-              <div className="space-y-2">
-                {toolCategories.map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={() => {
-                      setTaskType(tool.id as any);
-                      setFile(null);
-                      setAudioFile(null);
-                    }}
-                    className={cn(
-                      "w-full flex items-start gap-3 p-2 text-left transition-all border-2 border-slate-900 dark:border-white",
-                      taskType === tool.id
-                        ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]"
-                        : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
-                    )}
-                  >
-                    <div className={cn(
-                      "p-1.5 border-2 border-slate-900 dark:border-white",
-                      taskType === tool.id ? "bg-white/20 dark:bg-slate-900/20" : "bg-slate-100 dark:bg-slate-900"
-                    )}>
-                      <tool.icon className={cn("w-4 h-4", taskType === tool.id ? "text-current" : tool.color)} />
+      {/* 左侧配置栏 (拆分为两个并排的区域) */}
+      <div className={`w-[600px] h-full flex-shrink-0 flex bg-white dark:bg-slate-900 border-r-2 border-slate-900 dark:border-white relative z-10`}>
+        
+        {/* 工具类型选择区 */}
+        <div className="w-[280px] h-full flex flex-col border-r-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900">
+          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">1. 选择工具类型</h2>
+          </div>
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="p-3 space-y-2">
+              {toolCategories.map((tool) => (
+                <button
+                  key={tool.id}
+                  onClick={() => {
+                    setTaskType(tool.id as any);
+                    setFile(null);
+                    setAudioFile(null);
+                  }}
+                  className={cn(
+                    "w-full flex items-start gap-3 p-3 text-left transition-all border-2 border-slate-900 dark:border-white",
+                    taskType === tool.id
+                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]"
+                      : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
+                  )}
+                >
+                  <div className={cn(
+                    "p-1.5 border-2 border-slate-900 dark:border-white",
+                    taskType === tool.id ? "bg-white/20 dark:bg-slate-900/20" : "bg-slate-100 dark:bg-slate-900"
+                  )}>
+                    <tool.icon className={cn("w-5 h-5", taskType === tool.id ? "text-current" : tool.color)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-xs uppercase tracking-wide">{tool.label}</div>
+                    <div className={cn("text-[10px] mt-0.5 opacity-80 leading-tight", taskType === tool.id ? "" : "text-slate-500 dark:text-slate-400")}>
+                      {tool.desc}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-bold text-xs uppercase tracking-wide">{tool.label}</div>
-                      <div className={cn("text-[10px] mt-0.5 opacity-80 leading-tight", taskType === tool.id ? "" : "text-slate-500 dark:text-slate-400")}>
-                        {tool.desc}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                </button>
+              ))}
             </div>
+          </ScrollArea>
+        </div>
 
-            <div className="space-y-4">
+        {/* 文件上传与配置区 */}
+        <div className="flex-1 h-full flex flex-col bg-white dark:bg-slate-800">
+          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">2. 配置与上传</h2>
+          </div>
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="p-4 space-y-6">
 
-              {/* 2. 上传文件 */}
-              <div className={`p-3 bg-white dark:bg-slate-800 flex flex-col gap-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]`}>
-                <div className="font-bold uppercase text-sm border-b-2 border-slate-900 dark:border-white pb-2">2. 上传文件</div>
-                <div className="relative border-2 border-dashed border-slate-900 dark:border-slate-400 hover:border-slate-900 dark:hover:border-white transition-colors p-4 text-center cursor-pointer bg-slate-50 dark:bg-slate-900">
+              {/* 上传文件 */}
+              <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col gap-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]`}>
+                <div className="font-bold uppercase text-sm border-b-2 border-slate-900 dark:border-white pb-2 mb-2">上传文件</div>
+                <div className="relative border-2 border-dashed border-slate-900 dark:border-slate-400 hover:border-slate-900 dark:hover:border-white transition-colors p-6 text-center cursor-pointer bg-slate-50 dark:bg-slate-900">
                   <input
                     aria-label="上传视频或音频"
                     title="上传视频或音频"
@@ -485,52 +490,52 @@ export function SubtitlePanel() {
                 </div>
               )}
             </div>
-          </div>
-        </ScrollArea>
+          </ScrollArea>
 
-        {/* 底部操作区 */}
-        <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-t-2 border-slate-900 dark:border-white`}>
-          <button
-            onClick={handleSubmit}
-            disabled={submitDisabled}
-            className={cn(
-              "w-full h-12 text-base font-black uppercase tracking-wider flex items-center justify-center gap-3 transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed",
-              !submitDisabled ? "bg-slate-100 dark:bg-cyan-600 text-slate-900 dark:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" : "bg-slate-300 dark:bg-slate-700 text-slate-500"
-            )}
-          >
-            {isSubmitting ? (
-              <><Loader2 className="w-5 h-5 animate-spin" /> 上传中 {uploadProgress}%</>
-            ) : (
-              "开始生成"
-            )}
-          </button>
+          {/* 底部操作区 */}
+          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-t-2 border-slate-900 dark:border-white`}>
+            <button
+              onClick={handleSubmit}
+              disabled={submitDisabled}
+              className={cn(
+                "w-full h-12 text-base font-black uppercase tracking-wider flex items-center justify-center gap-3 transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed",
+                !submitDisabled ? "bg-slate-900 dark:bg-cyan-600 text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" : "bg-slate-300 dark:bg-slate-700 text-slate-500"
+              )}
+            >
+              {isSubmitting ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> 上传中 {uploadProgress}%</>
+              ) : (
+                "开始生成"
+              )}
+            </button>
 
-          {isSubmitting && (
-            <div className="mt-4 w-full">
-              <div className={`h-4 w-full bg-slate-200 dark:bg-slate-700 border-2 border-slate-900 dark:border-white p-0.5`}>
-                <motion.div
-                  className="h-full bg-slate-100 dark:bg-cyan-600 border-r-2 border-slate-900 dark:border-white"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.max(0, Math.min(100, uploadProgress))}%` }}
-                  transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                />
+            {isSubmitting && (
+              <div className="mt-4 w-full">
+                <div className={`h-4 w-full bg-slate-200 dark:bg-slate-700 border-2 border-slate-900 dark:border-white p-0.5`}>
+                  <motion.div
+                    className="h-full bg-slate-900 dark:bg-cyan-600 border-r-2 border-slate-900 dark:border-white"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(0, Math.min(100, uploadProgress))}%` }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  />
+                </div>
+                <p className="text-xs font-bold text-center mt-2 uppercase text-slate-500">
+                  {uploadProgress < 100 ? `正在上传文件... ${uploadProgress}%` : "上传完成, 等待处理..."}
+                </p>
               </div>
-              <p className="text-xs font-bold text-center mt-2 uppercase text-slate-500">
-                {uploadProgress < 100 ? `正在上传文件... ${uploadProgress}%` : "上传完成, 等待处理..."}
-              </p>
-            </div>
-          )}
+            )}
 
-          {error && (
-            <div className={`mt-3 p-3 font-bold text-sm bg-red-500 text-white border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] break-all`}>
-              {error}
-            </div>
-          )}
-          {currentTask && (
-            <div className={`mt-3 p-3 font-bold text-sm bg-emerald-500 text-slate-900 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] text-center uppercase`}>
-              任务已提交, 请在右侧查看进度
-            </div>
-          )}
+            {error && (
+              <div className={`mt-3 p-3 font-bold text-sm bg-red-500 text-white border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] break-all`}>
+                {error}
+              </div>
+            )}
+            {currentTask && (
+              <div className={`mt-3 p-3 font-bold text-sm bg-cyan-500 text-slate-900 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a] text-center uppercase`}>
+                任务已提交, 请在右侧查看进度
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -577,7 +582,7 @@ export function SubtitlePanel() {
                         <div className={`w-16 h-16 bg-slate-100 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
                           <Captions className="h-8 w-8 text-slate-900" />
                         </div>
-                        <span className="text-lg font-black uppercase text-emerald-600 tracking-wider">任务已完成</span>
+                        <span className="text-lg font-black uppercase text-cyan-600 tracking-wider">任务已完成</span>
                       </div>
                     )}
                   </div>
@@ -613,14 +618,14 @@ export function SubtitlePanel() {
                   <div className="flex flex-wrap gap-4 mt-2">
                     {activeRecord.output_video_url && (
                       <a href={activeRecord.output_video_url} target="_blank" rel="noopener noreferrer">
-                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
+                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
                           <ExternalLink className="w-4 h-4" /> 成品视频
                         </button>
                       </a>
                     )}
                     {activeRecord.target_lang === "audio_extract" && activeRecord.zh_srt_url && (
                       <a href={activeRecord.zh_srt_url} target="_blank" rel="noopener noreferrer">
-                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
+                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
                           <ExternalLink className="w-4 h-4" /> 提取音频
                         </button>
                       </a>
@@ -634,14 +639,14 @@ export function SubtitlePanel() {
                     )}
                     {activeRecord.target_srt_url && activeRecord.task_type !== "to_audio" && (
                       <a href={activeRecord.target_srt_url} target="_blank" rel="noopener noreferrer">
-                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-rose-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
+                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
                           <ExternalLink className="w-4 h-4" /> 翻译字幕
                         </button>
                       </a>
                     )}
                     {activeRecord.target_srt_url && activeRecord.task_type === "to_audio" && (
                       <a href={activeRecord.target_srt_url} target="_blank" rel="noopener noreferrer">
-                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-rose-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
+                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
                           <ExternalLink className="w-4 h-4" /> 提取字幕 (SRT)
                         </button>
                       </a>

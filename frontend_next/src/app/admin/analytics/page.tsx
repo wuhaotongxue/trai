@@ -127,13 +127,13 @@ export default function AnalyticsPage() {
   const coreIndicators = [
     { labelKey: "admin.analytics.total_users", value: data?.total_users || 0, subKey: "admin.analytics.monthly_change", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
     { labelKey: "admin.analytics.digital_coverage", value: "98.5%", subKey: "admin.analytics.achieved", icon: Target, color: "text-cyan-600", bg: "bg-cyan-50" },
-    { labelKey: "admin.analytics.ai_index", value: "84.2", subKey: "admin.analytics.leading", icon: BrainCircuit, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { labelKey: "admin.analytics.operational_health", value: data?.sys_health || 98, subKey: "admin.analytics.system_stable", icon: ShieldCheck, color: "text-rose-600", bg: "bg-rose-50" },
+    { labelKey: "admin.analytics.ai_index", value: "84.2", subKey: "admin.analytics.leading", icon: BrainCircuit, color: "text-cyan-600", bg: "bg-emerald-50" },
+    { labelKey: "admin.analytics.operational_health", value: data?.sys_health || 98, subKey: "admin.analytics.system_stable", icon: ShieldCheck, color: "text-cyan-600", bg: "bg-rose-50" },
   ];
 
   const systemStats = [
     { labelKey: "admin.analytics.db_latency", value: data?.db_latency || "12ms", color: "bg-blue-500" },
-    { labelKey: "admin.analytics.api_efficiency", value: data?.api_latency || "45ms", color: "bg-emerald-500" },
+    { labelKey: "admin.analytics.api_efficiency", value: data?.api_latency || "45ms", color: "bg-cyan-500" },
     { labelKey: "admin.analytics.ai_pressure", value: translate("admin.analytics.low"), color: "bg-slate-200" },
   ];
 
@@ -260,7 +260,7 @@ export default function AnalyticsPage() {
                         </td>
                         <td className="px-4 py-4 text-center font-mono font-bold text-foreground">{d.user_count}</td>
                         <td className="px-4 py-4 text-center">
-                          <span className="px-2 py-1 rounded-none bg-emerald-500/10 text-emerald-600 text-xs font-bold">
+                          <span className="px-2 py-1 rounded-none bg-cyan-500/10 text-cyan-600 text-xs font-bold">
                             +{d.new_hires}
                           </span>
                         </td>

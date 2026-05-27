@@ -216,15 +216,15 @@ export default function OrganizationPage() {
       </div>
 
       {syncResult && (
-        <Card className="border-emerald-500/20 bg-emerald-500/5 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+        <Card className="border-emerald-500/20 bg-cyan-500/5 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
           <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3 text-emerald-600">
+            <div className="flex items-center gap-3 text-cyan-600">
               <RefreshCw className="h-5 w-5" />
               <div className="text-sm font-medium">
                 {translate("admin.organization.sync_complete")}: {translate("admin.organization.sync_departments").replace("{departments}", syncResult.departments.toString())},{translate("admin.organization.sync_users").replace("{users}", syncResult.users.toString())}
               </div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setSyncResult(null)} className="h-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10">
+            <Button size="sm" variant="ghost" onClick={() => setSyncResult(null)} className="h-8 text-cyan-600 hover:text-emerald-700 hover:bg-cyan-500/10">
               {translate("admin.organization.sync_close")}
             </Button>
           </CardContent>

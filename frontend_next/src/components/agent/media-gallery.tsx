@@ -173,7 +173,7 @@ export function MediaGallery({
           {/* 当前结果区 */}
           {filteredCurrent.length > 0 && (
             <div className="mb-3">
-              <p className={`text-[10px] font-semibold uppercase tracking-wider px-1 mb-2 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              <p className={`text-[10px] font-semibold uppercase tracking-wider px-1 mb-2 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-emerald-400'}`}>
                 当前结果
               </p>
               <div className={viewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-1"}>
@@ -264,7 +264,7 @@ function MediaCardItem({
       {viewMode === "list" && (
         <div className="flex-1 min-w-0 p-2">
           <p className="text-xs text-foreground truncate" title={item.prompt}>{item.prompt}</p>
-          <p className={`text-[10px] mt-0.5 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+          <p className={`text-[10px] mt-0.5 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-emerald-400'}`}>
             {isVideo ? (item.id === "current-generated" ? "视频生成" : "视频生成") : (item.id === "current-generated" ? "绘图生成" : "图片编辑")}
           </p>
         </div>

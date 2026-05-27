@@ -202,7 +202,7 @@ export function ElectronChatPanel({
                   </span>
                   <span
                     className={`w-2 h-2 rounded-none ${
-                      message.toolSuccess ? "bg-emerald-500" : "bg-red-500"
+                      message.toolSuccess ? "bg-cyan-500" : "bg-red-500"
                     }`}
                   />
                 </div>
@@ -266,8 +266,8 @@ export function ElectronChatPanel({
 
             {/* User Avatar */}
             {message.role === "user" && (
-              <div className="shrink-0 w-8 h-8 rounded-none bg-emerald-500/10 flex items-center justify-center">
-                <User className="h-4 w-4 text-emerald-500" />
+              <div className="shrink-0 w-8 h-8 rounded-none bg-cyan-500/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-cyan-500" />
               </div>
             )}
           </div>

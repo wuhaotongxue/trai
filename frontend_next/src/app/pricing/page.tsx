@@ -143,7 +143,7 @@ export default function PricingPage() {
                 <ul className="mt-6 space-y-2.5">
                   {plan.features.map((fKey) => (
                     <li key={fKey} className="flex items-center gap-2.5 text-sm text-slate-600">
-                      <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-cyan-500 flex-shrink-0" />
                       {translate(fKey)}
                     </li>
                   ))}

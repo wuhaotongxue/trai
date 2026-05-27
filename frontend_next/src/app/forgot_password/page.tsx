@@ -95,8 +95,8 @@ export default function ForgotPasswordPage() {
 
           {sent ? (
             <div className="text-center space-y-6 py-8">
-              <div className="w-16 h-16 rounded-none bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              <div className="w-16 h-16 rounded-none bg-cyan-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="h-8 w-8 text-cyan-500" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">{translate("forgot_password.sent_title")}</h2>

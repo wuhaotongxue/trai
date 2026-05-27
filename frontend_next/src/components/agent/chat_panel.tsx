@@ -248,7 +248,7 @@ export function ChatPanel() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* 顶部导航 */}
         <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20`}>
-          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-emerald-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
+          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-cyan-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
             {showHistory ? <PanelLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </button>
           
@@ -256,10 +256,10 @@ export function ChatPanel() {
             <div className="flex items-center gap-3 py-1">
               {[
                 { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
-                { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-slate-50 dark:bg-emerald-600" },
+                { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "video", label: "视频生成", icon: Video, bg: "bg-slate-50 dark:bg-orange-600" },
                 { id: "music", label: "音乐创作", icon: Music, bg: "bg-slate-50 dark:bg-indigo-600" },
-                { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-slate-50 dark:bg-rose-600" },
+                { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "subtitle", label: "智能字幕", icon: Captions, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "downloader", label: "视频下载", icon: Download, bg: "bg-sky-300 dark:bg-sky-600" },
                 { id: "digital_human", label: "数字人", icon: UserRound, bg: "bg-teal-300 dark:bg-teal-600" },
@@ -430,7 +430,7 @@ export function ChatPanel() {
                                 type="button"
                                 onClick={handleGenerateImage}
                                 disabled={isGeneratingImage || !imagePrompt.trim()}
-                                className={`w-full h-16 bg-emerald-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                                className={`w-full h-16 bg-cyan-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
                               >
                                 {isGeneratingImage ? (
                                   <><Loader2 className="h-6 w-6 animate-spin" /> 正在生成</>
@@ -448,7 +448,7 @@ export function ChatPanel() {
                                     </div>
                                     <div className={`h-4 w-full bg-slate-200 dark:bg-slate-700 ${brutalBorder} p-0.5`}>
                                       <motion.div
-                                        className="h-full bg-emerald-500 border-r-2 border-slate-900"
+                                        className="h-full bg-cyan-500 border-r-2 border-slate-900"
                                         initial={{ width: 0 }}
                                         animate={{ width: `${Math.max(0, Math.min(100, imageGenerateProgress))}%` }}
                                         transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -748,7 +748,7 @@ export function ChatPanel() {
                                 type="button"
                                 onClick={handleStartEditImage}
                                 disabled={isEditingImage || !editingImagePreview || !editPrompt.trim()}
-                                className={`flex-1 h-16 bg-rose-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                                className={`flex-1 h-16 bg-cyan-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
                               >
                                 {isEditingImage ? (
                                   <><Loader2 className="h-6 w-6 animate-spin" /> 正在处理</>

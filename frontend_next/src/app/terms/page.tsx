@@ -91,7 +91,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <CheckCircle2 className="h-5 w-5 text-cyan-500" />
               五,免责声明
             </h2>
             <div className="space-y-3 text-sm text-slate-600 leading-relaxed">

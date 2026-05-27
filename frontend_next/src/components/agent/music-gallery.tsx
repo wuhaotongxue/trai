@@ -63,7 +63,7 @@ function MusicCardItem({
       <div className="p-4">
         {/* 标题和播放按钮 */}
         <div className="flex items-center gap-3 mb-3">
-          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-slate-50 dark:bg-emerald-600'}`}>
+          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-slate-50 dark:bg-cyan-600'}`}>
             <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -79,7 +79,7 @@ function MusicCardItem({
             onClick={togglePlay}
             className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
               isPlaying
-                ? 'bg-rose-500 text-white'
+                ? 'bg-cyan-500 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'
             }`}
           >

@@ -180,7 +180,7 @@ function get_area_meta(area: ChangeArea): { label: string; badge_class_name: str
   if (area === "backend") {
     return {
       label: "后端",
-      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-cyan-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
       node_class_name: "fill-emerald-500",
     };
   }
@@ -211,8 +211,8 @@ function get_status_meta(status: RoadmapStatus): {
   if (status === "completed") {
     return {
       label: "已完成",
-      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
-      dot_class_name: "bg-emerald-500 dark:bg-slate-100",
+      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-cyan-500/10 dark:text-emerald-400",
+      dot_class_name: "bg-cyan-500 dark:bg-slate-100",
       icon: "check",
     };
   }

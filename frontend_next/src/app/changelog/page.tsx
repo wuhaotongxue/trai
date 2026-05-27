@@ -16,12 +16,12 @@ import { useI18n } from "@/i18n/i18n_context";
 const typeConfig = {
   feat: {
     labelKey: "changelog.tag.feat",
-    color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+    color: "bg-emerald-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
     icon: <PlusCircle className="w-3.5 h-3.5" />,
   },
   fix: {
     labelKey: "changelog.tag.fix",
-    color: "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800",
+    color: "bg-rose-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800",
     icon: <Bug className="w-3.5 h-3.5" />,
   },
   refactor: {

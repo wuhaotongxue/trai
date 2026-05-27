@@ -56,8 +56,8 @@ const CATEGORY_CONFIG: Record<
   vision: {
     label: "Vision",
     icon: Eye,
-    bgColorClass: "bg-emerald-500/10",
-    textColorClass: "text-emerald-600 dark:text-emerald-400",
+    bgColorClass: "bg-cyan-500/10",
+    textColorClass: "text-cyan-600 dark:text-emerald-400",
     borderColorClass: "border-emerald-200 dark:border-emerald-800",
   },
   audio: {
@@ -497,7 +497,7 @@ export function AgentTypeSelector({
                             </span>
                           ))}
                           {agent.streaming_supported && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-emerald-600 text-slate-900 dark:text-white">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-cyan-600 text-slate-900 dark:text-white">
                               <Sparkles className="h-3 w-3" />
                               STREAM
                             </span>

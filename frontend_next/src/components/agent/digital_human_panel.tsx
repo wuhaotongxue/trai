@@ -159,7 +159,7 @@ export function DigitalHumanPanel() {
             <Button 
               onClick={handleSend}
               disabled={!input.trim() || isProcessing}
-              className="h-14 w-14 rounded-none bg-rose-500 hover:bg-slate-100 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all shrink-0"
+              className="h-14 w-14 rounded-none bg-cyan-500 hover:bg-slate-100 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all shrink-0"
             >
               <Send className="w-6 h-6" />
             </Button>

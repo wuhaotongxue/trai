@@ -31,7 +31,7 @@ const STATUS_TABS = [
 
 const STATUS_CONFIG = {
   pending: { labelKey: "admin.users.pending", cls: "text-cyan-600 bg-slate-200/10", dot: "bg-slate-200", icon: Clock },
-  active: { labelKey: "admin.users.normal", cls: "text-emerald-600 bg-emerald-500/10", dot: "bg-emerald-500", icon: CheckCircle2 },
+  active: { labelKey: "admin.users.normal", cls: "text-cyan-600 bg-cyan-500/10", dot: "bg-cyan-500", icon: CheckCircle2 },
   disabled: { labelKey: "admin.users.disabled", cls: "text-red-600 bg-red-500/10", dot: "bg-red-500", icon: XCircle },
 };
 
@@ -416,7 +416,7 @@ export default function UsersPage() {
                               <>
                                 <button
                                   onClick={() => void handleApprove(user)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 text-xs font-medium transition-colors"
                                   title={translate("admin.users.approve")}
                                 >
                                   <CheckCircle2 className="h-3.5 w-3.5" />
@@ -447,7 +447,7 @@ export default function UsersPage() {
                             {user.status === "disabled" && (
                               <button
                                 onClick={() => void toggleStatus(user)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 text-xs font-medium transition-colors"
                                 title={translate("admin.users.enable")}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />

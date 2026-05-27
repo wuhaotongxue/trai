@@ -173,7 +173,7 @@ export default function QuotasPage() {
             <CardContent className="space-y-3">
               {plan.featuresKey.map((fKey) => (
                 <div key={fKey} className="flex items-center gap-2 text-xs text-foreground/80">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-cyan-500 flex-shrink-0" />
                   {translate(fKey)}
                 </div>
               ))}
@@ -219,9 +219,9 @@ export default function QuotasPage() {
         <CardHeader className="pb-4 border-b border-border/40">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <ImageIcon className="h-4 w-4 text-emerald-500" />
+              <ImageIcon className="h-4 w-4 text-cyan-500" />
               {translate("admin.quotas.image_config")}
-              <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-none-none font-normal ml-2">ModelScope</span>
+              <span className="text-xs bg-cyan-500/10 text-cyan-600 px-2 py-0.5 rounded-none-none font-normal ml-2">ModelScope</span>
             </CardTitle>
             <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => void fetchImageConfig()}>
               <RefreshCw className="h-3.5 w-3.5" />
@@ -285,7 +285,7 @@ export default function QuotasPage() {
               {translate("admin.quotas.save_config")}
             </Button>
             <span className="text-xs text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-none-none ${imageConfig?.api_key_configured ? "bg-emerald-500" : "bg-red-500"}`} />
+              <span className={`w-2 h-2 rounded-none-none ${imageConfig?.api_key_configured ? "bg-cyan-500" : "bg-red-500"}`} />
               {translate("admin.quotas.api_key")} {imageConfig?.api_key_configured ? translate("admin.quotas.api_key_configured") : translate("admin.quotas.api_key_not_configured")}
             </span>
           </div>

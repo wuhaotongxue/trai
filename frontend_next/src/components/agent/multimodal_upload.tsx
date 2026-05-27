@@ -82,8 +82,8 @@ const FILE_TYPE_CONFIG: Record<
     accept: ".jpg,.jpeg,.png,.gif,.webp,.bmp",
     icon: ImageIcon,
     label: "Image",
-    colorClass: "text-emerald-500",
-    bgColorClass: "bg-emerald-500/10",
+    colorClass: "text-cyan-500",
+    bgColorClass: "bg-cyan-500/10",
     borderColorClass: "border-emerald-500/30 focus:border-emerald-500/60",
   },
   audio: {

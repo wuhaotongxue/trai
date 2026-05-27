@@ -115,7 +115,7 @@ export default function HomePage() {
             <Reveal delay={100}>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-[1.1] mb-8 text-slate-900 dark:text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
                 企业级 <br/>
-                <span className="text-emerald-500 dark:text-emerald-400">大模型</span> 与 <span className="text-indigo-500 dark:text-indigo-400">智能体</span>
+                <span className="text-cyan-500 dark:text-emerald-400">大模型</span> 与 <span className="text-indigo-500 dark:text-indigo-400">智能体</span>
               </h1>
             </Reveal>
 
@@ -128,7 +128,7 @@ export default function HomePage() {
             <Reveal delay={300}>
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                 <Link href="/register">
-                  <Button className="h-16 px-10 text-xl font-black uppercase tracking-widest bg-rose-500 text-white border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
+                  <Button className="h-16 px-10 text-xl font-black uppercase tracking-widest bg-cyan-500 text-white border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
                     立即开始体验 <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </Link>
@@ -193,7 +193,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== Stats ===== */}
-      <section className="py-20 bg-rose-500 border-b-4 border-slate-900 dark:border-white text-slate-900">
+      <section className="py-20 bg-slate-100 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white text-slate-900">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {stats.map((stat, i) => (

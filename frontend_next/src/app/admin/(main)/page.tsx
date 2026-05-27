@@ -50,8 +50,8 @@ const statCards = [
     key: "active_users_today" as const,
     icon: Activity,
     gradient: "from-emerald-500 to-emerald-600",
-    bg: "bg-emerald-500/10",
-    badge: "bg-emerald-500/15 text-emerald-400",
+    bg: "bg-cyan-500/10",
+    badge: "bg-cyan-500/15 text-emerald-400",
     trend: "+5",
     trendUp: true,
     sparkline: [20, 25, 22, 30, 28, 35, 32, 40, 38, 45],
@@ -281,8 +281,8 @@ export default function AdminDashboardPage() {
               </p>
             )}
             {lastUpdated && (
-              <span className="text-xs text-slate-900 dark:text-white font-bold uppercase flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-2 border-slate-900 dark:border-white border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-none-none-none bg-emerald-500 animate-pulse" />
+              <span className="text-xs text-slate-900 dark:text-white font-bold uppercase flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-cyan-500/10 text-cyan-600 dark:text-emerald-400 border-2 border-slate-900 dark:border-white border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-none-none-none bg-cyan-500 animate-pulse" />
                 {translate("admin.dashboard.updated_to")} {lastUpdated.toLocaleTimeString(locale === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
@@ -402,11 +402,11 @@ export default function AdminDashboardPage() {
         <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
-              <Shield className="h-4 w-4 text-emerald-500" />
+              <Shield className="h-4 w-4 text-cyan-500" />
               {translate("admin.dashboard.service_status")}
             </CardTitle>
-            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-emerald-500/10 border-2 border-slate-900 dark:border-white border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-none-none-none bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-cyan-500/10 border-2 border-slate-900 dark:border-white border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-none-none-none bg-cyan-500 animate-pulse" />
               {translate("admin.dashboard.all_ok")}
             </span>
           </CardHeader>
@@ -418,7 +418,7 @@ export default function AdminDashboardPage() {
                   key={svc.nameKey}
                   className="flex items-center gap-3 p-2.5 rounded-none-none-none bg-muted/25 hover:bg-muted/40 transition-colors border-2 border-slate-900 dark:border-white border-transparent hover:border-border/40"
                 >
-                  <div className={`w-8 h-8 rounded-none-none-none flex items-center justify-center ${ok ? "bg-emerald-500/10" : "bg-slate-200/10"}`}>
+                  <div className={`w-8 h-8 rounded-none-none-none flex items-center justify-center ${ok ? "bg-cyan-500/10" : "bg-slate-200/10"}`}>
                     <svc.icon className={`h-4 w-4 ${ok ? "text-emerald-400" : "text-cyan-400"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -429,7 +429,7 @@ export default function AdminDashboardPage() {
                     </p>
                   </div>
                   {ok ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-cyan-500 flex-shrink-0" />
                   ) : (
                     <AlertCircle className="h-4 w-4 text-cyan-500 flex-shrink-0" />
                   )}
@@ -452,7 +452,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-1">
             {[
-              { labelKey: "admin.dashboard.user_growth", valueKey: "admin.dashboard.new_this_month_sub", descKey: "admin.dashboard.new_this_month", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", icon: TrendingUp },
+              { labelKey: "admin.dashboard.user_growth", valueKey: "admin.dashboard.new_this_month_sub", descKey: "admin.dashboard.new_this_month", color: "text-emerald-400", bg: "bg-cyan-500/10", border: "border-emerald-500/20", icon: TrendingUp },
               { labelKey: "admin.dashboard.vip_ratio", valueKey: "vip_pct", descKey: "admin.dashboard.paid_conversion", color: "text-cyan-400", bg: "bg-slate-200/10", border: "border-cyan-500/20", icon: Star },
               { labelKey: "admin.dashboard.agent_total", valueKey: "agent_total", descKey: "admin.dashboard.total_history", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Bot },
               { labelKey: "admin.dashboard.avg_session", valueKey: "avg_session", descKey: "admin.dashboard.msg_per_session", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20", icon: MessageSquare },
@@ -492,7 +492,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${item.color}`}>{displayValue}</p>
-                    {item.labelKey === "admin.dashboard.user_growth" && <ArrowUp className="h-3 w-3 text-emerald-500 ml-auto" />}
+                    {item.labelKey === "admin.dashboard.user_growth" && <ArrowUp className="h-3 w-3 text-cyan-500 ml-auto" />}
                   </div>
                 </div>
               );
@@ -530,7 +530,7 @@ export default function AdminDashboardPage() {
                     const rate = Math.min((t.agent_calls / Math.max(maxAgentCalls, 1)) * 100, 100);
                     const health =
                       rate > 70
-                        ? { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-emerald-400", bg: "bg-emerald-500/10" }
+                        ? { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-emerald-400", bg: "bg-cyan-500/10" }
                         : rate > 40
                         ? { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-cyan-400", bg: "bg-slate-200/10" }
                         : { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-red-400", bg: "bg-red-500/10" };
@@ -540,7 +540,7 @@ export default function AdminDashboardPage() {
                         className="border-b-4 border-slate-900 dark:border-white border-border/40 hover:bg-muted/25 transition-colors"
                       >
                         <td className="py-2.5 text-foreground/80 font-medium">{t.date}</td>
-                        <td className="py-2.5 text-right text-emerald-500 font-medium">+{t.users}</td>
+                        <td className="py-2.5 text-right text-cyan-500 font-medium">+{t.users}</td>
                         <td className="py-2.5 text-right text-slate-900 dark:text-white font-bold uppercase">{t.sessions.toLocaleString()}</td>
                         <td className="py-2.5 text-right text-slate-900 dark:text-white font-bold uppercase">{t.messages.toLocaleString()}</td>
                         <td className="py-2.5 text-right font-semibold text-foreground">{t.agent_calls.toLocaleString()}</td>

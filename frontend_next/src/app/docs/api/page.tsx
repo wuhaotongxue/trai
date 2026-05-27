@@ -22,7 +22,7 @@ const apiFeatures = [
   {
     titleKey: "docs.api.jwt",
     descKey: "docs.api.jwt.desc",
-    icon: <Key className="h-5 w-5 text-emerald-500" />,
+    icon: <Key className="h-5 w-5 text-cyan-500" />,
   },
   {
     titleKey: "docs.api.sse",
@@ -53,7 +53,7 @@ const endpoints = [
     method: "POST",
     path: "/api/chat/completions",
     descKey: "docs.api.chat",
-    color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10",
+    color: "text-cyan-600 dark:text-emerald-400 bg-emerald-50 dark:bg-cyan-500/10",
   },
   {
     method: "POST",
@@ -154,9 +154,9 @@ export default function ApiDocsPage() {
               <div className="bg-[#0f172a] rounded-none p-6 md:p-8 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] overflow-hidden border border-slate-800 relative">
                 <div className="absolute top-0 left-0 right-0 h-10 bg-slate-800/50 flex items-center px-4 border-b border-slate-700">
                   <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-none bg-rose-500" />
+                    <div className="w-3 h-3 rounded-none bg-cyan-500" />
                     <div className="w-3 h-3 rounded-none bg-slate-200" />
-                    <div className="w-3 h-3 rounded-none bg-emerald-500" />
+                    <div className="w-3 h-3 rounded-none bg-cyan-500" />
                   </div>
                   <div className="mx-auto text-xs text-slate-400 font-mono">request.sh</div>
                 </div>

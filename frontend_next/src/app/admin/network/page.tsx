@@ -62,7 +62,7 @@ export default function NetworkPage() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: translate("admin.network.cpu_usage"), value: `${stats?.cpu_percent || 0}%`, icon: Cpu, color: "text-blue-400", bg: "bg-blue-500/15" },
-          { label: translate("admin.network.memory_usage"), value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-emerald-500/15" },
+          { label: translate("admin.network.memory_usage"), value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-cyan-500/15" },
           { label: translate("admin.network.disk_usage"), value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-cyan-400", bg: "bg-slate-200/15" },
         ].map((item) => (
           <Card key={item.label} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
@@ -101,7 +101,7 @@ export default function NetworkPage() {
                 <span className="font-mono text-foreground">{( (stats?.network_recv || 0) / 1024 / 1024 / 1024 ).toFixed(2)} GB</span>
               </div>
               <div className="h-2 bg-muted/40 rounded-none-none overflow-hidden">
-                <div className="h-full bg-emerald-500 w-[45%]" />
+                <div className="h-full bg-cyan-500 w-[45%]" />
               </div>
             </div>
           </div>

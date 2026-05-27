@@ -112,7 +112,7 @@ function GalleryHeader({
             </button>
             <button
               onClick={onClear}
-              className="flex items-center gap-1 h-8 px-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-black uppercase tracking-wider border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              className="flex items-center gap-1 h-8 px-2 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-black uppercase tracking-wider border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
             >
               <Trash2 className="h-3 w-3" />
               清空
