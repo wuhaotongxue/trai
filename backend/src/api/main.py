@@ -377,7 +377,6 @@ def register_routers(app: FastAPI) -> None:
         api_prefix = f"/{api_prefix}"
     api_prefix = api_prefix.rstrip("/")
 
-    from api.routers import tools
     from api.routers.admin import (
         ai_mgmt,
         analytics_router,
@@ -415,7 +414,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.system import monitor as system_monitor
     from api.routers.system.contact import router as contact_router
     from api.routers.system.i18n import router as i18n_public_router
-    from api.routers.system.websocket import websocket_router
+    from api.routers.system.websocket import router as websocket_router
 
     app.include_router(health.router, prefix=f"{api_prefix}/system", tags=["系统"])
     app.include_router(system_monitor.router, prefix=f"{api_prefix}/system", tags=["系统"])
@@ -457,7 +456,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(agent.router, prefix=api_prefix, tags=["Agent"])
     app.include_router(management.router, prefix=api_prefix, tags=["Agent 管理"])
     app.include_router(multimodal_agent_router, prefix=api_prefix, tags=["Multimodal Agent"])
-    app.include_router(websocket_router.router, tags=["WebSocket"])
+    app.include_router(websocket_router, tags=["WebSocket"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
     app.include_router(contact_router, prefix=api_prefix, tags=["公开接口"])

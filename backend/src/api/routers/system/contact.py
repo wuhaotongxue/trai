@@ -7,13 +7,15 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.orm import Session
 
 from api.deps import CurrentUserOptional
 from core.logger import get_logger
+from infrastructure.database import get_db_session
 from infrastructure.services.email_service import EmailService
 
 router = APIRouter()
@@ -129,7 +131,7 @@ class ContactRouter:
     async def submit_contact_form(
         req: ContactFormRequest,
         background_tasks: BackgroundTasks,
-        email_service: EmailService = Depends(EmailService),
+        db_session: Annotated[Session, Depends(get_db_session)],
         current_user: CurrentUserOptional = None,
     ) -> ContactFormResponse:
         """
@@ -138,11 +140,12 @@ class ContactRouter:
         参数:
             req (ContactFormRequest): 表单数据
             background_tasks (BackgroundTasks): 后台任务管理器
-            email_service (EmailService): 邮件服务
+            db_session (Session): 数据库会话
             current_user (CurrentUserOptional): 可选的当前用户
         返回值:
             ContactFormResponse: 提交结果
         """
+        email_service = EmailService(db_session)
         contact_data = req.model_dump()
         if current_user:
             contact_data["user_id"] = current_user.id
