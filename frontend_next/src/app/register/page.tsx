@@ -1,6 +1,7 @@
 /**
  * page.tsx
  * TRAI 注册页
+ * - Neo-Brutalism 风格
  */
 
 "use client";
@@ -16,9 +17,9 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const benefits = [
-  { icon: Zap, key: "register.benefit.1" },
-  { icon: Globe, key: "register.benefit.2" },
-  { icon: Shield, key: "register.benefit.3" },
+  { icon: Zap, key: "register.benefit.1", color: "bg-amber-400" },
+  { icon: Globe, key: "register.benefit.2", color: "bg-cyan-400" },
+  { icon: Shield, key: "register.benefit.3", color: "bg-emerald-400" },
 ];
 
 function validatePassword(p: string): boolean {
@@ -46,10 +47,10 @@ export default function RegisterPage() {
     setError(null);
     const errors: typeof fieldErrors = {};
 
-    if (form.username.length < 3) errors.username = translate("register.validation.username_min");
-    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) errors.username = translate("register.validation.username_format");
-    if (!form.email.includes("@")) errors.email = translate("register.validation.email_invalid");
-    if (!validatePassword(form.password)) errors.password = translate("register.validation.password_weak");
+    if (form.username.length < 3) errors.username = translate("register.validation.username_min") || "用户名至少3个字符";
+    if (!/^[a-zA-Z0-9_]+$/.test(form.username)) errors.username = translate("register.validation.username_format") || "用户名只能包含字母数字下划线";
+    if (!form.email.includes("@")) errors.email = translate("register.validation.email_invalid") || "无效的邮箱格式";
+    if (!validatePassword(form.password)) errors.password = translate("register.validation.password_weak") || "密码太弱";
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -65,218 +66,190 @@ export default function RegisterPage() {
       });
       setRegisteredEmail(form.email);
       setSuccess(true);
-    } catch (e: any) {
-      setError(e.message || translate("register.error.failed"));
+    } catch (e) {
+      const err = e as Error;
+      setError(err.message || (translate("register.error.failed") || "注册失败"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-rose-400 selection:text-slate-900">
       {/* 左侧品牌区 */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-indigo-700 via-blue-700 to-blue-600 p-12 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        </div>
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-rose-400 p-12 border-r-4 border-slate-900 dark:border-white relative">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #0f172a 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-xl">
-              <Bot className="h-6 w-6 text-white" />
+        <div className="relative flex items-center justify-between z-10">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
+              <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
-              <span className="text-xl font-bold text-white">TRAI</span>
-              <span className="block text-xs text-white/60 -mt-0.5">AI Agent Platform</span>
+              <span className="text-3xl font-black text-slate-900 uppercase tracking-widest">TRAI</span>
             </div>
-          </div>
+          </Link>
           <LanguageSwitcher />
         </div>
 
-        <div className="relative space-y-8">
+        <div className="relative space-y-10 z-10">
           <div>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              {translate("register.hero.title1")}<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">
-                {translate("register.hero.title2")}
-              </span>
+            <h1 className="text-5xl font-black text-slate-900 uppercase tracking-widest leading-tight mb-6 bg-white inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-1">
+              {translate("register.hero.title1") || "加入 TRAI"}
             </h1>
-            <p className="text-white/60 text-base leading-relaxed max-w-sm">
-              {translate("register.hero.subtitle")}
+            <br />
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-widest leading-tight bg-emerald-400 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
+              {translate("register.hero.title2") || "开启 AI 之旅"}
+            </h2>
+            <p className="text-slate-900 text-xl font-bold leading-relaxed max-w-md mt-6">
+              {translate("register.hero.subtitle") || "注册即可获取免费调用额度，体验强大的 AI 能力。"}
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {benefits.map((b) => (
-              <div key={b.key} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3.5 border border-white/10">
-                <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-                  <b.icon className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm text-white/90 font-medium">{translate(b.key)}</span>
+              <div key={b.key} className={`flex items-center gap-4 ${b.color} border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] px-4 py-3 transform transition-transform hover:translate-x-2`}>
+                <b.icon className="h-6 w-6 text-slate-900" />
+                <span className="text-lg text-slate-900 font-black uppercase tracking-wider">{translate(b.key) || b.key.split('.').pop()}</span>
               </div>
             ))}
           </div>
-
-          {/* 评价 */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
-            <div className="flex gap-1 mb-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <svg key={i} className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              ))}
-            </div>
-            <p className="text-sm text-white/80 italic leading-relaxed mb-3">
-              &ldquo;{translate("register.testimonial.quote")}&rdquo;
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white text-xs font-semibold">{translate("register.testimonial.avatar")}</div>
-              <div>
-                <p className="text-xs font-medium text-white">{translate("register.testimonial.name")}</p>
-                <p className="text-xs text-white/50">{translate("register.testimonial.role")}</p>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        <div className="relative text-xs text-white/40">
-          {translate("register.footer.brand")}
+        <div className="relative text-sm font-bold text-slate-900 uppercase tracking-widest z-10">
+          {translate("register.footer.brand") || "© 2026 TRAI AI PLATFORM"}
         </div>
       </div>
 
       {/* 右侧注册表单 */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* Logo - 移动端 */}
-          <div className="lg:hidden flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Bot className="h-5 w-5 text-white" />
+          <div className="lg:hidden flex items-center justify-between mb-10">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+                <Bot className="h-6 w-6 text-slate-900" />
               </div>
-              <span className="text-xl font-bold text-foreground">TRAI</span>
-            </div>
+              <span className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest">TRAI</span>
+            </Link>
             <LanguageSwitcher />
           </div>
 
           {success ? (
-            <div className="text-center space-y-6 py-8">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+            <div className="text-center space-y-8 py-8 border-4 border-slate-900 dark:border-white p-8 bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
+              <div className="w-20 h-20 bg-emerald-400 border-4 border-slate-900 flex items-center justify-center mx-auto shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-6">
+                <CheckCircle2 className="h-10 w-10 text-slate-900" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">{translate("register.success.title")}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {translate("register.success.email_sent")} <span className="font-medium text-foreground">{registeredEmail}</span>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4">{translate("register.success.title") || "注册成功"}</h2>
+                <p className="text-lg font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {translate("register.success.email_sent") || "确认邮件已发送至"}{" "}
+                  <span className="font-black text-slate-900 dark:text-white bg-amber-200 px-2 border-2 border-slate-900">{registeredEmail}</span>
                 </p>
-                <div className="mt-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 text-sm text-blue-600 dark:text-blue-400 text-left">
-                  <div className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p>{translate("register.success.awaiting_review")}</p>
+                <div className="mt-6 p-4 bg-cyan-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 text-left font-bold">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-6 w-6 shrink-0" />
+                    <p>{translate("register.success.awaiting_review") || "请等待管理员审核，审核通过后即可登录。"}</p>
                   </div>
                 </div>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Link href="/login">
-                  <Button className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/20">
-                    {translate("register.success.back_to_login")}
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                  <Button className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none">
+                    {translate("register.success.back_to_login") || "返回登录"}
+                    <ArrowRight className="h-6 w-6 ml-3" />
                   </Button>
                 </Link>
-                <button onClick={() => { setSuccess(false); setForm({ username: "", email: "", password: "" }); }} className="w-full h-11 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  {translate("register.success.register_another")}
+                <button onClick={() => { setSuccess(false); setForm({ username: "", email: "", password: "" }); }} className="w-full h-12 text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest hover:text-slate-900 dark:hover:text-white transition-colors">
+                  {translate("register.success.register_another") || "注册其他账号"}
                 </button>
               </div>
             </div>
           ) : (
             <>
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-foreground">{translate("register.form.title")}</h2>
-                <p className="text-sm text-muted-foreground mt-2">{translate("register.form.subtitle")}</p>
+              <div className="mb-10">
+                <h2 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-widest">{translate("register.form.title") || "创建账号"}</h2>
+                <p className="text-lg font-bold text-slate-600 dark:text-slate-400 mt-2">{translate("register.form.subtitle") || "几步操作即可开启 AI 体验"}</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-1.5">
-                  <Label htmlFor="username" className="text-sm font-medium text-foreground/80">{translate("register.form.username")}</Label>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("register.form.username") || "用户名"}</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder={translate("register.form.username_placeholder")}
+                    placeholder={translate("register.form.username_placeholder") || "字母、数字或下划线"}
                     value={form.username}
                     onChange={setField("username")}
-                    className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm ${fieldErrors.username ? "border-red-500/60 focus:border-red-500" : ""}`}
+                    className={`h-14 rounded-none border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500 focus-visible:shadow-[4px_4px_0px_0px_#6366f1] transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${fieldErrors.username ? "border-rose-500 focus-visible:border-rose-500 shadow-[4px_4px_0px_0px_#f43f5e]" : ""}`}
                     autoComplete="username"
                   />
                   {fieldErrors.username && (
-                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{fieldErrors.username}</p>
+                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.username}</p>
                   )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("register.form.email")}</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("register.form.email") || "邮箱"}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder={translate("register.form.email_placeholder")}
+                    placeholder={translate("register.form.email_placeholder") || "你的电子邮箱"}
                     value={form.email}
                     onChange={setField("email")}
-                    className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm ${fieldErrors.email ? "border-red-500/60 focus:border-red-500" : ""}`}
+                    className={`h-14 rounded-none border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500 focus-visible:shadow-[4px_4px_0px_0px_#6366f1] transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white ${fieldErrors.email ? "border-rose-500 focus-visible:border-rose-500 shadow-[4px_4px_0px_0px_#f43f5e]" : ""}`}
                     autoComplete="email"
                   />
                   {fieldErrors.email && (
-                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{fieldErrors.email}</p>
+                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.email}</p>
                   )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{translate("register.form.password")}</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("register.form.password") || "密码"}</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder={translate("register.form.password_placeholder")}
+                      placeholder={translate("register.form.password_placeholder") || "至少 8 位，包含字母和数字"}
                       value={form.password}
                       onChange={setField("password")}
-                      className={`h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm pr-12 ${fieldErrors.password ? "border-red-500/60 focus:border-red-500" : ""}`}
+                      className={`h-14 rounded-none border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500 focus-visible:shadow-[4px_4px_0px_0px_#6366f1] transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white pr-12 ${fieldErrors.password ? "border-rose-500 focus-visible:border-rose-500 shadow-[4px_4px_0px_0px_#f43f5e]" : ""}`}
                       autoComplete="new-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-900 dark:text-white hover:text-indigo-500 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                     </button>
                   </div>
                   {fieldErrors.password && (
-                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{fieldErrors.password}</p>
+                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2"><AlertCircle className="h-4 w-4" />{fieldErrors.password}</p>
                   )}
                 </div>
 
                 {error && (
-                  <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                    <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-red-500 text-xs font-bold">!</span>
-                    </div>
-                    <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                  <div className="flex items-center gap-3 p-4 bg-rose-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
+                    <span className="text-slate-900 text-xl font-black">!</span>
+                    <p className="text-sm font-bold text-slate-900 uppercase tracking-wide">{error}</p>
                   </div>
                 )}
 
                 {/* 密码强度指示 */}
                 {form.password && (
-                  <div className="space-y-1.5">
-                    <div className="flex gap-1">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
                       {validatePassword(form.password) ? (
-                        <div className="flex items-center gap-1.5 text-xs text-emerald-500">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          {translate("register.form.password_strong")}
+                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-500 bg-emerald-100 px-2 py-1 border-2 border-emerald-500 shadow-[2px_2px_0px_0px_#10b981]">
+                          <CheckCircle2 className="h-4 w-4" />
+                          {translate("register.form.password_strong") || "密码强度合格"}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 text-xs text-amber-500">
-                          <AlertCircle className="h-3.5 w-3.5" />
-                          {translate("register.form.password_weak")}
+                        <div className="flex items-center gap-2 text-sm font-bold text-amber-500 bg-amber-100 px-2 py-1 border-2 border-amber-500 shadow-[2px_2px_0px_0px_#f59e0b]">
+                          <AlertCircle className="h-4 w-4" />
+                          {translate("register.form.password_weak") || "密码需包含字母和数字，且至少8位"}
                         </div>
                       )}
                     </div>
@@ -286,41 +259,36 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   disabled={loading || !form.username || !form.email || !form.password}
-                  className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-60"
+                  className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      {translate("register.form.registering")}
+                    <span className="flex items-center gap-3">
+                      <span className="w-6 h-6 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                      {translate("register.form.registering") || "注册中..."}
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      {translate("register.form.register")}
-                      <ArrowRight className="h-4 w-4" />
+                      {translate("register.form.register") || "立即注册"}
+                      <ArrowRight className="h-6 w-6" />
                     </span>
                   )}
                 </Button>
               </form>
 
-              <div className="relative flex items-center justify-center mt-5">
+              <div className="relative flex items-center justify-center my-8">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border/60" />
+                  <div className="w-full border-t-4 border-slate-900 dark:border-white" />
                 </div>
-                <span className="relative px-3 bg-background text-xs text-muted-foreground">{translate("register.form.has_account")}</span>
+                <span className="relative px-4 bg-white dark:bg-slate-900 text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                  {translate("register.form.has_account") || "已经有账号？"}
+                </span>
               </div>
 
               <Link href="/login">
-                <Button variant="outline" className="w-full h-12 text-sm font-medium rounded-xl mt-5">
-                  {translate("register.form.login_now")}
+                <Button variant="outline" className="w-full h-14 text-lg font-black uppercase tracking-widest bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:bg-slate-100 dark:hover:bg-slate-700 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] dark:hover:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none">
+                  {translate("register.form.login_now") || "前往登录"}
                 </Button>
               </Link>
-
-              <p className="text-center text-xs text-muted-foreground/60 mt-5">
-                {translate("register.form.agree_terms_1")}{" "}
-                <Link href="/terms" className="underline hover:text-foreground transition-colors">{translate("register.form.terms")}</Link>
-                {" "}{translate("register.form.and")}{" "}
-                <Link href="/privacy" className="underline hover:text-foreground transition-colors">{translate("register.form.privacy")}</Link>
-              </p>
             </>
           )}
         </div>

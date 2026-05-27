@@ -5,6 +5,7 @@
  * 作者: wuhao
  * 日期: 2026-05-23
  * 描述: 数字人实时对话面板
+ * - Neo-Brutalism 风格
  */
 
 import { useState, useRef, useEffect } from "react";
@@ -51,12 +52,6 @@ export function DigitalHumanPanel() {
     setIsProcessing(true);
 
     try {
-      // 直接调用 Agent 的 tool endpoint 进行测试, 或者调用专门的 API
-      // 这里为了简单, 我们调用一个封装好的 API, 但后端没有专门的 API,
-      // 后端有 DigitalHumanChatTool, 我们可以通过执行工具的接口或者 Agent chat 来调用.
-      // 因为这是"实时对话", 我们可以向大模型发送请求, 然后把大模型的回复转给数字人TTS,
-      // 或者我们可以直接调用一个伪造的 API, 等一下后端我们可以补充这个 API.
-      
       const res = await request<{ reply: string, video_url: string }>("/ai/digital_human/chat", {
         method: "POST",
         body: JSON.stringify({ text: userText })
@@ -78,7 +73,7 @@ export function DigitalHumanPanel() {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "抱歉, 数字人生成出现错误.",
+        content: "抱歉，数字人生成出现错误。",
       }]);
     } finally {
       setIsProcessing(false);
@@ -86,53 +81,59 @@ export function DigitalHumanPanel() {
   };
 
   return (
-    <div className="flex w-full overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur shadow-xl shadow-slate-200/40 dark:shadow-none min-h-[560px]">
+    <div className="flex w-full h-[700px] border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] bg-white dark:bg-slate-900">
       {/* 左侧: 数字人视频展示区 */}
-      <div className="flex-1 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-black relative">
+      <div className="flex-1 border-r-4 border-slate-900 dark:border-white flex flex-col bg-slate-100 dark:bg-slate-800 relative">
         {currentVideo ? (
           <video 
             src={currentVideo} 
             autoPlay 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             onEnded={() => {
               // 视频播放结束可以做一些动作
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400">
-            <Bot className="w-24 h-24 mb-4 opacity-20" />
-            <p>等待数字人接入...</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-900 dark:text-white">
+            <div className="w-32 h-32 bg-amber-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center mb-6 transform -rotate-3">
+              <Bot className="w-16 h-16 text-slate-900" />
+            </div>
+            <p className="font-black uppercase tracking-widest text-2xl">等待数字人接入</p>
+            <p className="font-bold text-sm mt-2">请在右侧发送消息</p>
           </div>
         )}
         
         {isProcessing && (
-          <div className="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur text-white p-3 rounded-xl flex items-center gap-3">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm">数字人正在思考并生成回复...</span>
+          <div className="absolute bottom-6 left-6 right-6 bg-rose-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 p-4 flex items-center gap-4 transform rotate-1">
+            <Loader2 className="w-6 h-6 animate-spin font-black" />
+            <span className="text-lg font-black uppercase tracking-widest">数字人正在思考...</span>
           </div>
         )}
       </div>
 
       {/* 右侧: 聊天记录区 */}
-      <div className="w-[420px] flex flex-col bg-white/70 dark:bg-slate-950/30">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 font-semibold flex items-center gap-2">
-          <Bot className="w-5 h-5 text-teal-500" />
+      <div className="w-[480px] flex flex-col bg-white dark:bg-slate-900">
+        <div className="p-5 border-b-4 border-slate-900 dark:border-white font-black uppercase tracking-widest text-xl flex items-center gap-3 bg-emerald-400 text-slate-900">
+          <Bot className="w-6 h-6" />
           数字人对话
         </div>
         
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 p-6" ref={scrollRef}>
+          <div className="space-y-6">
             {messages.length === 0 && (
-              <div className="text-center text-sm text-slate-400 mt-10">
-                发个消息开始与数字人聊天吧
+              <div className="text-center mt-12 opacity-50 text-slate-900 dark:text-white">
+                <div className="w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] mx-auto mb-4">
+                  <Bot className="w-10 h-10" />
+                </div>
+                <div className="font-black uppercase text-xl tracking-widest">暂无对话记录</div>
               </div>
             )}
             {messages.map(msg => (
-              <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500"}`}>
-                  {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+              <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`w-12 h-12 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-indigo-400 text-slate-900" : "bg-white text-slate-900"}`}>
+                  {msg.role === "user" ? <User className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
                 </div>
-                <div className={`max-w-[75%] p-3 rounded-2xl text-sm shadow-sm ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"}`}>
+                <div className={`max-w-[75%] p-4 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] font-bold text-base leading-relaxed ${msg.role === "user" ? "bg-cyan-400 text-slate-900" : "bg-amber-200 text-slate-900"}`}>
                   {msg.content}
                 </div>
               </div>
@@ -140,8 +141,8 @@ export function DigitalHumanPanel() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/20">
-          <div className="flex items-center gap-2">
+        <div className="p-6 border-t-4 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800">
+          <div className="flex items-center gap-3">
             <Input 
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -152,16 +153,15 @@ export function DigitalHumanPanel() {
                 }
               }}
               placeholder="输入对话内容..."
-              className="flex-1 rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+              className="flex-1 h-14 rounded-none bg-white dark:bg-slate-900 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[4px_4px_0px_0px_#10b981]"
               disabled={isProcessing}
             />
             <Button 
               onClick={handleSend}
               disabled={!input.trim() || isProcessing}
-              size="icon"
-              className="rounded-2xl bg-teal-600 hover:bg-teal-700 text-white shrink-0"
+              className="h-14 w-14 rounded-none bg-rose-500 hover:bg-rose-400 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all shrink-0"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-6 h-6" />
             </Button>
           </div>
         </div>

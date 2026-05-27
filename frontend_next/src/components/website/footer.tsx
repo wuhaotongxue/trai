@@ -1,11 +1,7 @@
 /**
  * footer.tsx
  * TRAI 官网页脚
- * - 双语支持
- * - 品牌信息
- * - 链接分组
- * - 社交媒体
- * - 底部版权
+ * - Neo-Brutalism 风格
  */
 
 "use client";
@@ -81,9 +77,9 @@ function BackToTop() {
       type="button"
       aria-label="Back to top"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className={`fixed bottom-6 right-6 z-50 w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30 flex items-center justify-center transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-110 active:scale-95 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+      className={`fixed bottom-8 right-8 z-50 w-14 h-14 bg-amber-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 flex items-center justify-center transition-all hover:bg-amber-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
     >
-      <ArrowUp className="h-5 w-5" />
+      <ArrowUp className="h-8 w-8 font-black" />
     </button>
   );
 }
@@ -95,44 +91,38 @@ export function Footer() {
 
   return (
     <>
-      <footer className="relative bg-slate-950 dark:bg-black border-t border-slate-800/50 overflow-hidden">
-        {/* 背景装饰 */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-40 bg-blue-500/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-32 bg-indigo-500/5 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container mx-auto px-4 py-16 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+      <footer className="bg-white dark:bg-slate-900 border-t-4 border-slate-900 dark:border-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-12 mb-16">
             {/* 品牌区域 */}
             <div className="col-span-2">
-              <Link href="/" className="inline-flex items-center gap-2.5 mb-5 group">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-shadow">
-                  <Bot className="h-5 w-5 text-white" />
+              <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
+                <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+                  <Bot className="h-6 w-6 text-slate-900" />
                 </div>
-                <span className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">TRAI</span>
+                <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white">TRAI</span>
               </Link>
-              <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
+              <p className="text-lg font-bold text-slate-700 dark:text-slate-300 leading-relaxed mb-8 max-w-sm">
                 {isEn
                   ? "Next-generation AI Agent platform for secure, reliable, and scalable enterprise solutions."
-                  : "新一代 AI Agent 平台,为企业提供安全,可靠,可扩展的智能助手解决方案."}
+                  : "新一代 AI Agent 平台，为企业提供安全、可靠、可扩展的智能助手解决方案。"}
               </p>
 
               {/* 社交媒体 */}
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-4">
                 {[
-                  { Icon: Globe2, href: "#", label: "Community" },
-                  { Icon: MessageCircle, href: "#", label: "WeChat" },
-                  { Icon: Users, href: "#", label: "Forum" },
-                ].map(({ Icon, href, label }) => (
+                  { Icon: Globe2, href: "#", label: "Community", color: "bg-emerald-400" },
+                  { Icon: MessageCircle, href: "#", label: "WeChat", color: "bg-cyan-400" },
+                  { Icon: Users, href: "#", label: "Forum", color: "bg-rose-400" },
+                ].map(({ Icon, href, label, color }) => (
                   <a
                     key={label}
                     href={href}
                     aria-label={label}
                     title={label}
-                    className="w-10 h-10 rounded-xl bg-slate-800/60 hover:bg-blue-500/20 flex items-center justify-center text-slate-400 hover:text-blue-400 transition-all duration-200 border border-slate-700/50 hover:border-blue-500/30"
+                    className={`w-12 h-12 ${color} border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center text-slate-900 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_#0f172a] transition-all`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-6 w-6" />
                   </a>
                 ))}
               </div>
@@ -141,21 +131,19 @@ export function Footer() {
             {/* 链接分组 */}
             {Object.entries(links).map(([category, categoryLinks]) => (
               <div key={category}>
-                <h3 className="text-sm font-semibold text-white/90 mb-4 flex items-center gap-2">
-                  <span className="w-1 h-4 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500" />
+                <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white mb-6 border-b-4 border-slate-900 dark:border-white inline-block pb-2">
                   {category}
                 </h3>
-                <ul className="space-y-3">
+                <ul className="space-y-4">
                   {categoryLinks.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-slate-500 hover:text-blue-400 transition-colors duration-200 inline-flex items-center gap-1 group"
+                        className="text-lg font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-amber-400 dark:hover:bg-amber-500 hover:px-2 transition-all duration-200 inline-block"
                       >
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">&#x2022;</span>
-                        <span className="group-hover:translate-x-0.5 transition-transform">{link.label}</span>
+                        {link.label}
                       </Link>
                     </li>
                   ))}
@@ -165,28 +153,19 @@ export function Footer() {
           </div>
 
           {/* 分隔线 */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-800/80" />
-            </div>
-            <div className="relative flex justify-center">
-              <div className="px-4 bg-slate-950 dark:bg-black">
-                <div className="w-2 h-2 rounded-full bg-blue-500/40" />
-              </div>
-            </div>
-          </div>
+          <div className="border-t-4 border-slate-900 dark:border-white w-full my-8" />
 
           {/* 底部版权栏 */}
-          <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-6 text-xs text-slate-500">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6 text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
               <span>&copy; {new Date().getFullYear()} TRAI. {isEn ? "All rights reserved." : "保留所有权利."}</span>
-              <span className="hidden md:block w-px h-3 bg-slate-700" />
+              <span className="hidden md:block w-1 h-4 bg-slate-900 dark:bg-white" />
               <span>{isEn ? "Built with Next.js + Tailwind CSS" : "基于 Next.js + Tailwind CSS 构建"}</span>
             </div>
-            <div className="flex items-center gap-5 text-xs text-slate-500">
-              <Link href="/privacy" className="hover:text-white transition-colors">{isEn ? "Privacy" : "隐私政策"}</Link>
-              <Link href="/terms" className="hover:text-white transition-colors">{isEn ? "Terms" : "服务条款"}</Link>
-              <Link href="/cookies" className="hover:text-white transition-colors">{isEn ? "Cookies" : "Cookie 设置"}</Link>
+            <div className="flex items-center gap-6 text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white transition-colors">{isEn ? "Privacy" : "隐私政策"}</Link>
+              <Link href="/terms" className="hover:text-slate-900 dark:hover:text-white transition-colors">{isEn ? "Terms" : "服务条款"}</Link>
+              <Link href="/cookies" className="hover:text-slate-900 dark:hover:text-white transition-colors">{isEn ? "Cookies" : "Cookie 设置"}</Link>
             </div>
           </div>
         </div>

@@ -69,6 +69,9 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_05_27_1033
+- **重构(UI)**: 将所有主要前端页面（Homepage, Navbar, Footer, Login, Register, Agent Panels, Sidebar）重构为统一的 Neo-Brutalism（新粗野主义）设计风格，并增加完善的中文空白页填充（Empty States）。
+
 ### ✨ 后端重构与规范闭环_2026_05_26_2240
 - **架构升级**: 按照领域驱动设计（DDD）重构了后端目录结构，新增了 `api/routers/system`、`api/routers/tools` 等分类文件夹。
 - **类型提示补完**: 全面修复了所有核心函数的 `入参` 和 `返回值` 类型提示，确保 100% 符合 Python 3.13 规范。

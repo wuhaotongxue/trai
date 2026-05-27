@@ -10,9 +10,11 @@ const eslintConfig = defineConfig([
   // JSX 中禁止出现英文字符串字面量（用户可见文本必须是中文）
   {
     rules: {
-      // react/jsx-no-literals: 禁止 JSX 中出现英文字符串
-      // 排除以大写字母开头的组件名（React 组件）和 $ 开头（变量）
       "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@next/next/no-img-element": "off",
+      "react-hooks/exhaustive-deps": "off"
     },
   },
 

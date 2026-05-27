@@ -1,6 +1,7 @@
 /**
  * page.tsx
  * TRAI 登录页
+ * - Neo-Brutalism 风格
  */
 
 "use client";
@@ -17,10 +18,10 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const features = [
-  { icon: Zap, key: "login.feature.1" },
-  { icon: Shield, key: "login.feature.2" },
-  { icon: Globe, key: "login.feature.3" },
-  { icon: Sparkles, key: "login.feature.4" },
+  { icon: Zap, key: "login.feature.1", color: "bg-amber-400" },
+  { icon: Shield, key: "login.feature.2", color: "bg-emerald-400" },
+  { icon: Globe, key: "login.feature.3", color: "bg-cyan-400" },
+  { icon: Sparkles, key: "login.feature.4", color: "bg-rose-400" },
 ];
 
 function LoginForm() {
@@ -46,13 +47,13 @@ function LoginForm() {
     const err = searchParams.get("error");
     const reason = searchParams.get("reason");
     if (reason === "quota_exceeded") {
-      setErrorMessage(translate("login.error.quota_exceeded"));
+      setErrorMessage(translate("login.error.quota_exceeded") || "配额超限");
     } else if (err === "not_bound") {
-      setErrorMessage(translate("login.error.not_bound"));
+      setErrorMessage(translate("login.error.not_bound") || "账号未绑定");
     } else if (err === "account_disabled") {
-      setErrorMessage(translate("login.error.account_disabled"));
+      setErrorMessage(translate("login.error.account_disabled") || "账号已禁用");
     } else if (err === "auth_failed" || err === "wecom_auth_failed") {
-      setErrorMessage(translate("login.error.wecom_failed"));
+      setErrorMessage(translate("login.error.wecom_failed") || "企微登录失败");
     }
   }, [searchParams, translate]);
 
@@ -76,11 +77,11 @@ function LoginForm() {
         window.location.href = "/agent";
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : translate("login.error.failed");
+      const message = e instanceof Error ? e.message : (translate("login.error.failed") || "登录失败");
       if (message.toLowerCase().includes("fetch") || message.toLowerCase().includes("network")) {
-        setErrorMessage(`${translate("login.error.backend")} ${apiBase}`);
+        setErrorMessage(`${translate("login.error.backend") || "后端未响应"} ${apiBase}`);
       } else if (message.includes("403") || message.includes("待审核") || message.includes("禁用")) {
-        setErrorMessage(message.includes("403") ? translate("login.error.account_disabled_2") : message);
+        setErrorMessage(message.includes("403") ? (translate("login.error.account_disabled_2") || "账号待审核或禁用") : message);
       } else {
         setErrorMessage(message);
       }
@@ -91,201 +92,168 @@ function LoginForm() {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-screen bg-white">
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          <div className="w-12 h-12 border-4 border-slate-900 border-t-amber-400 animate-spin" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-rose-400 selection:text-slate-900">
       {/* 左侧品牌展示区 */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-indigo-400 p-12 border-r-4 border-slate-900 dark:border-white relative">
         {/* 背景装饰 */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-cyan-400/10 rounded-full blur-2xl" />
-          {/* 网格背景 */}
-          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        </div>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #0f172a 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
         {/* Logo */}
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-xl">
-              <Bot className="h-6 w-6 text-white" />
+        <div className="relative flex items-center justify-between z-10">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
+              <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
-              <span className="text-xl font-bold text-white">TRAI</span>
-              <span className="block text-xs text-white/60 -mt-0.5">AI Agent Platform</span>
+              <span className="text-3xl font-black text-slate-900 uppercase tracking-widest">TRAI</span>
             </div>
-          </div>
+          </Link>
           <LanguageSwitcher />
         </div>
 
         {/* 核心内容 */}
-        <div className="relative space-y-8">
+        <div className="relative space-y-10 z-10">
           <div>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              让 AI 替你<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">
-                完成工作
-              </span>
+            <h1 className="text-5xl font-black text-slate-900 uppercase tracking-widest leading-tight mb-6 bg-white inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-1">
+              让 AI 替你工作
             </h1>
-            <p className="text-white/60 text-base leading-relaxed max-w-sm">
-              企业级 AI 助手平台,支持多工具调用,自动纠错,VLM 视觉理解与流式交互
+            <p className="text-slate-900 text-xl font-bold leading-relaxed max-w-md bg-amber-200 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
+              企业级 AI 助手平台，支持多工具调用、自动纠错、视觉理解与流式交互。
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-6">
             {features.map((f) => (
-              <div key={f.key} className="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
-                <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
-                  <f.icon className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-sm text-white/90 font-medium">{translate(f.key)}</span>
+              <div key={f.key} className={`flex items-center gap-4 ${f.color} border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] px-4 py-3 transform transition-transform hover:-translate-y-1`}>
+                <f.icon className="h-6 w-6 text-slate-900" />
+                <span className="text-lg text-slate-900 font-black uppercase tracking-wider">{translate(f.key) || f.key.split('.').pop()}</span>
               </div>
             ))}
-          </div>
-
-          {/* 评价 */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
-            <div className="flex gap-1 mb-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <svg key={i} className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              ))}
-            </div>
-            <p className="text-sm text-white/80 italic leading-relaxed mb-3">
-              &ldquo;{translate("login.testimonial.quote")}&rdquo;
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center text-white text-xs font-semibold">{translate("login.testimonial.avatar")}</div>
-              <div>
-                <p className="text-xs font-medium text-white">{translate("login.testimonial.name")}</p>
-                <p className="text-xs text-white/50">{translate("login.testimonial.role")}</p>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* 底部 */}
-        <div className="relative text-xs text-white/40">
-          {translate("login.footer.brand")}
+        <div className="relative text-sm font-bold text-slate-900 uppercase tracking-widest z-10">
+          {translate("login.footer.brand") || "© 2026 TRAI AI PLATFORM"}
         </div>
       </div>
 
       {/* 右侧登录表单区 */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* Logo - 移动端显示 */}
-          <div className="lg:hidden flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Bot className="h-5 w-5 text-white" />
+          <div className="lg:hidden flex items-center justify-between mb-10">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+                <Bot className="h-6 w-6 text-slate-900" />
               </div>
-              <span className="text-xl font-bold text-foreground">TRAI</span>
-            </div>
+              <span className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest">TRAI</span>
+            </Link>
             <LanguageSwitcher />
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">{translate("login.form.title")}</h2>
-            <p className="text-sm text-muted-foreground mt-2">{translate("login.form.subtitle")}</p>
+          <div className="mb-10">
+            <h2 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-widest">{translate("login.form.title") || "欢迎回来"}</h2>
+            <p className="text-lg font-bold text-slate-600 dark:text-slate-400 mt-2">{translate("login.form.subtitle") || "请登录您的账号"}</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("login.form.username")}</Label>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("login.form.username") || "账号"}</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder={translate("login.form.username_placeholder")}
+                placeholder={translate("login.form.username_placeholder") || "邮箱/用户名"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
+                className="h-14 rounded-none border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500 focus-visible:shadow-[4px_4px_0px_0px_#6366f1] transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 autoComplete="username"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-foreground/80">{translate("login.form.password")}</Label>
-                <Link href="/forgot_password" className="text-xs text-blue-500 hover:text-blue-600 transition-colors">
-                  {translate("login.form.forgot_password")}
+                <Label htmlFor="password" className="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">{translate("login.form.password") || "密码"}</Label>
+                <Link href="/forgot_password" className="text-sm font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest transition-colors border-b-2 border-transparent hover:border-rose-500">
+                  {translate("login.form.forgot_password") || "忘记密码？"}
                 </Link>
               </div>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={translate("login.form.password_placeholder")}
+                  placeholder={translate("login.form.password_placeholder") || "输入密码"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 rounded-xl border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm pr-12"
+                  className="h-14 rounded-none border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-lg font-bold focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-indigo-500 focus-visible:shadow-[4px_4px_0px_0px_#6366f1] transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white pr-12"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-900 dark:text-white hover:text-indigo-500 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                 </button>
               </div>
             </div>
 
             {errorMessage && (
-              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-red-500 text-xs font-bold">!</span>
-                </div>
-                <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+              <div className="flex items-center gap-3 p-4 bg-rose-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
+                <span className="text-slate-900 text-xl font-black">!</span>
+                <p className="text-sm font-bold text-slate-900 uppercase tracking-wide">{errorMessage}</p>
               </div>
             )}
 
             <Button
               type="submit"
               disabled={loading || !email.trim() || !password.trim()}
-              className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-60"
+              className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  {translate("login.form.logging_in")}
+                <span className="flex items-center gap-3">
+                  <span className="w-6 h-6 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                  {translate("login.form.logging_in") || "登录中..."}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  {translate("login.form.login")}
-                  <ArrowRight className="h-4 w-4" />
+                  {translate("login.form.login") || "登录"}
+                  <ArrowRight className="h-6 w-6" />
                 </span>
               )}
             </Button>
 
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center my-8">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/60" />
+                <div className="w-full border-t-4 border-slate-900 dark:border-white" />
               </div>
-              <span className="relative px-3 bg-background text-xs text-muted-foreground">{translate("login.form.other_methods")}</span>
+              <span className="relative px-4 bg-white dark:bg-slate-900 text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                {translate("login.form.other_methods") || "其他登录方式"}
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 h-12 rounded-xl border border-border/60 bg-background hover:bg-muted/40 transition-all text-sm font-medium text-foreground/70 hover:text-foreground"
+                className="flex items-center justify-center gap-3 h-14 bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-slate-900 dark:text-white font-black uppercase tracking-widest hover:-translate-y-1 transition-transform"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866.523 3.952 1.464l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.478 2.543 12s4.478 10 10.002 10c3.31 0 5.954-1.193 8.033-3.152l-3.033-2.609z" />
                 </svg>
-                {translate("login.form.google")}
+                {translate("login.form.google") || "Google"}
               </button>
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 h-12 rounded-xl border border-border/60 bg-background hover:bg-muted/40 transition-all text-sm font-medium text-foreground/70 hover:text-foreground"
+                className="flex items-center justify-center gap-3 h-14 bg-blue-500 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-white font-black uppercase tracking-widest hover:-translate-y-1 transition-transform"
                 onClick={async () => {
                   try {
                     const res = await fetch(`${apiBase}/auth/wecom/url`);
@@ -294,30 +262,23 @@ function LoginForm() {
                       window.location.href = data.url;
                     }
                   } catch {
-                    setErrorMessage(translate("login.error.wecom_url_failed"));
+                    setErrorMessage(translate("login.error.wecom_url_failed") || "获取企微登录链接失败");
                   }
                 }}
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.996 22.46c-5.772 0-10.45-4.679-10.45-10.45S6.224 1.56 11.996 1.56c5.771 0 10.45 4.678 10.45 10.45s-4.679 10.45-10.45 10.45zm0-19.46c-4.968 0-8.988 4.02-8.988 8.988s4.02 8.989 8.988 8.989c4.968 0 8.988-4.021 8.988-8.989S16.964 3 11.996 3zm-2.85 13.568v-7.14h1.764v5.617h3.693v1.523H9.146zm2.85-8.54c-.642 0-1.162-.52-1.162-1.163 0-.641.52-1.162 1.162-1.162.641 0 1.162.521 1.162 1.162 0 .642-.52 1.163-1.162 1.163z" />
                 </svg>
-                {translate("login.form.wecom")}
+                {translate("login.form.wecom") || "企业微信"}
               </button>
             </div>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            {translate("login.form.no_account")}{" "}
-            <Link href="/register" className="text-blue-500 hover:text-blue-600 font-medium transition-colors">
-              {translate("login.form.register_now")}
+          <p className="text-center text-sm font-bold text-slate-600 dark:text-slate-400 mt-8 uppercase tracking-widest">
+            {translate("login.form.no_account") || "没有账号？"}{" "}
+            <Link href="/register" className="text-slate-900 dark:text-white bg-amber-400 px-2 py-1 border-2 border-slate-900 hover:bg-amber-300 transition-colors shadow-[2px_2px_0px_0px_#0f172a]">
+              {translate("login.form.register_now") || "立即注册"}
             </Link>
-          </p>
-
-          <p className="text-center text-xs text-muted-foreground/60 mt-4">
-            {translate("login.form.agree_terms_1")}{" "}
-            <Link href="/terms" className="underline hover:text-foreground transition-colors">{translate("login.form.terms")}</Link>
-            {" "}{translate("login.form.and")}{" "}
-            <Link href="/privacy" className="underline hover:text-foreground transition-colors">{translate("login.form.privacy")}</Link>
           </p>
         </div>
       </div>
@@ -327,7 +288,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-6 h-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-12 h-12 border-4 border-slate-900 border-t-amber-400 animate-spin" /></div>}>
       <LoginForm />
     </Suspense>
   );

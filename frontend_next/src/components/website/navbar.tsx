@@ -2,11 +2,7 @@
 /**
  * navbar.tsx
  * TRAI 官网导航栏
- * - 浅色模式(默认)+ 深色模式切换
- * - 滚动后背景模糊效果
- * - 主题切换按钮
- * - 语言切换
- * - 移动端菜单
+ * - Neo-Brutalism 风格
  */
 
 "use client";
@@ -66,83 +62,73 @@ export function Navbar() {
   }, []);
 
   const navItems = [
-    { label: translate("nav.home"), href: "/" },
-    { label: translate("nav.features"), href: "/features" },
-    { label: translate("nav.pricing"), href: "/pricing" },
-    { label: translate("nav.scenarios"), href: "/#scenarios" },
+    { label: translate("nav.home") || "首页", href: "/" },
+    { label: translate("nav.features") || "功能", href: "/features" },
+    { label: translate("nav.pricing") || "价格", href: "/pricing" },
     {
-      label: translate("nav.docs"),
+      label: translate("nav.docs") || "文档",
       href: "/docs",
       children: [
-        { label: translate("nav.quickstart"), href: "/docs/quickstart" },
-        { label: translate("nav.api"), href: "/docs/api" },
-        { label: translate("nav.sdk"), href: "/docs/sdk" },
-        { label: translate("nav.faq"), href: "/docs/faq" },
+        { label: translate("nav.quickstart") || "快速开始", href: "/docs/quickstart" },
+        { label: translate("nav.api") || "API 文档", href: "/docs/api" },
+        { label: translate("nav.faq") || "常见问题", href: "/docs/faq" },
       ],
     },
-    { label: translate("nav.about"), href: "/about" },
-    { label: translate("nav.contact"), href: "/contact" },
+    { label: translate("nav.about") || "关于", href: "/about" },
   ];
 
   return (
     <header
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-white/95 dark:bg-[#0d1220]/95 glass border-b border-slate-200/80 dark:border-slate-800/60 shadow-sm"
-          : "bg-white/80 dark:bg-[#0d1220]/80 dark:backdrop-blur-md"
+        "bg-white dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white"
       )}
     >
-      {/* 顶部渐变条 */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
-              <Bot className="h-[18px] w-[18px] text-white" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:group-hover:shadow-[6px_6px_0px_0px_#ffffff] transition-all">
+              <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">TRAI</span>
-              <span className="hidden sm:inline text-[10px] text-blue-500 font-medium ml-1.5 -mt-1 block">AI Agent</span>
+              <span className="text-2xl font-black tracking-widest text-slate-900 dark:text-white uppercase">TRAI</span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-0.5">
+          <nav className="hidden lg:flex items-center gap-2">
             {navItems.map((item) => (
               <div key={item.href} className="relative">
                 {item.children ? (
                   <button
-                    className="flex items-center gap-1 px-3.5 py-2 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100/80 dark:hover:bg-white/10"
+                    className="flex items-center gap-1 px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
                     onClick={() =>
                       setOpenDropdown(openDropdown === item.label ? null : item.label)
                     }
                     onBlur={() => setTimeout(() => setOpenDropdown(null), 150)}
                   >
                     {item.label}
-                    <ChevronDown className="h-3.5 w-3.5 transition-transform" />
+                    <ChevronDown className="h-4 w-4" />
                   </button>
                 ) : (
                   <Link
                     href={item.href}
-                    className="px-3.5 py-2 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100/80 dark:hover:bg-white/10"
+                    className="px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:text-slate-900 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
                   >
                     {item.label}
                   </Link>
                 )}
 
                 {item.children && openDropdown === item.label && (
-                  <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-[#0d1220] border border-slate-200/80 dark:border-slate-800/60 rounded-xl shadow-xl shadow-blue-500/5 py-2 z-50 backdrop-blur-sm animate-[slideUpFade_0.2s_cubic-bezier(0,0,0.2,1)_both]">
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-900 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] py-2 z-50">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-100/90 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 font-bold text-slate-900 dark:text-white hover:bg-amber-400 hover:text-slate-900 border-y-2 border-transparent hover:border-slate-900 transition-colors uppercase tracking-wider"
                         onClick={() => setOpenDropdown(null)}
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                         {child.label}
                       </Link>
                     ))}
@@ -153,94 +139,82 @@ export function Navbar() {
           </nav>
 
           {/* Right: Language + Theme Toggle + AI Assistant + CTA */}
-          <div className="hidden lg:flex items-center gap-2.5">
+          <div className="hidden lg:flex items-center gap-4">
             <LanguageSwitcher />
             <ThemeToggle />
+            
             <Button
-              variant="ghost"
-              size="sm"
-              className="text-sm text-slate-700 dark:text-slate-200 font-medium gap-1.5 px-3"
+              variant="outline"
+              className="h-10 px-4 gap-2 font-black uppercase tracking-widest bg-cyan-400 text-slate-900 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-cyan-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
               onClick={() => setFloatingChatOpen(true)}
             >
-              <div className="relative">
-                <Bot className="h-4 w-4 text-blue-500" />
-                <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              </div>
-              {translate("nav.ai_assistant")}
+              <Bot className="h-5 w-5" />
+              AI 助手
             </Button>
+            
             {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
+              <div className="w-10 h-10 border-2 border-slate-900 bg-slate-200 animate-pulse shadow-[4px_4px_0px_0px_#0f172a]" />
             ) : user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2.5 pl-3 border-l border-slate-200/60 dark:border-slate-700/60 hover:opacity-90 transition-opacity outline-none">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shadow-lg shadow-blue-500/20">
+                <DropdownMenuTrigger className="flex items-center gap-3 pl-4 border-l-4 border-slate-900 dark:border-white hover:opacity-80 transition-opacity outline-none">
+                  <div className="w-10 h-10 bg-rose-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-lg font-black shadow-[4px_4px_0px_0px_#0f172a]">
                     {user?.display_name?.[0] || user?.username?.[0] || "A"}
                   </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white leading-none">{user?.display_name || user?.username || "用户"}</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{user?.email || "已登录"}</p>
-                  </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 hidden lg:block" />
+                  <ChevronDown className="h-5 w-5 text-slate-900 dark:text-white hidden lg:block" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 p-2 bg-white dark:bg-[#0d1220] border border-slate-200 dark:border-slate-700 shadow-xl">
-                  <DropdownMenuLabel className="p-2">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{user?.display_name || user?.username || "用户"}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{user?.email || ""}</div>
+                <DropdownMenuContent align="end" className="w-56 p-0 bg-white dark:bg-slate-900 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] rounded-none">
+                  <DropdownMenuLabel className="p-4 border-b-4 border-slate-900 dark:border-white bg-indigo-400 text-slate-900">
+                    <div className="text-lg font-black uppercase tracking-wider">{user?.display_name || user?.username || "用户"}</div>
+                    <div className="text-sm font-bold">{user?.email || ""}</div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem className="rounded-lg cursor-pointer text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>{translate("nav.profile")}</span>
+                  <DropdownMenuGroup className="p-2">
+                    <DropdownMenuItem className="p-3 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 cursor-pointer rounded-none">
+                      <User className="mr-3 h-5 w-5" />
+                      <span>个人中心</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
-                  <DropdownMenuItem 
-                    className="rounded-lg cursor-pointer text-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
-                    onClick={() => { 
-                      Cookies.remove("token"); 
-                      Cookies.remove("refresh_token"); 
-                      window.location.href = "/login"; 
-                    }}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>{translate("nav.logout")}</span>
-                  </DropdownMenuItem>
+                  <div className="border-t-4 border-slate-900 dark:border-white p-2">
+                    <DropdownMenuItem 
+                      className="p-3 font-bold text-slate-900 uppercase tracking-wider bg-rose-400 hover:bg-rose-500 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] cursor-pointer rounded-none"
+                      onClick={() => { 
+                        Cookies.remove("token"); 
+                        Cookies.remove("refresh_token"); 
+                        window.location.href = "/login"; 
+                      }}
+                    >
+                      <LogOut className="mr-3 h-5 w-5" />
+                      <span>退出登录</span>
+                    </DropdownMenuItem>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" size="sm" className="text-sm text-slate-700 dark:text-slate-200 font-medium">
-                    {translate("nav.login")}
+                  <Button variant="ghost" className="font-black uppercase tracking-widest text-slate-900 dark:text-white hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 rounded-none h-10 px-6">
+                    登录
                   </Button>
                 </Link>
                 <Link href="/register">
                   <Button
-                    size="sm"
-                    className="text-sm font-semibold shadow-md shadow-blue-500/15 transition-all duration-300 rounded-full px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+                    className="h-10 px-6 font-black uppercase tracking-widest bg-rose-500 text-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-rose-400 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
                   >
-                    <Sparkles className="h-3 w-3 mr-1.5" />
-                    {translate("nav.register")}
+                    免费注册
                   </Button>
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile: Language + Theme + Menu */}
-          <div className="flex items-center gap-1.5 lg:hidden">
+          {/* Mobile: Menu Toggle */}
+          <div className="flex items-center gap-3 lg:hidden">
             <LanguageSwitcher />
             <ThemeToggle />
             <button
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+              className="p-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-slate-900 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
-              <div className="relative w-5 h-5">
-                <X className={cn("h-5 w-5 text-slate-900 dark:text-white absolute inset-0 transition-all duration-300", mobileOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90")} />
-                <Menu className={cn("h-5 w-5 text-slate-900 dark:text-white absolute inset-0 transition-all duration-300", mobileOpen ? "opacity-0 -rotate-90" : "opacity-100 rotate-0")} />
-              </div>
+              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -249,16 +223,16 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          "lg:hidden border-t border-slate-200/80 dark:border-slate-800/60 transition-all duration-300 overflow-hidden",
-          mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          "lg:hidden border-t-4 border-slate-900 dark:border-white transition-all duration-300 overflow-hidden bg-white dark:bg-slate-900",
+          mobileOpen ? "max-h-[800px] border-b-4" : "max-h-0 border-0"
         )}
       >
-        <div className="bg-white/95 dark:bg-[#0d1220]/95 glass px-4 py-4 space-y-0.5">
+        <div className="px-4 py-6 space-y-4">
           {navItems.map((item) => (
             <div key={item.href}>
               <Link
                 href={item.href}
-                className="block px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-lg transition-colors"
+                className="block px-4 py-3 font-black text-xl text-slate-900 dark:text-white uppercase tracking-widest hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 transition-all"
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}
@@ -267,7 +241,7 @@ export function Navbar() {
                 <Link
                   key={child.href}
                   href={child.href}
-                  className="block pl-6 pr-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-lg transition-colors"
+                  className="block pl-8 pr-4 py-2 font-bold text-lg text-slate-600 dark:text-slate-400 uppercase hover:text-slate-900 hover:bg-amber-400 border-l-4 border-transparent hover:border-slate-900 transition-all"
                   onClick={() => setMobileOpen(false)}
                 >
                   {child.label}
@@ -275,42 +249,43 @@ export function Navbar() {
               ))}
             </div>
           ))}
-          <div className="flex gap-2 pt-4 mt-2 border-t border-slate-200 dark:border-slate-800/60">
+          <div className="pt-6 border-t-4 border-slate-900 dark:border-white space-y-4">
             {user ? (
               <>
-                <div className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold">
+                <div className="p-4 bg-indigo-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center gap-4">
+                  <div className="w-12 h-12 bg-rose-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-xl font-black">
                     {user?.display_name?.[0] || user?.username?.[0] || "A"}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{user?.display_name || user?.username}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                    <p className="text-lg font-black text-slate-900 uppercase tracking-wider">{user?.display_name || user?.username}</p>
+                    <p className="text-sm font-bold text-slate-800">{user?.email}</p>
                   </div>
                 </div>
                 <button
-                  className="w-full mt-2 px-4 py-2 text-sm text-red-500 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
+                  className="w-full p-4 font-black text-xl uppercase tracking-widest bg-rose-500 text-white border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-3"
                   onClick={() => { 
                     Cookies.remove("token"); 
                     Cookies.remove("refresh_token"); 
                     window.location.href = "/login"; 
                   }}
                 >
-                  <LogOut className="h-4 w-4 inline mr-2" />
-                  {translate("nav.logout")}
+                  <LogOut className="h-6 w-6" />
+                  退出登录
                 </button>
               </>
             ) : (
-              <>
+              <div className="flex gap-4">
                 <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full text-sm rounded-lg">{translate("nav.login")}</Button>
-                </Link>
-                <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full text-sm font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
-                    <Sparkles className="h-3 w-3 mr-1.5" />
-                    {translate("nav.register")}
+                  <Button className="w-full h-14 text-lg font-black uppercase tracking-widest bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] rounded-none hover:bg-slate-100">
+                    登录
                   </Button>
                 </Link>
-              </>
+                <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full h-14 text-lg font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] rounded-none hover:bg-emerald-300">
+                    注册
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>
