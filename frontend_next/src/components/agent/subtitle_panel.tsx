@@ -596,7 +596,7 @@ export function SubtitlePanel() {
                         >
                           <Captions className="h-12 w-12 text-slate-900" />
                         </motion.div>
-                        <span className="text-2xl font-black uppercase text-emerald-600 tracking-widest mt-4">任务已完成</span>
+                        <span className="text-2xl font-black uppercase text-cyan-600 tracking-widest mt-4">任务已完成</span>
                       </div>
                     )}
                   </div>

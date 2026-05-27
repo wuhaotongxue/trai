@@ -323,28 +323,28 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             </button>
             {/* 用户下拉 */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2.5 pl-3 border-l border-border/60 hover:opacity-90 transition-opacity outline-none">
-                <div className="w-8 h-8 rounded-none-none bg-slate-100 flex items-center justify-center text-white text-sm font-semibold shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
+              <DropdownMenuTrigger className="flex items-center gap-2.5 pl-3 border-l-4 border-slate-900 dark:border-white hover:opacity-90 transition-opacity outline-none">
+                <div className="w-8 h-8 border-2 border-slate-900 dark:border-white bg-cyan-500 flex items-center justify-center text-slate-900 font-black text-sm shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">
                   {user?.display_name?.[0] || user?.username?.[0] || "A"}
                 </div>
                 <div className="text-left hidden lg:block">
-                  <p className="text-sm font-semibold text-foreground leading-none">{user?.display_name || user?.username || "管理员"}</p>
-                  <p className="text-[11px] text-slate-900 dark:text-white font-bold mt-0.5">{user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white leading-none">{user?.display_name || user?.username || "管理员"}</p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold mt-1 uppercase">{user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}</p>
                 </div>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-900 dark:text-white font-bold hidden lg:block" />
+                <ChevronDown className="h-4 w-4 text-slate-900 dark:text-white font-bold hidden lg:block" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 p-2">
+              <DropdownMenuContent align="end" className="w-52 p-2 border-4 border-slate-900 dark:border-white rounded-none shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
                 <DropdownMenuLabel className="p-2">
-                  <div className="text-sm font-semibold">{user?.display_name || user?.username || "管理员"}</div>
-                  <div className="text-xs text-slate-900 dark:text-white font-bold">{user?.email || "admin@trai.ai"}</div>
+                  <div className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">{user?.display_name || user?.username || "管理员"}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase mt-1">{user?.email || "admin@trai.ai"}</div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-slate-900 dark:bg-white h-1 my-2" />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="rounded-none-none cursor-pointer"><UserIcon className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.profile")}</span></DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-none-none cursor-pointer"><Settings className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.account_settings")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-none cursor-pointer font-bold uppercase text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-800"><UserIcon className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.profile")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-none cursor-pointer font-bold uppercase text-slate-900 dark:text-white focus:bg-slate-100 dark:focus:bg-slate-800"><Settings className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.account_settings")}</span></DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="rounded-none-none cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                <DropdownMenuSeparator className="bg-slate-900 dark:bg-white h-1 my-2" />
+                <DropdownMenuItem className="rounded-none cursor-pointer font-black uppercase text-white bg-red-500 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] focus:bg-red-600 focus:text-white mt-2"
                   onClick={() => { Cookies.remove("token"); Cookies.remove("refresh_token"); window.location.href = "/login"; }}>
                   <LogOut className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.logout")}</span>
                 </DropdownMenuItem>

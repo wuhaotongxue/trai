@@ -82,7 +82,7 @@ const features = [
   },
   {
     icon: Shield,
-    bg: "bg-amber-300",
+    bg: "bg-cyan-300",
     titleKey: "features.security",
     descKey: "features.security.desc",
     tags: ["JWT 认证", "权限管理", "数据加密"],

@@ -1,75 +1,116 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
 import { Navbar } from "@/components/website/navbar";
 import { Footer } from "@/components/website/footer";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/i18n/i18n_context";
+
+function Reveal({ children, delay = 0, className = "" }: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0)" : "translateY(40px)",
+        transition: `all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 const steps = [
-  { titleKey: "docs.quickstart.step1", descKey: "docs.quickstart.step1.desc", done: true },
-  { titleKey: "docs.quickstart.step2", descKey: "docs.quickstart.step2.desc", done: true },
-  { titleKey: "docs.quickstart.step3", descKey: "docs.quickstart.step3.desc", done: false },
-  { titleKey: "docs.quickstart.step4", descKey: "docs.quickstart.step4.desc", done: false },
+  { title: "第一步：注册账号", desc: "在平台注册您的开发者账号，并完成基础配置。", done: true },
+  { title: "第二步：获取 API Key", desc: "在控制台生成专属的 API 密钥，用于安全调用接口。", done: true },
+  { title: "第三步：集成 SDK", desc: "使用我们提供的官方 SDK，三行代码即可接入。", done: false },
+  { title: "第四步：上线应用", desc: "测试完成后，一键部署并上线您的 AI 应用。", done: false },
 ];
 
 export default function DocsQuickstartPage() {
-  const { translate } = useI18n();
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-12 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <section className="pt-32 pb-20 bg-slate-100 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
-                <BookOpen className="h-4 w-4" />
-                {translate("docs.quickstart.title")}
+            <Reveal>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 border-2 border-slate-900 dark:border-white bg-cyan-300 dark:bg-cyan-600 text-slate-900 dark:text-white text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+                  <BookOpen className="h-4 w-4" />
+                  快速开始
+                </div>
+                <Link href="/docs" className="text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors underline decoration-2 underline-offset-4">
+                  返回文档首页
+                </Link>
               </div>
-              <Link href="/docs" className="text-sm text-slate-500 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors">
-                {translate("docs.quickstart.back")}
-              </Link>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mt-6 tracking-tight">
-              {translate("docs.quickstart.hero.title")}
-            </h1>
-            <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed">
-              {translate("docs.quickstart.hero.desc")}
-            </p>
-            <div className="flex items-center gap-3 mt-6 flex-wrap">
-              <Link href="/agent">
-                <Button className="gap-2">
-                  {translate("docs.quickstart.hero.cta1")} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/docs/api">
-                <Button variant="outline" className="gap-2 border-slate-200 dark:border-slate-700">
-                  {translate("docs.quickstart.hero.cta2")} <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+              <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white mt-6 tracking-tight uppercase leading-tight">
+                五分钟接入<br />
+                <span className="text-cyan-600 dark:text-cyan-400">TRAI 核心能力</span>
+              </h1>
+              <p className="text-xl font-bold text-slate-600 dark:text-slate-400 mt-6 leading-relaxed max-w-3xl">
+                跟随我们的引导，您将快速掌握平台的基础使用方法，并成功运行您的第一个 AI 任务。
+              </p>
+              <div className="flex items-center gap-6 mt-10 flex-wrap">
+                <Link href="/agent">
+                  <Button className="h-16 px-10 rounded-none text-xl font-black uppercase tracking-widest bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all gap-3">
+                    进入控制台 <ArrowRight className="h-6 w-6" />
+                  </Button>
+                </Link>
+                <Link href="/docs/api">
+                  <Button variant="outline" className="h-16 px-10 rounded-none text-xl font-black uppercase tracking-widest bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all gap-3">
+                    查看 API 文档 <ArrowRight className="h-6 w-6" />
+                  </Button>
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
 
-        <section className="py-12">
+        <section className="py-24 bg-white dark:bg-slate-950 border-b-4 border-slate-900 dark:border-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {steps.map((s) => (
-                <div
-                  key={s.titleKey}
-                  className="p-6 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-none flex items-center justify-center ${s.done ? "bg-cyan-500/15" : "bg-muted/40"} `}>
-                      <CheckCircle2 className={`h-5 w-5 ${s.done ? "text-emerald-400" : "text-muted-foreground"}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-slate-900 dark:text-white">{translate(s.titleKey)}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">{translate(s.descKey)}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {steps.map((s, i) => (
+                <Reveal key={s.title} delay={i * 100}>
+                  <div
+                    className="p-8 bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] transition-all duration-300"
+                  >
+                    <div className="flex items-start gap-6">
+                      <div className={`w-16 h-16 flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex-shrink-0 ${s.done ? "bg-cyan-300 dark:bg-cyan-600" : "bg-slate-100 dark:bg-slate-700"} `}>
+                        <CheckCircle2 className={`h-8 w-8 ${s.done ? "text-slate-900 dark:text-white" : "text-slate-400"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mb-2">{s.title}</p>
+                        <p className="text-base font-bold text-slate-600 dark:text-slate-400 leading-relaxed">{s.desc}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>
