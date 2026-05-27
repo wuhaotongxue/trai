@@ -6,7 +6,9 @@
 
 from __future__ import annotations
 
-from application.common.result import Result
+from datetime import datetime
+from uuid import uuid4
+
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
@@ -34,26 +36,26 @@ class VideoDownloaderRouter:
         summary="下载 Bilibili 视频",
         description="接收 Bilibili 视频链接, 使用 yt-dlp 进行高清解析并下载至服务器临时目录",
     )
-    async def download_video(req: DownloadRequest) -> Result:
+    async def download_video(req: DownloadRequest):
         """
         执行视频下载任务
 
         参数:
             req (DownloadRequest): 包含视频 URL 的请求对象
         返回值:
-            Result: 包含下载结果、标题及文件路径的统一响应对象
+            统一响应格式: code/msg/data
         异常:
-            None: 错误信息封装在 Result 对象中返回
+            None: 错误信息封装在响应中返回
         """
         downloader = BilibiliDownloader()
         result = await downloader.download_bilibili(req.url)
+        req_id = str(uuid4())
+        ts = datetime.now().isoformat()
 
         if result["success"]:
-            return Result.success(
-                data={"title": result["title"], "file_path": result["file_path"], "video_id": result["video_id"]}
-            )
+            return {"code": 200, "msg": "OK", "data": {"title": result["title"], "file_path": result["file_path"], "video_id": result["video_id"]}, "req_id": req_id, "ts": ts}
         else:
-            return Result.error(msg=result["error"])
+            return {"code": 500, "msg": result["error"], "data": None, "req_id": req_id, "ts": ts}
 
 
 __all__ = ["VideoDownloaderRouter", "router"]
