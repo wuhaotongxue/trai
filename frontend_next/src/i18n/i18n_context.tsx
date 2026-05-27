@@ -1,6 +1,5 @@
-/* eslint-disable */
 /**
- * i18n_context.tsx
+ * 文件名: i18n_context.tsx
  * 作者: wuhao
  * 日期: 2026-04-24
  * 描述: 国际化上下文 provider

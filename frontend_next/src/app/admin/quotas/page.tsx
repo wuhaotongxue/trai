@@ -6,7 +6,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle2, Edit2, Image, RefreshCw, Save, Sparkles, Zap } from "lucide-react";
+import { CheckCircle2, Edit2, ImageIcon, RefreshCw, Save, Sparkles, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,7 +85,7 @@ interface ImageGenConfig {
 export default function QuotasPage() {
   const { translate, loadNamespace } = useAdminI18n();
   const [imageConfig, setImageConfig] = useState<ImageGenConfig | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const { toast } = useAdminToast();
 
   // 初始化时加载翻译
@@ -219,7 +219,7 @@ export default function QuotasPage() {
         <CardHeader className="pb-4 border-b border-border/40">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Image className="h-4 w-4 text-emerald-500" />
+              <ImageIcon className="h-4 w-4 text-emerald-500" />
               {translate("admin.quotas.image_config")}
               <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full font-normal ml-2">ModelScope</span>
             </CardTitle>

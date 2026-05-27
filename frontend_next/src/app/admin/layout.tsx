@@ -188,23 +188,20 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen overflow-hidden bg-background">
       {/* 侧边栏 */}
-      <aside className={cn("flex-shrink-0 flex flex-col bg-sidebar border-r border-border transition-all duration-300", (sidebarCollapsed ?? false) ? "w-20" : "w-64")}>
+      <aside className={cn("flex-shrink-0 flex flex-col bg-white dark:bg-slate-900 border-r-4 border-slate-900 dark:border-white transition-all duration-300 z-20", (sidebarCollapsed ?? false) ? "w-20" : "w-64")}>
         {/* Logo */}
-        <div className={cn("flex items-center gap-3 h-16 relative overflow-hidden", (sidebarCollapsed ?? false) ? "px-3" : "px-5")}>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600" />
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-indigo-700/90" />
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-xl" />
-          <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center shadow-lg relative z-10">
-            <Bot className="h-5 w-5 text-white" />
+        <div className={cn("flex items-center gap-3 h-16 border-b-4 border-slate-900 dark:border-white bg-amber-400 dark:bg-amber-500", (sidebarCollapsed ?? false) ? "px-3 justify-center" : "px-5")}>
+          <div className="w-10 h-10 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 flex items-center justify-center shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] z-10">
+            <Bot className="h-6 w-6 text-slate-900 dark:text-white" />
           </div>
           {!(sidebarCollapsed ?? false) && (
-            <div className="relative z-10">
-              <span className="text-lg font-bold text-white tracking-wide">TRAI</span>
-              <span className="text-xs text-white/70 block -mt-0.5 leading-none">{translate("admin.sidebar.brand")}</span>
+            <div className="relative z-10 flex-1">
+              <span className="text-xl font-black text-slate-900 uppercase tracking-widest">TRAI</span>
+              <span className="text-[10px] font-bold text-slate-800 block leading-none uppercase">{translate("admin.sidebar.brand")}</span>
             </div>
           )}
-          <button type="button" onClick={toggleSidebar} className="ml-auto w-9 h-9 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all relative z-10" aria-label={translate("admin.sidebar.toggle_sidebar")}>
-            {(sidebarCollapsed ?? false) ? <ChevronsRight className="h-4 w-4 text-white/90" /> : <ChevronsLeft className="h-4 w-4 text-white/90" />}
+          <button type="button" onClick={toggleSidebar} className="w-8 h-8 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 flex items-center justify-center hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all z-10" aria-label={translate("admin.sidebar.toggle_sidebar")}>
+            {(sidebarCollapsed ?? false) ? <ChevronsRight className="h-4 w-4 text-slate-900 dark:text-white" /> : <ChevronsLeft className="h-4 w-4 text-slate-900 dark:text-white" />}
           </button>
         </div>
 
@@ -223,14 +220,14 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* 导航菜单 */}
-        <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-5 scrollbar-thin">
+        <nav className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin">
           {menuGroups.map((group) => {
             return (
-              <div key={group.label} className={(sidebarCollapsed ?? false) ? "space-y-1" : "space-y-0.5"}>
+              <div key={group.label} className={(sidebarCollapsed ?? false) ? "space-y-2" : "space-y-1"}>
                 {!(sidebarCollapsed ?? false) && (
-                  <button type="button" onClick={() => toggleGroup(group.key)} className="w-full flex items-center justify-between px-2 mb-2 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider hover:text-foreground transition-colors">
+                  <button type="button" onClick={() => toggleGroup(group.key)} className="w-full flex items-center justify-between px-2 mb-3 text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b-2 border-slate-900 dark:border-white pb-1">
                     <span>{group.label}</span>
-                    <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", !collapsedGroups[group.key] ? "-rotate-90" : "")} />
+                    <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", !collapsedGroups[group.key] ? "-rotate-90" : "")} />
                   </button>
                 )}
                 {collapsedGroups[group.key] ? null : (
@@ -239,18 +236,16 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                       const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
                       return (
                         <Link key={item.href} href={item.href} title={item.label}
-                          className={cn("group flex items-center rounded-lg text-sm transition-all duration-200 relative overflow-hidden",
-                            (sidebarCollapsed ?? false) ? "justify-center p-2.5 mb-1" : "gap-3 px-3 py-2.5 mb-0.5",
-                            active ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground")}>
-                          {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-white rounded-r shadow-sm" />}
-                          <item.icon className={cn("h-4 w-4 flex-shrink-0", active ? "text-white" : "text-muted-foreground group-hover:text-blue-500")} />
+                          className={cn("group flex items-center transition-all duration-200 border-2 border-slate-900 dark:border-white",
+                            (sidebarCollapsed ?? false) ? "justify-center p-3 mb-2" : "gap-3 px-3 py-3 mb-2",
+                            active ? "bg-emerald-300 dark:bg-emerald-600 text-slate-900 dark:text-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]")}>
+                          <item.icon className={cn("h-5 w-5 flex-shrink-0", active ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white")} />
                           {!(sidebarCollapsed ?? false) && (
                             <>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium leading-none">{item.label}</p>
-                                <p className={cn("text-[11px] mt-0.5 truncate", active ? "text-white/70" : "text-muted-foreground/70")}>{item.desc}</p>
+                                <p className="font-bold text-sm leading-none uppercase tracking-wide">{item.label}</p>
                               </div>
-                              {active ? <ChevronRight className="h-3.5 w-3.5 text-white/60 flex-shrink-0" /> : <div className="w-1.5 h-1.5 rounded-full bg-border/60 group-hover:bg-blue-400 flex-shrink-0 transition-colors" />}
+                              {active && <ChevronRight className="h-4 w-4 text-slate-900 dark:text-white flex-shrink-0" />}
                             </>
                           )}
                         </Link>
@@ -264,31 +259,31 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* 底部版本 */}
-        <div className={cn("py-3 border-t border-border/40", (sidebarCollapsed ?? false) ? "px-3" : "px-4")}>
-          <div className={cn("flex items-center gap-2 text-[10px] text-muted-foreground/50", (sidebarCollapsed ?? false) ? "justify-center" : "")}>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        <div className={cn("py-3 border-t-4 border-slate-900 dark:border-white bg-amber-400 dark:bg-amber-500", (sidebarCollapsed ?? false) ? "px-3" : "px-4")}>
+          <div className={cn("flex items-center gap-2 text-xs font-black uppercase text-slate-900", (sidebarCollapsed ?? false) ? "justify-center" : "")}>
+            <div className="w-2 h-2 border-2 border-slate-900 bg-emerald-400" />
             <span>v2.0.0</span>
           </div>
         </div>
       </aside>
 
       {/* 主内容区 */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative">
         {/* 顶部栏 */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-border/60 bg-card/80 backdrop-blur-sm">
+        <header className="h-16 flex items-center justify-between px-6 border-b-4 border-slate-900 dark:border-white bg-white dark:bg-slate-900 z-10">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium text-foreground/80">TRAI</span>
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
-              <span className="font-semibold text-foreground">{translate("admin.dashboard")}</span>
+            <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+              <span>TRAI</span>
+              <ChevronRight className="h-4 w-4" />
+              <span>{translate("admin.dashboard")}</span>
             </div>
-            <div className="hidden md:block h-5 w-px bg-border/60" />
-            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            <div className="hidden md:block h-6 w-1 bg-slate-900 dark:bg-white" />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-cyan-300 dark:bg-cyan-600 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] text-slate-900 dark:text-white text-xs font-black uppercase">
+              <div className="w-2 h-2 border-2 border-slate-900 bg-white" />
               <span>{translate("admin.v2.0.0")}</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             {/* 中英文切换 */}
             <button
               type="button"
@@ -299,38 +294,32 @@ function AdminShell({ children }: { children: React.ReactNode }) {
                 await refreshTranslations();
                 toast({ message: translate("admin.topbar.lang_switched"), variant: "success", duration: 2000 });
               }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-xl border border-violet-500/20 hover:border-violet-500/40 hover:bg-violet-500/15 transition-all text-xs font-medium disabled:opacity-60"
+              className="flex items-center gap-2 px-3 py-2 bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-xs font-black uppercase disabled:opacity-60"
               title={translate("admin.topbar.switch_lang")}
             >
-              <Globe className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
+              <Globe className={cn("h-4 w-4", refreshing && "animate-spin")} />
               <span>{refreshing ? translate("admin.topbar.switching") : locale === "zh" ? "EN" : "中文"}</span>
             </button>
 
             <button type="button" onClick={() => setFloatingChatOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="relative">
-                <Bot className="h-4 w-4" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              </div>
-              <span className="text-sm font-medium hidden sm:inline">{translate("admin.topbar.ai_assistant")}</span>
+              className="flex items-center gap-2 px-4 py-2 bg-amber-300 dark:bg-amber-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+              <Bot className="h-4 w-4" />
+              <span className="text-xs font-black uppercase hidden sm:inline">{translate("admin.topbar.ai_assistant")}</span>
             </button>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
-              <div className="relative">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-500 animate-ping opacity-75" />
-              </div>
-              <span className="text-xs font-medium">{translate("admin.systemNormal")}</span>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-emerald-400 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a]">
+              <div className="w-2 h-2 border-2 border-slate-900 bg-white animate-pulse" />
+              <span className="text-xs font-black uppercase">{translate("admin.systemNormal")}</span>
             </div>
-            <div className="h-6 w-px bg-border/60 mx-1" />
+            <div className="h-8 w-1 bg-slate-900 dark:bg-white mx-2" />
             <ThemeToggle />
-            <button type="button" className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/50 rounded-lg transition-colors" onClick={() => window.location.reload()}>
-              <RefreshCw className="h-3.5 w-3.5" />
+            <button type="button" className="hidden sm:flex items-center gap-2 px-3 py-2 text-xs font-black uppercase text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[2px_2px_0px_0px_#0f172a] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all" onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4" />
               <span>{translate("admin.topbar.refresh")}</span>
             </button>
             <button type="button" aria-label={translate("admin.topbar.notifications")} title={translate("admin.topbar.notifications")} onClick={() => router.push("/admin/notifications")}
-              className="relative p-2 rounded-lg hover:bg-muted/50 transition-colors">
-              <Bell className="h-4 w-4 text-muted-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-card animate-pulse" />
+              className="relative p-2 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[2px_2px_0px_0px_#0f172a] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+              <Bell className="h-4 w-4 text-slate-900 dark:text-white" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-slate-900" />
             </button>
             {/* 用户下拉 */}
             <DropdownMenu>

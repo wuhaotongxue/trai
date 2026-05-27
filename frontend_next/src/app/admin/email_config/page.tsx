@@ -77,11 +77,6 @@ export default function EmailConfigPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<number | null>(null);
 
-  useEffect(() => {
-    void loadNamespace("admin");
-    void fetchConfigs();
-  }, []);
-
   const fetchConfigs = async () => {
     try {
       const response = await adminApi.getEmailConfigs();
@@ -95,6 +90,11 @@ export default function EmailConfigPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    void loadNamespace("admin");
+    void fetchConfigs();
+  }, []);
 
   const handleOpenModal = (config?: EmailConfig) => {
     if (config) {

@@ -256,7 +256,7 @@ export default function HomePage() {
             </div>
           </Reveal>
         </div>
-      </section></main>
+      </section>
 
       <Footer />
     </div>

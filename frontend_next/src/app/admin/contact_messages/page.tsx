@@ -70,33 +70,35 @@ export default function ContactMessagesPage() {
 
   const pageSize = 20;
 
-  useEffect(() => {
-    void loadNamespace("admin");
-    void fetchMessages();
-  }, [page, statusFilter, typeFilter]);
-
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const params: Record<string, any> = {
+      const response = await adminApi.getContactMessages({
         page,
-        page_size: pageSize,
-      };
-      if (statusFilter) params.status = statusFilter;
-      if (typeFilter) params.type = typeFilter;
-
-      const response = await adminApi.getContactMessages(params);
-      if (response.code === 200) {
-        setMessages(response.data || []);
+        size: pageSize,
+        status: statusFilter === "all" ? undefined : statusFilter,
+        type: typeFilter === "all" ? undefined : typeFilter,
+      });
+      if (response && response.items) {
+        setMessages(response.items);
         setTotal(response.total || 0);
       }
     } catch (error) {
-      console.error("Failed to fetch messages:", error);
-      toast({ message: "获取消息失败", variant: "error" });
+      console.error("Failed to fetch contact messages:", error);
+      toast({
+        title: "获取失败",
+        message: "无法获取联系人消息列表",
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    void loadNamespace("admin");
+    void fetchMessages();
+  }, [page, statusFilter, typeFilter]);
 
   const handleView = (message: ContactMessage) => {
     setSelectedMessage(message);
