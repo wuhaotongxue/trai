@@ -220,7 +220,7 @@ export function ChatPanel() {
             exit={{ width: 0, opacity: 0, x: -20 }}
             className={`flex flex-col overflow-hidden bg-white dark:bg-slate-900 ${brutalBorder} border-l-0 border-t-0 border-b-0 relative z-30`}
           >
-            <div className={`p-4 ${brutalBorder} border-l-0 border-t-0 border-r-0 flex items-center justify-between bg-amber-200 dark:bg-amber-500 text-slate-900`}>
+            <div className={`p-4 ${brutalBorder} border-l-0 border-t-0 border-r-0 flex items-center justify-between bg-cyan-200 dark:bg-slate-200 text-slate-900`}>
               <span className="font-black text-lg uppercase tracking-tight">历史会话</span>
               <button onClick={() => startSession()} className={`h-8 w-8 bg-white flex items-center justify-center ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}><Plus className="h-4 w-4" /></button>
             </div>
@@ -232,7 +232,7 @@ export function ChatPanel() {
                   className={cn(
                     `p-3 mb-3 cursor-pointer transition-all text-sm font-bold truncate ${brutalBorder}`,
                     currentSessionId === s.session_id 
-                      ? `bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white ${brutalShadowSm}` 
+                      ? `bg-slate-50 dark:bg-indigo-600 text-slate-900 dark:text-white ${brutalShadowSm}` 
                       : "bg-white dark:bg-slate-800 hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
@@ -248,7 +248,7 @@ export function ChatPanel() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* 顶部导航 */}
         <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20`}>
-          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-emerald-300 dark:bg-emerald-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
+          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-emerald-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
             {showHistory ? <PanelLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </button>
           
@@ -256,11 +256,11 @@ export function ChatPanel() {
             <div className="flex items-center gap-3 py-1">
               {[
                 { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
-                { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-emerald-300 dark:bg-emerald-600" },
-                { id: "video", label: "视频生成", icon: Video, bg: "bg-orange-300 dark:bg-orange-600" },
-                { id: "music", label: "音乐创作", icon: Music, bg: "bg-indigo-300 dark:bg-indigo-600" },
-                { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-rose-300 dark:bg-rose-600" },
-                { id: "subtitle", label: "智能字幕", icon: Captions, bg: "bg-amber-300 dark:bg-amber-600" },
+                { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-slate-50 dark:bg-emerald-600" },
+                { id: "video", label: "视频生成", icon: Video, bg: "bg-slate-50 dark:bg-orange-600" },
+                { id: "music", label: "音乐创作", icon: Music, bg: "bg-slate-50 dark:bg-indigo-600" },
+                { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-slate-50 dark:bg-rose-600" },
+                { id: "subtitle", label: "智能字幕", icon: Captions, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "downloader", label: "视频下载", icon: Download, bg: "bg-sky-300 dark:bg-sky-600" },
                 { id: "digital_human", label: "数字人", icon: UserRound, bg: "bg-teal-300 dark:bg-teal-600" },
               ].map(tab => (
@@ -304,7 +304,7 @@ export function ChatPanel() {
                     <div className="max-w-4xl mx-auto p-6 space-y-8">
                       {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 opacity-70">
-                          <div className={`w-24 h-24 bg-amber-200 dark:bg-amber-600 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <div className={`w-24 h-24 bg-cyan-200 dark:bg-cyan-600 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                             <MessageSquare className="w-12 h-12 text-slate-900 dark:text-white" />
                           </div>
                           <div>
@@ -314,11 +314,11 @@ export function ChatPanel() {
                         </div>
                       ) : messages.map(msg => (
                         <div key={msg.id} className={cn("flex gap-4", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
-                          <div className={cn(`w-12 h-12 flex items-center justify-center shrink-0 ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-amber-300 dark:bg-amber-500 text-slate-900" : "bg-white dark:bg-slate-800")}>
+                          <div className={cn(`w-12 h-12 flex items-center justify-center shrink-0 ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-slate-50 dark:bg-slate-200 text-slate-900" : "bg-white dark:bg-slate-800")}>
                             {msg.role === "user" ? <UserRound className="h-6 w-6 font-black" /> : <Bot className="h-6 w-6 font-black" />}
                           </div>
                           <div className={cn("flex flex-col gap-2 max-w-[80%]", msg.role === "user" ? "items-end" : "items-start")}>
-                            <div className={cn(`px-5 py-4 text-[15px] ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-amber-200 dark:bg-amber-400 text-slate-900" : "bg-white dark:bg-slate-800")}>
+                            <div className={cn(`px-5 py-4 text-[15px] ${brutalBorder} ${brutalShadowSm}`, msg.role === "user" ? "bg-cyan-200 dark:bg-slate-100 text-slate-900" : "bg-white dark:bg-slate-800")}>
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: ({ className, children }) => renderCodeBlock(className || "", children) }}>
                                 {msg.content}
                               </ReactMarkdown>
@@ -354,44 +354,44 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : activeTab === "subtitle" ? (
-                <div className="flex-1 overflow-hidden p-4 lg:p-8">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">智能字幕提取</h2>
+                <div className="flex-1 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">智能字幕提取</h2>
                     <div className="flex-1 min-h-0">
                       <SubtitlePanel />
                     </div>
                   </div>
                 </div>
               ) : activeTab === "digital_human" ? (
-                <div className="flex-1 overflow-hidden p-4 lg:p-8">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">数字人合成</h2>
-                    <div className="flex-1 min-h-0 overflow-y-auto pr-4">
+                <div className="flex-1 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">数字人合成</h2>
+                    <div className="flex-1 min-h-0 overflow-y-auto pr-2">
                       <DigitalHumanPanel />
                     </div>
                   </div>
                 </div>
               ) : activeTab === "downloader" ? (
-                <div className="flex-1 overflow-hidden p-4 lg:p-8">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-4 lg:p-8 ${brutalBorder} ${brutalShadow}`}>
-                    <h2 className="text-4xl font-black uppercase mb-6 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">全网视频下载</h2>
-                    <div className="flex-1 min-h-0 overflow-y-auto pr-4">
+                <div className="flex-1 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">全网视频下载</h2>
+                    <div className="flex-1 min-h-0 overflow-y-auto pr-2">
                       <VideoDownloaderPanel />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 overflow-hidden p-4 lg:p-8">
+                <div className="flex-1 overflow-hidden p-2">
                   <div className="w-full h-full">
                     {activeTab === "image" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
-                        <div className={`bg-emerald-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
-                            <h2 className="text-4xl font-black uppercase">创意绘图</h2>
-                            <div className="text-sm font-bold mt-2">将你的想象力转化为视觉杰作。</div>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
+                        <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
+                            <h2 className="text-2xl font-black uppercase">创意绘图</h2>
+                            <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作。</div>
                           </div>
 
-                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                          <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="relative">
                               <textarea
                                 value={imagePrompt}
@@ -474,11 +474,11 @@ export function ChatPanel() {
                                 <img src={generatedImageUrl} className={`w-full h-full object-contain ${brutalBorder}`} alt="Generated" />
                                 <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-emerald-300 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                  <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
                                     {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                                   </button>
                                   <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
-                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                    <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
                                   </a>
                                 </div>
                               </motion.div>
@@ -502,14 +502,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "video" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
-                        <div className={`bg-orange-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
-                            <h2 className="text-4xl font-black uppercase">视频生成</h2>
-                            <div className="text-sm font-bold mt-2">让你的想象力动起来。</div>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
+                        <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
+                            <h2 className="text-2xl font-black uppercase">视频生成</h2>
+                            <div className="text-sm font-bold mt-1">让你的想象力动起来。</div>
                           </div>
 
-                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                          <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <textarea
                               value={videoPrompt}
                               onChange={(e) => setVideoPrompt(e.target.value)}
@@ -556,11 +556,11 @@ export function ChatPanel() {
                                 <video src={generatedVideoUrl} controls className={`w-full h-full object-contain ${brutalBorder}`} />
                                 <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-orange-300 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                  <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
                                     {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
                                   </button>
                                   <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
-                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                    <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
                                   </a>
                                 </div>
                               </motion.div>
@@ -584,14 +584,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "music" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
-                        <div className={`bg-indigo-200 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
-                            <h2 className="text-4xl font-black uppercase">音乐创作</h2>
-                            <div className="text-sm font-bold mt-2">从文字到旋律的奇妙转化。</div>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
+                        <div className={`bg-indigo-200 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
+                            <h2 className="text-2xl font-black uppercase">音乐创作</h2>
+                            <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化。</div>
                           </div>
 
-                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                          <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="relative">
                               <textarea
                                 value={musicPrompt}
@@ -659,11 +659,11 @@ export function ChatPanel() {
                                 <audio src={generatedMusicUrl} controls className={`w-full ${brutalBorder}`} />
                                 <div className="flex gap-4 mt-4">
                                   <button onClick={clearGeneratedMusic} className={`flex-1 py-3 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-indigo-300 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
+                                  <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-slate-50 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
                                     {musicLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} 复制链接
                                   </button>
                                   <a href={generatedMusicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                                    <button className={`w-full py-3 bg-emerald-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                    <button className={`w-full py-3 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
                                   </a>
                                 </div>
                               </motion.div>
@@ -687,14 +687,14 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "image_edit" && (
-                      <div className="grid lg:grid-cols-2 gap-12 items-start h-full">
-                        <div className={`bg-rose-100 dark:bg-slate-900 p-8 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
-                          <div className="mb-8 border-b-4 border-slate-900 dark:border-white pb-4 shrink-0">
-                            <h2 className="text-4xl font-black uppercase">图像编辑</h2>
-                            <div className="text-sm font-bold mt-2">上传原图与遮罩，通过文字指令重新绘制图像。</div>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
+                        <div className={`bg-rose-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                          <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
+                            <h2 className="text-2xl font-black uppercase">图像编辑</h2>
+                            <div className="text-sm font-bold mt-1">上传原图与遮罩，通过文字指令重新绘制图像。</div>
                           </div>
 
-                          <div className="space-y-6 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                          <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="grid grid-cols-2 gap-4">
                               <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                 <div className="font-bold uppercase text-sm">源图片 (SOURCE)</div>
@@ -785,7 +785,7 @@ export function ChatPanel() {
                                 <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <button onClick={clearEditedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
                                   <a href={editedImageUrl} target="_blank" rel="noopener noreferrer">
-                                    <button className={`px-4 py-2 bg-indigo-300 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                    <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
                                   </a>
                                 </div>
                               </motion.div>

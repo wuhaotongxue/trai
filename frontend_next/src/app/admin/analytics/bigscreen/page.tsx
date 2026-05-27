@@ -120,7 +120,7 @@ export default function BigScreenAnalytics() {
             <Building2 className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-widest bg-amber-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold tracking-widest bg-slate-100 bg-clip-text text-transparent">
               TRAI Organization Analytics
             </h1>
             <p className="text-blue-400/60 text-xs mt-1">REAL-TIME DATA ANALYTICS CENTER</p>
@@ -180,7 +180,7 @@ export default function BigScreenAnalytics() {
         <div className="col-span-12 lg:col-span-4 bg-white/5 border border-white/10 rounded-none-none p-4 ">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-cyan-500 rounded-none-none" />
+              <span className="w-1 h-5 bg-slate-200 rounded-none-none" />
               Dept Distribution (Top {MAX_DEPT_DISPLAY})
             </h3>
           </div>

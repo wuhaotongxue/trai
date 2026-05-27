@@ -27,7 +27,7 @@ const apiFeatures = [
   {
     titleKey: "docs.api.sse",
     descKey: "docs.api.sse.desc",
-    icon: <Zap className="h-5 w-5 text-amber-500" />,
+    icon: <Zap className="h-5 w-5 text-cyan-500" />,
   },
   {
     titleKey: "docs.api.validate",
@@ -41,7 +41,7 @@ const endpoints = [
     method: "POST",
     path: "/api/auth/login",
     descKey: "docs.api.login",
-    color: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10",
+    color: "text-cyan-600 dark:text-cyan-400 bg-amber-50 dark:bg-slate-200/10",
   },
   {
     method: "GET",
@@ -73,7 +73,7 @@ export default function ApiDocsPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 text-sm font-medium">
               <Terminal className="h-4 w-4" />
@@ -155,7 +155,7 @@ export default function ApiDocsPage() {
                 <div className="absolute top-0 left-0 right-0 h-10 bg-slate-800/50 flex items-center px-4 border-b border-slate-700">
                   <div className="flex gap-2">
                     <div className="w-3 h-3 rounded-none bg-rose-500" />
-                    <div className="w-3 h-3 rounded-none bg-amber-500" />
+                    <div className="w-3 h-3 rounded-none bg-slate-200" />
                     <div className="w-3 h-3 rounded-none bg-emerald-500" />
                   </div>
                   <div className="mx-auto text-xs text-slate-400 font-mono">request.sh</div>
@@ -171,7 +171,7 @@ export default function ApiDocsPage() {
                     <code className="block mb-2">
                       {"  "}-H <span className="text-emerald-400">"Content-Type: application/json"</span> \
                     </code>
-                    <code className="block text-amber-300">
+                    <code className="block text-cyan-300">
                       {"  "}-d '{JSON.stringify({
                         model: "Qwen/Qwen3.5-0.8B",
                         messages: [{ role: "user", content: translate("docs.api.example_request") }],

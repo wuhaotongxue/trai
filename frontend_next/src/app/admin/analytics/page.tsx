@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
   const systemStats = [
     { labelKey: "admin.analytics.db_latency", value: data?.db_latency || "12ms", color: "bg-blue-500" },
     { labelKey: "admin.analytics.api_efficiency", value: data?.api_latency || "45ms", color: "bg-emerald-500" },
-    { labelKey: "admin.analytics.ai_pressure", value: translate("admin.analytics.low"), color: "bg-amber-500" },
+    { labelKey: "admin.analytics.ai_pressure", value: translate("admin.analytics.low"), color: "bg-slate-200" },
   ];
 
   return (
@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
               {translate("admin.analytics.refresh")}
             </Button>
             <Button
-              className="gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
+              className="gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500"
               onClick={() => void handleGenerateReport()}
               disabled={generating}
             >
@@ -268,7 +268,7 @@ export default function AnalyticsPage() {
                           <div className="flex items-center justify-end gap-2">
                             <div className="w-20 h-1.5 bg-muted rounded-none-none overflow-hidden">
                               <div
-                                className="h-full bg-amber-400 rounded-none-none"
+                                className="h-full bg-slate-100 rounded-none-none"
                                 style={{ width: `${Math.min(100, (d.user_count / 200) * 100)}%` }}
                               />
                             </div>
@@ -285,7 +285,7 @@ export default function AnalyticsPage() {
 
           {/* 管理建议 */}
           <div className="space-y-4">
-            <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-white">
+            <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 text-white">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Bot className="h-5 w-5" />

@@ -26,7 +26,7 @@ const typeConfig = {
   },
   refactor: {
     labelKey: "changelog.tag.refactor",
-    color: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+    color: "bg-amber-50 text-cyan-600 dark:bg-slate-200/10 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
     icon: <RefreshCw className="w-3.5 h-3.5" />,
   },
   chore: {
@@ -117,7 +117,7 @@ export default function ChangelogPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>

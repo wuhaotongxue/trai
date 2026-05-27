@@ -35,7 +35,7 @@ export default function AboutPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="pt-32 pb-20 bg-amber-400">
+      <section className="pt-32 pb-20 bg-slate-100">
         <div className="container mx-auto px-4 text-center max-w-7xl">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
             <Users className="h-4 w-4" />
@@ -78,7 +78,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {team.map((t) => (
               <div key={t.name} className="text-center">
-                <div className="w-16 h-16 rounded-none bg-amber-400 flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
+                <div className="w-16 h-16 rounded-none bg-slate-100 flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
                   {t.avatar}
                 </div>
                 <p className="font-bold text-slate-900">{t.name}</p>
@@ -110,7 +110,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-amber-400">
+      <section className="py-20 bg-slate-100">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">{translate("about.cta.title")}</h2>
           <p className="text-blue-100 mb-8">{translate("about.cta.desc")}</p>

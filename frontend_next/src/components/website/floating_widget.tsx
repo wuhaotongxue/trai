@@ -60,7 +60,7 @@ export function FloatingWidget() {
         }`}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-none bg-amber-400 flex items-center justify-center shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+              <div className="w-8 h-8 rounded-none bg-slate-100 flex items-center justify-center shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div>

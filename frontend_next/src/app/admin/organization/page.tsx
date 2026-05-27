@@ -322,7 +322,7 @@ export default function OrganizationPage() {
                             {user.avatar_url ? (
                               <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-none-none object-cover border border-border" referrerPolicy="no-referrer" />
                             ) : (
-                              <div className="w-8 h-8 rounded-none-none bg-amber-400 flex items-center justify-center text-white text-xs font-medium">
+                              <div className="w-8 h-8 rounded-none-none bg-slate-100 flex items-center justify-center text-white text-xs font-medium">
                                 {user.display_name?.[0] || user.username?.[0]}
                               </div>
                             )}
@@ -334,7 +334,7 @@ export default function OrganizationPage() {
                         <td className="p-4">
                           <span className={`px-2 py-0.5 rounded-none-none text-xs font-medium ${
                             user.role === "admin" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                            user.role === "vip" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                            user.role === "vip" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" :
                             "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
                           }`}>
                             {user.role === "admin" ? translate("admin.organization.admin") : user.role === "vip" ? translate("admin.organization.vip") : translate("admin.organization.normal_user")}
@@ -417,7 +417,7 @@ export default function OrganizationPage() {
           {permTarget && (
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-3 p-3 rounded-none-none bg-muted/50">
-                <div className="w-10 h-10 rounded-none-none bg-amber-400 flex items-center justify-center text-white font-medium">
+                <div className="w-10 h-10 rounded-none-none bg-slate-100 flex items-center justify-center text-white font-medium">
                   {permTarget.display_name?.[0] || permTarget.username?.[0] || "?"}
                 </div>
                 <div>
@@ -430,7 +430,7 @@ export default function OrganizationPage() {
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { value: "admin", label: translate("admin.organization.admin"), desc: translate("admin.organization.admin_desc"), color: "bg-blue-500" },
-                    { value: "vip", label: translate("admin.organization.vip"), desc: translate("admin.organization.vip_desc"), color: "bg-amber-500" },
+                    { value: "vip", label: translate("admin.organization.vip"), desc: translate("admin.organization.vip_desc"), color: "bg-slate-200" },
                     { value: "normal", label: translate("admin.organization.normal_user"), desc: translate("admin.organization.normal_desc"), color: "bg-slate-500" },
                   ].map((role) => (
                     <button

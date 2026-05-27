@@ -56,7 +56,7 @@ const plans = [
     price: "¥299",
     periodKey: "pricing.per_month",
     descKey: "pricing.vip_desc",
-    color: "from-amber-500 to-amber-600",
+    color: "from-cyan-500 to-cyan-600",
     badgeKey: "pricing.badge.enterprise",
     features: [
       "pricing.plan.vip.1",
@@ -88,7 +88,7 @@ export default function PricingPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-amber-400">
+      <section className="pt-32 pb-16 bg-slate-100">
         <div className="container mx-auto px-4 text-center max-w-7xl">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />

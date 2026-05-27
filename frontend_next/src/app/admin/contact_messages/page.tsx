@@ -43,13 +43,13 @@ const TYPE_COLORS: Record<string, string> = {
   presale: "bg-blue-100 text-blue-700",
   tech: "bg-purple-100 text-purple-700",
   business: "bg-green-100 text-green-700",
-  purchase: "bg-amber-100 text-amber-700",
+  purchase: "bg-cyan-100 text-cyan-700",
   channel: "bg-cyan-100 text-cyan-700",
   other: "bg-slate-100 text-slate-700",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
+  pending: "bg-cyan-100 text-cyan-700",
   processed: "bg-blue-100 text-blue-700",
   replied: "bg-green-100 text-green-700",
 };
@@ -415,7 +415,7 @@ export default function ContactMessagesPage() {
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
+                  className="bg-slate-100 hover:from-blue-500 hover:to-indigo-500"
                   onClick={() => handleUpdateStatus(selectedMessage.id, "replied", replyNote)}
                 >
                   <Reply className="h-4 w-4 mr-1" />

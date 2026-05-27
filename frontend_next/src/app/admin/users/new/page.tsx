@@ -161,14 +161,14 @@ export default function NewUserPage() {
                           ? "border-border bg-muted/25"
                           : plan.value === "pro"
                           ? "border-blue-500/60 bg-blue-500/10 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-blue-500/10"
-                          : "border-amber-500/60 bg-amber-500/10 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-amber-500/10"
+                          : "border-cyan-500/60 bg-slate-200/10 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-cyan-500/10"
                         : "border-border/60 hover:border-border bg-card"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <p className={`text-sm font-bold ${
                         form.plan === plan.value
-                          ? plan.value === "free" ? "text-foreground/80" : plan.value === "pro" ? "text-blue-400" : "text-amber-400"
+                          ? plan.value === "free" ? "text-foreground/80" : plan.value === "pro" ? "text-blue-400" : "text-cyan-400"
                           : "text-slate-900 dark:text-white font-bold"
                       }`}>{translate(plan.labelKey)}</p>
                       {form.plan === plan.value && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}

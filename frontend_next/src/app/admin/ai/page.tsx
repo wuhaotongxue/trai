@@ -113,7 +113,7 @@ export default function AIManagementPage() {
       labelKey: "admin.ai.management.video_synth",
       value: stats?.video_count || 0,
       icon: Video,
-      gradient: "from-orange-500/20 to-amber-500/20",
+      gradient: "from-orange-500/20 to-cyan-500/20",
       iconColor: "text-orange-500",
       borderColor: "border-orange-500/20",
     },
@@ -171,7 +171,7 @@ export default function AIManagementPage() {
                 <item.icon className={`h-5 w-5 ${item.iconColor}`} />
               </div>
             </div>
-            <div className="absolute bottom-0 right-0 w-20 h-20 rounded-none-none bg-amber-400/20 translate-x-4 translate-y-4" />
+            <div className="absolute bottom-0 right-0 w-20 h-20 rounded-none-none bg-slate-100/20 translate-x-4 translate-y-4" />
           </div>
         ))}
       </div>

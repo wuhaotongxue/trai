@@ -156,8 +156,8 @@ export default function LoginLogsPage() {
           label: translate("admin.login_logs.stats_success_rate"),
           value: `${stats.success_rate.toFixed(1)}%`,
           icon: Cpu,
-          color: "text-amber-600",
-          bg: "bg-amber-500/10",
+          color: "text-cyan-600",
+          bg: "bg-slate-200/10",
         },
       ]
     : [];

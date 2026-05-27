@@ -104,7 +104,7 @@ export const MemoToolCall = memo(function MemoToolCall({
   result,
 }: MemoToolCallProps) {
   const statusColors = {
-    pending: "bg-amber-500",
+    pending: "bg-slate-200",
     running: "bg-blue-500 animate-pulse",
     completed: "bg-emerald-500",
     error: "bg-red-500",

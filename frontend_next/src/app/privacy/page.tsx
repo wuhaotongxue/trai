@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-amber-400 py-16">
+      <div className="bg-slate-100 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center gap-3 mb-4">
             <Link href="/" className="text-blue-100 hover:text-white transition-colors text-sm flex items-center gap-1">

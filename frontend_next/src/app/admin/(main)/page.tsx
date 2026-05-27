@@ -72,8 +72,8 @@ const statCards = [
     key: "total_messages" as const,
     icon: FileText,
     gradient: "from-cyan-500 to-cyan-600",
-    bg: "bg-cyan-500/10",
-    badge: "bg-cyan-500/15 text-cyan-400",
+    bg: "bg-slate-200/10",
+    badge: "bg-slate-200/15 text-cyan-400",
     trend: "+89",
     trendUp: true,
     sparkline: [80, 75, 90, 85, 100, 95, 110, 105, 120, 115],
@@ -104,9 +104,9 @@ const statCards = [
     label: "admin.dashboard.vip_users",
     key: "vip_users" as const,
     icon: Star,
-    gradient: "from-amber-500 to-amber-600",
-    bg: "bg-amber-500/10",
-    badge: "bg-amber-500/15 text-amber-400",
+    gradient: "from-cyan-500 to-cyan-600",
+    bg: "bg-slate-200/10",
+    badge: "bg-slate-200/15 text-cyan-400",
     trend: "+3",
     trendUp: true,
     sparkline: [10, 12, 11, 14, 13, 16, 15, 18, 17, 20],
@@ -300,7 +300,7 @@ export default function AdminDashboardPage() {
           </Button>
           <Button
             size="sm"
-            className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-indigo-400 hover:from-blue-500 hover:to-indigo-500"
+            className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500"
             onClick={() => router.push("/admin/analytics")}
           >
             <TrendingUp className="h-3.5 w-3.5" />
@@ -364,7 +364,7 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex items-center gap-3 text-xs">
               <span className="flex items-center gap-1.5 text-slate-900 dark:text-white font-bold uppercase">
-                <span className="w-2 h-2 rounded-none-none-none bg-amber-400 border-b-4 border-slate-900" />
+                <span className="w-2 h-2 rounded-none-none-none bg-slate-100 border-b-4 border-slate-900" />
                 {translate("admin.dashboard.agent_trend_label")}
               </span>
             </div>
@@ -384,7 +384,7 @@ export default function AdminDashboardPage() {
                       {bar.agent_calls}
                     </span>
                     <div
-                      className="w-full rounded-none-none-t-sm transition-all duration-300 bg-amber-400 border-b-4 border-slate-900:from-blue-500 hover:to-blue-400 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] group-hover:shadow-blue-500/30 cursor-pointer"
+                      className="w-full rounded-none-none-t-sm transition-all duration-300 bg-slate-100 border-b-4 border-slate-900:from-blue-500 hover:to-blue-400 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] group-hover:shadow-blue-500/30 cursor-pointer"
                       style={{ height: `${Math.max(3, height)}%` }}
                       title={`${label}: ${bar.agent_calls} ${translate("admin.dashboard.calls")}`}
                     />
@@ -418,8 +418,8 @@ export default function AdminDashboardPage() {
                   key={svc.nameKey}
                   className="flex items-center gap-3 p-2.5 rounded-none-none-none bg-muted/25 hover:bg-muted/40 transition-colors border-2 border-slate-900 dark:border-white border-transparent hover:border-border/40"
                 >
-                  <div className={`w-8 h-8 rounded-none-none-none flex items-center justify-center ${ok ? "bg-emerald-500/10" : "bg-amber-500/10"}`}>
-                    <svc.icon className={`h-4 w-4 ${ok ? "text-emerald-400" : "text-amber-400"}`} />
+                  <div className={`w-8 h-8 rounded-none-none-none flex items-center justify-center ${ok ? "bg-emerald-500/10" : "bg-slate-200/10"}`}>
+                    <svc.icon className={`h-4 w-4 ${ok ? "text-emerald-400" : "text-cyan-400"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/90">{translate(svc.nameKey)}</p>
@@ -431,7 +431,7 @@ export default function AdminDashboardPage() {
                   {ok ? (
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 text-cyan-500 flex-shrink-0" />
                   )}
                 </div>
               );
@@ -446,14 +446,14 @@ export default function AdminDashboardPage() {
         <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="pb-3">
               <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
-              <Zap className="h-4 w-4 text-amber-500" />
+              <Zap className="h-4 w-4 text-cyan-500" />
               {translate("admin.dashboard.key_metrics")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
             {[
               { labelKey: "admin.dashboard.user_growth", valueKey: "admin.dashboard.new_this_month_sub", descKey: "admin.dashboard.new_this_month", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", icon: TrendingUp },
-              { labelKey: "admin.dashboard.vip_ratio", valueKey: "vip_pct", descKey: "admin.dashboard.paid_conversion", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", icon: Star },
+              { labelKey: "admin.dashboard.vip_ratio", valueKey: "vip_pct", descKey: "admin.dashboard.paid_conversion", color: "text-cyan-400", bg: "bg-slate-200/10", border: "border-cyan-500/20", icon: Star },
               { labelKey: "admin.dashboard.agent_total", valueKey: "agent_total", descKey: "admin.dashboard.total_history", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Bot },
               { labelKey: "admin.dashboard.avg_session", valueKey: "avg_session", descKey: "admin.dashboard.msg_per_session", color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20", icon: MessageSquare },
               { labelKey: "admin.dashboard.upload_total", valueKey: "upload_total", descKey: "admin.dashboard.file_storage", color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/20", icon: Upload },
@@ -530,10 +530,10 @@ export default function AdminDashboardPage() {
                     const rate = Math.min((t.agent_calls / Math.max(maxAgentCalls, 1)) * 100, 100);
                     const health =
                       rate > 70
-                        ? { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-emerald-400", bg: "bg-emerald-500/10" }
+                        ? { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-emerald-400", bg: "bg-emerald-500/10" }
                         : rate > 40
-                        ? { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-amber-400", bg: "bg-amber-500/10" }
-                        : { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-red-400", bg: "bg-red-500/10" };
+                        ? { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-cyan-400", bg: "bg-slate-200/10" }
+                        : { bar: "bg-slate-100 border-b-4 border-slate-900", text: "text-red-400", bg: "bg-red-500/10" };
                     return (
                       <tr
                         key={t.date}

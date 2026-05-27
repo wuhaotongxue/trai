@@ -23,7 +23,7 @@ export function QuotaBar() {
   const toolQuota = quotas.find((q) => q.quota_type === "agent_tool_call");
   if (!toolQuota)
     return (
-      <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-900 dark:text-white bg-amber-300 px-3 py-1 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a]">
+      <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-900 dark:text-white bg-slate-50 px-3 py-1 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a]">
         <Zap className="h-4 w-4 text-slate-900" />
         <span>加载中...</span>
       </div>
@@ -31,17 +31,17 @@ export function QuotaBar() {
 
   return (
     <div className="flex items-center gap-3 px-4 py-1.5 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] text-xs font-black uppercase tracking-widest">
-      <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
+      <Zap className="h-4 w-4 text-cyan-500 fill-cyan-500" />
       <span className="text-slate-900 dark:text-white">AGENT</span>
       {toolQuota.unlimited ? (
-        <span className="px-2 py-0.5 bg-emerald-400 text-slate-900 border-2 border-slate-900 text-[10px]">
+        <span className="px-2 py-0.5 bg-slate-100 text-slate-900 border-2 border-slate-900 text-[10px]">
           无限
         </span>
       ) : (
         <>
           <div className="w-24 h-3 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden shadow-inner">
             <div
-              className="h-full bg-cyan-400 border-r-2 border-slate-900 dark:border-white transition-all"
+              className="h-full bg-slate-100 border-r-2 border-slate-900 dark:border-white transition-all"
               style={{
                 width: `${Math.min(100, (toolQuota.used / toolQuota.limit) * 100)}%`,
               }}

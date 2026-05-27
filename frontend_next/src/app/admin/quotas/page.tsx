@@ -63,9 +63,9 @@ const plans = [
   },
   {
     nameKey: "admin.quotas.vip_plan",
-    color: "from-amber-500 to-amber-600",
+    color: "from-cyan-500 to-cyan-600",
     bg: "bg-amber-50",
-    text: "text-amber-500",
+    text: "text-cyan-500",
     priceKey: "admin.quotas.price_vip",
     descKey: "admin.quotas.vip_desc",
     featuresKey: PLAN_FEATURES.vip,
@@ -162,7 +162,7 @@ export default function QuotasPage() {
                   <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5">{translate(plan.descKey)}</p>
                 </div>
                 {plan.popular && (
-                  <span className="text-xs bg-amber-400 text-white font-medium px-2.5 py-0.5 rounded-none-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+                  <span className="text-xs bg-slate-100 text-white font-medium px-2.5 py-0.5 rounded-none-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                     <Sparkles className="h-3 w-3 inline mr-1" />
                     {translate("admin.quotas.popular")}
                   </span>
@@ -177,7 +177,7 @@ export default function QuotasPage() {
                   {translate(fKey)}
                 </div>
               ))}
-              <Button size="sm" className={`w-full h-9 mt-2 text-sm gap-2 ${plan.popular ? "bg-amber-400 hover:from-blue-500 hover:to-indigo-500" : ""}`} variant={plan.popular ? "default" : "outline"}>
+              <Button size="sm" className={`w-full h-9 mt-2 text-sm gap-2 ${plan.popular ? "bg-slate-100 hover:from-blue-500 hover:to-indigo-500" : ""}`} variant={plan.popular ? "default" : "outline"}>
                 <Edit2 className="h-3.5 w-3.5" />
                 {translate("admin.quotas.edit_quota")}
               </Button>
@@ -190,7 +190,7 @@ export default function QuotasPage() {
       <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
         <CardHeader className="pb-4 border-b border-border/40">
           <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-500" />
+            <Zap className="h-4 w-4 text-cyan-500" />
             {translate("admin.quotas.global_config")}
           </CardTitle>
           <p className="text-xs text-slate-900 dark:text-white font-bold mt-1">{translate("admin.quotas.global_desc")}</p>
@@ -206,7 +206,7 @@ export default function QuotasPage() {
             ))}
           </div>
           <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500">
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500">
               <Save className="h-4 w-4" />
               {translate("admin.quotas.save_global")}
             </Button>
@@ -280,7 +280,7 @@ export default function QuotasPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500" onClick={() => void handleSaveImageConfig()} disabled={loading}>
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500" onClick={() => void handleSaveImageConfig()} disabled={loading}>
               {loading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-4 w-4" />}
               {translate("admin.quotas.save_config")}
             </Button>

@@ -17,10 +17,10 @@ export default function CookiesPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-amber-400 py-16">
+      <div className="bg-slate-100 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center gap-3 mb-4">
-            <Link href="/" className="text-amber-100 hover:text-white transition-colors text-sm flex items-center gap-1">
+            <Link href="/" className="text-cyan-100 hover:text-white transition-colors text-sm flex items-center gap-1">
               <ArrowLeft className="h-4 w-4" /> 返回官网
             </Link>
           </div>
@@ -29,7 +29,7 @@ export default function CookiesPage() {
             Cookie 使用说明
           </div>
           <h1 className="text-3xl font-bold text-white mb-3">Cookie 政策</h1>
-          <p className="text-amber-100">了解 TRAI 如何使用 Cookie 提升你的体验</p>
+          <p className="text-cyan-100">了解 TRAI 如何使用 Cookie 提升你的体验</p>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default function CookiesPage() {
                 <li><strong>隐私模式: </strong>使用无痕/隐私模式浏览时, Cookie 不会被保存</li>
                 <li><strong>TRAI 设置: </strong>部分偏好设置可在账号设置中直接修改</li>
               </ul>
-              <p className="mt-3 text-amber-600">注意: 禁用必要 Cookie 将导致网站无法正常登录和使用. </p>
+              <p className="mt-3 text-cyan-600">注意: 禁用必要 Cookie 将导致网站无法正常登录和使用. </p>
             </div>
           </section>
 

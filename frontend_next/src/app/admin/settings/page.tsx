@@ -90,7 +90,7 @@ export default function SettingsPage() {
           </h1>
           <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.settings.subtitle")}</p>
         </div>
-        <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500" onClick={handleSave}>
+        <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500" onClick={handleSave}>
           {saved ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
           {saved ? translate("admin.settings.saved") : translate("admin.settings.save_all")}
         </Button>
@@ -176,9 +176,9 @@ export default function SettingsPage() {
             </div>
 
             {/* 安全提示 */}
-            <div className="flex items-start gap-3 p-4 rounded-none-none bg-amber-500/5 border border-amber-500/20">
-              <div className="w-8 h-8 rounded-none-none bg-amber-500/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <div className="flex items-start gap-3 p-4 rounded-none-none bg-slate-200/5 border border-cyan-500/20">
+              <div className="w-8 h-8 rounded-none-none bg-slate-200/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-4 w-4 text-cyan-500" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground/90">{translate("admin.settings.security_advice")}</p>

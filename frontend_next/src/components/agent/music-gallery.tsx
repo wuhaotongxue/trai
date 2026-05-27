@@ -54,7 +54,7 @@ function MusicCardItem({
   };
 
   return (
-    <div className={`group relative overflow-hidden transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-amber-300 dark:bg-amber-600' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
+    <div className={`group relative overflow-hidden transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-slate-50 dark:bg-cyan-600' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
       <audio
         ref={audioRef}
         src={music.url}
@@ -63,7 +63,7 @@ function MusicCardItem({
       <div className="p-4">
         {/* 标题和播放按钮 */}
         <div className="flex items-center gap-3 mb-3">
-          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-emerald-300 dark:bg-emerald-600'}`}>
+          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-slate-50 dark:bg-emerald-600'}`}>
             <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -208,7 +208,7 @@ export function MusicGallery({
   if (currentMusic.length === 0 && historyMusic.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6 transform rotate-3">
+        <div className="w-32 h-32 bg-slate-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6 transform rotate-3">
           <Music className="h-16 w-16 text-slate-900" />
         </div>
         <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">暂无音乐</p>

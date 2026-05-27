@@ -91,7 +91,7 @@ const FILE_TYPE_CONFIG: Record<
     icon: Mic,
     label: "Audio",
     colorClass: "text-cyan-500",
-    bgColorClass: "bg-cyan-500/10",
+    bgColorClass: "bg-slate-200/10",
     borderColorClass: "border-cyan-500/30 focus:border-cyan-500/60",
   },
   pdf: {

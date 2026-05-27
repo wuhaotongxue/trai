@@ -63,16 +63,16 @@ const CATEGORY_CONFIG: Record<
   audio: {
     label: "Audio",
     icon: Mic,
-    bgColorClass: "bg-cyan-500/10",
+    bgColorClass: "bg-slate-200/10",
     textColorClass: "text-cyan-600 dark:text-cyan-400",
     borderColorClass: "border-cyan-200 dark:border-cyan-800",
   },
   document: {
     label: "Document",
     icon: FileText,
-    bgColorClass: "bg-amber-500/10",
-    textColorClass: "text-amber-600 dark:text-amber-400",
-    borderColorClass: "border-amber-200 dark:border-amber-800",
+    bgColorClass: "bg-slate-200/10",
+    textColorClass: "text-cyan-600 dark:text-cyan-400",
+    borderColorClass: "border-cyan-200 dark:border-cyan-800",
   },
   data: {
     label: "Data",
@@ -464,7 +464,7 @@ export function AgentTypeSelector({
                       disabled={disabled}
                       className={`group flex items-start gap-3 p-4 border-2 border-slate-900 dark:border-white transition-all text-left ${
                         isSelected
-                          ? `bg-amber-300 dark:bg-amber-600 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]`
+                          ? `bg-slate-50 dark:bg-cyan-600 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]`
                           : "bg-slate-50 dark:bg-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]"
                       } ${disabled ? "opacity-50 cursor-not-allowed" : "active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"}`}
                       aria-label={`Select ${agent.name}`}
@@ -497,7 +497,7 @@ export function AgentTypeSelector({
                             </span>
                           ))}
                           {agent.streaming_supported && (
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-emerald-400 dark:bg-emerald-600 text-slate-900 dark:text-white">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-emerald-600 text-slate-900 dark:text-white">
                               <Sparkles className="h-3 w-3" />
                               STREAM
                             </span>

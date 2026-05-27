@@ -236,14 +236,14 @@ export default function ClientReleasePage() {
       {buildStatus.status !== "idle" && (
         <Card className={cn(
           "border-l-4",
-          buildStatus.status === "running" && "border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-500/10",
+          buildStatus.status === "running" && "border-l-cyan-500 bg-yellow-50/50 dark:bg-slate-200/10",
           buildStatus.status === "success" && "border-l-green-500 bg-green-50/50 dark:bg-green-500/10",
           buildStatus.status === "failed" && "border-l-red-500 bg-red-50/50 dark:bg-red-500/10"
         )}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {buildStatus.status === "running" && <Loader2 className="h-5 w-5 text-yellow-600 animate-spin" />}
+                {buildStatus.status === "running" && <Loader2 className="h-5 w-5 text-cyan-600 animate-spin" />}
                 {buildStatus.status === "success" && <CheckCircle className="h-5 w-5 text-green-600" />}
                 {buildStatus.status === "failed" && <XCircle className="h-5 w-5 text-red-600" />}
                 <div>

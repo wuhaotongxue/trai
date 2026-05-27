@@ -110,7 +110,7 @@ export default function ContactPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
         {/* Hero */}
-        <section className="pt-32 pb-16 bg-amber-400">
+        <section className="pt-32 pb-16 bg-slate-100">
           <div className="container mx-auto px-4 text-center max-w-7xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
               <Phone className="h-4 w-4" />
@@ -153,7 +153,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-amber-50 text-amber-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-amber-50 text-cyan-600">
                         <MapPin className="h-4 w-4" />
                       </div>
                       <div>
@@ -179,7 +179,7 @@ export default function ContactPage() {
                 </div>
 
                 {/* 微信二维码 */}
-                <div className="bg-amber-400 rounded-none p-5 border border-green-100">
+                <div className="bg-slate-100 rounded-none p-5 border border-green-100">
                   <div className="flex items-center gap-2 mb-4">
                     <MessageCircle className="h-5 w-5 text-green-600" />
                     <p className="text-sm font-semibold text-slate-800">{translate("contact.wechat_title")}</p>

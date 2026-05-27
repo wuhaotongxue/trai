@@ -187,8 +187,8 @@ function get_area_meta(area: ChangeArea): { label: string; badge_class_name: str
 
   return {
     label: "客户端",
-    badge_class_name: "bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
-    node_class_name: "fill-amber-500",
+    badge_class_name: "bg-amber-50 text-cyan-800 dark:bg-slate-200/10 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/20",
+    node_class_name: "fill-cyan-500",
   };
 }
 
@@ -212,7 +212,7 @@ function get_status_meta(status: RoadmapStatus): {
     return {
       label: "已完成",
       badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
-      dot_class_name: "bg-emerald-500 dark:bg-emerald-400",
+      dot_class_name: "bg-emerald-500 dark:bg-slate-100",
       icon: "check",
     };
   }
@@ -295,7 +295,7 @@ function RelationshipGraph({
 
           <g className={[node_opacity(has_client), "cursor-pointer"].join(" ")} onClick={() => on_select_area("client")}>
             <circle cx="160" cy="125" r="24" className={ring_class("client")} fill="transparent" />
-            <circle cx="160" cy="125" r="18" className="fill-amber-500" />
+            <circle cx="160" cy="125" r="18" className="fill-cyan-500" />
             <text x="160" y="130" textAnchor="middle" className="fill-white text-[12px] font-semibold">CL</text>
             <text x="160" y="155" textAnchor="middle" className="fill-slate-600 dark:fill-slate-300 text-[12px]">客户端</text>
           </g>
@@ -355,7 +355,7 @@ export default function RoadmapPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
               <Milestone className="h-4 w-4" />

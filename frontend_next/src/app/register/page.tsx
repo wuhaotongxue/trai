@@ -17,9 +17,9 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const benefits = [
-  { icon: Zap, key: "register.benefit.1", color: "bg-amber-400" },
-  { icon: Globe, key: "register.benefit.2", color: "bg-cyan-400" },
-  { icon: Shield, key: "register.benefit.3", color: "bg-emerald-400" },
+  { icon: Zap, key: "register.benefit.1", color: "bg-slate-100" },
+  { icon: Globe, key: "register.benefit.2", color: "bg-slate-100" },
+  { icon: Shield, key: "register.benefit.3", color: "bg-slate-100" },
 ];
 
 function validatePassword(p: string): boolean {
@@ -75,14 +75,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-rose-400 selection:text-slate-900">
+    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-slate-100 selection:text-slate-900">
       {/* 左侧品牌区 */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-rose-400 p-12 border-r-4 border-slate-900 dark:border-white relative">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-100 p-12 border-r-4 border-slate-900 dark:border-white relative">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #0f172a 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
         <div className="relative flex items-center justify-between z-10">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
+            <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
               <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function RegisterPage() {
               {translate("register.hero.title1") || "加入 TRAI"}
             </h1>
             <br />
-            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-widest leading-tight bg-emerald-400 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
+            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-widest leading-tight bg-slate-100 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
               {translate("register.hero.title2") || "开启 AI 之旅"}
             </h2>
             <p className="text-slate-900 text-xl font-bold leading-relaxed max-w-md mt-6">
@@ -127,7 +127,7 @@ export default function RegisterPage() {
           {/* Logo - 移动端 */}
           <div className="lg:hidden flex items-center justify-between mb-10">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+              <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
                 <Bot className="h-6 w-6 text-slate-900" />
               </div>
               <span className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest">TRAI</span>
@@ -137,16 +137,16 @@ export default function RegisterPage() {
 
           {success ? (
             <div className="text-center space-y-8 py-8 border-4 border-slate-900 dark:border-white p-8 bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
-              <div className="w-20 h-20 bg-emerald-400 border-4 border-slate-900 flex items-center justify-center mx-auto shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-6">
+              <div className="w-20 h-20 bg-slate-100 border-4 border-slate-900 flex items-center justify-center mx-auto shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-6">
                 <CheckCircle2 className="h-10 w-10 text-slate-900" />
               </div>
               <div>
                 <h2 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4">{translate("register.success.title") || "注册成功"}</h2>
                 <p className="text-lg font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
                   {translate("register.success.email_sent") || "确认邮件已发送至"}{" "}
-                  <span className="font-black text-slate-900 dark:text-white bg-amber-200 px-2 border-2 border-slate-900">{registeredEmail}</span>
+                  <span className="font-black text-slate-900 dark:text-white bg-cyan-200 px-2 border-2 border-slate-900">{registeredEmail}</span>
                 </p>
-                <div className="mt-6 p-4 bg-cyan-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 text-left font-bold">
+                <div className="mt-6 p-4 bg-slate-100 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 text-left font-bold">
                   <div className="flex items-start gap-3">
                     <Sparkles className="h-6 w-6 shrink-0" />
                     <p>{translate("register.success.awaiting_review") || "请等待管理员审核，审核通过后即可登录。"}</p>
@@ -155,7 +155,7 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-4">
                 <Link href="/login">
-                  <Button className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none">
+                  <Button className="w-full h-16 text-xl font-black uppercase tracking-widest bg-slate-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none">
                     {translate("register.success.back_to_login") || "返回登录"}
                     <ArrowRight className="h-6 w-6 ml-3" />
                   </Button>
@@ -231,7 +231,7 @@ export default function RegisterPage() {
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-3 p-4 bg-rose-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
+                  <div className="flex items-center gap-3 p-4 bg-slate-100 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
                     <span className="text-slate-900 text-xl font-black">!</span>
                     <p className="text-sm font-bold text-slate-900 uppercase tracking-wide">{error}</p>
                   </div>
@@ -247,7 +247,7 @@ export default function RegisterPage() {
                           {translate("register.form.password_strong") || "密码强度合格"}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 text-sm font-bold text-amber-500 bg-amber-100 px-2 py-1 border-2 border-amber-500 shadow-[2px_2px_0px_0px_#f59e0b]">
+                        <div className="flex items-center gap-2 text-sm font-bold text-cyan-500 bg-cyan-100 px-2 py-1 border-2 border-cyan-500 shadow-[2px_2px_0px_0px_#f59e0b]">
                           <AlertCircle className="h-4 w-4" />
                           {translate("register.form.password_weak") || "密码需包含字母和数字，且至少8位"}
                         </div>
@@ -259,7 +259,7 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   disabled={loading || !form.username || !form.email || !form.password}
-                  className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-16 text-xl font-black uppercase tracking-widest bg-slate-100 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-slate-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <span className="flex items-center gap-3">

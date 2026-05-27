@@ -32,8 +32,8 @@ export function WebSocketStatusIndicator({
   const statusConfig = {
     connecting: {
       icon: Loader2,
-      color: "text-amber-500",
-      bgClass: "bg-amber-500/10 border-amber-500/20",
+      color: "text-cyan-500",
+      bgClass: "bg-slate-200/10 border-cyan-500/20",
       label: "Connecting...",
       animate: "animate-spin",
     },
@@ -60,8 +60,8 @@ export function WebSocketStatusIndicator({
     },
     reconnecting: {
       icon: RefreshCw,
-      color: "text-amber-500",
-      bgClass: "bg-amber-500/10 border-amber-500/20",
+      color: "text-cyan-500",
+      bgClass: "bg-slate-200/10 border-cyan-500/20",
       label: "Reconnecting...",
       animate: "animate-spin",
     },

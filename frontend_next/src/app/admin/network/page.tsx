@@ -63,7 +63,7 @@ export default function NetworkPage() {
         {[
           { label: translate("admin.network.cpu_usage"), value: `${stats?.cpu_percent || 0}%`, icon: Cpu, color: "text-blue-400", bg: "bg-blue-500/15" },
           { label: translate("admin.network.memory_usage"), value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { label: translate("admin.network.disk_usage"), value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { label: translate("admin.network.disk_usage"), value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-cyan-400", bg: "bg-slate-200/15" },
         ].map((item) => (
           <Card key={item.label} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardContent className="p-4 flex items-center gap-3">

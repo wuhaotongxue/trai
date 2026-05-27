@@ -90,7 +90,7 @@ export function HistorySidebar({
                     "px-2 py-1 border-2 border-slate-900 dark:border-white",
                     record.status === "completed" ? "bg-emerald-200 text-emerald-800" :
                     record.status === "failed" ? "bg-red-200 text-red-800" :
-                    "bg-amber-200 text-amber-800"
+                    "bg-cyan-200 text-cyan-800"
                   )}>
                     {record.status === "completed" ? "已完成" : record.status === "failed" ? "失败" : "处理中"}
                   </span>

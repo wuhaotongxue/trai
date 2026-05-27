@@ -18,10 +18,10 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const features = [
-  { icon: Zap, key: "login.feature.1", color: "bg-amber-400" },
-  { icon: Shield, key: "login.feature.2", color: "bg-emerald-400" },
-  { icon: Globe, key: "login.feature.3", color: "bg-cyan-400" },
-  { icon: Sparkles, key: "login.feature.4", color: "bg-rose-400" },
+  { icon: Zap, key: "login.feature.1", color: "bg-slate-100" },
+  { icon: Shield, key: "login.feature.2", color: "bg-slate-100" },
+  { icon: Globe, key: "login.feature.3", color: "bg-slate-100" },
+  { icon: Sparkles, key: "login.feature.4", color: "bg-slate-100" },
 ];
 
 function LoginForm() {
@@ -94,23 +94,23 @@ function LoginForm() {
     return (
       <div className="flex min-h-screen bg-white">
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-slate-900 border-t-amber-400 animate-spin" />
+          <div className="w-12 h-12 border-4 border-slate-900 border-t-cyan-400 animate-spin" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-rose-400 selection:text-slate-900">
+    <div className="flex min-h-screen bg-white dark:bg-slate-900 selection:bg-slate-100 selection:text-slate-900">
       {/* 左侧品牌展示区 */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-indigo-400 p-12 border-r-4 border-slate-900 dark:border-white relative">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-slate-100 p-12 border-r-4 border-slate-900 dark:border-white relative">
         {/* 背景装饰 */}
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #0f172a 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
         {/* Logo */}
         <div className="relative flex items-center justify-between z-10">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
+            <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center transition-transform hover:-translate-y-1">
               <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
@@ -126,7 +126,7 @@ function LoginForm() {
             <h1 className="text-5xl font-black text-slate-900 uppercase tracking-widest leading-tight mb-6 bg-white inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform -rotate-1">
               让 AI 替你工作
             </h1>
-            <p className="text-slate-900 text-xl font-bold leading-relaxed max-w-md bg-amber-200 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
+            <p className="text-slate-900 text-xl font-bold leading-relaxed max-w-md bg-cyan-200 inline-block px-4 py-2 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] transform rotate-1 mt-4">
               企业级 AI 助手平台，支持多工具调用、自动纠错、视觉理解与流式交互。
             </p>
           </div>
@@ -153,7 +153,7 @@ function LoginForm() {
           {/* Logo - 移动端显示 */}
           <div className="lg:hidden flex items-center justify-between mb-10">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+              <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
                 <Bot className="h-6 w-6 text-slate-900" />
               </div>
               <span className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-widest">TRAI</span>
@@ -208,7 +208,7 @@ function LoginForm() {
             </div>
 
             {errorMessage && (
-              <div className="flex items-center gap-3 p-4 bg-rose-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
+              <div className="flex items-center gap-3 p-4 bg-slate-100 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]">
                 <span className="text-slate-900 text-xl font-black">!</span>
                 <p className="text-sm font-bold text-slate-900 uppercase tracking-wide">{errorMessage}</p>
               </div>
@@ -217,7 +217,7 @@ function LoginForm() {
             <Button
               type="submit"
               disabled={loading || !email.trim() || !password.trim()}
-              className="w-full h-16 text-xl font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-emerald-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-16 text-xl font-black uppercase tracking-widest bg-slate-100 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] hover:bg-slate-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center gap-3">
@@ -276,7 +276,7 @@ function LoginForm() {
 
           <p className="text-center text-sm font-bold text-slate-600 dark:text-slate-400 mt-8 uppercase tracking-widest">
             {translate("login.form.no_account") || "没有账号？"}{" "}
-            <Link href="/register" className="text-slate-900 dark:text-white bg-amber-400 px-2 py-1 border-2 border-slate-900 hover:bg-amber-300 transition-colors shadow-[2px_2px_0px_0px_#0f172a]">
+            <Link href="/register" className="text-slate-900 dark:text-white bg-slate-100 px-2 py-1 border-2 border-slate-900 hover:bg-slate-50 transition-colors shadow-[2px_2px_0px_0px_#0f172a]">
               {translate("login.form.register_now") || "立即注册"}
             </Link>
           </p>
@@ -288,7 +288,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-12 h-12 border-4 border-slate-900 border-t-amber-400 animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-12 h-12 border-4 border-slate-900 border-t-cyan-400 animate-spin" /></div>}>
       <LoginForm />
     </Suspense>
   );

@@ -162,7 +162,7 @@ export default function SessionsPage() {
                     <tr key={s.session_id} className={`border-b border-border/40 hover:bg-muted/25 transition-colors ${i % 2 === 0 ? "bg-card" : "bg-muted/10"}`}>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-none-none bg-amber-400 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                          <div className="w-7 h-7 rounded-none-none bg-slate-100 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                             <User className="h-4 w-4" />
                           </div>
                           <div>

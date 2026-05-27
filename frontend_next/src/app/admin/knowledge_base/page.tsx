@@ -288,7 +288,7 @@ export default function KnowledgeBasePage() {
                         </td>
                         <td className="px-6 py-4 text-slate-900 dark:text-white font-bold font-mono text-xs">{id}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-none-none text-xs font-medium ${status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-none-none text-xs font-medium ${status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-cyan-100 text-cyan-700'}`}>
                             {status}
                           </span>
                         </td>
@@ -348,7 +348,7 @@ export default function KnowledgeBasePage() {
                       <tr key={file.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-4 py-3 font-medium truncate max-w-[300px]">{file.name}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-none-none ${file.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-none-none ${file.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-cyan-100 text-cyan-700'}`}>
                             {file.status}
                           </span>
                         </td>

@@ -156,7 +156,7 @@ export default function MonitorPage() {
             <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
             {translate("admin.monitor.refresh_status")}
           </Button>
-          <Button size="sm" className="gap-1.5 bg-amber-400 hover:from-blue-500 hover:to-indigo-500 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => void handleBackup()}>
+          <Button size="sm" className="gap-1.5 bg-slate-100 hover:from-blue-500 hover:to-indigo-500 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => void handleBackup()}>
             <Database className="h-3.5 w-3.5" />
             {translate("admin.monitor.backup_now")}
           </Button>
@@ -169,9 +169,9 @@ export default function MonitorPage() {
           <Card key={svc.cnKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white  group">
             <CardContent className="p-4 flex items-center gap-4">
               <div className={cn("w-11 h-11 rounded-none-none flex items-center justify-center transition-colors",
-                svc.status === "ok" ? "bg-emerald-500/10 group-hover:bg-emerald-500/15" : "bg-amber-500/10 group-hover:bg-amber-500/15")}>
+                svc.status === "ok" ? "bg-emerald-500/10 group-hover:bg-emerald-500/15" : "bg-slate-200/10 group-hover:bg-slate-200/15")}>
                 <svc.icon className={cn("h-5 w-5",
-                  svc.status === "ok" ? "text-emerald-500" : "text-amber-500")} />
+                  svc.status === "ok" ? "text-emerald-500" : "text-cyan-500")} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
@@ -179,7 +179,7 @@ export default function MonitorPage() {
                     <span className="text-sm font-semibold text-foreground">{translate(svc.cnKey)}</span>
                   </div>
                   <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-none-none",
-                    svc.status === "ok" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-400")}>
+                    svc.status === "ok" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-slate-200/10 text-cyan-600 dark:text-cyan-400")}>
                     {svc.status === "ok" ? translate("admin.monitor.normal") : translate("admin.monitor.warning")}
                   </span>
                 </div>
@@ -289,7 +289,7 @@ export default function MonitorPage() {
 
         {/* 侧边信息栏 */}
         <div className="space-y-4">
-          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-white overflow-hidden relative group">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 text-white overflow-hidden relative group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <ShieldCheck className="h-24 w-24" />
             </div>

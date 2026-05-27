@@ -22,7 +22,7 @@ const features = [
   },
   {
     icon: Zap,
-    gradient: "from-amber-500 to-orange-500",
+    gradient: "from-cyan-500 to-orange-500",
     titleKey: "features.correct",
     descKey: "features.correct.desc",
     tags: ["自动重试", "错误恢复", "容错机制"],
@@ -78,7 +78,7 @@ export default function FeaturesPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
         {/* Hero */}
-        <section className="pt-32 pb-20 bg-amber-400">
+        <section className="pt-32 pb-20 bg-slate-100">
         <div className="container mx-auto px-4 text-center max-w-7xl">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />
@@ -134,7 +134,7 @@ export default function FeaturesPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-amber-400">
+      <section className="py-20 bg-slate-100">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">{translate("features.ready.title")}</h2>
           <p className="text-blue-100 mb-8">{translate("features.ready.subtitle")}</p>

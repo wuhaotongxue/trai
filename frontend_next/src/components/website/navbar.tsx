@@ -88,7 +88,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:group-hover:shadow-[6px_6px_0px_0px_#ffffff] transition-all">
+            <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:group-hover:shadow-[6px_6px_0px_0px_#ffffff] transition-all">
               <Bot className="h-6 w-6 text-slate-900" />
             </div>
             <div>
@@ -102,7 +102,7 @@ export function Navbar() {
               <div key={item.href} className="relative">
                 {item.children ? (
                   <button
-                    className="flex items-center gap-1 px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
+                    className="flex items-center gap-1 px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-slate-100 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
                     onClick={() =>
                       setOpenDropdown(openDropdown === item.label ? null : item.label)
                     }
@@ -114,7 +114,7 @@ export function Navbar() {
                 ) : (
                   <Link
                     href={item.href}
-                    className="px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:text-slate-900 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
+                    className="px-4 py-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-slate-100 hover:text-slate-900 hover:border-2 hover:border-slate-900 hover:shadow-[4px_4px_0px_0px_#0f172a] transition-all border-2 border-transparent"
                   >
                     {item.label}
                   </Link>
@@ -126,7 +126,7 @@ export function Navbar() {
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="flex items-center gap-3 px-4 py-3 font-bold text-slate-900 dark:text-white hover:bg-amber-400 hover:text-slate-900 border-y-2 border-transparent hover:border-slate-900 transition-colors uppercase tracking-wider"
+                        className="flex items-center gap-3 px-4 py-3 font-bold text-slate-900 dark:text-white hover:bg-slate-100 hover:text-slate-900 border-y-2 border-transparent hover:border-slate-900 transition-colors uppercase tracking-wider"
                         onClick={() => setOpenDropdown(null)}
                       >
                         {child.label}
@@ -145,7 +145,7 @@ export function Navbar() {
             
             <Button
               variant="outline"
-              className="h-10 px-4 gap-2 font-black uppercase tracking-widest bg-cyan-400 text-slate-900 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-cyan-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
+              className="h-10 px-4 gap-2 font-black uppercase tracking-widest bg-slate-100 text-slate-900 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
               onClick={() => setFloatingChatOpen(true)}
             >
               <Bot className="h-5 w-5" />
@@ -157,25 +157,25 @@ export function Navbar() {
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-3 pl-4 border-l-4 border-slate-900 dark:border-white hover:opacity-80 transition-opacity outline-none">
-                  <div className="w-10 h-10 bg-rose-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-lg font-black shadow-[4px_4px_0px_0px_#0f172a]">
+                  <div className="w-10 h-10 bg-slate-100 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-lg font-black shadow-[4px_4px_0px_0px_#0f172a]">
                     {user?.display_name?.[0] || user?.username?.[0] || "A"}
                   </div>
                   <ChevronDown className="h-5 w-5 text-slate-900 dark:text-white hidden lg:block" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 p-0 bg-white dark:bg-slate-900 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] rounded-none">
-                  <DropdownMenuLabel className="p-4 border-b-4 border-slate-900 dark:border-white bg-indigo-400 text-slate-900">
+                  <DropdownMenuLabel className="p-4 border-b-4 border-slate-900 dark:border-white bg-slate-100 text-slate-900">
                     <div className="text-lg font-black uppercase tracking-wider">{user?.display_name || user?.username || "用户"}</div>
                     <div className="text-sm font-bold">{user?.email || ""}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuGroup className="p-2">
-                    <DropdownMenuItem className="p-3 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 cursor-pointer rounded-none">
+                    <DropdownMenuItem className="p-3 font-bold text-slate-900 dark:text-white uppercase tracking-wider hover:bg-slate-100 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 cursor-pointer rounded-none">
                       <User className="mr-3 h-5 w-5" />
                       <span>个人中心</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <div className="border-t-4 border-slate-900 dark:border-white p-2">
                     <DropdownMenuItem 
-                      className="p-3 font-bold text-slate-900 uppercase tracking-wider bg-rose-400 hover:bg-rose-500 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] cursor-pointer rounded-none"
+                      className="p-3 font-bold text-slate-900 uppercase tracking-wider bg-slate-100 hover:bg-rose-500 border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] cursor-pointer rounded-none"
                       onClick={() => { 
                         Cookies.remove("token"); 
                         Cookies.remove("refresh_token"); 
@@ -191,13 +191,13 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" className="font-black uppercase tracking-widest text-slate-900 dark:text-white hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 rounded-none h-10 px-6">
+                  <Button variant="ghost" className="font-black uppercase tracking-widest text-slate-900 dark:text-white hover:bg-slate-100 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 rounded-none h-10 px-6">
                     登录
                   </Button>
                 </Link>
                 <Link href="/register">
                   <Button
-                    className="h-10 px-6 font-black uppercase tracking-widest bg-rose-500 text-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-rose-400 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
+                    className="h-10 px-6 font-black uppercase tracking-widest bg-rose-500 text-white border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all rounded-none"
                   >
                     免费注册
                   </Button>
@@ -211,7 +211,7 @@ export function Navbar() {
             <LanguageSwitcher />
             <ThemeToggle />
             <button
-              className="p-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-slate-900 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              className="p-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 text-slate-900 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               onClick={() => setMobileOpen((v) => !v)}
             >
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -232,7 +232,7 @@ export function Navbar() {
             <div key={item.href}>
               <Link
                 href={item.href}
-                className="block px-4 py-3 font-black text-xl text-slate-900 dark:text-white uppercase tracking-widest hover:bg-emerald-400 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 transition-all"
+                className="block px-4 py-3 font-black text-xl text-slate-900 dark:text-white uppercase tracking-widest hover:bg-slate-100 hover:text-slate-900 border-2 border-transparent hover:border-slate-900 transition-all"
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}
@@ -241,7 +241,7 @@ export function Navbar() {
                 <Link
                   key={child.href}
                   href={child.href}
-                  className="block pl-8 pr-4 py-2 font-bold text-lg text-slate-600 dark:text-slate-400 uppercase hover:text-slate-900 hover:bg-amber-400 border-l-4 border-transparent hover:border-slate-900 transition-all"
+                  className="block pl-8 pr-4 py-2 font-bold text-lg text-slate-600 dark:text-slate-400 uppercase hover:text-slate-900 hover:bg-slate-100 border-l-4 border-transparent hover:border-slate-900 transition-all"
                   onClick={() => setMobileOpen(false)}
                 >
                   {child.label}
@@ -252,8 +252,8 @@ export function Navbar() {
           <div className="pt-6 border-t-4 border-slate-900 dark:border-white space-y-4">
             {user ? (
               <>
-                <div className="p-4 bg-indigo-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center gap-4">
-                  <div className="w-12 h-12 bg-rose-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-xl font-black">
+                <div className="p-4 bg-slate-100 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] flex items-center gap-4">
+                  <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 flex items-center justify-center text-slate-900 text-xl font-black">
                     {user?.display_name?.[0] || user?.username?.[0] || "A"}
                   </div>
                   <div>
@@ -281,7 +281,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/register" className="flex-1" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full h-14 text-lg font-black uppercase tracking-widest bg-emerald-400 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] rounded-none hover:bg-emerald-300">
+                  <Button className="w-full h-14 text-lg font-black uppercase tracking-widest bg-slate-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] rounded-none hover:bg-slate-50">
                     注册
                   </Button>
                 </Link>

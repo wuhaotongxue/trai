@@ -18,18 +18,18 @@ import { useI18n } from "@/i18n/i18n_context";
 const trustedBy = [
   { key: "bytedance", name: "字节跳动", color: "bg-teal-400" },
   { key: "tencent", name: "腾讯", color: "bg-blue-400" },
-  { key: "alibaba", name: "阿里巴巴", color: "bg-orange-400" },
-  { key: "meituan", name: "美团", color: "bg-yellow-400" },
+  { key: "alibaba", name: "阿里巴巴", color: "bg-slate-100" },
+  { key: "meituan", name: "美团", color: "bg-slate-100" },
   { key: "xiaomi", name: "小米", color: "bg-orange-500" },
   { key: "huawei", name: "华为", color: "bg-red-500" },
 ];
 
 const features = [
-  { icon: Bot, color: "bg-indigo-400", key: "agent", title: "智能 Agent", desc: "高度定制化的 AI 助手，满足复杂业务需求" },
-  { icon: Zap, color: "bg-amber-400", key: "correction", title: "极速响应", desc: "底层深度优化，毫秒级 API 调用延迟" },
-  { icon: Image, color: "bg-emerald-400", key: "vision", title: "视觉大模型", desc: "支持图生图、多图编辑等高阶图像能力" },
-  { icon: MessageSquare, color: "bg-cyan-400", key: "streaming", title: "流式交互", desc: "原生支持 SSE，提供打字机般丝滑体验" },
-  { icon: Shield, color: "bg-rose-400", key: "quota", title: "配额管控", desc: "企业级租户隔离与精确到 Token 的计费" },
+  { icon: Bot, color: "bg-slate-100", key: "agent", title: "智能 Agent", desc: "高度定制化的 AI 助手，满足复杂业务需求" },
+  { icon: Zap, color: "bg-slate-100", key: "correction", title: "极速响应", desc: "底层深度优化，毫秒级 API 调用延迟" },
+  { icon: Image, color: "bg-slate-100", key: "vision", title: "视觉大模型", desc: "支持图生图、多图编辑等高阶图像能力" },
+  { icon: MessageSquare, color: "bg-slate-100", key: "streaming", title: "流式交互", desc: "原生支持 SSE，提供打字机般丝滑体验" },
+  { icon: Shield, color: "bg-slate-100", key: "quota", title: "配额管控", desc: "企业级租户隔离与精确到 Token 的计费" },
   { icon: BarChart3, color: "bg-purple-400", key: "analytics", title: "数据洞察", desc: "全景大屏与多维统计，调用情况一目了然" },
 ];
 
@@ -43,7 +43,7 @@ const stats = [
 const useCases = [
   { icon: Workflow, key: "support", title: "智能客服", desc: "7x24小时全天候响应", color: "bg-pink-400" },
   { icon: Database, key: "data", title: "数据分析", desc: "自然语言查询数据库", color: "bg-lime-400" },
-  { icon: Globe, key: "content", title: "内容创作", desc: "多语言批量生成文案", color: "bg-cyan-400" },
+  { icon: Globe, key: "content", title: "内容创作", desc: "多语言批量生成文案", color: "bg-slate-100" },
   { icon: Cpu, key: "auto", title: "自动化流程", desc: "串联多个系统接口", color: "bg-fuchsia-400" },
 ];
 
@@ -96,7 +96,7 @@ export default function HomePage() {
   const { translate } = useI18n();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 selection:bg-rose-400 selection:text-slate-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-100 selection:bg-slate-100 selection:text-slate-900">
       <Navbar />
 
       {/* ===== Hero Section ===== */}
@@ -107,7 +107,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <Reveal>
-              <div className="inline-block border-2 border-slate-900 dark:border-white bg-amber-400 text-slate-900 px-4 py-2 font-black uppercase tracking-widest text-sm mb-8 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transform -rotate-2">
+              <div className="inline-block border-2 border-slate-900 dark:border-white bg-slate-100 text-slate-900 px-4 py-2 font-black uppercase tracking-widest text-sm mb-8 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transform -rotate-2">
                 🚀 下一代 AI Agent 驱动引擎
               </div>
             </Reveal>
@@ -128,7 +128,7 @@ export default function HomePage() {
             <Reveal delay={300}>
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                 <Link href="/register">
-                  <Button className="h-16 px-10 text-xl font-black uppercase tracking-widest bg-rose-500 text-white border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:bg-rose-400 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
+                  <Button className="h-16 px-10 text-xl font-black uppercase tracking-widest bg-rose-500 text-white border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff] active:translate-x-[8px] active:translate-y-[8px] active:shadow-none transition-all rounded-none">
                     立即开始体验 <ArrowRight className="ml-2 h-6 w-6" />
                   </Button>
                 </Link>
@@ -144,7 +144,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== Trusted By (Marquee) ===== */}
-      <section className="py-8 border-b-4 border-slate-900 dark:border-white bg-amber-200 overflow-hidden">
+      <section className="py-8 border-b-4 border-slate-900 dark:border-white bg-cyan-200 overflow-hidden">
         <div className="flex whitespace-nowrap">
           <div className="animate-marquee flex gap-16 items-center px-8">
             {[...trustedBy, ...trustedBy, ...trustedBy].map((company, i) => (
@@ -223,7 +223,7 @@ export default function HomePage() {
               <Reveal key={s.key} delay={i * 100}>
                 <div className="relative pt-12">
                   {/* Number Badge */}
-                  <div className="absolute top-0 left-8 w-16 h-16 bg-amber-400 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center text-2xl font-black text-slate-900 z-10">
+                  <div className="absolute top-0 left-8 w-16 h-16 bg-slate-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center text-2xl font-black text-slate-900 z-10">
                     {s.num}
                   </div>
                   <div className="border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 p-8 pt-10 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
@@ -238,7 +238,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-32 bg-cyan-400 border-b-4 border-slate-900 dark:border-white text-slate-900 text-center">
+      <section className="py-32 bg-slate-100 border-b-4 border-slate-900 dark:border-white text-slate-900 text-center">
         <div className="container mx-auto px-4">
           <Reveal>
             <h2 className="text-5xl md:text-7xl font-black uppercase tracking-widest mb-8">

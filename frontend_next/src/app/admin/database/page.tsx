@@ -174,7 +174,7 @@ export default function DatabasePage() {
         {[
           { labelKey: "admin.database.total_tables", value: schema?.total_tables?.toString() || "24", icon: Table2, color: "text-blue-400", bg: "bg-blue-500/15" },
           { labelKey: "admin.database.total_rows", value: schema?.total_rows?.toLocaleString(locale === "zh" ? "zh-CN" : "en-US") || "623,128", icon: Database, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { labelKey: "admin.database.backups", value: backups.length.toString(), icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
+          { labelKey: "admin.database.backups", value: backups.length.toString(), icon: HardDrive, color: "text-cyan-400", bg: "bg-slate-200/15" },
           { labelKey: "admin.database.status", value: translate("admin.database.ok"), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
         ].map((item) => (
           <Card key={item.labelKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">

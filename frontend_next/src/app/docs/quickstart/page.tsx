@@ -20,7 +20,7 @@ export default function DocsQuickstartPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-12 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-12 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex items-center gap-3">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">

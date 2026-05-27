@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
       <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-none blur-3xl" />
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-indigo-400/10 rounded-none blur-3xl" />
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-slate-100/10 rounded-none blur-3xl" />
           <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         </div>
 
@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
           <div>
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
               {translate("forgot_password.brand_line1")}<br />
-              <span className="text-transparent bg-clip-text bg-amber-400">
+              <span className="text-transparent bg-clip-text bg-slate-100">
                 {translate("forgot_password.brand_line2")}
               </span>
             </h1>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md">
           {/* Logo - 移动端 */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-none bg-amber-400 flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
+            <div className="w-10 h-10 rounded-none bg-slate-100 flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
               <Bot className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-foreground">TRAI</span>

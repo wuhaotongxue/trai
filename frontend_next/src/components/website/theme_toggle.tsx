@@ -53,7 +53,7 @@ export function ThemeToggle() {
         className={`h-4.5 w-4.5 transition-all duration-300 ${
           theme === "dark"
             ? "text-slate-400 rotate-90 scale-0"
-            : "text-amber-500 rotate-0 scale-100"
+            : "text-cyan-500 rotate-0 scale-100"
         }`}
         style={{ position: theme === "dark" ? "absolute" : "relative" }}
       />

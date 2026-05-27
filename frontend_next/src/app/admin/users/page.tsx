@@ -30,13 +30,13 @@ const STATUS_TABS = [
 ];
 
 const STATUS_CONFIG = {
-  pending: { labelKey: "admin.users.pending", cls: "text-amber-600 bg-amber-500/10", dot: "bg-amber-500", icon: Clock },
+  pending: { labelKey: "admin.users.pending", cls: "text-cyan-600 bg-slate-200/10", dot: "bg-slate-200", icon: Clock },
   active: { labelKey: "admin.users.normal", cls: "text-emerald-600 bg-emerald-500/10", dot: "bg-emerald-500", icon: CheckCircle2 },
   disabled: { labelKey: "admin.users.disabled", cls: "text-red-600 bg-red-500/10", dot: "bg-red-500", icon: XCircle },
 };
 
 const ROLE_CONFIG = {
-  admin: { labelKey: "admin.users.admin", cls: "text-amber-600 bg-amber-500/10" },
+  admin: { labelKey: "admin.users.admin", cls: "text-cyan-600 bg-slate-200/10" },
   vip: { labelKey: "admin.users.vip", cls: "text-purple-600 bg-purple-500/10" },
   normal: { labelKey: "admin.users.normal_user", cls: "text-blue-600 bg-blue-500/10" },
 };
@@ -245,19 +245,19 @@ export default function UsersPage() {
 
       {/* 待审核提醒横幅 */}
       {activeTab === 0 && pendingCount > 0 && (
-        <div className="flex items-center gap-3 p-4 rounded-none-none bg-amber-500/10 border border-amber-500/20">
-          <div className="w-10 h-10 rounded-none-none bg-amber-500/20 flex items-center justify-center shrink-0">
-            <AlertCircle className="h-5 w-5 text-amber-500" />
+        <div className="flex items-center gap-3 p-4 rounded-none-none bg-slate-200/10 border border-cyan-500/20">
+          <div className="w-10 h-10 rounded-none-none bg-slate-200/20 flex items-center justify-center shrink-0">
+            <AlertCircle className="h-5 w-5 text-cyan-500" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">
-              {translate("admin.users.pending_count")} <span className="text-amber-600 font-bold">{pendingCount}</span> {translate("admin.users.pending_wait")}
+              {translate("admin.users.pending_count")} <span className="text-cyan-600 font-bold">{pendingCount}</span> {translate("admin.users.pending_wait")}
             </p>
             <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5">{translate("admin.users.pending_desc")}</p>
           </div>
           <Button
             size="sm"
-            className="h-8 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium"
+            className="h-8 bg-slate-200 hover:bg-cyan-600 text-white text-xs font-medium"
             onClick={() => { setActiveTab(pendingTabIndex); setPage(1); }}
           >
             {translate("admin.users.go_review")}
@@ -301,7 +301,7 @@ export default function UsersPage() {
                         activeTab === i
                           ? "bg-blue-500 text-white"
                           : i === 1
-                          ? "bg-amber-500 text-white"
+                          ? "bg-slate-200 text-white"
                           : "bg-muted text-slate-900 dark:text-white font-bold"
                       }`}>
                         {count}

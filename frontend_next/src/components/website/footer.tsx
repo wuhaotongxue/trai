@@ -77,7 +77,7 @@ function BackToTop() {
       type="button"
       aria-label="Back to top"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className={`fixed bottom-8 right-8 z-50 w-14 h-14 bg-amber-400 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 flex items-center justify-center transition-all hover:bg-amber-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
+      className={`fixed bottom-8 right-8 z-50 w-14 h-14 bg-slate-100 border-4 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a] text-slate-900 flex items-center justify-center transition-all hover:bg-slate-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
     >
       <ArrowUp className="h-8 w-8 font-black" />
     </button>
@@ -97,7 +97,7 @@ export function Footer() {
             {/* 品牌区域 */}
             <div className="col-span-2">
               <Link href="/" className="inline-flex items-center gap-3 mb-6 group">
-                <div className="w-12 h-12 bg-amber-400 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+                <div className="w-12 h-12 bg-slate-100 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:-translate-y-1 transition-transform">
                   <Bot className="h-6 w-6 text-slate-900" />
                 </div>
                 <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white">TRAI</span>
@@ -111,9 +111,9 @@ export function Footer() {
               {/* 社交媒体 */}
               <div className="flex items-center gap-4">
                 {[
-                  { Icon: Globe2, href: "#", label: "Community", color: "bg-emerald-400" },
-                  { Icon: MessageCircle, href: "#", label: "WeChat", color: "bg-cyan-400" },
-                  { Icon: Users, href: "#", label: "Forum", color: "bg-rose-400" },
+                  { Icon: Globe2, href: "#", label: "Community", color: "bg-slate-100" },
+                  { Icon: MessageCircle, href: "#", label: "WeChat", color: "bg-slate-100" },
+                  { Icon: Users, href: "#", label: "Forum", color: "bg-slate-100" },
                 ].map(({ Icon, href, label, color }) => (
                   <a
                     key={label}
@@ -141,7 +141,7 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-lg font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-amber-400 dark:hover:bg-amber-500 hover:px-2 transition-all duration-200 inline-block"
+                        className="text-lg font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-200 hover:px-2 transition-all duration-200 inline-block"
                       >
                         {link.label}
                       </Link>

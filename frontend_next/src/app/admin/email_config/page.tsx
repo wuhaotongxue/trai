@@ -222,7 +222,7 @@ export default function EmailConfigPage() {
         </div>
         <Button
           size="sm"
-          className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
+          className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-slate-100 hover:from-blue-500 hover:to-indigo-500"
           onClick={() => handleOpenModal()}
         >
           <Plus className="h-4 w-4" />
@@ -456,7 +456,7 @@ export default function EmailConfigPage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
+                className="bg-slate-100 hover:from-blue-500 hover:to-indigo-500"
               >
                 {saving ? (
                   <span className="flex items-center gap-2">

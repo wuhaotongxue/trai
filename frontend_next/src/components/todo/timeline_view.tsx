@@ -103,7 +103,7 @@ export function TimelineView({ tasks }: TimelineViewProps) {
     backend_core: 'from-blue-500 to-blue-600',
     backend_application: 'from-cyan-500 to-cyan-600',
     backend_domain: 'from-teal-500 to-emerald-600',
-    backend_infrastructure: 'from-amber-500 to-orange-600',
+    backend_infrastructure: 'from-cyan-500 to-orange-600',
     frontend_init: 'from-blue-500 to-indigo-600',
     frontend_pages: 'from-sky-500 to-cyan-600',
     frontend_components: 'from-emerald-500 to-green-600',

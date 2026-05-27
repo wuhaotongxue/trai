@@ -72,7 +72,7 @@ function GalleryHeader({
   const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : activeTab === "subtitle" ? "影音画廊" : "音乐廊";
 
   return (
-    <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 dark:border-white bg-amber-300 dark:bg-amber-600">
+    <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-cyan-600">
       <div className="flex items-center gap-3">
         <span className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white">{title}</span>
         <span className="text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2 py-0.5 border-2 border-slate-900 dark:border-white">({itemCount})</span>

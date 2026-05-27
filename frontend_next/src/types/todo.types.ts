@@ -97,7 +97,7 @@ export interface TodoStats {
  */
 export const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; bgColor: string }> = {
   high: { label: '高', color: 'text-red-600', bgColor: 'bg-red-100' },
-  medium: { label: '中', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+  medium: { label: '中', color: 'text-cyan-600', bgColor: 'bg-cyan-100' },
   low: { label: '低', color: 'text-green-600', bgColor: 'bg-green-100' },
 };
 

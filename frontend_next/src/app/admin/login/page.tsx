@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-none-none blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-400/10 rounded-none-none blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-slate-100/10 rounded-none-none blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-500/5 rounded-none-none blur-3xl" />
       </div>
 
@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-14 h-14 rounded-none-none bg-amber-400 flex items-center justify-center shadow-2xl shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-shadow">
+            <div className="w-14 h-14 rounded-none-none bg-slate-100 flex items-center justify-center shadow-2xl shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-shadow">
               <Bot className="h-7 w-7 text-white" />
             </div>
           </Link>
@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
 
         <div className="bg-white dark:bg-slate-900 -md rounded-none-3xl border border-border shadow-2xl shadow-blue-500/5 overflow-hidden">
           {/* 头部标识 */}
-          <div className="bg-amber-400 px-6 py-4 flex items-center gap-3">
+          <div className="bg-slate-100 px-6 py-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-none-none bg-white/15  flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>

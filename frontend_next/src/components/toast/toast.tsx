@@ -48,8 +48,8 @@ const variantConfig: Record<
   warning: {
     icon: AlertTriangle,
     bg: "bg-card",
-    border: "border-l-4 border-l-amber-500",
-    iconColor: "text-amber-500",
+    border: "border-l-4 border-l-cyan-500",
+    iconColor: "text-cyan-500",
     titleColor: "text-foreground",
   },
   info: {
