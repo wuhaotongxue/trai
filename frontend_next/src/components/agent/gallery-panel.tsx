@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /**
  * gallery-panel.tsx
  * 作者: wuhao
@@ -72,57 +72,51 @@ function GalleryHeader({
   const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : activeTab === "subtitle" ? "影音画廊" : "音乐廊";
 
   return (
-    <div className="flex items-center justify-between p-3 border-b border-border">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-foreground">{title}</span>
-        <span className="text-xs text-muted-foreground">({itemCount})</span>
+    <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 dark:border-white bg-amber-300 dark:bg-amber-600">
+      <div className="flex items-center gap-3">
+        <span className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white">{title}</span>
+        <span className="text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2 py-0.5 border-2 border-slate-900 dark:border-white">({itemCount})</span>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {itemCount > 0 && (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
+            <button
+              className="h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               onClick={onToggleViewMode}
               title={viewMode === "grid" ? "列表视图" : "网格视图"}
             >
               {viewMode === "grid" ? (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
               ) : (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
+            </button>
+            <button
+              className="h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
               onClick={onToggleMaximize}
               title={isMaximized ? "还原大小" : "最大化"}
             >
               {isMaximized ? (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
               ) : (
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            </button>
+            <button
               onClick={onClear}
-              className="text-xs text-muted-foreground hover:text-red-500 h-7"
+              className="flex items-center gap-1 h-8 px-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-black uppercase tracking-wider border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className="h-3 w-3" />
               清空
-            </Button>
+            </button>
           </>
         )}
       </div>
@@ -217,7 +211,7 @@ export function GalleryPanel({
   const currentGallery = isImageTab ? imageGallery : isVideoTab ? videoGallery : isSubtitleTab ? videoGallery : musicGallery;
 
   return (
-    <div className={`border-l border-border bg-background transition-all duration-300 ease-in-out ${showGallery ? "w-80" : "w-0 overflow-hidden"} ${isGalleryMaximized ? "fixed inset-4 z-50 w-auto !top-[100px] rounded-xl shadow-2xl" : ""}`}>
+    <div className={`border-l-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900 transition-all duration-300 ease-in-out ${showGallery ? "w-80" : "w-0 overflow-hidden"} ${isGalleryMaximized ? "fixed inset-4 z-50 w-auto !top-[100px] border-4 border-slate-900 dark:border-white rounded-none shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]" : ""}`}>
       <div className="flex flex-col h-full">
         <GalleryHeader
           activeTab={activeTab}

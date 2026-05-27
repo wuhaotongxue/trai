@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /**
  * music-gallery.tsx
  * 作者: wuhao
@@ -54,41 +54,41 @@ function MusicCardItem({
   };
 
   return (
-    <div className={`group relative rounded-xl border overflow-hidden transition-all hover:shadow-md ${isCurrent ? 'border-indigo-300 dark:border-indigo-700 bg-gradient-to-br from-indigo-500/5 to-cyan-500/5' : 'border-border bg-card hover:border-indigo-300 dark:hover:border-indigo-700'}`}>
+    <div className={`group relative overflow-hidden transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-amber-300 dark:bg-amber-600' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
       <audio
         ref={audioRef}
         src={music.url}
         onEnded={() => setIsPlaying(false)}
       />
-      <div className="p-3">
+      <div className="p-4">
         {/* 标题和播放按钮 */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isCurrent ? 'bg-gradient-to-br from-indigo-500/20 to-cyan-500/20' : 'bg-muted'}`}>
-            <Music className={`h-5 w-5 ${isCurrent ? 'text-indigo-500' : 'text-muted-foreground'}`} />
+        <div className="flex items-center gap-3 mb-3">
+          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-emerald-300 dark:bg-emerald-600'}`}>
+            <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-foreground truncate" title={music.prompt}>
+            <p className="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white truncate" title={music.prompt}>
               {music.prompt}
             </p>
-            <p className={`text-[10px] ${isCurrent ? 'text-indigo-500' : 'text-muted-foreground'}`}>
+            <p className={`text-[10px] font-bold uppercase ${isCurrent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
               {isCurrent ? '当前生成' : new Date(music.timestamp).toLocaleString()}
             </p>
           </div>
           {/* 播放按钮 */}
           <button
             onClick={togglePlay}
-            className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+            className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
               isPlaying
-                ? 'bg-indigo-500 text-white hover:bg-indigo-600'
-                : 'bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20'
+                ? 'bg-rose-500 text-white'
+                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'
             }`}
           >
             {isPlaying ? (
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               </svg>
             ) : (
-              <svg className="h-4 w-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
@@ -100,9 +100,9 @@ function MusicCardItem({
           <div className="flex justify-end">
             <button
               onClick={() => onDelete(music.id)}
-              className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted hover:bg-red-500/10 text-xs text-muted-foreground hover:text-red-500 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 text-xs font-black uppercase text-slate-900 dark:text-white hover:text-white transition-colors border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-4 w-4" />
               删除
             </button>
           </div>
@@ -207,12 +207,12 @@ export function MusicGallery({
 
   if (currentMusic.length === 0 && historyMusic.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-4">
-        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-          <Music className="h-8 w-8 text-slate-400" />
+      <div className="flex flex-col items-center justify-center h-full text-center p-8">
+        <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6 transform rotate-3">
+          <Music className="h-16 w-16 text-slate-900" />
         </div>
-        <p className="text-sm text-muted-foreground">还没有生成过音乐</p>
-        <p className="text-xs text-muted-foreground mt-1">在音乐模式下生成音乐</p>
+        <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">暂无音乐</p>
+        <p className="text-sm font-bold uppercase mt-2 text-slate-500 dark:text-slate-400">在音乐模式下生成您的第一首曲目</p>
       </div>
     );
   }

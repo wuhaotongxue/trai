@@ -409,9 +409,9 @@ export function AgentTypeSelector({
     <div className={`space-y-3 ${className}`}>
       {/* Loading state */}
       {isLoading && (
-        <div className="flex items-center justify-center py-6">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
-          <span className="text-sm text-muted-foreground">Loading agents...</span>
+        <div className="flex flex-col items-center justify-center py-10 bg-slate-100 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+          <Loader2 className="h-10 w-10 animate-spin text-slate-900 dark:text-white mb-4" />
+          <span className="text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white">正在加载 Agent 数据...</span>
         </div>
       )}
 
@@ -424,26 +424,26 @@ export function AgentTypeSelector({
         if (categoryAgents.length === 0) return null;
 
         return (
-          <div key={category} className="rounded-xl border border-border overflow-hidden">
+          <div key={category} className="border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-950 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden">
             {/* Category header */}
             <button
               type="button"
               onClick={() => toggleCategory(category)}
-              className="w-full flex items-center gap-3 p-3 hover:bg-muted/30 transition-colors"
+              className="w-full flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b-2 border-slate-900 dark:border-white last:border-b-0"
               aria-expanded={isExpanded}
               aria-label={`${config.label} category (${categoryAgents.length} agents)`}
             >
-              <div className={`p-2 rounded-lg ${config.bgColorClass}`}>
-                <CategoryIcon className={`h-4 w-4 ${config.textColorClass}`} />
+              <div className={`p-2 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${config.bgColorClass.replace("/10", "")}`}>
+                <CategoryIcon className={`h-5 w-5 ${config.textColorClass.replace("text-", "text-slate-900 dark:text-").replace("-600", "-900")}`} />
               </div>
-              <span className="flex-1 text-sm font-semibold text-left text-foreground">
+              <span className="flex-1 text-base font-black uppercase tracking-widest text-left text-slate-900 dark:text-white">
                 {config.label}
               </span>
-              <span className="text-xs text-muted-foreground mr-2">
+              <span className="text-sm font-bold text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-700 px-2 py-0.5 border-2 border-slate-900 dark:border-white">
                 {categoryAgents.length}
               </span>
               <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                className={`h-5 w-5 text-slate-900 dark:text-white transition-transform duration-200 ${
                   isExpanded ? "rotate-180" : ""
                 }`}
               />
@@ -451,7 +451,7 @@ export function AgentTypeSelector({
 
             {/* Agent grid */}
             {isExpanded && (
-              <div className="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-slate-950">
                 {categoryAgents.map((agent) => {
                   const isSelected = value === agent.type;
                   const IconComponent = ICON_MAP[agent.icon || "Bot"] || Bot;
@@ -462,57 +462,48 @@ export function AgentTypeSelector({
                       type="button"
                       onClick={() => handleSelect(agent.type)}
                       disabled={disabled}
-                      className={`group flex items-start gap-3 p-3 rounded-lg border transition-all text-left ${
+                      className={`group flex items-start gap-3 p-4 border-2 border-slate-900 dark:border-white transition-all text-left ${
                         isSelected
-                          ? `${config.borderColorClass} ${config.bgColorClass} ring-1 ${config.textColorClass.replace("text-", "ring-")}`
-                          : "border-transparent hover:bg-muted/50"
-                      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                          ? `bg-amber-300 dark:bg-amber-600 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]`
+                          : "bg-slate-50 dark:bg-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]"
+                      } ${disabled ? "opacity-50 cursor-not-allowed" : "active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"}`}
                       aria-label={`Select ${agent.name}`}
                       title={agent.description}
                     >
-                      <IconComponent
-                        className={`h-5 w-5 shrink-0 mt-0.5 ${
-                          isSelected ? config.textColorClass : "text-muted-foreground group-hover:text-foreground"
-                        }`}
-                      />
+                      <div className={`p-2 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]`}>
+                        <IconComponent
+                          className={`h-6 w-6 shrink-0 text-slate-900 dark:text-white`}
+                        />
+                      </div>
 
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm font-medium truncate ${
-                            isSelected ? "text-foreground" : "text-foreground/80"
-                          }`}
+                          className={`text-base font-black uppercase tracking-wide truncate text-slate-900 dark:text-white`}
                         >
                           {agent.name}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 line-clamp-1 uppercase">
                           {agent.description}
                         </p>
 
                         {/* Modality badges */}
-                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                        <div className="flex items-center gap-2 mt-3 flex-wrap">
                           {agent.input_modalities.slice(0, 3).map((modality) => (
                             <span
                               key={modality}
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${config.bgColorClass} ${config.textColorClass}`}
+                              className={`px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white`}
                             >
                               {modality}
                             </span>
                           ))}
                           {agent.streaming_supported && (
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-600 dark:text-green-400">
-                              <Sparkles className="h-2.5 w-2.5" />
-                              stream
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-black uppercase border-2 border-slate-900 dark:border-white bg-emerald-400 dark:bg-emerald-600 text-slate-900 dark:text-white">
+                              <Sparkles className="h-3 w-3" />
+                              STREAM
                             </span>
                           )}
                         </div>
                       </div>
-
-                      {/* Selected indicator */}
-                      {isSelected && (
-                        <div
-                          className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${config.bgColorClass.replace("/10", "-500")}`}
-                        />
-                      )}
                     </button>
                   );
                 })}

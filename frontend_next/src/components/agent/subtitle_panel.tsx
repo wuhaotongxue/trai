@@ -162,7 +162,7 @@ export function SubtitlePanel() {
     }, 5000); // 每 5 秒轮询一次
 
     return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const inferredType = useMemo(() => {

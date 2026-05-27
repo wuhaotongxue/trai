@@ -23,35 +23,35 @@ export function QuotaBar() {
   const toolQuota = quotas.find((q) => q.quota_type === "agent_tool_call");
   if (!toolQuota)
     return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Zap className="h-3.5 w-3.5 text-yellow-500" />
+      <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-900 dark:text-white bg-amber-300 px-3 py-1 border-2 border-slate-900 shadow-[2px_2px_0px_0px_#0f172a]">
+        <Zap className="h-4 w-4 text-slate-900" />
         <span>加载中...</span>
       </div>
     );
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-slate-100/60 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-xs">
-      <Zap className="h-3.5 w-3.5 text-yellow-500" />
-      <span className="text-muted-foreground font-medium">Agent</span>
+    <div className="flex items-center gap-3 px-4 py-1.5 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] text-xs font-black uppercase tracking-widest">
+      <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
+      <span className="text-slate-900 dark:text-white">AGENT</span>
       {toolQuota.unlimited ? (
-        <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold text-[10px]">
+        <span className="px-2 py-0.5 bg-emerald-400 text-slate-900 border-2 border-slate-900 text-[10px]">
           无限
         </span>
       ) : (
         <>
-          <div className="w-20 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+          <div className="w-24 h-3 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden shadow-inner">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all"
+              className="h-full bg-cyan-400 border-r-2 border-slate-900 dark:border-white transition-all"
               style={{
                 width: `${Math.min(100, (toolQuota.used / toolQuota.limit) * 100)}%`,
               }}
             />
           </div>
-          <span className="font-semibold text-blue-600 dark:text-blue-400">
+          <span className="text-slate-900 dark:text-white">
             {toolQuota.used}
           </span>
-          <span className="text-muted-foreground">/ {toolQuota.limit}</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700/80 text-muted-foreground text-[10px]">
+          <span className="text-slate-500 dark:text-slate-400">/ {toolQuota.limit}</span>
+          <span className="px-2 py-0.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] border-2 border-slate-900 dark:border-white">
             {toolQuota.billing_month}
           </span>
         </>

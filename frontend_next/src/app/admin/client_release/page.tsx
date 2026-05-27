@@ -107,7 +107,7 @@ export default function ClientReleasePage() {
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   const fetchBuildStatus = useCallback(async () => {
     try {
@@ -147,7 +147,7 @@ export default function ClientReleasePage() {
   // 搜索触发
   useEffect(() => {
     void fetchReleases(1, searchQuery);
-  }, [searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchQuery]);  
 
   // 轮询状态管理：构建中 3 秒轮询，空闲时 30 秒
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function ClientReleasePage() {
       void fetchReleases(1);
       pollingIntervalRef.current = setInterval(() => { void fetchBuildStatus(); }, 30000);
     }
-  }, [buildStatus.status, initDone]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [buildStatus.status, initDone]);  
 
   useEffect(() => {
     if (initDone) return;
@@ -177,7 +177,7 @@ export default function ClientReleasePage() {
     return () => {
       if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   // 一键打包
   const handleBuildAndRelease = async () => {
