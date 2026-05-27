@@ -151,7 +151,7 @@ function GallerySearchBar({
           placeholder="搜索提示词..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full pl-8 pr-3 py-1.5 text-xs rounded-none border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
       </div>
       <div className="flex items-center justify-between">

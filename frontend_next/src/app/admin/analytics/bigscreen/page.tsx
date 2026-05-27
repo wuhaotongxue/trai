@@ -116,36 +116,36 @@ export default function BigScreenAnalytics() {
     <div className={`min-h-screen bg-[#0b0f1a] text-white p-6 font-sans overflow-hidden ${isFullscreen ? 'p-10' : ''}`}>
       <div className="flex items-center justify-between mb-6 border-b border-blue-500/30 pb-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+          <div className="w-12 h-12 bg-blue-600 rounded-none-none flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-600/20">
             <Building2 className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-widest bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold tracking-widest bg-amber-400 bg-clip-text text-transparent">
               TRAI Organization Analytics
             </h1>
             <p className="text-blue-400/60 text-xs mt-1">REAL-TIME DATA ANALYTICS CENTER</p>
           </div>
         </div>
-        <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+        <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-none-none transition-colors">
           {isFullscreen ? <Minimize2 className="h-6 w-6 text-blue-400" /> : <Maximize2 className="h-6 w-6 text-blue-400" />}
         </button>
       </div>
 
       <div className="grid grid-cols-12 gap-4 h-[calc(100vh-180px)]">
         <div className="col-span-12 lg:col-span-3 space-y-4 overflow-hidden">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+          <div className="bg-white/5 border border-white/10 rounded-none-none p-4 ">
             <div className="flex items-center justify-between mb-2">
               <Users className="h-5 w-5 text-blue-400" />
-              <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">LIVE</span>
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-none">LIVE</span>
             </div>
             <p className="text-xs text-gray-400">Total Users</p>
             <p className="text-4xl font-mono font-bold text-white">{data.total_users}</p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+          <div className="bg-white/5 border border-white/10 rounded-none-none p-4 ">
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="h-5 w-5 text-emerald-400" />
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">WEEKLY</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-none">WEEKLY</span>
             </div>
             <p className="text-xs text-gray-400">New Hires</p>
             <p className="text-4xl font-mono font-bold text-white">
@@ -153,10 +153,10 @@ export default function BigScreenAnalytics() {
             </p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+          <div className="bg-white/5 border border-white/10 rounded-none-none p-4 ">
             <div className="flex items-center justify-between mb-2">
               <TrendingDown className="h-5 w-5 text-red-400" />
-              <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded">WEEKLY</span>
+              <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-none">WEEKLY</span>
             </div>
             <p className="text-xs text-gray-400">Resigned</p>
             <p className="text-4xl font-mono font-bold text-white">
@@ -165,10 +165,10 @@ export default function BigScreenAnalytics() {
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-5 bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="col-span-12 lg:col-span-5 bg-white/5 border border-white/10 rounded-none-none p-4 ">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-blue-500 rounded-full" />
+              <span className="w-1 h-5 bg-blue-500 rounded-none-none" />
               Hire/Resign Trend
             </h3>
           </div>
@@ -177,10 +177,10 @@ export default function BigScreenAnalytics() {
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-4 bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+        <div className="col-span-12 lg:col-span-4 bg-white/5 border border-white/10 rounded-none-none p-4 ">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-cyan-500 rounded-full" />
+              <span className="w-1 h-5 bg-cyan-500 rounded-none-none" />
               Dept Distribution (Top {MAX_DEPT_DISPLAY})
             </h3>
           </div>

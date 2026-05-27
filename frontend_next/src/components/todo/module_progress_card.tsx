@@ -41,7 +41,7 @@ export function ModuleProgressCard({
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+      className={`cursor-pointer transition-all duration-200 hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${
         isActive ? 'ring-2 ring-primary' : ''
       }`}
       onClick={onClick}
@@ -64,19 +64,19 @@ export function ModuleProgressCard({
             {completed} / {total} 任务
           </span>
         </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+        <div className="h-2 bg-secondary rounded-none overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-500"
+            className="h-full rounded-none transition-all duration-500"
             style={{ width: `${percentage}%`, backgroundColor: color }}
           />
         </div>
         <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="w-2 h-2 rounded-none bg-blue-500" />
             {inProgress} 进行中
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="w-2 h-2 rounded-none bg-green-500" />
             {completed} 已完成
           </span>
         </div>

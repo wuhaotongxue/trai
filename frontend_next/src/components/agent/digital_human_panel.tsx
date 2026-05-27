@@ -122,7 +122,7 @@ export function DigitalHumanPanel() {
           <div className="space-y-6">
             {messages.length === 0 && (
               <div className="text-center mt-12 opacity-50 text-slate-900 dark:text-white">
-                <div className="w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] mx-auto mb-4">
+                <div className="w-24 h-24 bg-slate-200 dark:bg-slate-800 rounded-none flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] mx-auto mb-4">
                   <Bot className="w-10 h-10" />
                 </div>
                 <div className="font-black uppercase text-xl tracking-widest">暂无对话记录</div>

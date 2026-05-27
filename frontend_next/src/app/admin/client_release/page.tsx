@@ -222,10 +222,10 @@ export default function ClientReleasePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.client_release.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.client_release.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.client_release.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button className="h-9 gap-2 shadow-sm" onClick={() => setIsModalOpen(true)}>
+          <Button className="h-9 gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => setIsModalOpen(true)}>
             <Zap className="h-4 w-4" />
             {translate("admin.client_release.build_and_release")}
           </Button>
@@ -252,7 +252,7 @@ export default function ClientReleasePage() {
                     {buildStatus.status === "success" && translate("admin.client_release.build_success").replace("{version}", buildStatus.version || "")}
                     {buildStatus.status === "failed" && translate("admin.client_release.build_failed")}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-900 dark:text-white font-bold">
                     {buildStatus.status === "running" && buildStatus.message}
                     {buildStatus.status === "success" && buildStatus.message}
                     {buildStatus.status === "failed" && buildStatus.error}
@@ -282,7 +282,7 @@ export default function ClientReleasePage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{translate("admin.client_release.current_step")}</span>
+                  <span className="text-slate-900 dark:text-white font-bold">{translate("admin.client_release.current_step")}</span>
                   <span className="text-foreground font-medium">{buildStatus.message || translate("admin.client_release.waiting")}</span>
                 </div>
                 {buildStatus.status === "success" && (
@@ -298,7 +298,7 @@ export default function ClientReleasePage() {
                   </div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-900 dark:text-white font-bold">
                 {buildStatus.status === "running"
                   ? translate("admin.client_release.auto_refresh")
                   : buildStatus.status === "success"
@@ -333,12 +333,12 @@ export default function ClientReleasePage() {
                       <Label htmlFor="notes">{translate("admin.client_release.release_notes_label")}</Label>
                       <textarea
                         id="notes"
-                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex min-h-[120px] w-full rounded-none-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-slate-900 dark:text-white font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder={translate("admin.client_release.release_notes_placeholder")}
                         value={releaseNotes}
                         onChange={e => setReleaseNotes(e.target.value)}
                       />
-                      <p className="text-xs text-muted-foreground">{translate("admin.client_release.release_notes_hint")}</p>
+                      <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.client_release.release_notes_hint")}</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="agentRole" className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export default function ClientReleasePage() {
                   </Label>
                   <select
                     id="agentRole"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-none-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-slate-900 dark:text-white font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={selectedRole}
                     onChange={e => setSelectedRole(e.target.value)}
                   >
@@ -359,7 +359,7 @@ export default function ClientReleasePage() {
                     ))}
                   </select>
                   {selectedRole && agentRoles.find(r => r.t_role_name === selectedRole) && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-900 dark:text-white font-bold">
                       {agentRoles.find(r => r.t_role_name === selectedRole)?.t_role_comment}
                     </p>
                   )}
@@ -369,7 +369,7 @@ export default function ClientReleasePage() {
                     {translate("admin.client_release.wecom_groups_label")}
                   </Label>
                   <div className="flex flex-wrap gap-2">
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-none-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
                       <input
                         type="checkbox"
                         checked={selectedWecomGroups.includes("wuhao")}
@@ -380,11 +380,11 @@ export default function ClientReleasePage() {
                             setSelectedWecomGroups(prev => prev.filter(g => g !== "wuhao"));
                           }
                         }}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                        className="h-4 w-4 rounded-none border-gray-300 text-blue-600"
                       />
                       <span className="text-sm">wuhao Group</span>
                     </label>
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-none-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors">
                       <input
                         type="checkbox"
                         checked={selectedWecomGroups.includes("wudu")}
@@ -395,12 +395,12 @@ export default function ClientReleasePage() {
                             setSelectedWecomGroups(prev => prev.filter(g => g !== "wudu"));
                           }
                         }}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                        className="h-4 w-4 rounded-none border-gray-300 text-blue-600"
                       />
                       <span className="text-sm">wudu Group</span>
                     </label>
                   </div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.client_release.wecom_group_select_hint")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.client_release.wecom_group_select_hint")}</p>
                 </div>
               </div>
               <DialogFooter className="pt-4">
@@ -418,20 +418,20 @@ export default function ClientReleasePage() {
       </Dialog>
 
       {/* 版本列表 */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="pb-4 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Cpu className="h-5 w-5 text-indigo-500" />
               {translate("admin.client_release.version_list")}
               {activeRelease && (
-                <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+                <span className="ml-2 px-2 py-0.5 rounded-none-none bg-emerald-100 text-emerald-700 text-xs font-medium">
                   {translate("admin.client_release.current_version")}: v{activeRelease.version.split(".")[0]}.{activeRelease.version.split(".")[1]}.{activeRelease.version.split(".")[2]}
                 </span>
               )}
             </CardTitle>
             <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 dark:text-white font-bold" />
               <Input 
                 placeholder={translate("admin.client_release.search_version")} 
                 className="pl-9 h-9" 
@@ -444,18 +444,18 @@ export default function ClientReleasePage() {
         <CardContent className="p-0">
           <div className="min-h-[300px]">
             {loading ? (
-              <div className="p-12 text-center text-muted-foreground">
+              <div className="p-12 text-center text-slate-900 dark:text-white font-bold">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 opacity-20" />
                 {translate("admin.client_release.loading_versions")}
               </div>
             ) : releases.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground">
-                <Download className="h-10 w-10 mx-auto mb-4 text-muted-foreground/30" />
+              <div className="p-12 text-center text-slate-900 dark:text-white font-bold">
+                <Download className="h-10 w-10 mx-auto mb-4 text-slate-900 dark:text-white font-bold/30" />
                 <p className="text-sm">{translate("admin.client_release.no_releases")}</p>
               </div>
             ) : (
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="bg-muted/30 text-muted-foreground">
+                <thead className="bg-muted/30 text-slate-900 dark:text-white font-bold">
                   <tr>
                     <th className="p-4 font-medium">{translate("admin.client_release.col_version")}</th>
                     <th className="p-4 font-medium">{translate("admin.client_release.col_time")}</th>
@@ -470,16 +470,16 @@ export default function ClientReleasePage() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-indigo-600 dark:text-indigo-400">v{item.version}</span>
                           {idx === 0 && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">{translate("admin.client_release.latest")}</span>
+                            <span className="px-1.5 py-0.5 rounded-none-none bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">{translate("admin.client_release.latest")}</span>
                           )}
                         </div>
                       </td>
-                      <td className="p-4 text-muted-foreground flex items-center gap-1.5">
+                      <td className="p-4 text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
                         {new Date(item.created_at).toLocaleString()}
                       </td>
                       <td className="p-4">
-                        <p className="text-xs text-muted-foreground line-clamp-1 max-w-xs" title={item.release_notes || "无"}>
+                        <p className="text-xs text-slate-900 dark:text-white font-bold line-clamp-1 max-w-xs" title={item.release_notes || "无"}>
                           {item.release_notes || "—"}
                         </p>
                       </td>
@@ -531,9 +531,9 @@ export default function ClientReleasePage() {
                         <div className="flex items-center justify-between flex-wrap gap-3">
                           {/* 左侧：每页条数 */}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.items_per_page")}</span>
+                            <span className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.client_release.items_per_page")}</span>
                             <select
-                              className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                              className="h-8 rounded-none-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               value={pageSize}
                               onChange={e => {
                                 setPageSize(Number(e.target.value));
@@ -549,10 +549,10 @@ export default function ClientReleasePage() {
 
                           {/* 中间：跳转 */}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.jump_to")}</span>
+                            <span className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.client_release.jump_to")}</span>
                             <input
                               type="number"
-                              className="h-8 w-16 rounded-md border border-input bg-background px-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-ring"
+                              className="h-8 w-16 rounded-none-md border border-input bg-background px-2 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-ring"
                               min={1}
                               max={totalPages}
                               value={page}
@@ -566,12 +566,12 @@ export default function ClientReleasePage() {
                                 else if (val > totalPages) void fetchReleases(totalPages);
                               }}
                             />
-                            <span className="text-sm text-muted-foreground">{translate("admin.client_release.page")}</span>
+                            <span className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.client_release.page")}</span>
                           </div>
 
                           {/* 右侧：翻页 + 总计 */}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-slate-900 dark:text-white font-bold">
                               {translate("admin.client_release.total")} {total} {translate("admin.client_release.items")} / {totalPages} {translate("admin.client_release.page")}
                             </span>
                             <Button

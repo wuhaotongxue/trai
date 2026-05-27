@@ -40,7 +40,7 @@ export function TaskCard({ task, onStart, onComplete, onDelete }: TaskCardProps)
   const status = STATUS_CONFIG[task.status];
 
   return (
-    <Card className="group hover:shadow-md transition-shadow duration-200">
+    <Card className="group hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-shadow duration-200">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">

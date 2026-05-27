@@ -205,19 +205,19 @@ export default function UsersPage() {
       {/* 顶部标题栏 */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
             <Shield className="h-5 w-5 text-blue-500" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">{translate("admin.users.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5">
               {translate("admin.users.total")} {total} {translate("admin.users.registered")}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 h-9 px-4 text-sm rounded-lg border border-border bg-background hover:bg-slate-100 cursor-pointer transition-colors">
+            <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 h-9 px-4 text-sm rounded-none-none border border-border bg-background hover:bg-slate-100 cursor-pointer transition-colors">
               <Download className="h-3.5 w-3.5" />
               {translate("admin.users.export")}
             </DropdownMenuTrigger>
@@ -236,7 +236,7 @@ export default function UsersPage() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={() => window.location.href = "/admin/users/new"}>
+          <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => window.location.href = "/admin/users/new"}>
             <UserPlus className="h-3.5 w-3.5" />
             {translate("admin.users.new_user")}
           </Button>
@@ -245,15 +245,15 @@ export default function UsersPage() {
 
       {/* 待审核提醒横幅 */}
       {activeTab === 0 && pendingCount > 0 && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-3 p-4 rounded-none-none bg-amber-500/10 border border-amber-500/20">
+          <div className="w-10 h-10 rounded-none-none bg-amber-500/20 flex items-center justify-center shrink-0">
             <AlertCircle className="h-5 w-5 text-amber-500" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">
               {translate("admin.users.pending_count")} <span className="text-amber-600 font-bold">{pendingCount}</span> {translate("admin.users.pending_wait")}
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">{translate("admin.users.pending_desc")}</p>
+            <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5">{translate("admin.users.pending_desc")}</p>
           </div>
           <Button
             size="sm"
@@ -266,20 +266,20 @@ export default function UsersPage() {
       )}
 
       {/* 筛选工具栏 */}
-      <Card className="border-0 shadow-sm overflow-hidden">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden">
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center gap-3 flex-wrap">
             {/* 搜索框 */}
             <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-900 dark:text-white font-bold" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={translate("admin.users.search")}
-                className="h-9 pl-9 pr-4 rounded-lg border-border text-sm"
+                className="h-9 pl-9 pr-4 rounded-none-none border-border text-sm"
               />
             </div>
-            <div className="flex items-center gap-1.5 bg-muted/40 rounded-lg p-1 border border-border/60">
+            <div className="flex items-center gap-1.5 bg-muted/40 rounded-none-none p-1 border border-border/60">
               {STATUS_TABS.map((tab, i) => {
                 const count = i === 0 ? total :
                   i === 1 ? users.filter((u) => u.status === "pending").length :
@@ -289,20 +289,20 @@ export default function UsersPage() {
                   <button
                     key={tab.key}
                     onClick={() => { setActiveTab(i); setPage(1); }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-none-md text-xs font-medium transition-all ${
                       activeTab === i
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "bg-card text-foreground shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]"
+                        : "text-slate-900 dark:text-white font-bold hover:text-foreground"
                     }`}
                   >
                     {translate(tab.key)}
                     {count > 0 && (
-                      <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
+                      <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-none-none text-[10px] font-bold ${
                         activeTab === i
                           ? "bg-blue-500 text-white"
                           : i === 1
                           ? "bg-amber-500 text-white"
-                          : "bg-muted text-muted-foreground"
+                          : "bg-muted text-slate-900 dark:text-white font-bold"
                       }`}>
                         {count}
                       </span>
@@ -315,16 +315,16 @@ export default function UsersPage() {
 
           {/* 角色筛选 */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{translate("admin.users.role")}</span>
+            <span className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.users.role")}</span>
             <div className="flex items-center gap-1.5">
               {ROLE_FILTER_TABS.map((tab, i) => (
                 <button
                   key={tab.labelKey}
                   onClick={() => { setActiveRoleTab(i); setPage(1); }}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-none-md text-xs font-medium transition-all ${
                     activeRoleTab === i
                       ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                      : "text-muted-foreground hover:text-foreground border border-transparent hover:border-border/60"
+                      : "text-slate-900 dark:text-white font-bold hover:text-foreground border border-transparent hover:border-border/60"
                   }`}
                 >
                   {translate(tab.labelKey)}
@@ -336,34 +336,34 @@ export default function UsersPage() {
       </Card>
 
       {/* 用户列表 */}
-      <Card className="border-0 shadow-sm overflow-hidden">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.user")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.employee_id")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.role")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.status")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.reg_time")}</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.login_ip")}</th>
-                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.users.table.action")}</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.user")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.employee_id")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.role")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.status")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.reg_time")}</th>
+                  <th className="text-left px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.login_ip")}</th>
+                  <th className="text-right px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.users.table.action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
                     <td colSpan={7} className="px-5 py-12 text-center">
-                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                        <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                      <div className="flex items-center justify-center gap-2 text-slate-900 dark:text-white font-bold">
+                        <div className="w-4 h-4 rounded-none-none border-2 border-primary/30 border-t-primary animate-spin" />
                         <span className="text-sm">{translate("admin.users.loading")}</span>
                       </div>
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">{translate("admin.users.no_result")}</td>
+                    <td colSpan={7} className="px-5 py-12 text-center text-slate-900 dark:text-white font-bold text-sm">{translate("admin.users.no_result")}</td>
                   </tr>
                 ) : (
                   filtered.map((user) => {
@@ -374,38 +374,38 @@ export default function UsersPage() {
                         <td className="px-5 py-3.5">
                           <div className="flex items-center gap-3">
                             {user.avatar_url ? (
-                              <img src={user.avatar_url} alt={user.display_name} className="h-9 w-9 rounded-full object-cover border border-border shrink-0" referrerPolicy="no-referrer" />
+                              <img src={user.avatar_url} alt={user.display_name} className="h-9 w-9 rounded-none-none object-cover border border-border shrink-0" referrerPolicy="no-referrer" />
                             ) : (
-                              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center font-bold text-sm text-blue-600 shrink-0 border border-blue-500/20">
+                              <div className="h-9 w-9 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center font-bold text-sm text-blue-600 shrink-0 border border-blue-500/20">
                                 {(user.display_name || user.username || "U")[0].toUpperCase()}
                               </div>
                             )}
                             <div className="min-w-0">
                               <div className="font-medium text-foreground">{user.display_name || user.username}</div>
-                              <div className="text-xs text-muted-foreground truncate max-w-[180px]">{user.email || user.username}</div>
+                              <div className="text-xs text-slate-900 dark:text-white font-bold truncate max-w-[180px]">{user.email || user.username}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground">
+                        <td className="px-4 py-3.5 font-mono text-xs text-slate-900 dark:text-white font-bold">
                           {user.wecom_user_id || "—"}
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${roleCfg.cls}`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none-md text-xs font-medium ${roleCfg.cls}`}>
                             {translate(roleCfg.labelKey)}
                           </span>
                         </td>
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-1.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${stCfg.dot} ${user.status === "pending" ? "animate-pulse" : ""}`} />
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${stCfg.cls}`}>
+                            <span className={`w-1.5 h-1.5 rounded-none-none ${stCfg.dot} ${user.status === "pending" ? "animate-pulse" : ""}`} />
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-none-md text-xs font-medium ${stCfg.cls}`}>
                               {translate(stCfg.labelKey)}
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-muted-foreground">
+                        <td className="px-4 py-3.5 text-xs text-slate-900 dark:text-white font-bold">
                           {user.created_at ? new Date(user.created_at).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { year: "numeric", month: "2-digit", day: "2-digit" }) : "—"}
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-muted-foreground">
+                        <td className="px-4 py-3.5 text-xs text-slate-900 dark:text-white font-bold">
                           <div>{user.last_login_ip || "—"}</div>
                           <div className="truncate max-w-[120px]">{user.last_login_location || ""}</div>
                         </td>
@@ -416,7 +416,7 @@ export default function UsersPage() {
                               <>
                                 <button
                                   onClick={() => void handleApprove(user)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
                                   title={translate("admin.users.approve")}
                                 >
                                   <CheckCircle2 className="h-3.5 w-3.5" />
@@ -424,7 +424,7 @@ export default function UsersPage() {
                                 </button>
                                 <button
                                   onClick={() => void handleReject(user)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-medium transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-red-500/10 text-red-600 hover:bg-red-500/20 text-xs font-medium transition-colors"
                                   title={translate("admin.users.reject")}
                                 >
                                   <XCircle className="h-3.5 w-3.5" />
@@ -436,7 +436,7 @@ export default function UsersPage() {
                             {user.status === "active" && (
                               <button
                                 onClick={() => void toggleStatus(user)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted hover:bg-red-500/10 text-muted-foreground hover:text-red-500 text-xs font-medium transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-muted hover:bg-red-500/10 text-slate-900 dark:text-white font-bold hover:text-red-500 text-xs font-medium transition-colors"
                                 title={translate("admin.users.disable")}
                               >
                                 <XCircle className="h-3.5 w-3.5" />
@@ -447,7 +447,7 @@ export default function UsersPage() {
                             {user.status === "disabled" && (
                               <button
                                 onClick={() => void toggleStatus(user)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-none-none bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-medium transition-colors"
                                 title={translate("admin.users.enable")}
                               >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -456,7 +456,7 @@ export default function UsersPage() {
                             )}
                             <button
                               onClick={() => void deleteUser(user.user_id)}
-                              className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"
+                              className="p-1.5 rounded-none-none hover:bg-red-500/15 text-slate-900 dark:text-white font-bold hover:text-red-400 transition-colors"
                               title={translate("admin.users.delete")}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -474,7 +474,7 @@ export default function UsersPage() {
           {/* 分页 */}
           {total > 0 && (
             <div className="p-4 border-t border-border/60 flex items-center justify-between bg-muted/10">
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-slate-900 dark:text-white font-bold">
                 {translate("admin.users.pagination.show")} {(page - 1) * pageSize + 1} {translate("admin.users.pagination.to")} {Math.min(page * pageSize, total)} {translate("admin.users.pagination.total")} {total}
               </div>
               <div className="flex items-center gap-2">

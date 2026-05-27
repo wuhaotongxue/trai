@@ -45,7 +45,7 @@ export default function NetworkPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-foreground">{translate("admin.network.server_status")}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5 flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             {translate("admin.network.last_check")}: {lastRefresh.toLocaleTimeString("zh-CN")} ({translate("admin.network.auto_refresh")})
           </p>
@@ -65,9 +65,9 @@ export default function NetworkPage() {
           { label: translate("admin.network.memory_usage"), value: `${stats?.memory_percent || 0}%`, icon: Signal, color: "text-emerald-400", bg: "bg-emerald-500/15" },
           { label: translate("admin.network.disk_usage"), value: `${stats?.disk_percent || 0}%`, icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
         ].map((item) => (
-          <Card key={item.label} className="border-0 shadow-sm">
+          <Card key={item.label} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.bg}`}>
+              <div className={`w-10 h-10 rounded-none-none flex items-center justify-center ${item.bg}`}>
                 <item.icon className={`h-5 w-5 ${item.color}`} />
               </div>
               <div>
@@ -80,7 +80,7 @@ export default function NetworkPage() {
       </div>
 
       {/* 网络流量 */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.network.real_time_traffic")}</CardTitle>
         </CardHeader>
@@ -88,19 +88,19 @@ export default function NetworkPage() {
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{translate("admin.network.total_sent")}</span>
+                <span className="text-slate-900 dark:text-white font-bold">{translate("admin.network.total_sent")}</span>
                 <span className="font-mono text-foreground">{( (stats?.network_sent || 0) / 1024 / 1024 / 1024 ).toFixed(2)} GB</span>
               </div>
-              <div className="h-2 bg-muted/40 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted/40 rounded-none-none overflow-hidden">
                 <div className="h-full bg-blue-500 w-[65%]" />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{translate("admin.network.total_received")}</span>
+                <span className="text-slate-900 dark:text-white font-bold">{translate("admin.network.total_received")}</span>
                 <span className="font-mono text-foreground">{( (stats?.network_recv || 0) / 1024 / 1024 / 1024 ).toFixed(2)} GB</span>
               </div>
-              <div className="h-2 bg-muted/40 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted/40 rounded-none-none overflow-hidden">
                 <div className="h-full bg-emerald-500 w-[45%]" />
               </div>
             </div>

@@ -351,7 +351,7 @@ export function MultimodalUpload({
             inputRef.current?.click();
           }
         }}
-        className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all duration-200 cursor-pointer ${
+        className={`relative flex flex-col items-center justify-center rounded-none border-2 border-dashed p-8 transition-all duration-200 cursor-pointer ${
           isDragging
             ? "border-blue-500 bg-blue-500/10 scale-[1.02]"
             : "border-border hover:border-blue-400/50 bg-muted/30"
@@ -395,7 +395,7 @@ export function MultimodalUpload({
 
       {/* Error message */}
       {error && (
-        <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+        <div className="mt-3 flex items-center gap-2 p-3 rounded-none bg-red-500/10 border border-red-500/20">
           <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           <button
@@ -436,7 +436,7 @@ export function MultimodalUpload({
               return (
                 <div
                   key={fileInfo.id}
-                  className={`group relative rounded-xl border overflow-hidden transition-all ${
+                  className={`group relative rounded-none border overflow-hidden transition-all ${
                     config.borderColorClass
                   }`}
                 >
@@ -451,7 +451,7 @@ export function MultimodalUpload({
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="h-8 w-8 rounded-full"
+                          className="h-8 w-8 rounded-none"
                           onClick={() => removeFile(fileInfo.id)}
                           type="button"
                           aria-label={`Remove ${fileInfo.file.name}`}
@@ -480,7 +480,7 @@ export function MultimodalUpload({
                     <button
                       type="button"
                       onClick={() => removeFile(fileInfo.id)}
-                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background rounded-full p-1"
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background rounded-none p-1"
                       aria-label={`Remove ${fileInfo.file.name}`}
                       title="Remove file"
                     >

@@ -193,12 +193,12 @@ export default function AgentRolesPage() {
       {/* 标题栏 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
+          <div className="p-2 bg-blue-100 rounded-none-none">
             <Bot className="w-6 h-6 text-blue-600" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">{translate("admin.agent_roles.title")}</h1>
-            <p className="text-sm text-muted-foreground">{translate("admin.agent_roles.subtitle")}</p>
+            <p className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.agent_roles.subtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function AgentRolesPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-900 dark:text-white font-bold" />
             <Input
               placeholder={translate("admin.agent_roles.search_placeholder")}
               value={searchQuery}
@@ -232,13 +232,13 @@ export default function AgentRolesPage() {
       <div className="grid gap-4">
         {loading ? (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
+            <CardContent className="py-12 text-center text-slate-900 dark:text-white font-bold">
               {translate("admin.agent_roles.loading")}
             </CardContent>
           </Card>
         ) : filteredRoles.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
+            <CardContent className="py-12 text-center text-slate-900 dark:text-white font-bold">
               {searchQuery ? translate("admin.agent_roles.no_match") : translate("admin.agent_roles.no_data")}
             </CardContent>
           </Card>
@@ -254,24 +254,24 @@ export default function AgentRolesPage() {
                         {role.t_is_active ? translate("admin.agent_roles.enable") : translate("admin.agent_roles.disable")}
                       </Badge>
                       <Badge variant="outline">{role.t_style_type}</Badge>
-                      <span className="text-xs text-muted-foreground">优先级: {role.t_priority}</span>
+                      <span className="text-xs text-slate-900 dark:text-white font-bold">优先级: {role.t_priority}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className="text-sm text-slate-900 dark:text-white font-bold mb-2">
                       <MessageSquare className="inline w-3 h-3 mr-1" />
                       {role.t_role_comment}
                     </p>
                     {role.t_role_keyword && (
-                      <p className="text-xs text-muted-foreground mb-2">
+                      <p className="text-xs text-slate-900 dark:text-white font-bold mb-2">
                         <Tag className="inline w-3 h-3 mr-1" />
                         {translate("admin.agent_roles.keywords")}: {role.t_role_keyword}
                       </p>
                     )}
                     {role.t_remark && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-slate-900 dark:text-white font-bold">
                         {translate("admin.agent_roles.remark")}: {role.t_remark}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-slate-900 dark:text-white font-bold mt-2">
                       {translate("admin.agent_roles.update_time")}: {new Date(role.t_updated_at).toLocaleString("zh-CN")}
                     </p>
                   </div>
@@ -347,7 +347,7 @@ export default function AgentRolesPage() {
                 <Label htmlFor="style_type">{translate("admin.agent_roles.style_type")}</Label>
                 <select
                   id="style_type"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                  className="flex h-9 w-full rounded-none-md border border-input bg-transparent px-3 py-1 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]"
                   value={editRole?.t_style_type || "default"}
                   onChange={(e) => setEditRole((prev) => ({ ...prev, t_style_type: e.target.value }))}
                 >

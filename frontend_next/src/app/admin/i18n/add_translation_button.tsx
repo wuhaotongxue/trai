@@ -51,8 +51,8 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-4">
+          <div className="absolute inset-0 bg-black/40 " onClick={() => setOpen(false)} />
+          <div className="relative bg-card border border-border rounded-none-none shadow-2xl w-full max-w-md mx-4 p-6 space-y-4">
             <h3 className="text-base font-bold text-foreground flex items-center gap-2">
               <Plus className="h-4 w-4 text-violet-500" />
               新增翻译
@@ -60,9 +60,9 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">语言</Label>
+                <Label className="text-xs font-medium text-slate-900 dark:text-white font-bold">语言</Label>
                 <Select value={locale} onValueChange={(v) => v && setLocale(v)}>
-                  <SelectTrigger className="h-9 rounded-xl">
+                  <SelectTrigger className="h-9 rounded-none-none">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -73,9 +73,9 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">命名空间</Label>
+                <Label className="text-xs font-medium text-slate-900 dark:text-white font-bold">命名空间</Label>
                 <Input
-                  className="h-9 font-mono text-sm rounded-xl"
+                  className="h-9 font-mono text-sm rounded-none-none"
                   placeholder="例如: nav / hero / admin"
                   value={ns}
                   onChange={(e) => setNs(e.target.value)}
@@ -89,9 +89,9 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">翻译键 (Key)</Label>
+                <Label className="text-xs font-medium text-slate-900 dark:text-white font-bold">翻译键 (Key)</Label>
                 <Input
-                  className="h-9 font-mono text-sm rounded-xl"
+                  className="h-9 font-mono text-sm rounded-none-none"
                   placeholder="例如: hero.title"
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
@@ -99,9 +99,9 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">翻译值</Label>
+                <Label className="text-xs font-medium text-slate-900 dark:text-white font-bold">翻译值</Label>
                 <textarea
-                  className="min-h-[80px] rounded-xl text-sm font-mono w-full px-3 py-2 border border-input bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-ring/30"
+                  className="min-h-[80px] rounded-none-none text-sm font-mono w-full px-3 py-2 border border-input bg-transparent resize-none focus:outline-none focus:ring-2 focus:ring-ring/30"
                   placeholder="输入翻译文本..."
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
@@ -110,12 +110,12 @@ export default function AddTranslationButton({ namespaces, onAdd }: Props) {
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-1">
-              <Button variant="outline" size="sm" className="h-9 rounded-xl" onClick={() => setOpen(false)}>
+              <Button variant="outline" size="sm" className="h-9 rounded-none-none" onClick={() => setOpen(false)}>
                 取消
               </Button>
               <Button
                 size="sm"
-                className="h-9 rounded-xl bg-violet-600 hover:bg-violet-500"
+                className="h-9 rounded-none-none bg-violet-600 hover:bg-violet-500"
                 onClick={handleSubmit}
                 disabled={!ns || !key}
               >

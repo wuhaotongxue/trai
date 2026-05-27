@@ -221,7 +221,7 @@ function LoginForm() {
             >
               {loading ? (
                 <span className="flex items-center gap-3">
-                  <span className="w-6 h-6 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                  <span className="w-6 h-6 border-4 border-slate-900 border-t-transparent rounded-none animate-spin" />
                   {translate("login.form.logging_in") || "登录中..."}
                 </span>
               ) : (

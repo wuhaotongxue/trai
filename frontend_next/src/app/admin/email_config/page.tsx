@@ -202,7 +202,7 @@ export default function EmailConfigPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">{translate("admin.loading") || "加载中..."}</div>
+        <div className="text-slate-900 dark:text-white font-bold">{translate("admin.loading") || "加载中..."}</div>
       </div>
     );
   }
@@ -213,16 +213,16 @@ export default function EmailConfigPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
               <Mail className="h-5 w-5 text-blue-500" />
             </div>
             {translate("admin.email_config.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.email_config.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.email_config.subtitle")}</p>
         </div>
         <Button
           size="sm"
-          className="h-9 gap-2 text-sm shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+          className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
           onClick={() => handleOpenModal()}
         >
           <Plus className="h-4 w-4" />
@@ -249,8 +249,8 @@ export default function EmailConfigPage() {
       {configs.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <Mail className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">暂无邮件配置</p>
+            <Mail className="h-12 w-12 text-slate-900 dark:text-white font-bold/30 mx-auto mb-4" />
+            <p className="text-slate-900 dark:text-white font-bold">暂无邮件配置</p>
             <Button
               variant="outline"
               className="mt-4"
@@ -268,7 +268,7 @@ export default function EmailConfigPage() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    <div className={`w-10 h-10 rounded-none-none flex items-center justify-center ${
                       config.is_active ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-400"
                     }`}>
                       <Shield className="h-5 w-5" />
@@ -276,7 +276,7 @@ export default function EmailConfigPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-foreground">{config.config_name}</h3>
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        <span className={`px-2 py-0.5 rounded-none text-xs font-medium ${
                           config.is_active
                             ? "bg-green-100 text-green-700"
                             : "bg-slate-100 text-slate-500"
@@ -286,14 +286,14 @@ export default function EmailConfigPage() {
                             : translate("admin.email_config.inactive")}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">
                         {config.host}:{config.port} | {config.username}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-slate-900 dark:text-white font-bold mt-1">
                         收件人: {config.to_emails.join(", ") || "未设置"}
                       </p>
                       {config.remark && (
-                        <p className="text-xs text-muted-foreground mt-1">备注: {config.remark}</p>
+                        <p className="text-xs text-slate-900 dark:text-white font-bold mt-1">备注: {config.remark}</p>
                       )}
                     </div>
                   </div>
@@ -338,7 +338,7 @@ export default function EmailConfigPage() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={handleCloseModal} />
-          <div className="relative bg-background rounded-xl border shadow-lg w-full max-w-lg max-h-[90vh] overflow-auto m-4">
+          <div className="relative bg-background rounded-none-none border shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] w-full max-w-lg max-h-[90vh] overflow-auto m-4">
             <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
                 {editingConfig
@@ -434,7 +434,7 @@ export default function EmailConfigPage() {
                   id="is_active"
                   checked={form.is_active}
                   onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                  className="w-4 h-4 rounded border-input"
+                  className="w-4 h-4 rounded-none border-input"
                 />
                 <Label htmlFor="is_active" className="cursor-pointer">
                   {translate("admin.email_config.is_active")}
@@ -456,11 +456,11 @@ export default function EmailConfigPage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+                className="bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
               >
                 {saving ? (
                   <span className="flex items-center gap-2">
-                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-none-none" />
                     保存中...
                   </span>
                 ) : (

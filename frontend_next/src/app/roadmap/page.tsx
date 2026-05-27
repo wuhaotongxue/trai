@@ -268,7 +268,7 @@ function RelationshipGraph({
     is_selected(area) ? "stroke-slate-900 dark:stroke-white stroke-[6]" : "stroke-transparent stroke-[0]";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
+    <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
       <div className="text-sm font-semibold text-slate-900 dark:text-white">关系图谱</div>
       <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
         点击节点可定位到对应域的更新列表, 再次点击可取消高亮
@@ -355,9 +355,9 @@ export default function RoadmapPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-gradient-to-b from-slate-50 to-white dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
               <Milestone className="h-4 w-4" />
               {translate("roadmap.title")}
             </div>
@@ -372,7 +372,7 @@ export default function RoadmapPage() {
 
         <section className="py-12">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-6">
+            <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-6">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
                   <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">{translate("roadmap.timeline")}</div>
@@ -406,7 +406,7 @@ export default function RoadmapPage() {
                               <div className="flex items-center justify-center mt-2">
                                 <div
                                   className={[
-                                    "w-5 h-5 rounded-full flex items-center justify-center",
+                                    "w-5 h-5 rounded-none flex items-center justify-center",
                                     meta.dot_class_name,
                                     is_active ? "ring-4 ring-slate-200/60 dark:ring-slate-800/60" : "ring-2 ring-white dark:ring-[#0d1220]",
                                   ].join(" ")}
@@ -424,7 +424,7 @@ export default function RoadmapPage() {
                                 <div className="text-xs font-semibold text-slate-900 dark:text-white line-clamp-2 leading-snug min-h-[32px]">
                                   {node.title}
                                 </div>
-                                <div className={["inline-flex mt-2 px-2 py-0.5 rounded-full text-[11px] font-medium", meta.badge_class_name].join(" ")}>
+                                <div className={["inline-flex mt-2 px-2 py-0.5 rounded-none text-[11px] font-medium", meta.badge_class_name].join(" ")}>
                                   {meta.label}
                                 </div>
                               </div>
@@ -452,7 +452,7 @@ export default function RoadmapPage() {
                         aria-label={`查看 ${node.range_label}`}
                         onClick={() => select_timeline_node(node.id)}
                         className={[
-                          "w-full p-4 rounded-xl border text-left transition-colors",
+                          "w-full p-4 rounded-none border text-left transition-colors",
                           is_active
                             ? "border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-white/5"
                             : "border-slate-200 bg-white dark:border-slate-800/60 dark:bg-[#0d1220]",
@@ -463,7 +463,7 @@ export default function RoadmapPage() {
                             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">{node.range_label}</div>
                             <div className="text-sm font-bold text-slate-900 dark:text-white mt-1">{node.title}</div>
                           </div>
-                          <div className={["px-2 py-0.5 rounded-full text-[11px] font-medium flex-shrink-0", meta.badge_class_name].join(" ")}>
+                          <div className={["px-2 py-0.5 rounded-none text-[11px] font-medium flex-shrink-0", meta.badge_class_name].join(" ")}>
                             {meta.label}
                           </div>
                         </div>
@@ -475,13 +475,13 @@ export default function RoadmapPage() {
             </div>
 
             {active_node ? (
-              <div id="roadmap_detail" className="mt-6 rounded-2xl bg-slate-50 dark:bg-[#0b1020] p-6">
+              <div id="roadmap_detail" className="mt-6 rounded-none bg-slate-50 dark:bg-[#0b1020] p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                   <div>
                     <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">{active_node.range_label}</div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-1">{active_node.title}</h2>
                   </div>
-                  <div className={["px-3 py-1 rounded-full text-xs font-medium", active_meta?.badge_class_name ?? ""].join(" ")}>
+                  <div className={["px-3 py-1 rounded-none text-xs font-medium", active_meta?.badge_class_name ?? ""].join(" ")}>
                     {active_meta?.label ?? ""}
                   </div>
                 </div>
@@ -492,7 +492,7 @@ export default function RoadmapPage() {
                     selected_area={selected_area}
                     on_select_area={(area) => select_graph_area(area)}
                   />
-                  <div className="rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
+                  <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
                     <div className="text-sm font-semibold text-slate-900 dark:text-white">关联摘要</div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       当同一天存在多个域的提交时, 视为存在关联
@@ -506,7 +506,7 @@ export default function RoadmapPage() {
                           <span
                             key={area}
                             className={[
-                              "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-medium",
+                              "inline-flex items-center gap-2 px-2.5 py-1 rounded-none border text-xs font-medium",
                               meta.badge_class_name,
                             ].join(" ")}
                           >
@@ -537,7 +537,7 @@ export default function RoadmapPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
+                <div className="mt-4 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
                   <div className="grid lg:grid-cols-3 gap-4">
                     {(Object.keys({ frontend: 1, backend: 1, client: 1 }) as ChangeArea[]).map((area) => {
                       const meta = get_area_meta(area);
@@ -550,7 +550,7 @@ export default function RoadmapPage() {
                           key={area}
                           id={`roadmap_area_${area}`}
                           className={[
-                            "rounded-xl border p-4 transition-colors",
+                            "rounded-none border p-4 transition-colors",
                             is_emphasis
                               ? "border-slate-400 bg-slate-50 dark:border-slate-600 dark:bg-white/5"
                               : "border-slate-200 bg-white dark:border-slate-800/60 dark:bg-[#0d1220]",
@@ -559,7 +559,7 @@ export default function RoadmapPage() {
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="text-sm font-semibold text-slate-900 dark:text-white">{meta.label}</div>
-                            <span className={["inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-medium", meta.badge_class_name].join(" ")}>
+                            <span className={["inline-flex items-center gap-2 px-2.5 py-1 rounded-none border text-xs font-medium", meta.badge_class_name].join(" ")}>
                               <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{list.length}</span>
                             </span>
                           </div>
@@ -576,7 +576,7 @@ export default function RoadmapPage() {
                                     </span>
                                     <div className="min-w-0 flex-1">
                                       <div className="flex items-center flex-wrap gap-2">
-                                        <span className={["inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
+                                        <span className={["inline-flex items-center px-2 py-0.5 rounded-none border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
                                           {type_meta.label}
                                         </span>
                                       </div>
@@ -599,7 +599,7 @@ export default function RoadmapPage() {
                   </div>
 
                   {grouped_items.other.length > 0 ? (
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
+                    <div className="mt-4 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
                       <div className="text-sm font-semibold text-slate-900 dark:text-white">其他</div>
                       <div className="mt-3 space-y-2">
                         {grouped_items.other.map((raw_item, i) => {
@@ -613,7 +613,7 @@ export default function RoadmapPage() {
                               </span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center flex-wrap gap-2">
-                                  <span className={["inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
+                                  <span className={["inline-flex items-center px-2 py-0.5 rounded-none border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
                                     {type_meta.label}
                                   </span>
                                 </div>

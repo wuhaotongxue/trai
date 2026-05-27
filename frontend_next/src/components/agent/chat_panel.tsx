@@ -304,7 +304,7 @@ export function ChatPanel() {
                     <div className="max-w-4xl mx-auto p-6 space-y-8">
                       {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 opacity-70">
-                          <div className={`w-24 h-24 bg-amber-200 dark:bg-amber-600 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                          <div className={`w-24 h-24 bg-amber-200 dark:bg-amber-600 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                             <MessageSquare className="w-12 h-12 text-slate-900 dark:text-white" />
                           </div>
                           <div>
@@ -489,7 +489,7 @@ export function ChatPanel() {
                               </motion.div>
                             ) : (
                               <motion.div key="image-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                   <ImageIcon className="h-16 w-16 text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
@@ -571,7 +571,7 @@ export function ChatPanel() {
                               </motion.div>
                             ) : (
                               <motion.div key="video-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                   <Video className="h-16 w-16 text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
@@ -674,7 +674,7 @@ export function ChatPanel() {
                               </motion.div>
                             ) : (
                               <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                   <Music className="h-16 w-16 text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
@@ -796,7 +796,7 @@ export function ChatPanel() {
                               </motion.div>
                             ) : (
                               <motion.div key="edit-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-rose-200 dark:bg-rose-800 rounded-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                <div className={`w-32 h-32 bg-rose-200 dark:bg-rose-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                   <Pencil className="h-16 w-16 text-slate-900 dark:text-white" />
                                 </div>
                                 <div className="font-black uppercase text-2xl tracking-widest">等待上传与指令</div>

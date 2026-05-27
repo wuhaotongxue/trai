@@ -44,9 +44,9 @@ export default function DocsIndexPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-14 bg-gradient-to-b from-slate-50 to-white dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-14 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium mb-6">
               <BookOpen className="h-4 w-4" />
               {translate("docs.title")}
             </div>
@@ -66,10 +66,10 @@ export default function DocsIndexPage() {
                 <Link
                   key={c.href}
                   href={c.href}
-                  className="group p-6 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors dark:bg-[#0d1220] dark:border-slate-800/60 dark:hover:bg-white/5"
+                  className="group p-6 rounded-none border border-slate-200 bg-white hover:bg-slate-50 transition-colors dark:bg-[#0d1220] dark:border-slate-800/60 dark:hover:bg-white/5"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <div className="w-12 h-12 rounded-none bg-amber-400 flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
                       <c.icon className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -143,9 +143,9 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   if (token === undefined || isAdmin === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="max-w-md w-full rounded-xl border border-border bg-card p-6 text-center">
+        <div className="max-w-md w-full rounded-none-none border border-border bg-card p-6 text-center">
           <div className="text-sm font-semibold text-foreground">TRAI {translate("admin.title")}</div>
-          <div className="text-xs text-muted-foreground mt-2">{translate("admin.loading")}</div>
+          <div className="text-xs text-slate-900 dark:text-white font-bold mt-2">{translate("admin.loading")}</div>
         </div>
       </div>
     );
@@ -154,19 +154,19 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   if (token === null || isAdmin === false) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center space-y-4">
-          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+        <div className="max-w-md w-full rounded-none-none border border-border bg-card p-8 text-center space-y-4">
+          <div className="w-16 h-16 bg-red-500/10 rounded-none-none flex items-center justify-center mx-auto">
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-foreground">{translate("admin.access_denied.title")}</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-900 dark:text-white font-bold">
             {token === null ? translate("admin.access_denied.not_logged_in") : translate("admin.access_denied.admin_only")}
           </p>
           <div className="pt-4 flex items-center justify-center gap-3">
-            <Link href="/" className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors">
+            <Link href="/" className="inline-flex items-center justify-center h-9 px-4 rounded-none-none bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors">
               {translate("admin.access_denied.back_to_home")}
             </Link>
-            <Link href="/admin/login" className="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
+            <Link href="/admin/login" className="inline-flex items-center justify-center h-9 px-4 rounded-none-none bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
               {translate("admin.access_denied.relogin")}
             </Link>
           </div>
@@ -208,13 +208,13 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         {/* 搜索框 */}
         <div className={cn("py-3 border-b border-border/40", (sidebarCollapsed ?? false) ? "px-3" : "px-4")}>
           {(sidebarCollapsed ?? false) ? (
-            <button type="button" className="w-full h-10 rounded-lg border border-border/60 bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title={translate("admin.sidebar.search_menu")} aria-label={translate("admin.sidebar.search_menu")}>
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <button type="button" className="w-full h-10 rounded-none-none border border-border/60 bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title={translate("admin.sidebar.search_menu")} aria-label={translate("admin.sidebar.search_menu")}>
+              <Search className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
             </button>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg border border-border/60 transition-all focus-within:border-blue-500/50 group">
-              <Search className="h-3.5 w-3.5 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
-              <input type="text" placeholder={translate("admin.sidebar.search_menu")} className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none w-full" />
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-none-none border border-border/60 transition-all focus-within:border-blue-500/50 group">
+              <Search className="h-3.5 w-3.5 text-slate-900 dark:text-white font-bold group-focus-within:text-blue-500 transition-colors" />
+              <input type="text" placeholder={translate("admin.sidebar.search_menu")} className="bg-transparent text-xs text-foreground placeholder:text-slate-900 dark:text-white font-bold outline-none w-full" />
             </div>
           )}
         </div>
@@ -324,27 +324,27 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             {/* 用户下拉 */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2.5 pl-3 border-l border-border/60 hover:opacity-90 transition-opacity outline-none">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold shadow-lg shadow-blue-500/20">
+                <div className="w-8 h-8 rounded-none-none bg-amber-400 flex items-center justify-center text-white text-sm font-semibold shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
                   {user?.display_name?.[0] || user?.username?.[0] || "A"}
                 </div>
                 <div className="text-left hidden lg:block">
                   <p className="text-sm font-semibold text-foreground leading-none">{user?.display_name || user?.username || "管理员"}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}</p>
+                  <p className="text-[11px] text-slate-900 dark:text-white font-bold mt-0.5">{user?.wecom_user_id ? `工号: ${user.wecom_user_id}` : user?.email || "admin@trai.ai"}</p>
                 </div>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground hidden lg:block" />
+                <ChevronDown className="h-3.5 w-3.5 text-slate-900 dark:text-white font-bold hidden lg:block" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 p-2">
                 <DropdownMenuLabel className="p-2">
                   <div className="text-sm font-semibold">{user?.display_name || user?.username || "管理员"}</div>
-                  <div className="text-xs text-muted-foreground">{user?.email || "admin@trai.ai"}</div>
+                  <div className="text-xs text-slate-900 dark:text-white font-bold">{user?.email || "admin@trai.ai"}</div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="rounded-lg cursor-pointer"><UserIcon className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.profile")}</span></DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-lg cursor-pointer"><Settings className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.account_settings")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-none-none cursor-pointer"><UserIcon className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.profile")}</span></DropdownMenuItem>
+                  <DropdownMenuItem className="rounded-none-none cursor-pointer"><Settings className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.account_settings")}</span></DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="rounded-lg cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                <DropdownMenuItem className="rounded-none-none cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
                   onClick={() => { Cookies.remove("token"); Cookies.remove("refresh_token"); window.location.href = "/login"; }}>
                   <LogOut className="mr-2 h-4 w-4" /><span>{translate("admin.topbar.logout")}</span>
                 </DropdownMenuItem>

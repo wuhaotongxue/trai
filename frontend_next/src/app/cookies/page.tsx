@@ -17,14 +17,14 @@ export default function CookiesPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-600 to-amber-500 py-16">
+      <div className="bg-amber-400 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center gap-3 mb-4">
             <Link href="/" className="text-amber-100 hover:text-white transition-colors text-sm flex items-center gap-1">
               <ArrowLeft className="h-4 w-4" /> 返回官网
             </Link>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-white/20 text-white text-sm font-medium mb-4">
             <Cookie className="h-4 w-4" />
             Cookie 使用说明
           </div>
@@ -75,10 +75,10 @@ export default function CookiesPage() {
                   safe: true,
                 },
               ].map((c) => (
-                <div key={c.name} className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div key={c.name} className="p-4 rounded-none bg-slate-50 border border-slate-100">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-sm font-bold text-slate-800">{c.name}</h3>
-                    {c.safe && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">无害</span>}
+                    {c.safe && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-none font-medium">无害</span>}
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed mb-2">{c.desc}</p>
                   <p className="text-xs text-slate-400 font-mono">例如: {c.example}</p>

@@ -75,7 +75,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
     <div
       role="alert"
       className={`
-        flex items-start gap-3 p-4 rounded-xl shadow-lg
+        flex items-start gap-3 p-4 rounded-none shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff]
         border border-border
         ${config.bg} ${config.border}
         transition-all duration-300 ease-out
@@ -97,14 +97,14 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
                 toast.onConfirm?.();
                 onDismiss();
               }}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium rounded-none bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
             >
               {toast.confirmText || "确认"}
             </button>
             <button
               type="button"
               onClick={onDismiss}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium rounded-none bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
             >
               {toast.cancelText || "取消"}
             </button>
@@ -116,7 +116,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
           type="button"
           onClick={onDismiss}
           aria-label="关闭通知"
-          className="flex-shrink-0 p-1 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex-shrink-0 p-1 rounded-none hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
         </button>

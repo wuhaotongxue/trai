@@ -167,7 +167,7 @@ export default function LoginLogsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.login_logs.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.login_logs.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.login_logs.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={() => { void fetchLogs(); void fetchStats(); }}>
@@ -186,14 +186,14 @@ export default function LoginLogsPage() {
           {statCards.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.label} className="border-0 shadow-sm">
+              <Card key={stat.label} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white font-bold">{stat.label}</p>
                       <p className="text-2xl font-bold mt-1">{stat.value}</p>
                     </div>
-                    <div className={`p-2.5 rounded-lg ${stat.bg}`}>
+                    <div className={`p-2.5 rounded-none-none ${stat.bg}`}>
                       <Icon className={`h-5 w-5 ${stat.color}`} />
                     </div>
                   </div>
@@ -204,25 +204,25 @@ export default function LoginLogsPage() {
         </div>
       )}
 
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardContent className="p-4">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-900 dark:text-white font-bold" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={translate("admin.login_logs.search_placeholder")}
-                className="h-9 pl-9 rounded-lg border-border text-sm"
+                className="h-9 pl-9 rounded-none-none border-border text-sm"
               />
             </div>
-            <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
+            <div className="flex items-center gap-1 p-1 bg-muted rounded-none-none">
               {["全部", "success", "failure"].map((status) => (
                 <button
                   key={status}
                   onClick={() => { setStatusFilter(status); setPage(1); }}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                    statusFilter === status ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  className={`px-3 py-1.5 text-xs font-medium rounded-none-md transition-colors ${
+                    statusFilter === status ? "bg-background text-foreground shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" : "text-slate-900 dark:text-white font-bold hover:text-foreground"
                   }`}
                 >
                   {status === "全部" ? translate("admin.login_logs.filter_all") :
@@ -234,7 +234,7 @@ export default function LoginLogsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -254,13 +254,13 @@ export default function LoginLogsPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
+                    <td colSpan={9} className="px-4 py-12 text-center text-slate-900 dark:text-white font-bold">
                       {translate("admin.login_logs.loading")}
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
+                    <td colSpan={9} className="px-4 py-12 text-center text-slate-900 dark:text-white font-bold">
                       {translate("admin.login_logs.no_data")}
                     </td>
                   </tr>
@@ -276,7 +276,7 @@ export default function LoginLogsPage() {
                             {statusConfig.label}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="px-4 py-3 text-slate-900 dark:text-white font-bold">
                           <div className="flex items-center gap-1.5">
                             <Clock className="h-3.5 w-3.5" />
                             {formatTime(log.created_at)}
@@ -284,42 +284,42 @@ export default function LoginLogsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5">
-                            <User className="h-3.5 w-3.5 text-muted-foreground" />
+                            <User className="h-3.5 w-3.5 text-slate-900 dark:text-white font-bold" />
                             <span className="font-medium">{log.username}</span>
                             {log.display_name && (
-                              <span className="text-xs text-muted-foreground">({log.display_name})</span>
+                              <span className="text-xs text-slate-900 dark:text-white font-bold">({log.display_name})</span>
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-muted">
+                          <span className="px-2 py-0.5 rounded-none text-xs font-medium bg-muted">
                             {getRoleLabel(log.role)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="px-4 py-3 text-slate-900 dark:text-white font-bold">
                           <div className="flex items-center gap-1.5 font-mono text-xs">
                             <Globe className="h-3.5 w-3.5" />
                             {log.client_ip}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="px-4 py-3 text-slate-900 dark:text-white font-bold">
                           <div className="flex items-center gap-1.5">
                             <Globe2 className="h-3.5 w-3.5" />
                             {log.device_type || "-"}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="px-4 py-3 text-slate-900 dark:text-white font-bold">
                           <div className="flex items-center gap-1.5">
                             <Globe2 className="h-3.5 w-3.5" />
                             {log.browser || "-"}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">{log.os || "-"}</td>
+                        <td className="px-4 py-3 text-slate-900 dark:text-white font-bold">{log.os || "-"}</td>
                         <td className="px-4 py-3 max-w-[200px] truncate" title={log.failure_reason || undefined}>
                           {log.login_status === "failure" && log.failure_reason ? (
                             <span className="text-red-500 text-xs">{log.failure_reason}</span>
                           ) : (
-                            <span className="text-muted-foreground text-xs">-</span>
+                            <span className="text-slate-900 dark:text-white font-bold text-xs">-</span>
                           )}
                         </td>
                       </tr>
@@ -332,7 +332,7 @@ export default function LoginLogsPage() {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-3 border-t">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-900 dark:text-white font-bold">
                 {translate("admin.login_logs.pagination_info")
                   .replace("{total}", String(total))
                   .replace("{page}", String(page))

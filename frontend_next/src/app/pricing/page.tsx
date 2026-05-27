@@ -88,9 +88,9 @@ export default function PricingPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-gradient-to-b from-slate-50 to-white">
+      <section className="pt-32 pb-16 bg-amber-400">
         <div className="container mx-auto px-4 text-center max-w-7xl">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />
             {translate("pricing.hero.badge")}
           </div>
@@ -110,15 +110,15 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <div
                 key={plan.nameKey}
-                className={`relative rounded-2xl border p-6 transition-all ${
+                className={`relative rounded-none border p-6 transition-all ${
                   plan.popular
-                    ? "border-blue-300 shadow-xl shadow-blue-500/10 ring-2 ring-blue-500"
-                    : "border-slate-200 shadow-sm hover:shadow-md"
+                    ? "border-blue-300 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] shadow-blue-500/10 ring-2 ring-blue-500"
+                    : "border-slate-200 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]"
                 }`}
               >
                 {plan.badgeKey && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full text-white bg-gradient-to-r ${plan.color}`}>
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-none text-white bg-gradient-to-r ${plan.color}`}>
                       {translate(plan.badgeKey)}
                     </span>
                   </div>
@@ -134,7 +134,7 @@ export default function PricingPage() {
                   <Button
                     variant={plan.ctaVariant}
                     className={`w-full h-10 mt-5 gap-2 font-semibold text-sm ${
-                      plan.popular ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20" : ""
+                      plan.popular ? "bg-blue-600 hover:bg-blue-700 text-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-blue-500/20" : ""
                     }`}
                   >
                     {translate(plan.ctaKey)} <ArrowRight className="h-3.5 w-3.5" />
@@ -160,7 +160,7 @@ export default function PricingPage() {
           <h2 className="text-3xl font-bold text-slate-900 text-center mb-10">{translate("pricing.faq.title")}</h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
-              <div key={faq.qKey} className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm">
+              <div key={faq.qKey} className="bg-white rounded-none p-5 border border-slate-100 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                 <p className="text-sm font-semibold text-slate-800 mb-2">{translate(faq.qKey)}</p>
                 <p className="text-sm text-slate-500 leading-relaxed">{translate(faq.aKey)}</p>
               </div>

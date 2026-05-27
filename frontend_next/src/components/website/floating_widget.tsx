@@ -35,7 +35,7 @@ export function FloatingWidget() {
         size="icon"
         variant="ghost"
         className={cn(
-          "fixed z-50 h-10 w-10 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 group relative",
+          "fixed z-50 h-10 w-10 rounded-none shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] transition-all hover:scale-110 active:scale-95 group relative",
           isChatOpen 
             ? "bg-blue-600 text-white hover:bg-blue-700" 
             : "bg-white/90 dark:bg-[#0d1220]/90 text-blue-600 hover:text-blue-700 dark:hover:bg-white/10",
@@ -47,7 +47,7 @@ export function FloatingWidget() {
         <div className="relative">
           <Bot className="h-4 w-4 relative z-10" />
           {!isChatOpen && (
-            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-none bg-blue-500 animate-pulse" />
           )}
         </div>
       </Button>
@@ -55,12 +55,12 @@ export function FloatingWidget() {
       {isChatOpen && (
         <div className={`fixed z-50 bg-background border border-border shadow-2xl overflow-hidden flex flex-col animate-in fade-in duration-300 transition-all ${
           isExpanded 
-            ? "inset-4 md:inset-10 lg:inset-20 rounded-xl" 
-            : "bottom-12 right-6 w-[400px] h-[600px] rounded-2xl slide-in-from-bottom-10"
+            ? "inset-4 md:inset-10 lg:inset-20 rounded-none" 
+            : "bottom-12 right-6 w-[400px] h-[600px] rounded-none slide-in-from-bottom-10"
         }`}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+              <div className="w-8 h-8 rounded-none bg-amber-400 flex items-center justify-center shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div>
@@ -72,7 +72,7 @@ export function FloatingWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-blue-600 rounded-full"
+                className="h-8 w-8 text-muted-foreground hover:text-blue-600 rounded-none"
                 onClick={() => setIsExpanded(!isExpanded)}
                 title={isExpanded ? "还原" : "放大"}
               >
@@ -81,7 +81,7 @@ export function FloatingWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-blue-600 rounded-full"
+                className="h-8 w-8 text-muted-foreground hover:text-blue-600 rounded-none"
                 onClick={() => {
                   setIsChatOpen(false);
                   window.open("/agent", "_blank", "noopener,noreferrer");
@@ -93,7 +93,7 @@ export function FloatingWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-none"
                 onClick={() => setIsChatOpen(false)}
                 title="关闭"
               >

@@ -42,7 +42,7 @@ export function StatsCard({ title, value, total, icon: Icon, gradient, textColor
               )}
             </div>
           </div>
-          <div className={`p-3 rounded-full ${gradient} bg-opacity-20`}>
+          <div className={`p-3 rounded-none ${gradient} bg-opacity-20`}>
             <Icon className={`h-6 w-6 ${textColor}`} />
           </div>
         </div>
@@ -52,7 +52,7 @@ export function StatsCard({ title, value, total, icon: Icon, gradient, textColor
               <span>进度</span>
               <span>{percentage}%</span>
             </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="h-2 bg-secondary rounded-none overflow-hidden">
               <div
                 className={`h-full ${gradient.replace('bg-opacity-20', '100')}`}
                 style={{ width: `${percentage}%` }}

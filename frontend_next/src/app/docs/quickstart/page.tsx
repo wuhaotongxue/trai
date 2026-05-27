@@ -20,10 +20,10 @@ export default function DocsQuickstartPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-12 bg-gradient-to-b from-slate-50 to-white dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-12 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
                 <BookOpen className="h-4 w-4" />
                 {translate("docs.quickstart.title")}
               </div>
@@ -58,10 +58,10 @@ export default function DocsQuickstartPage() {
               {steps.map((s) => (
                 <div
                   key={s.titleKey}
-                  className="p-6 rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
+                  className="p-6 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.done ? "bg-emerald-500/15" : "bg-muted/40"} `}>
+                    <div className={`w-10 h-10 rounded-none flex items-center justify-center ${s.done ? "bg-emerald-500/15" : "bg-muted/40"} `}>
                       <CheckCircle2 className={`h-5 w-5 ${s.done ? "text-emerald-400" : "text-muted-foreground"}`} />
                     </div>
                     <div className="flex-1 min-w-0">

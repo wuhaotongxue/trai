@@ -18,7 +18,7 @@ export function LanguageSwitcher() {
     <div className="relative group">
       <button
         type="button"
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-white/10"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-none hover:bg-slate-100 dark:hover:bg-white/10"
         title="切换语言 / Switch Language"
       >
         <Globe className="h-4 w-4" />
@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
       </button>
 
       {/* Dropdown */}
-      <div className="absolute right-0 top-full mt-1 w-36 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl shadow-slate-200/20 dark:shadow-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+      <div className="absolute right-0 top-full mt-1 w-36 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-none shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] shadow-slate-200/20 dark:shadow-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
         {locales.map((l) => (
           <button
             key={l}

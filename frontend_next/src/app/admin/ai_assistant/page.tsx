@@ -26,11 +26,11 @@ export default function AIAssistantPage() {
 
   if (!mounted) {
     return (
-      <div className="flex flex-col h-[calc(100vh-120px)] bg-background rounded-xl border border-border overflow-hidden">
+      <div className="flex flex-col h-[calc(100vh-120px)] bg-background rounded-none-none border border-border overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-            <p className="text-sm text-muted-foreground">{translate("admin.ai_assistant.init")}</p>
+            <div className="w-8 h-8 rounded-none-none border-2 border-primary/30 border-t-primary animate-spin" />
+            <p className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.ai_assistant.init")}</p>
           </div>
         </div>
       </div>
@@ -38,19 +38,19 @@ export default function AIAssistantPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-background rounded-xl border border-border overflow-hidden shadow-sm">
+    <div className="flex flex-col h-[calc(100vh-120px)] bg-background rounded-none-none border border-border overflow-hidden shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
       {/* 顶部状态栏 */}
       <div className="px-5 py-3 border-b border-border bg-gradient-to-r from-muted/40 to-transparent flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isStreaming ? "bg-blue-500 animate-pulse" : "bg-emerald-500"}`} />
-            <span className="text-xs font-medium text-muted-foreground">
+            <div className={`w-2 h-2 rounded-none-none ${isStreaming ? "bg-blue-500 animate-pulse" : "bg-emerald-500"}`} />
+            <span className="text-xs font-medium text-slate-900 dark:text-white font-bold">
               {isStreaming ? translate("admin.ai_assistant.thinking") : translate("admin.ai_assistant.ready")}
             </span>
           </div>
         </div>
         {totalTokens > 0 && (
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-xs text-slate-900 dark:text-white font-bold">
             <span>
               <span className="font-medium text-foreground">{totalTokens}</span> Tokens
             </span>

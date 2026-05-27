@@ -141,12 +141,12 @@ export default function MonitorPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
               <ShieldCheck className="h-5 w-5 text-blue-500" />
             </div>
             {translate("admin.monitor.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1 flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             {translate("admin.monitor.sync_time")} {lastRefresh.toLocaleString(locale === "zh" ? "zh-CN" : "en-US")}
           </p>
@@ -156,7 +156,7 @@ export default function MonitorPage() {
             <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
             {translate("admin.monitor.refresh_status")}
           </Button>
-          <Button size="sm" className="gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-sm" onClick={() => void handleBackup()}>
+          <Button size="sm" className="gap-1.5 bg-amber-400 hover:from-blue-500 hover:to-indigo-500 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => void handleBackup()}>
             <Database className="h-3.5 w-3.5" />
             {translate("admin.monitor.backup_now")}
           </Button>
@@ -166,9 +166,9 @@ export default function MonitorPage() {
       {/* 服务组件状态 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {SERVICE_KEYS.map((svc) => (
-          <Card key={svc.cnKey} className="border-0 shadow-sm hover:shadow-md transition-all bg-card/80 backdrop-blur-sm group">
+          <Card key={svc.cnKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white  group">
             <CardContent className="p-4 flex items-center gap-4">
-              <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center transition-colors",
+              <div className={cn("w-11 h-11 rounded-none-none flex items-center justify-center transition-colors",
                 svc.status === "ok" ? "bg-emerald-500/10 group-hover:bg-emerald-500/15" : "bg-amber-500/10 group-hover:bg-amber-500/15")}>
                 <svc.icon className={cn("h-5 w-5",
                   svc.status === "ok" ? "text-emerald-500" : "text-amber-500")} />
@@ -178,12 +178,12 @@ export default function MonitorPage() {
                   <div>
                     <span className="text-sm font-semibold text-foreground">{translate(svc.cnKey)}</span>
                   </div>
-                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-none-none",
                     svc.status === "ok" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-400")}>
                     {svc.status === "ok" ? translate("admin.monitor.normal") : translate("admin.monitor.warning")}
                   </span>
                 </div>
-                <div className="mt-1.5 flex items-center gap-3 text-[11px] text-muted-foreground font-mono">
+                <div className="mt-1.5 flex items-center gap-3 text-[11px] text-slate-900 dark:text-white font-bold font-mono">
                   <span className="flex items-center gap-1">
                     <Gauge className="h-3 w-3" />
                     {svc.latency}
@@ -201,7 +201,7 @@ export default function MonitorPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* S3 备份历史 */}
-        <Card className="lg:col-span-2 border-0 shadow-sm overflow-hidden bg-card/80 backdrop-blur-sm">
+        <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
           <CardHeader className="border-b border-border/40 flex flex-row items-center justify-between space-y-0 py-4">
             <div>
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function MonitorPage() {
             </div>
 
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center justify-center gap-1 h-8 px-3 text-xs rounded-lg border border-border/60 bg-background hover:bg-muted cursor-pointer transition-colors text-sm">
+              <DropdownMenuTrigger className="inline-flex items-center justify-center gap-1 h-8 px-3 text-xs rounded-none-none border border-border/60 bg-background hover:bg-muted cursor-pointer transition-colors text-sm">
                 <Settings2 className="h-3.5 w-3.5" />
                 {translate("admin.monitor.retention")} {retentionDays === 0 ? translate("admin.monitor.permanent") : `${retentionDays} ${translate("admin.monitor.retention_days")}`}
               </DropdownMenuTrigger>
@@ -232,10 +232,10 @@ export default function MonitorPage() {
               <table className="w-full text-sm text-left">
                 <thead>
                   <tr className="border-b border-border/40">
-                    <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.monitor.backup_file")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.monitor.size")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.monitor.backup_time")}</th>
-                    <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.monitor.operation")}</th>
+                    <th className="px-5 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.monitor.backup_file")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-right">{translate("admin.monitor.size")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-right">{translate("admin.monitor.backup_time")}</th>
+                    <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-center">{translate("admin.monitor.operation")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -243,7 +243,7 @@ export default function MonitorPage() {
                     <tr key={b.key} className="hover:bg-muted/20 transition-colors group">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
+                          <div className="p-2 rounded-none-none bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
                             <Database className="h-3.5 w-3.5 text-blue-500" />
                           </div>
                           <span className="font-medium text-foreground truncate max-w-[200px]" title={b.key}>
@@ -251,8 +251,8 @@ export default function MonitorPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right text-muted-foreground font-mono text-xs">{formatSize(b.size)}</td>
-                      <td className="px-4 py-4 text-right text-muted-foreground text-xs">
+                      <td className="px-4 py-4 text-right text-slate-900 dark:text-white font-bold font-mono text-xs">{formatSize(b.size)}</td>
+                      <td className="px-4 py-4 text-right text-slate-900 dark:text-white font-bold text-xs">
                         {new Date(b.last_modified).toLocaleString(locale === "zh" ? "zh-CN" : "en-US")}
                       </td>
                       <td className="px-4 py-4">
@@ -276,7 +276,7 @@ export default function MonitorPage() {
                   ))}
                   {backups.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-5 py-10 text-center text-muted-foreground text-sm italic">
+                      <td colSpan={4} className="px-5 py-10 text-center text-slate-900 dark:text-white font-bold text-sm italic">
                         {translate("admin.monitor.no_backups")}
                       </td>
                     </tr>
@@ -289,7 +289,7 @@ export default function MonitorPage() {
 
         {/* 侧边信息栏 */}
         <div className="space-y-4">
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-900 to-slate-800 text-white overflow-hidden relative group">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-white overflow-hidden relative group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <ShieldCheck className="h-24 w-24" />
             </div>
@@ -324,14 +324,14 @@ export default function MonitorPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.monitor.quick_tools")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {quickTools.map((tool) => (
                 <Button key={tool.labelKey} variant="outline" className="w-full justify-start text-xs h-9 border-border/60 hover:bg-muted/50">
-                  <tool.icon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  <tool.icon className="h-3.5 w-3.5 mr-2 text-slate-900 dark:text-white font-bold" />
                   {translate(tool.labelKey)}
                 </Button>
               ))}

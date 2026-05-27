@@ -147,7 +147,7 @@ export function MediaGallery({
   if (filteredCurrent.length === 0 && paginatedHistory.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-4">
-        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-none bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
           {isVideo ? (
             <Video className="h-8 w-8 text-slate-400" />
           ) : (
@@ -248,7 +248,7 @@ function MediaCardItem({
   onDownload: (url: string) => void;
 }) {
   return (
-    <div className={`group relative rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-all ${viewMode === "grid" ? "" : "flex items-center gap-3"} ${isVideo ? 'border-orange-300 dark:border-orange-700' : isCurrent ? 'border-emerald-300 dark:border-emerald-700' : 'border-border'}`}>
+    <div className={`group relative rounded-none overflow-hidden border shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all ${viewMode === "grid" ? "" : "flex items-center gap-3"} ${isVideo ? 'border-orange-300 dark:border-orange-700' : isCurrent ? 'border-emerald-300 dark:border-emerald-700' : 'border-border'}`}>
       {/* 媒体内容 */}
       {isVideo ? (
         <div className="overflow-hidden cursor-pointer" onClick={() => window.open(item.url, "_blank")}>
@@ -273,15 +273,15 @@ function MediaCardItem({
       {/* 操作按钮 */}
       <div className={`absolute ${viewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
         {!isVideo && (
-          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => onDownload(item.url)} title="下载">
+          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800" onClick={() => onDownload(item.url)} title="下载">
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </Button>
         )}
-        <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(item.url, "_blank")} title="打开">
+        <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(item.url, "_blank")} title="打开">
           <ExternalLink className="h-3 w-3" />
         </Button>
         {!isCurrent && onDelete && (
-          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-full bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors" onClick={() => onDelete(item.id)} title="删除">
+          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors" onClick={() => onDelete(item.id)} title="删除">
             <Trash2 className="h-3 w-3" />
           </Button>
         )}

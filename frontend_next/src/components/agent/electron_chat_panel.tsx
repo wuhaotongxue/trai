@@ -137,7 +137,7 @@ export function ElectronChatPanel({
         <div className="flex items-center gap-3 no-drag-region">
           <Bot className="h-5 w-5 text-primary" />
           <h1 className="text-sm font-semibold text-foreground">TRAI Assistant</h1>
-          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+          <span className="px-2 py-0.5 rounded-none bg-primary/10 text-primary text-xs font-medium">
             Online
           </span>
         </div>
@@ -146,7 +146,7 @@ export function ElectronChatPanel({
           <button
             type="button"
             onClick={() => {}}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-none transition-colors"
             aria-label="Settings"
             title="Settings"
           >
@@ -157,7 +157,7 @@ export function ElectronChatPanel({
 
       {/* Error Display */}
       {error && (
-        <div className="mx-4 mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-2">
+        <div className="mx-4 mt-3 p-3 rounded-none bg-red-500/10 border border-red-500/20 flex items-start gap-2">
           <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
           <p className="text-sm text-red-600 dark:text-red-400 flex-1">{error}</p>
           <button
@@ -182,14 +182,14 @@ export function ElectronChatPanel({
           >
             {/* Avatar */}
             {message.role !== "user" && (
-              <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
               </div>
             )}
 
             {/* Message Content */}
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[80%] rounded-none px-4 py-3 ${
                 message.role === "user"
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted"
@@ -201,7 +201,7 @@ export function ElectronChatPanel({
                     Tool: {message.toolName}
                   </span>
                   <span
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-2 h-2 rounded-none ${
                       message.toolSuccess ? "bg-emerald-500" : "bg-red-500"
                     }`}
                   />
@@ -215,7 +215,7 @@ export function ElectronChatPanel({
                       key={i}
                       src={img}
                       alt={`Attachment ${i + 1}`}
-                      className="rounded-lg max-w-full h-auto object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                      className="rounded-none max-w-full h-auto object-cover cursor-pointer hover:opacity-90 transition-opacity"
                       loading="lazy"
                     />
                   ))}
@@ -266,7 +266,7 @@ export function ElectronChatPanel({
 
             {/* User Avatar */}
             {message.role === "user" && (
-              <div className="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 rounded-none bg-emerald-500/10 flex items-center justify-center">
                 <User className="h-4 w-4 text-emerald-500" />
               </div>
             )}
@@ -283,7 +283,7 @@ export function ElectronChatPanel({
             {attachments.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background border text-xs"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-background border text-xs"
               >
                 <Paperclip className="h-3 w-3 text-muted-foreground" />
                 <span className="max-w-[120px] truncate">{file.name}</span>
@@ -308,7 +308,7 @@ export function ElectronChatPanel({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 hover:bg-muted rounded-lg transition-colors shrink-0"
+            className="p-2 hover:bg-muted rounded-none transition-colors shrink-0"
             aria-label="Attach files"
             title="Attach files"
           >
@@ -330,7 +330,7 @@ export function ElectronChatPanel({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
-            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
+            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-none border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring leading-tight"
             rows={1}
             aria-label="Message input"
           />
@@ -339,7 +339,7 @@ export function ElectronChatPanel({
           <button
             type="button"
             onClick={() => setIsRecording(!isRecording)}
-            className={`p-2 rounded-lg transition-colors shrink-0 ${
+            className={`p-2 rounded-none transition-colors shrink-0 ${
               isRecording ? "bg-red-500 text-white" : "hover:bg-muted"
             }`}
             aria-label={isRecording ? "Stop recording" : "Start voice recording"}
@@ -360,7 +360,7 @@ export function ElectronChatPanel({
                 setIsStreaming(false);
                 onStreamEnd?.();
               }}
-              className="p-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-colors shrink-0"
+              className="p-2.5 rounded-none bg-red-500 text-white hover:bg-red-600 transition-colors shrink-0"
               aria-label="Stop generation"
               title="Stop response"
             >
@@ -371,7 +371,7 @@ export function ElectronChatPanel({
               type="button"
               onClick={handleSend}
               disabled={!input.trim() && attachments.length === 0}
-              className="p-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              className="p-2.5 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               aria-label="Send message"
               title="Send message"
             >

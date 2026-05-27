@@ -110,9 +110,9 @@ export default function ContactPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
         {/* Hero */}
-        <section className="pt-32 pb-16 bg-gradient-to-b from-slate-50 to-white">
+        <section className="pt-32 pb-16 bg-amber-400">
           <div className="container mx-auto px-4 text-center max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 text-sm font-medium mb-6">
               <Phone className="h-4 w-4" />
               {translate("contact.title")}
             </div>
@@ -135,7 +135,7 @@ export default function ContactPage() {
                   <h2 className="text-xl font-bold text-slate-900 mb-5">{translate("contact.contact_info")}</h2>
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-50 text-blue-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-blue-50 text-blue-600">
                         <Mail className="h-4 w-4" />
                       </div>
                       <div>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-50 text-emerald-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-emerald-50 text-emerald-600">
                         <Phone className="h-4 w-4" />
                       </div>
                       <div>
@@ -153,7 +153,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-amber-50 text-amber-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-amber-50 text-amber-600">
                         <MapPin className="h-4 w-4" />
                       </div>
                       <div>
@@ -162,7 +162,7 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-indigo-50 text-indigo-600">
+                      <div className="w-9 h-9 rounded-none flex items-center justify-center flex-shrink-0 bg-indigo-50 text-indigo-600">
                         <Clock className="h-4 w-4" />
                       </div>
                       <div>
@@ -173,20 +173,20 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                <div className="bg-slate-50 rounded-none p-5 border border-slate-100">
                   <p className="text-sm font-semibold text-slate-800 mb-2">{translate("contact.quick_title")}</p>
                   <p className="text-xs text-slate-500 leading-relaxed">{translate("contact.quick_desc")}</p>
                 </div>
 
                 {/* 微信二维码 */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-100">
+                <div className="bg-amber-400 rounded-none p-5 border border-green-100">
                   <div className="flex items-center gap-2 mb-4">
                     <MessageCircle className="h-5 w-5 text-green-600" />
                     <p className="text-sm font-semibold text-slate-800">{translate("contact.wechat_title")}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-xl shadow-sm overflow-hidden">
+                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden">
                         <Image
                           src="/weixin.jpg"
                           alt={translate("contact.wechat_contact")}
@@ -197,7 +197,7 @@ export default function ContactPage() {
                       <p className="text-xs text-slate-600">{translate("contact.wechat_contact")}</p>
                     </div>
                     <div className="text-center">
-                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-xl shadow-sm overflow-hidden">
+                      <div className="relative w-28 h-28 mx-auto mb-2 bg-white rounded-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden">
                         <Image
                           src="/gongzhonghao.jpg"
                           alt={translate("contact.wechat_official")}
@@ -214,19 +214,19 @@ export default function ContactPage() {
               {/* 右侧: 表单 */}
               <div className="lg:col-span-3">
                 {sent && (
-                  <div className="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-3 animate-pulse">
+                  <div className="mb-4 p-4 rounded-none bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center gap-3 animate-pulse">
                     <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                     <span className="font-medium">{translate("contact.submit_success")}</span>
                   </div>
                 )}
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div className="bg-white rounded-none border border-slate-200 p-6 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                   <h2 className="text-lg font-bold text-slate-900 mb-5">{translate("contact.send_title")}</h2>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">{translate("contact.name_label")} *</Label>
                         <Input
-                          className={`h-10 rounded-lg ${errors.name ? "border-red-500 focus:ring-red-100" : ""}`}
+                          className={`h-10 rounded-none ${errors.name ? "border-red-500 focus:ring-red-100" : ""}`}
                           placeholder={translate("contact.name_placeholder")}
                           value={formData.name}
                           onChange={(e) => handleChange("name", e.target.value)}
@@ -241,7 +241,7 @@ export default function ContactPage() {
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-slate-700">{translate("contact.email_label")}</Label>
                         <Input
-                          className={`h-10 rounded-lg ${errors.email ? "border-red-500 focus:ring-red-100" : ""}`}
+                          className={`h-10 rounded-none ${errors.email ? "border-red-500 focus:ring-red-100" : ""}`}
                           type="email"
                           placeholder="your@email.com"
                           value={formData.email}
@@ -258,7 +258,7 @@ export default function ContactPage() {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">{translate("contact.company_label")}</Label>
                       <Input
-                        className={`h-10 rounded-lg ${errors.company ? "border-red-500 focus:ring-red-100" : ""}`}
+                        className={`h-10 rounded-none ${errors.company ? "border-red-500 focus:ring-red-100" : ""}`}
                         placeholder={translate("contact.company_placeholder")}
                         value={formData.company}
                         onChange={(e) => handleChange("company", e.target.value)}
@@ -278,7 +278,7 @@ export default function ContactPage() {
                             key={type.key}
                             type="button"
                             onClick={() => setSelectedType(type.key.replace("contact.type.", ""))}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                            className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
                               selectedType === type.key.replace("contact.type.", "")
                                 ? "bg-blue-500 border-blue-500 text-white"
                                 : "border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600"
@@ -292,7 +292,7 @@ export default function ContactPage() {
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">{translate("contact.message_label")} *</Label>
                       <textarea
-                        className={`w-full min-h-[120px] rounded-lg border p-3 text-sm resize-none focus:outline-none focus:ring-2 transition-all ${
+                        className={`w-full min-h-[120px] rounded-none border p-3 text-sm resize-none focus:outline-none focus:ring-2 transition-all ${
                           errors.message
                             ? "border-red-500 focus:ring-red-100"
                             : "border-slate-200 focus:ring-blue-100 focus:border-blue-400"
@@ -309,7 +309,7 @@ export default function ContactPage() {
                       )}
                     </div>
                     {submitError && (
-                      <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
+                      <div className="p-3 rounded-none bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
                         <AlertCircle className="h-4 w-4" />
                         {submitError}
                       </div>
@@ -317,7 +317,7 @@ export default function ContactPage() {
                     <Button
                       onClick={handleSubmit}
                       disabled={loading}
-                      className="h-10 px-6 font-semibold rounded-lg shadow-md shadow-blue-500/20 gap-2 w-full md:w-auto"
+                      className="h-10 px-6 font-semibold rounded-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-blue-500/20 gap-2 w-full md:w-auto"
                     >
                       {loading ? (
                         <>

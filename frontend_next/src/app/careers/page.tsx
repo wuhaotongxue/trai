@@ -18,7 +18,7 @@ export default function CareersPage() {
     <>
       <Navbar />
       <div className="min-h-[70vh] flex flex-col items-center justify-center bg-slate-50">
-        <div className="w-20 h-20 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6">
+        <div className="w-20 h-20 rounded-none bg-blue-100 text-blue-600 flex items-center justify-center mb-6">
           <Construction className="w-10 h-10" />
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-4">{translate("careers.title")}</h1>

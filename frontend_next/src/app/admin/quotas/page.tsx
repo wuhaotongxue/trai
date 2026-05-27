@@ -139,12 +139,12 @@ export default function QuotasPage() {
       {/* 顶部标题 */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
             <Zap className="h-5 w-5 text-blue-500" />
           </div>
           {translate("admin.quotas.title")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">{translate("admin.quotas.subtitle")}</p>
+        <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.quotas.subtitle")}</p>
       </div>
 
       {/* 套餐卡片 */}
@@ -152,17 +152,17 @@ export default function QuotasPage() {
         {plans.map((plan) => (
           <Card
             key={plan.nameKey}
-            className={`border-0 shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 group ${plan.popular ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
+            className={`border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all duration-200 group ${plan.popular ? "ring-2 ring-blue-500 ring-offset-2" : ""}`}
           >
             <div className={`h-1.5 bg-gradient-to-r ${plan.color}`} />
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-base font-bold text-foreground">{translate(plan.nameKey)}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{translate(plan.descKey)}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5">{translate(plan.descKey)}</p>
                 </div>
                 {plan.popular && (
-                  <span className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium px-2.5 py-0.5 rounded-full shadow-sm">
+                  <span className="text-xs bg-amber-400 text-white font-medium px-2.5 py-0.5 rounded-none-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                     <Sparkles className="h-3 w-3 inline mr-1" />
                     {translate("admin.quotas.popular")}
                   </span>
@@ -177,7 +177,7 @@ export default function QuotasPage() {
                   {translate(fKey)}
                 </div>
               ))}
-              <Button size="sm" className={`w-full h-9 mt-2 text-sm gap-2 ${plan.popular ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500" : ""}`} variant={plan.popular ? "default" : "outline"}>
+              <Button size="sm" className={`w-full h-9 mt-2 text-sm gap-2 ${plan.popular ? "bg-amber-400 hover:from-blue-500 hover:to-indigo-500" : ""}`} variant={plan.popular ? "default" : "outline"}>
                 <Edit2 className="h-3.5 w-3.5" />
                 {translate("admin.quotas.edit_quota")}
               </Button>
@@ -187,26 +187,26 @@ export default function QuotasPage() {
       </div>
 
       {/* 快速配置区 */}
-      <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
         <CardHeader className="pb-4 border-b border-border/40">
           <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
             <Zap className="h-4 w-4 text-amber-500" />
             {translate("admin.quotas.global_config")}
           </CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">{translate("admin.quotas.global_desc")}</p>
+          <p className="text-xs text-slate-900 dark:text-white font-bold mt-1">{translate("admin.quotas.global_desc")}</p>
         </CardHeader>
         <CardContent className="space-y-5 pt-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {globalConfigFields.map((field) => (
               <div key={field.labelKey} className="space-y-2">
                 <Label className="text-sm font-medium text-foreground/80">{translate(field.labelKey)}</Label>
-                <Input className="h-10 rounded-lg" defaultValue={field.value} placeholder={translate(field.placeholderKey)} />
-                <p className="text-xs text-muted-foreground">{translate(field.descKey)}</p>
+                <Input className="h-10 rounded-none-none" defaultValue={field.value} placeholder={translate(field.placeholderKey)} />
+                <p className="text-xs text-slate-900 dark:text-white font-bold">{translate(field.descKey)}</p>
               </div>
             ))}
           </div>
           <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500">
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500">
               <Save className="h-4 w-4" />
               {translate("admin.quotas.save_global")}
             </Button>
@@ -215,27 +215,27 @@ export default function QuotasPage() {
       </Card>
 
       {/* 图像生成配置 */}
-      <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
         <CardHeader className="pb-4 border-b border-border/40">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-emerald-500" />
               {translate("admin.quotas.image_config")}
-              <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full font-normal ml-2">ModelScope</span>
+              <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-none-none font-normal ml-2">ModelScope</span>
             </CardTitle>
             <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => void fetchImageConfig()}>
               <RefreshCw className="h-3.5 w-3.5" />
               {translate("admin.quotas.refresh")}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">{translate("admin.quotas.image_config_desc")}</p>
+          <p className="text-xs text-slate-900 dark:text-white font-bold mt-1">{translate("admin.quotas.image_config_desc")}</p>
         </CardHeader>
         <CardContent className="space-y-5 pt-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground/80">{translate("admin.quotas.provider")}</Label>
               <select
-                className="flex h-10 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-none-none border border-border/60 bg-background px-3 py-2 text-sm"
                 value={imageConfig?.provider || "modelscope"}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, provider: e.target.value } : prev)}
               >
@@ -247,7 +247,7 @@ export default function QuotasPage() {
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground/80">{translate("admin.quotas.default_model")}</Label>
               <Input
-                className="h-10 rounded-lg"
+                className="h-10 rounded-none-none"
                 value={imageConfig?.default_model || "Z-Image-Turbo"}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, default_model: e.target.value } : prev)}
               />
@@ -255,16 +255,16 @@ export default function QuotasPage() {
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground/80">{translate("admin.quotas.modelscope_model")}</Label>
               <Input
-                className="h-10 rounded-lg"
+                className="h-10 rounded-none-none"
                 value={imageConfig?.modelscope_model || "Z-Image-Turbo"}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, modelscope_model: e.target.value } : prev)}
               />
-              <p className="text-xs text-muted-foreground">{translate("admin.quotas.modelscope_desc")}</p>
+              <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.quotas.modelscope_desc")}</p>
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground/80">{translate("admin.quotas.openai_model")}</Label>
               <Input
-                className="h-10 rounded-lg"
+                className="h-10 rounded-none-none"
                 value={imageConfig?.openai_model || "dall-e-3"}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, openai_model: e.target.value } : prev)}
               />
@@ -272,7 +272,7 @@ export default function QuotasPage() {
             <div className="md:col-span-2 space-y-2">
               <Label className="text-sm font-medium text-foreground/80">{translate("admin.quotas.custom_api")}</Label>
               <Input
-                className="h-10 rounded-lg"
+                className="h-10 rounded-none-none"
                 placeholder="https://api.openai.com/v1"
                 value={imageConfig?.api_base_url || ""}
                 onChange={(e) => setImageConfig((prev) => prev ? { ...prev, api_base_url: e.target.value } : prev)}
@@ -280,12 +280,12 @@ export default function QuotasPage() {
             </div>
           </div>
           <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500" onClick={() => void handleSaveImageConfig()} disabled={loading}>
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500" onClick={() => void handleSaveImageConfig()} disabled={loading}>
               {loading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-4 w-4" />}
               {translate("admin.quotas.save_config")}
             </Button>
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${imageConfig?.api_key_configured ? "bg-emerald-500" : "bg-red-500"}`} />
+            <span className="text-xs text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-none-none ${imageConfig?.api_key_configured ? "bg-emerald-500" : "bg-red-500"}`} />
               {translate("admin.quotas.api_key")} {imageConfig?.api_key_configured ? translate("admin.quotas.api_key_configured") : translate("admin.quotas.api_key_not_configured")}
             </span>
           </div>

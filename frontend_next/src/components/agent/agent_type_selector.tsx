@@ -392,7 +392,7 @@ export function AgentTypeSelector({
           disabled={disabled}
           aria-label="Select agent type"
           title="Select agent type"
-          className="h-11 w-full rounded-lg border border-border bg-background px-4 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500"
+          className="h-11 w-full rounded-none border border-border bg-background px-4 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500"
         >
           <option value="auto">Auto-detect</option>
           {agents.map((agent) => (

@@ -160,16 +160,16 @@ export default function ContactMessagesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
               <MessageSquare className="h-5 w-5 text-blue-500" />
             </div>
             {translate("admin.contact_messages.title")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">
             {translate("admin.contact_messages.subtitle")}
           </p>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-slate-900 dark:text-white font-bold">
           共 {total} 条消息
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function ContactMessagesPage() {
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-[200px]">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 dark:text-white font-bold" />
                 <Input
                   placeholder="搜索姓名/邮箱/公司/内容..."
                   className="pl-9"
@@ -190,9 +190,9 @@ export default function ContactMessagesPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Filter className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
               <select
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                className="h-10 rounded-none-none border border-input bg-background px-3 text-sm"
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
@@ -205,7 +205,7 @@ export default function ContactMessagesPage() {
                 <option value="replied">{translate("admin.contact_messages.filter.replied")}</option>
               </select>
               <select
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                className="h-10 rounded-none-none border border-input bg-background px-3 text-sm"
                 value={typeFilter}
                 onChange={(e) => {
                   setTypeFilter(e.target.value);
@@ -229,14 +229,14 @@ export default function ContactMessagesPage() {
       {loading ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <div className="text-muted-foreground">{translate("admin.loading") || "加载中..."}</div>
+            <div className="text-slate-900 dark:text-white font-bold">{translate("admin.loading") || "加载中..."}</div>
           </CardContent>
         </Card>
       ) : filteredMessages.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">{translate("admin.contact_messages.no_messages")}</p>
+            <MessageSquare className="h-12 w-12 text-slate-900 dark:text-white font-bold/30 mx-auto mb-4" />
+            <p className="text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.no_messages")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -256,10 +256,10 @@ export default function ContactMessagesPage() {
                           {getStatusLabel(message.status)}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      <p className="text-sm text-slate-900 dark:text-white font-bold mt-2 line-clamp-2">
                         {message.content}
                       </p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4 mt-2 text-xs text-slate-900 dark:text-white font-bold">
                         {message.email && <span>邮箱: {message.email}</span>}
                         {message.phone && <span>电话: {message.phone}</span>}
                         {message.company && <span>公司: {message.company}</span>}
@@ -303,7 +303,7 @@ export default function ContactMessagesPage() {
               >
                 上一页
               </Button>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-slate-900 dark:text-white font-bold">
                 第 {page} / {Math.ceil(total / pageSize)} 页
               </span>
               <Button
@@ -323,7 +323,7 @@ export default function ContactMessagesPage() {
       {showDetailModal && selectedMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={() => setShowDetailModal(false)} />
-          <div className="relative bg-background rounded-xl border shadow-lg w-full max-w-2xl max-h-[90vh] overflow-auto m-4">
+          <div className="relative bg-background rounded-none-none border shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] w-full max-w-2xl max-h-[90vh] overflow-auto m-4">
             <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">{translate("admin.contact_messages.view")}</h2>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowDetailModal(false)}>
@@ -333,37 +333,37 @@ export default function ContactMessagesPage() {
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.name")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.name")}</p>
                   <p className="font-medium">{selectedMessage.name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.type")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.type")}</p>
                   <Badge className={TYPE_COLORS[selectedMessage.type] || TYPE_COLORS.other}>
                     {getTypeLabel(selectedMessage.type)}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.email")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.email")}</p>
                   <p className="text-sm">{selectedMessage.email || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.phone")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.phone")}</p>
                   <p className="text-sm">{selectedMessage.phone || "-"}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.company")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.company")}</p>
                   <p className="text-sm">{selectedMessage.company || "-"}</p>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.content")}</p>
-                <div className="mt-1 p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.content")}</p>
+                <div className="mt-1 p-3 bg-muted/50 rounded-none-none">
                   <p className="text-sm whitespace-pre-wrap">{selectedMessage.content}</p>
                 </div>
               </div>
               {selectedMessage.attachment_urls && selectedMessage.attachment_urls.length > 0 && (
                 <div>
-                  <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.attachment")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.attachment")}</p>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {selectedMessage.attachment_urls.map((url, index) => (
                       <a
@@ -371,7 +371,7 @@ export default function ContactMessagesPage() {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-sm hover:bg-blue-100"
+                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-none text-sm hover:bg-blue-100"
                       >
                         附件 {index + 1}
                       </a>
@@ -380,19 +380,19 @@ export default function ContactMessagesPage() {
                 </div>
               )}
               <div>
-                <p className="text-xs text-muted-foreground">{translate("admin.contact_messages.created_at")}</p>
+                <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.contact_messages.created_at")}</p>
                 <p className="text-sm">{selectedMessage.created_at}</p>
               </div>
               {selectedMessage.ip_address && (
                 <div>
-                  <p className="text-xs text-muted-foreground">IP 地址</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">IP 地址</p>
                   <p className="text-sm">{selectedMessage.ip_address}</p>
                 </div>
               )}
               <div className="border-t pt-4">
-                <p className="text-xs text-muted-foreground mb-2">{translate("admin.contact_messages.reply_note")}</p>
+                <p className="text-xs text-slate-900 dark:text-white font-bold mb-2">{translate("admin.contact_messages.reply_note")}</p>
                 <textarea
-                  className="w-full p-3 border rounded-lg text-sm resize-none"
+                  className="w-full p-3 border rounded-none-none text-sm resize-none"
                   rows={3}
                   placeholder="输入回复备注..."
                   value={replyNote}
@@ -415,7 +415,7 @@ export default function ContactMessagesPage() {
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+                  className="bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
                   onClick={() => handleUpdateStatus(selectedMessage.id, "replied", replyNote)}
                 >
                   <Reply className="h-4 w-4 mr-1" />

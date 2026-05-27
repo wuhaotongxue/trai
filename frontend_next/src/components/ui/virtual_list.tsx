@@ -194,8 +194,8 @@ export function LazyLoad({
     return (
       <div ref={elementRef} aria-busy="true">
         {placeholder || (
-          <div className="flex items-center justify-center p-4 animate-pulse bg-muted/30 rounded-lg">
-            <div className="h-4 w-4 rounded-full bg-muted-foreground/20" />
+          <div className="flex items-center justify-center p-4 animate-pulse bg-muted/30 rounded-none">
+            <div className="h-4 w-4 rounded-none bg-muted-foreground/20" />
           </div>
         )}
       </div>

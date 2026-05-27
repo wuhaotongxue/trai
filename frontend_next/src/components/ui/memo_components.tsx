@@ -157,7 +157,7 @@ export const MemoLoadingSpinner = memo(function MemoLoadingSpinner({
 
   return (
     <div className="loading-spinner flex items-center gap-3 justify-center py-4">
-      <div className={`${sizes[size]} rounded-full border-2 border-muted border-t-primary animate-spin`} />
+      <div className={`${sizes[size]} rounded-none border-2 border-muted border-t-primary animate-spin`} />
       {text && <span className="text-sm text-muted-foreground">{text}</span>}
     </div>
   );

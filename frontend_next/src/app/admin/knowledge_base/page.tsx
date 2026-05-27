@@ -202,14 +202,14 @@ export default function KnowledgeBasePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.knowledge_base.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.knowledge_base.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.knowledge_base.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="h-9 gap-2 shadow-sm" onClick={fetchIndices} disabled={loading}>
+          <Button variant="outline" className="h-9 gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={fetchIndices} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             {translate("admin.knowledge_base.refresh")}
           </Button>
-          <Button className="h-9 gap-2 shadow-sm" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: true }))}>
+          <Button className="h-9 gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={() => setCreateKBDialog(prev => ({ ...prev, open: true }))}>
             <Plus className="h-4 w-4" />
             {translate("admin.knowledge_base.create")}
           </Button>
@@ -217,13 +217,13 @@ export default function KnowledgeBasePage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 flex items-start gap-3">
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-none-none p-4 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
           <div className="text-sm">{error}</div>
         </div>
       )}
 
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="pb-4 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function KnowledgeBasePage() {
               {translate("admin.knowledge_base.index_list") || "索引列表"}
             </CardTitle>
             <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 dark:text-white font-bold" />
               <Input
                 placeholder={translate("admin.knowledge_base.search_placeholder")}
                 className="pl-9 h-9"
@@ -244,7 +244,7 @@ export default function KnowledgeBasePage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-muted/50 text-muted-foreground">
+              <thead className="bg-muted/50 text-slate-900 dark:text-white font-bold">
                 <tr>
                   <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_name")}</th>
                   <th className="px-6 py-4 font-medium">{translate("admin.knowledge_base.col_index_id")}</th>
@@ -256,15 +256,15 @@ export default function KnowledgeBasePage() {
               <tbody className="divide-y divide-border/50">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-8 text-center text-slate-900 dark:text-white font-bold">
                       {translate("admin.sessions.loading")}
                     </td>
                   </tr>
                 ) : indices.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center text-muted-foreground">
-                        <FolderOpen className="h-10 w-10 mb-3 text-muted-foreground/50" />
+                      <div className="flex flex-col items-center justify-center text-slate-900 dark:text-white font-bold">
+                        <FolderOpen className="h-10 w-10 mb-3 text-slate-900 dark:text-white font-bold/50" />
                         <p>{translate("admin.knowledge_base.no_data")}</p>
                       </div>
                     </td>
@@ -286,13 +286,13 @@ export default function KnowledgeBasePage() {
                           <FileText className="h-4 w-4 text-indigo-400" />
                           {name}
                         </td>
-                        <td className="px-6 py-4 text-muted-foreground font-mono text-xs">{id}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-white font-bold font-mono text-xs">{id}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-none-none text-xs font-medium ${status === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                             {status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-muted-foreground">{docCount}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-white font-bold">{docCount}</td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <Button variant="ghost" size="sm" className="h-8 text-indigo-600" onClick={() => handleManageDocs(kb)}>{translate("admin.knowledge_base.manage_docs")}</Button>
                           <Button variant="ghost" size="sm" className="h-8 text-red-600" onClick={() => handleDeleteClick("index", id, name)}>{translate("admin.knowledge_base.delete")}</Button>
@@ -318,16 +318,16 @@ export default function KnowledgeBasePage() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{translate("admin.knowledge_base.doc_manager_hint")}</p>
+              <p className="text-sm text-slate-900 dark:text-white font-bold">{translate("admin.knowledge_base.doc_manager_hint")}</p>
               <Button size="sm" className="gap-2" onClick={() => setUploadDialogOpen(true)}>
                 <Upload className="h-4 w-4" />
                 {translate("admin.knowledge_base.upload")}
               </Button>
             </div>
             
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border rounded-none-none overflow-hidden">
               <table className="w-full text-sm text-left">
-                <thead className="bg-muted/50 text-muted-foreground">
+                <thead className="bg-muted/50 text-slate-900 dark:text-white font-bold">
                   <tr>
                     <th className="px-4 py-3 font-medium">{translate("admin.knowledge_base.col_filename")}</th>
                     <th className="px-4 py-3 font-medium">{translate("admin.knowledge_base.col_doc_status")}</th>
@@ -337,18 +337,18 @@ export default function KnowledgeBasePage() {
                 <tbody className="divide-y divide-border/50">
                   {filesLoading ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">{translate("admin.sessions.loading")}</td>
+                      <td colSpan={3} className="px-4 py-8 text-center text-slate-900 dark:text-white font-bold">{translate("admin.sessions.loading")}</td>
                     </tr>
                   ) : files.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">{translate("admin.knowledge_base.no_docs")}</td>
+                      <td colSpan={3} className="px-4 py-8 text-center text-slate-900 dark:text-white font-bold">{translate("admin.knowledge_base.no_docs")}</td>
                     </tr>
                   ) : (
                     files.map(file => (
                       <tr key={file.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-4 py-3 font-medium truncate max-w-[300px]">{file.name}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${file.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-none-none ${file.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                             {file.status}
                           </span>
                         </td>
@@ -388,7 +388,7 @@ export default function KnowledgeBasePage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">{translate("admin.knowledge_base.content_label")}</label>
               <textarea
-                className="w-full h-64 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full h-64 p-3 text-sm rounded-none-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder={translate("admin.knowledge_base.content_placeholder")}
                 value={uploadContent}
                 onChange={(e) => setUploadContent(e.target.value)}
@@ -422,12 +422,12 @@ export default function KnowledgeBasePage() {
                 onChange={(e) => setCreateKBDialog(prev => ({ ...prev, name: e.target.value }))}
                 maxLength={20}
               />
-              <p className="text-xs text-muted-foreground">{translate("admin.knowledge_base.name_max_chars") || "最多 20 个字符"}</p>
+              <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.knowledge_base.name_max_chars") || "最多 20 个字符"}</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{translate("admin.knowledge_base.content_label")}</label>
               <textarea
-                className="w-full h-48 p-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full h-48 p-3 text-sm rounded-none-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder={translate("admin.knowledge_base.content_placeholder")}
                 value={createKBDialog.content}
                 onChange={(e) => setCreateKBDialog(prev => ({ ...prev, content: e.target.value }))}

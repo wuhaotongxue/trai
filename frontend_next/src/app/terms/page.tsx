@@ -17,14 +17,14 @@ export default function TermsPage() {
       <Navbar />
       <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-700 to-slate-800 py-16">
+      <div className="bg-amber-400 py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center gap-3 mb-4">
             <Link href="/" className="text-slate-300 hover:text-white transition-colors text-sm flex items-center gap-1">
               <ArrowLeft className="h-4 w-4" /> 返回官网
             </Link>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-white/10 text-white text-sm font-medium mb-4">
             <FileText className="h-4 w-4" />
             法律声明
           </div>

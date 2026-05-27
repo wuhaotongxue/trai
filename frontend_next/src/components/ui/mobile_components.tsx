@@ -86,7 +86,7 @@ export function MobileDrawer({
 
       {/* Drawer */}
       <div
-        className={`fixed z-50 bg-background shadow-xl transition-transform duration-300 ease-in-out ${
+        className={`fixed z-50 bg-background shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] transition-transform duration-300 ease-in-out ${
           positionClasses[position]
         } ${isOpen ? (position === "bottom" ? "translate-y-0" : "translate-x-0") : ""} ${
           position === "bottom" ? "h-[80vh] rounded-t-2xl" : "w-80"
@@ -100,7 +100,7 @@ export function MobileDrawer({
             <h3 className="font-semibold text-lg">{title}</h3>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              className="p-2 hover:bg-muted rounded-none transition-colors"
               aria-label="Close drawer"
             >
               ✕
@@ -144,7 +144,7 @@ export function MobileBottomSheet({
           <div className="absolute bottom-0 left-0 right-0 bg-background rounded-t-2xl shadow-2xl z-50 max-h-[90vh] overflow-hidden flex flex-col animate-slide-up">
             {/* Handle bar */}
             <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+              <div className="w-10 h-1 rounded-none bg-muted-foreground/20" />
             </div>
 
             {title && (

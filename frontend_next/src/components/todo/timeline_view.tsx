@@ -50,7 +50,7 @@ function TaskNode({
   return (
     <div className={`flex gap-4 ${isLast ? '' : 'pb-8'}`}>
       <div className="flex flex-col items-center">
-        <div className="w-8 h-8 rounded-full bg-background border-2 flex items-center justify-center shrink-0 z-10">
+        <div className="w-8 h-8 rounded-none bg-background border-2 flex items-center justify-center shrink-0 z-10">
           {statusIcon}
         </div>
         {!isLast && <div className="w-0.5 flex-1 bg-border mt-2 min-h-[80px]" />}
@@ -126,7 +126,7 @@ export function TimelineView({ tasks }: TimelineViewProps) {
             {tasksByModule.map(({ module, tasks }) => (
               <div key={module.id}>
                 <div
-                  className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r ${
+                  className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-none text-sm font-medium bg-gradient-to-r ${
                     moduleColors[module.id] ||
                     'from-gray-500 to-gray-600'
                   } text-white`}

@@ -168,16 +168,16 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
  */
 function SkeletonCard({ gradient }: { gradient: string }) {
   return (
-    <Card className="overflow-hidden border-0 shadow-sm bg-card/50">
+    <Card className="overflow-hidden border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900">
       <CardContent className="p-0">
         <div className={`h-1 bg-gradient-to-r ${gradient}`} />
         <div className="p-3.5 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="w-9 h-9 rounded-lg bg-muted/30 animate-pulse" />
-            <div className="w-12 h-5 rounded-full bg-muted/30 animate-pulse" />
+            <div className="w-9 h-9 rounded-none-none-none bg-muted/30 animate-pulse" />
+            <div className="w-12 h-5 rounded-none-none-none bg-muted/30 animate-pulse" />
           </div>
-          <div className="w-16 h-7 rounded bg-muted/30 animate-pulse" />
-          <div className="w-20 h-3 rounded bg-muted/30 animate-pulse" />
+          <div className="w-16 h-7 rounded-none-none bg-muted/30 animate-pulse" />
+          <div className="w-20 h-3 rounded-none-none bg-muted/30 animate-pulse" />
         </div>
       </CardContent>
     </Card>
@@ -228,12 +228,12 @@ export default function AdminDashboardPage() {
         {/* 骨架屏: 顶部 */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <div className="w-48 h-8 rounded-lg bg-muted/40 animate-pulse" />
-            <div className="w-72 h-4 rounded bg-muted/25 animate-pulse" />
+            <div className="w-48 h-8 rounded-none-none-none bg-muted/40 animate-pulse" />
+            <div className="w-72 h-4 rounded-none-none bg-muted/25 animate-pulse" />
           </div>
           <div className="flex gap-2">
-            <div className="w-28 h-9 rounded-lg bg-muted/40 animate-pulse" />
-            <div className="w-28 h-9 rounded-lg bg-muted/40 animate-pulse" />
+            <div className="w-28 h-9 rounded-none-none-none bg-muted/40 animate-pulse" />
+            <div className="w-28 h-9 rounded-none-none-none bg-muted/40 animate-pulse" />
           </div>
         </div>
         {/* 骨架屏: 数据卡片 2x4 */}
@@ -243,12 +243,12 @@ export default function AdminDashboardPage() {
           ))}
         </div>
         {/* 骨架屏: 图表 */}
-        <Card className="border-0 shadow-sm bg-card/50">
-          <CardHeader className="pb-3"><div className="w-40 h-5 rounded bg-muted/25 animate-pulse" /></CardHeader>
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900">
+          <CardHeader className="pb-3"><div className="w-40 h-5 rounded-none-none bg-muted/25 animate-pulse" /></CardHeader>
           <CardContent>
             <div className="flex items-end gap-0.5 h-32">
               {skeletonChartHeights.map((h, i) => (
-                <div key={i} className="flex-1 bg-muted/25 rounded-t-sm animate-pulse" style={{ height: `${h}%` }} />
+                <div key={i} className="flex-1 bg-muted/25 rounded-none-none-t-sm animate-pulse" style={{ height: `${h}%` }} />
               ))}
             </div>
           </CardContent>
@@ -265,13 +265,13 @@ export default function AdminDashboardPage() {
       {/* ===== 顶部区域 ===== */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-4xl font-black uppercase tracking-widest text-foreground flex items-center gap-2">
             <span className="text-2xl">&#x1F44B;</span>
             {greeting}, {translate("admin.dashboard.admin")}
           </h1>
           <div className="flex items-center gap-3 mt-1.5">
             {now && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <p className="text-sm text-slate-900 dark:text-white font-bold uppercase flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
                 {now.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
                   year: "numeric",
@@ -281,8 +281,8 @@ export default function AdminDashboardPage() {
               </p>
             )}
             {lastUpdated && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs text-slate-900 dark:text-white font-bold uppercase flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-2 border-slate-900 dark:border-white border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-none-none-none bg-emerald-500 animate-pulse" />
                 {translate("admin.dashboard.updated_to")} {lastUpdated.toLocaleTimeString(locale === "zh" ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
@@ -292,7 +292,7 @@ export default function AdminDashboardPage() {
           <Button
             size="sm"
             variant="outline"
-            className="h-9 gap-2 text-sm shadow-sm border-border/60 text-muted-foreground hover:bg-muted/50"
+            className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] border-border/60 text-slate-900 dark:text-white font-bold uppercase hover:bg-muted/50"
             onClick={fetchData}
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -300,7 +300,7 @@ export default function AdminDashboardPage() {
           </Button>
           <Button
             size="sm"
-            className="h-9 gap-2 text-sm shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+            className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-indigo-400 hover:from-blue-500 hover:to-indigo-500"
             onClick={() => router.push("/admin/analytics")}
           >
             <TrendingUp className="h-3.5 w-3.5" />
@@ -316,29 +316,29 @@ export default function AdminDashboardPage() {
           return (
             <Card
               key={card.key}
-              className="overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 bg-card/80 backdrop-blur-sm group"
+              className="overflow-hidden border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all bg-white dark:bg-slate-900  group"
             >
               <CardContent className="p-0">
                 {/* 顶部渐变条 */}
                 <div className={`h-1 bg-gradient-to-r ${card.gradient}`} />
                 <div className="p-3.5">
                   <div className="flex items-center justify-between mb-2.5">
-                    <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <div className={`w-9 h-9 rounded-none-none-none ${card.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                       <card.icon className={`h-4 w-4 ${card.badge.replace("bg-", "text-").split(" ")[0]}`} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${card.badge} flex items-center gap-0.5`}>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-none-none-none ${card.badge} flex items-center gap-0.5`}>
                         <ArrowUp className="h-2.5 w-2.5" />
                         {card.trend}
                       </span>
                       <Sparkline data={card.sparkline} color={card.badge.split(" ")[0].replace("bg-", "rgb(").replace("500/15", ")").replace("blue", "59,130,246").replace("emerald", "16,185,129").replace("indigo", "99,102,241").replace("cyan", "6,182,212").replace("orange", "249,115,22").replace("pink", "236,72,153").replace("amber", "245,158,11").replace("teal", "20,184,166")} />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white leading-none mb-1.5 tabular-nums">
+                  <p className="text-4xl font-black uppercase tracking-widest text-slate-900 dark:text-white leading-none mb-1.5 tabular-nums">
                     {typeof val === "number" ? val.toLocaleString() : val}
                   </p>
-                  <div className="text-xs font-medium text-muted-foreground leading-none flex items-center gap-1">
-                    <div className={`w-1 h-1 rounded-full ${card.badge.replace("bg-", "bg-").split(" ")[0]}`} />
+                  <div className="text-xs font-medium text-slate-900 dark:text-white font-bold uppercase leading-none flex items-center gap-1">
+                    <div className={`w-1 h-1 rounded-none-none-none ${card.badge.replace("bg-", "bg-").split(" ")[0]}`} />
                     {translate(card.label)}
                   </div>
                 </div>
@@ -351,20 +351,20 @@ export default function AdminDashboardPage() {
       {/* ===== 图表 + 系统状态 + 摘要 3列 ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 近 30 天趋势 */}
-        <Card className="lg:col-span-2 border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-blue-500" />
                 {translate("admin.dashboard.agent_trend")}
               </CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-slate-900 dark:text-white font-bold uppercase mt-0.5">
                 {translate("admin.dashboard.total_calls")} {chartBars.reduce((s, t) => s + t.agent_calls, 0).toLocaleString()} {translate("admin.dashboard.calls")}
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="w-2 h-2 rounded-sm bg-gradient-to-r from-blue-500 to-blue-600 inline-block" />
+              <span className="flex items-center gap-1.5 text-slate-900 dark:text-white font-bold uppercase">
+                <span className="w-2 h-2 rounded-none-none-none bg-amber-400 border-b-4 border-slate-900" />
                 {translate("admin.dashboard.agent_trend_label")}
               </span>
             </div>
@@ -380,16 +380,16 @@ export default function AdminDashboardPage() {
                     key={i}
                     className="flex-1 flex flex-col items-center gap-0.5 group"
                   >
-                    <span className="text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity leading-none bg-slate-900 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded mb-0.5">
+                    <span className="text-[9px] text-slate-900 dark:text-white font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity leading-none bg-slate-900 dark:bg-slate-700 text-white px-1.5 py-0.5 rounded-none-none mb-0.5">
                       {bar.agent_calls}
                     </span>
                     <div
-                      className="w-full rounded-t-sm transition-all duration-300 bg-gradient-to-t from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-400 group-hover:shadow-lg group-hover:shadow-blue-500/30 cursor-pointer"
+                      className="w-full rounded-none-none-t-sm transition-all duration-300 bg-amber-400 border-b-4 border-slate-900:from-blue-500 hover:to-blue-400 group-hover:shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] group-hover:shadow-blue-500/30 cursor-pointer"
                       style={{ height: `${Math.max(3, height)}%` }}
                       title={`${label}: ${bar.agent_calls} ${translate("admin.dashboard.calls")}`}
                     />
                     {i % 5 === 0 && (
-                      <span className="text-[9px] text-muted-foreground leading-none">{label}</span>
+                      <span className="text-[9px] text-slate-900 dark:text-white font-bold uppercase leading-none">{label}</span>
                     )}
                   </div>
                 );
@@ -399,14 +399,14 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* 系统服务状态 */}
-        <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
               <Shield className="h-4 w-4 text-emerald-500" />
               {translate("admin.dashboard.service_status")}
             </CardTitle>
-            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-2 py-0.5 rounded-none-none-none bg-emerald-500/10 border-2 border-slate-900 dark:border-white border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-none-none-none bg-emerald-500 animate-pulse" />
               {translate("admin.dashboard.all_ok")}
             </span>
           </CardHeader>
@@ -416,14 +416,14 @@ export default function AdminDashboardPage() {
               return (
                 <div
                   key={svc.nameKey}
-                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/25 hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
+                  className="flex items-center gap-3 p-2.5 rounded-none-none-none bg-muted/25 hover:bg-muted/40 transition-colors border-2 border-slate-900 dark:border-white border-transparent hover:border-border/40"
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${ok ? "bg-emerald-500/10" : "bg-amber-500/10"}`}>
+                  <div className={`w-8 h-8 rounded-none-none-none flex items-center justify-center ${ok ? "bg-emerald-500/10" : "bg-amber-500/10"}`}>
                     <svc.icon className={`h-4 w-4 ${ok ? "text-emerald-400" : "text-amber-400"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/90">{translate(svc.nameKey)}</p>
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <p className="text-[11px] text-slate-900 dark:text-white font-bold uppercase flex items-center gap-1">
                       <Zap className="h-2.5 w-2.5" />
                       {svc.latency} &middot; {svc.uptime}
                     </p>
@@ -443,9 +443,9 @@ export default function AdminDashboardPage() {
       {/* ===== 底部: 数据摘要 + 每日明细 ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* 数据摘要 */}
-        <Card className="lg:col-span-2 border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
               {translate("admin.dashboard.key_metrics")}
             </CardTitle>
@@ -481,14 +481,14 @@ export default function AdminDashboardPage() {
               return (
                 <div
                   key={item.labelKey}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/25 transition-colors border ${item.border}`}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-none-none-none hover:bg-muted/25 transition-colors border-2 border-slate-900 dark:border-white ${item.border}`}
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${item.bg}`}>
+                  <div className={`w-9 h-9 rounded-none-none-none flex items-center justify-center ${item.bg}`}>
                     <item.icon className={`h-4 w-4 ${item.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/90">{translate(item.labelKey)}</p>
-                    <p className="text-[11px] text-muted-foreground">{translate(item.descKey)}</p>
+                    <p className="text-[11px] text-slate-900 dark:text-white font-bold uppercase">{translate(item.descKey)}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-sm font-bold ${item.color}`}>{displayValue}</p>
@@ -501,13 +501,13 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* 每日明细 */}
-        <Card className="lg:col-span-3 border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="lg:col-span-3 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 ">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <CardTitle className="text-2xl font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
               <Bell className="h-4 w-4 text-cyan-500" />
               {translate("admin.dashboard.daily_detail")}
             </CardTitle>
-            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground" onClick={() => router.push("/admin/analytics")}>
+            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-slate-900 dark:text-white font-bold uppercase hover:text-foreground" onClick={() => router.push("/admin/analytics")}>
               <Eye className="h-3 w-3" />
               {translate("admin.dashboard.view_all")}
             </Button>
@@ -516,13 +516,13 @@ export default function AdminDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-border/60">
-                    <th className="text-left pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.date")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.users")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.sessions")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.messages")}</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">Agent</th>
-                    <th className="text-right pb-2.5 font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.dashboard.health")}</th>
+                  <tr className="border-b-4 border-slate-900 dark:border-white border-border/60">
+                    <th className="text-left pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">{translate("admin.dashboard.date")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">{translate("admin.dashboard.users")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">{translate("admin.dashboard.sessions")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">{translate("admin.dashboard.messages")}</th>
+                    <th className="text-right pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">Agent</th>
+                    <th className="text-right pb-2.5 font-semibold text-slate-900 dark:text-white font-bold uppercase uppercase tracking-wide">{translate("admin.dashboard.health")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -530,24 +530,24 @@ export default function AdminDashboardPage() {
                     const rate = Math.min((t.agent_calls / Math.max(maxAgentCalls, 1)) * 100, 100);
                     const health =
                       rate > 70
-                        ? { bar: "bg-gradient-to-r from-emerald-400 to-emerald-500", text: "text-emerald-400", bg: "bg-emerald-500/10" }
+                        ? { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-emerald-400", bg: "bg-emerald-500/10" }
                         : rate > 40
-                        ? { bar: "bg-gradient-to-r from-amber-400 to-amber-500", text: "text-amber-400", bg: "bg-amber-500/10" }
-                        : { bar: "bg-gradient-to-r from-red-400 to-red-500", text: "text-red-400", bg: "bg-red-500/10" };
+                        ? { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-amber-400", bg: "bg-amber-500/10" }
+                        : { bar: "bg-amber-400 border-b-4 border-slate-900", text: "text-red-400", bg: "bg-red-500/10" };
                     return (
                       <tr
                         key={t.date}
-                        className="border-b border-border/40 hover:bg-muted/25 transition-colors"
+                        className="border-b-4 border-slate-900 dark:border-white border-border/40 hover:bg-muted/25 transition-colors"
                       >
                         <td className="py-2.5 text-foreground/80 font-medium">{t.date}</td>
                         <td className="py-2.5 text-right text-emerald-500 font-medium">+{t.users}</td>
-                        <td className="py-2.5 text-right text-muted-foreground">{t.sessions.toLocaleString()}</td>
-                        <td className="py-2.5 text-right text-muted-foreground">{t.messages.toLocaleString()}</td>
+                        <td className="py-2.5 text-right text-slate-900 dark:text-white font-bold uppercase">{t.sessions.toLocaleString()}</td>
+                        <td className="py-2.5 text-right text-slate-900 dark:text-white font-bold uppercase">{t.messages.toLocaleString()}</td>
                         <td className="py-2.5 text-right font-semibold text-foreground">{t.agent_calls.toLocaleString()}</td>
                         <td className="py-2.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            <div className="w-14 h-1.5 bg-muted/40 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${health.bar}`} style={{ width: `${rate}%` }} />
+                            <div className="w-14 h-1.5 bg-muted/40 rounded-none-none-none overflow-hidden">
+                              <div className={`h-full rounded-none-none-none ${health.bar}`} style={{ width: `${rate}%` }} />
                             </div>
                             <span className={`text-xs font-medium w-8 text-right ${health.text}`}>{rate.toFixed(0)}%</span>
                           </div>

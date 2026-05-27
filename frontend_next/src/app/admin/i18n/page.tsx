@@ -321,12 +321,12 @@ export default function I18nPage() {
       {/* 顶部标题栏 */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none-none bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
             <Globe className="h-5 w-5 text-violet-500" />
           </div>
           <div>
             <h1 className="text-lg font-bold">{translate("admin.i18n.title")}</h1>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-900 dark:text-white font-bold">
               {translate("admin.i18n.total")} {tabStats.all} {translate("admin.i18n.items")} · {translate("admin.i18n.tab_client")} {tabStats.client} / {translate("admin.i18n.tab_frontend")} {tabStats.frontend} / {translate("admin.i18n.tab_admin")} {tabStats.admin}
             </p>
           </div>
@@ -357,12 +357,12 @@ export default function I18nPage() {
 
       {/* Tab 切换 + 统计 */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="inline-flex items-center rounded-xl border bg-muted/50 p-0.5">
+        <div className="inline-flex items-center rounded-none-none border bg-muted/50 p-0.5">
           {(Object.keys(TAB_LABELS) as TabKey[]).map((tab) => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); setPage(1); setSearchKey(""); }}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${activeTab === tab ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-none-none text-xs font-medium transition-all ${activeTab === tab ? "bg-background shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-foreground" : "text-slate-900 dark:text-white font-bold hover:text-foreground"}`}
             >
               {TAB_LABELS[tab]}
               <Badge variant="outline" className="text-[10px] px-1 py-0 font-mono ml-0.5">
@@ -378,7 +378,7 @@ export default function I18nPage() {
             key={tab}
             variant="ghost"
             size="sm"
-            className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground px-2"
+            className="h-7 gap-1 text-xs text-slate-900 dark:text-white font-bold hover:text-foreground px-2"
             onClick={() => window.open(`/admin/i18n?tab=${tab}`, "_blank")}
           >
             <ExternalLink className="h-3 w-3" />
@@ -389,17 +389,17 @@ export default function I18nPage() {
       </div>
 
       {/* 搜索栏，紧贴翻译列表 Card */}
-      <Card className="border-0 shadow-sm bg-card/80">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white">
         <CardContent className="p-3 flex items-center gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-            <Input className="h-8 pl-8 pr-3 rounded-lg text-xs" placeholder={translate("admin.i18n.search_placeholder")} value={searchKey} onChange={(e) => { setSearchKey(e.target.value); setPage(1); }} />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-900 dark:text-white font-bold" />
+            <Input className="h-8 pl-8 pr-3 rounded-none-none text-xs" placeholder={translate("admin.i18n.search_placeholder")} value={searchKey} onChange={(e) => { setSearchKey(e.target.value); setPage(1); }} />
           </div>
-          <div className="inline-flex items-center rounded-lg border bg-muted/50 p-0.5 shrink-0">
-            <button onClick={() => setViewMode("table")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${viewMode === "table" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
+          <div className="inline-flex items-center rounded-none-none border bg-muted/50 p-0.5 shrink-0">
+            <button onClick={() => setViewMode("table")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-none-md text-xs font-medium transition-all ${viewMode === "table" ? "bg-background shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" : "text-slate-900 dark:text-white font-bold"}`}>
               <Table2 className="h-3 w-3" /> {translate("admin.i18n.view_table")}
             </button>
-            <button onClick={() => setViewMode("split")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${viewMode === "split" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>
+            <button onClick={() => setViewMode("split")} className={`inline-flex items-center gap-1 px-3 py-1 rounded-none-md text-xs font-medium transition-all ${viewMode === "split" ? "bg-background shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" : "text-slate-900 dark:text-white font-bold"}`}>
               <SplitSquareHorizontal className="h-3 w-3" /> {translate("admin.i18n.view_split")}
             </button>
           </div>
@@ -407,7 +407,7 @@ export default function I18nPage() {
       </Card>
 
       {/* 翻译列表 */}
-      <Card className="border-0 shadow-sm bg-card/80">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white">
         <CardHeader className="pb-0 px-4 pt-4">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -421,7 +421,7 @@ export default function I18nPage() {
           </div>
           {viewMode === "table" && (
             <div className="mt-3 grid grid-cols-12 gap-3 px-1">
-              <div className="col-span-4 text-xs font-semibold text-muted-foreground uppercase">{translate("admin.i18n.key")}</div>
+              <div className="col-span-4 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase">{translate("admin.i18n.key")}</div>
               <div className="col-span-4 text-xs font-semibold text-blue-500 uppercase">{translate("admin.i18n.chinese")}</div>
               <div className="col-span-3 text-xs font-semibold text-emerald-500 uppercase">{translate("admin.i18n.english")}</div>
               <div className="col-span-1" />
@@ -431,12 +431,12 @@ export default function I18nPage() {
 
         <CardContent className="p-0">
           {loading ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground text-sm gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
+            <div className="flex items-center justify-center py-16 text-slate-900 dark:text-white font-bold text-sm gap-2">
+              <div className="w-4 h-4 rounded-none-none border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
               {translate("admin.i18n.loading")}
             </div>
           ) : tabSections.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-sm gap-2">
+            <div className="flex flex-col items-center justify-center py-16 text-slate-900 dark:text-white font-bold text-sm gap-2">
               <Globe className="h-10 w-10 opacity-20" />
               <p className="font-medium">{translate("admin.i18n.no_data")}</p>
             </div>
@@ -469,7 +469,7 @@ export default function I18nPage() {
         {/* 分页 */}
         {tabSections.length > PAGE_SIZE && (
           <div className="px-4 py-3 border-t border-border/40 flex items-center justify-between bg-muted/10">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-900 dark:text-white font-bold">
               {translate("admin.i18n.page")} {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, tabSections.length)} {translate("admin.i18n.items")}，{translate("admin.i18n.total")} {tabSections.length} {translate("admin.i18n.items")}
             </p>
             <div className="flex items-center gap-1">

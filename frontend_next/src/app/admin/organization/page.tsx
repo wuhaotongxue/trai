@@ -44,7 +44,7 @@ function DeptTreeItem({
     <div className="select-none">
       <div 
         className={`
-          flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors
+          flex items-center justify-between p-2 rounded-none-md cursor-pointer transition-colors
           ${isSelected ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}
         `}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
@@ -64,7 +64,7 @@ function DeptTreeItem({
           )}
           <span className="text-sm font-medium truncate">{node.name}</span>
         </div>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isSelected ? "bg-blue-100 dark:bg-blue-800" : "bg-slate-100 dark:bg-slate-800"}`}>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded-none-none ${isSelected ? "bg-blue-100 dark:bg-blue-800" : "bg-slate-100 dark:bg-slate-800"}`}>
           {node.user_count}
         </span>
       </div>
@@ -201,14 +201,14 @@ export default function OrganizationPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.organization.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.organization.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.organization.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={handleSync} disabled={syncing} variant="outline" className="h-9 gap-2 shadow-sm">
+          <Button onClick={handleSync} disabled={syncing} variant="outline" className="h-9 gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? translate("admin.organization.syncing") || "正在同步..." : translate("admin.organization.sync") || "从企业微信同步"}
           </Button>
-          <Button className="h-9 gap-2 shadow-sm">
+          <Button className="h-9 gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <Plus className="h-4 w-4" />
             {translate("admin.organization.create")}
           </Button>
@@ -216,7 +216,7 @@ export default function OrganizationPage() {
       </div>
 
       {syncResult && (
-        <Card className="border-emerald-500/20 bg-emerald-500/5 shadow-sm">
+        <Card className="border-emerald-500/20 bg-emerald-500/5 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
           <CardContent className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3 text-emerald-600">
               <RefreshCw className="h-5 w-5" />
@@ -233,7 +233,7 @@ export default function OrganizationPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* 部门树 */}
-        <Card className="border-0 shadow-sm col-span-1">
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] col-span-1">
           <CardHeader className="pb-4 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function OrganizationPage() {
           <CardContent className="p-2 overflow-auto max-h-[600px]">
             <div 
               className={`
-                flex items-center justify-between p-2 rounded-md cursor-pointer mb-2 transition-colors
+                flex items-center justify-between p-2 rounded-none-md cursor-pointer mb-2 transition-colors
                 ${selectedDeptId === null ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}
               `}
               onClick={() => setSelectedDeptId(null)}
@@ -254,7 +254,7 @@ export default function OrganizationPage() {
                 <div className="w-4 h-4" />
                 <span className="text-sm font-medium">{translate("admin.organization.all_company")}</span>
               </div>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedDeptId === null ? "bg-blue-100 dark:bg-blue-800" : "bg-slate-100 dark:bg-slate-800"}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-none-none ${selectedDeptId === null ? "bg-blue-100 dark:bg-blue-800" : "bg-slate-100 dark:bg-slate-800"}`}>
                 {total}
               </span>
             </div>
@@ -270,7 +270,7 @@ export default function OrganizationPage() {
         </Card>
 
         {/* 成员列表 */}
-        <Card className="border-0 shadow-sm col-span-1 md:col-span-3">
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] col-span-1 md:col-span-3">
           <CardHeader className="pb-4 border-b">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -278,7 +278,7 @@ export default function OrganizationPage() {
                 {translate("admin.organization.members")}
               </CardTitle>
               <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900 dark:text-white font-bold" />
                 <Input 
                   placeholder={translate("admin.organization.search_member")} 
                   className="pl-9 h-9" 
@@ -291,7 +291,7 @@ export default function OrganizationPage() {
           <CardContent className="p-0 overflow-auto">
             <div className="min-h-[400px]">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/50 text-muted-foreground sticky top-0">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white font-bold sticky top-0">
                   <tr>
                     <th className="p-4 font-medium">{translate("admin.organization.col_name")}</th>
                     <th className="p-4 font-medium">{translate("admin.organization.col_employee_id")}</th>
@@ -303,14 +303,14 @@ export default function OrganizationPage() {
                 <tbody className="divide-y divide-border">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                      <td colSpan={5} className="p-8 text-center text-slate-900 dark:text-white font-bold">
                         <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2" />
                         {translate("admin.organization.loading")}
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                      <td colSpan={5} className="p-8 text-center text-slate-900 dark:text-white font-bold">
                         {translate("admin.organization.no_members")}
                       </td>
                     </tr>
@@ -320,19 +320,19 @@ export default function OrganizationPage() {
                         <td className="p-4 font-medium">
                           <div className="flex items-center gap-3">
                             {user.avatar_url ? (
-                              <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-full object-cover border border-border" referrerPolicy="no-referrer" />
+                              <img src={user.avatar_url} alt={user.display_name} className="w-8 h-8 rounded-none-none object-cover border border-border" referrerPolicy="no-referrer" />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                              <div className="w-8 h-8 rounded-none-none bg-amber-400 flex items-center justify-center text-white text-xs font-medium">
                                 {user.display_name?.[0] || user.username?.[0]}
                               </div>
                             )}
                             <span>{user.display_name}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-muted-foreground font-mono">{user.wecom_user_id || "---"}</td>
-                        <td className="p-4 text-muted-foreground">{user.email}</td>
+                        <td className="p-4 text-slate-900 dark:text-white font-bold font-mono">{user.wecom_user_id || "---"}</td>
+                        <td className="p-4 text-slate-900 dark:text-white font-bold">{user.email}</td>
                         <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          <span className={`px-2 py-0.5 rounded-none-none text-xs font-medium ${
                             user.role === "admin" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
                             user.role === "vip" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
                             "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
@@ -356,7 +356,7 @@ export default function OrganizationPage() {
             {/* 分页控制 */}
             {total > 0 && (
               <div className="p-4 border-t flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-slate-900 dark:text-white font-bold">
                   {translate("admin.organization.showing")} {startIdx} {translate("admin.organization.to")} {endIdx},{translate("admin.organization.total")} {total} {translate("admin.organization.items")}
                 </div>
                 <div className="flex items-center gap-2">
@@ -382,7 +382,7 @@ export default function OrganizationPage() {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                   <div className="flex items-center gap-1.5 ml-2 border-l pl-3 border-border/60">
-                    <span className="text-[10px] text-muted-foreground">{translate("admin.organization.jump")}</span>
+                    <span className="text-[10px] text-slate-900 dark:text-white font-bold">{translate("admin.organization.jump")}</span>
                     <Input
                       type="number"
                       min={1}
@@ -416,13 +416,13 @@ export default function OrganizationPage() {
           </DialogHeader>
           {permTarget && (
             <div className="space-y-4 py-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
+              <div className="flex items-center gap-3 p-3 rounded-none-none bg-muted/50">
+                <div className="w-10 h-10 rounded-none-none bg-amber-400 flex items-center justify-center text-white font-medium">
                   {permTarget.display_name?.[0] || permTarget.username?.[0] || "?"}
                 </div>
                 <div>
                   <p className="font-medium">{permTarget.display_name || permTarget.username}</p>
-                  <p className="text-sm text-muted-foreground">{permTarget.email}</p>
+                  <p className="text-sm text-slate-900 dark:text-white font-bold">{permTarget.email}</p>
                 </div>
               </div>
               <div className="space-y-2">
@@ -437,17 +437,17 @@ export default function OrganizationPage() {
                       key={role.value}
                       type="button"
                       onClick={() => setPermRole(role.value)}
-                      className={`p-3 rounded-lg border-2 transition-all text-left ${
+                      className={`p-3 rounded-none-none border-2 transition-all text-left ${
                         permRole === role.value
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
                           : "border-border hover:border-muted-foreground/40"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${role.color}`} />
+                        <div className={`w-2 h-2 rounded-none-none ${role.color}`} />
                         <span className="font-medium text-sm">{role.label}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{role.desc}</p>
+                      <p className="text-xs text-slate-900 dark:text-white font-bold">{role.desc}</p>
                     </button>
                   ))}
                 </div>

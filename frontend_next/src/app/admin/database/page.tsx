@@ -151,7 +151,7 @@ export default function DatabasePage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-foreground">{translate("admin.database.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">PostgreSQL 16.2 - {translate("admin.database.connection_ok")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5">PostgreSQL 16.2 - {translate("admin.database.connection_ok")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={handleOptimize}>
@@ -162,7 +162,7 @@ export default function DatabasePage() {
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             {translate("admin.monitor.refresh_status")}
           </Button>
-          <Button size="sm" className="h-9 gap-2 text-sm shadow-sm bg-red-600 hover:bg-red-700" onClick={handleBackup} disabled={backingUp}>
+          <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-red-600 hover:bg-red-700" onClick={handleBackup} disabled={backingUp}>
             {backingUp ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
             {backingUp ? translate("admin.database.backing_up") : translate("admin.database.manual_backup")}
           </Button>
@@ -177,14 +177,14 @@ export default function DatabasePage() {
           { labelKey: "admin.database.backups", value: backups.length.toString(), icon: HardDrive, color: "text-amber-400", bg: "bg-amber-500/15" },
           { labelKey: "admin.database.status", value: translate("admin.database.ok"), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
         ].map((item) => (
-          <Card key={item.labelKey} className="border-0 shadow-sm">
+          <Card key={item.labelKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${item.bg}`}>
+              <div className={`w-9 h-9 rounded-none-none flex items-center justify-center ${item.bg}`}>
                 <item.icon className={`h-4.5 w-4.5 ${item.color}`} />
               </div>
               <div>
                 <p className="text-lg font-bold text-foreground">{item.value}</p>
-                <p className="text-xs text-muted-foreground">{translate(item.labelKey)}</p>
+                <p className="text-xs text-slate-900 dark:text-white font-bold">{translate(item.labelKey)}</p>
               </div>
             </CardContent>
           </Card>
@@ -192,14 +192,14 @@ export default function DatabasePage() {
       </div>
 
       {/* Schema Documentation */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Table2 className="h-4 w-4" />
             {translate("admin.database.schema_doc")}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-slate-900 dark:text-white font-bold">
               {translate("admin.database.last_synced")}: {schema?.synced_at ? new Date(schema.synced_at).toLocaleString(locale === "zh" ? "zh-CN" : "en-US") : translate("admin.database.never")}
             </span>
             <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={fetchSchema} disabled={schemaLoading}>
@@ -211,29 +211,29 @@ export default function DatabasePage() {
         <CardContent>
           <div className="space-y-2">
             {schemaLoading ? (
-              <div className="py-8 text-center text-muted-foreground">{translate("admin.database.loading_schema")}</div>
+              <div className="py-8 text-center text-slate-900 dark:text-white font-bold">{translate("admin.database.loading_schema")}</div>
             ) : schema?.tables && schema.tables.length > 0 ? (
               schema.tables.map((table) => (
-                <div key={table.table_name} className="border border-border rounded-lg overflow-hidden">
+                <div key={table.table_name} className="border border-border rounded-none-none overflow-hidden">
                   <div
                     className="flex items-center gap-3 p-3 hover:bg-muted/30 cursor-pointer transition-colors"
                     onClick={() => toggleTable(table.table_name)}
                   >
                     {expandedTables.has(table.table_name) ? (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ChevronRight className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
                     )}
                     <Table2 className="h-4 w-4 text-blue-500" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{table.table_name}</span>
                         {table.description && (
-                          <span className="text-xs text-muted-foreground">- {table.description}</span>
+                          <span className="text-xs text-slate-900 dark:text-white font-bold">- {table.description}</span>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 text-xs text-slate-900 dark:text-white font-bold">
                       <span>{table.row_count.toLocaleString(locale === "zh" ? "zh-CN" : "en-US")} {translate("admin.database.rows")}</span>
                       <span>{formatBytes(table.total_bytes)}</span>
                       <span>{table.columns.length} {translate("admin.database.columns")}</span>
@@ -256,7 +256,7 @@ export default function DatabasePage() {
                               <td className="px-4 py-2 font-mono text-blue-600">{col.name}</td>
                               <td className="px-4 py-2 font-mono text-emerald-600">{col.type}</td>
                               <td className="px-4 py-2">{col.nullable ? translate("admin.database.yes") : translate("admin.database.no")}</td>
-                              <td className="px-4 py-2 text-muted-foreground">{col.default || "-"}</td>
+                              <td className="px-4 py-2 text-slate-900 dark:text-white font-bold">{col.default || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -266,7 +266,7 @@ export default function DatabasePage() {
                 </div>
               ))
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
+              <div className="py-8 text-center text-slate-900 dark:text-white font-bold">
                 {translate("admin.database.no_schema_data")}
               </div>
             )}
@@ -275,10 +275,10 @@ export default function DatabasePage() {
       </Card>
 
       {/* Backup History */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-semibold">{translate("admin.database.s3_backup_history")}</CardTitle>
-          <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+          <span className="text-xs text-slate-900 dark:text-white font-bold font-medium flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             {translate("admin.database.latest")}: {backups[0]?.last_modified || translate("admin.database.none")}
           </span>
@@ -286,18 +286,18 @@ export default function DatabasePage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {loading ? (
-              <div className="col-span-2 py-8 text-center text-muted-foreground">{translate("admin.loading")}</div>
+              <div className="col-span-2 py-8 text-center text-slate-900 dark:text-white font-bold">{translate("admin.loading")}</div>
             ) : backups.length === 0 ? (
-              <div className="col-span-2 py-8 text-center text-muted-foreground">{translate("admin.database.no_backups")}</div>
+              <div className="col-span-2 py-8 text-center text-slate-900 dark:text-white font-bold">{translate("admin.database.no_backups")}</div>
             ) : (
               backups.map((b) => (
-                <div key={b.key} className="flex items-center gap-4 p-4 rounded-xl bg-muted/25 hover:bg-muted/40 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center flex-shrink-0">
+                <div key={b.key} className="flex items-center gap-4 p-4 rounded-none-none bg-muted/25 hover:bg-muted/40 transition-colors">
+                  <div className="w-10 h-10 rounded-none-none bg-blue-500/15 flex items-center justify-center flex-shrink-0">
                     <Database className="h-5 w-5 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{b.key.split("/").pop()}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{b.last_modified} - {formatSize(b.size)}</p>
+                    <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5">{b.last_modified} - {formatSize(b.size)}</p>
                   </div>
                   <a href={b.url} target="_blank" rel="noopener noreferrer">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">

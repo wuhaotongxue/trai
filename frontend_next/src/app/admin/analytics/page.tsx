@@ -148,28 +148,28 @@ export default function AnalyticsPage() {
               {translate("admin.analytics.exec_dashboard")}
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
-              {translate("admin.analytics.digital_assets")} <span className="text-muted-foreground font-light">{translate("admin.analytics.and")}</span> {translate("admin.analytics.performance_board")}
+              {translate("admin.analytics.digital_assets")} <span className="text-slate-900 dark:text-white font-bold font-light">{translate("admin.analytics.and")}</span> {translate("admin.analytics.performance_board")}
             </h1>
-            <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+            <p className="text-slate-900 dark:text-white font-bold max-w-2xl text-sm leading-relaxed">
               {translate("admin.analytics.sync_desc")}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden lg:block text-right mr-4">
-              <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">{translate("admin.analytics.last_sync")}</p>
+              <p className="text-[10px] text-slate-900 dark:text-white font-bold uppercase font-mono tracking-tighter">{translate("admin.analytics.last_sync")}</p>
               <p className="text-xs font-semibold text-foreground">{lastUpdated || translate("admin.analytics.syncing_status")}</p>
             </div>
             <Button
               variant="outline"
-              className="gap-2 shadow-sm"
+              className="gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]"
               onClick={() => void fetchData()}
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
               {translate("admin.analytics.refresh")}
             </Button>
             <Button
-              className="gap-2 shadow-md bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500"
+              className="gap-2 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 hover:from-blue-500 hover:to-indigo-500"
               onClick={() => void handleGenerateReport()}
               disabled={generating}
             >
@@ -182,16 +182,16 @@ export default function AnalyticsPage() {
         {/* 核心战略指标 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
           {coreIndicators.map((item) => (
-            <Card key={item.labelKey} className="border-0 shadow-sm hover:shadow-md transition-all bg-card/80 backdrop-blur-sm group">
+            <Card key={item.labelKey} className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white  group">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className={cn("p-2 rounded-xl", item.bg)}>
+                  <div className={cn("p-2 rounded-none-none", item.bg)}>
                     <item.icon className={cn("h-5 w-5", item.color)} />
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground">{translate(item.subKey)}</span>
+                  <span className="text-[10px] font-bold text-slate-900 dark:text-white font-bold">{translate(item.subKey)}</span>
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-1">{item.value}</h3>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate(item.labelKey)}</p>
+                <p className="text-xs font-medium text-slate-900 dark:text-white font-bold uppercase tracking-wider">{translate(item.labelKey)}</p>
               </CardContent>
             </Card>
           ))}
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
         {/* 中部深度分析 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
           {/* 效能趋势 */}
-          <Card className="lg:col-span-2 border-0 shadow-sm overflow-hidden flex flex-col bg-card/80 backdrop-blur-sm">
+          <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden flex flex-col bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
             <CardHeader className="border-b border-border/40 shrink-0">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
           </Card>
 
           {/* 组织结构 */}
-          <Card className="border-0 shadow-sm overflow-hidden flex flex-col bg-card/80 backdrop-blur-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] overflow-hidden flex flex-col bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
             <CardHeader className="border-b border-border/40 shrink-0">
               <div className="space-y-1">
                 <CardTitle className="text-base font-bold text-foreground">{translate("admin.analytics.talent_matrix")}</CardTitle>
@@ -232,7 +232,7 @@ export default function AnalyticsPage() {
         {/* 底部详细看板 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
           {/* 详细列表 */}
-          <Card className="lg:col-span-2 border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+          <Card className="lg:col-span-2 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
             <CardHeader>
               <CardTitle className="text-base font-bold text-foreground">{translate("admin.analytics.dept_metrics")}</CardTitle>
             </CardHeader>
@@ -241,10 +241,10 @@ export default function AnalyticsPage() {
                 <table className="w-full text-sm text-left">
                   <thead>
                     <tr className="border-b border-border/40">
-                      <th className="px-5 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.analytics.dept")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.analytics.headcount")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center">{translate("admin.analytics.new_hires")}</th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">{translate("admin.analytics.efficiency")}</th>
+                      <th className="px-5 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.analytics.dept")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-center">{translate("admin.analytics.headcount")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-center">{translate("admin.analytics.new_hires")}</th>
+                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide text-right">{translate("admin.analytics.efficiency")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
@@ -252,7 +252,7 @@ export default function AnalyticsPage() {
                       <tr key={`${d.dept_name}-${idx}`} className="hover:bg-muted/20 transition-colors">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-none-none bg-blue-500/10 flex items-center justify-center">
                               <Briefcase className="h-4 w-4 text-blue-500" />
                             </div>
                             <span className="font-semibold text-foreground">{d.dept_name}</span>
@@ -260,19 +260,19 @@ export default function AnalyticsPage() {
                         </td>
                         <td className="px-4 py-4 text-center font-mono font-bold text-foreground">{d.user_count}</td>
                         <td className="px-4 py-4 text-center">
-                          <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-600 text-xs font-bold">
+                          <span className="px-2 py-1 rounded-none bg-emerald-500/10 text-emerald-600 text-xs font-bold">
                             +{d.new_hires}
                           </span>
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className="w-20 h-1.5 bg-muted rounded-none-none overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
+                                className="h-full bg-amber-400 rounded-none-none"
                                 style={{ width: `${Math.min(100, (d.user_count / 200) * 100)}%` }}
                               />
                             </div>
-                            <span className="text-[10px] font-bold text-muted-foreground">A+</span>
+                            <span className="text-[10px] font-bold text-slate-900 dark:text-white font-bold">A+</span>
                           </div>
                         </td>
                       </tr>
@@ -285,7 +285,7 @@ export default function AnalyticsPage() {
 
           {/* 管理建议 */}
           <div className="space-y-4">
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+            <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-amber-400 text-white">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Bot className="h-5 w-5" />
@@ -295,24 +295,24 @@ export default function AnalyticsPage() {
               <CardContent className="space-y-4">
                 <p className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: translate("admin.analytics.ai_suggestion_text") }} />
                 <div className="h-px bg-white/20" />
-                <div className="text-xs bg-white/10 p-3 rounded-lg border border-white/10">
+                <div className="text-xs bg-white/10 p-3 rounded-none-none border border-white/10">
                   <p className="font-bold mb-1 opacity-60">{translate("admin.analytics.system_optimization")}</p>
                   {translate("admin.analytics.system_optimization_text")}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+            <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
               <CardHeader>
                 <CardTitle className="text-sm font-bold text-foreground">{translate("admin.analytics.system_summary")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {systemStats.map((stat) => (
                   <div key={stat.labelKey} className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{translate(stat.labelKey)}</span>
+                    <span className="text-slate-900 dark:text-white font-bold">{translate(stat.labelKey)}</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-foreground">{stat.value}</span>
-                      <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", stat.color)} />
+                      <div className={cn("w-1.5 h-1.5 rounded-none-none animate-pulse", stat.color)} />
                     </div>
                   </div>
                 ))}

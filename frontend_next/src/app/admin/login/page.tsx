@@ -67,9 +67,9 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50 dark:from-[#080c1a] dark:via-[#0d1220] dark:to-[#080c1a] p-4 relative overflow-hidden">
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-none-none blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-400/10 rounded-none-none blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-violet-500/5 rounded-none-none blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative">
@@ -81,18 +81,18 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-shadow">
+            <div className="w-14 h-14 rounded-none-none bg-amber-400 flex items-center justify-center shadow-2xl shadow-blue-500/30 group-hover:shadow-blue-500/40 transition-shadow">
               <Bot className="h-7 w-7 text-white" />
             </div>
           </Link>
           <h1 className="text-2xl font-bold text-foreground mt-5 tracking-tight">{translate("admin.login.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1.5">{translate("admin.login.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1.5">{translate("admin.login.subtitle")}</p>
         </div>
 
-        <div className="bg-background/90 backdrop-blur-md rounded-3xl border border-border shadow-2xl shadow-blue-500/5 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 -md rounded-none-3xl border border-border shadow-2xl shadow-blue-500/5 overflow-hidden">
           {/* 头部标识 */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+          <div className="bg-amber-400 px-6 py-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-none-none bg-white/15  flex items-center justify-center">
               <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
                 id="username"
                 type="text"
                 placeholder={translate("admin.login.username_placeholder")}
-                className={`h-11 rounded-xl ${shakeError ? "border-red-400 animate-shake" : ""}`}
+                className={`h-11 rounded-none-none ${shakeError ? "border-red-400 animate-shake" : ""}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
@@ -125,13 +125,13 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }}
-                  className={`h-11 rounded-xl pr-10 ${shakeError ? "border-red-400 animate-shake" : ""}`}
+                  className={`h-11 rounded-none-none pr-10 ${shakeError ? "border-red-400 animate-shake" : ""}`}
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-900 dark:text-white font-bold hover:text-foreground transition-colors p-1"
                   aria-label={showPassword ? translate("admin.login.hide_password") : translate("admin.login.show_password")}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -140,16 +140,16 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                <input type="checkbox" id="admin-remember" className="rounded border-border text-blue-600 focus:ring-blue-500 cursor-pointer" />
+              <label className="flex items-center gap-2 text-sm text-slate-900 dark:text-white font-bold cursor-pointer">
+                <input type="checkbox" id="admin-remember" className="rounded-none border-border text-blue-600 focus:ring-blue-500 cursor-pointer" />
                 <span>{translate("admin.login.remember")}</span>
               </label>
               <button className="text-xs text-blue-500 hover:underline">{translate("admin.login.forgot")}</button>
             </div>
 
             {errorMessage && (
-              <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+              <div className="px-4 py-3 rounded-none-none bg-red-500/10 border border-red-500/20 text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
+                <div className="w-4 h-4 rounded-none-none bg-red-500/20 flex items-center justify-center shrink-0">
                   <span className="text-red-500 text-[10px] font-bold">!</span>
                 </div>
                 {errorMessage}
@@ -159,11 +159,11 @@ export default function AdminLoginPage() {
             <Button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full h-11 font-semibold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all active:scale-[0.98]"
+              className="w-full h-11 font-semibold rounded-none-none shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20 hover:shadow-blue-500/30 transition-all active:scale-[0.98]"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin mr-2" />
+                  <div className="w-4 h-4 rounded-none-none border-2 border-white/30 border-t-white animate-spin mr-2" />
                   {translate("admin.login.verifying")}
                 </>
               ) : (
@@ -175,14 +175,14 @@ export default function AdminLoginPage() {
             </Button>
 
             <div className="text-center">
-              <Link href="/" className="text-xs text-muted-foreground hover:text-blue-500 transition-colors">
+              <Link href="/" className="text-xs text-slate-900 dark:text-white font-bold hover:text-blue-500 transition-colors">
                 {translate("admin.login.back")}
               </Link>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-4">
+        <p className="text-center text-xs text-slate-900 dark:text-white font-bold mt-4">
           TRAI Admin System v2.0.0 · {translate("admin.login.footer")}
         </p>
       </div>

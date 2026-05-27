@@ -138,17 +138,17 @@ export default function AIManagementPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-none-none bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/20 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-violet-500" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">{translate("admin.ai.management.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{translate("admin.ai.management.subtitle")}</p>
+            <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5">{translate("admin.ai.management.subtitle")}</p>
           </div>
         </div>
         <button
           onClick={() => void fetchData()}
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all border border-primary/20"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-none-none bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all border border-primary/20"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           {translate("admin.ai.management.refresh")}
@@ -160,33 +160,33 @@ export default function AIManagementPage() {
         {statsData.map((item) => (
           <div
             key={item.labelKey}
-            className={`relative overflow-hidden rounded-2xl border ${item.borderColor} bg-gradient-to-br ${item.gradient} p-5 transition-all hover:scale-[1.02] hover:shadow-lg`}
+            className={`relative overflow-hidden rounded-none-none border ${item.borderColor} bg-gradient-to-br ${item.gradient} p-5 transition-all hover:scale-[1.02] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff]`}
           >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-3xl font-bold text-foreground mt-1">{item.value.toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground mt-1">{translate(item.labelKey)}</p>
+                <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate(item.labelKey)}</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-background/80 flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-none-none bg-white dark:bg-slate-900 flex items-center justify-center shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                 <item.icon className={`h-5 w-5 ${item.iconColor}`} />
               </div>
             </div>
-            <div className="absolute bottom-0 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-transparent to-background/20 translate-x-4 translate-y-4" />
+            <div className="absolute bottom-0 right-0 w-20 h-20 rounded-none-none bg-amber-400/20 translate-x-4 translate-y-4" />
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 模型节点配置 */}
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-background overflow-hidden">
+        <div className="lg:col-span-2 rounded-none-none border border-border bg-background overflow-hidden">
           <div className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Server className="h-4 w-4 text-muted-foreground" />
+              <Server className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
               <h2 className="text-sm font-semibold">{translate("admin.ai.management.model_config")}</h2>
             </div>
             <button
               onClick={() => toast({ message: translate("admin.ai.management.coming_soon"), variant: "info" })}
-              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-lg bg-background border border-border text-xs text-muted-foreground hover:bg-muted transition-colors"
+              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-none-none bg-background border border-border text-xs text-slate-900 dark:text-white font-bold hover:bg-muted transition-colors"
             >
               <Settings className="h-3 w-3" />
               {translate("admin.ai.management.config_channel")}
@@ -194,37 +194,37 @@ export default function AIManagementPage() {
           </div>
           <div className="p-4 space-y-3">
             {models.length === 0 && (
-              <div className="text-center py-8 text-sm text-muted-foreground">
+              <div className="text-center py-8 text-sm text-slate-900 dark:text-white font-bold">
                 {loading ? translate("admin.ai.management.loading") : translate("admin.ai.management.no_models")}
               </div>
             )}
             {models.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:bg-muted/10 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-none-none border border-border/50 hover:bg-muted/10 transition-all group"
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                <div className={`w-10 h-10 rounded-none-none flex items-center justify-center transition-colors ${
                   m.is_active ? "bg-emerald-500/10" : "bg-muted"
                 }`}>
-                  <Activity className={`h-5 w-5 ${m.is_active ? "text-emerald-500" : "text-muted-foreground"}`} />
+                  <Activity className={`h-5 w-5 ${m.is_active ? "text-emerald-500" : "text-slate-900 dark:text-white font-bold"}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-foreground">{m.name}</p>
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
+                    <span className={`px-2 py-0.5 rounded-none-md text-[10px] font-medium ${
                       m.is_active
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-slate-900 dark:text-white font-bold"
                     }`}>
                       {m.is_active ? translate("admin.ai.management.running") : translate("admin.ai.management.stopped")}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] text-muted-foreground font-mono">{m.provider}</span>
+                    <span className="px-1.5 py-0.5 rounded-none-md bg-muted text-[10px] text-slate-900 dark:text-white font-bold font-mono">{m.provider}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{m.api_base || translate("admin.ai.management.internal")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold mt-1 truncate">{m.api_base || translate("admin.ai.management.internal")}</p>
                 </div>
                 <button
                   onClick={() => void handleToggle(m.id)}
-                  className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-all ${
+                  className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-none-none text-xs font-medium transition-all ${
                     m.is_active
                       ? "bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-500/20"
                       : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
@@ -239,10 +239,10 @@ export default function AIManagementPage() {
         </div>
 
         {/* 实时状态 */}
-        <div className="rounded-2xl border border-border bg-background overflow-hidden">
+        <div className="rounded-none-none border border-border bg-background overflow-hidden">
           <div className="px-6 py-4 border-b border-border bg-muted/20">
             <div className="flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-muted-foreground" />
+              <Cpu className="h-4 w-4 text-slate-900 dark:text-white font-bold" />
               <h2 className="text-sm font-semibold">{translate("admin.ai.management.system_status")}</h2>
             </div>
           </div>
@@ -251,12 +251,12 @@ export default function AIManagementPage() {
               {systemMetrics.map((item) => (
                 <div key={item.labelKey}>
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">{translate(item.labelKey)}</span>
+                    <span className="text-slate-900 dark:text-white font-bold">{translate(item.labelKey)}</span>
                     <span className="font-medium text-foreground">{item.used} / {item.total}</span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-none-none overflow-hidden">
                     <div
-                      className={`h-full ${item.color} rounded-full transition-all`}
+                      className={`h-full ${item.color} rounded-none-none transition-all`}
                       style={{ width: `${(item.used / item.total) * 100}%` }}
                     />
                   </div>
@@ -265,14 +265,14 @@ export default function AIManagementPage() {
             </div>
             <div className="pt-3 border-t border-border space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground flex items-center gap-1.5">
+                <span className="text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
                   <Zap className="h-3 w-3 text-emerald-500" />
                   {translate("admin.ai.management.model_status")}
                 </span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">{translate("admin.ai.model_status.idle")}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground flex items-center gap-1.5">
+                <span className="text-slate-900 dark:text-white font-bold flex items-center gap-1.5">
                   <Cloud className="h-3 w-3 text-blue-500" />
                   {translate("admin.ai.management.backend_service")}
                 </span>
@@ -284,43 +284,43 @@ export default function AIManagementPage() {
       </div>
 
       {/* 文生图配置面板 */}
-      <div className="rounded-2xl border border-border bg-background overflow-hidden">
+      <div className="rounded-none-none border border-border bg-background overflow-hidden">
         <div className="px-6 py-4 border-b border-border bg-gradient-to-r from-emerald-500/5 to-teal-500/5">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-emerald-500" />
             <h2 className="text-sm font-semibold">{translate("admin.ai.management.image_config")}</h2>
-            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Z-Image-Turbo</span>
+            <span className="ml-auto text-[10px] px-2 py-0.5 rounded-none-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">Z-Image-Turbo</span>
           </div>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 提供商选择 */}
             <div className="space-y-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate("admin.ai.management.select_provider")}</label>
+              <label className="text-xs font-medium text-slate-900 dark:text-white font-bold uppercase tracking-wider">{translate("admin.ai.management.select_provider")}</label>
               <div className="space-y-2">
                 {imageProviders.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedProvider(p.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-none-none border transition-all text-left ${
                       selectedProvider === p.id
                         ? "border-emerald-500/40 bg-emerald-500/5"
                         : "border-border hover:border-emerald-500/20 hover:bg-muted/20"
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                    <div className={`w-8 h-8 rounded-none-none flex items-center justify-center ${
                       p.status === "online" ? "bg-emerald-500/10" : "bg-muted"
                     }`}>
-                      <Activity className={`h-4 w-4 ${p.status === "online" ? "text-emerald-500" : "text-muted-foreground"}`} />
+                      <Activity className={`h-4 w-4 ${p.status === "online" ? "text-emerald-500" : "text-slate-900 dark:text-white font-bold"}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.model}</p>
+                      <p className="text-xs text-slate-900 dark:text-white font-bold">{p.model}</p>
                     </div>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-none-none font-medium ${
                       p.status === "online"
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-slate-900 dark:text-white font-bold"
                     }`}>
                       {p.status === "online" ? translate("admin.ai.management.online") : translate("admin.ai.management.offline")}
                     </span>
@@ -331,20 +331,20 @@ export default function AIManagementPage() {
 
             {/* 快速提示词 */}
             <div className="md:col-span-2 space-y-3">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{translate("admin.ai.management.preset_prompts")}</label>
+              <label className="text-xs font-medium text-slate-900 dark:text-white font-bold uppercase tracking-wider">{translate("admin.ai.management.preset_prompts")}</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {IMAGE_PRESETS.map((preset) => (
                   <button
                     key={preset.labelKey}
                     onClick={() => handlePreset(translate(preset.promptKey))}
-                    className="flex items-start gap-3 p-3 rounded-xl border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left group"
+                    className="flex items-start gap-3 p-3 rounded-none-none border border-border hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-left group"
                   >
-                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+                    <div className="w-6 h-6 rounded-none-none bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
                       <Sparkles className="h-3 w-3 text-emerald-500" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">{translate(preset.labelKey)}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{translate(preset.promptKey)}</p>
+                      <p className="text-xs text-slate-900 dark:text-white font-bold mt-0.5 line-clamp-2">{translate(preset.promptKey)}</p>
                     </div>
                   </button>
                 ))}

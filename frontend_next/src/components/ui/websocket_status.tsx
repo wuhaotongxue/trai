@@ -72,7 +72,7 @@ export function WebSocketStatusIndicator({
 
   return (
     <div
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${config.bgClass} ${config.color} ${className}`}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${config.bgClass} ${config.color} ${className}`}
       role="status"
       aria-label={`WebSocket ${config.label}`}
     >

@@ -73,18 +73,18 @@ export default function NewUserPage() {
     <div className="space-y-5">
       {/* 顶部导航 */}
       <div className="flex items-center gap-3">
-        <Link href="/admin/users" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link href="/admin/users" className="flex items-center gap-1.5 text-sm text-slate-900 dark:text-white font-bold hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
           {translate("admin.users.new.back")}
         </Link>
-        <span className="text-muted-foreground/50">/</span>
+        <span className="text-slate-900 dark:text-white font-bold/50">/</span>
         <span className="text-sm text-foreground font-medium">{translate("admin.users.new.title")}</span>
       </div>
 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-foreground">{translate("admin.users.new.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{translate("admin.users.new.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5">{translate("admin.users.new.subtitle")}</p>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export default function NewUserPage() {
         {/* 左侧: 表单 */}
         <div className="lg:col-span-2 space-y-5">
           {/* 基本信息 */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.users.new.basic_info")}</CardTitle>
             </CardHeader>
@@ -103,7 +103,7 @@ export default function NewUserPage() {
                     {translate("admin.users.new.name_label")} <span className="text-red-500">*</span>
                   </Label>
                   <Input
-                    className={`h-10 rounded-lg ${errors.name ? "border-red-400 focus:ring-red-100" : ""}`}
+                    className={`h-10 rounded-none-none ${errors.name ? "border-red-400 focus:ring-red-100" : ""}`}
                     placeholder={translate("admin.users.new.name_required")}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -116,7 +116,7 @@ export default function NewUserPage() {
                   </Label>
                   <Input
                     type="email"
-                    className={`h-10 rounded-lg ${errors.email ? "border-red-400 focus:ring-red-100" : ""}`}
+                    className={`h-10 rounded-none-none ${errors.email ? "border-red-400 focus:ring-red-100" : ""}`}
                     placeholder="user@example.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -130,7 +130,7 @@ export default function NewUserPage() {
                 </Label>
                 <Input
                   type="password"
-                  className={`h-10 rounded-lg ${errors.password ? "border-red-400 focus:ring-red-100" : ""}`}
+                  className={`h-10 rounded-none-none ${errors.password ? "border-red-400 focus:ring-red-100" : ""}`}
                   placeholder={translate("admin.users.new.password_min")}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -138,14 +138,14 @@ export default function NewUserPage() {
                 {errors.password ? (
                   <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{errors.password}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground">{translate("admin.users.new.password_hint")}</p>
+                  <p className="text-xs text-slate-900 dark:text-white font-bold">{translate("admin.users.new.password_hint")}</p>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* 套餐配置 */}
-          <Card className="border-0 shadow-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.users.new.plan_config")}</CardTitle>
             </CardHeader>
@@ -155,13 +155,13 @@ export default function NewUserPage() {
                   <button
                     key={plan.value}
                     onClick={() => setForm({ ...form, plan: plan.value })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`p-4 rounded-none-none border-2 text-left transition-all ${
                       form.plan === plan.value
                         ? plan.value === "free"
                           ? "border-border bg-muted/25"
                           : plan.value === "pro"
-                          ? "border-blue-500/60 bg-blue-500/10 shadow-sm shadow-blue-500/10"
-                          : "border-amber-500/60 bg-amber-500/10 shadow-sm shadow-amber-500/10"
+                          ? "border-blue-500/60 bg-blue-500/10 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-blue-500/10"
+                          : "border-amber-500/60 bg-amber-500/10 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-amber-500/10"
                         : "border-border/60 hover:border-border bg-card"
                     }`}
                   >
@@ -169,11 +169,11 @@ export default function NewUserPage() {
                       <p className={`text-sm font-bold ${
                         form.plan === plan.value
                           ? plan.value === "free" ? "text-foreground/80" : plan.value === "pro" ? "text-blue-400" : "text-amber-400"
-                          : "text-muted-foreground"
+                          : "text-slate-900 dark:text-white font-bold"
                       }`}>{translate(plan.labelKey)}</p>
                       {form.plan === plan.value && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
                     </div>
-                    <p className="text-xs text-muted-foreground">{translate(plan.descKey)}</p>
+                    <p className="text-xs text-slate-900 dark:text-white font-bold">{translate(plan.descKey)}</p>
                   </button>
                 ))}
               </div>
@@ -184,7 +184,7 @@ export default function NewUserPage() {
           <div className="flex items-center gap-3">
             <Button
               size="sm"
-              className="h-10 px-6 font-semibold rounded-lg shadow-md shadow-blue-500/20 gap-2"
+              className="h-10 px-6 font-semibold rounded-none-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] shadow-blue-500/20 gap-2"
               onClick={handleSave}
             >
               {saving ? (
@@ -194,7 +194,7 @@ export default function NewUserPage() {
               )}
             </Button>
             <Link href="/admin/users">
-              <Button variant="outline" size="sm" className="h-10 px-6 rounded-lg border-border">
+              <Button variant="outline" size="sm" className="h-10 px-6 rounded-none-none border-border">
                 {translate("admin.users.new.cancel")}
               </Button>
             </Link>
@@ -203,26 +203,26 @@ export default function NewUserPage() {
 
         {/* 右侧: 说明 */}
         <div className="space-y-4">
-          <Card className="border-0 shadow-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.users.new.instructions_title")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs text-muted-foreground leading-relaxed">
+            <CardContent className="space-y-3 text-xs text-slate-900 dark:text-white font-bold leading-relaxed">
               <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">1</div>
+                <div className="w-5 h-5 rounded-none bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">1</div>
                 <p>{translate("admin.users.new.instruction1")}</p>
               </div>
               <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">2</div>
+                <div className="w-5 h-5 rounded-none bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">2</div>
                 <p>{translate("admin.users.new.instruction2")}</p>
               </div>
               <div className="flex items-start gap-2">
-                <div className="w-5 h-5 rounded bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">3</div>
+                <div className="w-5 h-5 rounded-none bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 text-center font-bold">3</div>
                 <p>{translate("admin.users.new.instruction3")}</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-sm">
+          <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.users.new.quick_actions")}</CardTitle>
             </CardHeader>
@@ -231,9 +231,9 @@ export default function NewUserPage() {
                 <button
                   key={item.labelKey}
                   onClick={item.action}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg bg-muted/25 hover:bg-muted/40 text-xs font-medium text-foreground/80 transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-none-none bg-muted/25 hover:bg-muted/40 text-xs font-medium text-foreground/80 transition-colors text-left"
                 >
-                  <item.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <item.icon className="h-3.5 w-3.5 text-slate-900 dark:text-white font-bold" />
                   {translate(item.labelKey)}
                 </button>
               ))}

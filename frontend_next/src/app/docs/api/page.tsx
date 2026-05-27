@@ -73,9 +73,9 @@ export default function ApiDocsPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-gradient-to-b from-slate-50 to-white dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 text-sm font-medium">
               <Terminal className="h-4 w-4" />
               API Reference
             </div>
@@ -91,14 +91,14 @@ export default function ApiDocsPage() {
                 href={openapiDocsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center h-10 px-6 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-none bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
               >
                 {translate("docs.api.swagger")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
               <Link
                 href="/docs/sdk"
-                className="inline-flex items-center justify-center h-10 px-6 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center justify-center h-10 px-6 rounded-none border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 {translate("docs.api.sdk_guide")}
               </Link>
@@ -110,8 +110,8 @@ export default function ApiDocsPage() {
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
               {apiFeatures.map((feature, idx) => (
-                <div key={idx} className="p-6 rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700">
+                <div key={idx} className="p-6 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60">
+                  <div className="w-10 h-10 rounded-none bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700">
                     {feature.icon}
                   </div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{translate(feature.titleKey)}</h3>
@@ -134,7 +134,7 @@ export default function ApiDocsPage() {
 
                 <div className="space-y-3">
                   {endpoints.map((ep, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0a0f1c]">
+                    <div key={idx} className="flex items-center justify-between p-4 rounded-none border border-slate-200 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0a0f1c]">
                       <div className="flex items-center gap-4">
                         <span className={`px-2.5 py-1 rounded text-xs font-bold tracking-wider ${ep.color}`}>
                           {ep.method}
@@ -151,12 +151,12 @@ export default function ApiDocsPage() {
                 </div>
               </div>
 
-              <div className="bg-[#0f172a] rounded-2xl p-6 md:p-8 shadow-xl overflow-hidden border border-slate-800 relative">
+              <div className="bg-[#0f172a] rounded-none p-6 md:p-8 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] overflow-hidden border border-slate-800 relative">
                 <div className="absolute top-0 left-0 right-0 h-10 bg-slate-800/50 flex items-center px-4 border-b border-slate-700">
                   <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-rose-500" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                    <div className="w-3 h-3 rounded-none bg-rose-500" />
+                    <div className="w-3 h-3 rounded-none bg-amber-500" />
+                    <div className="w-3 h-3 rounded-none bg-emerald-500" />
                   </div>
                   <div className="mx-auto text-xs text-slate-400 font-mono">request.sh</div>
                 </div>

@@ -47,7 +47,7 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
-      className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+      className="relative w-9 h-9 rounded-none flex items-center justify-center transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
     >
       <Sun
         className={`h-4.5 w-4.5 transition-all duration-300 ${

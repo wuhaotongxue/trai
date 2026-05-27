@@ -19,9 +19,9 @@ export default function DocsFaqPage() {
     <>
       <Navbar />
       <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-gradient-to-b from-slate-50 to-white dark:from-[#0d1220] dark:to-[#080c1a]">
+        <section className="pt-28 pb-10 bg-amber-400 dark:from-[#0d1220] dark:to-[#080c1a]">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
               <HelpCircle className="h-4 w-4" />
               {translate("docs.faq.title")}
             </div>
@@ -42,7 +42,7 @@ export default function DocsFaqPage() {
             {faqs.map((item) => (
               <div
                 key={item.qKey}
-                className="p-6 rounded-2xl border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
+                className="p-6 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60"
               >
                 <p className="text-base font-bold text-slate-900 dark:text-white">{translate(item.qKey)}</p>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">

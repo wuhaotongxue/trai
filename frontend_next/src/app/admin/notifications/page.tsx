@@ -54,11 +54,11 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-foreground">{translate("admin.notifications.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{translate("admin.notifications.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-0.5">{translate("admin.notifications.subtitle")}</p>
         </div>
         <Button
           size="sm"
-          className="h-9 gap-2 text-sm shadow-sm"
+          className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]"
           onClick={() => toast({ message: translate("admin.notifications.coming_soon"), variant: "info" })}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -67,7 +67,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* 发送通知表单 */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.notifications.quick_send")}</CardTitle>
         </CardHeader>
@@ -75,7 +75,7 @@ export default function NotificationsPage() {
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground/80">{translate("admin.notifications.send_title")}</Label>
             <Input
-              className="h-9 rounded-lg"
+              className="h-9 rounded-none-none"
               placeholder={translate("admin.notifications.send_title_placeholder")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -84,14 +84,14 @@ export default function NotificationsPage() {
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground/80">{translate("admin.notifications.send_content")}</Label>
             <textarea
-              className="w-full min-h-[100px] rounded-lg border border-border p-3 text-sm resize-none bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500/60 transition-all"
+              className="w-full min-h-[100px] rounded-none-none border border-border p-3 text-sm resize-none bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500/60 transition-all"
               placeholder={translate("admin.notifications.send_content_placeholder")}
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" className="h-9 gap-2 text-sm shadow-sm" onClick={handleSendAll}>
+            <Button size="sm" className="h-9 gap-2 text-sm shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]" onClick={handleSendAll}>
               <Send className="h-3.5 w-3.5" />
               {translate("admin.notifications.send_all")}
             </Button>
@@ -103,7 +103,7 @@ export default function NotificationsPage() {
       </Card>
 
       {/* 发送历史 */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-foreground">{translate("admin.notifications.history")}</CardTitle>
         </CardHeader>
@@ -112,12 +112,12 @@ export default function NotificationsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-muted/20">
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_title")}</th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_time")}</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_sent")}</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_read")}</th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_status")}</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{translate("admin.notifications.th_action")}</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_title")}</th>
+                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_time")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_sent")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_read")}</th>
+                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_status")}</th>
+                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-white font-bold uppercase tracking-wide">{translate("admin.notifications.th_action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,12 +126,12 @@ export default function NotificationsPage() {
                     <td className="px-4 py-3">
                       <p className="font-medium text-foreground text-sm">{n.title}</p>
                     </td>
-                    <td className="px-4 py-3 text-center text-muted-foreground text-xs">{n.time}</td>
+                    <td className="px-4 py-3 text-center text-slate-900 dark:text-white font-bold text-xs">{n.time}</td>
                     <td className="px-4 py-3 text-right text-foreground/80">{n.sent.toLocaleString()}</td>
                     <td className="px-4 py-3 text-right text-foreground/80">{n.read.toLocaleString()}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        n.status === "sent" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-muted-foreground"
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-none-none ${
+                        n.status === "sent" ? "bg-emerald-500/15 text-emerald-400" : "bg-muted/40 text-slate-900 dark:text-white font-bold"
                       }`}>
                         {translate(n.status === "sent" ? "admin.notifications.status_sent" : "admin.notifications.status_draft")}
                       </span>
@@ -142,7 +142,7 @@ export default function NotificationsPage() {
                           type="button"
                           aria-label={translate("admin.notifications.action_view")}
                           title={translate("admin.notifications.action_view")}
-                          className="p-1.5 rounded-lg hover:bg-blue-500/15 text-muted-foreground hover:text-blue-400 transition-colors"
+                          className="p-1.5 rounded-none-none hover:bg-blue-500/15 text-slate-900 dark:text-white font-bold hover:text-blue-400 transition-colors"
                           onClick={() => toast({ message: translate("admin.notifications.coming_soon"), variant: "info" })}
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -151,7 +151,7 @@ export default function NotificationsPage() {
                           type="button"
                           aria-label={translate("admin.notifications.action_edit")}
                           title={translate("admin.notifications.action_edit")}
-                          className="p-1.5 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
+                          className="p-1.5 rounded-none-none hover:bg-muted/40 text-slate-900 dark:text-white font-bold hover:text-foreground transition-colors"
                           onClick={() => toast({ message: translate("admin.notifications.coming_soon"), variant: "info" })}
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -160,7 +160,7 @@ export default function NotificationsPage() {
                           type="button"
                           aria-label={translate("admin.notifications.action_delete")}
                           title={translate("admin.notifications.action_delete")}
-                          className="p-1.5 rounded-lg hover:bg-red-500/15 text-muted-foreground hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-none-none hover:bg-red-500/15 text-slate-900 dark:text-white font-bold hover:text-red-400 transition-colors"
                           onClick={() => toast({ message: translate("admin.notifications.coming_soon"), variant: "info" })}
                         >
                           <Trash2 className="h-3.5 w-3.5" />

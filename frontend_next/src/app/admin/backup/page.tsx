@@ -114,7 +114,7 @@ export default function BackupPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{translate("admin.backup.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{translate("admin.backup.subtitle")}</p>
+          <p className="text-sm text-slate-900 dark:text-white font-bold mt-1">{translate("admin.backup.subtitle")}</p>
         </div>
         <Button size="sm" variant="outline" className="h-9 gap-2 text-sm border-border" onClick={() => window.location.reload()}>
           <RefreshCw className="h-3.5 w-3.5" />
@@ -124,7 +124,7 @@ export default function BackupPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Docker 数据备份 */}
-        <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
           <CardHeader className="pb-4 border-b border-border/40">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
@@ -139,9 +139,9 @@ export default function BackupPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             {dockerItems.map((item, index) => (
-              <div key={item.id} className="space-y-3 p-4 rounded-lg bg-muted/30 border border-border/40">
+              <div key={item.id} className="space-y-3 p-4 rounded-none-none bg-muted/30 border border-border/40">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
+                  <span className="text-xs font-medium text-slate-900 dark:text-white font-bold">#{index + 1}</span>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -154,7 +154,7 @@ export default function BackupPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-foreground/70">{translate("admin.backup.docker_volume_path")}</Label>
                   <Input
-                    className="h-9 rounded-lg border-border/60 bg-background/50 font-mono text-xs"
+                    className="h-9 rounded-none-none border-border/60 bg-white dark:bg-slate-900 font-mono text-xs"
                     value={item.volumePath}
                     onChange={(e) => updateDockerItem(item.id, "volumePath", e.target.value)}
                   />
@@ -162,7 +162,7 @@ export default function BackupPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-foreground/70">{translate("admin.backup.docker_backup_path")}</Label>
                   <Input
-                    className="h-9 rounded-lg border-border/60 bg-background/50 font-mono text-xs"
+                    className="h-9 rounded-none-none border-border/60 bg-white dark:bg-slate-900 font-mono text-xs"
                     value={item.backupPath}
                     onChange={(e) => updateDockerItem(item.id, "backupPath", e.target.value)}
                   />
@@ -182,7 +182,7 @@ export default function BackupPage() {
         </Card>
 
         {/* 数据库备份 */}
-        <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+        <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
           <CardHeader className="pb-4 border-b border-border/40">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
@@ -197,9 +197,9 @@ export default function BackupPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             {dbItems.map((item, index) => (
-              <div key={item.id} className="space-y-3 p-4 rounded-lg bg-muted/30 border border-border/40">
+              <div key={item.id} className="space-y-3 p-4 rounded-none-none bg-muted/30 border border-border/40">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
+                  <span className="text-xs font-medium text-slate-900 dark:text-white font-bold">#{index + 1}</span>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -212,7 +212,7 @@ export default function BackupPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-foreground/70">{translate("admin.backup.db_connection")}</Label>
                   <Input
-                    className="h-9 rounded-lg border-border/60 bg-background/50 font-mono text-xs"
+                    className="h-9 rounded-none-none border-border/60 bg-white dark:bg-slate-900 font-mono text-xs"
                     value={item.connection}
                     onChange={(e) => updateDbItem(item.id, "connection", e.target.value)}
                   />
@@ -220,7 +220,7 @@ export default function BackupPage() {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-foreground/70">{translate("admin.backup.db_backup_path")}</Label>
                   <Input
-                    className="h-9 rounded-lg border-border/60 bg-background/50 font-mono text-xs"
+                    className="h-9 rounded-none-none border-border/60 bg-white dark:bg-slate-900 font-mono text-xs"
                     value={item.backupPath}
                     onChange={(e) => updateDbItem(item.id, "backupPath", e.target.value)}
                   />
@@ -241,7 +241,7 @@ export default function BackupPage() {
       </div>
 
       {/* 备份历史 */}
-      <Card className="border-0 shadow-sm bg-card/80 backdrop-blur-sm">
+      <Card className="border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white ">
         <CardHeader className="pb-4 border-b border-border/40">
           <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
             <HardDrive className="h-4 w-4 text-purple-500" />
@@ -262,7 +262,7 @@ export default function BackupPage() {
               </thead>
               <tbody>
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-slate-900 dark:text-white font-bold">
                     {translate("admin.backup.no_data")}
                   </td>
                 </tr>

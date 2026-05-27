@@ -292,7 +292,7 @@ export function SubtitlePanel() {
                     )}
                   >
                     <div className={cn(
-                      "p-2 rounded-full border-2 border-slate-900 dark:border-white",
+                      "p-2 rounded-none border-2 border-slate-900 dark:border-white",
                       taskType === tool.id ? "bg-white/20 dark:bg-slate-900/20" : "bg-slate-100 dark:bg-slate-900"
                     )}>
                       <tool.icon className={cn("w-4 h-4", taskType === tool.id ? "text-current" : tool.color)} />
@@ -566,7 +566,7 @@ export function SubtitlePanel() {
                       </div>
                     ) : activeRecord.status === "failed" ? (
                       <div className="flex flex-col items-center gap-4">
-                        <div className={`w-16 h-16 bg-red-500 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
+                        <div className={`w-16 h-16 bg-red-500 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
                           <Captions className="h-8 w-8 text-white" />
                         </div>
                         <span className="text-lg font-black uppercase text-red-500 tracking-wider">处理失败</span>
@@ -574,7 +574,7 @@ export function SubtitlePanel() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-4">
-                        <div className={`w-16 h-16 bg-emerald-400 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
+                        <div className={`w-16 h-16 bg-emerald-400 rounded-none flex items-center justify-center border-2 border-slate-900 shadow-[4px_4px_0px_0px_#0f172a]`}>
                           <Captions className="h-8 w-8 text-slate-900" />
                         </div>
                         <span className="text-lg font-black uppercase text-emerald-600 tracking-wider">任务已完成</span>

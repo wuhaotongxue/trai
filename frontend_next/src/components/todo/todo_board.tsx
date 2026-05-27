@@ -122,7 +122,7 @@ export function TodoBoard() {
             管理和追踪项目进度
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-muted rounded-none p-1">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
