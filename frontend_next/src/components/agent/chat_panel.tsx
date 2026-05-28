@@ -3,7 +3,7 @@
  * 作者: wuhao
  * 日期: 2026-04-23
  * 描述: Agent 对话主面板 - 现代化三栏式布局，集成创作、工具与 AI 前沿功能
- *       (全新 Neo-Brutalist 设计风格)
+ *       (全新 Neo-Brutalist 设计风格) 
  */
 
 "use client";
