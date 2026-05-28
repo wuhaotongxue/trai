@@ -172,34 +172,34 @@ function get_area_meta(area: ChangeArea): { label: string; badge_class_name: str
   if (area === "frontend") {
     return {
       label: "前端",
-      badge_class_name: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20",
-      node_class_name: "fill-blue-500",
+      badge_class_name: "bg-cyan-300 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]",
+      node_class_name: "fill-cyan-400 dark:fill-cyan-500 stroke-slate-900 dark:stroke-white stroke-2",
     };
   }
 
   if (area === "backend") {
     return {
       label: "后端",
-      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-cyan-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
-      node_class_name: "fill-emerald-500",
+      badge_class_name: "bg-emerald-300 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]",
+      node_class_name: "fill-emerald-400 dark:fill-emerald-500 stroke-slate-900 dark:stroke-white stroke-2",
     };
   }
 
   return {
     label: "客户端",
-    badge_class_name: "bg-amber-50 text-cyan-800 dark:bg-slate-200/10 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/20",
-    node_class_name: "fill-cyan-500",
+    badge_class_name: "bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]",
+    node_class_name: "fill-indigo-400 dark:fill-indigo-500 stroke-slate-900 dark:stroke-white stroke-2",
   };
 }
 
 function get_commit_type_meta(type: CommitType): { label: string; badge_class_name: string } {
-  if (type === "feat") return { label: "feat", badge_class_name: "border-blue-200 text-blue-700 dark:border-blue-500/20 dark:text-blue-300" };
-  if (type === "fix") return { label: "fix", badge_class_name: "border-rose-200 text-rose-700 dark:border-rose-500/20 dark:text-rose-300" };
-  if (type === "refactor") return { label: "refactor", badge_class_name: "border-teal-200 text-teal-700 dark:border-teal-500/20 dark:text-teal-300" };
-  if (type === "docs") return { label: "docs", badge_class_name: "border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-300" };
-  if (type === "chore") return { label: "chore", badge_class_name: "border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-300" };
-  if (type === "merge") return { label: "merge", badge_class_name: "border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-300" };
-  return { label: "other", badge_class_name: "border-slate-200 text-slate-700 dark:border-slate-700 dark:text-slate-300" };
+  if (type === "feat") return { label: "feat", badge_class_name: "border-2 border-slate-900 dark:border-white bg-blue-300 dark:bg-blue-600 text-slate-900 dark:text-white font-black uppercase" };
+  if (type === "fix") return { label: "fix", badge_class_name: "border-2 border-slate-900 dark:border-white bg-rose-300 dark:bg-rose-600 text-slate-900 dark:text-white font-black uppercase" };
+  if (type === "refactor") return { label: "refactor", badge_class_name: "border-2 border-slate-900 dark:border-white bg-amber-300 dark:bg-amber-600 text-slate-900 dark:text-white font-black uppercase" };
+  if (type === "docs") return { label: "docs", badge_class_name: "border-2 border-slate-900 dark:border-white bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white font-black uppercase" };
+  if (type === "chore") return { label: "chore", badge_class_name: "border-2 border-slate-900 dark:border-white bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white font-black uppercase" };
+  if (type === "merge") return { label: "merge", badge_class_name: "border-2 border-slate-900 dark:border-white bg-purple-300 dark:bg-purple-600 text-slate-900 dark:text-white font-black uppercase" };
+  return { label: "other", badge_class_name: "border-2 border-slate-900 dark:border-white bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white font-black uppercase" };
 }
 
 function get_status_meta(status: RoadmapStatus): {
@@ -211,8 +211,8 @@ function get_status_meta(status: RoadmapStatus): {
   if (status === "completed") {
     return {
       label: "已完成",
-      badge_class_name: "bg-emerald-50 text-emerald-700 dark:bg-cyan-500/10 dark:text-emerald-400",
-      dot_class_name: "bg-cyan-500 dark:bg-slate-100",
+      badge_class_name: "bg-cyan-300 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] font-black uppercase",
+      dot_class_name: "bg-cyan-400 dark:bg-cyan-500 border-2 border-slate-900 dark:border-white",
       icon: "check",
     };
   }
@@ -220,16 +220,16 @@ function get_status_meta(status: RoadmapStatus): {
   if (status === "in_progress") {
     return {
       label: "进行中",
-      badge_class_name: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
-      dot_class_name: "bg-blue-500 dark:bg-blue-400",
+      badge_class_name: "bg-emerald-300 dark:bg-emerald-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] font-black uppercase",
+      dot_class_name: "bg-emerald-400 dark:bg-emerald-500 border-2 border-slate-900 dark:border-white",
       icon: "rocket",
     };
   }
 
   return {
     label: "计划中",
-    badge_class_name: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
-    dot_class_name: "bg-slate-400 dark:bg-slate-600",
+    badge_class_name: "bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] font-black uppercase",
+    dot_class_name: "bg-slate-300 dark:bg-slate-600 border-2 border-slate-900 dark:border-white",
     icon: "planned",
   };
 }
@@ -268,36 +268,36 @@ function RelationshipGraph({
     is_selected(area) ? "stroke-slate-900 dark:stroke-white stroke-[6]" : "stroke-transparent stroke-[0]";
 
   return (
-    <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
-      <div className="text-sm font-semibold text-slate-900 dark:text-white">关系图谱</div>
-      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+    <div className="rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] p-6">
+      <div className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white">关系图谱</div>
+      <div className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2">
         点击节点可定位到对应域的更新列表, 再次点击可取消高亮
       </div>
-      <div className="mt-4">
+      <div className="mt-6">
         <svg viewBox="0 0 320 160" className="w-full h-[160px]">
-          <line x1="80" y1="45" x2="240" y2="45" className={edge_class(has_frontend && has_backend)} strokeWidth="3" strokeLinecap="round" />
-          <line x1="80" y1="45" x2="160" y2="125" className={edge_class(has_frontend && has_client)} strokeWidth="3" strokeLinecap="round" />
-          <line x1="240" y1="45" x2="160" y2="125" className={edge_class(has_backend && has_client)} strokeWidth="3" strokeLinecap="round" />
+          <line x1="80" y1="45" x2="240" y2="45" className={edge_class(has_frontend && has_backend)} strokeWidth="4" strokeLinecap="square" />
+          <line x1="80" y1="45" x2="160" y2="125" className={edge_class(has_frontend && has_client)} strokeWidth="4" strokeLinecap="square" />
+          <line x1="240" y1="45" x2="160" y2="125" className={edge_class(has_backend && has_client)} strokeWidth="4" strokeLinecap="square" />
 
-          <g className={[node_opacity(has_frontend), "cursor-pointer"].join(" ")} onClick={() => on_select_area("frontend")}>
+          <g className={[node_opacity(has_frontend), "cursor-pointer hover:scale-105 transition-transform"].join(" ")} onClick={() => on_select_area("frontend")}>
             <circle cx="80" cy="45" r="24" className={ring_class("frontend")} fill="transparent" />
-            <circle cx="80" cy="45" r="18" className="fill-blue-500" />
-            <text x="80" y="50" textAnchor="middle" className="fill-white text-[12px] font-semibold">FE</text>
-            <text x="80" y="80" textAnchor="middle" className="fill-slate-600 dark:fill-slate-300 text-[12px]">前端</text>
+            <circle cx="80" cy="45" r="18" className="fill-cyan-400 dark:fill-cyan-500 stroke-slate-900 dark:stroke-white stroke-2" />
+            <text x="80" y="50" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-black uppercase">FE</text>
+            <text x="80" y="80" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-bold">前端</text>
           </g>
 
-          <g className={[node_opacity(has_backend), "cursor-pointer"].join(" ")} onClick={() => on_select_area("backend")}>
+          <g className={[node_opacity(has_backend), "cursor-pointer hover:scale-105 transition-transform"].join(" ")} onClick={() => on_select_area("backend")}>
             <circle cx="240" cy="45" r="24" className={ring_class("backend")} fill="transparent" />
-            <circle cx="240" cy="45" r="18" className="fill-emerald-500" />
-            <text x="240" y="50" textAnchor="middle" className="fill-white text-[12px] font-semibold">BE</text>
-            <text x="240" y="80" textAnchor="middle" className="fill-slate-600 dark:fill-slate-300 text-[12px]">后端</text>
+            <circle cx="240" cy="45" r="18" className="fill-emerald-400 dark:fill-emerald-500 stroke-slate-900 dark:stroke-white stroke-2" />
+            <text x="240" y="50" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-black uppercase">BE</text>
+            <text x="240" y="80" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-bold">后端</text>
           </g>
 
-          <g className={[node_opacity(has_client), "cursor-pointer"].join(" ")} onClick={() => on_select_area("client")}>
+          <g className={[node_opacity(has_client), "cursor-pointer hover:scale-105 transition-transform"].join(" ")} onClick={() => on_select_area("client")}>
             <circle cx="160" cy="125" r="24" className={ring_class("client")} fill="transparent" />
-            <circle cx="160" cy="125" r="18" className="fill-cyan-500" />
-            <text x="160" y="130" textAnchor="middle" className="fill-white text-[12px] font-semibold">CL</text>
-            <text x="160" y="155" textAnchor="middle" className="fill-slate-600 dark:fill-slate-300 text-[12px]">客户端</text>
+            <circle cx="160" cy="125" r="18" className="fill-indigo-400 dark:fill-indigo-500 stroke-slate-900 dark:stroke-white stroke-2" />
+            <text x="160" y="130" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-black uppercase">CL</text>
+            <text x="160" y="155" textAnchor="middle" className="fill-slate-900 dark:fill-white text-[12px] font-bold">客户端</text>
           </g>
         </svg>
       </div>
@@ -354,17 +354,17 @@ export default function RoadmapPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <section className="pt-28 pb-10 bg-cyan-300 dark:bg-cyan-900 border-b-4 border-slate-900 dark:border-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">
               <Milestone className="h-4 w-4" />
               {translate("roadmap.title")}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mt-6 tracking-tight">
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mt-6 tracking-widest uppercase">
               Roadmap
             </h1>
-            <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed">
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-300 mt-4 leading-relaxed max-w-2xl">
               {translate("roadmap.desc")}
             </p>
           </div>
@@ -372,13 +372,13 @@ export default function RoadmapPage() {
 
         <section className="py-12">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-6">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] p-8">
+              <div className="flex items-center justify-between gap-4 flex-wrap border-b-4 border-slate-900 dark:border-white pb-6">
                 <div>
-                  <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">{translate("roadmap.timeline")}</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">Git {translate("roadmap.timeline")}</div>
+                  <div className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{translate("roadmap.timeline")}</div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white mt-1 uppercase tracking-wider">Git {translate("roadmap.timeline")}</div>
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="text-sm font-bold text-slate-500 dark:text-slate-400">
                   {translate("roadmap.timeline.hint")}
                 </div>
               </div>
@@ -475,29 +475,29 @@ export default function RoadmapPage() {
             </div>
 
             {active_node ? (
-              <div id="roadmap_detail" className="mt-6 rounded-none bg-slate-50 dark:bg-[#0b1020] p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div id="roadmap_detail" className="mt-8 rounded-none border-4 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-900 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b-4 border-slate-900 dark:border-white pb-4">
                   <div>
-                    <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">{active_node.range_label}</div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-1">{active_node.title}</h2>
+                    <div className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{active_node.range_label}</div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white mt-2 uppercase tracking-wider">{active_node.title}</h2>
                   </div>
-                  <div className={["px-3 py-1 rounded-none text-xs font-medium", active_meta?.badge_class_name ?? ""].join(" ")}>
+                  <div className={["px-4 py-2 border-2 border-slate-900 dark:border-white rounded-none text-sm font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]", active_meta?.badge_class_name ?? ""].join(" ")}>
                     {active_meta?.label ?? ""}
                   </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid lg:grid-cols-2 gap-8">
                   <RelationshipGraph
                     active_areas={active_area_stats.areas}
                     selected_area={selected_area}
                     on_select_area={(area) => select_graph_area(area)}
                   />
-                  <div className="rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">关联摘要</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <div className="rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] p-6">
+                    <div className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-4 border-slate-900 dark:border-white pb-3">关联摘要</div>
+                    <div className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-4">
                       当同一天存在多个域的提交时, 视为存在关联
                     </div>
-                    <div className="mt-4 flex items-center flex-wrap gap-2">
+                    <div className="mt-6 flex items-center flex-wrap gap-3">
                       {(Object.keys(active_area_stats.counts) as ChangeArea[]).map((area) => {
                         const count = active_area_stats.counts[area];
                         if (count <= 0) return null;
@@ -537,8 +537,8 @@ export default function RoadmapPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
-                  <div className="grid lg:grid-cols-3 gap-4">
+                <div className="mt-8 rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] p-6">
+                  <div className="grid lg:grid-cols-3 gap-6">
                     {(Object.keys({ frontend: 1, backend: 1, client: 1 }) as ChangeArea[]).map((area) => {
                       const meta = get_area_meta(area);
                       const list = grouped_items[area];
@@ -550,37 +550,37 @@ export default function RoadmapPage() {
                           key={area}
                           id={`roadmap_area_${area}`}
                           className={[
-                            "rounded-none border p-4 transition-colors",
+                            "rounded-none border-4 p-6 transition-all",
                             is_emphasis
-                              ? "border-slate-400 bg-slate-50 dark:border-slate-600 dark:bg-white/5"
-                              : "border-slate-200 bg-white dark:border-slate-800/60 dark:bg-[#0d1220]",
+                              ? "border-cyan-400 bg-cyan-50 dark:border-cyan-600 dark:bg-cyan-900 shadow-[4px_4px_0px_0px_#22d3ee]"
+                              : "border-slate-900 dark:border-white bg-white dark:bg-slate-800",
                             is_active ? "opacity-100" : "opacity-30",
                           ].join(" ")}
                         >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white">{meta.label}</div>
-                            <span className={["inline-flex items-center gap-2 px-2.5 py-1 rounded-none border text-xs font-medium", meta.badge_class_name].join(" ")}>
-                              <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{list.length}</span>
+                          <div className="flex items-center justify-between gap-3 border-b-4 border-slate-900 dark:border-white pb-3 mb-4">
+                            <div className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{meta.label}</div>
+                            <span className={["inline-flex items-center gap-2 px-3 py-1 rounded-none border-2 text-sm font-black uppercase", meta.badge_class_name].join(" ")}>
+                              <span className="font-mono">{list.length}</span>
                             </span>
                           </div>
-                          <div className="mt-3 space-y-2">
+                          <div className="space-y-4">
                             {list.length > 0 ? (
                               list.map((raw_item, i) => {
                                 const item = normalize_display_text(raw_item);
                                 const type = infer_commit_type(raw_item);
                                 const type_meta = get_commit_type_meta(type);
                                 return (
-                                  <div key={`${active_node.id}_${area}_${i}`} className="flex items-start gap-3">
-                                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500 select-none w-6 text-right">
+                                  <div key={`${active_node.id}_${area}_${i}`} className="flex items-start gap-4 p-3 border-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                                    <span className="font-mono text-sm font-black text-slate-500 dark:text-slate-400 select-none w-6 text-right">
                                       {String(i + 1).padStart(2, "0")}
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                      <div className="flex items-center flex-wrap gap-2">
-                                        <span className={["inline-flex items-center px-2 py-0.5 rounded-none border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
+                                      <div className="flex items-center flex-wrap gap-2 mb-2">
+                                        <span className={["inline-flex items-center px-2 py-0.5 rounded-none border-2 text-[10px] font-black uppercase", type_meta.badge_class_name].join(" ")}>
                                           {type_meta.label}
                                         </span>
                                       </div>
-                                      <div className="mt-1 font-mono text-xs text-slate-700 dark:text-slate-200 leading-relaxed break-words">
+                                      <div className="font-mono text-sm font-bold text-slate-800 dark:text-slate-200 leading-relaxed break-words">
                                         {item}
                                       </div>
                                     </div>
@@ -588,7 +588,7 @@ export default function RoadmapPage() {
                                 );
                               })
                             ) : (
-                              <div className="text-xs text-slate-500 dark:text-slate-400">
+                              <div className="text-sm font-bold text-slate-500 dark:text-slate-400 p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 text-center">
                                 无更新
                               </div>
                             )}
@@ -599,25 +599,25 @@ export default function RoadmapPage() {
                   </div>
 
                   {grouped_items.other.length > 0 ? (
-                    <div className="mt-4 rounded-none border border-slate-200 bg-white dark:bg-[#0d1220] dark:border-slate-800/60 p-4">
-                      <div className="text-sm font-semibold text-slate-900 dark:text-white">其他</div>
-                      <div className="mt-3 space-y-2">
+                    <div className="mt-6 rounded-none border-4 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900 p-6 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+                      <div className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-4 border-slate-900 dark:border-white pb-3 mb-4">其他</div>
+                      <div className="space-y-4">
                         {grouped_items.other.map((raw_item, i) => {
                           const item = normalize_display_text(raw_item);
                           const type = infer_commit_type(raw_item);
                           const type_meta = get_commit_type_meta(type);
                           return (
-                            <div key={`${active_node.id}_other_${i}`} className="flex items-start gap-3">
-                              <span className="font-mono text-xs text-slate-400 dark:text-slate-500 select-none w-6 text-right">
+                            <div key={`${active_node.id}_other_${i}`} className="flex items-start gap-4 p-3 border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                              <span className="font-mono text-sm font-black text-slate-500 dark:text-slate-400 select-none w-6 text-right">
                                 {String(i + 1).padStart(2, "0")}
                               </span>
                               <div className="min-w-0 flex-1">
-                                <div className="flex items-center flex-wrap gap-2">
-                                  <span className={["inline-flex items-center px-2 py-0.5 rounded-none border text-[11px] font-medium", type_meta.badge_class_name].join(" ")}>
+                                <div className="flex items-center flex-wrap gap-2 mb-2">
+                                  <span className={["inline-flex items-center px-2 py-0.5 rounded-none border-2 text-[10px] font-black uppercase", type_meta.badge_class_name].join(" ")}>
                                     {type_meta.label}
                                   </span>
                                 </div>
-                                <div className="mt-1 font-mono text-xs text-slate-700 dark:text-slate-200 leading-relaxed break-words">
+                                <div className="font-mono text-sm font-bold text-slate-800 dark:text-slate-200 leading-relaxed break-words">
                                   {item}
                                 </div>
                               </div>

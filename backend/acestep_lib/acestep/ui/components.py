@@ -6,10 +6,10 @@ https://github.com/ace-step/ACE-Step
 Apache 2.0 License
 """
 
-import gradio as gr
-import librosa
 import os
 
+import gradio as gr
+import librosa
 
 TAG_DEFAULT = "funk, pop, soul, rock, melodic, guitar, drums, bass, keyboard, percussion, 105 BPM, energetic, upbeat, groovy, vibrant, dynamic"
 LYRIC_DEFAULT = """[verse]

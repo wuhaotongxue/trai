@@ -16,28 +16,28 @@ import { useI18n } from "@/i18n/i18n_context";
 const typeConfig = {
   feat: {
     labelKey: "changelog.tag.feat",
-    color: "bg-emerald-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-    icon: <PlusCircle className="w-3.5 h-3.5" />,
+    color: "bg-cyan-300 dark:bg-cyan-600 text-slate-900 dark:text-white border-slate-900 dark:border-white",
+    icon: <PlusCircle className="w-4 h-4" />,
   },
   fix: {
     labelKey: "changelog.tag.fix",
-    color: "bg-rose-50 text-cyan-600 dark:bg-cyan-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800",
-    icon: <Bug className="w-3.5 h-3.5" />,
+    color: "bg-rose-300 dark:bg-rose-600 text-slate-900 dark:text-white border-slate-900 dark:border-white",
+    icon: <Bug className="w-4 h-4" />,
   },
   refactor: {
     labelKey: "changelog.tag.refactor",
-    color: "bg-amber-50 text-cyan-600 dark:bg-slate-200/10 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
-    icon: <RefreshCw className="w-3.5 h-3.5" />,
+    color: "bg-amber-300 dark:bg-amber-600 text-slate-900 dark:text-white border-slate-900 dark:border-white",
+    icon: <RefreshCw className="w-4 h-4" />,
   },
   chore: {
     labelKey: "changelog.tag.chore",
-    color: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700",
-    icon: <Wrench className="w-3.5 h-3.5" />,
+    color: "bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white border-slate-900 dark:border-white",
+    icon: <Wrench className="w-4 h-4" />,
   },
   docs: {
     labelKey: "changelog.tag.docs",
-    color: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    icon: <FileCode className="w-3.5 h-3.5" />,
+    color: "bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white border-slate-900 dark:border-white",
+    icon: <FileCode className="w-4 h-4" />,
   },
 };
 
@@ -116,35 +116,35 @@ export default function ChangelogPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-10 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <section className="pt-28 pb-10 bg-emerald-300 dark:bg-emerald-900 border-b-4 border-slate-900 dark:border-white">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">
                   <FileText className="h-4 w-4" />
                   {translate("changelog.title")}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mt-6 tracking-tight">
+                <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mt-6 tracking-widest uppercase">
                   Changelog
                 </h1>
-                <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed max-w-2xl">
+                <p className="text-xl font-bold text-slate-800 dark:text-slate-300 mt-4 leading-relaxed max-w-2xl">
                   {translate("changelog.subtitle")}
                 </p>
               </div>
 
               <button
                 onClick={toggleAll}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium transition-colors shrink-0"
+                className="inline-flex items-center gap-2 px-6 py-3 border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] dark:hover:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all shrink-0"
               >
                 {isAllExpanded ? (
                   <>
-                    <FoldVertical className="w-4 h-4" />
+                    <FoldVertical className="w-5 h-5" />
                     {translate("changelog.collapse_all")}
                   </>
                 ) : (
                   <>
-                    <UnfoldVertical className="w-4 h-4" />
+                    <UnfoldVertical className="w-5 h-5" />
                     {translate("changelog.expand_all")}
                   </>
                 )}
@@ -153,44 +153,44 @@ export default function ChangelogPage() {
           </div>
         </section>
 
-        <section className="py-12">
+        <section className="py-20 bg-white dark:bg-slate-950">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="max-w-4xl space-y-12">
+            <div className="max-w-4xl space-y-16">
               {changelogData.map((release, idx) => {
                 const isExpanded = expandedVersions.includes(release.version);
 
                 return (
                   <div key={idx} className="relative pl-0 md:pl-8">
-                    <div className="hidden md:block absolute left-[11px] top-10 bottom-[-48px] w-px bg-slate-200 dark:bg-slate-800 last:hidden" />
+                    <div className="hidden md:block absolute left-[14px] top-12 bottom-[-64px] w-1 bg-slate-900 dark:bg-white last:hidden" />
 
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="hidden md:flex absolute left-0 w-6 h-6 rounded-none bg-white dark:bg-[#080c1a] border-4 border-blue-500 items-center justify-center z-10" />
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-8">
+                      <div className="flex items-center gap-4">
+                        <div className="hidden md:flex absolute left-0 w-8 h-8 rounded-none bg-emerald-400 dark:bg-emerald-600 border-4 border-slate-900 dark:border-white items-center justify-center z-10 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]" />
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-wider">
                           {release.version}
                         </h2>
-                        <span className="px-3 py-1 rounded-none text-sm font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        <span className="px-4 py-1.5 border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]">
                           {release.date}
                         </span>
                       </div>
-                      <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+                      <div className="h-1 flex-1 bg-slate-900 dark:bg-white hidden sm:block" />
                     </div>
 
                     <div
-                      className={`bg-white dark:bg-[#0d1220] border border-slate-200 dark:border-slate-800/60 rounded-none shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all overflow-hidden ${
-                        isExpanded ? "pb-6" : "pb-0"
+                      className={`bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] transition-all overflow-hidden ${
+                        isExpanded ? "pb-8" : "pb-0"
                       }`}
                     >
                       <div
-                        className="p-6 pb-0 cursor-pointer group flex items-center justify-between"
+                        className="p-8 pb-0 cursor-pointer group flex items-center justify-between"
                         onClick={() => toggleVersion(release.version)}
                       >
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                           {release.title}
                         </h3>
-                        <div className="w-8 h-8 rounded-none bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors shrink-0">
+                        <div className="w-12 h-12 rounded-none bg-slate-100 dark:bg-slate-900 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center group-hover:bg-emerald-300 dark:group-hover:bg-emerald-600 group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-[2px_2px_0px_0px_#0f172a] dark:group-hover:shadow-[2px_2px_0px_0px_#ffffff] transition-all shrink-0">
                           <ChevronDown
-                            className={`w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-transform duration-300 ${
+                            className={`w-6 h-6 text-slate-900 dark:text-white transition-transform duration-300 ${
                               isExpanded ? "rotate-180" : ""
                             }`}
                           />
@@ -198,23 +198,23 @@ export default function ChangelogPage() {
                       </div>
 
                       <div
-                        className={`px-6 transition-all duration-300 ease-in-out origin-top ${
+                        className={`px-8 transition-all duration-300 ease-in-out origin-top ${
                           isExpanded
-                            ? "opacity-100 max-h-[1000px] mt-6"
+                            ? "opacity-100 max-h-[2000px] mt-8"
                             : "opacity-0 max-h-0 mt-0 overflow-hidden"
                         }`}
                       >
-                        <ul className="space-y-4">
+                        <ul className="space-y-6">
                           {release.changes.map((change, i) => {
                             const typeInfo = typeConfig[change.type as keyof typeof typeConfig] || typeConfig.feat;
 
                             return (
-                              <li key={i} className="flex items-start gap-4">
-                                <div className={`mt-0.5 flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-semibold shrink-0 ${typeInfo.color}`}>
+                              <li key={i} className="flex items-start gap-6">
+                                <div className={`mt-0.5 flex items-center gap-2 px-3 py-1.5 rounded-none border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] text-sm font-black uppercase tracking-widest shrink-0 ${typeInfo.color}`}>
                                   {typeInfo.icon}
                                   {translate(typeInfo.labelKey)}
                                 </div>
-                                <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed pt-0.5">
+                                <span className="text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed pt-1">
                                   {change.content}
                                 </span>
                               </li>

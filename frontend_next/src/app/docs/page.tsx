@@ -43,47 +43,46 @@ export default function DocsIndexPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white dark:bg-[#080c1a]">
-        <section className="pt-28 pb-14 bg-slate-100 dark:from-[#0d1220] dark:to-[#080c1a]">
+      <div className="min-h-screen bg-white dark:bg-slate-950">
+        <section className="pt-28 pb-14 bg-cyan-300 dark:bg-cyan-900 border-b-4 border-slate-900 dark:border-white">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] mb-6">
               <BookOpen className="h-4 w-4" />
               {translate("docs.title")}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-widest uppercase">
               {translate("docs.subtitle")}
             </h1>
-            <p className="text-base text-slate-500 dark:text-slate-300 mt-3 leading-relaxed">
+            <p className="text-xl font-bold text-slate-800 dark:text-slate-300 mt-4 leading-relaxed max-w-2xl">
               {translate("docs.desc")}
             </p>
           </div>
         </section>
 
-        <section className="py-14">
+        <section className="py-20 bg-white dark:bg-slate-950">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {docsCards.map((c) => (
                 <Link
                   key={c.href}
                   href={c.href}
-                  className="group p-6 rounded-none border border-slate-200 bg-white hover:bg-slate-50 transition-colors dark:bg-[#0d1220] dark:border-slate-800/60 dark:hover:bg-white/5"
+                  className="group p-8 rounded-none border-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] transition-all"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-none bg-slate-100 flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
-                      <c.icon className="h-6 w-6 text-white" />
+                  <div className="flex items-start gap-6">
+                    <div className="w-16 h-16 rounded-none bg-cyan-300 dark:bg-cyan-600 flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+                      <c.icon className="h-8 w-8 text-slate-900 dark:text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-lg font-bold text-slate-900 dark:text-white">
+                      <p className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">
                         {translate(c.titleKey)}
                       </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">
+                      <p className="text-base font-bold text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
                         {translate(c.descKey)}
                       </p>
-                      <div className="mt-4">
+                      <div className="mt-6">
                         <Button
                           size="sm"
-                          variant="outline"
-                          className="border-slate-200 dark:border-slate-700"
+                          className="h-10 px-6 rounded-none border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900 transition-colors"
                         >
                           {translate(c.enterKey)}
                         </Button>

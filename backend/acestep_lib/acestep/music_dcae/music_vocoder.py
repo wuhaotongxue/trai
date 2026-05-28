@@ -6,23 +6,21 @@ https://github.com/ace-step/ACE-Step
 Apache 2.0 License
 """
 
-import librosa
-import torch
-from torch import nn
-
+from collections.abc import Callable
 from functools import partial
 from math import prod
-from typing import Callable, Tuple, List
 
+import librosa
 import numpy as np
+import torch
 import torch.nn.functional as F
+from diffusers.configuration_utils import ConfigMixin, register_to_config
+from diffusers.loaders import FromOriginalModelMixin
+from diffusers.models.modeling_utils import ModelMixin
+from torch import nn
 from torch.nn import Conv1d
 from torch.nn.utils import weight_norm
 from torch.nn.utils.parametrize import remove_parametrizations as remove_weight_norm
-from diffusers.models.modeling_utils import ModelMixin
-from diffusers.loaders import FromOriginalModelMixin
-from diffusers.configuration_utils import ConfigMixin, register_to_config
-
 
 try:
     from music_log_mel import LogMelSpectrogram
@@ -59,7 +57,7 @@ class DropPath(nn.Module):
     """Drop paths (Stochastic Depth) per sample  (when applied in main path of residual blocks)."""  # noqa: E501
 
     def __init__(self, drop_prob: float = 0.0, scale_by_keep: bool = True):
-        super(DropPath, self).__init__()
+        super().__init__()
         self.drop_prob = drop_prob
         self.scale_by_keep = scale_by_keep
 
@@ -140,7 +138,7 @@ class ConvNeXtBlock(nn.Module):
         self.act = nn.GELU()
         self.pwconv2 = nn.Linear(int(mlp_ratio * dim), dim)
         self.gamma = (
-            nn.Parameter(layer_scale_init_value * torch.ones((dim)), requires_grad=True)
+            nn.Parameter(layer_scale_init_value * torch.ones(dim), requires_grad=True)
             if layer_scale_init_value > 0
             else None
         )
@@ -169,7 +167,7 @@ class ConvNeXtBlock(nn.Module):
 
 
 class ParallelConvNeXtBlock(nn.Module):
-    def __init__(self, kernel_sizes: List[int], *args, **kwargs):
+    def __init__(self, kernel_sizes: list[int], *args, **kwargs):
         super().__init__()
         self.blocks = nn.ModuleList(
             [
@@ -193,7 +191,7 @@ class ConvNeXtEncoder(nn.Module):
         dims=[96, 192, 384, 768],
         drop_path_rate=0.0,
         layer_scale_init_value=1e-6,
-        kernel_sizes: Tuple[int] = (7,),
+        kernel_sizes: tuple[int] = (7,),
     ):
         super().__init__()
         assert len(depths) == len(dims)
@@ -370,10 +368,10 @@ class HiFiGANGenerator(nn.Module):
         self,
         *,
         hop_length: int = 512,
-        upsample_rates: Tuple[int] = (8, 8, 2, 2, 2),
-        upsample_kernel_sizes: Tuple[int] = (16, 16, 8, 2, 2),
-        resblock_kernel_sizes: Tuple[int] = (3, 7, 11),
-        resblock_dilation_sizes: Tuple[Tuple[int]] = ((1, 3, 5), (1, 3, 5), (1, 3, 5)),
+        upsample_rates: tuple[int] = (8, 8, 2, 2, 2),
+        upsample_kernel_sizes: tuple[int] = (16, 16, 8, 2, 2),
+        resblock_kernel_sizes: tuple[int] = (3, 7, 11),
+        resblock_dilation_sizes: tuple[tuple[int]] = ((1, 3, 5), (1, 3, 5), (1, 3, 5)),
         num_mels: int = 128,
         upsample_initial_channel: int = 512,
         use_template: bool = True,
@@ -495,14 +493,14 @@ class ADaMoSHiFiGANV1(ModelMixin, ConfigMixin, FromOriginalModelMixin):
     def __init__(
         self,
         input_channels: int = 128,
-        depths: List[int] = [3, 3, 9, 3],
-        dims: List[int] = [128, 256, 384, 512],
+        depths: list[int] = [3, 3, 9, 3],
+        dims: list[int] = [128, 256, 384, 512],
         drop_path_rate: float = 0.0,
-        kernel_sizes: Tuple[int] = (7,),
-        upsample_rates: Tuple[int] = (4, 4, 2, 2, 2, 2, 2),
-        upsample_kernel_sizes: Tuple[int] = (8, 8, 4, 4, 4, 4, 4),
-        resblock_kernel_sizes: Tuple[int] = (3, 7, 11, 13),
-        resblock_dilation_sizes: Tuple[Tuple[int]] = (
+        kernel_sizes: tuple[int] = (7,),
+        upsample_rates: tuple[int] = (4, 4, 2, 2, 2, 2, 2),
+        upsample_kernel_sizes: tuple[int] = (8, 8, 4, 4, 4, 4, 4),
+        resblock_kernel_sizes: tuple[int] = (3, 7, 11, 13),
+        resblock_dilation_sizes: tuple[tuple[int]] = (
             (1, 3, 5),
             (1, 3, 5),
             (1, 3, 5),

@@ -17,9 +17,9 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const benefits = [
-  { icon: Zap, key: "register.benefit.1", color: "bg-slate-100" },
-  { icon: Globe, key: "register.benefit.2", color: "bg-slate-100" },
-  { icon: Shield, key: "register.benefit.3", color: "bg-slate-100" },
+  { icon: Zap, key: "register.benefit.1", color: "bg-cyan-300 dark:bg-cyan-600" },
+  { icon: Globe, key: "register.benefit.2", color: "bg-emerald-300 dark:bg-emerald-600" },
+  { icon: Shield, key: "register.benefit.3", color: "bg-indigo-300 dark:bg-indigo-600" },
 ];
 
 function validatePassword(p: string): boolean {

@@ -11,29 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Tuple, Union
 
 import torch
-import torch.nn.functional as F
-from torch import nn
-
-from diffusers.utils import logging
 from diffusers.models.normalization import RMSNorm
-
+from diffusers.utils import logging
+from torch import nn
 
 try:
     # from .dcformer import DCMHAttention
     from .customer_attention_processor import (
         Attention,
-        CustomLiteLAProcessor2_0,
         CustomerAttnProcessor2_0,
+        CustomLiteLAProcessor2_0,
     )
 except ImportError:
     # from dcformer import DCMHAttention
     from customer_attention_processor import (
         Attention,
-        CustomLiteLAProcessor2_0,
         CustomerAttnProcessor2_0,
+        CustomLiteLAProcessor2_0,
     )
 
 
@@ -64,8 +60,8 @@ def t2i_modulate(x, shift, scale):
 
 
 def get_same_padding(
-    kernel_size: Union[int, Tuple[int, ...]],
-) -> Union[int, Tuple[int, ...]]:
+    kernel_size: int | tuple[int, ...],
+) -> int | tuple[int, ...]:
     if isinstance(kernel_size, tuple):
         return tuple([get_same_padding(ks) for ks in kernel_size])
     else:
@@ -82,7 +78,7 @@ class ConvLayer(nn.Module):
         stride=1,
         dilation=1,
         groups=1,
-        padding: Union[int, None] = None,
+        padding: int | None = None,
         use_bias=False,
         norm=None,
         act=None,
@@ -137,7 +133,7 @@ class GLUMBConv(nn.Module):
         out_feature=None,
         kernel_size=3,
         stride=1,
-        padding: Union[int, None] = None,
+        padding: int | None = None,
         use_bias=False,
         norm=(None, None, None),
         act=("silu", "silu", None),
@@ -264,8 +260,8 @@ class LinearTransformerBlock(nn.Module):
         encoder_hidden_states: torch.FloatTensor = None,
         attention_mask: torch.FloatTensor = None,
         encoder_attention_mask: torch.FloatTensor = None,
-        rotary_freqs_cis: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
-        rotary_freqs_cis_cross: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
+        rotary_freqs_cis: torch.Tensor | tuple[torch.Tensor] = None,
+        rotary_freqs_cis_cross: torch.Tensor | tuple[torch.Tensor] = None,
         temb: torch.FloatTensor = None,
     ):
 

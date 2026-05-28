@@ -46,7 +46,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
       <div className="drag-region" style={{
         padding: '16px 24px',
         backgroundColor: 'var(--ui_panel)',
-        borderBottom: '1px solid var(--ui_border)',
+        borderBottom: '2px solid var(--ui_border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         transition: 'background-color var(--ui_transition_normal)',
         animation: 'fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -67,12 +67,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             minWidth: is_left_open ? '180px' : '0px',
             opacity: is_left_open ? 1 : 0,
             backgroundColor: 'var(--ui_panel)',
-            borderRight: is_left_open ? '1px solid var(--ui_border)' : 'none',
+            borderRight: is_left_open ? '2px solid var(--ui_border)' : 'none',
             display: 'flex', flexDirection: 'column',
             transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, border-color 0.3s ease',
             overflow: 'hidden', flexShrink: 1,
           }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '2px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {leftPanelTitle && (
                 <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)', whiteSpace: 'nowrap' }}>{leftPanelTitle}</span>
               )}
@@ -104,12 +104,12 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
             minWidth: is_middle_open ? '180px' : '0px',
             opacity: is_middle_open ? 1 : 0,
             backgroundColor: 'var(--ui_panel)',
-            borderRight: is_middle_open ? '1px solid var(--ui_border)' : 'none',
+            borderRight: is_middle_open ? '2px solid var(--ui_border)' : 'none',
             display: 'flex', flexDirection: 'column',
             transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, border-color 0.3s ease',
             overflow: 'hidden', flexShrink: 1,
           }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '2px solid var(--ui_border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {leftPanel && !is_left_open && (
                   <button
@@ -159,7 +159,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
           <div className="drag-region" style={{
             padding: '12px 16px',
             backgroundColor: 'var(--ui_panel)',
-            borderBottom: '1px solid var(--ui_border)',
+            borderBottom: '2px solid var(--ui_border)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             transition: 'background-color var(--ui_transition_normal)',
           }}>
@@ -214,7 +214,7 @@ const ThreePanelLayout: React.FC<ThreePanelLayoutProps> = ({
               backgroundColor: 'var(--ui_panel)',
               borderRadius: 'var(--ui_radius_lg)',
               boxShadow: 'var(--ui_shadow_card)',
-              border: '1px solid var(--ui_border)',
+              border: '2px solid var(--ui_border)',
               overflow: 'auto', minWidth: 0,
             }}>
               {children}

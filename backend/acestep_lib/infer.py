@@ -1,8 +1,8 @@
-import click
 import os
 
-from acestep.pipeline_ace_step import ACEStepPipeline
+import click
 from acestep.data_sampler import DataSampler
+from acestep.pipeline_ace_step import ACEStepPipeline
 
 
 def sample_data(json_data):

@@ -148,8 +148,8 @@ class ContactRouter:
         email_service = EmailService(db_session)
         contact_data = req.model_dump()
         if current_user:
-            contact_data["user_id"] = current_user.id
-            contact_data["username"] = current_user.username
+            contact_data["user_id"] = current_user.get("user_id")
+            contact_data["username"] = current_user.get("username")
 
         # 异步发送邮件通知
         background_tasks.add_task(ContactUtils.send_contact_email, email_service, contact_data, req.attachment_urls)

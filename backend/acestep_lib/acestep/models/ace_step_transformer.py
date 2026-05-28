@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple, List, Union
 
 import torch
 import torch.nn.functional as F
-from torch import nn
-
 from diffusers.configuration_utils import ConfigMixin, register_to_config
-from diffusers.utils import BaseOutput, is_torch_version
-from diffusers.models.modeling_utils import ModelMixin
-from diffusers.models.embeddings import TimestepEmbedding, Timesteps
 from diffusers.loaders import FromOriginalModelMixin, PeftAdapterMixin
-
+from diffusers.models.embeddings import TimestepEmbedding, Timesteps
+from diffusers.models.modeling_utils import ModelMixin
+from diffusers.utils import BaseOutput
+from torch import nn
 
 from .attention import LinearTransformerBlock, t2i_modulate
 from .lyrics_utils.lyric_encoder import ConformerEncoder as LyricEncoder
@@ -200,7 +197,7 @@ class PatchEmbed(nn.Module):
 class Transformer2DModelOutput(BaseOutput):
 
     sample: torch.FloatTensor
-    proj_losses: Optional[Tuple[Tuple[str, torch.Tensor]]] = None
+    proj_losses: tuple[tuple[str, torch.Tensor]] | None = None
 
 
 class ACEStepTransformer2DModel(
@@ -211,7 +208,7 @@ class ACEStepTransformer2DModel(
     @register_to_config
     def __init__(
         self,
-        in_channels: Optional[int] = 8,
+        in_channels: int | None = 8,
         num_layers: int = 28,
         inner_dim: int = 1536,
         attention_head_dim: int = 64,
@@ -222,12 +219,12 @@ class ACEStepTransformer2DModel(
         rope_theta: float = 1000000.0,
         speaker_embedding_dim: int = 512,
         text_embedding_dim: int = 768,
-        ssl_encoder_depths: List[int] = [9, 9],
-        ssl_names: List[str] = ["mert", "m-hubert"],
-        ssl_latent_dims: List[int] = [1024, 768],
+        ssl_encoder_depths: list[int] = [9, 9],
+        ssl_names: list[str] = ["mert", "m-hubert"],
+        ssl_latent_dims: list[int] = [1024, 768],
         lyric_encoder_vocab_size: int = 6681,
         lyric_hidden_size: int = 1024,
-        patch_size: List[int] = [16, 1],
+        patch_size: list[int] = [16, 1],
         max_height: int = 16,
         max_width: int = 4096,
         **kwargs,
@@ -328,7 +325,7 @@ class ACEStepTransformer2DModel(
 
     # Copied from diffusers.models.unets.unet_3d_condition.UNet3DConditionModel.enable_forward_chunking
     def enable_forward_chunking(
-        self, chunk_size: Optional[int] = None, dim: int = 0
+        self, chunk_size: int | None = None, dim: int = 0
     ) -> None:
         """
         Sets the attention processor to use [feed forward
@@ -362,8 +359,8 @@ class ACEStepTransformer2DModel(
 
     def forward_lyric_encoder(
         self,
-        lyric_token_idx: Optional[torch.LongTensor] = None,
-        lyric_mask: Optional[torch.LongTensor] = None,
+        lyric_token_idx: torch.LongTensor | None = None,
+        lyric_mask: torch.LongTensor | None = None,
     ):
         # N x T x D
         lyric_embs = self.lyric_embs(lyric_token_idx)
@@ -375,11 +372,11 @@ class ACEStepTransformer2DModel(
 
     def encode(
         self,
-        encoder_text_hidden_states: Optional[torch.Tensor] = None,
-        text_attention_mask: Optional[torch.LongTensor] = None,
-        speaker_embeds: Optional[torch.FloatTensor] = None,
-        lyric_token_idx: Optional[torch.LongTensor] = None,
-        lyric_mask: Optional[torch.LongTensor] = None,
+        encoder_text_hidden_states: torch.Tensor | None = None,
+        text_attention_mask: torch.LongTensor | None = None,
+        speaker_embeds: torch.FloatTensor | None = None,
+        lyric_token_idx: torch.LongTensor | None = None,
+        lyric_mask: torch.LongTensor | None = None,
     ):
 
         bs = encoder_text_hidden_states.shape[0]
@@ -417,13 +414,11 @@ class ACEStepTransformer2DModel(
         attention_mask: torch.Tensor,
         encoder_hidden_states: torch.Tensor,
         encoder_hidden_mask: torch.Tensor,
-        timestep: Optional[torch.Tensor],
-        ssl_hidden_states: Optional[List[torch.Tensor]] = None,
+        timestep: torch.Tensor | None,
+        ssl_hidden_states: list[torch.Tensor] | None = None,
         output_length: int = 0,
-        block_controlnet_hidden_states: Optional[
-            Union[List[torch.Tensor], torch.Tensor]
-        ] = None,
-        controlnet_scale: Union[float, torch.Tensor] = 1.0,
+        block_controlnet_hidden_states: list[torch.Tensor] | torch.Tensor | None = None,
+        controlnet_scale: float | torch.Tensor = 1.0,
         return_dict: bool = True,
     ):
 
@@ -529,17 +524,15 @@ class ACEStepTransformer2DModel(
         self,
         hidden_states: torch.Tensor,
         attention_mask: torch.Tensor,
-        encoder_text_hidden_states: Optional[torch.Tensor] = None,
-        text_attention_mask: Optional[torch.LongTensor] = None,
-        speaker_embeds: Optional[torch.FloatTensor] = None,
-        lyric_token_idx: Optional[torch.LongTensor] = None,
-        lyric_mask: Optional[torch.LongTensor] = None,
-        timestep: Optional[torch.Tensor] = None,
-        ssl_hidden_states: Optional[List[torch.Tensor]] = None,
-        block_controlnet_hidden_states: Optional[
-            Union[List[torch.Tensor], torch.Tensor]
-        ] = None,
-        controlnet_scale: Union[float, torch.Tensor] = 1.0,
+        encoder_text_hidden_states: torch.Tensor | None = None,
+        text_attention_mask: torch.LongTensor | None = None,
+        speaker_embeds: torch.FloatTensor | None = None,
+        lyric_token_idx: torch.LongTensor | None = None,
+        lyric_mask: torch.LongTensor | None = None,
+        timestep: torch.Tensor | None = None,
+        ssl_hidden_states: list[torch.Tensor] | None = None,
+        block_controlnet_hidden_states: list[torch.Tensor] | torch.Tensor | None = None,
+        controlnet_scale: float | torch.Tensor = 1.0,
         return_dict: bool = True,
     ):
         encoder_hidden_states, encoder_hidden_mask = self.encode(

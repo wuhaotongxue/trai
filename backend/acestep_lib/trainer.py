@@ -1,32 +1,30 @@
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning import Trainer
-from datetime import datetime
 import argparse
-import torch
-import json
+import os
+import random
+from datetime import datetime
+
 import matplotlib
+import torch
 import torch.nn.functional as F
 import torch.utils.data
-from pytorch_lightning.core import LightningModule
-from torch.utils.data import DataLoader
+import torchaudio
+from acestep.apg_guidance import MomentumBuffer, apg_forward
+from acestep.pipeline_ace_step import ACEStepPipeline
 from acestep.schedulers.scheduling_flow_match_euler_discrete import (
     FlowMatchEulerDiscreteScheduler,
 )
 from acestep.text2music_dataset import Text2MusicDataset
-from loguru import logger
-from transformers import AutoModel, Wav2Vec2FeatureExtractor
-import torchaudio
 from diffusers.pipelines.stable_diffusion_3.pipeline_stable_diffusion_3 import (
     retrieve_timesteps,
 )
 from diffusers.utils.torch_utils import randn_tensor
-from acestep.apg_guidance import apg_forward, MomentumBuffer
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.core import LightningModule
+from pytorch_lightning.loggers import TensorBoardLogger
+from torch.utils.data import DataLoader
 from tqdm import tqdm
-import random
-import os
-from acestep.pipeline_ace_step import ACEStepPipeline
-
+from transformers import AutoModel, Wav2Vec2FeatureExtractor
 
 matplotlib.use("Agg")
 torch.backends.cudnn.benchmark = False

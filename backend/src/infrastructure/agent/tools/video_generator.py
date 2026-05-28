@@ -35,8 +35,8 @@ class VideoGeneratorTool(BaseTool):
             id="video_generator",
             name="AI 视频生成",
             description="根据用户提供的文字提示或参考图片，自动生成一段视频。当你收到用户要求'生成视频'、'让这张图动起来'等指令时调用此工具。",
-            category=ToolCategory.MEDIA,
-            risk_level=RiskLevel.MEDIUM,
+            category=ToolCategory.VIDEO,
+            risk_level=RiskLevel.MONITORED,
             parameters=[
                 ToolParameter(
                     name="prompt",

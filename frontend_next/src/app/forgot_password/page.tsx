@@ -29,55 +29,51 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950 font-sans">
       {/* 左侧品牌区 */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-12 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-none blur-3xl" />
-          <div className="absolute bottom-20 left-10 w-96 h-96 bg-slate-100/10 rounded-none blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        </div>
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-cyan-300 dark:bg-cyan-900 border-r-4 border-slate-900 dark:border-white p-12 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-10 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
 
-        <div className="relative flex items-center gap-3">
-          <div className="w-11 h-11 rounded-none bg-white/15  flex items-center justify-center shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
-            <Bot className="h-6 w-6 text-white" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-14 h-14 bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+            <Bot className="h-8 w-8 text-slate-900 dark:text-white" />
           </div>
           <div>
-            <span className="text-xl font-bold text-white">TRAI</span>
-            <span className="block text-xs text-white/60 -mt-0.5">AI Agent Platform</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">TRAI</span>
+            <span className="block text-sm font-bold text-slate-800 dark:text-slate-300 uppercase tracking-widest">AI Agent Platform</span>
           </div>
         </div>
 
-        <div className="relative space-y-6">
+        <div className="relative space-y-8">
           <div>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+            <h1 className="text-5xl font-black text-slate-900 dark:text-white leading-tight mb-6 uppercase tracking-widest">
               {translate("forgot_password.brand_line1")}<br />
-              <span className="text-transparent bg-clip-text bg-slate-100">
+              <span className="bg-emerald-300 dark:bg-emerald-600 px-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] mt-2 inline-block">
                 {translate("forgot_password.brand_line2")}
               </span>
             </h1>
-            <p className="text-white/60 text-base leading-relaxed max-w-sm">
+            <p className="text-slate-800 dark:text-slate-300 text-lg font-bold leading-relaxed max-w-sm">
               {translate("forgot_password.brand_desc")}
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[
               { step: "01", text: translate("forgot_password.step1") },
               { step: "02", text: translate("forgot_password.step2") },
               { step: "03", text: translate("forgot_password.step3") },
             ].map((item) => (
-              <div key={item.step} className="flex items-center gap-4 bg-white/10  rounded-none px-5 py-3.5 border border-white/10">
-                <div className="w-9 h-9 rounded-none bg-white/15 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-white">{item.step}</span>
+              <div key={item.step} className="flex items-center gap-4 bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white p-4 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
+                <div className="w-12 h-12 bg-indigo-300 dark:bg-indigo-600 border-2 border-slate-900 dark:border-white flex items-center justify-center shrink-0">
+                  <span className="text-lg font-black text-slate-900 dark:text-white">{item.step}</span>
                 </div>
-                <span className="text-sm text-white/90 font-medium">{item.text}</span>
+                <span className="text-base text-slate-900 dark:text-white font-bold uppercase tracking-wider">{item.text}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative text-xs text-white/40">
+        <div className="relative text-sm font-bold text-slate-800 dark:text-slate-400 uppercase tracking-widest">
           {translate("forgot_password.footer")}
         </div>
       </div>
@@ -86,37 +82,37 @@ export default function ForgotPasswordPage() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-md">
           {/* Logo - 移动端 */}
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-none bg-slate-100 flex items-center justify-center shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20">
-              <Bot className="h-5 w-5 text-white" />
+          <div className="lg:hidden flex items-center gap-4 mb-10">
+            <div className="w-14 h-14 bg-cyan-300 dark:bg-cyan-600 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center">
+              <Bot className="h-8 w-8 text-slate-900 dark:text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">TRAI</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">TRAI</span>
           </div>
 
           {sent ? (
-            <div className="text-center space-y-6 py-8">
-              <div className="w-16 h-16 rounded-none bg-cyan-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="h-8 w-8 text-cyan-500" />
+            <div className="text-center space-y-8 py-10">
+              <div className="w-24 h-24 bg-emerald-300 dark:bg-emerald-600 border-4 border-slate-900 dark:border-white shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] flex items-center justify-center mx-auto transform rotate-3">
+                <CheckCircle2 className="h-12 w-12 text-slate-900 dark:text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">{translate("forgot_password.sent_title")}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-widest">{translate("forgot_password.sent_title")}</h2>
+                <p className="text-base font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
                   {translate("forgot_password.sent_desc").replace("{email}", email)}
                 </p>
               </div>
-              <div className="p-4 rounded-none bg-blue-500/5 border border-blue-500/20 text-sm text-blue-600 dark:text-blue-400 text-left">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                  <p>{translate("forgot_password.not_received")} <a href="mailto:support@trai.ai" className="underline">support@trai.ai</a></p>
+              <div className="p-6 border-4 border-slate-900 dark:border-white bg-indigo-50 dark:bg-indigo-900 text-sm font-bold text-slate-900 dark:text-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] text-left">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-6 w-6 mt-0.5 shrink-0 text-indigo-500" />
+                  <p className="leading-relaxed">{translate("forgot_password.not_received")} <a href="mailto:support@trai.ai" className="underline decoration-2 underline-offset-4">support@trai.ai</a></p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full h-11 rounded-none gap-2" onClick={() => { setSent(false); setEmail(""); }}>
-                  <ArrowLeft className="h-4 w-4" />
+              <div className="space-y-4">
+                <Button variant="outline" className="w-full h-14 border-4 border-slate-900 dark:border-white rounded-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] dark:hover:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all gap-3" onClick={() => { setSent(false); setEmail(""); }}>
+                  <ArrowLeft className="h-5 w-5" />
                   {translate("forgot_password.back_input")}
                 </Button>
                 <Link href="/login" className="block">
-                  <Button className="w-full h-11 rounded-none text-sm font-medium">
+                  <Button className="w-full h-14 border-4 border-slate-900 dark:border-white rounded-none bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] dark:hover:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all">
                     {translate("forgot_password.back_login")}
                   </Button>
                 </Link>
@@ -124,17 +120,17 @@ export default function ForgotPasswordPage() {
             </div>
           ) : (
             <>
-              <div className="mb-8">
-                <div className="w-12 h-12 rounded-none bg-blue-500/10 flex items-center justify-center mb-4">
-                  <Mail className="h-6 w-6 text-blue-500" />
+              <div className="mb-10">
+                <div className="w-16 h-16 bg-cyan-300 dark:bg-cyan-600 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6">
+                  <Mail className="h-8 w-8 text-slate-900 dark:text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">{translate("forgot_password.title")}</h2>
-                <p className="text-sm text-muted-foreground mt-2">{translate("forgot_password.subtitle")}</p>
+                <h2 className="text-4xl font-black text-slate-900 dark:text-white uppercase tracking-widest">{translate("forgot_password.title")}</h2>
+                <p className="text-base font-bold text-slate-600 dark:text-slate-400 mt-3">{translate("forgot_password.subtitle")}</p>
               </div>
 
-              <div className="space-y-5">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-sm font-medium text-foreground/80">{translate("forgot_password.email_label")}</Label>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">{translate("forgot_password.email_label")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -142,36 +138,36 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                    className="h-12 rounded-none border-border/60 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm"
+                    className="h-14 border-4 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-bold rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyan-400 focus-visible:shadow-[4px_4px_0px_0px_#22d3ee] transition-all"
                   />
                   {error && (
-                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3.5 w-3.5" />{error}</p>
+                    <p className="text-sm font-bold text-rose-500 flex items-center gap-2 mt-2"><AlertCircle className="h-4 w-4" />{error}</p>
                   )}
                 </div>
 
                 <Button
                   onClick={handleSend}
                   disabled={loading}
-                  className="w-full h-12 text-sm font-semibold rounded-none shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-60"
+                  className="w-full h-16 text-lg font-black uppercase tracking-widest border-4 border-slate-900 dark:border-white bg-cyan-300 dark:bg-cyan-600 text-slate-900 dark:text-white rounded-none shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff] hover:bg-cyan-400 dark:hover:bg-cyan-500 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all disabled:opacity-50"
                 >
                   {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 rounded-none border-2 border-white/30 border-t-white animate-spin" />
+                    <span className="flex items-center gap-3">
+                      <span className="w-5 h-5 rounded-none border-4 border-slate-900/30 border-t-slate-900 animate-spin" />
                       {translate("forgot_password.sending")}
                     </span>
                   ) : translate("forgot_password.send_btn")}
                 </Button>
 
-                <div className="p-4 rounded-none bg-muted/40 border border-border/60 text-xs text-muted-foreground">
+                <div className="p-6 border-4 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 text-sm font-bold text-slate-600 dark:text-slate-400 shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
                   {translate("forgot_password.hint")}
                 </div>
               </div>
             </>
           )}
 
-          <div className="text-center mt-6">
-            <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" />
+          <div className="text-center mt-10">
+            <Link href="/login" className="inline-flex items-center gap-2 text-base font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+              <ArrowLeft className="h-5 w-5" />
               {translate("forgot_password.back_login")}
             </Link>
           </div>

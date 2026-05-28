@@ -11,14 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional, Union, Tuple
 
 import torch
 import torch.nn.functional as F
-from torch import nn
-
-from diffusers.utils import logging
 from diffusers.models.attention_processor import Attention
+from diffusers.utils import logging
+from torch import nn
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
@@ -34,8 +32,8 @@ class CustomLiteLAProcessor2_0:
     def apply_rotary_emb(
         self,
         x: torch.Tensor,
-        freqs_cis: Union[torch.Tensor, Tuple[torch.Tensor]],
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        freqs_cis: torch.Tensor | tuple[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Apply rotary embeddings to input tensors using the given frequency tensor. This function applies rotary embeddings
         to the given query or key 'x' tensors using the provided frequency tensor 'freqs_cis'. The input tensors are
@@ -66,10 +64,10 @@ class CustomLiteLAProcessor2_0:
         attn: Attention,
         hidden_states: torch.FloatTensor,
         encoder_hidden_states: torch.FloatTensor = None,
-        attention_mask: Optional[torch.FloatTensor] = None,
-        encoder_attention_mask: Optional[torch.FloatTensor] = None,
-        rotary_freqs_cis: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
-        rotary_freqs_cis_cross: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
+        attention_mask: torch.FloatTensor | None = None,
+        encoder_attention_mask: torch.FloatTensor | None = None,
+        rotary_freqs_cis: torch.Tensor | tuple[torch.Tensor] = None,
+        rotary_freqs_cis_cross: torch.Tensor | tuple[torch.Tensor] = None,
         *args,
         **kwargs,
     ) -> torch.FloatTensor:
@@ -258,8 +256,8 @@ class CustomerAttnProcessor2_0:
     def apply_rotary_emb(
         self,
         x: torch.Tensor,
-        freqs_cis: Union[torch.Tensor, Tuple[torch.Tensor]],
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        freqs_cis: torch.Tensor | tuple[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Apply rotary embeddings to input tensors using the given frequency tensor. This function applies rotary embeddings
         to the given query or key 'x' tensors using the provided frequency tensor 'freqs_cis'. The input tensors are
@@ -290,10 +288,10 @@ class CustomerAttnProcessor2_0:
         attn: Attention,
         hidden_states: torch.FloatTensor,
         encoder_hidden_states: torch.FloatTensor = None,
-        attention_mask: Optional[torch.FloatTensor] = None,
-        encoder_attention_mask: Optional[torch.FloatTensor] = None,
-        rotary_freqs_cis: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
-        rotary_freqs_cis_cross: Union[torch.Tensor, Tuple[torch.Tensor]] = None,
+        attention_mask: torch.FloatTensor | None = None,
+        encoder_attention_mask: torch.FloatTensor | None = None,
+        rotary_freqs_cis: torch.Tensor | tuple[torch.Tensor] = None,
+        rotary_freqs_cis_cross: torch.Tensor | tuple[torch.Tensor] = None,
         *args,
         **kwargs,
     ) -> torch.Tensor:

@@ -53,9 +53,9 @@ export function ChatPanel() {
   const {
     messages, isStreaming, sendMessage, loadSessions,
     sessions, sessionId: currentSessionId, startSession, switchSession, deleteSession,
-    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage, imageGenerateError, imageGenerateProgress, imageGenerateStage,
-    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError,
-    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError,
+    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage, imageGenerateError, imageGenerateProgress, imageGenerateStage, imageGallery,
+    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError, videoGallery,
+    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery,
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError,
   } = useAgentStore();
 
@@ -467,37 +467,57 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                          <AnimatePresence mode="wait">
-                            {generatedImageUrl ? (
-                              <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
-                                <img src={generatedImageUrl} className={`w-full h-full object-contain ${brutalBorder}`} alt="Generated" />
-                                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
-                                    {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                                  </button>
-                                  <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
-                                    <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                  </a>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+                            <div className="flex-1 flex items-center justify-center relative min-h-0">
+                              <AnimatePresence mode="wait">
+                                {generatedImageUrl ? (
+                                  <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex items-center justify-center">
+                                    <img src={generatedImageUrl} className={`max-w-full max-h-full object-contain ${brutalBorder}`} alt="Generated" />
+                                    <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                      <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                        {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                      </button>
+                                      <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
+                                        <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                      </a>
+                                    </div>
+                                  </motion.div>
+                                ) : isGeneratingImage ? (
+                                  <motion.div key="image-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
+                                    <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在处理...</div>
+                                  </motion.div>
+                                ) : (
+                                  <motion.div key="image-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
+                                    <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                      <ImageIcon className="h-16 w-16 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                    <p className="font-bold text-sm">在左侧输入你的创意描述</p>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+
+                            {/* 画廊部分 */}
+                            {imageGallery && imageGallery.length > 0 && (
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
+                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
+                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
+                                  {imageGallery.map((item) => (
+                                    <div 
+                                      key={item.id} 
+                                      className={`shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`}
+                                      onClick={() => useAgentStore.setState({ generatedImageUrl: item.url })}
+                                    >
+                                      <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" title={item.prompt} />
+                                    </div>
+                                  ))}
                                 </div>
-                              </motion.div>
-                            ) : isGeneratingImage ? (
-                              <motion.div key="image-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
-                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在处理...</div>
-                              </motion.div>
-                            ) : (
-                              <motion.div key="image-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                                  <ImageIcon className="h-16 w-16 text-slate-900 dark:text-white" />
-                                </div>
-                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                <p className="font-bold text-sm">在左侧输入你的创意描述</p>
-                              </motion.div>
+                              </div>
                             )}
-                          </AnimatePresence>
-                        </div>
+                          </div>
                       </div>
                     )}
 
@@ -549,37 +569,62 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                          <AnimatePresence mode="wait">
-                            {generatedVideoUrl ? (
-                              <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group">
-                                <video src={generatedVideoUrl} controls className={`w-full h-full object-contain ${brutalBorder}`} />
-                                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
-                                    {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                                  </button>
-                                  <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
-                                    <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                  </a>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+                            <div className="flex-1 flex items-center justify-center relative min-h-0">
+                              <AnimatePresence mode="wait">
+                                {generatedVideoUrl ? (
+                                  <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex items-center justify-center">
+                                    <video src={generatedVideoUrl} controls className={`max-w-full max-h-full object-contain ${brutalBorder}`} />
+                                    <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                      <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                        {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                      </button>
+                                      <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
+                                        <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                      </a>
+                                    </div>
+                                  </motion.div>
+                                ) : isGeneratingVideo ? (
+                                  <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
+                                    <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在渲染帧...</div>
+                                  </motion.div>
+                                ) : (
+                                  <motion.div key="video-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
+                                    <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                      <Video className="h-16 w-16 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                    <p className="font-bold text-sm">在左侧输入你的视频分镜描述</p>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+
+                            {/* 画廊部分 */}
+                            {videoGallery && videoGallery.length > 0 && (
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
+                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
+                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
+                                  {videoGallery.map((item) => (
+                                    <div 
+                                      key={item.id} 
+                                      className={`shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`}
+                                      onClick={() => useAgentStore.setState({ generatedVideoUrl: item.url })}
+                                    >
+                                      <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" title={item.prompt} />
+                                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
+                                          <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
-                              </motion.div>
-                            ) : isGeneratingVideo ? (
-                              <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
-                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在渲染帧...</div>
-                              </motion.div>
-                            ) : (
-                              <motion.div key="video-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                                  <Video className="h-16 w-16 text-slate-900 dark:text-white" />
-                                </div>
-                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                <p className="font-bold text-sm">在左侧输入你的视频分镜描述</p>
-                              </motion.div>
+                              </div>
                             )}
-                          </AnimatePresence>
-                        </div>
+                          </div>
                       </div>
                     )}
 
@@ -625,21 +670,40 @@ export function ChatPanel() {
                               ))}
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={handleGenerateMusic}
-                              disabled={isGeneratingMusic || !musicPrompt.trim()}
-                              className={`w-full h-16 bg-indigo-500 text-white text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
-                            >
-                              {isGeneratingMusic ? (
-                                <><Loader2 className="h-6 w-6 animate-spin" /> 正在谱曲</>
-                              ) : (
-                                <><Music className="h-6 w-6" /> 开始创作音乐</>
-                              )}
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                  type="button"
+                                  onClick={handleGenerateMusic}
+                                  disabled={isGeneratingMusic || !musicPrompt.trim()}
+                                  className={`flex-1 h-16 bg-indigo-500 text-white text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                                >
+                                  {isGeneratingMusic ? (
+                                    <><Loader2 className="h-6 w-6 animate-spin" /> 正在谱曲</>
+                                  ) : (
+                                    <><Music className="h-6 w-6" /> 开始创作音乐</>
+                                  )}
+                                </button>
 
-                            <AnimatePresence>
-                              {musicGenerateError && (
+                                {isGeneratingMusic && (
+                                  <button
+                                    type="button"
+                                    onClick={cancelGenerateMusic}
+                                    className={`px-6 h-16 bg-red-500 text-white text-xl flex items-center justify-center gap-2 ${brutalBtnBase}`}
+                                  >
+                                    <X className="h-6 w-6" /> 取消
+                                  </button>
+                                )}
+                              </div>
+
+                              <AnimatePresence>
+                                {isGeneratingMusic && musicGenerateProgress && (
+                                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-slate-100 dark:bg-slate-800 font-bold flex items-center gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
+                                    <Loader2 className="h-5 w-5 animate-spin text-slate-900 dark:text-white" />
+                                    <span className="text-slate-900 dark:text-white">{musicGenerateProgress}</span>
+                                  </motion.div>
+                                )}
+                                
+                                {musicGenerateError && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                   <AlertCircle className="h-6 w-6 shrink-0" />
                                   <span className="break-words">{musicGenerateError}</span>
@@ -649,40 +713,68 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-8 h-full flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                          <AnimatePresence mode="wait">
-                            {generatedMusicUrl ? (
-                              <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full group flex flex-col gap-6">
-                                <div className="border-b-4 border-slate-900 dark:border-white pb-4 flex items-center justify-between">
-                                  <h3 className="text-2xl font-black uppercase">生成完毕</h3>
+                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+                            <div className="flex-1 flex items-center justify-center relative min-h-0">
+                              <AnimatePresence mode="wait">
+                                {generatedMusicUrl ? (
+                                  <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full group flex flex-col gap-6">
+                                    <div className="border-b-4 border-slate-900 dark:border-white pb-4 flex items-center justify-between">
+                                      <h3 className="text-2xl font-black uppercase">生成完毕</h3>
+                                    </div>
+                                    <audio src={generatedMusicUrl} controls className={`w-full ${brutalBorder}`} />
+                                    <div className="flex gap-4 mt-4">
+                                      <button onClick={clearGeneratedMusic} className={`flex-1 py-3 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                      <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-slate-50 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
+                                        {musicLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} 复制链接
+                                      </button>
+                                      <a href={generatedMusicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                                        <button className={`w-full py-3 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                      </a>
+                                    </div>
+                                  </motion.div>
+                                ) : isGeneratingMusic ? (
+                                  <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
+                                    <div className={`w-full h-24 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在合成音频...</div>
+                                  </motion.div>
+                                ) : (
+                                  <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
+                                    <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                      <Music className="h-16 w-16 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
+                                    <p className="font-bold text-sm">在左侧输入你的音乐灵感</p>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+
+                            {/* 画廊部分 */}
+                            {musicGallery && musicGallery.length > 0 && (
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
+                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
+                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
+                                  {musicGallery.map((item) => (
+                                    <div 
+                                      key={item.id} 
+                                      className={`shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`}
+                                      onClick={() => useAgentStore.setState({ generatedMusicUrl: item.url })}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                          <Music className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-bold text-sm truncate" title={item.prompt}>{item.prompt}</p>
+                                          <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
-                                <audio src={generatedMusicUrl} controls className={`w-full ${brutalBorder}`} />
-                                <div className="flex gap-4 mt-4">
-                                  <button onClick={clearGeneratedMusic} className={`flex-1 py-3 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                  <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-slate-50 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
-                                    {musicLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} 复制链接
-                                  </button>
-                                  <a href={generatedMusicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                                    <button className={`w-full py-3 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                  </a>
-                                </div>
-                              </motion.div>
-                            ) : isGeneratingMusic ? (
-                              <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
-                                <div className={`w-full h-24 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在合成音频...</div>
-                              </motion.div>
-                            ) : (
-                              <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
-                                <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                                  <Music className="h-16 w-16 text-slate-900 dark:text-white" />
-                                </div>
-                                <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                <p className="font-bold text-sm">在左侧输入你的音乐灵感</p>
-                              </motion.div>
+                              </div>
                             )}
-                          </AnimatePresence>
-                        </div>
+                          </div>
                       </div>
                     )}
 

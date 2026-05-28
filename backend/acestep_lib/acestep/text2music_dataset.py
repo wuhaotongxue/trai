@@ -1,17 +1,16 @@
-import torch
-import numpy as np
 import random
-from torch.utils.data import Dataset
+import re
+import traceback
+import warnings
+
+import torch
+import torchaudio
 from datasets import load_from_disk
 from loguru import logger
-import time
-import traceback
-import torchaudio
-from pathlib import Path
-import re
+from torch.utils.data import Dataset
+
 from acestep.language_segmentation import LangSegment
 from acestep.models.lyrics_utils.lyric_tokenizer import VoiceBpeTokenizer
-import warnings
 
 warnings.simplefilter("ignore", category=FutureWarning)
 

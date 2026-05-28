@@ -14,13 +14,13 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "src"))
 
+from loguru import logger
+
 from infrastructure.database.database import Database
 from infrastructure.database.models import (
-    Base,
     ChatLogModel,
     LoginLogModel,
 )
-from loguru import logger
 
 
 def init_tables() -> None:

@@ -91,7 +91,7 @@ const SIDEBAR_STYLES = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column' as const,
-    borderRight: '1px solid var(--ui_border)',
+    borderRight: '2px solid var(--ui_border)',
     transition: 'width var(--ui_transition_normal)',
     overflow: 'hidden',
   },
@@ -102,7 +102,7 @@ const SIDEBAR_STYLES = {
   },
   header: {
     padding: '20px 16px',
-    borderBottom: '1px solid var(--ui_border)',
+    borderBottom: '2px solid var(--ui_border)',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '12px',
@@ -122,7 +122,7 @@ const SIDEBAR_STYLES = {
   },
   footer: {
     padding: '12px 16px',
-    borderTop: '1px solid var(--ui_border)',
+    borderTop: '2px solid var(--ui_border)',
     display: 'flex',
     alignItems: 'center',
   },

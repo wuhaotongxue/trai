@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Verify S3 upload"""
-import boto3
 import os
 from pathlib import Path
+
+import boto3
 
 _env_file = Path(__file__).parent.parent.parent / ".env"
 if _env_file.exists():

@@ -117,7 +117,7 @@ const TitleBar: React.FC = () => {
         fontSize: '12px',
         color: 'var(--ui_text)',
         boxSizing: 'border-box',
-        borderBottom: '1px solid var(--ui_border)',
+        borderBottom: '2px solid var(--ui_border)',
         position: 'relative',
         zIndex: 1000,
       }}

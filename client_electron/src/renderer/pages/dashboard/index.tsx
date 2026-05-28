@@ -307,8 +307,8 @@ const Dashboard: React.FC = () => {
                       style={{
                         padding: '20px',
                         background: 'var(--ui_panel)',
-                        border: '1px solid var(--ui_border)',
-                        borderRadius: '12px',
+                        border: '2px solid var(--ui_border)',
+                        borderRadius: 'var(--ui_radius_lg)',
                         animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.06}s both`,
                         boxShadow: 'var(--ui_shadow_sm)'
                       }}
@@ -320,32 +320,32 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--ui_border)' }}>
-                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)' }}>模型使用分布</h3>
+                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: 'var(--ui_radius_lg)', border: '2px solid var(--ui_border)', boxShadow: 'var(--ui_shadow_sm)' }}>
+                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 800 }}>模型使用分布</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {(api_usage.models_distribution || []).map((m: any, i: number) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '13px', color: 'var(--ui_text_secondary)' }}>{m.model}</span>
+                          <span style={{ fontSize: '13px', color: 'var(--ui_text_secondary)', fontWeight: 700 }}>{m.model}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, margin: '0 16px' }}>
-                            <div style={{ flex: 1, height: '6px', background: 'var(--ui_border)', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${m.percentage}%`, height: '100%', background: 'var(--ui_accent)', borderRadius: '3px' }} />
+                            <div style={{ flex: 1, height: '12px', background: 'var(--ui_border)', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--ui_border)' }}>
+                              <div style={{ width: `${m.percentage}%`, height: '100%', background: 'var(--ui_accent)' }} />
                             </div>
                           </div>
-                          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)', minWidth: '40px', textAlign: 'right' }}>{m.percentage}%</span>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ui_text)', minWidth: '40px', textAlign: 'right' }}>{m.percentage}%</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--ui_border)' }}>
-                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)' }}>用户调用排行</h3>
+                  <div style={{ background: 'var(--ui_panel)', padding: '20px', borderRadius: 'var(--ui_radius_lg)', border: '2px solid var(--ui_border)', boxShadow: 'var(--ui_shadow_sm)' }}>
+                    <h3 style={{ margin: '0 0 16px 0', fontSize: '14px', color: 'var(--ui_text)', fontWeight: 800 }}>用户调用排行</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {(api_usage.top_users || []).map((u: any, i: number) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--ui_panel_alt)', borderRadius: '8px' }}>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--ui_panel_alt)', borderRadius: 'var(--ui_radius_sm)', border: '2px solid var(--ui_border)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '24px', height: '24px', borderRadius: '12px', background: 'var(--ui_accent_light)', color: 'var(--ui_accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600 }}>{i + 1}</div>
+                            <div style={{ width: '24px', height: '24px', borderRadius: 'var(--ui_radius_sm)', background: 'var(--ui_accent_light)', color: 'var(--ui_accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, border: '2px solid var(--ui_accent)' }}>{i + 1}</div>
                             <div>
-                              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ui_text)' }}>{u.user_id}</div>
+                              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--ui_text)' }}>{u.user_id}</div>
                               <div style={{ fontSize: '11px', color: 'var(--ui_text_muted)' }}>{u.department}</div>
                             </div>
                           </div>
@@ -387,9 +387,10 @@ const Dashboard: React.FC = () => {
                     style={{
                       padding: '20px',
                       background: item.bgColor,
-                      border: '1px solid var(--ui_border)',
-                      borderRadius: '12px',
+                      border: '2px solid var(--ui_border)',
+                      borderRadius: 'var(--ui_radius_lg)',
                       animation: `fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.06}s both`,
+                      boxShadow: 'var(--ui_shadow_sm)',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
@@ -423,65 +424,65 @@ const Dashboard: React.FC = () => {
             <h2 style={{ fontSize: '16px', margin: '0 0 20px 0', color: 'var(--ui_text)', fontWeight: 600 }}>{translate('performance_monitor')}</h2>
             {metrics ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: 'var(--ui_radius_lg)', border: '2px solid var(--ui_border)', padding: '20px', boxShadow: 'var(--ui_shadow_sm)', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: 'var(--ui_radius_md)', background: 'var(--ui_accent_light)', border: '2px solid var(--ui_accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Activity size={22} color="var(--ui_accent)" />
                       </div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>CPU</div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ui_text)' }}>CPU</div>
                     </div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_accent)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--ui_accent)' }}>{format_percent(metrics.cpu_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '10px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', background: 'linear-gradient(90deg, var(--ui_accent), var(--ui_accent_hover))', borderRadius: '999px', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ height: '16px', backgroundColor: 'var(--ui_panel_alt)', border: '2px solid var(--ui_border)', borderRadius: '0', overflow: 'hidden', marginBottom: '16px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.cpu_usage_percent)}%`, height: '100%', background: 'var(--ui_accent)', borderRight: '2px solid var(--ui_border)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={cpu_series} stroke="var(--ui_accent)" seq={chart_seq} />
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: 'var(--ui_radius_lg)', border: '2px solid var(--ui_border)', padding: '20px', boxShadow: 'var(--ui_shadow_sm)', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: 'var(--ui_radius_md)', background: 'var(--ui_success_light)', border: '2px solid var(--ui_success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <HardDrive size={22} color="var(--ui_success)" />
                       </div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{translate('memory')}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ui_text)' }}>{translate('memory')}</div>
                     </div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ui_success)' }}>{format_percent(metrics.mem_usage_percent)}</div>
+                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--ui_success)' }}>{format_percent(metrics.mem_usage_percent)}</div>
                   </div>
-                  <div style={{ height: '10px', backgroundColor: 'var(--ui_border)', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
-                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', background: 'linear-gradient(90deg, var(--ui_success), var(--ui_success))', borderRadius: '999px', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ height: '16px', backgroundColor: 'var(--ui_panel_alt)', border: '2px solid var(--ui_border)', borderRadius: '0', overflow: 'hidden', marginBottom: '16px' }}>
+                    <div style={{ width: `${clamp_percent(metrics.mem_usage_percent)}%`, height: '100%', background: 'var(--ui_success)', borderRight: '2px solid var(--ui_border)', transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                   </div>
                   <MiniLineChart values={mem_series} stroke="var(--ui_success)" seq={chart_seq} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', color: 'var(--ui_text_muted)', fontSize: '13px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', color: 'var(--ui_text_muted)', fontSize: '13px', fontWeight: 600 }}>
                     <span>{translate('available')} {format_gb(metrics.free_mem)}</span>
                     <span>{translate('total')} {format_gb(metrics.total_mem)}</span>
                   </div>
                 </div>
 
-                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: '16px', border: '1px solid var(--ui_border)', padding: '20px', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <div style={{ backgroundColor: 'var(--ui_panel)', borderRadius: 'var(--ui_radius_lg)', border: '2px solid var(--ui_border)', padding: '20px', boxShadow: 'var(--ui_shadow_sm)', animation: 'fadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: 'var(--ui_radius_md)', background: 'var(--ui_accent_light)', border: '2px solid var(--ui_accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <LayoutDashboard size={22} color="var(--ui_accent)" />
                     </div>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ui_text)' }}>{translate('process_memory')}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--ui_text)' }}>{translate('process_memory')}</div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>RSS</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_rss)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: 'var(--ui_radius_sm)', border: '2px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 800 }}>RSS</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_rss)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Heap Used</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_used)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: 'var(--ui_radius_sm)', border: '2px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 800 }}>Heap Used</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_used)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Heap Total</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_total)}</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: 'var(--ui_radius_sm)', border: '2px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 800 }}>Heap Total</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--ui_text)' }}>{format_bytes(metrics.process_heap_total)}</div>
                     </div>
-                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: '10px', border: '1px solid var(--ui_border)', padding: '14px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 500 }}>Uptime</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--ui_text)' }}>{Math.floor(metrics.uptime_sec)} s</div>
+                    <div style={{ backgroundColor: 'var(--ui_panel_alt)', borderRadius: 'var(--ui_radius_sm)', border: '2px solid var(--ui_border)', padding: '14px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--ui_text_muted)', marginBottom: '6px', fontWeight: 800 }}>Uptime</div>
+                      <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--ui_text)' }}>{Math.floor(metrics.uptime_sec)} s</div>
                     </div>
                   </div>
                 </div>

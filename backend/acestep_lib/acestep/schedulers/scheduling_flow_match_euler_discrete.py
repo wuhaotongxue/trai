@@ -14,15 +14,12 @@
 
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-
 from diffusers.configuration_utils import ConfigMixin, register_to_config
-from diffusers.utils import BaseOutput, logging
 from diffusers.schedulers.scheduling_utils import SchedulerMixin
-
+from diffusers.utils import BaseOutput, logging
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 
@@ -67,11 +64,11 @@ class FlowMatchEulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
         num_train_timesteps: int = 1000,
         shift: float = 1.0,
         use_dynamic_shifting=False,
-        base_shift: Optional[float] = 0.5,
-        max_shift: Optional[float] = 1.15,
-        base_image_seq_len: Optional[int] = 256,
-        max_image_seq_len: Optional[int] = 4096,
-        sigma_max: Optional[float] = 1.0,
+        base_shift: float | None = 0.5,
+        max_shift: float | None = 1.15,
+        base_image_seq_len: int | None = 256,
+        max_image_seq_len: int | None = 4096,
+        sigma_max: float | None = 1.0,
     ):
         timesteps = np.linspace(
             1.0, sigma_max*num_train_timesteps, num_train_timesteps, dtype=np.float32
@@ -120,8 +117,8 @@ class FlowMatchEulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
     def scale_noise(
         self,
         sample: torch.FloatTensor,
-        timestep: Union[float, torch.FloatTensor],
-        noise: Optional[torch.FloatTensor] = None,
+        timestep: float | torch.FloatTensor,
+        noise: torch.FloatTensor | None = None,
     ) -> torch.FloatTensor:
         """
         Forward process in flow-matching
@@ -176,9 +173,9 @@ class FlowMatchEulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
     def set_timesteps(
         self,
         num_inference_steps: int = None,
-        device: Union[str, torch.device] = None,
-        sigmas: Optional[List[float]] = None,
-        mu: Optional[float] = None,
+        device: str | torch.device = None,
+        sigmas: list[float] | None = None,
+        mu: float | None = None,
     ):
         """
         Sets the discrete timesteps used for the diffusion chain (to be run before inference).
@@ -244,16 +241,16 @@ class FlowMatchEulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
     def step(
         self,
         model_output: torch.FloatTensor,
-        timestep: Union[float, torch.FloatTensor],
+        timestep: float | torch.FloatTensor,
         sample: torch.FloatTensor,
         s_churn: float = 0.0,
         s_tmin: float = 0.0,
         s_tmax: float = float("inf"),
         s_noise: float = 1.0,
-        generator: Optional[torch.Generator] = None,
+        generator: torch.Generator | None = None,
         return_dict: bool = True,
-        omega: Union[float, np.array] = 0.0,
-    ) -> Union[FlowMatchEulerDiscreteSchedulerOutput, Tuple]:
+        omega: float | np.array = 0.0,
+    ) -> FlowMatchEulerDiscreteSchedulerOutput | tuple:
         """
         Predict the sample from the previous timestep by reversing the SDE. This function propagates the diffusion
         process from the learned model outputs (most often the predicted noise).

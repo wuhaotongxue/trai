@@ -36,8 +36,8 @@ class VideoDubbingTool(BaseTool):
             id="video_dubbing",
             name="视频自动配音",
             description="自动对视频进行人声分离、翻译、声音克隆或口型同步操作。当你收到用户的视频配音指令时调用此工具。",
-            category=ToolCategory.MEDIA,
-            risk_level=RiskLevel.MEDIUM,
+            category=ToolCategory.VIDEO,
+            risk_level=RiskLevel.MONITORED,
             parameters=[
                 ToolParameter(
                     name="video_path",

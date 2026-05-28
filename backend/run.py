@@ -199,37 +199,48 @@ class PortCleaner:
         print(f"端口 {port} 检测")
         print(f"{'=' * 60}")
 
-        processes = cls.find_processes_on_port(port)
+        max_retries = 3
+        for attempt in range(max_retries):
+            processes = cls.find_processes_on_port(port)
 
-        if not processes:
-            print(f"  [OK] 端口 {port} 空闲")
-            return True
-
-        print(f"  [!] 发现 {len(processes)} 个进程占用端口 {port}:")
-
-        killed_any = False
-        for proc in processes:
-            if proc["pid"] == os.getpid():
-                print(f"  [~] 跳过自身: {proc['name']} (PID: {proc['pid']})")
-                continue
-
-            if cls.kill_process(proc["pid"], proc["name"]):
-                killed_any = True
-                time.sleep(0.5)
-
-        if killed_any:
-            time.sleep(1)
-            remaining = cls.find_processes_on_port(port)
-            if remaining:
-                print(f"  [!] 警告: 仍有 {len(remaining)} 个进程占用端口")
-                for p in remaining:
-                    print(f"      - {p['name']} (PID: {p['pid']})")
-                return False
-            else:
-                print(f"  [OK] 端口 {port} 已释放")
+            if not processes:
+                if attempt == 0:
+                    print(f"  [OK] 端口 {port} 空闲")
+                else:
+                    print(f"  [OK] 端口 {port} 已释放")
                 return True
 
-        return False
+            if attempt == 0:
+                print(f"  [!] 发现 {len(processes)} 个进程占用端口 {port}:")
+            else:
+                print(f"  [!] 第 {attempt + 1} 次重试: 仍有 {len(processes)} 个进程占用端口 {port}:")
+
+            killed_any = False
+            for proc in processes:
+                if proc["pid"] == os.getpid():
+                    print(f"  [~] 跳过自身: {proc['name']} (PID: {proc['pid']})")
+                    continue
+
+                if cls.kill_process(proc["pid"], proc["name"]):
+                    killed_any = True
+                    time.sleep(0.5)
+
+            if killed_any:
+                time.sleep(1)
+            else:
+                # 没有任何进程被杀掉(可能是自身或无法终止), 跳出循环
+                break
+
+        remaining = cls.find_processes_on_port(port)
+        if remaining:
+            print(f"  [!] 警告: 仍有 {len(remaining)} 个进程占用端口")
+            for p in remaining:
+                print(f"      - {p['name']} (PID: {p['pid']})")
+            return False
+        else:
+            if max_retries > 1:
+                print(f"  [OK] 端口 {port} 已彻底释放")
+            return True
 
 
 def get_config() -> dict[str, Any]:
@@ -253,7 +264,7 @@ def main() -> None:
     config = get_config()
 
     print(f"\n{'=' * 60}")
-    print(f"TRAI 后端服务")
+    print("TRAI 后端服务")
     print(f"{'=' * 60}")
     print(f"工作目录: {Path(__file__).resolve().parent}")
     print(f"目标端口: {config['port']}")
@@ -267,7 +278,7 @@ def main() -> None:
         print("\n[!] 端口清理未完成,继续启动可能失败")
 
     print(f"{'=' * 60}")
-    print(f"[启动] 后端服务...")
+    print("[启动] 后端服务...")
     print(f"{'=' * 60}")
 
     import socket as _socket
@@ -294,7 +305,7 @@ def main() -> None:
     log_file = log_dir / f"backend_{timestamp}.log"
 
     print(f"{'=' * 60}")
-    print(f"[启动] 后端服务...")
+    print("[启动] 后端服务...")
     print(f"{'=' * 60}")
 
     # 启动日志写入器
@@ -309,7 +320,7 @@ def main() -> None:
         def _start(self) -> None:
             """启动日志文件写入"""
             self.file_handle = open(self.file_path, "w", encoding="utf-8")
-            self._write(f"TRAI Backend Service Log\n")
+            self._write("TRAI Backend Service Log\n")
             self._write(f"Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             self._write(f"Port: {config['port']}\n")
             self._write(f"Debug: {config['reload']}\n")
@@ -395,7 +406,7 @@ def main() -> None:
     print(f"[PID] {os.getpid()}")
     print(f"[日志] {log_file}")
     print(f"[地址] http://localhost:{config['port']}")
-    print(f"[提示] 按 Ctrl+C 停止")
+    print("[提示] 按 Ctrl+C 停止")
     print(f"{'=' * 60}\n")
 
     # 恢复 stdout

@@ -46,10 +46,10 @@ function Reveal({ children, delay = 0, className = "" }: {
 }
 
 const team = [
-  { name: "Wuhao", role: "Product Manager", desc: "Leading the vision and strategy for TRAI.", avatar: "W", color: "bg-cyan-400" },
-  { name: "Developer A", role: "Fullstack Engineer", desc: "Building scalable backend and robust frontend.", avatar: "A", color: "bg-emerald-400" },
-  { name: "Designer B", role: "UI/UX Designer", desc: "Crafting the Neo-Brutalism experience.", avatar: "B", color: "bg-indigo-400" },
-  { name: "Expert C", role: "AI Researcher", desc: "Integrating top-tier AI models.", avatar: "C", color: "bg-rose-400" },
+  { name: "Wuhao", role: "Product Manager", desc: "Leading the vision and strategy for TRAI.", avatar: "W", color: "bg-cyan-300 dark:bg-cyan-600" },
+  { name: "Developer A", role: "Fullstack Engineer", desc: "Building scalable backend and robust frontend.", avatar: "A", color: "bg-emerald-300 dark:bg-emerald-600" },
+  { name: "Designer B", role: "UI/UX Designer", desc: "Crafting the Neo-Brutalism experience.", avatar: "B", color: "bg-indigo-300 dark:bg-indigo-600" },
+  { name: "Expert C", role: "AI Researcher", desc: "Integrating top-tier AI models.", avatar: "C", color: "bg-rose-300 dark:bg-rose-600" },
 ];
 
 const milestones = [

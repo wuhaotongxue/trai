@@ -75,12 +75,12 @@ export default function ContactMessagesPage() {
     try {
       const response = await adminApi.getContactMessages({
         page,
-        size: pageSize,
+        page_size: pageSize,
         status: statusFilter === "all" ? undefined : statusFilter,
         type: typeFilter === "all" ? undefined : typeFilter,
       });
-      if (response && response.items) {
-        setMessages(response.items);
+      if (response && response.data) {
+        setMessages(response.data as unknown as ContactMessage[]);
         setTotal(response.total || 0);
       }
     } catch (error) {

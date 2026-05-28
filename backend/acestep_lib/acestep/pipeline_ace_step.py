@@ -6,18 +6,35 @@ https://github.com/ace-step/ACE-Step
 Apache 2.0 License
 """
 
-import random
-import time
-import os
-import re
-import sys
-
-import torch
-from loguru import logger
-from tqdm import tqdm
 import json
 import math
+import os
+import random
+import re
+import time
+
+import torch
+from diffusers.pipelines.stable_diffusion_3.pipeline_stable_diffusion_3 import (
+    retrieve_timesteps,
+)
+from diffusers.utils.peft_utils import set_weights_and_activate_adapters
+from diffusers.utils.torch_utils import randn_tensor
 from huggingface_hub import snapshot_download
+from loguru import logger
+from tqdm import tqdm
+from transformers import AutoTokenizer, UMT5EncoderModel
+
+from acestep.apg_guidance import (
+    MomentumBuffer,
+    apg_forward,
+    cfg_double_condition_forward,
+    cfg_forward,
+    cfg_zero_star,
+)
+from acestep.language_segmentation import LangSegment, language_filters
+from acestep.models.ace_step_transformer import ACEStepTransformer2DModel
+from acestep.models.lyrics_utils.lyric_tokenizer import VoiceBpeTokenizer
+from acestep.music_dcae.music_dcae_pipeline import MusicDCAE
 
 # from diffusers.pipelines.pipeline_utils import DiffusionPipeline
 from acestep.schedulers.scheduling_flow_match_euler_discrete import (
@@ -29,27 +46,8 @@ from acestep.schedulers.scheduling_flow_match_heun_discrete import (
 from acestep.schedulers.scheduling_flow_match_pingpong import (
     FlowMatchPingPongScheduler,
 )
-from diffusers.pipelines.stable_diffusion_3.pipeline_stable_diffusion_3 import (
-    retrieve_timesteps,
-)
-from diffusers.utils.torch_utils import randn_tensor
-from diffusers.utils.peft_utils import set_weights_and_activate_adapters
-from transformers import UMT5EncoderModel, AutoTokenizer
 
-from acestep.language_segmentation import LangSegment, language_filters
-from acestep.music_dcae.music_dcae_pipeline import MusicDCAE
-from acestep.models.ace_step_transformer import ACEStepTransformer2DModel
-from acestep.models.lyrics_utils.lyric_tokenizer import VoiceBpeTokenizer
-from acestep.apg_guidance import (
-    apg_forward,
-    MomentumBuffer,
-    cfg_forward,
-    cfg_zero_star,
-    cfg_double_condition_forward,
-)
-import torchaudio
-from .cpu_offload import cpu_offload, CpuOffloader
-
+from .cpu_offload import CpuOffloader, cpu_offload
 
 torch.backends.cudnn.benchmark = False
 torch.set_float32_matmul_precision("high")
@@ -157,7 +155,7 @@ class ACEStepPipeline:
 
     def get_checkpoint_path(self, checkpoint_dir, repo):
         checkpoint_dir_models = None
-        
+
         if checkpoint_dir is not None:
             required_dirs = ["music_dcae_f8c8", "music_vocoder", "ace_step_transformer", "umt5-base"]
             all_dirs_exist = True
@@ -166,11 +164,11 @@ class ACEStepPipeline:
                 if not os.path.exists(dir_path):
                     all_dirs_exist = False
                     break
-            
+
             if all_dirs_exist:
                 logger.info(f"Load models from: {checkpoint_dir}")
                 checkpoint_dir_models = checkpoint_dir
-        
+
         if checkpoint_dir_models is None:
             if checkpoint_dir is None:
                 logger.info(f"Download models from Hugging Face: {repo}")
@@ -241,8 +239,8 @@ class ACEStepPipeline:
         if self.torch_compile:
             if export_quantized_weights:
                 from torch.ao.quantization import (
-                    quantize_,
                     Int4WeightOnlyConfig,
+                    quantize_,
                 )
 
                 group_size = 128
@@ -432,7 +430,7 @@ class ACEStepPipeline:
             language = langCounts[0][0]
             if len(langCounts) > 1 and language == "en":
                 language = langCounts[1][0]
-        except Exception as err:
+        except Exception:
             language = "en"
         return language
 
@@ -656,7 +654,7 @@ class ACEStepPipeline:
         n_min = int(infer_steps * n_min)
         n_max = int(infer_steps * n_max)
 
-        logger.info("flowedit start from {} to {}".format(n_min, n_max))
+        logger.info(f"flowedit start from {n_min} to {n_max}")
 
         for i, t in tqdm(enumerate(timesteps), total=T_steps):
 
@@ -846,9 +844,7 @@ class ACEStepPipeline:
     ):
 
         logger.info(
-            "cfg_type: {}, guidance_scale: {}, omega_scale: {}".format(
-                cfg_type, guidance_scale, omega_scale
-            )
+            f"cfg_type: {cfg_type}, guidance_scale: {guidance_scale}, omega_scale: {omega_scale}"
         )
         do_classifier_free_guidance = True
         if guidance_scale == 0.0 or guidance_scale == 1.0:
@@ -863,11 +859,7 @@ class ACEStepPipeline:
         ):
             do_double_condition_guidance = True
             logger.info(
-                "do_double_condition_guidance: {}, guidance_scale_text: {}, guidance_scale_lyric: {}".format(
-                    do_double_condition_guidance,
-                    guidance_scale_text,
-                    guidance_scale_lyric,
-                )
+                f"do_double_condition_guidance: {do_double_condition_guidance}, guidance_scale_text: {guidance_scale_text}, guidance_scale_lyric: {guidance_scale_lyric}"
             )
 
         bsz = encoder_text_hidden_states.shape[0]
@@ -891,7 +883,7 @@ class ACEStepPipeline:
         frame_length = int(duration * 44100 / 512 / 8)
         if src_latents is not None:
             frame_length = src_latents.shape[-1]
-        
+
         if ref_latents is not None:
             frame_length = ref_latents.shape[-1]
 
@@ -1392,7 +1384,7 @@ class ACEStepPipeline:
         self, target_wav, idx, save_path=None, sample_rate=48000, format="wav"
     ):
         import soundfile as sf
-        
+
         if save_path is None:
             logger.warning("save_path is None, using default path ./outputs/")
             base_path = "./outputs"
@@ -1569,7 +1561,7 @@ class ACEStepPipeline:
                 src_audio_path
             ), f"src_audio_path {src_audio_path} does not exist"
             src_latents = self.infer_latents(src_audio_path)
-        
+
         ref_latents = None
         if ref_audio_input is not None and audio2audio_enable:
             assert ref_audio_input is not None, "ref_audio_input is required for audio2audio task"

@@ -1,5 +1,5 @@
-from typing import Optional, Tuple, Union
 import math
+
 import torch
 from torch import nn
 
@@ -77,7 +77,7 @@ class ConvolutionModule(nn.Module):
         x: torch.Tensor,
         mask_pad: torch.Tensor = torch.ones((0, 0, 0), dtype=torch.bool),
         cache: torch.Tensor = torch.zeros((0, 0, 0)),
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Compute convolution module.
         Args:
             x (torch.Tensor): Input tensor (#batch, time, channels).
@@ -151,7 +151,7 @@ class PositionwiseFeedForward(torch.nn.Module):
         activation: torch.nn.Module = torch.nn.ReLU(),
     ):
         """Construct a PositionwiseFeedForward object."""
-        super(PositionwiseFeedForward, self).__init__()
+        super().__init__()
         self.w_1 = torch.nn.Linear(idim, hidden_units)
         self.activation = activation
         self.dropout = torch.nn.Dropout(dropout_rate)
@@ -203,7 +203,7 @@ class MultiHeadedAttention(nn.Module):
 
     def forward_qkv(
         self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Transform query, key and value.
 
         Args:
@@ -280,7 +280,7 @@ class MultiHeadedAttention(nn.Module):
         mask: torch.Tensor = torch.ones((0, 0, 0), dtype=torch.bool),
         pos_emb: torch.Tensor = torch.empty(0),
         cache: torch.Tensor = torch.zeros((0, 0, 0, 0)),
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Compute scaled dot product attention.
 
         Args:
@@ -375,7 +375,7 @@ class RelPositionMultiHeadedAttention(MultiHeadedAttention):
         mask: torch.Tensor = torch.ones((0, 0, 0), dtype=torch.bool),
         pos_emb: torch.Tensor = torch.empty(0),
         cache: torch.Tensor = torch.zeros((0, 0, 0, 0)),
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Compute 'Scaled Dot Product Attention' with rel. positional encoding.
         Args:
             query (torch.Tensor): Query tensor (#batch, time1, size).
@@ -607,9 +607,9 @@ class ConformerEncoderLayer(nn.Module):
         self,
         size: int,
         self_attn: torch.nn.Module,
-        feed_forward: Optional[nn.Module] = None,
-        feed_forward_macaron: Optional[nn.Module] = None,
-        conv_module: Optional[nn.Module] = None,
+        feed_forward: nn.Module | None = None,
+        feed_forward_macaron: nn.Module | None = None,
+        conv_module: nn.Module | None = None,
         dropout_rate: float = 0.1,
         normalize_before: bool = True,
     ):
@@ -643,7 +643,7 @@ class ConformerEncoderLayer(nn.Module):
         mask_pad: torch.Tensor = torch.ones((0, 0, 0), dtype=torch.bool),
         att_cache: torch.Tensor = torch.zeros((0, 0, 0, 0)),
         cnn_cache: torch.Tensor = torch.zeros((0, 0, 0, 0)),
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Compute encoded features.
 
         Args:
@@ -728,7 +728,7 @@ class EspnetRelPositionalEncoding(torch.nn.Module):
 
     def __init__(self, d_model: int, dropout_rate: float, max_len: int = 5000):
         """Construct an PositionalEncoding object."""
-        super(EspnetRelPositionalEncoding, self).__init__()
+        super().__init__()
         self.d_model = d_model
         self.xscale = math.sqrt(self.d_model)
         self.dropout = torch.nn.Dropout(p=dropout_rate)
@@ -768,8 +768,8 @@ class EspnetRelPositionalEncoding(torch.nn.Module):
         self.pe = pe.to(device=x.device, dtype=x.dtype)
 
     def forward(
-        self, x: torch.Tensor, offset: Union[int, torch.Tensor] = 0
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, x: torch.Tensor, offset: int | torch.Tensor = 0
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Add positional encoding.
 
         Args:
@@ -785,7 +785,7 @@ class EspnetRelPositionalEncoding(torch.nn.Module):
         return self.dropout(x), self.dropout(pos_emb)
 
     def position_encoding(
-        self, offset: Union[int, torch.Tensor], size: int
+        self, offset: int | torch.Tensor, size: int
     ) -> torch.Tensor:
         """For getting encoding in a streaming fashion
 
@@ -832,13 +832,13 @@ class LinearEmbed(torch.nn.Module):
         self.pos_enc = pos_enc_class  # rel_pos_espnet
 
     def position_encoding(
-        self, offset: Union[int, torch.Tensor], size: int
+        self, offset: int | torch.Tensor, size: int
     ) -> torch.Tensor:
         return self.pos_enc.position_encoding(offset, size)
 
     def forward(
-        self, x: torch.Tensor, offset: Union[int, torch.Tensor] = 0
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        self, x: torch.Tensor, offset: int | torch.Tensor = 0
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Input x.
 
         Args:
@@ -1041,7 +1041,7 @@ class ConformerEncoder(torch.nn.Module):
         pad_mask: torch.Tensor,
         decoding_chunk_size: int = 0,
         num_decoding_left_chunks: int = -1,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Embed positions in tensor.
 
         Args:

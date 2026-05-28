@@ -25,12 +25,12 @@ const trustedBy = [
 ];
 
 const features = [
-  { icon: Bot, color: "bg-slate-100", key: "agent", title: "智能 Agent", desc: "高度定制化的 AI 助手，满足复杂业务需求" },
-  { icon: Zap, color: "bg-slate-100", key: "correction", title: "极速响应", desc: "底层深度优化，毫秒级 API 调用延迟" },
-  { icon: Image, color: "bg-slate-100", key: "vision", title: "视觉大模型", desc: "支持图生图、多图编辑等高阶图像能力" },
-  { icon: MessageSquare, color: "bg-slate-100", key: "streaming", title: "流式交互", desc: "原生支持 SSE，提供打字机般丝滑体验" },
-  { icon: Shield, color: "bg-slate-100", key: "quota", title: "配额管控", desc: "企业级租户隔离与精确到 Token 的计费" },
-  { icon: BarChart3, color: "bg-purple-400", key: "analytics", title: "数据洞察", desc: "全景大屏与多维统计，调用情况一目了然" },
+  { icon: Bot, color: "bg-slate-100 dark:bg-slate-700", key: "agent", title: "智能 Agent", desc: "高度定制化的 AI 助手，满足复杂业务需求" },
+  { icon: Zap, color: "bg-cyan-200 dark:bg-cyan-900", key: "correction", title: "极速响应", desc: "底层深度优化，毫秒级 API 调用延迟" },
+  { icon: Image, color: "bg-slate-200 dark:bg-slate-600", key: "vision", title: "视觉大模型", desc: "支持图生图、多图编辑等高阶图像能力" },
+  { icon: MessageSquare, color: "bg-cyan-100 dark:bg-cyan-800", key: "streaming", title: "流式交互", desc: "原生支持 SSE，提供打字机般丝滑体验" },
+  { icon: Shield, color: "bg-slate-300 dark:bg-slate-500", key: "quota", title: "配额管控", desc: "企业级租户隔离与精确到 Token 的计费" },
+  { icon: BarChart3, color: "bg-cyan-300 dark:bg-cyan-700", key: "analytics", title: "数据洞察", desc: "全景大屏与多维统计，调用情况一目了然" },
 ];
 
 const stats = [
@@ -41,10 +41,10 @@ const stats = [
 ];
 
 const useCases = [
-  { icon: Workflow, key: "support", title: "智能客服", desc: "7x24小时全天候响应", color: "bg-pink-400" },
-  { icon: Database, key: "data", title: "数据分析", desc: "自然语言查询数据库", color: "bg-lime-400" },
+  { icon: Workflow, key: "support", title: "智能客服", desc: "7x24小时全天候响应", color: "bg-cyan-400" },
+  { icon: Database, key: "data", title: "数据分析", desc: "自然语言查询数据库", color: "bg-slate-400" },
   { icon: Globe, key: "content", title: "内容创作", desc: "多语言批量生成文案", color: "bg-slate-100" },
-  { icon: Cpu, key: "auto", title: "自动化流程", desc: "串联多个系统接口", color: "bg-fuchsia-400" },
+  { icon: Cpu, key: "auto", title: "自动化流程", desc: "串联多个系统接口", color: "bg-cyan-200" },
 ];
 
 const steps = [
@@ -160,11 +160,11 @@ export default function HomePage() {
       </section>
 
       {/* ===== Features ===== */}
-      <section className="py-24 bg-indigo-50 dark:bg-slate-800 border-b-4 border-slate-900 dark:border-white">
+      <section className="py-24 bg-slate-50 dark:bg-slate-800 border-b-4 border-slate-900 dark:border-white">
         <div className="container mx-auto px-4">
           <Reveal>
             <div className="mb-16">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-8 border-indigo-500 inline-block pb-2 mb-6">
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-8 border-cyan-500 inline-block pb-2 mb-6">
                 核心能力架构
               </h2>
               <p className="text-xl font-bold text-slate-700 dark:text-slate-300">
@@ -209,11 +209,11 @@ export default function HomePage() {
       </section>
 
       {/* ===== How It Works ===== */}
-      <section className="py-24 bg-emerald-50 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white">
+      <section className="py-24 bg-cyan-50 dark:bg-slate-900 border-b-4 border-slate-900 dark:border-white">
         <div className="container mx-auto px-4">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-8 border-emerald-500 inline-block pb-2">
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-slate-900 dark:text-white border-b-8 border-cyan-500 inline-block pb-2">
                 极简接入流程
               </h2>
             </div>

@@ -7,14 +7,14 @@ Apache 2.0 License
 """
 
 import os
+
 import torch
-from diffusers import AutoencoderDC
 import torchaudio
 import torchvision.transforms as transforms
-from diffusers.models.modeling_utils import ModelMixin
-from diffusers.loaders import FromOriginalModelMixin
+from diffusers import AutoencoderDC
 from diffusers.configuration_utils import ConfigMixin, register_to_config
-from tqdm import tqdm
+from diffusers.loaders import FromOriginalModelMixin
+from diffusers.models.modeling_utils import ModelMixin
 
 try:
     from .music_vocoder import ADaMoSHiFiGANV1
@@ -35,7 +35,7 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
         dcae_checkpoint_path=DEFAULT_PRETRAINED_PATH,
         vocoder_checkpoint_path=VOCODER_PRETRAINED_PATH,
     ):
-        super(MusicDCAE, self).__init__()
+        super().__init__()
 
         self.dcae = AutoencoderDC.from_pretrained(dcae_checkpoint_path)
         self.vocoder = ADaMoSHiFiGANV1.from_pretrained(vocoder_checkpoint_path)
@@ -52,7 +52,7 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
         )
         self.min_mel_value = -11.0
         self.max_mel_value = 3.0
-        self.audio_chunk_size = int(round((1024 * 512 / 44100 * 48000)))
+        self.audio_chunk_size = int(round(1024 * 512 / 44100 * 48000))
         self.mel_chunk_size = 1024
         self.time_dimention_multiple = 8
         self.latent_chunk_size = self.mel_chunk_size // self.time_dimention_multiple
@@ -159,7 +159,7 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
 
         # --- DCAE Parameters ---
         # dcae_win_len_latent: Window length in the latent domain for DCAE processing
-        dcae_win_len_latent = 512 
+        dcae_win_len_latent = 512
         # dcae_mel_win_len: Expected mel window length from DCAE decoder output (latent_win * stride)
         dcae_mel_win_len = dcae_win_len_latent * 8
         # dcae_anchor_offset: Offset from anchor point to actual start of latent window slice
@@ -173,12 +173,12 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
         # vocoder_win_len_audio: Audio samples per vocoder processing window
         vocoder_win_len_audio = 512 * 512 # Example: 262144 samples
         # vocoder_overlap_len_audio: Audio samples for overlap between vocoder windows
-        vocoder_overlap_len_audio = 1024  
+        vocoder_overlap_len_audio = 1024
         # vocoder_hop_len_audio: Hop size in audio samples for vocoder processing
         vocoder_hop_len_audio = vocoder_win_len_audio - 2 * vocoder_overlap_len_audio
         # vocoder_input_mel_frames_per_block: Number of mel frames fed to vocoder in one go
         vocoder_input_mel_frames_per_block = vocoder_win_len_audio // VOCODER_AUDIO_SAMPLES_PER_MEL_FRAME
-        
+
         crossfade_len_audio = 128 # Audio samples for crossfading vocoder outputs
         cf_win_tail = torch.linspace(1, 0, crossfade_len_audio, device=self.device).unsqueeze(0).unsqueeze(0)
         cf_win_head = torch.linspace(0, 1, crossfade_len_audio, device=self.device).unsqueeze(0).unsqueeze(0)
@@ -200,11 +200,11 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                 dcae_anchors = list(range(dcae_anchor_offset, latent_len - dcae_anchor_offset, dcae_anchor_hop))
                 if not dcae_anchors: # If latent is too short for the range, use one anchor
                     dcae_anchors = [dcae_anchor_offset]
-                
+
                 for i, anchor in enumerate(dcae_anchors):
                     win_start_idx = max(0, anchor - dcae_anchor_offset)
                     win_end_idx = min(latent_len, win_start_idx + dcae_win_len_latent)
-                    
+
                     dcae_input_segment = current_latent[:, :, :, win_start_idx:win_end_idx]
                     if dcae_input_segment.shape[3] == 0: continue
 
@@ -229,10 +229,10 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                         mel_to_keep = mel_output_full[:, :, :, dcae_mel_overlap_len:]
                     else: # Middle segment, trim both overlaps
                         mel_to_keep = mel_output_full[:, :, :, dcae_mel_overlap_len:-dcae_mel_overlap_len]
-                    
+
                     if mel_to_keep.shape[3] > 0:
                         mels_segments.append(mel_to_keep)
-            
+
             if not mels_segments:
                 num_mel_channels = current_latent.shape[1]
                 mel_height = self.dcae.decoder_output_mel_height
@@ -246,7 +246,7 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             # Denormalize mels
             concatenated_mels = concatenated_mels * 0.5 + 0.5
             concatenated_mels = concatenated_mels * (self.max_mel_value - self.min_mel_value) + self.min_mel_value
-            
+
             mel_total_frames = concatenated_mels.shape[3]
 
             # 2. Vocoder: Mel Spectrogram to Waveform (Overlapped)
@@ -258,21 +258,21 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                 # Initial vocoder window
                 # Vocoder expects (C_mel, H_mel, W_mel_block)
                 mel_block = concatenated_mels[0, :, :, :vocoder_input_mel_frames_per_block].to(self.device)
-                
+
                 # Pad mel_block if it's shorter than vocoder_input_mel_frames_per_block (e.g. very short audio)
                 if 0 < mel_block.shape[2] < vocoder_input_mel_frames_per_block:
                     pad_len = vocoder_input_mel_frames_per_block - mel_block.shape[2]
                     mel_block = torch.nn.functional.pad(mel_block, (0, pad_len), mode='constant', value=0) # Pad last dim
-                
+
                 current_audio_output = self.vocoder.decode(mel_block) # (C_audio, 1, Samples)
                 current_audio_output = current_audio_output[:, :, :-vocoder_overlap_len_audio] # Remove end overlap
 
                 # p_audio_samples tracks the start of the *next* audio segment to generate (in conceptual total audio samples)
-                p_audio_samples = vocoder_hop_len_audio 
+                p_audio_samples = vocoder_hop_len_audio
                 conceptual_total_audio_len_native_sr = mel_total_frames * VOCODER_AUDIO_SAMPLES_PER_MEL_FRAME
-                
+
                 pbar_total = 1 + max(0, (conceptual_total_audio_len_native_sr - (vocoder_win_len_audio - vocoder_overlap_len_audio))) // vocoder_hop_len_audio
-                
+
                 # Use tqdm if you want a progress bar for the vocoder part
                 # with tqdm(total=pbar_total, desc=f"Vocoder {latent_idx+1}/{len(latents)}", leave=False) as pbar:
                 # pbar.update(1) # For initial window
@@ -280,11 +280,11 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                 while p_audio_samples < conceptual_total_audio_len_native_sr:
                     mel_frame_start = p_audio_samples // VOCODER_AUDIO_SAMPLES_PER_MEL_FRAME
                     mel_frame_end = mel_frame_start + vocoder_input_mel_frames_per_block
-                    
+
                     if mel_frame_start >= mel_total_frames: break # No more mel frames
 
                     mel_block = concatenated_mels[0, :, :, mel_frame_start:min(mel_frame_end, mel_total_frames)].to(self.device)
-                    
+
                     if mel_block.shape[2] == 0: break # Should not happen if mel_frame_start is valid
 
                     # Pad if current mel_block is too short (end of sequence)
@@ -300,10 +300,10 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                     if actual_cf_len > 0: # Ensure valid slice lengths for crossfade
                         tail_part = current_audio_output[:, :, -actual_cf_len:]
                         head_part = new_audio_win[:, :, vocoder_overlap_len_audio - actual_cf_len : vocoder_overlap_len_audio]
-                        
+
                         crossfaded_segment = tail_part * cf_win_tail[:,:,:actual_cf_len] + \
                                              head_part * cf_win_head[:,:,:actual_cf_len]
-                        
+
                         current_audio_output = torch.cat([current_audio_output[:, :, :-actual_cf_len], crossfaded_segment], dim=2)
 
                     # Append non-overlapping part of new_audio_win
@@ -312,12 +312,12 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                         segment_to_append = new_audio_win[:, :, vocoder_overlap_len_audio:]
                     else:
                         segment_to_append = new_audio_win[:, :, vocoder_overlap_len_audio:-vocoder_overlap_len_audio]
-                    
+
                     current_audio_output = torch.cat([current_audio_output, segment_to_append], dim=2)
-                    
+
                     p_audio_samples += vocoder_hop_len_audio
                     # pbar.update(1) # if using tqdm
-                
+
                 final_wav = current_audio_output.squeeze(1) # (C_audio, Samples)
 
             # 3. Resampling (if necessary)
@@ -327,7 +327,7 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
                     MODEL_INTERNAL_SR, final_output_sr, dtype=final_wav.dtype
                 )
                 final_wav = resampler(final_wav.cpu()).to(self.device) # Move back to device if needed later
-            
+
             pred_wavs.append(final_wav)
 
         # 4. Final Truncation
@@ -340,14 +340,14 @@ class MusicDCAE(ModelMixin, ConfigMixin, FromOriginalModelMixin):
             max_possible_len = int(_conceptual_native_audio_len * final_output_sr / MODEL_INTERNAL_SR)
 
             current_wav_len = wav.shape[1]
-            
+
             if audio_lengths is not None:
                 # User-provided length is the primary target, capped by actual and max possible
                 target_len = min(audio_lengths[i], current_wav_len, max_possible_len)
             else:
                 # No user length, use max possible capped by actual
                 target_len = min(max_possible_len, current_wav_len)
-            
+
             processed_pred_wavs.append(wav[:, :max(0, target_len)].cpu()) # Ensure length is non-negative
 
         return final_output_sr, processed_pred_wavs

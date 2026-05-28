@@ -222,7 +222,7 @@ class SubtitleApiRouter:
         from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
         task_id = str(uuid.uuid4())
-        user_id_str = current_user.user_id if current_user else "anonymous"
+        user_id_str = current_user.get("user_id", "anonymous") if current_user else "anonymous"
 
         record = SubtitleRecord(
             id=task_id,
@@ -310,7 +310,7 @@ class SubtitleApiRouter:
         from domain.ai.entities import SubtitleRecord, SubtitleTaskType
 
         task_id = str(uuid.uuid4())
-        user_id_str = current_user.user_id if current_user else "anonymous"
+        user_id_str = current_user.get("user_id", "anonymous") if current_user else "anonymous"
 
         record = SubtitleRecord(
             id=task_id,

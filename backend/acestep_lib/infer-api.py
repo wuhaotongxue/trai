@@ -1,10 +1,9 @@
+import os
+import uuid
+
+from acestep.pipeline_ace_step import ACEStepPipeline
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
-import os
-from acestep.pipeline_ace_step import ACEStepPipeline
-from acestep.data_sampler import DataSampler
-import uuid
 
 app = FastAPI(title="ACEStep Pipeline API")
 
@@ -13,7 +12,7 @@ class ACEStepInput(BaseModel):
     bf16: bool = True
     torch_compile: bool = False
     device_id: int = 0
-    output_path: Optional[str] = None
+    output_path: str | None = None
     audio_duration: float
     prompt: str
     lyrics: str
@@ -22,20 +21,20 @@ class ACEStepInput(BaseModel):
     scheduler_type: str
     cfg_type: str
     omega_scale: float
-    actual_seeds: List[int]
+    actual_seeds: list[int]
     guidance_interval: float
     guidance_interval_decay: float
     min_guidance_scale: float
     use_erg_tag: bool
     use_erg_lyric: bool
     use_erg_diffusion: bool
-    oss_steps: List[int]
+    oss_steps: list[int]
     guidance_scale_text: float = 0.0
     guidance_scale_lyric: float = 0.0
 
 class ACEStepOutput(BaseModel):
     status: str
-    output_path: Optional[str]
+    output_path: str | None
     message: str
 
 def initialize_pipeline(checkpoint_path: str, bf16: bool, torch_compile: bool, device_id: int) -> ACEStepPipeline:

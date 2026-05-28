@@ -42,8 +42,57 @@ class MusicGenerateResponse(BaseModel):
     error: str | None = None
 
 
+from typing import Any
+
+_music_tasks: dict[str, Any] = {}
+
 class MusicController:
     """音乐生成控制器类."""
+
+    @staticmethod
+    def _do_generate(task_id: str, request: MusicGenerateRequest):
+        """后台实际执行音乐生成的任务."""
+        try:
+            _music_tasks[task_id]["status"] = "processing"
+            _music_tasks[task_id]["progress"] = "正在初始化生成任务..."
+            client = MusicClientProvider.get_music_client()
+
+            def progress_cb(msg: str):
+                _music_tasks[task_id]["progress"] = msg
+
+            def cancel_check() -> bool:
+                return _music_tasks.get(task_id, {}).get("status") == "cancelling"
+
+            # 在后台线程中必须使用同步生成，或者创建一个新的事件循环
+            result = client.generate(
+                prompt=request.prompt,
+                duration=request.duration,
+                steps=request.steps,
+                guidance_scale=request.guidance_scale,
+                progress_callback=progress_cb,
+                cancel_check=cancel_check,
+            )
+
+            if _music_tasks[task_id]["status"] == "cancelling":
+                _music_tasks[task_id]["status"] = "cancelled"
+                _music_tasks[task_id]["progress"] = "已取消"
+                return
+
+            if result.success:
+                filename = os.path.basename(result.file_path or "")
+                _music_tasks[task_id]["status"] = "completed"
+                _music_tasks[task_id]["progress"] = "完成"
+                _music_tasks[task_id]["music_url"] = f"/api_trai/v1/ai/music/files/{filename}"
+                _music_tasks[task_id]["file_path"] = result.file_path
+                _music_tasks[task_id]["duration"] = result.duration
+            else:
+                _music_tasks[task_id]["status"] = "failed"
+                _music_tasks[task_id]["progress"] = "生成失败"
+                _music_tasks[task_id]["error"] = result.error
+        except Exception as e:
+            _music_tasks[task_id]["status"] = "failed"
+            _music_tasks[task_id]["progress"] = "生成异常"
+            _music_tasks[task_id]["error"] = str(e)
 
     @staticmethod
     @router.post("/generate", response_model=MusicGenerateResponse)
@@ -52,60 +101,52 @@ class MusicController:
         background_tasks: BackgroundTasks,
     ) -> MusicGenerateResponse:
         """
-        生成音乐接口.
-
-        参数:
-            request: MusicGenerateRequest, 请求对象.
-            background_tasks: BackgroundTasks, 后台任务管理器.
-
-        返回值:
-            MusicGenerateResponse: 生成结果.
-
-        异常:
-            无.
+        提交音乐生成任务.
         """
-        # 生成任务 ID
         task_id = f"music_{uuid.uuid4().hex[:12]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-        try:
-            client = MusicClientProvider.get_music_client()
+        _music_tasks[task_id] = {
+            "status": "queued",
+            "music_url": None,
+            "error": None,
+            "prompt": request.prompt
+        }
 
-            # 同步生成（阻塞调用）
-            result = client.generate(
-                prompt=request.prompt,
-                duration=request.duration,
-                steps=request.steps,
-                guidance_scale=request.guidance_scale,
-            )
+        # 将长耗时的生成任务交给后台
+        background_tasks.add_task(MusicController._do_generate, task_id, request)
 
-            if result.success:
-                # 构建音乐 URL - 返回完整可访问的 URL
-                filename = os.path.basename(result.file_path or "")
-                music_url = f"http://localhost:5666/api_trai/v1/ai/music/files/{filename}"
+        return MusicGenerateResponse(
+            success=True,
+            task_id=task_id,
+            message="音乐生成任务已提交，请稍后查询状态",
+        )
 
-                return MusicGenerateResponse(
-                    success=True,
-                    task_id=task_id,
-                    message="音乐生成成功",
-                    music_url=music_url,
-                    file_path=result.file_path,
-                    duration=result.duration,
-                )
-            else:
-                return MusicGenerateResponse(
-                    success=False,
-                    task_id=task_id,
-                    message="音乐生成失败",
-                    error=result.error,
-                )
+    @staticmethod
+    @router.get("/status/{task_id}")
+    async def get_music_status(task_id: str):
+        """
+        查询音乐生成任务状态.
+        """
+        if task_id not in _music_tasks:
+            raise HTTPException(status_code=404, detail="任务不存在")
+        return _music_tasks[task_id]
 
-        except Exception as e:
-            return MusicGenerateResponse(
-                success=False,
-                task_id=task_id,
-                message="音乐生成异常",
-                error=str(e),
-            )
+    @staticmethod
+    @router.delete("/cancel/{task_id}")
+    async def cancel_music_generation(task_id: str):
+        """
+        取消音乐生成任务.
+        """
+        if task_id not in _music_tasks:
+            raise HTTPException(status_code=404, detail="任务不存在")
+
+        status = _music_tasks[task_id]["status"]
+        if status in ["completed", "failed", "cancelled"]:
+            return {"success": False, "message": f"任务已经处于 {status} 状态，无法取消"}
+
+        _music_tasks[task_id]["status"] = "cancelling"
+        _music_tasks[task_id]["progress"] = "正在取消..."
+        return {"success": True, "message": "已发送取消请求"}
 
     @staticmethod
     @router.get("/files/{filename}")

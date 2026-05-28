@@ -1,20 +1,19 @@
-import torch
-import torchaudio
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Optional
 import os
 import random
-from diffusers.utils.torch_utils import randn_tensor
-from diffusers.pipelines.stable_diffusion_3.pipeline_stable_diffusion_3 import retrieve_timesteps
-from acestep.schedulers.scheduling_flow_match_euler_discrete import FlowMatchEulerDiscreteScheduler
-from acestep.pipeline_ace_step import ACEStepPipeline
-from acestep.apg_guidance import apg_forward, MomentumBuffer
-from transformers import AutoTokenizer
-from loguru import logger
-import uvicorn
 import time
 from datetime import datetime
+
+import torch
+import torchaudio
+import uvicorn
+from acestep.apg_guidance import MomentumBuffer, apg_forward
+from acestep.pipeline_ace_step import ACEStepPipeline
+from acestep.schedulers.scheduling_flow_match_euler_discrete import FlowMatchEulerDiscreteScheduler
+from diffusers.pipelines.stable_diffusion_3.pipeline_stable_diffusion_3 import retrieve_timesteps
+from diffusers.utils.torch_utils import randn_tensor
+from fastapi import FastAPI, HTTPException
+from loguru import logger
+from pydantic import BaseModel
 
 app = FastAPI(title="Text-to-Music API")
 
@@ -24,7 +23,7 @@ class TextToMusicRequest(BaseModel):
     infer_steps: int = 60
     guidance_scale: float = 15.0
     omega_scale: float = 10.0
-    seed: Optional[int] = None
+    seed: int | None = None
 
 class TextToMusicResponse(BaseModel):
     audio_path: str
@@ -159,7 +158,7 @@ class InferencePipeline:
         infer_steps: int,
         guidance_scale: float,
         omega_scale: float,
-        seed: Optional[int],
+        seed: int | None,
     ):
         # Set random seed
         if seed is not None:

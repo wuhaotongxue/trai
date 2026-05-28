@@ -48,21 +48,18 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVE
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import os
 import re
-import sys
+from collections import Counter, defaultdict
+
 import numpy as np
-from collections import Counter
-from collections import defaultdict
 
 # import langid
 # import py3langid as langid
 # pip install py3langid==0.2.2
-
 # 启用语言预测概率归一化，概率预测的分数。因此，实现重新规范化 产生 0-1 范围内的输出。
 # langid disables probability normalization by default. For command-line usages of , it can be enabled by passing the flag.
 # For probability normalization in library use, the user must instantiate their own . An example of such usage is as follows:
-from py3langid.langid import LanguageIdentifier, MODEL_FILE
+from py3langid.langid import MODEL_FILE, LanguageIdentifier
 
 from acestep.language_segmentation.utils.num import num2str
 
@@ -379,7 +376,7 @@ class LangSegment:
         if self._lang_count is None or not isinstance(self._lang_count, defaultdict):
             self._lang_count = defaultdict(int)
         lang_count = self._lang_count
-        if not "|" in language:
+        if "|" not in language:
             lang_count[language] += (
                 int(len(text) * 2) if language == "zh" else len(text)
             )
@@ -464,7 +461,7 @@ class LangSegment:
                 )
         pre_lang = preResult["lang"] if preResult else None
         if ("|" in language) and (
-            pre_lang and not pre_lang in language and not "…" in language
+            pre_lang and pre_lang not in language and "…" not in language
         ):
             language = language.split("|")[0]
         if "|" in language:
@@ -798,7 +795,7 @@ class LangSegment:
             "$7",
             "$8",
         )
-        TAG_BASE = re.compile(rf'(([【《（(“‘"\']*[LANGUAGE]+[\W\s]*)+)')
+        TAG_BASE = re.compile(r'(([【《（(“‘"\']*[LANGUAGE]+[\W\s]*)+)')
         # Get custom language filter
         filters = self.Langfilters
         filters = filters if filters is not None else ""
@@ -832,17 +829,17 @@ class LangSegment:
             ),  # Symbol Tag
             (
                 TAG_KO,
-                re.compile(re.sub(r"LANGUAGE", f"\uac00-\ud7a3", TAG_BASE.pattern)),
+                re.compile(re.sub(r"LANGUAGE", "\uac00-\ud7a3", TAG_BASE.pattern)),
                 self._process_korean,
             ),  # Korean words
             (
                 TAG_TH,
-                re.compile(re.sub(r"LANGUAGE", f"\u0e00-\u0e7f", TAG_BASE.pattern)),
+                re.compile(re.sub(r"LANGUAGE", "\u0e00-\u0e7f", TAG_BASE.pattern)),
                 self._process_Thai,
             ),  # Thai words support.
             (
                 TAG_RU,
-                re.compile(re.sub(r"LANGUAGE", f"А-Яа-яЁё", TAG_BASE.pattern)),
+                re.compile(re.sub(r"LANGUAGE", "А-Яа-яЁё", TAG_BASE.pattern)),
                 self._process_Russian,
             ),  # Russian words support.
             (

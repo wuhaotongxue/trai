@@ -10,9 +10,9 @@
     python s3_upload_simple.py --version 0.1.0  # 指定版本，自动上传
 """
 
+import argparse
 import os
 import sys
-import argparse
 from pathlib import Path
 
 # 确保 backend 路径
@@ -27,8 +27,8 @@ except ImportError:
     pass
 
 import boto3
-from botocore.exceptions import ClientError
 import yaml
+from botocore.exceptions import ClientError
 
 # 加载 .env
 _env_file = Path(__file__).parent.parent.parent / ".env"
@@ -62,7 +62,7 @@ def main():
 
     exe_files = list(release_dir.glob("*.exe"))
     exe_files = [f for f in exe_files if "TRAI_" in f.name]
-    
+
     if not exe_files:
         print(f"[ERROR] No installer found: {release_dir}")
         return
@@ -92,7 +92,7 @@ def main():
 
     exe_key = f"releases/{version}/{exe_file.name}"
     print(f"\n[INFO] Uploading installer to: {exe_key}")
-    
+
     try:
         s3.upload_file(
             str(exe_file),
@@ -103,7 +103,7 @@ def main():
                 'ACL': 'public-read'
             }
         )
-        print(f"[OK] Installer uploaded!")
+        print("[OK] Installer uploaded!")
     except ClientError as e:
         print(f"[ERROR] Upload failed: {e}")
         return
@@ -119,12 +119,12 @@ def main():
         }],
         'path': exe_file.name
     }
-    
+
     yml_content = yaml.dump(yml_data)
     yml_key = f"releases/{version}/latest.yml"
-    
+
     print(f"\n[INFO] Uploading latest.yml to: {yml_key}")
-    
+
     try:
         s3.put_object(
             Bucket=bucket,
@@ -133,12 +133,12 @@ def main():
             ContentType='application/x-yaml',
             ACL='public-read'
         )
-        print(f"[OK] latest.yml uploaded!")
+        print("[OK] latest.yml uploaded!")
     except ClientError as e:
         print(f"[ERROR] latest.yml upload failed: {e}")
         return
 
-    print(f"\n[INFO] Updating latest channel...")
+    print("\n[INFO] Updating latest channel...")
     try:
         s3.put_object(
             Bucket=bucket,
@@ -149,24 +149,24 @@ def main():
         )
         s3.copy_object(
             Bucket=bucket,
-            Key=f'releases/TRAI-latest.exe',
+            Key='releases/TRAI-latest.exe',
             CopySource={'Bucket': bucket, 'Key': exe_key}
         )
-        print(f"[OK] Latest channel updated!")
+        print("[OK] Latest channel updated!")
     except ClientError as e:
         print(f"[WARN] Latest channel update failed: {e}")
 
     print(f"\n{'='*50}")
     print("[OK] Upload completed!")
     print(f"{'='*50}\n")
-    
+
     if public_domain:
         url = f"{public_domain}/releases/{version}/{exe_file.name}"
     else:
         url = f"{endpoint}/{bucket}/releases/{version}/{exe_file.name}"
-    
+
     print(f"Download URL: {url}")
-    print(f"\nClients can check for updates in Settings page")
+    print("\nClients can check for updates in Settings page")
 
 if __name__ == "__main__":
     main()

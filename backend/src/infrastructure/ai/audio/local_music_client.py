@@ -69,27 +69,15 @@ class LocalMusicClient:
         steps: int | None = None,
         guidance_scale: float = 7.0,
         task: str = "text2music",
+        progress_callback=None,
+        cancel_check=None,
     ) -> MusicGenerateResult:
         """
         生成音乐（同步调用）.
-
-        参数:
-            prompt: str, 音乐描述提示词.
-            duration: float | None, 音频时长（秒）.
-            steps: int | None, 推理步数.
-            guidance_scale: float, 引导强度.
-            task: str, 任务类型 (text2music, audio2music).
-
-        返回值:
-            MusicGenerateResult: 生成结果.
-
-        异常:
-            无.
         """
         actual_duration = duration or self.default_duration
         actual_steps = steps or self.default_steps
 
-        # 生成唯一文件名
         timestamp = int(time.time())
         unique_id = str(uuid.uuid4())[:8]
         safe_prompt = "".join(c for c in prompt if c.isalnum() or c in (" ", "_", "-")).strip()[:30]
@@ -99,7 +87,6 @@ class LocalMusicClient:
         start_time = time.time()
 
         try:
-            # 构建命令
             cmd = [
                 sys.executable,
                 self.script_path,
@@ -110,26 +97,58 @@ class LocalMusicClient:
                 output_path,
             ]
 
-            # 执行（使用独立环境）
             env = os.environ.copy()
-            result = subprocess.run(
+            # 使用 Popen 以便实时读取日志和支持取消
+            process = subprocess.Popen(
                 cmd,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 text=True,
-                timeout=600,  # 10分钟超时
                 env=env,
+                bufsize=1,
+                universal_newlines=True,
             )
+
+            last_output = ""
+            while True:
+                # 检查是否被取消
+                if cancel_check and cancel_check():
+                    process.terminate()
+                    process.wait(timeout=5)
+                    return MusicGenerateResult(
+                        success=False,
+                        error="已取消",
+                        duration=time.time() - start_time,
+                    )
+
+                line = process.stdout.readline()
+                if not line and process.poll() is not None:
+                    break
+                if line:
+                    line = line.strip()
+                    last_output += line + "\n"
+                    if progress_callback:
+                        # 解析日志中的进度信息
+                        if "[1] 导入 pipeline" in line:
+                            progress_callback("正在初始化引擎...")
+                        elif "[3] 加载 checkpoint" in line:
+                            progress_callback("正在加载模型权重...")
+                        elif "[4] 模型加载完成" in line:
+                            progress_callback("模型加载完成，准备生成...")
+                        elif "[5] 生成音乐" in line:
+                            progress_callback("正在生成音乐 (约需 3-5 分钟)，请耐心等待...")
+                        elif "[6] 生成完成" in line:
+                            progress_callback("音乐生成完毕，正在保存...")
 
             elapsed = time.time() - start_time
 
-            if result.returncode != 0:
+            if process.returncode != 0:
                 return MusicGenerateResult(
                     success=False,
-                    error=f"生成失败: {result.stderr[:500]}",
+                    error=f"生成失败: {last_output[-500:]}",
                     duration=elapsed,
                 )
 
-            # 检查输出文件
             if not os.path.exists(output_path):
                 return MusicGenerateResult(
                     success=False,
@@ -138,7 +157,7 @@ class LocalMusicClient:
                 )
 
             file_size = os.path.getsize(output_path)
-            if file_size < 1000:  # 文件太小，可能是错误的
+            if file_size < 1000:
                 return MusicGenerateResult(
                     success=False,
                     error=f"输出文件过小 ({file_size} bytes)，可能生成失败",
@@ -151,12 +170,6 @@ class LocalMusicClient:
                 duration=elapsed,
             )
 
-        except subprocess.TimeoutExpired:
-            return MusicGenerateResult(
-                success=False,
-                error="生成超时（超过10分钟）",
-                duration=time.time() - start_time,
-            )
         except Exception as e:
             return MusicGenerateResult(
                 success=False,

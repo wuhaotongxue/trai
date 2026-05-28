@@ -1,7 +1,6 @@
 import json
-from pathlib import Path
 import random
-
+from pathlib import Path
 
 DEFAULT_ROOT_DIR = "examples/default/input_params"
 ZH_RAP_LORA_ROOT_DIR = "examples/zh_rap_lora/input_params"
@@ -14,7 +13,7 @@ class DataSampler:
         self.zh_rap_lora_input_params_files += list(Path(ZH_RAP_LORA_ROOT_DIR).glob("*.json"))
 
     def load_json(self, file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return json.load(f)
 
     def sample(self, lora_name_or_path=None):

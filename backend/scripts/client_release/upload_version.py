@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """手动上传指定版本"""
 import os
-import sys
 import re
+import sys
 from pathlib import Path
 
 # 加载环境变量
@@ -15,10 +15,12 @@ if _env_file.exists():
                 k, v = line.split('=', 1)
                 os.environ.setdefault(k.strip(), v.strip())
 
-import boto3
-import yaml
 import datetime
 import hashlib
+
+import boto3
+import yaml
+
 
 def calc_sha512(path):
     h = hashlib.sha512()

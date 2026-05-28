@@ -18,10 +18,10 @@ import { useI18n } from "@/i18n/i18n_context";
 import { LanguageSwitcher } from "@/components/website/language_switcher";
 
 const features = [
-  { icon: Zap, key: "login.feature.1", color: "bg-slate-100" },
-  { icon: Shield, key: "login.feature.2", color: "bg-slate-100" },
-  { icon: Globe, key: "login.feature.3", color: "bg-slate-100" },
-  { icon: Sparkles, key: "login.feature.4", color: "bg-slate-100" },
+  { icon: Zap, key: "login.feature.1", color: "bg-cyan-300 dark:bg-cyan-600" },
+  { icon: Shield, key: "login.feature.2", color: "bg-emerald-300 dark:bg-emerald-600" },
+  { icon: Globe, key: "login.feature.3", color: "bg-indigo-300 dark:bg-indigo-600" },
+  { icon: Sparkles, key: "login.feature.4", color: "bg-cyan-300 dark:bg-cyan-600" },
 ];
 
 function LoginForm() {
@@ -34,13 +34,7 @@ function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  const apiBase =
-    process.env.NEXT_PUBLIC_API_BASE ||
-    (typeof window !== "undefined"
-      ? window.location.protocol === "https:"
-        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
-        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`
-      : "http://localhost:5666/api_trai/v1");
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || "/api_trai/v1";
 
   useEffect(() => {
     setMounted(true);

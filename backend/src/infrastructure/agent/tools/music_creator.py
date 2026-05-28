@@ -47,8 +47,8 @@ class MusicCreatorTool(BaseTool):
             id="music_creator",
             name="AI 音乐工作室",
             description="自动生成一首完整的音乐作品. 根据用户的主题或内容, 使用 LLM 生成歌词, 使用文生图生成音乐封面, 并调用音乐模型生成配乐. 当你收到用户要求写歌、生成音乐、创作专辑时调用此工具.",
-            category=ToolCategory.MEDIA,
-            risk_level=RiskLevel.LOW,
+            category=ToolCategory.AUDIO,
+            risk_level=RiskLevel.SAFE,
             parameters=[
                 ToolParameter(
                     name="topic",

@@ -11,6 +11,7 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -190,7 +191,7 @@ async def agent_chat(
                 )
                 service.send(message)
             except Exception as e:
-                from loguru import logger
+                # removed logger import
 
                 logger.warning(f"Failed to send wecom notify: {e}")
 
@@ -203,7 +204,6 @@ async def agent_chat(
     if not agent_id:
         orchestrator = Orchestrator(_MOCK_AGENTS)
         agent_id = await orchestrator.dispatch(request.message)
-        from loguru import logger
 
         logger.info(f"Agent 自动路由: '{request.message[:20]}...' -> {agent_id}")
 
@@ -241,7 +241,7 @@ async def agent_chat(
                 for i, node in enumerate(res.body.data.nodes):
                     rag_context += f"[资料 {i + 1}]\n{node.text}\n"
         except Exception as e:
-            from loguru import logger
+            # removed logger import
 
             logger.warning(f"RAG retrieve failed for kb {request.knowledge_base_id}: {e}")
 
@@ -287,8 +287,6 @@ async def agent_chat(
 
         async def event_generator():
             import json
-
-            from loguru import logger
 
             try:
                 async for event in result:

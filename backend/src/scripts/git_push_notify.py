@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: git_push_notify.py
 # 作者: wuhao
 # 日期: 2026_05_26_21:53:21

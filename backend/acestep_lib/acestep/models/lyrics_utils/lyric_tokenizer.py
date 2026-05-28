@@ -2,6 +2,7 @@ import os
 import re
 import textwrap
 from functools import cached_property
+from typing import Union
 
 import pypinyin
 import torch
@@ -16,7 +17,6 @@ from spacy.lang.zh import Chinese
 from tokenizers import Tokenizer
 
 from .zh_num2words import TextNorm as zh_num2words
-from typing import Dict, List, Optional, Set, Union
 
 
 # copy from https://github.com/coqui-ai/TTS/blob/dbf1a08a0d4e47fdad6172e433eeb34bc6b13b4e/TTS/tts/layers/xtts/tokenizer.py
@@ -487,7 +487,7 @@ def _expand_decimal_point(m, lang="en"):
 
 
 def _expand_currency(m, lang="en", currency="USD"):
-    amount = float((re.sub(r"[^\d.]", "", m.group(0).replace(",", "."))))
+    amount = float(re.sub(r"[^\d.]", "", m.group(0).replace(",", ".")))
     full_amount = num2words(
         amount, to="currency", currency=currency, lang=lang if lang != "cs" else "cz"
     )
@@ -714,10 +714,10 @@ class VoiceBpeTokenizer:
     def batch_decode(
         self,
         sequences: Union[
-            List[int], List[List[int]], "np.ndarray", "torch.Tensor", "tf.Tensor"
+            list[int], list[list[int]], "np.ndarray", "torch.Tensor", "tf.Tensor"
         ],
         skip_special_tokens: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Convert a list of lists of token ids into a list of strings by calling decode.
 

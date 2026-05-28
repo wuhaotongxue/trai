@@ -150,6 +150,10 @@ interface AgentState {
   }>;
   /** 是否正在生成音乐 */
   isGeneratingMusic: boolean;
+  /** 音乐生成进度 */
+  musicGenerateProgress: string | null;
+  /** 音乐生成任务 ID */
+  musicGenerateTaskId: string | null;
   /** 生成的音乐 URL */
   generatedMusicUrl: string | null;
   /** 音乐生成错误信息 */
@@ -220,6 +224,8 @@ interface AgentState {
   clearVideoGallery: () => void;
   /** 生成音乐 */
   generateMusic: (prompt: string, duration?: number, steps?: number, guidance_scale?: number) => Promise<void>;
+  /** 取消音乐生成 */
+  cancelGenerateMusic: () => Promise<void>;
   /** 清除生成的音乐 */
   clearGeneratedMusic: () => void;
   /** 添加音乐到音乐廊 */
@@ -273,6 +279,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   videoGenerateError: null,
   videoGallery: [],
   isGeneratingMusic: false,
+  musicGenerateProgress: null,
+  musicGenerateTaskId: null,
   generatedMusicUrl: null,
   musicGenerateError: null,
   musicGallery: [],
@@ -364,11 +372,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     // SSE POST 需要用 fetch, EventSource 不支持 POST, 改用 fetch + ReadableStream
     const token = Cookies.get("token");
-    const apiBase =
-      process.env.NEXT_PUBLIC_API_BASE ||
-      (window.location.protocol === "https:"
-        ? `${window.location.protocol}//${window.location.hostname}/api_trai/v1`
-        : `${window.location.protocol}//${window.location.hostname}:5666/api_trai/v1`);
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE || "/api_trai/v1";
     let aborted = false;
 
     const abortFn = () => {
@@ -462,7 +466,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
             } else if (parsed.event === "reasoning") {
               set((state) => ({
                 messages: state.messages.map((m) =>
-                  m.id === assistantMsgId ? { ...m, thinking: parsed.data } : m
+                  m.id === assistantMsgId ? { ...m, thinking: (m.thinking || "") + parsed.data } : m
                 ),
               }));
             } else if (parsed.event === "tool_call_end") {
@@ -989,25 +993,68 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   generateMusic: async (prompt: string, duration?: number, steps?: number, guidance_scale?: number) => {
-    set({ isGeneratingMusic: true, musicGenerateError: null, generatedMusicUrl: null });
+    set({ isGeneratingMusic: true, musicGenerateError: null, generatedMusicUrl: null, musicGenerateProgress: "正在提交任务...", musicGenerateTaskId: null });
     try {
       const res = await api.agent.generateMusic({ prompt, duration, steps, guidance_scale });
-      if (res.success && res.music_url) {
-        // 后端返回的是完整 URL，直接使用
-        set({ generatedMusicUrl: res.music_url, isGeneratingMusic: false });
-        // 将生成的音乐添加到音乐廊
-        get().addToMusicGallery(res.music_url, prompt);
+      if (res.success && res.task_id) {
+        set({ musicGenerateTaskId: res.task_id });
+        
+        // 开始轮询检查状态
+        const checkStatus = async () => {
+          // 如果任务已经被清空或不再是生成中，停止轮询
+          if (!get().isGeneratingMusic || get().musicGenerateTaskId !== res.task_id) {
+            return;
+          }
+          
+          try {
+            const statusRes = await api.agent.getMusicStatus(res.task_id);
+            
+            // 更新进度
+            if (statusRes.progress) {
+              set({ musicGenerateProgress: statusRes.progress });
+            }
+
+            if (statusRes.status === "completed" && statusRes.music_url) {
+              set({ generatedMusicUrl: statusRes.music_url, isGeneratingMusic: false, musicGenerateProgress: "生成完毕", musicGenerateTaskId: null });
+              get().addToMusicGallery(statusRes.music_url, prompt);
+            } else if (statusRes.status === "failed") {
+              set({ musicGenerateError: statusRes.error || "音乐生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
+            } else if (statusRes.status === "cancelled") {
+              set({ isGeneratingMusic: false, musicGenerateProgress: "已取消", musicGenerateTaskId: null });
+            } else {
+              // 还在队列或处理中，继续轮询
+              setTimeout(checkStatus, 3000); // 改为每 3 秒查一次，进度更新更及时
+            }
+          } catch (e: unknown) {
+            set({ musicGenerateError: "查询状态失败", isGeneratingMusic: false, musicGenerateTaskId: null });
+          }
+        };
+        checkStatus();
       } else {
-        set({ musicGenerateError: res.error || res.message || "音乐生成失败", isGeneratingMusic: false });
+        set({ musicGenerateError: res.error || res.message || "音乐生成任务提交失败", isGeneratingMusic: false, musicGenerateTaskId: null });
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "音乐生成失败";
-      set({ musicGenerateError: msg, isGeneratingMusic: false });
+      set({ musicGenerateError: msg, isGeneratingMusic: false, musicGenerateTaskId: null });
+    }
+  },
+
+  cancelGenerateMusic: async () => {
+    const taskId = get().musicGenerateTaskId;
+    if (!taskId) return;
+    
+    set({ musicGenerateProgress: "正在取消..." });
+    try {
+      await api.agent.cancelMusicGeneration(taskId);
+      set({ isGeneratingMusic: false, musicGenerateProgress: "已取消", musicGenerateTaskId: null });
+    } catch (e) {
+      // 忽略取消失败
+      set({ isGeneratingMusic: false, musicGenerateTaskId: null });
     }
   },
 
   clearGeneratedMusic: () => {
-    set({ generatedMusicUrl: null, musicGenerateError: null });
+    set({ generatedMusicUrl: null, musicGenerateError: null, musicGenerateProgress: null, musicGenerateTaskId: null });
   },
 
   addToMusicGallery: (url: string, prompt: string) => {

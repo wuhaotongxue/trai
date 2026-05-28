@@ -92,21 +92,31 @@ export default function DocsQuickstartPage() {
           </div>
         </section>
 
-        <section className="py-24 bg-white dark:bg-slate-950 border-b-4 border-slate-900 dark:border-white">
+        <section className="py-24 bg-white dark:bg-slate-950">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {steps.map((s, i) => (
                 <Reveal key={s.title} delay={i * 100}>
                   <div
-                    className="p-8 bg-white dark:bg-slate-800 border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] transition-all duration-300"
+                    className="p-8 border-4 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-800 shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:hover:shadow-[4px_4px_0px_0px_#ffffff] transition-all relative overflow-hidden"
                   >
-                    <div className="flex items-start gap-6">
-                      <div className={`w-16 h-16 flex items-center justify-center border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex-shrink-0 ${s.done ? "bg-cyan-300 dark:bg-cyan-600" : "bg-slate-100 dark:bg-slate-700"} `}>
-                        <CheckCircle2 className={`h-8 w-8 ${s.done ? "text-slate-900 dark:text-white" : "text-slate-400"}`} />
+                    <div className="flex items-start gap-6 relative z-10">
+                      <div className={`w-16 h-16 rounded-none flex items-center justify-center shrink-0 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${
+                        s.done ? "bg-emerald-300 dark:bg-emerald-600" : "bg-white dark:bg-slate-900"
+                      }`}>
+                        {s.done ? (
+                          <CheckCircle2 className="h-8 w-8 text-slate-900 dark:text-white" />
+                        ) : (
+                          <span className="text-2xl font-black text-slate-900 dark:text-white">0{i + 1}</span>
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mb-2">{s.title}</p>
-                        <p className="text-base font-bold text-slate-600 dark:text-slate-400 leading-relaxed">{s.desc}</p>
+                      <div>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-3">
+                          {s.title}
+                        </h3>
+                        <p className="text-base font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {s.desc}
+                        </p>
                       </div>
                     </div>
                   </div>

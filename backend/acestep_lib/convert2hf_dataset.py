@@ -1,6 +1,8 @@
-from datasets import Dataset
-from pathlib import Path
 import os
+from pathlib import Path
+
+from datasets import Dataset
+
 
 def create_dataset(data_dir="./data", repeat_count=2000, output_name="zh_lora_dataset"):
     data_path = Path(data_dir)
@@ -12,12 +14,12 @@ def create_dataset(data_dir="./data", repeat_count=2000, output_name="zh_lora_da
         try:
             assert os.path.exists(prompt_path), f"Prompt file {prompt_path} does not exist."
             assert os.path.exists(lyric_path), f"Lyrics file {lyric_path} does not exist."
-            with open(prompt_path, "r", encoding="utf-8") as f:
+            with open(prompt_path, encoding="utf-8") as f:
                 prompt = f.read().strip()
-            
-            with open(lyric_path, "r", encoding="utf-8") as f:
+
+            with open(lyric_path, encoding="utf-8") as f:
                 lyrics = f.read().strip()
-            
+
             keys = song_path.stem
             example = {
                 "keys": keys,
@@ -28,7 +30,7 @@ def create_dataset(data_dir="./data", repeat_count=2000, output_name="zh_lora_da
                 "recaption": {}
             }
             all_examples.append(example)
-        except AssertionError as e:
+        except AssertionError:
             continue
 
     # repeat specified times
@@ -36,6 +38,7 @@ def create_dataset(data_dir="./data", repeat_count=2000, output_name="zh_lora_da
     ds.save_to_disk(output_name)
 
 import argparse
+
 
 def main():
     parser = argparse.ArgumentParser(description="Create a dataset from audio files.")

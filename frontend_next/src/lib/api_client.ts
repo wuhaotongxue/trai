@@ -18,19 +18,12 @@ function getApiBase(): string {
   if (fromEnv) return fromEnv;
 
   if (typeof window !== "undefined") {
-    // 假设在同一个域名下部署, 但后端跑在 5666 端口
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    
-    // If accessed via HTTPS, might be Nginx proxy, use /api_trai/v1 as base path
-    if (protocol === "https:") {
-      return `${protocol}//${hostname}/api_trai/v1`;
-    }
-    
-    return `${protocol}//${hostname}:5666/api_trai/v1`;
+    // 客户端使用相对路径，走 Next.js proxy
+    return "/api_trai/v1";
   }
 
-  return DEFAULT_API_BASE;
+  // 服务端默认走本地 5666 端口
+  return "http://localhost:5666/api_trai/v1";
 }
 
 /** API 选项接口
@@ -516,6 +509,23 @@ export const agentApi = {
       duration?: number;
       error?: string;
     }>("/ai/music/generate", { method: "POST", body: JSON.stringify(data) }),
+
+  /** 查询音乐生成状态 */
+  getMusicStatus: (taskId: string) =>
+    request<{
+      status: "queued" | "processing" | "completed" | "failed" | "cancelled" | "cancelling";
+      progress?: string;
+      music_url?: string;
+      error?: string;
+      prompt: string;
+    }>(`/ai/music/status/${taskId}`, { method: "GET" }),
+
+  /** 取消音乐生成 */
+  cancelMusicGeneration: (taskId: string) =>
+    request<{
+      success: boolean;
+      message: string;
+    }>(`/ai/music/cancel/${taskId}`, { method: "DELETE" }),
 };
 
 // ============================================================

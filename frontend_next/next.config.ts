@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  experimental: {
+    proxyTimeout: 1000 * 60 * 10, // 设置代理超时时间为 10 分钟 (解决音乐生成等长耗时接口 socket hang up 的问题)
+  },
 };
 
 export default nextConfig;

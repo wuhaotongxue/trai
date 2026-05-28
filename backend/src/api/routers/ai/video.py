@@ -163,8 +163,8 @@ class VideoApiRouter:
         """
         task_id = str(uuid.uuid4())
         client_ip = VideoApiUtils.get_client_ip(request)
-        user_id = str(current_user.id) if current_user else "guest"
-        user_name = current_user.username if current_user else f"guest_{client_ip}"
+        user_id = str(current_user.get("user_id", "")) if current_user else "guest"
+        user_name = current_user.get("username", "") if current_user else f"guest_{client_ip}"
 
         logger.info(f"[视频生成] 接收任务 | task_id={task_id} | user={user_name} | prompt={req.prompt[:50]}...")
 

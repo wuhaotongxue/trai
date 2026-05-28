@@ -71,7 +71,7 @@ const MainLayout: React.FC = () => {
       <div style={{
         display: 'flex',
         backgroundColor: 'var(--ui_panel)',
-        borderTop: '1px solid var(--ui_border)',
+        borderTop: '2px solid var(--ui_border)',
         height: 'var(--footer_height)',
         minHeight: 'var(--footer_height)',
         flexShrink: 0,
