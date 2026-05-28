@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_15:32:49
+# 日期: 2026_05_28_16:20:00
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -28,11 +28,11 @@ class LocalImageEditClient:
     本地图像编辑客户端.
 
     参数:
-        无.
+      无.
     返回:
-        LocalImageEditClient: 单例客户端实例.
+      LocalImageEditClient: 单例客户端实例.
     异常:
-        无.
+      无.
     """
 
     _instance: LocalImageEditClient | None = None
@@ -45,11 +45,11 @@ class LocalImageEditClient:
         创建或复用单例实例.
 
         参数:
-            cls: 当前类对象.
+          cls: 当前类对象.
         返回:
-            LocalImageEditClient: 客户端实例.
+          LocalImageEditClient: 客户端实例.
         异常:
-            无.
+          无.
         """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -60,11 +60,11 @@ class LocalImageEditClient:
         初始化本地模型路径与默认参数.
 
         参数:
-            无.
+          无.
         返回:
-            None: 无返回值.
+          None: 无返回值.
         异常:
-            ValueError: 当环境变量值无法转换为整数时抛出.
+          ValueError: 当环境变量值无法转换为整数时抛出.
         """
         if LocalImageEditClient._init_done:
             return
@@ -82,11 +82,11 @@ class LocalImageEditClient:
         查询指定 GPU 的空闲显存.
 
         参数:
-            device: GPU 索引编号.
+          device: GPU 索引编号.
         返回:
-            float: 空闲显存大小, 单位为 GB.
+          float: 空闲显存大小, 单位为 GB.
         异常:
-            无. 失败时返回 -1.0.
+          无. 失败时返回 -1.0.
         """
         if device < 0:
             return float("inf")
@@ -116,11 +116,11 @@ class LocalImageEditClient:
         按空闲显存倒序获取可用设备列表.
 
         参数:
-            无.
+          无.
         返回:
-            list[tuple[int, float]]: 设备索引与空闲显存列表.
+          list[tuple[int, float]]: 设备索引与空闲显存列表.
         异常:
-            无.
+          无.
         """
         if not torch.cuda.is_available():
             return [(-1, float("inf"))]
@@ -137,11 +137,11 @@ class LocalImageEditClient:
         为指定设备创建并返回并发锁.
 
         参数:
-            device: 设备索引, CPU 使用 -1.
+          device: 设备索引, CPU 使用 -1.
         返回:
-            asyncio.Lock: 对应设备锁.
+          asyncio.Lock: 对应设备锁.
         异常:
-            无.
+          无.
         """
         if device not in LocalImageEditClient._device_locks:
             LocalImageEditClient._device_locks[device] = asyncio.Lock()
@@ -152,13 +152,13 @@ class LocalImageEditClient:
         将 base64 或 data URL 写入临时图片文件.
 
         参数:
-            data: 前端上传的图片内容.
-            suffix: 输出文件后缀, 例如 ".png".
-            temp_dir: 临时目录路径.
+          data: 前端上传的图片内容.
+          suffix: 输出文件后缀, 例如 ".png".
+          temp_dir: 临时目录路径.
         返回:
-            tuple[Path, tuple[int, int]]: 临时文件路径与图片原始尺寸.
+          tuple[Path, tuple[int, int]]: 临时文件路径与图片原始尺寸.
         异常:
-            ValueError: 当图片无法解码时抛出.
+          ValueError: 当图片无法解码时抛出.
         """
         data_body = data.split(",", 1)[1] if data.startswith("data:") else data
         image_bytes = base64.b64decode(data_body)
@@ -172,12 +172,12 @@ class LocalImageEditClient:
         将单个尺寸规范到 16 的倍数.
 
         参数:
-            value: 原始尺寸值.
-            fallback: 当尺寸无效时使用的兜底值.
+          value: 原始尺寸值.
+          fallback: 当尺寸无效时使用的兜底值.
         返回:
-            int: 可用于模型推理的合法尺寸.
+          int: 可用于模型推理的合法尺寸.
         异常:
-            无.
+          无.
         """
         if value <= 0:
             value = fallback
@@ -191,12 +191,12 @@ class LocalImageEditClient:
         将输出宽高同时规范到 16 的倍数.
 
         参数:
-            width: 原始宽度.
-            height: 原始高度.
+          width: 原始宽度.
+          height: 原始高度.
         返回:
-            tuple[int, int]: 规范化后的宽高.
+          tuple[int, int]: 规范化后的宽高.
         异常:
-            无.
+          无.
         """
         normalized_width = self._normalize_dimension(width, fallback=self._default_width)
         normalized_height = self._normalize_dimension(height, fallback=self._default_height)
@@ -207,12 +207,12 @@ class LocalImageEditClient:
         构造子进程推理脚本.
 
         参数:
-            steps: 推理步数.
-            seed: 随机种子.
+          steps: 推理步数.
+          seed: 随机种子.
         返回:
-            str: 可直接传给 python -c 的脚本文本.
+          str: 可直接传给 python -c 的脚本文本.
         异常:
-            无.
+          无.
         """
         return f"""
 import base64
@@ -228,57 +228,66 @@ from PIL import Image
 
 
 def _load_image(path: str, width: int, height: int) -> Image.Image:
-    image = Image.open(path).convert("RGB")
-    if image.size != (width, height):
-        image = image.resize((width, height), Image.LANCZOS)
-    return image
+  image = Image.open(path).convert("RGB")
+  if image.size != (width, height):
+    image = image.resize((width, height), Image.LANCZOS)
+  return image
 
 
 def _main() -> None:
-    device = os.environ.get("TRAI_IMAGE_EDIT_DEVICE", "cpu")
-    model_path = os.environ["TRAI_IMAGE_EDIT_MODEL_PATH"]
-    prompt = os.environ["TRAI_IMAGE_EDIT_PROMPT"]
-    width = int(os.environ["TRAI_IMAGE_EDIT_WIDTH"])
-    height = int(os.environ["TRAI_IMAGE_EDIT_HEIGHT"])
-    sys.stderr.write("[1/7] 初始化编辑管线\\n")
-    dtype = torch.bfloat16 if device.startswith("cuda") else torch.float32
-    pipe = QwenImageEditPlusPipeline.from_pretrained(model_path, torch_dtype=dtype)
+  device = os.environ.get("TRAI_IMAGE_EDIT_DEVICE", "cpu")
+  model_path = os.environ["TRAI_IMAGE_EDIT_MODEL_PATH"]
+  prompt = os.environ["TRAI_IMAGE_EDIT_PROMPT"]
+  width = int(os.environ["TRAI_IMAGE_EDIT_WIDTH"])
+  height = int(os.environ["TRAI_IMAGE_EDIT_HEIGHT"])
+  sys.stderr.write("[1/7] 初始化编辑管线\\n")
+  dtype = torch.bfloat16 if device.startswith("cuda") else torch.float32
+  pipe = QwenImageEditPlusPipeline.from_pretrained(model_path, torch_dtype=dtype)
+
+  if device.startswith("cuda"):
+    # 显式设置当前设备, 配合 CUDA_VISIBLE_DEVICES 确保正确加载
+    torch.cuda.set_device(0)
+    # 开启模型层级 CPU Offload, 解决 20B 模型显存需求 (>50GB) 超过单卡 (44GB) 的问题
+    pipe.enable_model_cpu_offload()
+    sys.stderr.write("[1.5/7] 已启用显存优化 (Model CPU Offload)\\n")
+  else:
     pipe = pipe.to(device)
-    pipe.set_progress_bar_config(disable=None)
-    sys.stderr.write("[2/7] 模型加载完成\\n")
-    images = [_load_image(path, width, height) for path in sys.argv[1:]]
-    sys.stderr.write("[3/7] 图片加载完成 | count=" + str(len(images)) + " | size=" + str((width, height)) + "\\n")
-    seed_value = {repr(seed)}
-    generator = None
-    if seed_value is not None and seed_value >= 0:
-        generator = torch.Generator(device=device).manual_seed(seed_value)
-    sys.stderr.write("[4/7] 开始推理 | steps={steps} | seed=" + str(seed_value) + "\\n")
-    result = pipe(
-        image=images if len(images) > 1 else images[0],
-        prompt=prompt,
-        negative_prompt=" ",
-        num_inference_steps={steps},
-        true_cfg_scale=4.0,
-        guidance_scale=1.0,
-        num_images_per_prompt=1,
-        generator=generator,
-    )
-    image = result.images[0]
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
-    sys.stderr.write("[5/7] 推理完成 | result_size=" + str(image.size) + "\\n")
-    sys.stderr.write("[6/7] 结果编码完成\\n")
-    print(json.dumps({{"status": "completed", "image_base64": encoded}}, ensure_ascii=False))
-    sys.stderr.write("[7/7] 子进程结束\\n")
+
+  pipe.set_progress_bar_config(disable=None)
+  sys.stderr.write("[2/7] 模型加载完成\\n")
+  images = [_load_image(path, width, height) for path in sys.argv[1:]]
+  sys.stderr.write("[3/7] 图片加载完成 | count=" + str(len(images)) + " | size=" + str((width, height)) + "\\n")
+  seed_value = {repr(seed)}
+  generator = None
+  if seed_value is not None and seed_value >= 0:
+    generator = torch.Generator(device=device).manual_seed(seed_value)
+  sys.stderr.write("[4/7] 开始推理 | steps={steps} | seed=" + str(seed_value) + "\\n")
+  result = pipe(
+    image=images if len(images) > 1 else images[0],
+    prompt=prompt,
+    negative_prompt=" ",
+    num_inference_steps={steps},
+    true_cfg_scale=4.0,
+    guidance_scale=1.0,
+    num_images_per_prompt=1,
+    generator=generator,
+  )
+  image = result.images[0]
+  buffer = io.BytesIO()
+  image.save(buffer, format="PNG")
+  encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
+  sys.stderr.write("[5/7] 推理完成 | result_size=" + str(image.size) + "\\n")
+  sys.stderr.write("[6/7] 结果编码完成\\n")
+  print(json.dumps({{"status": "completed", "image_base64": encoded}}, ensure_ascii=False))
+  sys.stderr.write("[7/7] 子进程结束\\n")
 
 
 if __name__ == "__main__":
-    try:
-        _main()
-    except Exception:
-        traceback.print_exc()
-        sys.exit(1)
+  try:
+    _main()
+  except Exception:
+    traceback.print_exc()
+    sys.exit(1)
 """
 
     async def _run_subprocess(
@@ -295,17 +304,17 @@ if __name__ == "__main__":
         启动子进程执行本地图像编辑推理.
 
         参数:
-            image_input: 第一张输入图片.
-            prompt: 编辑指令.
-            width: 输出宽度.
-            height: 输出高度.
-            steps: 推理步数.
-            seed: 随机种子.
-            image_input_2: 第二张输入图片, 为空表示单图编辑.
+          image_input: 第一张输入图片.
+          prompt: 编辑指令.
+          width: 输出宽度.
+          height: 输出高度.
+          steps: 推理步数.
+          seed: 随机种子.
+          image_input_2: 第二张输入图片, 为空表示单图编辑.
         返回:
-            dict[str, Any]: 编辑结果字典.
+          dict[str, Any]: 编辑结果字典.
         异常:
-            RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
+          RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
         """
         devices = self._get_devices_by_free_memory()
         selected_device, free_gb = devices[0]
@@ -325,7 +334,12 @@ if __name__ == "__main__":
                     input_paths.append(str(second_path))
                 command = [sys.executable, "-c", self._build_script(steps=steps, seed=seed), *input_paths]
                 environment = os.environ.copy()
-                environment["TRAI_IMAGE_EDIT_DEVICE"] = "cpu" if selected_device < 0 else f"cuda:{selected_device}"
+                if selected_device >= 0:
+                    environment["CUDA_VISIBLE_DEVICES"] = str(selected_device)
+                    environment["TRAI_IMAGE_EDIT_DEVICE"] = "cuda:0"
+                    environment["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+                else:
+                    environment["TRAI_IMAGE_EDIT_DEVICE"] = "cpu"
                 environment["TRAI_IMAGE_EDIT_MODEL_PATH"] = self._model_path
                 environment["TRAI_IMAGE_EDIT_PROMPT"] = prompt
                 environment["TRAI_IMAGE_EDIT_WIDTH"] = str(width)
@@ -375,17 +389,17 @@ if __name__ == "__main__":
         执行单图或双图本地图像编辑.
 
         参数:
-            image_input: 第一张输入图片, 支持 data URL 或 base64.
-            prompt: 编辑描述文本.
-            width: 指定输出宽度, 为空时回退到原图宽度或默认值.
-            height: 指定输出高度, 为空时回退到原图高度或默认值.
-            steps: 指定推理步数, 为空时使用默认值.
-            seed: 指定随机种子, 为空时使用随机种子.
-            image_input_2: 第二张输入图片, 用于双图联动编辑.
+          image_input: 第一张输入图片, 支持 data URL 或 base64.
+          prompt: 编辑描述文本.
+          width: 指定输出宽度, 为空时回退到原图宽度或默认值.
+          height: 指定输出高度, 为空时回退到原图高度或默认值.
+          steps: 指定推理步数, 为空时使用默认值.
+          seed: 指定随机种子, 为空时使用随机种子.
+          image_input_2: 第二张输入图片, 用于双图联动编辑.
         返回:
-            dict[str, Any]: 编辑结果, 包含 status, image_base64 与 task_id.
+          dict[str, Any]: 编辑结果, 包含 status, image_base64 与 task_id.
         异常:
-            RuntimeError: 当图片解码失败或本地推理失败时抛出.
+          RuntimeError: 当图片解码失败或本地推理失败时抛出.
         """
         with tempfile.TemporaryDirectory(prefix="trai_image_probe_") as probe_dir_str:
             probe_dir = Path(probe_dir_str)

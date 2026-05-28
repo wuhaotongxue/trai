@@ -35,6 +35,11 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1620
+- **修复**: local_image_edit_client 子进程 CUDA OOM. 针对 Qwen-Image-Edit-2511 模型 (~55GB) 显存需求超过单卡 (44GB) 的问题, 启用了 `enable_model_cpu_offload()`. 
+- **优化**: local_image_edit_client 子进程新增 `CUDA_VISIBLE_DEVICES` 隔离与 `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` 显存优化. 
+- **规范**: 全量清理 local_image_edit_client.py 中的中文标点, 符合 backend 开发规范. 
+
 ### 🛠️ 后端_2026_05_28_1532
 - **修正(image_edit_size)**: 本地图像编辑模型执行前新增尺寸自动对齐, 会把宽高规范到最接近的 16 倍数, 避免原图尺寸如 `5972x3987` 直接触发推理报错.
 
