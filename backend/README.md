@@ -35,6 +35,11 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1705
+- **优化**: local_image_edit_client 引入全局 `Semaphore(1)` 强制任务排队, 彻底防止多任务并发导致的 CUDA OOM. 
+- **增强**: 优化 GPU 自动切换逻辑, 优先选择显存充足 (>20GB) 的卡, 若无则选显存空闲最高的卡. 
+- **加固**: 改进推理脚本加载逻辑, 引入 `low_cpu_mem_usage=True` 和 `device_map="cpu"`, 确保 50GB 模型能在 44GB GPU 上通过 Model CPU Offload 成功加载并运行. 
+
 ### 🛠️ 后端_2026_05_28_1620
 - **修复**: local_image_edit_client 子进程 CUDA OOM. 针对 Qwen-Image-Edit-2511 模型 (~55GB) 显存需求超过单卡 (44GB) 的问题, 启用了 `enable_model_cpu_offload()`. 
 - **优化**: local_image_edit_client 子进程新增 `CUDA_VISIBLE_DEVICES` 隔离与 `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` 显存优化. 
