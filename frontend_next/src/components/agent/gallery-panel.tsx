@@ -50,7 +50,10 @@ interface GalleryPanelProps {
 }
 
 /**
- * 画廊头部组件
+ * 画廊头部组件.
+ *
+ * @param props 当前标签页、视图模式和画廊控制参数.
+ * @returns 统一风格的画廊标题条.
  */
 function GalleryHeader({
   activeTab,
@@ -70,18 +73,23 @@ function GalleryHeader({
   onClear: () => void;
 }) {
   const title = activeTab === "image" || activeTab === "image_edit" ? "图片廊" : activeTab === "video" ? "视频廊" : activeTab === "subtitle" ? "影音画廊" : "音乐廊";
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
 
   return (
-    <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-cyan-600">
+    <div className="flex items-center justify-between p-4 border-b-2 border-slate-900 dark:border-white bg-cyan-200 dark:bg-slate-200">
       <div className="flex items-center gap-3">
-        <span className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white">{title}</span>
-        <span className="text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2 py-0.5 border-2 border-slate-900 dark:border-white">({itemCount})</span>
+        <div>
+          <span className="text-base font-black uppercase tracking-widest text-slate-900">{title}</span>
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-1">Gallery Rail</div>
+        </div>
+        <span className={`text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-2 py-0.5 ${brutalBorder}`}>({itemCount})</span>
       </div>
       <div className="flex items-center gap-2">
         {itemCount > 0 && (
           <>
             <button
-              className="h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              type="button"
+              className={`h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
               onClick={onToggleViewMode}
               title={viewMode === "grid" ? "列表视图" : "网格视图"}
             >
@@ -96,7 +104,8 @@ function GalleryHeader({
               )}
             </button>
             <button
-              className="h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              type="button"
+              className={`h-8 w-8 flex items-center justify-center bg-white dark:bg-slate-800 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
               onClick={onToggleMaximize}
               title={isMaximized ? "还原大小" : "最大化"}
             >
@@ -111,8 +120,9 @@ function GalleryHeader({
               )}
             </button>
             <button
+              type="button"
               onClick={onClear}
-              className="flex items-center gap-1 h-8 px-2 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-black uppercase tracking-wider border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              className={`flex items-center gap-1 h-8 px-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 dark:text-white text-xs font-black uppercase tracking-wider ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
             >
               <Trash2 className="h-3 w-3" />
               清空
@@ -125,7 +135,10 @@ function GalleryHeader({
 }
 
 /**
- * 搜索和排序组件（仅图片廊）
+ * 搜索和排序组件.
+ *
+ * @param props 搜索词、排序方式和变更回调.
+ * @returns 统一风格的搜索排序条.
  */
 function GallerySearchBar({
   searchQuery,
@@ -141,9 +154,9 @@ function GallerySearchBar({
   onSortChange: (type: GallerySortType) => void;
 }) {
   return (
-    <div className="p-3 border-b border-border">
+    <div className="p-3 border-b-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-950">
       <div className="relative mb-2">
-        <svg className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
@@ -151,26 +164,29 @@ function GallerySearchBar({
           placeholder="搜索提示词..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-8 pr-3 py-1.5 text-xs rounded-none border border-input bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full pl-8 pr-3 py-2 text-xs rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 focus-visible:outline-none"
         />
       </div>
       <div className="flex items-center justify-between">
         <select
           value={sortType}
           onChange={(e) => onSortChange(e.target.value as GallerySortType)}
-          className="text-xs rounded-md border border-input bg-background px-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="text-xs rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-900 px-2 py-1 text-slate-900 dark:text-white focus-visible:outline-none"
         >
           <option value="latest">最新</option>
           <option value="oldest">最早</option>
         </select>
-        <span className="text-xs text-muted-foreground">{itemCount} 张图片</span>
+        <span className="text-xs text-slate-500">{itemCount} 张图片</span>
       </div>
     </div>
   );
 }
 
 /**
- * 画廊面板组件
+ * 画廊面板组件.
+ *
+ * @param props 当前标签页、画廊数据和交互回调.
+ * @returns 统一风格的右侧画廊容器.
  */
 export function GalleryPanel({
   activeTab,

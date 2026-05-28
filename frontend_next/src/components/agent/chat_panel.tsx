@@ -325,7 +325,7 @@ export function ChatPanel() {
       <div className="relative group/code overflow-hidden my-4 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">
         <div className="flex items-center justify-between px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs uppercase tracking-wider border-b-2 border-slate-900 dark:border-white">
           <span>{language}</span>
-          <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-indigo-600 transition-colors">
+          <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-cyan-600 transition-colors">
             <Copy className="h-4 w-4" />
           </button>
         </div>
@@ -365,7 +365,7 @@ export function ChatPanel() {
                   className={cn(
                     `p-3 mb-3 cursor-pointer transition-all text-sm font-bold truncate ${brutalBorder}`,
                     currentSessionId === s.session_id 
-                      ? `bg-slate-50 dark:bg-indigo-600 text-slate-900 dark:text-white ${brutalShadowSm}` 
+                      ? `bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white ${brutalShadowSm}` 
                       : "bg-white dark:bg-slate-800 hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
@@ -391,7 +391,7 @@ export function ChatPanel() {
                 { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
                 { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "video", label: "视频生成", icon: Video, bg: "bg-slate-50 dark:bg-orange-600" },
-                { id: "music", label: "音乐创作", icon: Music, bg: "bg-slate-50 dark:bg-indigo-600" },
+                { id: "music", label: "音乐创作", icon: Music, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "image_edit", label: "图像编辑", icon: Pencil, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "subtitle", label: "智能字幕", icon: Captions, bg: "bg-slate-50 dark:bg-cyan-600" },
                 { id: "downloader", label: "视频下载", icon: Download, bg: "bg-sky-300 dark:bg-sky-600" },
@@ -428,7 +428,7 @@ export function ChatPanel() {
             >
               { activeTab === "chat" ? (
                 <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className={`p-4 bg-indigo-100 dark:bg-indigo-900 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex justify-center`}>
+                  <div className={`p-4 bg-cyan-100 dark:bg-slate-200 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex justify-center text-slate-900`}>
                     <div className="w-full max-w-4xl">
                       <AgentTypeSelector value={selectedAgentType} onChange={setSelectedAgentType} compact />
                     </div>
@@ -1017,7 +1017,7 @@ export function ChatPanel() {
 
                     {activeTab === "music" && (
                       <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
-                        <div className={`bg-indigo-200 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                        <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">音乐创作</h2>
                             <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化。</div>
@@ -1062,7 +1062,7 @@ export function ChatPanel() {
                                   type="button"
                                   onClick={handleGenerateMusic}
                                   disabled={isGeneratingMusic || !musicPrompt.trim()}
-                                  className={`flex-1 h-16 bg-indigo-500 text-white text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
+                                  className={`flex-1 h-16 bg-cyan-500 text-slate-900 dark:text-white text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
                                 >
                                   {isGeneratingMusic ? (
                                     <><Loader2 className="h-6 w-6 animate-spin" /> 正在谱曲</>
@@ -1121,7 +1121,7 @@ export function ChatPanel() {
                                   </motion.div>
                                 ) : isGeneratingMusic ? (
                                   <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
-                                    <div className={`w-full max-w-2xl p-6 bg-indigo-50 dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-6`}>
+                                    <div className={`w-full max-w-2xl p-6 bg-cyan-50 dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-6`}>
                                       <div className="flex items-center justify-between gap-4">
                                         <div className="font-black uppercase text-xl flex items-center gap-3">
                                           <Loader2 className="animate-spin" />
@@ -1135,7 +1135,7 @@ export function ChatPanel() {
                                         {Array.from({ length: 12 }).map((_, index) => (
                                           <motion.div
                                             key={`music-bar-${index}`}
-                                            className="w-4 bg-indigo-500 border-2 border-slate-900 dark:border-white"
+                                            className="w-4 bg-cyan-500 border-2 border-slate-900 dark:border-white"
                                             animate={{ height: [20 + (index % 3) * 8, 88 - (index % 4) * 10, 28 + (index % 5) * 6] }}
                                             transition={{ duration: 1.1 + index * 0.08, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
                                           />
@@ -1152,7 +1152,7 @@ export function ChatPanel() {
                                   </motion.div>
                                 ) : (
                                   <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
-                                    <div className={`w-32 h-32 bg-indigo-200 dark:bg-indigo-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
+                                    <div className={`w-32 h-32 bg-cyan-200 dark:bg-cyan-900 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                       <Music className="h-16 w-16 text-slate-900 dark:text-white" />
                                     </div>
                                     <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
@@ -1170,12 +1170,12 @@ export function ChatPanel() {
                                   onClick={() => toggleGallery('music')}
                                 >
                                   <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-indigo-500 transition-colors">
+                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-cyan-600 transition-colors">
                                       GALLERY / 历史作品 ({musicGallery.length})
                                     </h3>
                                     <button
                                       type="button"
-                                      className={`px-3 py-1 text-xs bg-indigo-200 text-slate-900 ${brutalBtnBase}`}
+                                      className={`px-3 py-1 text-xs bg-cyan-200 text-slate-900 ${brutalBtnBase}`}
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         toggleGallerySelectionMode("music");
@@ -1246,8 +1246,8 @@ export function ChatPanel() {
                                           <div 
                                             key={item.id} 
                                             className={cn(
-                                              `shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`,
-                                              selectedGalleryItems.music.includes(item.id) && "ring-4 ring-indigo-500 ring-offset-2"
+                                              `shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-cyan-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`,
+                                              selectedGalleryItems.music.includes(item.id) && "ring-4 ring-cyan-500 ring-offset-2"
                                             )}
                                             onClick={() => openGalleryItem("music", item)}
                                           >
@@ -1255,12 +1255,12 @@ export function ChatPanel() {
                                               <div className="absolute inset-0 bg-slate-900/15 pointer-events-none" />
                                             )}
                                             {(gallerySelectionMode.music || selectedGalleryItems.music.includes(item.id)) && (
-                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-indigo-500 ${brutalBorder}`}>
+                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-cyan-600 ${brutalBorder}`}>
                                                 <Check className="w-4 h-4" />
                                               </div>
                                             )}
                                             <div className="flex items-center gap-3">
-                                              <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                              <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white shrink-0">
                                                 <Music className="w-5 h-5" />
                                               </div>
                                               <div className="flex-1 min-w-0">

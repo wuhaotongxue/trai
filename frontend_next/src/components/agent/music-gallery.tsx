@@ -26,7 +26,10 @@ interface MusicGalleryProps {
 }
 
 /**
- * 音乐卡片组件
+ * 音乐卡片组件.
+ *
+ * @param props 单条音乐记录和操作参数.
+ * @returns 统一风格的音乐卡片.
  */
 function MusicCardItem({
   music,
@@ -41,6 +44,7 @@ function MusicCardItem({
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -54,7 +58,7 @@ function MusicCardItem({
   };
 
   return (
-    <div className={`group relative overflow-hidden transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-slate-50 dark:bg-cyan-600' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
+    <div className={`group relative overflow-hidden transition-all ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-cyan-50 dark:bg-slate-900' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
       <audio
         ref={audioRef}
         src={music.url}
@@ -63,23 +67,23 @@ function MusicCardItem({
       <div className="p-4">
         {/* 标题和播放按钮 */}
         <div className="flex items-center gap-3 mb-3">
-          <div className={`w-12 h-12 flex items-center justify-center shrink-0 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-white dark:bg-slate-800' : 'bg-slate-50 dark:bg-cyan-600'}`}>
+          <div className={`w-12 h-12 flex items-center justify-center shrink-0 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-cyan-100 dark:bg-cyan-900' : 'bg-slate-50 dark:bg-cyan-600'}`}>
             <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white truncate" title={music.prompt}>
               {music.prompt}
             </p>
-            <p className={`text-[10px] font-bold uppercase ${isCurrent ? 'text-slate-800 dark:text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
+            <p className={`text-[10px] font-black uppercase tracking-[0.18em] ${isCurrent ? 'text-cyan-700 dark:text-cyan-300' : 'text-slate-500 dark:text-slate-400'}`}>
               {isCurrent ? '当前生成' : new Date(music.timestamp).toLocaleString()}
             </p>
           </div>
           {/* 播放按钮 */}
           <button
             onClick={togglePlay}
-            className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
+            className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
               isPlaying
-                ? 'bg-cyan-500 text-white'
+                ? 'bg-cyan-500 text-slate-900'
                 : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'
             }`}
           >
@@ -100,7 +104,7 @@ function MusicCardItem({
           <div className="flex justify-end">
             <button
               onClick={() => onDelete(music.id)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 text-xs font-black uppercase text-slate-900 dark:text-white hover:text-white transition-colors border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+              className={`flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-red-500 text-xs font-black uppercase text-slate-900 dark:text-white hover:text-white transition-colors ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}
             >
               <Trash2 className="h-4 w-4" />
               删除
@@ -113,7 +117,10 @@ function MusicCardItem({
 }
 
 /**
- * 翻页组件
+ * 翻页组件.
+ *
+ * @param props 当前页、总页数和翻页回调.
+ * @returns 统一风格的分页控件.
  */
 function Pagination({
   currentPage,
@@ -124,6 +131,7 @@ function Pagination({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) {
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
   if (totalPages <= 1) return null;
 
   const pageNumbers = [];
@@ -140,49 +148,51 @@ function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 py-2 border-t border-border">
+    <div className="flex items-center justify-center gap-1 py-3 border-t-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-950">
       <Button
-        variant="ghost"
+        type="button"
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-7 px-2 text-xs"
+        className={`h-8 px-3 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] disabled:opacity-50`}
       >
         上一页
       </Button>
       {startPage > 1 && (
         <>
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-7 w-8 p-0 text-xs">
+          <Button type="button" size="sm" onClick={() => onPageChange(1)} className={`h-8 w-8 p-0 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder}`}>
             1
           </Button>
-          {startPage > 2 && <span className="px-1 text-xs text-muted-foreground">...</span>}
+          {startPage > 2 && <span className="px-1 text-xs text-slate-500">...</span>}
         </>
       )}
       {pageNumbers.map((page) => (
         <Button
+          type="button"
           key={page}
-          variant={page === currentPage ? "default" : "ghost"}
           size="sm"
           onClick={() => onPageChange(page)}
-          className={`h-7 w-8 p-0 text-xs ${page === currentPage ? 'bg-indigo-500 hover:bg-indigo-600' : ''}`}
+          className={`h-8 w-8 p-0 text-xs rounded-none ${brutalBorder} ${
+            page === currentPage ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-900' : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
+          }`}
         >
           {page}
         </Button>
       ))}
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-1 text-xs text-muted-foreground">...</span>}
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-7 w-8 p-0 text-xs">
+          {endPage < totalPages - 1 && <span className="px-1 text-xs text-slate-500">...</span>}
+          <Button type="button" size="sm" onClick={() => onPageChange(totalPages)} className={`h-8 w-8 p-0 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder}`}>
             {totalPages}
           </Button>
         </>
       )}
       <Button
-        variant="ghost"
+        type="button"
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-7 px-2 text-xs"
+        className={`h-8 px-3 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] disabled:opacity-50`}
       >
         下一页
       </Button>
@@ -191,7 +201,10 @@ function Pagination({
 }
 
 /**
- * 音乐画廊组件
+ * 音乐画廊组件.
+ *
+ * @param props 当前音乐、历史音乐和删除回调.
+ * @returns 统一风格的音乐廊.
  */
 export function MusicGallery({
   currentMusic,
@@ -208,7 +221,7 @@ export function MusicGallery({
   if (currentMusic.length === 0 && historyMusic.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
-        <div className="w-32 h-32 bg-slate-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6 transform rotate-3">
+        <div className="w-32 h-32 bg-cyan-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6">
           <Music className="h-16 w-16 text-slate-900" />
         </div>
         <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">暂无音乐</p>
@@ -224,7 +237,7 @@ export function MusicGallery({
           {/* 当前结果区 */}
           {currentMusic.length > 0 && (
             <div className="mb-3">
-              <p className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider px-1 mb-2">
+              <p className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.2em] px-1 mb-2">
                 当前结果
               </p>
               <div className="space-y-2">
@@ -239,7 +252,7 @@ export function MusicGallery({
           {paginatedHistory.length > 0 && (
             <div>
               {currentMusic.length > 0 && (
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 mb-2">
                   历史记录 ({historyMusic.length})
                 </p>
               )}

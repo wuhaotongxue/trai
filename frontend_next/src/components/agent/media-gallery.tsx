@@ -33,7 +33,10 @@ interface MediaGalleryProps {
 }
 
 /**
- * 翻页组件
+ * 翻页组件.
+ *
+ * @param props 当前页、总页数和翻页回调.
+ * @returns 统一风格的分页导航.
  */
 function Pagination({
   currentPage,
@@ -44,6 +47,7 @@ function Pagination({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) {
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
   if (totalPages <= 1) return null;
 
   const pageNumbers = [];
@@ -60,49 +64,51 @@ function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 py-2 border-t border-border">
+    <div className="flex items-center justify-center gap-1 py-3 border-t-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-950">
       <Button
-        variant="ghost"
+        type="button"
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="h-7 px-2 text-xs"
+        className={`h-8 px-3 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] disabled:opacity-50`}
       >
         上一页
       </Button>
       {startPage > 1 && (
         <>
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(1)} className="h-7 w-8 p-0 text-xs">
+          <Button type="button" size="sm" onClick={() => onPageChange(1)} className={`h-8 w-8 p-0 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder}`}>
             1
           </Button>
-          {startPage > 2 && <span className="px-1 text-xs text-muted-foreground">...</span>}
+          {startPage > 2 && <span className="px-1 text-xs text-slate-500">...</span>}
         </>
       )}
       {pageNumbers.map((page) => (
         <Button
+          type="button"
           key={page}
-          variant={page === currentPage ? "default" : "ghost"}
           size="sm"
           onClick={() => onPageChange(page)}
-          className={`h-7 w-8 p-0 text-xs ${page === currentPage ? 'bg-indigo-500 hover:bg-indigo-600' : ''}`}
+          className={`h-8 w-8 p-0 text-xs rounded-none ${brutalBorder} ${
+            page === currentPage ? "bg-cyan-500 hover:bg-cyan-400 text-slate-900" : "bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+          }`}
         >
           {page}
         </Button>
       ))}
       {endPage < totalPages && (
         <>
-          {endPage < totalPages - 1 && <span className="px-1 text-xs text-muted-foreground">...</span>}
-          <Button variant="ghost" size="sm" onClick={() => onPageChange(totalPages)} className="h-7 w-8 p-0 text-xs">
+          {endPage < totalPages - 1 && <span className="px-1 text-xs text-slate-500">...</span>}
+          <Button type="button" size="sm" onClick={() => onPageChange(totalPages)} className={`h-8 w-8 p-0 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder}`}>
             {totalPages}
           </Button>
         </>
       )}
       <Button
-        variant="ghost"
+        type="button"
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="h-7 px-2 text-xs"
+        className={`h-8 px-3 text-xs rounded-none bg-white dark:bg-slate-900 text-slate-900 dark:text-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] disabled:opacity-50`}
       >
         下一页
       </Button>
@@ -111,7 +117,10 @@ function Pagination({
 }
 
 /**
- * 媒体画廊组件
+ * 媒体画廊组件.
+ *
+ * @param props 当前结果、历史记录和媒体操作参数.
+ * @returns 统一风格的图片或视频画廊.
  */
 export function MediaGallery({
   currentItems,
@@ -147,7 +156,7 @@ export function MediaGallery({
   if (filteredCurrent.length === 0 && paginatedHistory.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-4">
-        <div className="w-16 h-16 rounded-none bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-none bg-cyan-100 dark:bg-cyan-900 border-2 border-slate-900 dark:border-white flex items-center justify-center mb-4 shadow-[4px_4px_0px_0px_#0f172a]">
           {isVideo ? (
             <Video className="h-8 w-8 text-slate-400" />
           ) : (
@@ -173,7 +182,7 @@ export function MediaGallery({
           {/* 当前结果区 */}
           {filteredCurrent.length > 0 && (
             <div className="mb-3">
-              <p className={`text-[10px] font-semibold uppercase tracking-wider px-1 mb-2 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-emerald-400'}`}>
+              <p className={`text-[10px] font-black uppercase tracking-[0.2em] px-1 mb-2 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
                 当前结果
               </p>
               <div className={viewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-1"}>
@@ -196,7 +205,7 @@ export function MediaGallery({
           {paginatedHistory.length > 0 && (
             <div>
               {filteredCurrent.length > 0 && (
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 mb-2">
                   历史记录 ({filteredHistory.length})
                 </p>
               )}
@@ -228,7 +237,10 @@ export function MediaGallery({
 }
 
 /**
- * 媒体卡片组件
+ * 媒体卡片组件.
+ *
+ * @param props 单条媒体记录与操作回调.
+ * @returns 图片或视频卡片.
  */
 function MediaCardItem({
   item,
@@ -247,8 +259,9 @@ function MediaCardItem({
   onPreview: (url: string) => void;
   onDownload: (url: string) => void;
 }) {
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
   return (
-    <div className={`group relative rounded-none overflow-hidden border shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all ${viewMode === "grid" ? "" : "flex items-center gap-3"} ${isVideo ? 'border-orange-300 dark:border-orange-700' : isCurrent ? 'border-emerald-300 dark:border-emerald-700' : 'border-border'}`}>
+    <div className={`group relative rounded-none overflow-hidden ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] transition-all ${viewMode === "grid" ? "" : "flex items-center gap-3"} ${isVideo ? 'bg-orange-50 dark:bg-slate-900' : isCurrent ? 'bg-cyan-50 dark:bg-slate-900' : 'bg-white dark:bg-slate-900'}`}>
       {/* 媒体内容 */}
       {isVideo ? (
         <div className="overflow-hidden cursor-pointer" onClick={() => window.open(item.url, "_blank")}>
@@ -264,7 +277,7 @@ function MediaCardItem({
       {viewMode === "list" && (
         <div className="flex-1 min-w-0 p-2">
           <p className="text-xs text-foreground truncate" title={item.prompt}>{item.prompt}</p>
-          <p className={`text-[10px] mt-0.5 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-emerald-400'}`}>
+          <p className={`text-[10px] mt-0.5 font-black uppercase tracking-wider ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
             {isVideo ? (item.id === "current-generated" ? "视频生成" : "视频生成") : (item.id === "current-generated" ? "绘图生成" : "图片编辑")}
           </p>
         </div>
@@ -273,15 +286,15 @@ function MediaCardItem({
       {/* 操作按钮 */}
       <div className={`absolute ${viewMode === "grid" ? "inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2" : "right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"}`}>
         {!isVideo && (
-          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800" onClick={() => onDownload(item.url)} title="下载">
+          <Button type="button" size="icon" variant="secondary" className={`h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800 ${brutalBorder}`} onClick={() => onDownload(item.url)} title="下载">
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </Button>
         )}
-        <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800" onClick={() => window.open(item.url, "_blank")} title="打开">
+        <Button type="button" size="icon" variant="secondary" className={`h-6 w-6 rounded-none bg-white/90 hover:bg-white text-slate-800 ${brutalBorder}`} onClick={() => window.open(item.url, "_blank")} title="打开">
           <ExternalLink className="h-3 w-3" />
         </Button>
         {!isCurrent && onDelete && (
-          <Button size="icon" variant="secondary" className="h-6 w-6 rounded-none bg-white/90 hover:bg-red-500 hover:text-white text-slate-800 transition-colors" onClick={() => onDelete(item.id)} title="删除">
+          <Button type="button" size="icon" variant="secondary" className={`h-6 w-6 rounded-none bg-red-500/90 hover:bg-red-500 text-white ${brutalBorder}`} onClick={() => onDelete(item.id)} title="删除">
             <Trash2 className="h-3 w-3" />
           </Button>
         )}

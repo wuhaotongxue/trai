@@ -40,11 +40,14 @@ export function SubtitlePanel() {
 
   const [activeRecord, setActiveRecord] = useState<SubtitleRecordDTO | null>(null);
   const [showGallery, setShowGallery] = useState(true);
+  const brutalBorder = "border-2 border-slate-900 dark:border-white";
+  const brutalShadow = "shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff]";
+  const brutalShadowSm = "shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]";
 
   const toolCategories = [
-    { id: "subtitle", label: "字幕生成", icon: Captions, color: "text-pink-500", desc: "自动识别并生成多语种字幕" },
+    { id: "subtitle", label: "字幕生成", icon: Captions, color: "text-cyan-600", desc: "自动识别并生成多语种字幕" },
     { id: "separate", label: "人声分离", icon: Music, color: "text-blue-500", desc: "分离背景音乐与人声" },
-    { id: "clone", label: "声音克隆", icon: Languages, color: "text-indigo-500", desc: "克隆音色并翻译内容" },
+    { id: "clone", label: "声音克隆", icon: Languages, color: "text-cyan-600", desc: "克隆音色并翻译内容" },
     { id: "lipsync", label: "口型同步", icon: MonitorPlay, color: "text-orange-500", desc: "根据音频同步视频口型" },
     { id: "to_audio", label: "视频转音频", icon: Type, color: "text-teal-500", desc: "提取视频中的音频轨道" },
   ];
@@ -263,14 +266,15 @@ export function SubtitlePanel() {
   };
 
   return (
-    <div className="flex w-full h-full overflow-hidden border-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-950 relative shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]">
+    <div className={`flex w-full h-full overflow-hidden ${brutalBorder} bg-slate-50 dark:bg-slate-950 relative shadow-[8px_8px_0px_0px_#0f172a] dark:shadow-[8px_8px_0px_0px_#ffffff]`}>
       {/* 左侧配置栏 (拆分为两个并排的区域) */}
       <div className={`w-[600px] h-full flex-shrink-0 flex bg-white dark:bg-slate-900 border-r-2 border-slate-900 dark:border-white relative z-10`}>
         
         {/* 工具类型选择区 */}
         <div className="w-[280px] h-full flex flex-col border-r-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900">
-          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
-            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">1. 选择工具类型</h2>
+          <div className="p-4 bg-cyan-200 dark:bg-slate-200 border-b-2 border-slate-900 dark:border-white text-slate-900">
+            <h2 className="text-sm font-black uppercase tracking-wider">1. 选择工具类型</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">Tool Rail</p>
           </div>
           <ScrollArea className="flex-1 min-h-0">
             <div className="p-3 space-y-2">
@@ -285,7 +289,7 @@ export function SubtitlePanel() {
                   className={cn(
                     "w-full flex items-start gap-3 p-3 text-left transition-all border-2 border-slate-900 dark:border-white",
                     taskType === tool.id
-                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] translate-x-[-2px] translate-y-[-2px]"
+                      ? "bg-cyan-100 dark:bg-slate-100 text-slate-900 shadow-[2px_2px_0px_0px_#0f172a] translate-x-[-2px] translate-y-[-2px]"
                       : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
@@ -309,16 +313,17 @@ export function SubtitlePanel() {
 
         {/* 文件上传与配置区 */}
         <div className="flex-1 h-full flex flex-col bg-white dark:bg-slate-800">
-          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-900 dark:border-white`}>
-            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">2. 配置与上传</h2>
+          <div className="p-4 bg-cyan-200 dark:bg-slate-200 border-b-2 border-slate-900 dark:border-white text-slate-900">
+            <h2 className="text-sm font-black uppercase tracking-wider">2. 配置与上传</h2>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">Config Rail</p>
           </div>
           <ScrollArea className="flex-1 min-h-0">
             <div className="p-4 space-y-6">
 
               {/* 上传文件 */}
-              <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col gap-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]`}>
+              <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col gap-2 ${brutalBorder} ${brutalShadowSm}`}>
                 <div className="font-bold uppercase text-sm border-b-2 border-slate-900 dark:border-white pb-2 mb-2">上传文件</div>
-                <div className="relative border-2 border-dashed border-slate-900 dark:border-slate-400 hover:border-slate-900 dark:hover:border-white transition-colors p-6 text-center cursor-pointer bg-slate-50 dark:bg-slate-900">
+                <div className="relative border-2 border-dashed border-cyan-500 dark:border-cyan-700 hover:border-slate-900 dark:hover:border-white transition-colors p-6 text-center cursor-pointer bg-slate-50 dark:bg-slate-900">
                   <input
                     aria-label="上传视频或音频"
                     title="上传视频或音频"
@@ -493,13 +498,13 @@ export function SubtitlePanel() {
           </ScrollArea>
 
           {/* 底部操作区 */}
-          <div className={`p-4 bg-slate-100 dark:bg-slate-800 border-t-2 border-slate-900 dark:border-white`}>
+          <div className="p-4 bg-slate-100 dark:bg-slate-950 border-t-2 border-slate-900 dark:border-white">
             <button
               onClick={handleSubmit}
               disabled={submitDisabled}
               className={cn(
                 "w-full h-12 text-base font-black uppercase tracking-wider flex items-center justify-center gap-3 transition-all border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed",
-                !submitDisabled ? "bg-slate-900 dark:bg-cyan-600 text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" : "bg-slate-300 dark:bg-slate-700 text-slate-500"
+                !submitDisabled ? "bg-cyan-500 dark:bg-cyan-600 text-slate-900 dark:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" : "bg-slate-300 dark:bg-slate-700 text-slate-500"
               )}
             >
               {isSubmitting ? (
@@ -544,7 +549,7 @@ export function SubtitlePanel() {
         <div className="absolute top-4 right-4 z-20">
           <button 
             onClick={() => setShowGallery(!showGallery)}
-            className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
+            className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
           >
             {showGallery ? "隐藏侧边栏" : "显示侧边栏"}
           </button>
@@ -553,7 +558,7 @@ export function SubtitlePanel() {
         <ScrollArea className="flex-1 w-full h-full">
           <div className="flex flex-col min-h-full p-6 pt-16">
             {activeRecord ? (
-              <div className={`m-auto w-full max-w-3xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col border-2 border-slate-900 dark:border-white shadow-[6px_6px_0px_0px_#0f172a] dark:shadow-[6px_6px_0px_0px_#ffffff]`}>
+              <div className={`m-auto w-full max-w-3xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col ${brutalBorder} ${brutalShadow}`}>
                 {/* 视频/状态预览区 */}
               <div className="w-full bg-slate-100 dark:bg-slate-950 flex items-center justify-center min-h-[400px] border-b-2 border-slate-900 dark:border-white relative">
                 {activeRecord.output_video_url || (activeRecord.zh_srt_url && activeRecord.target_lang === "audio_extract") ? (
@@ -573,7 +578,18 @@ export function SubtitlePanel() {
                         >
                           <Loader2 className="h-10 w-10 text-slate-900 animate-spin" />
                         </motion.div>
-                        <span className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">正在玩命处理中...</span>
+                        <span className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">正在处理中...</span>
+                        <div className={`w-full max-w-md p-4 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} space-y-3`}>
+                          <div className="h-4 w-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+                            <motion.div
+                              className="h-full bg-cyan-500"
+                              animate={{ x: ["-20%", "100%"] }}
+                              transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+                              style={{ width: "30%" }}
+                            />
+                          </div>
+                          <div className="text-xs font-black uppercase tracking-wider text-slate-500">正在等待后端返回最新阶段...</div>
+                        </div>
                       </div>
                     ) : activeRecord.status === "failed" ? (
                       <div className="flex flex-col items-center gap-4">
@@ -608,9 +624,9 @@ export function SubtitlePanel() {
                 <div className="mb-6 flex flex-col gap-2">
                   <h3 className="font-black text-xl line-clamp-2" title={activeRecord.file_name}>{activeRecord.file_name}</h3>
                   <div className="flex flex-wrap items-center gap-3 mt-1 text-xs font-bold uppercase text-slate-500">
-                    <span className="bg-slate-100 dark:bg-slate-700 px-2 py-1 border-2 border-slate-900 dark:border-white">ID: {activeRecord.task_id.substring(0, 8)}...</span>
-                    <span className="bg-slate-100 dark:bg-slate-700 px-2 py-1 border-2 border-slate-900 dark:border-white">类型: {activeRecord.task_type}</span>
-                    <span className="bg-slate-100 dark:bg-slate-700 px-2 py-1 border-2 border-slate-900 dark:border-white">时间: {activeRecord.created_at}</span>
+                    <span className={`bg-slate-100 dark:bg-slate-700 px-2 py-1 ${brutalBorder}`}>ID: {activeRecord.task_id.substring(0, 8)}...</span>
+                    <span className={`bg-slate-100 dark:bg-slate-700 px-2 py-1 ${brutalBorder}`}>类型: {activeRecord.task_type}</span>
+                    <span className={`bg-slate-100 dark:bg-slate-700 px-2 py-1 ${brutalBorder}`}>时间: {activeRecord.created_at}</span>
                     <span className={cn(
                       "px-2 py-1 border-2 border-slate-900 dark:border-white",
                       activeRecord.status === "completed" ? "bg-emerald-200 text-emerald-800" :
@@ -646,7 +662,7 @@ export function SubtitlePanel() {
                     )}
                     {activeRecord.zh_srt_url && activeRecord.target_lang !== "audio_extract" && activeRecord.task_type !== "to_audio" && (
                       <a href={activeRecord.zh_srt_url} target="_blank" rel="noopener noreferrer">
-                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-indigo-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
+                        <button className="h-10 px-4 text-sm font-black uppercase flex items-center gap-2 bg-slate-50 dark:bg-cyan-600 text-slate-900 dark:text-white border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] active:translate-x-[-2px] active:translate-y-[-2px] active:shadow-none transition-all">
                           <ExternalLink className="w-4 h-4" /> 原字幕
                         </button>
                       </a>
@@ -691,7 +707,7 @@ export function SubtitlePanel() {
                   transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
                   className="flex flex-col items-center justify-center gap-6"
                 >
-                <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center transform -rotate-3">
+                <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center">
                   <Captions className="h-16 w-16 text-slate-900" />
                 </div>
                 <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">等待任务执行</span>
