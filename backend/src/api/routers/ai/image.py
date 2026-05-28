@@ -30,6 +30,7 @@ from infrastructure.notify.feishu_ai_notify import (
     get_feishu_ai_notify_service,
 )
 from infrastructure.repositories.image_record_repository import ImageRecordRepository
+from infrastructure.notifications.media_notify import media_notifier
 
 router = APIRouter()
 
@@ -339,6 +340,13 @@ async def generate_image(
                         task_id,
                         request.width,
                         request.height,
+                    )
+                    background_tasks.add_task(
+                        media_notifier.notify,
+                        media_type="image",
+                        prompt=request.prompt,
+                        file_url=result.image_url,
+                        duration=0.0
                     )
 
             return ImageGenerationResponse(

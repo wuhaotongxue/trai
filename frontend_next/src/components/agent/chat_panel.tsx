@@ -18,7 +18,7 @@ import {
   ArrowUp, Sparkles, Video, Music, ExternalLink, Plus, MessageSquare, 
   ChevronRight, ChevronLeft, PanelLeft, PanelRight, Pencil, Upload, 
   ArrowDownToLine, Loader2, Captions, UserRound, FileText, Clock, 
-  Download, Search, LayoutGrid, Type, Globe, ChevronDown, AlertCircle 
+  Download, Search, LayoutGrid, Type, Globe, ChevronDown, ChevronUp, AlertCircle 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -67,6 +67,17 @@ export function ChatPanel() {
   // 新增：支持两张图片上传 (原图 + 参考图/遮罩)
   const [editingImagePreview, setEditingImagePreview] = useState<string | null>(null);
   const [editingImagePreview2, setEditingImagePreview2] = useState<string | null>(null);
+
+  // 画廊折叠状态
+  const [galleryExpanded, setGalleryExpanded] = useState<Record<string, boolean>>({
+    image: true,
+    video: true,
+    music: true,
+  });
+
+  const toggleGallery = (type: string) => {
+    setGalleryExpanded(prev => ({ ...prev, [type]: !prev[type] }));
+  };
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -502,19 +513,41 @@ export function ChatPanel() {
 
                             {/* 画廊部分 */}
                             {imageGallery && imageGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
-                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
-                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
-                                  {imageGallery.map((item) => (
-                                    <div 
-                                      key={item.id} 
-                                      className={`shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`}
-                                      onClick={() => useAgentStore.setState({ generatedImageUrl: item.url })}
-                                    >
-                                      <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" title={item.prompt} />
-                                    </div>
-                                  ))}
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                                <div 
+                                  className="flex items-center justify-between cursor-pointer group mb-3"
+                                  onClick={() => toggleGallery('image')}
+                                >
+                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-emerald-600 transition-colors">
+                                    GALLERY / 历史作品 ({imageGallery.length})
+                                  </h3>
+                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    {galleryExpanded.image ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+                                  </div>
                                 </div>
+                                
+                                <AnimatePresence>
+                                  {galleryExpanded.image && (
+                                    <motion.div 
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="h-36 overflow-x-auto flex gap-4 pb-4 snap-x">
+                                        {imageGallery.map((item) => (
+                                          <div 
+                                            key={item.id} 
+                                            className={`shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`}
+                                            onClick={() => useAgentStore.setState({ generatedImageUrl: item.url })}
+                                          >
+                                            <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" title={item.prompt} />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             )}
                           </div>
@@ -604,24 +637,46 @@ export function ChatPanel() {
 
                             {/* 画廊部分 */}
                             {videoGallery && videoGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
-                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
-                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
-                                  {videoGallery.map((item) => (
-                                    <div 
-                                      key={item.id} 
-                                      className={`shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`}
-                                      onClick={() => useAgentStore.setState({ generatedVideoUrl: item.url })}
-                                    >
-                                      <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" title={item.prompt} />
-                                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
-                                          <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                                <div 
+                                  className="flex items-center justify-between cursor-pointer group mb-3"
+                                  onClick={() => toggleGallery('video')}
+                                >
+                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-orange-500 transition-colors">
+                                    GALLERY / 历史作品 ({videoGallery.length})
+                                  </h3>
+                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    {galleryExpanded.video ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+                                  </div>
                                 </div>
+
+                                <AnimatePresence>
+                                  {galleryExpanded.video && (
+                                    <motion.div 
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="h-36 overflow-x-auto flex gap-4 pb-4 snap-x">
+                                        {videoGallery.map((item) => (
+                                          <div 
+                                            key={item.id} 
+                                            className={`shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`}
+                                            onClick={() => useAgentStore.setState({ generatedVideoUrl: item.url })}
+                                          >
+                                            <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" title={item.prompt} />
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
+                                                <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             )}
                           </div>
@@ -706,7 +761,7 @@ export function ChatPanel() {
                                 {musicGenerateError && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`p-4 bg-red-500 text-white font-bold flex gap-3 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                   <AlertCircle className="h-6 w-6 shrink-0" />
-                                  <span className="break-words">{musicGenerateError}</span>
+                                  <span className="break-words whitespace-pre-wrap text-sm">{musicGenerateError}</span>
                                 </motion.div>
                               )}
                             </AnimatePresence>
@@ -751,27 +806,49 @@ export function ChatPanel() {
 
                             {/* 画廊部分 */}
                             {musicGallery && musicGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 h-48 flex flex-col">
-                                <h3 className="text-lg font-black uppercase mb-3 shrink-0">GALLERY / 历史作品</h3>
-                                <div className="flex-1 overflow-x-auto flex gap-4 pb-2 snap-x">
-                                  {musicGallery.map((item) => (
-                                    <div 
-                                      key={item.id} 
-                                      className={`shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`}
-                                      onClick={() => useAgentStore.setState({ generatedMusicUrl: item.url })}
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shrink-0">
-                                          <Music className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <p className="font-bold text-sm truncate" title={item.prompt}>{item.prompt}</p>
-                                          <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                                <div 
+                                  className="flex items-center justify-between cursor-pointer group mb-3"
+                                  onClick={() => toggleGallery('music')}
+                                >
+                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-indigo-500 transition-colors">
+                                    GALLERY / 历史作品 ({musicGallery.length})
+                                  </h3>
+                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    {galleryExpanded.music ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+                                  </div>
                                 </div>
+
+                                <AnimatePresence>
+                                  {galleryExpanded.music && (
+                                    <motion.div 
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="h-32 overflow-x-auto flex gap-4 pb-4 snap-x">
+                                        {musicGallery.map((item) => (
+                                          <div 
+                                            key={item.id} 
+                                            className={`shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`}
+                                            onClick={() => useAgentStore.setState({ generatedMusicUrl: item.url })}
+                                          >
+                                            <div className="flex items-center gap-3">
+                                              <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                                <Music className="w-5 h-5" />
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-sm truncate" title={item.prompt}>{item.prompt}</p>
+                                                <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             )}
                           </div>

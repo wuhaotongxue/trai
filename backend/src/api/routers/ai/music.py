@@ -12,6 +12,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
+from infrastructure.notifications.media_notify import media_notifier
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
 
@@ -85,6 +86,14 @@ class MusicController:
                 _music_tasks[task_id]["music_url"] = f"/api_trai/v1/ai/music/files/{filename}"
                 _music_tasks[task_id]["file_path"] = result.file_path
                 _music_tasks[task_id]["duration"] = result.duration
+                
+                # 发送飞书和企微通知
+                media_notifier.notify(
+                    media_type="music",
+                    prompt=request.prompt,
+                    file_url=f"http://localhost:5666{_music_tasks[task_id]['music_url']}",
+                    duration=result.duration
+                )
             else:
                 _music_tasks[task_id]["status"] = "failed"
                 _music_tasks[task_id]["progress"] = "生成失败"
@@ -129,7 +138,21 @@ class MusicController:
         """
         if task_id not in _music_tasks:
             raise HTTPException(status_code=404, detail="任务不存在")
-        return _music_tasks[task_id]
+        
+        task_info = _music_tasks[task_id].copy()
+        
+        # 计算排队位置
+        if task_info["status"] == "queued":
+            # 找到所有排在当前任务前面的、并且还在 queued 状态的任务数量
+            queued_tasks = [
+                tid for tid, t in _music_tasks.items()
+                if t["status"] == "queued" and tid < task_id
+            ]
+            task_info["queue_position"] = len(queued_tasks) + 1
+        else:
+            task_info["queue_position"] = 0
+            
+        return task_info
 
     @staticmethod
     @router.delete("/cancel/{task_id}")

@@ -515,6 +515,7 @@ export const agentApi = {
     request<{
       status: "queued" | "processing" | "completed" | "failed" | "cancelled" | "cancelling";
       progress?: string;
+      queue_position?: number;
       music_url?: string;
       error?: string;
       prompt: string;

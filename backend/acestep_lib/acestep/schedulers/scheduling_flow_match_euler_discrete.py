@@ -249,7 +249,7 @@ class FlowMatchEulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
         s_noise: float = 1.0,
         generator: torch.Generator | None = None,
         return_dict: bool = True,
-        omega: float | np.array = 0.0,
+        omega: float | np.ndarray = 0.0,
     ) -> FlowMatchEulerDiscreteSchedulerOutput | tuple:
         """
         Predict the sample from the previous timestep by reversing the SDE. This function propagates the diffusion

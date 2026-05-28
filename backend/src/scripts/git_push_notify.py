@@ -93,26 +93,20 @@ class GitPushNotifier:
     def build_markdown(self, commit_hash: str, commit_msg: str, branch: str) -> str:
         """
         构建企微 Markdown 通知内容.
-
-        参数:
-            commit_hash: str, 提交哈希.
-            commit_msg: str, 提交信息.
-            branch: str, 分支名.
-
-        返回值:
-            str: Markdown 格式通知.
         """
         changed = self._get_changed_files_summary()
 
         return (
-            f"## 💖 小甜心代码推送通知\n\n"
-            f"> **分支:** `{branch}`\n"
-            f"> **提交:** `{commit_hash}`\n"
-            f"> **作者:** wuhao\n\n"
-            f"### 📝 提交信息\n"
+            f"## 🌍 地理专家观测报告：板块运动监测 (Git Push)\n\n"
+            f"> **分支断层带:** `{branch}`\n"
+            f"> **地质标记点:** `{commit_hash}`\n"
+            f"> **勘探者:** wuhao\n\n"
+            f"作为地理专家，我刚刚观测到了代码库发生了一次剧烈的板块运动。以下是详细的勘探数据：\n\n"
+            f"### 📝 运动成因 (Commit Message)\n"
             f"{commit_msg}\n\n"
-            f"### 📂 变更文件\n"
-            f"{changed}\n"
+            f"### 📂 发生位移的地貌 (Changed Files)\n"
+            f"{changed}\n\n"
+            f"*“每一次代码的合并，都如同大陆板块的碰撞，塑造出更加宏伟的产品高峰。”*"
         )
 
     def send_wecom(self, content: str) -> bool:

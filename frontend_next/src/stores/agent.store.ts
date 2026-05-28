@@ -1010,7 +1010,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
             const statusRes = await api.agent.getMusicStatus(res.task_id);
             
             // 更新进度
-            if (statusRes.progress) {
+            if (statusRes.status === "queued" && statusRes.queue_position) {
+              set({ musicGenerateProgress: `排队中... 前面还有 ${statusRes.queue_position - 1} 人等待` });
+            } else if (statusRes.progress) {
               set({ musicGenerateProgress: statusRes.progress });
             }
 

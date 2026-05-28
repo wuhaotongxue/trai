@@ -19,6 +19,7 @@ from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
     get_feishu_ai_notify_service,
 )
+from infrastructure.notifications.media_notify import media_notifier
 
 router = APIRouter()
 
@@ -100,6 +101,16 @@ class VideoApiUtils:
                 logger.info(f"[通知] 飞书视频推送完成 | task_id={task_id} | result={feishu_result}")
             except Exception as e:
                 logger.error(f"[通知] 飞书推送失败 | task_id={task_id} | error={str(e)}")
+
+        try:
+            media_notifier.notify(
+                media_type="video",
+                prompt=prompt,
+                file_url=public_url or video_url,
+                duration=frames // 5
+            )
+        except Exception as e:
+            logger.error(f"[通知] 媒体推送失败 | task_id={task_id} | error={str(e)}")
 
 
 class VideoGenerationRequest(BaseModel):
