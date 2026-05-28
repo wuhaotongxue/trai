@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Upload, FileAudio, FileVideo, ExternalLink, Video, Trash2, Captions, Music, Languages, MonitorPlay, Type } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { globalToast } from "@/components/toast/toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BurnMode, SubtitleGenerateResponse, SubtitleRecordDTO, TARGET_LANG_OPTIONS } from "./subtitle/types";
 import { HistorySidebar } from "./subtitle/history_sidebar";
@@ -67,7 +67,7 @@ export function SubtitlePanel() {
       if (!activeRecord && records.length > 0) {
         setActiveRecord(records[0]);
       }
-      // 不要重置页码，以免影响当前浏览
+      // 不要重置页码, 以免影响当前浏览
     } catch (e) {
       console.error("Failed to fetch subtitle history:", e);
     } finally {
@@ -78,7 +78,7 @@ export function SubtitlePanel() {
   const handleDelete = async (taskId: string) => {
     globalToast({
       title: "确认删除",
-      message: "确定要删除这条记录吗？此操作不可撤销。",
+      message: "确定要删除这条记录吗? 此操作不可撤销.",
       variant: "warning",
       confirmText: "删除",
       cancelText: "取消",
@@ -97,16 +97,14 @@ export function SubtitlePanel() {
             setActiveRecord(null);
           }
           globalToast({
-            message: "删除成功，资源已移除",
+            message: "删除成功, 资源已移除",
             variant: "success",
-            duration: 3000,
           });
         } catch (e) {
-          console.error("Failed to delete subtitle record:", e);
+          console.error("Failed to delete record:", e);
           globalToast({
-            message: "删除失败，请稍后重试",
+            message: "删除失败, 请稍后重试",
             variant: "error",
-            duration: 3000,
           });
         }
       },
@@ -276,8 +274,8 @@ export function SubtitlePanel() {
       {/* 左侧配置与上传区 */}
       <div className={`bg-cyan-50 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
         <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
-          <h2 className="text-2xl font-black uppercase">字幕与视频处理</h2>
-          <div className="text-sm font-bold mt-1">自动生成字幕、人声分离、声音克隆及口型同步。</div>
+          <h2 className="text-2xl font-black uppercase tracking-tight">字幕创作中心</h2>
+          <div className="text-sm font-bold mt-1">自动生成字幕, 人声分离, 声音克隆及口型同步.</div>
         </div>
 
         <ScrollArea className="flex-1 min-h-0 pr-2">

@@ -4,6 +4,12 @@
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_05_28_1800
+- **修复(undefined_error)**: 修复 `chat_panel.tsx` 中 `editingImagePreview` 和 `editPrompt` 未定义导致的渲染崩溃问题.
+- **重构(state_cleanup)**: 从 `agent.store.ts` 中彻底移除已弃用的 legacy 变量 (`editingImagePreview`, `editPrompt`), 统一使用 `editingSourceImage` 和 `imageEditPrompt`.
+- **规范(punctuation)**: 全量修复 `chat_panel.tsx`, `agent.store.ts` 和 `subtitle_panel.tsx` 中的中文全角标点, 确保 100% 符合前端代码审查规范.
+- **修复(import)**: 修复 `subtitle_panel.tsx` 缺少 `AnimatePresence` 导入导致的类型检查失败.
+
 ### 🎨 前端_2026_05_28_1605
 - **优化(image_edit_progress)**: `/agent` 图像编辑结果区补齐与图片生成一致的进度条、阶段文案和加载动画, 同时把取消、失败、重置后的状态收口到同一套前端状态流.
 

@@ -31,7 +31,7 @@ interface GalleryPanelProps {
   generatedImageUrl: string | null;
   imagePrompt: string;
   editedImageUrl: string | null;
-  editPrompt: string;
+  imageEditPrompt: string;
   generatedVideoUrl: string | null;
   videoPrompt: string;
   generatedMusicUrl: string | null;
@@ -201,7 +201,7 @@ export function GalleryPanel({
   generatedImageUrl,
   imagePrompt,
   editedImageUrl,
-  editPrompt,
+  imageEditPrompt,
   generatedVideoUrl,
   videoPrompt,
   generatedMusicUrl,
@@ -266,7 +266,7 @@ export function GalleryPanel({
                   currentItems.push({ id: "current-generated", url: generatedImageUrl, prompt: imagePrompt, timestamp: 0, isCurrent: true });
                 }
                 if (editedImageUrl) {
-                  currentItems.push({ id: "current-edited", url: editedImageUrl, prompt: editPrompt, timestamp: 1, isCurrent: true });
+                  currentItems.push({ id: "current-edited", url: editedImageUrl, prompt: imageEditPrompt, timestamp: 1, isCurrent: true });
                 }
                 historyItems.push(...imageGallery.map((img) => ({ ...img, isCurrent: false })));
               }

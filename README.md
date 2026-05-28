@@ -69,6 +69,12 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🧩 前端_2026_05_28_1800
+- **修复(undefined_error)**: 修复 `chat_panel.tsx` 中 `editingImagePreview` 和 `editPrompt` 未定义导致的渲染崩溃问题.
+- **重构(state_cleanup)**: 从 `agent.store.ts` 中彻底移除已弃用的 legacy 变量 (`editingImagePreview`, `editPrompt`), 统一使用 `editingSourceImage` 和 `imageEditPrompt`.
+- **规范(punctuation)**: 全量修复 `chat_panel.tsx`, `agent.store.ts` 和 `subtitle_panel.tsx` 中的中文全角标点, 确保 100% 符合前端代码审查规范.
+- **修复(import)**: 修复 `subtitle_panel.tsx` 缺少 `AnimatePresence` 导入导致的类型检查失败.
+
 ### 🧩 前后端_2026_05_28_1730
 - **后端 (图片编辑实时进度)**: 将图片编辑接口 `/ai/image/edit` 重构为后台异步执行模式, 并新增 `/ai/image/status/{task_id}` 接口. 改进了 `LocalImageEditClient` 子进程日志读取, 允许通过回调实时上报推理进度.
 - **前端 (编辑进度轮询)**: 前端 Agent Store 的 `editImage` 方法接入真实轮询, 根据后端返回的 `progress` 与 `progress_message` 动态更新 UI. 解决了用户点击"编辑"后一直卡在"分析原图"阶段毫无真实进展的问题.

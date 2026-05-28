@@ -2,7 +2,7 @@
  * chat_panel.tsx
  * 作者: wuhao
  * 日期: 2026-04-23
- * 描述: Agent 对话主面板 - 现代化三栏式布局，集成创作、工具与 AI 前沿功能
+ * 描述: Agent 对话主面板 - 现代化三栏式布局, 集成创作、工具与 AI 前沿功能
  *       (全新 Neo-Brutalist 设计风格) 
  */
 
@@ -445,7 +445,7 @@ export function ChatPanel() {
                           </div>
                           <div>
                             <h3 className="text-2xl font-black uppercase tracking-widest mb-2">新的会话已就绪</h3>
-                            <p className="font-bold text-sm">选择上方的 Agent 类型，输入你的想法，随时开始创造！</p>
+                            <p className="font-bold text-sm">选择上方的 Agent 类型, 输入你的想法, 随时开始创造!</p>
                           </div>
                         </div>
                       ) : messages.map(msg => (
@@ -480,7 +480,7 @@ export function ChatPanel() {
                         value={input} 
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-                        placeholder="输入你的消息，按 Enter 发送，Shift + Enter 换行..."
+                        placeholder="输入你的消息, 按 Enter 发送, Shift + Enter 换行..."
                         className="flex-1 bg-transparent border-none focus:ring-0 text-base font-medium p-3 resize-none max-h-40 outline-none"
                       />
                       <button onClick={handleSend} disabled={isStreaming || !input.trim()} className={`h-12 w-14 flex items-center justify-center bg-blue-500 text-white ${brutalBtnBase} disabled:opacity-50 disabled:cursor-not-allowed`}>
@@ -524,7 +524,7 @@ export function ChatPanel() {
                         <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">创意绘图</h2>
-                            <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作。</div>
+                            <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
@@ -794,7 +794,7 @@ export function ChatPanel() {
                         <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">视频生成</h2>
-                            <div className="text-sm font-bold mt-1">让你的想象力动起来。</div>
+                            <div className="text-sm font-bold mt-1">让你的想象力动起来.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
@@ -1023,7 +1023,7 @@ export function ChatPanel() {
                         <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">音乐创作</h2>
-                            <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化。</div>
+                            <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
@@ -1296,17 +1296,17 @@ export function ChatPanel() {
                         <div className={`bg-rose-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">图像编辑</h2>
-                            <div className="text-sm font-bold mt-1">上传原图或双图参考, 使用本地图像编辑模型按指令完成修改。</div>
+                            <div className="text-sm font-bold mt-1">上传原图或双图参考, 使用本地图像编辑模型按指令完成修改.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
                             <div className="grid grid-cols-2 gap-4">
                               <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                 <div className="font-bold uppercase text-sm">源图片 (SOURCE)</div>
-                                {editingImagePreview ? (
+                                {editingSourceImage ? (
                                   <div className="relative w-full aspect-square">
-                                    <img src={editingImagePreview} className={`w-full h-full object-cover ${brutalBorder}`} alt="Source" />
-                                    <button onClick={() => setEditingImagePreview(null)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
+                                    <img src={editingSourceImage} className={`w-full h-full object-cover ${brutalBorder}`} alt="Source" />
+                                    <button onClick={() => setEditingSourceImage(null)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
                                   </div>
                                 ) : (
                                   <label className={`w-full aspect-square flex flex-col items-center justify-center cursor-pointer bg-slate-100 dark:bg-slate-900 ${brutalBorder} hover:bg-slate-200 transition-colors`}>
@@ -1318,10 +1318,10 @@ export function ChatPanel() {
                               </div>
                               <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
                                 <div className="font-bold uppercase text-sm">第二张参考图 (OPTIONAL)</div>
-                                {editingImagePreview2 ? (
+                                {editingSourceImage2 ? (
                                   <div className="relative w-full aspect-square">
-                                    <img src={editingImagePreview2} className={`w-full h-full object-cover ${brutalBorder}`} alt="Ref" />
-                                    <button onClick={() => setEditingImagePreview2(null)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
+                                    <img src={editingSourceImage2} className={`w-full h-full object-cover ${brutalBorder}`} alt="Ref" />
+                                    <button onClick={() => setEditingSourceImage(null, true)} className={`absolute top-2 right-2 p-1 bg-red-500 text-white ${brutalBorder}`}><X className="h-4 w-4"/></button>
                                   </div>
                                 ) : (
                                   <label className={`w-full aspect-square flex flex-col items-center justify-center cursor-pointer bg-slate-100 dark:bg-slate-900 ${brutalBorder} hover:bg-slate-200 transition-colors`}>
@@ -1334,8 +1334,8 @@ export function ChatPanel() {
                             </div>
 
                             <textarea
-                              value={editPrompt}
-                              onChange={(e) => setEditPrompt(e.target.value)}
+                              value={imageEditPrompt}
+                              onChange={(e) => setImageEditPrompt(e.target.value)}
                               onKeyDown={(e) => {
                                 if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
                                   e.preventDefault();
@@ -1352,7 +1352,7 @@ export function ChatPanel() {
                               <button
                                 type="button"
                                 onClick={handleStartEditImage}
-                                disabled={isEditingImage || !editingImagePreview || !editPrompt.trim()}
+                                disabled={isEditingImage || !editingSourceImage || !imageEditPrompt.trim()}
                                 className={`flex-1 h-16 bg-cyan-500 text-slate-900 text-xl flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed ${brutalBtnBase}`}
                               >
                                 {isEditingImage ? (
@@ -1368,9 +1368,9 @@ export function ChatPanel() {
                                     cancelEditImage();
                                     return;
                                   }
-                                  setEditingImagePreview(null);
-                                  setEditingImagePreview2(null);
-                                  setEditPrompt("");
+                                  setEditingSourceImage(null);
+                                  setEditingSourceImage(null, true);
+                                  setImageEditPrompt("");
                                   clearEditedImage();
                                 }}
                                 className={`px-6 bg-white dark:bg-slate-800 text-slate-900 dark:text-white disabled:opacity-50 ${brutalBtnBase}`}

@@ -70,7 +70,7 @@ export interface SessionItem {
   message_count: number;
   created_at: string | null;
   updated_at: string | null;
-  /** 本地缓存：第一条用户消息 */
+  /** 本地缓存: 第一条用户消息 */
   firstUserMessage?: string;
 }
 
@@ -186,12 +186,6 @@ interface AgentState {
   editedImageUrl: string | null;
   /** 图片编辑错误信息 */
   imageEditError: string | null;
-  /** 当前编辑的原图 base64 (预览) */
-  editingImagePreview: string | null;
-  /** 当前编辑的参考图 base64 (预览) */
-  editingImagePreview2: string | null;
-  /** 当前编辑的提示词 */
-  editPrompt: string;
   /** 当前编辑的原图 base64 */
   editingSourceImage: string | null;
   /** 当前编辑的参考图 base64 */
@@ -595,7 +589,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         buffer = lines.pop() || "";
 
         for (const line of lines) {
-          // 跳过 event: 行，只处理 data: 行
+          // 跳过 event: 行, 只处理 data: 行
           if (line.startsWith("event: ")) continue;
           if (!line.startsWith("data: ")) continue;
           const data = line.slice(6);
@@ -606,7 +600,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
             if (parsed.event === "token") {
               assistantContent += parsed.data;
-              // 立即更新状态，确保打字机效果
+              // 立即更新状态, 确保打字机效果
               set((state) => ({
                 messages: state.messages.map((m) =>
                   m.id === assistantMsgId ? { ...m, content: assistantContent } : m
@@ -665,23 +659,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     } finally {
       set({ isStreaming: false, streamClient: null, activeToolCall: null });
     }
-    // 缓存第一条用户消息到会话列表，供会话标题展示
-    if (sessionId && content) {
-      set((state) => {
-        const updated = state.sessions.map((s) =>
-          s.session_id === sessionId && !s.firstUserMessage
-            ? { ...s, firstUserMessage: content }
-            : s
-        );
-        // 同步到 localStorage
-        try {
-          const stored = JSON.parse(localStorage.getItem("sessionFirstMessages") || "{}");
-          stored[sessionId] = content;
-          localStorage.setItem("sessionFirstMessages", JSON.stringify(stored));
-        } catch {}
-        return { sessions: updated };
-      });
-    }
+    // 缓存第一条用户消息到会话列表, 供会话标题展示
+    const updatedSessions = get().sessions.map((s) => {
+      if (s.session_id === sessionId) {
+        return { ...s, firstUserMessage: content, message_count: (s.message_count || 0) + 2 };
+      }
+      return s;
+    });
+    set({ sessions: updatedSessions });
     await get().loadSessions();
   },
 
@@ -711,20 +696,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     if (!targetId) return;
     try {
       await api.session.delete(targetId);
-      // 延迟 1 秒后提示，让用户看到删除效果
+      // 延迟 1 秒后提示, 让用户看到删除效果
       setTimeout(() => {
         globalToast({ message: toastMessages.deleted, variant: "success" });
       }, 1000);
       if (targetId === get().sessionId) {
         set({ sessionId: null, messages: [] });
       }
-      // 从会话列表中移除已删除的会话，避免 404
+      // 从会话列表中移除已删除的会话, 避免 404
       set((state) => ({
         sessions: state.sessions.filter((s) => s.session_id !== targetId),
       }));
       await get().loadSessions();
     } catch (e) {
-      // 删除失败时也移除本地会话（乐观更新），避免 UI 与后端不一致
+      // 删除失败时也移除本地会话 (乐观更新), 避免 UI 与后端不一致
       set((state) => ({
         sessions: state.sessions.filter((s) => s.session_id !== targetId),
       }));
@@ -744,13 +729,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       try {
         storedFirstMsgs = JSON.parse(localStorage.getItem("sessionFirstMessages") || "{}");
       } catch {}
-      // 合并更新：API 返回的标题优先，避免竞态导致旧数据覆盖新标题
+      // 合并更新: API 返回的标题优先, 避免竞态导致旧数据覆盖新标题
       set((state) => {
         const freshIds = new Set(res.sessions.map((s: { session_id: string }) => s.session_id));
         const freshSessions = res.sessions as unknown as Array<{ session_id: string; title: string | null | undefined }>;
         const merged = freshSessions.map((fresh) => {
           const local = state.sessions.find((s) => s.session_id === fresh.session_id);
-          // API 返回的标题为准；null 说明后端尚未更新（旧缓存），保留本地已知标题
+          // API 返回的标题为准; null 说明后端尚未更新 (旧缓存), 保留本地已知标题
           return {
             ...local,
             ...fresh,
@@ -768,31 +753,20 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   switchSession: async (sessionId: string) => {
-    // 如果已经是当前会话，不重复切换
-    if (sessionId === get().sessionId) return;
+    // 如果已经是当前会话, 不重复切换
+    if (get().sessionId === sessionId) return;
 
     set({ isLoading: true, error: null });
     try {
       const res = await api.session.get(sessionId);
-      set({
-        sessionId: res.session_id,
-        messages: res.messages,
-        isLoading: false,
-      });
+      set({ sessionId, messages: res.messages, isLoading: false });
     } catch (e) {
-      // 会话不存在（404）时，静默从列表移除，避免反复报错
-      const errorMsg = e instanceof Error ? e.message : String(e);
-      const is404 = errorMsg.includes("不存在") || errorMsg.includes("404") || errorMsg.includes("会话");
-
-      set({ isLoading: false });
+      console.error("切换会话失败:", e);
+      set({ error: "切换会话失败", isLoading: false });
+      // 会话不存在 (404) 时, 静默从列表移除, 避免反复报错
       set((state) => ({
         sessions: state.sessions.filter((s) => s.session_id !== sessionId),
-        sessionId: state.sessionId === sessionId ? null : state.sessionId,
       }));
-
-      if (!is404) {
-        console.warn("切换会话失败:", sessionId, e);
-      }
     }
   },
 
@@ -975,7 +949,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       imageEditTimer: timer,
     });
     try {
-      // 压缩图片：base64 图片压缩到 5M 以内（避免超过后端 10M 限制）
+      // 压缩图片: base64 图片压缩到 5M 以内 (避免超过后端 10M 限制)
       let imageToSend = sourceImage;
       if (sourceImage.startsWith("data:image/")) {
         const maxSize = 5 * 1024 * 1024; // 5MB
@@ -1071,7 +1045,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           });
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000);
         pollCount++;
       }
 
@@ -1363,7 +1337,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         
         // 开始轮询检查状态
         const checkStatus = async () => {
-          // 如果任务已经被清空或不再是生成中，停止轮询
+          // 如果任务已经被清空或不再是生成中, 停止轮询
           if (!get().isGeneratingMusic || get().musicGenerateTaskId !== res.task_id) {
             return;
           }
@@ -1379,15 +1353,15 @@ export const useAgentStore = create<AgentState>((set, get) => ({
             }
 
             if (statusRes.status === "completed" && statusRes.music_url) {
-              set({ generatedMusicUrl: statusRes.music_url, isGeneratingMusic: false, musicGenerateProgress: "生成完毕", musicGenerateTaskId: null });
+              set({ generatedMusicUrl: statusRes.music_url, isGeneratingMusic: false, musicGenerateProgress: "生成完成", musicGenerateTaskId: null });
               get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url);
             } else if (statusRes.status === "failed") {
-              set({ musicGenerateError: statusRes.error || "音乐生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
+              set({ musicGenerateError: statusRes.error || "生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
             } else if (statusRes.status === "cancelled") {
               set({ isGeneratingMusic: false, musicGenerateProgress: "已取消", musicGenerateTaskId: null });
             } else {
-              // 还在队列或处理中，继续轮询
-              setTimeout(checkStatus, 3000); // 改为每 3 秒查一次，进度更新更及时
+              // 还在队列或处理中, 继续轮询
+              setTimeout(checkStatus, 3000); // 改为每 3 秒查一次, 进度更新更及时
             }
           } catch (e: unknown) {
             set({ musicGenerateError: "查询状态失败", isGeneratingMusic: false, musicGenerateTaskId: null });
