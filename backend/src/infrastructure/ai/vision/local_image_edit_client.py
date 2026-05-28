@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_1855
+# 日期: 2026_05_28_1920
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -192,7 +192,7 @@ class LocalImageEditClient:
 
     def _normalize_output_size(self, width: int, height: int) -> tuple[int, int]:
         """
-        将输出宽高同时规范到 16 的倍数.
+        规范化输出尺寸, 确保不超出模型处理能力 (最大 1536x1536).
 
         参数:
           width: 原始宽度.
@@ -202,6 +202,16 @@ class LocalImageEditClient:
         异常:
           无.
         """
+        # 限制最大维度为 1536, 避免显存溢出并提高生成速度
+        max_dim = 1536
+        if width > max_dim or height > max_dim:
+            if width > height:
+                height = int(height * (max_dim / width))
+                width = max_dim
+            else:
+                width = int(width * (max_dim / height))
+                height = max_dim
+
         normalized_width = self._normalize_dimension(width, fallback=self._default_width)
         normalized_height = self._normalize_dimension(height, fallback=self._default_height)
         return normalized_width, normalized_height
@@ -277,13 +287,16 @@ def _main() -> None:
   if seed_value is not None and seed_value >= 0:
     generator = torch.Generator(device=device).manual_seed(seed_value)
   sys.stderr.write("[4/7] 开始推理 | steps={steps} | seed=" + str(seed_value) + "\\n")
+  # 优化推理参数:
+  # guidance_scale 为文本引导强度, 提高到 7.5 以增强指令遵循度 (如 "合并" 等复杂指令)
+  # true_cfg_scale 为图像引导强度, 提高到 5.0 以更好地保留两张原图的特征
   result = pipe(
     image=images if len(images) > 1 else images[0],
     prompt=prompt,
-    negative_prompt=" ",
+    negative_prompt="low quality, blurry, distorted, deformed, watermark, extra limbs, ugly, messy, grainy, bad anatomy, out of focus",
     num_inference_steps={steps},
-    true_cfg_scale=4.0,
-    guidance_scale=1.0,
+    true_cfg_scale=5.0,
+    guidance_scale=7.5,
     num_images_per_prompt=1,
     generator=generator,
   )

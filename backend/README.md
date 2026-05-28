@@ -35,6 +35,12 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1920
+- **优化**: 进一步调优 `LocalImageEditClient` 推理参数, 将 `guidance_scale` 提升至 `7.5`, `true_cfg_scale` 提升至 `5.0`. 显著增强模型对 "合并" 等跨图指令的遵循能力, 并更好地保留原图特征. 
+- **质量**: 强化 `negative_prompt`, 引入人体解剖、画质细节等负向提示词, 减少生成结果中的扭曲与模糊. 
+
+### 🛠️ 后端_2026_05_28_1910
+
 ### 🛠️ 后端_2026_05_28_1855
 - **加固**: 为 `LocalImageEditClient` 子进程新增 `limit=50MB` 缓冲区设置. 彻底解决因模型输出超大 Base64 字符串导致的 `Separator is not found, and chunk exceed the limit` 错误. 
 
