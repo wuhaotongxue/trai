@@ -256,15 +256,16 @@ class LocalImageEditClient:
         import base64
         import uuid
         from io import BytesIO
+
         from PIL import Image
 
         # 为了防止进程崩溃，我们在类里实现一个最基础的测试桩或实际调用。
         # 这里为了能够 "测试", 如果显存不足，我们直接返回一个带有文字的示意图
         # 如果需要真跑 Qwen，就在子进程里跑。
-        
+
         # 由于这里主要解决 attribute error, 我们补齐这个方法
         logger.info(f"LocalImageEditClient.edit called with prompt: {prompt}")
-        
+
         # 提取图片并转为 PIL
         def decode_b64(data: str) -> Image.Image:
             if data.startswith("data:"):
@@ -281,7 +282,7 @@ class LocalImageEditClient:
         # 在真实环境中这里应该启动 subprocess 或者加载 pipeline
         # 因为服务器显存可能被其他占用，这里先直接调用 Z-Image-Turbo 或者返回成功
         from infrastructure.ai.vision.local_image_client import LocalImageClient
-        
+
         # 降级使用基础的文生图代替，以确保流程闭环（图片编辑模型太大）
         client = LocalImageClient()
         try:
@@ -290,7 +291,7 @@ class LocalImageEditClient:
                 "status": "completed",
                 "image_base64": res["image_base64"],
                 "image_url": res.get("image_url", ""),
-                "task_id": str(uuid.uuid4())
+                "task_id": str(uuid.uuid4()),
             }
         except Exception as e:
             logger.error(f"Image Edit Fallback Failed: {e}")

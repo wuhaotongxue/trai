@@ -83,11 +83,12 @@ class MusicController:
 
             if result.success:
                 filename = os.path.basename(result.file_path or "")
-                
+
                 # 上传到 S3
                 s3_url = ""
                 try:
                     from infrastructure.storage.s3_storage import get_s3_storage
+
                     s3_storage = get_s3_storage()
                     date_prefix = datetime.now().strftime("%Y%m")
                     s3_key = f"public/ai/music/{date_prefix}/{filename}"
@@ -95,9 +96,11 @@ class MusicController:
                     s3_url = s3_storage.get_file_url(s3_key)
                 except Exception as e:
                     logger.warning(f"音乐文件上传 S3 失败: {e}")
-                
-                final_url = s3_url or f"/api_trai/v1/ai/music/files/{filename}"
-                
+
+                # 优先返回通过后端的下载链接，避免 Nginx 直接拦截静态文件 .wav 导致 404
+                public_base = os.getenv("S3_PRESIGNED_PUBLIC_BASE", "https://ai.tuoren.com").rstrip("/")
+                final_url = f"{public_base}/api_trai/v1/ai/music/download?filename={filename}"
+
                 _music_tasks[task_id]["status"] = "completed"
                 _music_tasks[task_id]["progress"] = "完成"
                 _music_tasks[task_id]["music_url"] = final_url
@@ -179,6 +182,45 @@ class MusicController:
         _music_tasks[task_id]["status"] = "cancelling"
         _music_tasks[task_id]["progress"] = "正在取消..."
         return {"success": True, "message": "已发送取消请求"}
+
+    @staticmethod
+    @router.get("/download")
+    async def download_music_file(filename: str):
+        """
+        获取音乐文件接口 (通过 Query 参数避免 Nginx 拦截 .wav).
+
+        参数:
+            filename: str, 文件名.
+
+        返回值:
+            FileResponse: 音频文件响应.
+        """
+        import re
+        from urllib.parse import unquote
+
+        from fastapi.responses import FileResponse
+
+        filename = unquote(filename)
+        if not re.match(r"^[\w\s\-\( \)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
+            raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
+
+        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+        file_path = os.path.join(output_dir, filename)
+
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="文件不存在")
+
+        mime_type = "audio/wav"
+        if filename.endswith(".mp3"):
+            mime_type = "audio/mpeg"
+        elif filename.endswith(".ogg"):
+            mime_type = "audio/ogg"
+
+        return FileResponse(
+            path=file_path,
+            media_type=mime_type,
+            filename=filename,
+        )
 
     @staticmethod
     @router.get("/files/{filename}")

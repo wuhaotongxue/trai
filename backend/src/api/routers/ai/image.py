@@ -127,7 +127,7 @@ def _send_image_generated_notify(
         except Exception as e:
             logger.warning(f"飞书原生图片生成通知失败: {e}")
             _update_notify_status(task_id, False, "failed")
-            
+
     try:
         media_notifier.notify(
             media_type="image",
