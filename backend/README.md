@@ -35,6 +35,9 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1740
+- **修复**: 解决 `LocalImageEditClient` 读取子进程 `stdout` 时因 Base64 字符串过长导致的缓冲区溢出错误 (`Separator is not found, and chunk exceed the limit`). 将 `readline()` 替换为 `read()` 以完整接收大尺寸图片数据. 
+
 ### 🛠️ 后端_2026_05_28_1730
 - **重构**: 将图片编辑接口 `/ai/image/edit` 改为异步模式, 引入 `ImageTaskStore` 维护实时任务状态. 
 - **增强**: 实现图片编辑任务状态查询接口 `/ai/image/status/{task_id}`, 支持前端轮询真实进度. 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_17:05:00
+# 日期: 2026_05_28_17:40:00
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -333,7 +333,7 @@ if __name__ == "__main__":
         异常:
           RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
         """
-        async with (self._global_semaphore or asyncio.Semaphore(1)):
+        async with self._global_semaphore or asyncio.Semaphore(1):
             devices = self._get_devices_by_free_memory()
             selected_device = -1
             for dev_idx, free_gb in devices:
@@ -389,6 +389,7 @@ if __name__ == "__main__":
 
                 async def read_stderr(stream: asyncio.StreamReader) -> None:
                     import re
+
                     while True:
                         line = await stream.readline()
                         if not line:
@@ -408,13 +409,10 @@ if __name__ == "__main__":
 
                 async def read_stdout(stream: asyncio.StreamReader) -> None:
                     nonlocal last_stdout_line
-                    while True:
-                        line = await stream.readline()
-                        if not line:
-                            break
-                        text = line.decode("utf-8", errors="ignore").strip()
-                        if text:
-                            last_stdout_line = text
+                    # 使用 read() 而非 readline() 以支持超大 Base64 字符串 (解决 "Separator is not found" 错误)
+                    data = await stream.read()
+                    if data:
+                        last_stdout_line = data.decode("utf-8", errors="ignore").strip()
 
                 # 并发读取 stdout 和 stderr
                 await asyncio.gather(read_stderr(process.stderr), read_stdout(process.stdout))
