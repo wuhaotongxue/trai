@@ -20,8 +20,8 @@ export class ApiEndpoints {
 
   static readonly ai_generate_image = `${ApiEndpoints.api_prefix}/ai/image`
   static readonly ai_generate_image_to_image = `${ApiEndpoints.api_prefix}/ai/image_to_image`
-  static readonly ai_generate_music = `${ApiEndpoints.api_prefix}/ai/music`
-  static readonly ai_generate_video = `${ApiEndpoints.api_prefix}/ai/video`
+  static readonly ai_generate_music = `${ApiEndpoints.api_prefix}/ai/music/generate`
+  static readonly ai_generate_video = `${ApiEndpoints.api_prefix}/ai/video/generate`
   static readonly ai_generate_comfyui = `${ApiEndpoints.api_prefix}/ai/comfyui/generate`
   static readonly ai_generate_report = `${ApiEndpoints.api_prefix}/ai/report/generate`
 
@@ -36,10 +36,10 @@ export class ApiEndpoints {
   static readonly tools_md_to_pdf = `${ApiEndpoints.api_prefix}/tools/md_to_pdf`
   static readonly tools_compress_image = `${ApiEndpoints.api_prefix}/tools/compress_image`
   static readonly tools_compress_zip = `${ApiEndpoints.api_prefix}/tools/compress_zip`
-  static readonly tools_convert_image = `${ApiEndpoints.api_prefix}/tools/convert_image`
-  static readonly tools_word_to_pdf = `${ApiEndpoints.api_prefix}/tools/word_to_pdf`
-  static readonly tools_pdf_to_word = `${ApiEndpoints.api_prefix}/tools/pdf_to_word`
-  static readonly tools_convert_excel = `${ApiEndpoints.api_prefix}/tools/convert_excel`
+  
+  // 工具调用 API
+  static readonly agent_tool_call = `${ApiEndpoints.api_prefix}/agent/tool_call`
+  static readonly agent_tool_list = `${ApiEndpoints.api_prefix}/agent/tools/list`
 
   static readonly admin_knowledge_base_demo_create = `${ApiEndpoints.api_prefix}/admin/knowledge_base/demo_create`
   static readonly admin_knowledge_base_categories = `${ApiEndpoints.api_prefix}/admin/knowledge_base/categories`

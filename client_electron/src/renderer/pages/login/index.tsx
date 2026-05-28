@@ -20,6 +20,7 @@ const PREDEFINED_SERVERS = [
   { id: 'local', label_key: 'server_local', desc_key: 'server_local_desc', url: 'http://127.0.0.1:5666' },
   { id: 'remote', label_key: 'server_remote', desc_key: 'server_remote_desc', url: 'https://trai.tuoren.com:5666' },
   { id: 'production', label_key: 'server_production', desc_key: 'server_production_desc', url: 'https://trai.tuoren.com' },
+  { id: 'internal', label_key: 'server_internal', desc_key: 'server_internal_desc', url: 'http://192.168.100.119:5666' },
 ]
 
 // 服务器配置弹窗组件
@@ -306,17 +307,17 @@ const ServerConfigModal: React.FC<ServerConfigModalProps> = ({ current_url, on_s
 
 // 默认离线角色配置
 const DEFAULT_OFFLINE_USER = {
-  username: 'wuhaotongxue',
-  password: 'whf123456'
+  username: 'wuhao',
+  password: 'Wuhao123456'
 }
 
 const Login: React.FC = () => {
   console.info('[login] Login function called')
   const [username, set_username] = useState('wuhao')
-  const [password, set_password] = useState('Tr@@2026...')
+  const [password, set_password] = useState('Wuhao123456')
   const [password_visible, set_password_visible] = useState(false)
   const [error_msg, set_error_msg] = useState('')
-  const [api_url, set_api_url] = useState('http://127.0.0.1:5666')
+  const [api_url, set_api_url] = useState('http://192.168.100.119:5666')
   const [api_loading, set_api_loading] = useState(true)
   const [remember_me, set_remember_me] = useState(true)
   const [show_logs, set_show_logs] = useState(false)

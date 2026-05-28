@@ -341,5 +341,262 @@ export const agent_service = {
         }, 3000)
       })
     }
+  },
+
+  /**
+   * 获取可用工具列表
+   * @returns 工具列表
+   */
+  async get_tool_list() {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_tool_list)
+      const res = await api_client.get(url)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('get_tool_list failed:', error.message)
+      return { success: false, error: error.message || '获取工具列表失败' }
+    }
+  },
+
+  /**
+   * 调用工具
+   * @param tool_name - 工具名称
+   * @param tool_params - 工具参数
+   * @returns 工具执行结果
+   */
+  async call_tool(tool_name: string, tool_params: Record<string, any>) {
+    try {
+      const url = ApiUrl.build_api_url(ApiEndpoints.agent_tool_call)
+      const payload = { tool_name, tool_params }
+      const res = await api_client.post(url, payload)
+      return { success: true, data: res.data.data }
+    } catch (error: any) {
+      log.error('call_tool failed:', error.message)
+      return { success: false, error: error.message || '工具调用失败' }
+    }
+  },
+
+  /**
+   * 读取本地文件
+   * @param file_path - 文件路径
+   * @returns 文件内容
+   */
+  async read_file(file_path: string) {
+    try {
+      const { readFile } = await import('fs/promises')
+      const content = await readFile(file_path, 'utf-8')
+      log.info(`Read file: ${file_path}`)
+      return { success: true, data: content }
+    } catch (error: any) {
+      log.error('read_file failed:', error.message)
+      return { success: false, error: error.message || '读取文件失败' }
+    }
+  },
+
+  /**
+   * 写入本地文件
+   * @param file_path - 文件路径
+   * @param content - 文件内容
+   * @param encoding - 编码格式，默认 utf-8
+   * @returns 写入结果
+   */
+  async write_file(file_path: string, content: string, encoding: string = 'utf-8') {
+    try {
+      const { writeFile } = await import('fs/promises')
+      await writeFile(file_path, content, encoding)
+      log.info(`Write file: ${file_path}`)
+      return { success: true, data: { message: '文件写入成功', path: file_path } }
+    } catch (error: any) {
+      log.error('write_file failed:', error.message)
+      return { success: false, error: error.message || '写入文件失败' }
+    }
+  },
+
+  /**
+   * 追加内容到本地文件
+   * @param file_path - 文件路径
+   * @param content - 追加内容
+   * @returns 追加结果
+   */
+  async append_file(file_path: string, content: string) {
+    try {
+      const { appendFile } = await import('fs/promises')
+      await appendFile(file_path, content, 'utf-8')
+      log.info(`Append file: ${file_path}`)
+      return { success: true, data: { message: '内容追加成功', path: file_path } }
+    } catch (error: any) {
+      log.error('append_file failed:', error.message)
+      return { success: false, error: error.message || '追加内容失败' }
+    }
+  },
+
+  /**
+   * 删除本地文件
+   * @param file_path - 文件路径
+   * @returns 删除结果
+   */
+  async delete_file(file_path: string) {
+    try {
+      const { unlink } = await import('fs/promises')
+      await unlink(file_path)
+      log.info(`Delete file: ${file_path}`)
+      return { success: true, data: { message: '文件删除成功', path: file_path } }
+    } catch (error: any) {
+      log.error('delete_file failed:', error.message)
+      return { success: false, error: error.message || '删除文件失败' }
+    }
+  },
+
+  /**
+   * 列出目录内容
+   * @param dir_path - 目录路径
+   * @returns 目录内容列表
+   */
+  async list_directory(dir_path: string) {
+    try {
+      const { readdir, stat } = await import('fs/promises')
+      const files = await readdir(dir_path)
+      const result = []
+      
+      for (const file of files) {
+        const full_path = `${dir_path}/${file}`
+        const stats = await stat(full_path)
+        result.push({
+          name: file,
+          path: full_path,
+          is_directory: stats.isDirectory(),
+          size: stats.size,
+          modified_at: stats.mtime.toISOString()
+        })
+      }
+      
+      log.info(`List directory: ${dir_path}`)
+      return { success: true, data: result }
+    } catch (error: any) {
+      log.error('list_directory failed:', error.message)
+      return { success: false, error: error.message || '读取目录失败' }
+    }
+  },
+
+  /**
+   * 创建目录
+   * @param dir_path - 目录路径
+   * @param recursive - 是否递归创建，默认 true
+   * @returns 创建结果
+   */
+  async create_directory(dir_path: string, recursive: boolean = true) {
+    try {
+      const { mkdir } = await import('fs/promises')
+      await mkdir(dir_path, { recursive })
+      log.info(`Create directory: ${dir_path}`)
+      return { success: true, data: { message: '目录创建成功', path: dir_path } }
+    } catch (error: any) {
+      log.error('create_directory failed:', error.message)
+      return { success: false, error: error.message || '创建目录失败' }
+    }
+  },
+
+  /**
+   * 浏览器截图
+   * @param url - 目标网址
+   * @param output_path - 输出路径
+   * @param options - 截图选项
+   * @returns 截图结果
+   */
+  async browser_screenshot(url: string, output_path: string, options: any = {}) {
+    try {
+      let puppeteer
+      try {
+        puppeteer = await import('puppeteer')
+      } catch {
+        return { success: false, error: 'puppeteer 未安装，请先安装依赖: pnpm add puppeteer' }
+      }
+      
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      })
+      
+      const page = await browser.newPage()
+      await page.goto(url, { waitUntil: 'networkidle2' })
+      
+      const screenshot_options = {
+        path: output_path,
+        fullPage: options.fullPage || false,
+        quality: options.quality || 100,
+        ...(options.viewport && { viewport: options.viewport })
+      }
+      
+      await page.screenshot(screenshot_options)
+      await browser.close()
+      
+      log.info(`Browser screenshot: ${url} -> ${output_path}`)
+      return { success: true, data: { message: '截图成功', path: output_path } }
+    } catch (error: any) {
+      log.error('browser_screenshot failed:', error.message)
+      return { success: false, error: error.message || '截图失败' }
+    }
+  },
+
+  /**
+   * 浏览器页面内容抓取
+   * @param url - 目标网址
+   * @returns 页面内容
+   */
+  async browser_scrape(url: string) {
+    try {
+      let puppeteer
+      try {
+        puppeteer = await import('puppeteer')
+      } catch {
+        return { success: false, error: 'puppeteer 未安装，请先安装依赖: pnpm add puppeteer' }
+      }
+      
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      })
+      
+      const page = await browser.newPage()
+      await page.goto(url, { waitUntil: 'networkidle2' })
+      
+      const content = await page.content()
+      const title = await page.title()
+      const text = await page.evaluate(() => document.body.textContent)
+      
+      await browser.close()
+      
+      log.info(`Browser scrape: ${url}`)
+      return { success: true, data: { url, title, content, text } }
+    } catch (error: any) {
+      log.error('browser_scrape failed:', error.message)
+      return { success: false, error: error.message || '抓取失败' }
+    }
+  },
+
+  /**
+   * 执行命令行
+   * @param command - 命令
+   * @param cwd - 工作目录
+   * @returns 命令执行结果
+   */
+  async execute_command(command: string, cwd?: string) {
+    try {
+      const { exec } = await import('child_process')
+      return new Promise((resolve) => {
+        exec(command, { cwd, timeout: 60000 }, (error, stdout, stderr) => {
+          if (error) {
+            log.error('execute_command failed:', error.message)
+            resolve({ success: false, error: error.message, stderr })
+          } else {
+            log.info(`Execute command: ${command}`)
+            resolve({ success: true, data: { stdout, stderr } })
+          }
+        })
+      })
+    } catch (error: any) {
+      log.error('execute_command failed:', error.message)
+      return { success: false, error: error.message || '命令执行失败' }
+    }
   }
 }

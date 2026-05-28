@@ -239,22 +239,6 @@ export const register_ipc_handlers = (): void => {
     return await tools_service.compress_files_to_zip(file_paths)
   })
 
-  ipcMain.handle('tools:convert_image', async (_, file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => {
-    return await tools_service.convert_image(file_path, target_format, sizes, width, height, target_size_kb)
-  })
-
-  ipcMain.handle('tools:convert_word_to_pdf', async (_, file_path: string) => {
-    return await tools_service.convert_word_to_pdf(file_path)
-  })
-
-  ipcMain.handle('tools:convert_pdf_to_word', async (_, file_path: string) => {
-    return await tools_service.convert_pdf_to_word(file_path)
-  })
-
-  ipcMain.handle('tools:convert_excel', async (_, file_path: string, target_format: string) => {
-    return await tools_service.convert_excel(file_path, target_format)
-  })
-
   // ===================== Agent =====================
   ipcMain.handle('agent:chat', async (event, session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, files?: Array<{ name: string; type: string; data: string }>) => {
   return await agent_service.chat(session_id, message, agent_id, knowledge_base_id, files, (evt, data) => {
@@ -311,6 +295,54 @@ export const register_ipc_handlers = (): void => {
 
   ipcMain.handle('agent:management:check', async (_, agent_id: string) => {
     return agent_service.check_agent(agent_id)
+  })
+
+  // ===================== Agent Tools =====================
+  ipcMain.handle('agent:tools:list', async () => {
+    return agent_service.get_tool_list()
+  })
+
+  ipcMain.handle('agent:tool:call', async (_, tool_name: string, tool_params: Record<string, any>) => {
+    return agent_service.call_tool(tool_name, tool_params)
+  })
+
+  // ===================== 文件操作工具 =====================
+  ipcMain.handle('file:read', async (_, file_path: string) => {
+    return agent_service.read_file(file_path)
+  })
+
+  ipcMain.handle('file:write', async (_, file_path: string, content: string, encoding?: string) => {
+    return agent_service.write_file(file_path, content, encoding || 'utf-8')
+  })
+
+  ipcMain.handle('file:append', async (_, file_path: string, content: string) => {
+    return agent_service.append_file(file_path, content)
+  })
+
+  ipcMain.handle('file:delete', async (_, file_path: string) => {
+    return agent_service.delete_file(file_path)
+  })
+
+  ipcMain.handle('file:list', async (_, dir_path: string) => {
+    return agent_service.list_directory(dir_path)
+  })
+
+  ipcMain.handle('file:mkdir', async (_, dir_path: string, recursive?: boolean) => {
+    return agent_service.create_directory(dir_path, recursive !== false)
+  })
+
+  // ===================== 浏览器工具 =====================
+  ipcMain.handle('browser:screenshot', async (_, url: string, output_path: string, options?: any) => {
+    return agent_service.browser_screenshot(url, output_path, options || {})
+  })
+
+  ipcMain.handle('browser:scrape', async (_, url: string) => {
+    return agent_service.browser_scrape(url)
+  })
+
+  // ===================== 命令执行工具 =====================
+  ipcMain.handle('system:exec', async (_, command: string, cwd?: string) => {
+    return agent_service.execute_command(command, cwd)
   })
 
   // ===================== 系统反馈 =====================

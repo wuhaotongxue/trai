@@ -158,8 +158,8 @@ const App: React.FC = () => {
                     // 离线模式下不需要验证，直接使用已有状态
                     login({
                       id: 'offline_user',
-                      username: 'wuhaotongxue',
-                      email: 'wuhaotongxue@trai.local',
+                      username: 'wuhao',
+                      email: 'wuhao@trai.local',
                       role: 'user'
                     }, 'offline_token')
                   } else {

@@ -31,6 +31,7 @@ const Settings: React.FC = () => {
   // 预设 API 地址选项
   const preset_urls = [
     { label: '本地开发', value: 'http://127.0.0.1:5666' },
+    { label: '内网服务器', value: 'http://192.168.100.119:5666' },
     { label: '远程生产', value: 'https://trai.tuoren.com' },
   ]
 

@@ -13,6 +13,8 @@ export const zh = {
   server_remote_desc: 'trai.tuoren.com:5666',
   server_production: '生产环境',
   server_production_desc: 'trai.tuoren.com',
+  server_internal: '内网服务器',
+  server_internal_desc: '192.168.100.119:5666',
   server_config_title: '服务器配置',
   server_current: '当前服务器',
   server_select_or_input: '选择或输入服务器地址',

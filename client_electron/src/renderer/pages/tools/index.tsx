@@ -5,7 +5,7 @@
  * 描述: 客户端工具箱页面, 提供文件处理功能
  */
 import React, { useState } from 'react'
-import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, RefreshCw, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder, Code as FileCode, FileSpreadsheet } from 'lucide-react'
+import { FileText, Image as ImageIcon, FileArchive, ArrowDownToLine, Loader2, AlertCircle, CheckCircle2, PanelLeftOpen, PanelLeftClose, List, Wrench, Folder, Code as FileCode } from 'lucide-react'
 import { translate } from '@/i18n'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -42,12 +42,6 @@ const Tools: React.FC = () => {
   const [result_url, set_result_url] = useState('')
   const [result_info, set_result_info] = useState<any>(null)
   const [error_msg, set_error_msg] = useState('')
-  const [target_image_format, set_target_image_format] = useState('png')
-  const [ico_sizes, set_ico_sizes] = useState<number[]>([16, 32, 48, 64, 128, 256])
-  const [target_width, set_target_width] = useState<string>('')
-  const [target_height, set_target_height] = useState<string>('')
-  const [target_convert_kb, set_target_compress_kb] = useState<string>('')
-  const [target_convert_size_kb, set_target_convert_size_kb] = useState<string>('')
   const [is_left_sidebar_open, set_is_left_sidebar_open] = useState(true)
   const [is_middle_sidebar_open, set_is_middle_sidebar_open] = useState(true)
   const [active_cat_id, set_active_cat_id] = useState('all')
@@ -159,141 +153,6 @@ const Tools: React.FC = () => {
     input.click()
   }
 
-  const handle_convert_image = async () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0]
-      if (!file) return
-      
-      set_loading_task('convert_image')
-      set_error_msg('')
-      set_result_url('')
-      set_result_info(null)
-      
-      let sizes_param: number[] | undefined = undefined
-      let w: number | undefined = undefined
-      let h: number | undefined = undefined
-      let target_kb: number | undefined = undefined
-      
-      if (target_image_format === 'ico') {
-        sizes_param = ico_sizes.length > 0 ? ico_sizes : undefined
-      } else {
-        if (target_width && !isNaN(Number(target_width))) w = Number(target_width)
-        if (target_height && !isNaN(Number(target_height))) h = Number(target_height)
-        if (target_convert_size_kb && !isNaN(Number(target_convert_size_kb))) target_kb = Number(target_convert_size_kb)
-      }
-      
-      try {
-        const res = await window.electron_api.tools_convert_image(file.path, target_image_format, sizes_param, w, h, target_kb)
-        if (res.success && res.data) {
-          set_result_url(res.data.url)
-          set_result_info(res.data)
-        } else {
-          set_error_msg(res.error || '格式转换失败')
-        }
-      } catch (err: any) {
-        set_error_msg(err.message || '格式转换异常')
-      } finally {
-        set_loading_task(null)
-      }
-    }
-    input.click()
-  }
-
-  const handle_word_to_pdf = async () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.docx,.doc'
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0]
-      if (!file) return
-      
-      set_loading_task('word2pdf')
-      set_error_msg('')
-      set_result_url('')
-      set_result_info(null)
-      
-      try {
-        const res = await window.electron_api.tools_convert_word_to_pdf(file.path)
-        if (res.success && res.data) {
-          set_result_url(res.data.url)
-          set_result_info(res.data)
-        } else {
-          set_error_msg(res.error || '转换失败')
-        }
-      } catch (err: any) {
-        set_error_msg(err.message || '转换异常')
-      } finally {
-        set_loading_task(null)
-      }
-    }
-    input.click()
-  }
-
-  const handle_pdf_to_word = async () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.pdf'
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0]
-      if (!file) return
-      
-      set_loading_task('pdf2word')
-      set_error_msg('')
-      set_result_url('')
-      set_result_info(null)
-      
-      try {
-        const res = await window.electron_api.tools_convert_pdf_to_word(file.path)
-        if (res.success && res.data) {
-          set_result_url(res.data.url)
-          set_result_info(res.data)
-        } else {
-          set_error_msg(res.error || '转换失败')
-        }
-      } catch (err: any) {
-        set_error_msg(err.message || '转换异常')
-      } finally {
-        set_loading_task(null)
-      }
-    }
-    input.click()
-  }
-
-  const [target_excel_format, set_target_excel_format] = useState('csv')
-
-  const handle_excel_convert = async () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.xlsx,.xls'
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0]
-      if (!file) return
-      
-      set_loading_task('excel')
-      set_error_msg('')
-      set_result_url('')
-      set_result_info(null)
-      
-      try {
-        const res = await window.electron_api.tools_convert_excel(file.path, target_excel_format)
-        if (res.success && res.data) {
-          set_result_url(res.data.url)
-          set_result_info(res.data)
-        } else {
-          set_error_msg(res.error || '转换失败')
-        }
-      } catch (err: any) {
-        set_error_msg(err.message || '转换异常')
-      } finally {
-        set_loading_task(null)
-      }
-    }
-    input.click()
-  }
-
   const handle_json_tool = () => {
     set_json_error('')
     set_json_result('')
@@ -328,7 +187,7 @@ const Tools: React.FC = () => {
   const all_tools: ToolItem[] = [
     {
       id: 'md2pdf',
-      title: 'MD转PDF',
+      title: 'MD 转 PDF',
       description: '将 MD 文件渲染并导出为 PDF 文档',
       icon: <FileText size={32} color="var(--ui_accent)" />,
       action: handle_md_to_pdf,
@@ -336,72 +195,8 @@ const Tools: React.FC = () => {
       border_color: 'var(--ui_border)'
     },
     {
-      id: 'word2pdf',
-      title: 'Word转PDF',
-      description: '将 Word 文件转换为 PDF 文档',
-      icon: <FileText size={32} color="var(--ui_accent)" />,
-      action: handle_word_to_pdf,
-      bg_color: 'var(--ui_panel_alt)',
-      border_color: 'var(--ui_border)'
-    },
-    {
-      id: 'pdf2word',
-      title: 'PDF转Word',
-      description: '将 PDF 文件转换为 Word 文档',
-      icon: <FileText size={32} color="var(--ui_accent)" />,
-      action: handle_pdf_to_word,
-      bg_color: 'var(--ui_panel_alt)',
-      border_color: 'var(--ui_border)'
-    },
-    {
-      id: 'excel',
-      title: 'Excel转换',
-      description: '将 Excel 文件转换为 CSV、JSON 等格式',
-      icon: <FileSpreadsheet size={32} color="var(--ui_accent)" />,
-      action: handle_excel_convert,
-      bg_color: 'var(--ui_panel_alt)',
-      border_color: 'var(--ui_border)',
-      extra_ui: (
-        <div style={{ marginTop: '12px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label style={{ fontSize: '13px', color: 'var(--ui_text_muted)' }}>目标格式:</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            {[
-              { value: 'csv', label: 'CSV' },
-              { value: 'json', label: 'JSON' },
-              { value: 'xlsx', label: 'Excel' }
-            ].map((format) => (
-              <label key={format.value} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                border: '1px solid var(--ui_border)',
-                backgroundColor: target_excel_format === format.value ? 'var(--ui_accent)' : 'var(--ui_panel)',
-                color: target_excel_format === format.value ? 'white' : 'var(--ui_text)',
-                cursor: 'pointer',
-                fontSize: '13px',
-                flex: 1,
-                justifyContent: 'center'
-              }}>
-                <input
-                  type="radio"
-                  name="excel_format"
-                  value={format.value}
-                  checked={target_excel_format === format.value}
-                  onChange={() => set_target_excel_format(format.value)}
-                  style={{ display: 'none' }}
-                />
-                {format.label}
-              </label>
-            ))}
-          </div>
-        </div>
-      )
-    },
-    {
       id: 'json',
-      title: 'JSON检测',
+      title: 'JSON 检测',
       description: '检测和格式化 JSON 数据',
       icon: <FileCode size={32} color="var(--ui_accent)" />,
       action: () => {},
@@ -697,7 +492,7 @@ const Tools: React.FC = () => {
 
   const categories: ToolCategory[] = [
     { id: 'all', name: '全部工具', icon: <Wrench size={16} />, tools: all_tools },
-    { id: 'convert', name: '格式转换', icon: <RefreshCw size={16} />, tools: all_tools.filter(t => ['md2pdf', 'convert_image', 'word2pdf', 'pdf2word', 'excel'].includes(t.id)) },
+    { id: 'convert', name: '格式转换', icon: <FileText size={16} />, tools: all_tools.filter(t => ['md2pdf'].includes(t.id)) },
     { id: 'compress', name: '压缩工具', icon: <FileArchive size={16} />, tools: all_tools.filter(t => ['image', 'zip'].includes(t.id)) },
     { id: 'tools', name: '其他工具', icon: <FileCode size={16} />, tools: all_tools.filter(t => ['json'].includes(t.id)) }
   ]

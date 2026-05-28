@@ -13,6 +13,8 @@ export const en = {
   server_remote_desc: 'trai.tuoren.com:5666',
   server_production: 'Production',
   server_production_desc: 'trai.tuoren.com',
+  server_internal: 'Internal Server',
+  server_internal_desc: '192.168.100.119:5666',
   server_config_title: 'Server Configuration',
   server_current: 'Current Server',
   server_select_or_input: 'Select or enter server address',

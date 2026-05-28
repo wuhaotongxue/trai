@@ -21,7 +21,6 @@ contextBridge.exposeInMainWorld('electron_api', {
   tools_convert_md_to_pdf: (file_path: string) => ipcRenderer.invoke('tools:convert_md_to_pdf', file_path),
   tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => ipcRenderer.invoke('tools:compress_image', file_path, quality, target_size_kb),
   tools_compress_files_to_zip: (file_paths: string[]) => ipcRenderer.invoke('tools:compress_files_to_zip', file_paths),
-  tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => ipcRenderer.invoke('tools:convert_image', file_path, target_format, sizes, width, height, target_size_kb),
   agent_chat: (session_id: string, message: string, agent_id?: string, knowledge_base_id?: string) => ipcRenderer.invoke('agent:chat', session_id, message, agent_id, knowledge_base_id),
   agent_stop: (session_id: string) => ipcRenderer.invoke('agent:stop', session_id),
   ai_generate_image: (prompt: string) => ipcRenderer.invoke('ai:generate_image', prompt),
@@ -35,6 +34,21 @@ contextBridge.exposeInMainWorld('electron_api', {
   agent_management_update: (agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string) => ipcRenderer.invoke('agent:management:update', agent_id, name, description, model, system_prompt, icon),
   agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => ipcRenderer.invoke('agent:management:toggle', agent_id, action),
   agent_management_check: (agent_id: string) => ipcRenderer.invoke('agent:management:check', agent_id),
+  // Agent 工具调用
+  agent_tools_list: () => ipcRenderer.invoke('agent:tools:list'),
+  agent_tool_call: (tool_name: string, tool_params: Record<string, any>) => ipcRenderer.invoke('agent:tool:call', tool_name, tool_params),
+  // 文件操作工具
+  file_read: (file_path: string) => ipcRenderer.invoke('file:read', file_path),
+  file_write: (file_path: string, content: string, encoding?: string) => ipcRenderer.invoke('file:write', file_path, content, encoding),
+  file_append: (file_path: string, content: string) => ipcRenderer.invoke('file:append', file_path, content),
+  file_delete: (file_path: string) => ipcRenderer.invoke('file:delete', file_path),
+  file_list: (dir_path: string) => ipcRenderer.invoke('file:list', dir_path),
+  file_mkdir: (dir_path: string, recursive?: boolean) => ipcRenderer.invoke('file:mkdir', dir_path, recursive),
+  // 浏览器工具
+  browser_screenshot: (url: string, output_path: string, options?: any) => ipcRenderer.invoke('browser:screenshot', url, output_path, options),
+  browser_scrape: (url: string) => ipcRenderer.invoke('browser:scrape', url),
+  // 系统命令执行
+  system_exec: (command: string, cwd?: string) => ipcRenderer.invoke('system:exec', command, cwd),
   feedback_submit: (data: { type: string, title: string, content: string, contact?: string, attachments?: { name: string, data: string }[] }) => ipcRenderer.invoke('feedback:submit', data),
   kb_demo_create: (params: { content?: string | null, file_name?: string | null, index_name?: string | null }) => ipcRenderer.invoke('kb:demo_create', params),
   kb_list_categories: () => ipcRenderer.invoke('kb:list_categories'),

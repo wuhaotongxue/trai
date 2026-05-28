@@ -20,10 +20,6 @@ interface Window {
     tools_convert_md_to_pdf: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_image: (file_path: string, quality?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
     tools_compress_files_to_zip: (file_paths: string[]) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_convert_image: (file_path: string, target_format: string, sizes?: number[], width?: number, height?: number, target_size_kb?: number) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_convert_word_to_pdf: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_convert_pdf_to_word: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-    tools_convert_excel: (file_path: string, target_format: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_chat: (session_id: string, message: string, agent_id?: string, knowledge_base_id?: string, files?: Array<{ name: string; type: string; data: string }>) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_stop: (session_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     ai_generate_image: (prompt: string) => Promise<{ success: boolean; data?: any; error?: string }>;
@@ -36,6 +32,21 @@ interface Window {
     agent_management_toggle: (agent_id: string, action: 'start' | 'stop') => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_check: (agent_id: string) => Promise<{ success: boolean; data?: any; error?: string }>;
     agent_management_update: (agent_id: string, name: string, description: string, model: string, system_prompt: string, icon: string, category?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    // Agent 工具调用
+    agent_tools_list: () => Promise<{ success: boolean; data?: any; error?: string }>;
+    agent_tool_call: (tool_name: string, tool_params: Record<string, any>) => Promise<{ success: boolean; data?: any; error?: string }>;
+    // 文件操作工具
+    file_read: (file_path: string) => Promise<{ success: boolean; data?: string; error?: string }>;
+    file_write: (file_path: string, content: string, encoding?: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    file_append: (file_path: string, content: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    file_delete: (file_path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+    file_list: (dir_path: string) => Promise<{ success: boolean; data?: Array<{ name: string; path: string; is_directory: boolean; size: number; modified_at: string }>; error?: string }>;
+    file_mkdir: (dir_path: string, recursive?: boolean) => Promise<{ success: boolean; data?: any; error?: string }>;
+    // 浏览器工具
+    browser_screenshot: (url: string, output_path: string, options?: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+    browser_scrape: (url: string) => Promise<{ success: boolean; data?: { url: string; title: string; content: string; text: string }; error?: string }>;
+    // 系统命令执行
+    system_exec: (command: string, cwd?: string) => Promise<{ success: boolean; data?: { stdout: string; stderr: string }; error?: string }>;
     feedback_submit: (data: { type: string; title: string; content: string; contact?: string; attachments?: any[] }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_demo_create?: (params: { content?: string | null; file_name?: string | null; index_name?: string | null }) => Promise<{ success: boolean; data?: any; error?: string }>;
     kb_list_categories: () => Promise<{ success: boolean; data?: any; error?: string }>;
