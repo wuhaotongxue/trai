@@ -53,7 +53,13 @@ class VideoDownloaderRouter:
         ts = datetime.now().isoformat()
 
         if result["success"]:
-            return {"code": 200, "msg": "OK", "data": {"title": result["title"], "file_path": result["file_path"], "video_id": result["video_id"]}, "req_id": req_id, "ts": ts}
+            return {
+                "code": 200,
+                "msg": "OK",
+                "data": {"title": result["title"], "file_path": result["file_path"], "video_id": result["video_id"]},
+                "req_id": req_id,
+                "ts": ts,
+            }
         else:
             return {"code": 500, "msg": result["error"], "data": None, "req_id": req_id, "ts": ts}
 

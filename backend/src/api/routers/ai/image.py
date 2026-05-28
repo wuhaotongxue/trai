@@ -24,13 +24,13 @@ from domain.media.entities import ImageRecord, ImageRecordType
 from infrastructure.ai.core.modelscope_client import ModelScopeClient
 from infrastructure.ai.vision.vision_client import LocalModelScopeVisionClient
 from infrastructure.database import get_session
+from infrastructure.notifications.media_notify import media_notifier
 from infrastructure.notify.feishu_ai_notify import (
     ImageEditedEvent,
     ImageGeneratedEvent,
     get_feishu_ai_notify_service,
 )
 from infrastructure.repositories.image_record_repository import ImageRecordRepository
-from infrastructure.notifications.media_notify import media_notifier
 
 router = APIRouter()
 
@@ -346,7 +346,7 @@ async def generate_image(
                         media_type="image",
                         prompt=request.prompt,
                         file_url=result.image_url,
-                        duration=0.0
+                        duration=0.0,
                     )
 
             return ImageGenerationResponse(

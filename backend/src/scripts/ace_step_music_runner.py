@@ -14,7 +14,14 @@ import os
 import sys
 import time
 
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
 from loguru import logger
+
+# 强制 logger 输出到 stderr/stdout 无缓冲
+logger.remove()
+logger.add(sys.stdout, format="{message}", level="INFO", enqueue=False)
 
 # === sys.path 隔离 ===
 for p in list(sys.path):
@@ -25,19 +32,20 @@ sys.path.insert(_site_idx, "/home/qyjgylc_whf/code/trai/backend/acestep_lib")
 sys.path.insert(_site_idx + 1, "/home/qyjgylc_whf/code/trai/backend/acestep_lib/acestep")
 
 OUT_DIR = "/home/qyjgylc_whf/code/trai/output_music"
-CKPT_DIR = os.path.join(OUT_DIR, "checkpoints")
+# CKPT_DIR = os.path.join(OUT_DIR, "checkpoints")
+CKPT_DIR = "/home/qyjgylc_whf/.cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B"
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(CKPT_DIR, exist_ok=True)
 
 logger.info("[1] 导入 pipeline...")
-import soundfile as sf
-from acestep.pipeline_ace_step import ACEStepPipeline
+import soundfile as sf  # noqa: E402
+from acestep.pipeline_ace_step import ACEStepPipeline  # noqa: E402
 
 logger.info("[2] 创建 pipe...")
 pipe = ACEStepPipeline(
     checkpoint_dir=CKPT_DIR,
     dtype="bfloat16",
-    cpu_offload=True,
+    cpu_offload=False,  # 充分利用 GPU
     torch_compile=False,
 )
 logger.info("[3] 加载 checkpoint...")

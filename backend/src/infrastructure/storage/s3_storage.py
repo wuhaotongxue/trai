@@ -137,12 +137,7 @@ class S3StorageService:
         """
         logger.info(f"S3 上传 bytes | 键: {object_key} | 大小: {len(data)} bytes")
         try:
-            self._client.put_object(
-                Bucket=self._bucket,
-                Key=object_key,
-                Body=data,
-                ContentType=content_type
-            )
+            self._client.put_object(Bucket=self._bucket, Key=object_key, Body=data, ContentType=content_type)
             return self.get_file_url(object_key)
         except ClientError as e:
             logger.error(f"S3 上传 bytes 失败 | 错误: {str(e)}")

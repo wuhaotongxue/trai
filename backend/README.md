@@ -322,3 +322,11 @@ python run.py
 
 ### 🛠️ 后端_2026_04_13_1955
 - **新增(backend)**: 初始化后端模块的 README.md 说明文档
+
+## 📝 更新日志 (Changelog)
+
+### 🛠️ 后端_2026_05_28_1040
+- **修复(音乐生成)**: 修复 ACE-Step 音乐模型无法纯本地断网加载导致的 HuggingFace 连接超时问题，强制使用 ModelScope 本地离线权重缓存。
+- **优化(日志)**: 移除了 `ace_step_music_runner.py` 中的 `print` 语句，统一收口至 `loguru`，遵循规范。
+- **重构(通知推送)**: 重构了 `git_push_notify.py`，加入 argparse 支持通过命令行动态切换不同的通报角色口吻 ("地理专家" vs "小甜心")，并通过分离方法提升代码结构。
+

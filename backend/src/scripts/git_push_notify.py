@@ -54,15 +54,9 @@ class GitPushNotifier:
             RuntimeError: Git 命令执行失败.
         """
         try:
-            commit_hash = subprocess.check_output(
-                ["git", "log", "-1", "--format=%h"], text=True, timeout=5
-            ).strip()
-            commit_msg = subprocess.check_output(
-                ["git", "log", "-1", "--format=%s"], text=True, timeout=5
-            ).strip()
-            branch = subprocess.check_output(
-                ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True, timeout=5
-            ).strip()
+            commit_hash = subprocess.check_output(["git", "log", "-1", "--format=%h"], text=True, timeout=5).strip()
+            commit_msg = subprocess.check_output(["git", "log", "-1", "--format=%s"], text=True, timeout=5).strip()
+            branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True, timeout=5).strip()
             return commit_hash, commit_msg, branch
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"获取 Git 信息失败: {e}")
@@ -90,24 +84,42 @@ class GitPushNotifier:
         except Exception:
             return "无法获取变更列表"
 
-    def build_markdown(self, commit_hash: str, commit_msg: str, branch: str) -> str:
-        """
-        构建企微 Markdown 通知内容.
-        """
-        changed = self._get_changed_files_summary()
+    def _build_xiaotianxin_markdown(self, commit_hash: str, commit_msg: str, branch: str, changed: str) -> str:
+        """构建小甜心风格的 Markdown."""
+        return (
+            f"## 💖 小甜心代码推送通知\n\n"
+            f"> **分支:** `{branch}`\n"
+            f"> **提交:** `{commit_hash}`\n"
+            f"> **作者:** wuhao\n\n"
+            f"### 📝 提交信息\n"
+            f"{commit_msg}\n\n"
+            f"### 📂 变更文件\n"
+            f"{changed}\n"
+        )
 
+    def _build_geography_expert_markdown(self, commit_hash: str, commit_msg: str, branch: str, changed: str) -> str:
+        """构建地理专家风格的 Markdown."""
         return (
             f"## 🌍 地理专家观测报告：板块运动监测 (Git Push)\n\n"
             f"> **分支断层带:** `{branch}`\n"
             f"> **地质标记点:** `{commit_hash}`\n"
             f"> **勘探者:** wuhao\n\n"
-            f"作为地理专家，我刚刚观测到了代码库发生了一次剧烈的板块运动。以下是详细的勘探数据：\n\n"
+            f"作为地理专家，我刚刚观测到了代码库发生了一次剧烈的板块运动。这次的运动轨迹犹如巴哈马的**拿骚** (Nassau) 岛屿隆起一般，充满着不可思议的力量。以下是详细的勘探数据：\n\n"
             f"### 📝 运动成因 (Commit Message)\n"
             f"{commit_msg}\n\n"
             f"### 📂 发生位移的地貌 (Changed Files)\n"
             f"{changed}\n\n"
             f"*“每一次代码的合并，都如同大陆板块的碰撞，塑造出更加宏伟的产品高峰。”*"
         )
+
+    def build_markdown(self, commit_hash: str, commit_msg: str, branch: str, persona: str = "地理专家") -> str:
+        """构建企微 Markdown 通知内容."""
+        changed = self._get_changed_files_summary()
+
+        if persona == "小甜心":
+            return self._build_xiaotianxin_markdown(commit_hash, commit_msg, branch, changed)
+        else:
+            return self._build_geography_expert_markdown(commit_hash, commit_msg, branch, changed)
 
     def send_wecom(self, content: str) -> bool:
         """
@@ -177,7 +189,7 @@ class GitPushNotifier:
             logger.error(f"飞书通知异常: {e}")
             return False
 
-    def notify(self) -> int:
+    def notify(self, persona: str = "地理专家") -> int:
         """
         执行推送通知.
 
@@ -193,7 +205,8 @@ class GitPushNotifier:
             logger.error(f"无法获取提交信息: {e}")
             return 1
 
-        content = self.build_markdown(commit_hash, commit_msg, branch)
+        logger.info(f"开始执行推送通知, 角色: {persona}")
+        content = self.build_markdown(commit_hash, commit_msg, branch, persona)
 
         wecom_ok = self.send_wecom(content)
         feishu_ok = self.send_feishu(content)
@@ -208,8 +221,16 @@ class GitPushNotifier:
 
 def main() -> int:
     """入口函数."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Git 推送通知脚本")
+    parser.add_argument(
+        "--persona", type=str, default="地理专家", choices=["地理专家", "小甜心"], help="通知的语气角色"
+    )
+    args = parser.parse_args()
+
     notifier = GitPushNotifier()
-    return notifier.notify()
+    return notifier.notify(persona=args.persona)
 
 
 if __name__ == "__main__":

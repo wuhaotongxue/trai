@@ -98,7 +98,9 @@ class LocalMusicClient:
             ]
 
             env = os.environ.copy()
-            # 使用 Popen 以便实时读取日志和支持取消
+            # 设置环境变量强制 Python 不缓冲 stdout，保证 logger 的输出能实时被读取
+            env["PYTHONUNBUFFERED"] = "1"
+
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
