@@ -18,6 +18,7 @@ from infrastructure.ai.audio.local_music_client import MusicClientProvider
 from infrastructure.database import get_session
 from infrastructure.database.models import MusicRecordModel
 from infrastructure.notifications.media_notify import media_notifier
+from infrastructure.services.agent_audit_log_service import AgentAuditLogService
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
 
@@ -74,6 +75,10 @@ class MusicController:
         """
         创建音乐记录.
         """
+        logger.info(
+            f"[音乐生成] 创建数据库记录 | task_id={task_id} | user_id={user_context.get('user_id', '')} "
+            f"| duration={request.duration} | steps={request.steps}"
+        )
         with get_session() as db:
             db.add(
                 MusicRecordModel(
@@ -92,6 +97,23 @@ class MusicController:
                     t_guidance_scale=float(request.guidance_scale or 7.0),
                     t_created_by=user_context.get("user_id", ""),
                 )
+            )
+            AgentAuditLogService(db).write_log(
+                action="music_generate_submitted",
+                level="info",
+                path="/ai/music/generate",
+                message="音乐生成任务已提交",
+                user_id=user_context.get("user_id", ""),
+                username=user_context.get("username", ""),
+                client_ip=user_context.get("client_ip", ""),
+                status_code=200,
+                method="POST",
+                metadata={
+                    "task_id": task_id,
+                    "duration": request.duration,
+                    "steps": request.steps,
+                    "log_type": "music",
+                },
             )
             db.commit()
 
@@ -115,6 +137,7 @@ class MusicController:
     def _do_generate(task_id: str, request: MusicGenerateRequest, user_context: dict[str, str]):
         """后台实际执行音乐生成的任务."""
         try:
+            logger.info(f"[音乐生成] 开始执行后台任务 | task_id={task_id}")
             _music_tasks[task_id]["status"] = "processing"
             _music_tasks[task_id]["progress"] = "正在初始化生成任务..."
             MusicController._update_record(
@@ -125,6 +148,7 @@ class MusicController:
             client = MusicClientProvider.get_music_client()
 
             def progress_cb(msg: str):
+                logger.info(f"[音乐生成] 进度更新 | task_id={task_id} | progress={msg}")
                 _music_tasks[task_id]["progress"] = msg
                 MusicController._update_record(task_id, t_progress_message=msg)
 
@@ -142,12 +166,24 @@ class MusicController:
             )
 
             if _music_tasks[task_id]["status"] == "cancelling":
+                logger.warning(f"[音乐生成] 任务被取消 | task_id={task_id}")
                 _music_tasks[task_id]["status"] = "cancelled"
                 _music_tasks[task_id]["progress"] = "已取消"
                 MusicController._update_record(
                     task_id,
                     t_status="cancelled",
                     t_progress_message="已取消",
+                )
+                AgentAuditLogService.write_log_with_new_session(
+                    action="music_generate_cancelled",
+                    level="warning",
+                    path="/ai/music/cancel",
+                    message="音乐生成任务已取消",
+                    user_id=user_context.get("user_id", ""),
+                    username=user_context.get("username", ""),
+                    client_ip=user_context.get("client_ip", ""),
+                    status_code=200,
+                    metadata={"task_id": task_id, "log_type": "music"},
                 )
                 return
 
@@ -160,8 +196,6 @@ class MusicController:
                     from infrastructure.storage.s3_storage import get_s3_storage
 
                     s3_storage = get_s3_storage()
-                    date_prefix = datetime.now().strftime("%Y%m")
-
                     # 提取纯英数字作为前缀，避免 SignatureDoesNotMatch
                     safe_filename = f"music_{task_id}.wav"
                     s3_key = f"private/tenants/default/ai_generated/music/anonymous/{safe_filename}"
@@ -174,6 +208,7 @@ class MusicController:
                     public_url = ""
 
                 final_url = s3_url or f"/api_trai/v1/ai/music/files/{filename}"
+                logger.info(f"[音乐生成] 任务完成 | task_id={task_id} | url={final_url}")
 
                 _music_tasks[task_id]["status"] = "completed"
                 _music_tasks[task_id]["progress"] = "完成"
@@ -190,6 +225,17 @@ class MusicController:
                     t_file_path=result.file_path,
                     t_duration_seconds=float(result.duration),
                 )
+                AgentAuditLogService.write_log_with_new_session(
+                    action="music_generate_completed",
+                    level="info",
+                    path="/ai/music/generate",
+                    message="音乐生成任务完成",
+                    user_id=user_context.get("user_id", ""),
+                    username=user_context.get("username", ""),
+                    client_ip=user_context.get("client_ip", ""),
+                    status_code=200,
+                    metadata={"task_id": task_id, "url": final_url, "log_type": "music"},
+                )
 
                 # 发送飞书和企微通知
                 media_notifier.notify(
@@ -197,8 +243,10 @@ class MusicController:
                     prompt=request.prompt,
                     file_url=final_url,
                     duration=result.duration,
+                    persona="河南地理专家",
                 )
             else:
+                logger.warning(f"[音乐生成] 模型返回失败 | task_id={task_id} | error={result.error}")
                 _music_tasks[task_id]["status"] = "failed"
                 _music_tasks[task_id]["progress"] = "生成失败"
                 _music_tasks[task_id]["error"] = result.error
@@ -208,7 +256,20 @@ class MusicController:
                     t_progress_message="生成失败",
                     t_error_message=result.error,
                 )
+                AgentAuditLogService.write_log_with_new_session(
+                    action="music_generate_failed",
+                    level="error",
+                    path="/ai/music/generate",
+                    message="音乐生成任务失败",
+                    user_id=user_context.get("user_id", ""),
+                    username=user_context.get("username", ""),
+                    client_ip=user_context.get("client_ip", ""),
+                    status_code=500,
+                    error=result.error,
+                    metadata={"task_id": task_id, "log_type": "music"},
+                )
         except Exception as e:
+            logger.error(f"[音乐生成] 后台任务异常 | task_id={task_id} | error={e}")
             _music_tasks[task_id]["status"] = "failed"
             _music_tasks[task_id]["progress"] = "生成异常"
             _music_tasks[task_id]["error"] = str(e)
@@ -217,6 +278,18 @@ class MusicController:
                 t_status="failed",
                 t_progress_message="生成异常",
                 t_error_message=str(e),
+            )
+            AgentAuditLogService.write_log_with_new_session(
+                action="music_generate_exception",
+                level="error",
+                path="/ai/music/generate",
+                message="音乐生成后台任务异常",
+                user_id=user_context.get("user_id", ""),
+                username=user_context.get("username", ""),
+                client_ip=user_context.get("client_ip", ""),
+                status_code=500,
+                error=str(e),
+                metadata={"task_id": task_id, "log_type": "music"},
             )
 
     @staticmethod
@@ -240,6 +313,9 @@ class MusicController:
         }
 
         _music_tasks[task_id] = {"status": "queued", "music_url": None, "error": None, "prompt": request.prompt}
+        logger.info(
+            f"[音乐生成] 收到生成请求 | task_id={task_id} | user_id={user_context['user_id']} | prompt={request.prompt[:80]}"
+        )
         MusicController._create_record(task_id=task_id, request=request, user_context=user_context)
 
         # 将长耗时的生成任务交给后台

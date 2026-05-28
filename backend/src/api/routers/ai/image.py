@@ -31,6 +31,7 @@ from infrastructure.notify.feishu_ai_notify import (
     get_feishu_ai_notify_service,
 )
 from infrastructure.repositories.image_record_repository import ImageRecordRepository
+from infrastructure.services.agent_audit_log_service import AgentAuditLogService
 
 router = APIRouter()
 
@@ -135,6 +136,17 @@ def _send_image_generated_notify(
             prompt=prompt,
             file_url=image_url,
             duration=3.0,
+            persona="河南地理专家",
+        )
+        AgentAuditLogService.write_log_with_new_session(
+            action="image_notify_completed",
+            level="info",
+            path="/ai/image/notify",
+            message="图片生成通知发送完成",
+            user_id=user_id,
+            username=user_name,
+            status_code=200,
+            metadata={"task_id": task_id, "model": model, "log_type": "image"},
         )
     except Exception as e:
         logger.error(f"媒体统一推送异常(image): {e}")
@@ -184,6 +196,17 @@ def _send_image_edited_notify(
             prompt=prompt,
             file_url=result_image_url,
             duration=3.0,
+            persona="河南地理专家",
+        )
+        AgentAuditLogService.write_log_with_new_session(
+            action="image_edit_notify_completed",
+            level="info",
+            path="/ai/image/edit/notify",
+            message="图片编辑通知发送完成",
+            user_id=user_id,
+            username=user_name,
+            status_code=200,
+            metadata={"task_id": task_id, "model": model, "log_type": "image_edit"},
         )
     except Exception as e:
         logger.error(f"媒体统一推送异常(image_edit): {e}")
@@ -694,7 +717,6 @@ async def edit_image(
             image_input_2=request.image_url_2,
         )
 
-        result_task_id = result.get("task_id", task_id)
         result_url = result.get("image_url", "")
         result_base64 = result.get("image_base64", "")
 

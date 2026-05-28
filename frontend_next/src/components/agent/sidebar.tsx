@@ -12,6 +12,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAgentStore, SessionItem } from "@/stores/agent.store";
+import { AgentAuthCorner } from "@/components/agent/agent_auth_corner";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { 
@@ -85,8 +86,8 @@ export function Sidebar() {
   const groups = ["今天", "昨天", "最近 7 天", "最近 30 天", "更早以前"];
 
   return (
-    <div className="w-72 h-full bg-white dark:bg-slate-900 border-r-4 border-slate-900 dark:border-white flex flex-col transition-all duration-300">
-      <div className="p-6 border-b-4 border-slate-900 dark:border-white bg-slate-100">
+    <div className="w-72 h-full bg-slate-50 dark:bg-slate-900 border-r-4 border-slate-900 dark:border-white flex flex-col transition-all duration-300">
+      <div className="p-6 border-b-4 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-950">
         <Button 
           onClick={handleStartNew}
           className="w-full h-14 justify-start gap-4 shadow-[4px_4px_0px_0px_#0f172a] bg-white text-slate-900 border-4 border-slate-900 hover:bg-slate-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none rounded-none transition-all"
@@ -106,7 +107,7 @@ export function Sidebar() {
 
             return (
               <div key={group} className="space-y-3">
-                <h3 className="px-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2 border-l-4 border-indigo-400 pl-3">
+                <h3 className="px-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2 border-l-4 border-cyan-500 pl-3">
                   <History className="h-5 w-5" />
                   {group}
                 </h3>
@@ -180,6 +181,9 @@ export function Sidebar() {
           })}
         </div>
       </ScrollArea>
+      <div className="p-4 border-t-4 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-950">
+        <AgentAuthCorner className="w-full" />
+      </div>
     </div>
   );
 }

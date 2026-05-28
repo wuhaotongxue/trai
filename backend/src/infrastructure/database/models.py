@@ -633,34 +633,63 @@ class MusicRecordModel(Base):
     __comment__ = "AI 音乐记录表, 存储音乐生成任务、结果地址、参数与状态信息."
 
     t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """音乐任务唯一标识"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    """创建任务的用户 ID"""
     t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """创建任务的用户名"""
     t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    """请求来源 IP"""
     t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """请求来源 User-Agent"""
     t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """所属租户 ID"""
     t_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    """音乐生成提示词"""
     t_status: Mapped[str] = mapped_column(String(32), default="queued", nullable=False, index=True)
+    """任务状态, 如 queued processing completed failed"""
     t_progress_message: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """任务当前进度描述"""
     t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """结果文件访问地址"""
     t_public_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """公共域名访问地址"""
     t_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """S3 对象键"""
     t_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """本地输出文件路径"""
     t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """任务失败时的错误信息"""
     t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """执行生成的模型名称"""
     t_duration_seconds: Mapped[float] = mapped_column(Float, default=30.0, nullable=False)
+    """目标音频时长, 单位秒"""
     t_steps: Mapped[int] = mapped_column(Integer, default=27, nullable=False)
+    """推理步数"""
     t_guidance_scale: Mapped[float] = mapped_column(Float, default=7.0, nullable=False)
+    """引导强度参数"""
     t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    """通知发送状态"""
     t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展元数据"""
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """创建时间"""
     t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
     t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """更新时间"""
     t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """更新人 user_id"""
     t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """任务完成时间"""
     t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """软删除时间"""
     t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """软删除操作人 user_id"""
     t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """软删除来源 IP"""
 
 
 class VideoRecordModel(Base):
@@ -670,37 +699,69 @@ class VideoRecordModel(Base):
     __comment__ = "AI 视频记录表, 存储视频生成任务、进度、结果地址与状态信息."
 
     t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
     t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """视频任务唯一标识"""
     t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    """创建任务的用户 ID"""
     t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """创建任务的用户名"""
     t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    """请求来源 IP"""
     t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """请求来源 User-Agent"""
     t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    """所属租户 ID"""
     t_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    """视频生成提示词"""
     t_status: Mapped[str] = mapped_column(String(32), default="queued", nullable=False, index=True)
+    """任务状态, 如 queued processing completed failed"""
     t_stage: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """任务当前阶段标识"""
     t_progress_message: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    """任务当前进度描述"""
     t_current_step: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    """当前步骤序号"""
     t_total_steps: Mapped[int] = mapped_column(Integer, default=9, nullable=False)
+    """总步骤数量"""
     t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """结果视频访问地址"""
     t_public_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """公共域名访问地址"""
     t_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """S3 对象键"""
     t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """任务失败时的错误信息"""
     t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """执行生成的模型名称"""
     t_frames: Mapped[int] = mapped_column(Integer, default=81, nullable=False)
+    """目标视频帧数"""
     t_resolution: Mapped[str] = mapped_column(String(32), default="1280x720", nullable=False)
+    """目标视频分辨率"""
     t_inference_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """模型纯推理耗时, 单位秒"""
     t_total_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """总耗时, 单位秒"""
     t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    """通知发送状态"""
     t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展元数据"""
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """创建时间"""
     t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """创建人 user_id"""
     t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    """更新时间"""
     t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """更新人 user_id"""
     t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """任务完成时间"""
     t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    """软删除时间"""
     t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    """软删除操作人 user_id"""
     t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """软删除来源 IP"""
 
 
 class LoginLogModel(Base):

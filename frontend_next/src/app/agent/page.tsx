@@ -7,7 +7,6 @@
 
 "use client";
 
-import { AgentAuthCorner } from "@/components/agent/agent_auth_corner";
 import { ChatPanel } from "@/components/agent/chat_panel";
 import { Sidebar } from "@/components/agent/sidebar";
 import { ToastContainer, registerToastState, ToastItem } from "@/components/toast/toast";
@@ -59,7 +58,6 @@ function AgentContent() {
           <div className="flex-1 overflow-hidden h-full">
             <ChatPanel />
           </div>
-          <AgentAuthCorner />
         </main>
       </div>
       <ToastContainer toasts={toasts} onDismiss={(id) => setToasts((p) => p.filter((t) => t.id !== id))} />

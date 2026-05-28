@@ -55,6 +55,7 @@ class MediaHistoryListRequest(BaseModel):
     """
 
     limit: int = Field(default=100, ge=1, le=200, description="单类媒体最大返回数量")
+    include_deleted: bool = Field(default=False, description="是否包含已软删除记录")
 
 
 class MediaHistoryDeleteRequest(BaseModel):
@@ -90,6 +91,7 @@ class MediaHistoryItemResponse(BaseModel):
     model: str | None = Field(default=None, description="模型名称")
     created_at: str = Field(description="创建时间")
     updated_at: str = Field(description="更新时间")
+    deleted_at: str | None = Field(default=None, description="软删除时间")
     meta: dict[str, Any] = Field(default_factory=dict, description="扩展元数据")
 
 
@@ -136,7 +138,11 @@ class MediaHistoryRouter:
             无.
         """
         service = MediaHistoryService(session)
-        records = service.list_user_media_records(user_id=str(current_user.get("user_id", "")), limit=req.limit)
+        records = service.list_user_media_records(
+            user_id=str(current_user.get("user_id", "")),
+            limit=req.limit,
+            include_deleted=req.include_deleted,
+        )
         return MediaHistoryListResponse(
             images=[MediaHistoryItemResponse(**item) for item in records["images"]],
             music=[MediaHistoryItemResponse(**item) for item in records["music"]],

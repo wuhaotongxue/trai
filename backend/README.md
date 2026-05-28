@@ -325,6 +325,12 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_28_1435
+- **优化(audit)**: 新增 `agent_audit_log_service.py`, 为媒体历史、音乐生成、视频生成和图片通知链路统一写入 `t_audit_logs`, 支持 `info/warning/error` 分级。
+- **优化(media_history)**: `/ai/media/history/list` 新增 `include_deleted` 参数并返回 `deleted_at`, 软删除记录可继续用于后台排查和审计。
+- **优化(notify)**: `git_push_notify.py` 与 `media_notify.py` 新增 `河南地理专家` persona, 可按河南地理风格发送企微和飞书通知。
+- **规范(models)**: 为 `MusicRecordModel` 和 `VideoRecordModel` 补齐字段级注释, 对齐数据库模型注释规范。
+
 ### 🛠️ 后端_2026_05_28_1415
 - **新增(media_history)**: 新增 `/ai/media/history/list`、`/ai/media/history/delete`、`/ai/media/history/batch_delete` 接口, 统一返回图片、音乐、视频历史并支持用户侧删除。
 - **新增(migration)**: 补充 `migrate_add_media_history_tables.py`, 用于创建 `t_music_records` 与 `t_video_records`, 让音乐和视频历史真正落库可恢复。

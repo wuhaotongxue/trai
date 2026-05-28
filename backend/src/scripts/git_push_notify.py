@@ -112,12 +112,30 @@ class GitPushNotifier:
             f"*“每一次代码的合并，都如同大陆板块的碰撞，塑造出更加宏伟的产品高峰。”*"
         )
 
+    def _build_henan_geography_markdown(self, commit_hash: str, commit_msg: str, branch: str, changed: str) -> str:
+        """构建河南地理专家风格的 Markdown."""
+        return (
+            f"## 🏞️ 河南地理专家观测报告: 中原代码地貌更新\n\n"
+            f"> **分支河道:** `{branch}`\n"
+            f"> **勘探编号:** `{commit_hash}`\n"
+            f"> **观测员:** wuhao\n\n"
+            f"作为河南地理专家, 我刚刚观测到这次代码地貌更新如同太行山南麓向中原平原舒展, "
+            f"又像黄河穿过郑州花园口时那样有力量且层次分明。以下是本次中原勘探结果:\n\n"
+            f"### 📝 地貌成因 (Commit Message)\n"
+            f"{commit_msg}\n\n"
+            f"### 📂 地层变化点 (Changed Files)\n"
+            f"{changed}\n\n"
+            f"*“代码如中原沃土, 每一次沉积与抬升, 都在塑造更稳固的产品地形。”*"
+        )
+
     def build_markdown(self, commit_hash: str, commit_msg: str, branch: str, persona: str = "地理专家") -> str:
         """构建企微 Markdown 通知内容."""
         changed = self._get_changed_files_summary()
 
         if persona == "小甜心":
             return self._build_xiaotianxin_markdown(commit_hash, commit_msg, branch, changed)
+        if persona == "河南地理专家":
+            return self._build_henan_geography_markdown(commit_hash, commit_msg, branch, changed)
         else:
             return self._build_geography_expert_markdown(commit_hash, commit_msg, branch, changed)
 
@@ -225,7 +243,11 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description="Git 推送通知脚本")
     parser.add_argument(
-        "--persona", type=str, default="地理专家", choices=["地理专家", "小甜心"], help="通知的语气角色"
+        "--persona",
+        type=str,
+        default="地理专家",
+        choices=["地理专家", "河南地理专家", "小甜心"],
+        help="通知的语气角色",
     )
     args = parser.parse_args()
 

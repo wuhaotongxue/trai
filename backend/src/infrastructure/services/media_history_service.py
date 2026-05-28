@@ -9,10 +9,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from loguru import logger
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from infrastructure.database.models import ImageRecordModel, MusicRecordModel, VideoRecordModel
+from infrastructure.services.agent_audit_log_service import AgentAuditLogService
 
 
 class MediaHistoryService:
@@ -34,14 +36,18 @@ class MediaHistoryService:
             无.
         """
         self._session = session
+        self._audit_log_service = AgentAuditLogService(session)
 
-    def list_user_media_records(self, user_id: str, limit: int = 100) -> dict[str, list[dict[str, Any]]]:
+    def list_user_media_records(
+        self, user_id: str, limit: int = 100, include_deleted: bool = False
+    ) -> dict[str, list[dict[str, Any]]]:
         """
         查询用户的全部媒体历史记录.
 
         参数:
             user_id (str): 用户 ID.
             limit (int): 单类媒体最大返回数量.
+            include_deleted (bool): 是否包含软删除记录.
 
         返回值:
             dict[str, list[dict[str, Any]]]: 按媒体类型分组的历史记录.
@@ -49,14 +55,14 @@ class MediaHistoryService:
         异常:
             无.
         """
+        logger.info(
+            f"[媒体历史] 查询用户媒体记录 | user_id={user_id} | limit={limit} | include_deleted={include_deleted}"
+        )
         image_records = (
             self._session.execute(
                 select(ImageRecordModel)
                 .where(
-                    and_(
-                        ImageRecordModel.t_user_id == user_id,
-                        ImageRecordModel.t_deleted_at.is_(None),
-                    )
+                    and_(*self._build_user_filters(ImageRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(ImageRecordModel.t_created_at.desc())
                 .limit(limit)
@@ -68,10 +74,7 @@ class MediaHistoryService:
             self._session.execute(
                 select(MusicRecordModel)
                 .where(
-                    and_(
-                        MusicRecordModel.t_user_id == user_id,
-                        MusicRecordModel.t_deleted_at.is_(None),
-                    )
+                    and_(*self._build_user_filters(MusicRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(MusicRecordModel.t_created_at.desc())
                 .limit(limit)
@@ -83,10 +86,7 @@ class MediaHistoryService:
             self._session.execute(
                 select(VideoRecordModel)
                 .where(
-                    and_(
-                        VideoRecordModel.t_user_id == user_id,
-                        VideoRecordModel.t_deleted_at.is_(None),
-                    )
+                    and_(*self._build_user_filters(VideoRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(VideoRecordModel.t_created_at.desc())
                 .limit(limit)
@@ -95,11 +95,26 @@ class MediaHistoryService:
             .all()
         )
 
-        return {
+        records = {
             "images": [self._serialize_image_record(record) for record in image_records],
             "music": [self._serialize_music_record(record) for record in music_records],
             "videos": [self._serialize_video_record(record) for record in video_records],
         }
+        self._audit_log_service.write_log(
+            action="agent_media_history_list",
+            level="info",
+            path="/ai/media/history/list",
+            message="查询 Agent 媒体历史成功",
+            user_id=user_id,
+            status_code=200,
+            metadata={
+                "include_deleted": include_deleted,
+                "image_count": len(records["images"]),
+                "music_count": len(records["music"]),
+                "video_count": len(records["videos"]),
+            },
+        )
+        return records
 
     def delete_media_record(self, media_type: str, task_id: str, user_id: str, operator_ip: str) -> bool:
         """
@@ -117,13 +132,37 @@ class MediaHistoryService:
         异常:
             无.
         """
+        logger.info(f"[媒体历史] 删除单条记录 | media_type={media_type} | task_id={task_id} | user_id={user_id}")
         model = self._find_model(media_type=media_type, task_id=task_id, user_id=user_id)
         if model is None:
+            logger.warning(
+                f"[媒体历史] 删除失败, 未找到记录 | media_type={media_type} | task_id={task_id} | user_id={user_id}"
+            )
+            self._audit_log_service.write_log(
+                action="agent_media_history_delete",
+                level="warning",
+                path="/ai/media/history/delete",
+                message="删除媒体历史失败, 记录不存在",
+                user_id=user_id,
+                client_ip=operator_ip,
+                status_code=404,
+                metadata={"media_type": media_type, "task_id": task_id, "log_type": "delete"},
+            )
             return False
         model.t_deleted_at = datetime.now()
         model.t_deleted_by = user_id
         model.t_deleted_ip = operator_ip
         self._session.flush()
+        self._audit_log_service.write_log(
+            action="agent_media_history_delete",
+            level="info",
+            path="/ai/media/history/delete",
+            message="软删除媒体历史成功",
+            user_id=user_id,
+            client_ip=operator_ip,
+            status_code=200,
+            metadata={"media_type": media_type, "task_id": task_id, "log_type": "delete"},
+        )
         return True
 
     def batch_delete_media_records(
@@ -149,12 +188,51 @@ class MediaHistoryService:
             无.
         """
         count = 0
+        logger.info(
+            f"[媒体历史] 批量删除记录 | media_type={media_type} | user_id={user_id} | task_count={len(task_ids)}"
+        )
         for task_id in task_ids:
             if self.delete_media_record(
                 media_type=media_type, task_id=task_id, user_id=user_id, operator_ip=operator_ip
             ):
                 count += 1
+        self._audit_log_service.write_log(
+            action="agent_media_history_batch_delete",
+            level="info",
+            path="/ai/media/history/batch_delete",
+            message="批量软删除媒体历史完成",
+            user_id=user_id,
+            client_ip=operator_ip,
+            status_code=200,
+            metadata={
+                "media_type": media_type,
+                "task_ids": task_ids,
+                "deleted_count": count,
+                "log_type": "batch_delete",
+            },
+        )
         return count
+
+    @staticmethod
+    def _build_user_filters(model_class: type[Any], user_id: str, include_deleted: bool) -> list[Any]:
+        """
+        构建按用户查询媒体记录的筛选条件.
+
+        参数:
+            model_class (type[Any]): ORM 模型类.
+            user_id (str): 用户 ID.
+            include_deleted (bool): 是否包含软删除记录.
+
+        返回值:
+            list[Any]: SQLAlchemy 条件列表.
+
+        异常:
+            无.
+        """
+        filters: list[Any] = [model_class.t_user_id == user_id]
+        if not include_deleted:
+            filters.append(model_class.t_deleted_at.is_(None))
+        return filters
 
     def _find_model(self, media_type: str, task_id: str, user_id: str) -> Any | None:
         """
@@ -230,6 +308,7 @@ class MediaHistoryService:
             "model": record.t_model,
             "created_at": record.t_created_at.isoformat() if record.t_created_at else "",
             "updated_at": record.t_updated_at.isoformat() if record.t_updated_at else "",
+            "deleted_at": record.t_deleted_at.isoformat() if record.t_deleted_at else None,
             "meta": {
                 "width": record.t_width,
                 "height": record.t_height,
@@ -262,6 +341,7 @@ class MediaHistoryService:
             "model": record.t_model,
             "created_at": record.t_created_at.isoformat() if record.t_created_at else "",
             "updated_at": record.t_updated_at.isoformat() if record.t_updated_at else "",
+            "deleted_at": record.t_deleted_at.isoformat() if record.t_deleted_at else None,
             "meta": {
                 "duration_seconds": record.t_duration_seconds,
                 "steps": record.t_steps,
@@ -295,6 +375,7 @@ class MediaHistoryService:
             "model": record.t_model,
             "created_at": record.t_created_at.isoformat() if record.t_created_at else "",
             "updated_at": record.t_updated_at.isoformat() if record.t_updated_at else "",
+            "deleted_at": record.t_deleted_at.isoformat() if record.t_deleted_at else None,
             "meta": {
                 "frames": record.t_frames,
                 "resolution": record.t_resolution,

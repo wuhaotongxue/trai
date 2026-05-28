@@ -22,9 +22,10 @@ class MediaNotifier:
             env_path = "/home/qyjgylc_whf/code/trai/backend/env/llm.env"
             if os.path.exists(env_path):
                 from dotenv import dotenv_values
+
                 env_dict = dotenv_values(env_path)
                 api_key = env_dict.get("DEEPSEEK_API_KEY")
-        
+
         if not api_key:
             logger.warning("未找到 DEEPSEEK_API_KEY，使用默认播报文案")
             return self._fallback_geography_expert(type_name, prompt, duration)
@@ -96,6 +97,16 @@ class MediaNotifier:
 
         return self._fallback_geography_expert(type_name, prompt, duration)
 
+    def _build_henan_geography_text(self, type_name: str, prompt: str, duration: float) -> str:
+        """构建河南地理专家风格的通知头部."""
+        return (
+            f"## 🏞️ 河南地理专家观测报告: 中原新{type_name}地貌\n\n"
+            f"> **观测坐标 (Prompt):** `{prompt}`\n"
+            f"> **形成耗时:** `{duration:.1f} 秒`\n\n"
+            "作为河南地理专家, 我刚刚观测到这件新作品像嵩山山势一样层次分明, "
+            "又像黄河流经河南时那样有力量与方向感, 请查收这一份来自中原地貌带的数字成果。\n\n"
+        )
+
     def _fallback_geography_expert(self, type_name: str, prompt: str, duration: float) -> str:
         """兜底的地理专家文案"""
         return (
@@ -124,6 +135,13 @@ class MediaNotifier:
                 f"主人，您心心念念的{type_name}已经生成好啦！快来看看这美妙的作品吧，小甜心为你自豪哦~ (❁´◡`❁)\n\n"
                 f"👉 **[点击查看生成结果]({file_url})**\n\n"
                 f"*“代码和灵感的交织，就是最棒的魔法！”*"
+            )
+        elif persona == "河南地理专家":
+            header = self._build_henan_geography_text(type_name, prompt, duration)
+            content = (
+                f"{header}"
+                f"👉 **[点击查看生成结果]({file_url})**\n\n"
+                f"*“中原地势讲究起伏有序, AI 作品也讲究结构、力量与气韵。”*"
             )
         else:
             # 默认：地理专家 (动态调用 DeepSeek)

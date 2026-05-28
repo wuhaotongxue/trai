@@ -11,6 +11,7 @@ import os
 import re
 import time
 import uuid
+from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Request
@@ -27,6 +28,7 @@ from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
     get_feishu_ai_notify_service,
 )
+from infrastructure.services.agent_audit_log_service import AgentAuditLogService
 from infrastructure.storage.s3_storage import S3StorageService
 
 router = APIRouter()
@@ -53,6 +55,7 @@ class VideoTaskStore:
         异常:
             无.
         """
+        logger.info(f"[视频生成] 创建数据库记录 | task_id={task.get('task_id', '')} | status={task.get('status', '')}")
         with get_session() as db:
             db.add(
                 VideoRecordModel(
@@ -73,6 +76,23 @@ class VideoTaskStore:
                     t_resolution=str(task.get("resolution", "1280x720") or "1280x720"),
                     t_created_by=str(task.get("user_id", "")) or None,
                 )
+            )
+            AgentAuditLogService(db).write_log(
+                action="video_generate_submitted",
+                level="info",
+                path="/ai/video/generate",
+                message="视频生成任务已提交",
+                user_id=str(task.get("user_id", "")),
+                username=str(task.get("user_name", "")),
+                client_ip=str(task.get("client_ip", "")),
+                status_code=200,
+                method="POST",
+                metadata={
+                    "task_id": str(task.get("task_id", "")),
+                    "frames": int(task.get("frames", 81) or 81),
+                    "resolution": str(task.get("resolution", "1280x720")),
+                    "log_type": "video",
+                },
             )
             db.commit()
 
@@ -438,7 +458,11 @@ class VideoApiUtils:
 
         try:
             media_notifier.notify(
-                media_type="video", prompt=prompt, file_url=public_url or video_url, duration=frames // 5
+                media_type="video",
+                prompt=prompt,
+                file_url=public_url or video_url,
+                duration=frames // 5,
+                persona="河南地理专家",
             )
         except Exception as e:
             logger.error(f"[通知] 媒体推送失败 | task_id={task_id} | error={str(e)}")
@@ -509,9 +533,21 @@ class VideoApiRouter:
             current_step=0,
             total_steps=9,
         )
+        AgentAuditLogService.write_log_with_new_session(
+            action="video_generate_processing",
+            level="info",
+            path="/ai/video/generate",
+            message="视频生成任务开始处理",
+            user_id=str(task.get("user_id", "")),
+            username=str(task.get("user_name", "")),
+            client_ip=str(task.get("client_ip", "")),
+            status_code=200,
+            metadata={"task_id": task_id, "log_type": "video"},
+        )
 
         try:
             local_video_client = LocalVideoClient()
+            logger.info(f"[视频生成] 后台任务启动 | task_id={task_id}")
 
             def progress_callback(line: str) -> None:
                 parsed = VideoApiUtils.parse_progress_line(line)
@@ -576,6 +612,17 @@ class VideoApiRouter:
                     result.get("resolution", task.get("resolution", "1280x720")) or task.get("resolution", "1280x720")
                 ),
             )
+            AgentAuditLogService.write_log_with_new_session(
+                action="video_generate_completed",
+                level="info",
+                path="/ai/video/generate",
+                message="视频生成任务完成",
+                user_id=str(task.get("user_id", "")),
+                username=str(task.get("user_name", "")),
+                client_ip=str(task.get("client_ip", "")),
+                status_code=200,
+                metadata={"task_id": task_id, "object_key": object_key, "log_type": "video"},
+            )
 
             VideoTaskStore.update_task(
                 task_id,
@@ -588,6 +635,18 @@ class VideoApiRouter:
             )
         except Exception as error:
             logger.error(f"[视频生成] 任务失败 | task_id={task_id} | error={str(error)}")
+            AgentAuditLogService.write_log_with_new_session(
+                action="video_generate_failed",
+                level="error",
+                path="/ai/video/generate",
+                message="视频生成任务失败",
+                user_id=str(task.get("user_id", "")),
+                username=str(task.get("user_name", "")),
+                client_ip=str(task.get("client_ip", "")),
+                status_code=500,
+                error=str(error),
+                metadata={"task_id": task_id, "log_type": "video"},
+            )
             VideoTaskStore.update_task(
                 task_id,
                 status="failed",
