@@ -468,6 +468,45 @@ export interface AgentChatResponse {
 }
 
 /** Agent API */
+export interface VideoGenerationTaskStatus {
+  task_id: string;
+  status: string;
+  video_url?: string | null;
+  video_base64?: string | null;
+  object_key?: string | null;
+  public_url?: string | null;
+  frames: number;
+  resolution: string;
+  error?: string | null;
+  inference_time_seconds?: number | null;
+  total_time_seconds?: number | null;
+  stage?: string | null;
+  progress_message?: string | null;
+  current_step?: number | null;
+  total_steps?: number | null;
+  queue_position?: number | null;
+}
+
+export interface MediaHistoryItem {
+  task_id: string;
+  media_type: "image" | "music" | "video";
+  prompt: string;
+  url?: string | null;
+  public_url?: string | null;
+  object_key?: string | null;
+  status: string;
+  model?: string | null;
+  created_at: string;
+  updated_at: string;
+  meta: Record<string, unknown>;
+}
+
+export interface MediaHistoryResponse {
+  images: MediaHistoryItem[];
+  music: MediaHistoryItem[];
+  videos: MediaHistoryItem[];
+}
+
 export const agentApi = {
   /** Agent 聊天 */
   chat: (data: { session_id: string; message: string; role?: string }) =>
@@ -496,7 +535,11 @@ export const agentApi = {
 
   /** 文生视频 (Wan2.1-T2V-1.3B) */
   generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string }) =>
-    request<{ task_id: string; status: string; video_url?: string; video_base64?: string; object_key?: string; public_url?: string; error?: string }>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),
+    request<VideoGenerationTaskStatus>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),
+
+  /** 查询视频生成状态 */
+  getVideoStatus: (taskId: string) =>
+    request<VideoGenerationTaskStatus>(`/ai/video/status/${taskId}`, { method: "GET" }),
 
   /** 文生音乐 (ACE-Step) */
   generateMusic: (data: { prompt: string; duration?: number; steps?: number; guidance_scale?: number }) =>
@@ -527,6 +570,18 @@ export const agentApi = {
       success: boolean;
       message: string;
     }>(`/ai/music/cancel/${taskId}`, { method: "DELETE" }),
+
+  /** 查询媒体历史 */
+  listMediaHistory: (data?: { limit?: number }) =>
+    request<MediaHistoryResponse>("/ai/media/history/list", { method: "POST", body: JSON.stringify(data ?? { limit: 100 }) }),
+
+  /** 删除媒体历史 */
+  deleteMediaHistory: (data: { media_type: "image" | "music" | "video"; task_id: string }) =>
+    request<{ code: number; msg: string; data: { task_id: string } }>("/ai/media/history/delete", { method: "POST", body: JSON.stringify(data) }),
+
+  /** 批量删除媒体历史 */
+  batchDeleteMediaHistory: (data: { media_type: "image" | "music" | "video"; task_ids: string[] }) =>
+    request<{ code: number; msg: string; data: { deleted_count: number } }>("/ai/media/history/batch_delete", { method: "POST", body: JSON.stringify(data) }),
 };
 
 // ============================================================

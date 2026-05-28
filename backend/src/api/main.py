@@ -397,7 +397,19 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.admin.i18n import router as admin_i18n_router
     from api.routers.admin.image_gen_config import router as image_gen_config_router
     from api.routers.admin.image_records import router as admin_image_records_router
-    from api.routers.ai import agent, chat, comfyui, digital_human, image, management, music, report, subtitle, video
+    from api.routers.ai import (
+        agent,
+        chat,
+        comfyui,
+        digital_human,
+        image,
+        management,
+        media_history,
+        music,
+        report,
+        subtitle,
+        video,
+    )
     from api.routers.ai.audio_transcribe import router as audio_transcribe_router
     from api.routers.apps.extensions import router as extensions_router
     from api.routers.tools import converter as tools
@@ -445,6 +457,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(client_update_router, prefix=f"{api_prefix}/client", tags=["客户端更新"])
     app.include_router(chat.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(image.router, prefix=f"{api_prefix}/ai", tags=["AI"])
+    app.include_router(media_history.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(music.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(video.router, prefix=f"{api_prefix}/ai", tags=["AI"])
     app.include_router(subtitle.router, prefix=f"{api_prefix}/ai", tags=["AI"])

@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, Integer, String, Text
+from sqlalchemy import JSON, DateTime, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from infrastructure.database.database import Base
@@ -626,6 +626,83 @@ class ImageRecordModel(Base):
     """删除时的客户端 IP 地址"""
 
 
+class MusicRecordModel(Base):
+    """AI 音乐记录模型"""
+
+    __tablename__ = "t_music_records"
+    __comment__ = "AI 音乐记录表, 存储音乐生成任务、结果地址、参数与状态信息."
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    t_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    t_status: Mapped[str] = mapped_column(String(32), default="queued", nullable=False, index=True)
+    t_progress_message: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_public_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    t_file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_duration_seconds: Mapped[float] = mapped_column(Float, default=30.0, nullable=False)
+    t_steps: Mapped[int] = mapped_column(Integer, default=27, nullable=False)
+    t_guidance_scale: Mapped[float] = mapped_column(Float, default=7.0, nullable=False)
+    t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+
+class VideoRecordModel(Base):
+    """AI 视频记录模型"""
+
+    __tablename__ = "t_video_records"
+    __comment__ = "AI 视频记录表, 存储视频生成任务、进度、结果地址与状态信息."
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    t_user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    t_tenant_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    t_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    t_status: Mapped[str] = mapped_column(String(32), default="queued", nullable=False, index=True)
+    t_stage: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_progress_message: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    t_current_step: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    t_total_steps: Mapped[int] = mapped_column(Integer, default=9, nullable=False)
+    t_result_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_public_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_object_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    t_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    t_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_frames: Mapped[int] = mapped_column(Integer, default=81, nullable=False)
+    t_resolution: Mapped[str] = mapped_column(String(32), default="1280x720", nullable=False)
+    t_inference_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    t_total_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+
 class LoginLogModel(Base):
     """用户登录日志模型"""
 
@@ -686,6 +763,8 @@ __all__ = [
     "EmailConfigModel",
     "AgentRoleModel",
     "ImageRecordModel",
+    "MusicRecordModel",
+    "VideoRecordModel",
     "ChatLogModel",
     "LoginLogModel",
 ]

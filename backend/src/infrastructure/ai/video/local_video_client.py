@@ -16,6 +16,7 @@ import select
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from typing import Any
 
 import torch
@@ -208,6 +209,9 @@ class LocalVideoClient:
             "video = pipe(",
             "    prompt=prompt_input,",
             '    negative_prompt="blurry, low quality, distorted, artifacts, watermark",',
+            "    num_frames=" + str(frames) + ",",
+            "    height=" + height + ",",
+            "    width=" + width + ",",
             "    seed=42,",
             ")",
             "",
@@ -247,6 +251,7 @@ class LocalVideoClient:
         frames: int,
         resolution: str,
         task_id: str = "",
+        progress_callback: Callable[[str], None] | None = None,
     ) -> dict[str, Any]:
         """在独立子进程中执行视频生成，用 subprocess.Popen + asyncio.to_thread() 避免 pipe 协程冲突"""
 
@@ -298,6 +303,8 @@ class LocalVideoClient:
                                 ln = ln.strip()
                                 if ln:
                                     logger.info(f"[子进程] {ln}")
+                                    if progress_callback is not None:
+                                        progress_callback(ln)
                     if proc.stderr in ready_r:
                         chunk = os.read(proc.stderr.fileno(), 4096)
                         if not chunk:
@@ -345,7 +352,7 @@ class LocalVideoClient:
                 raise torch.cuda.OutOfMemoryError(stderr_str)
             raise RuntimeError(f"视频生成子进程失败(returncode={returncode}): {stderr_str[:500]}")
 
-        lines = [l.strip() for l in stdout_str.strip().splitlines() if l.strip()]
+        lines = [line_item.strip() for line_item in stdout_str.strip().splitlines() if line_item.strip()]
         for line in reversed(lines):
             if line.startswith("{"):
                 return json.loads(line)
@@ -358,6 +365,7 @@ class LocalVideoClient:
         frames: int | None = None,
         resolution: str | None = None,
         task_id: str = "",
+        progress_callback: Callable[[str], None] | None = None,
     ) -> dict[str, Any]:
         """异步生成视频，自动选择最空闲的 GPU，OOM 时自动换 GPU 重试
 
@@ -415,6 +423,7 @@ class LocalVideoClient:
                             actual_frames,
                             actual_resolution,
                             task_id_hash,
+                            progress_callback,
                         )
 
                         size = result.get("size_bytes", 0)

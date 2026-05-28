@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
  */
 
 import { create } from "zustand";
-import { api, type AgentTypeValue, type QuotaStatus, type StreamUsageEvent } from "@/lib/api_client";
+import { api, type AgentTypeValue, type MediaHistoryItem, type QuotaStatus, type StreamUsageEvent, type VideoGenerationTaskStatus } from "@/lib/api_client";
 import { globalToast } from "@/components/toast/toast";
 import { toastMessages } from "@/components/toast/use_toast";
 
@@ -75,6 +75,20 @@ export interface SessionItem {
 }
 
 /**
+ * 画廊媒体项接口.
+ */
+export interface GalleryMediaItem {
+  id: string;
+  url: string;
+  prompt: string;
+  timestamp: number;
+  task_id?: string;
+  public_url?: string | null;
+  status?: string;
+  meta?: Record<string, unknown>;
+}
+
+/**
  * Agent 状态管理接口
  * @property sessionId - 会话 ID
  * @property messages - 消息列表
@@ -129,25 +143,31 @@ interface AgentState {
   /** 图片生成进度定时器 */
   imageGenerateTimer: number | null;
   /** 图片廊 - 历史生成的图片 */
-  imageGallery: Array<{
-    id: string;
-    url: string;
-    prompt: string;
-    timestamp: number;
-  }>;
+  imageGallery: GalleryMediaItem[];
   /** 是否正在生成视频 */
   isGeneratingVideo: boolean;
   /** 生成的视频 URL */
   generatedVideoUrl: string | null;
   /** 视频生成错误信息 */
   videoGenerateError: string | null;
+  /** 视频生成任务 ID */
+  videoGenerateTaskId: string | null;
+  /** 视频生成阶段 */
+  videoGenerateStage: string | null;
+  /** 视频生成进度描述 */
+  videoGenerateProgress: string | null;
+  /** 视频生成当前步骤 */
+  videoGenerateCurrentStep: number | null;
+  /** 视频生成总步骤 */
+  videoGenerateTotalSteps: number | null;
+  /** 视频生成帧数 */
+  videoGenerateFrames: number | null;
+  /** 视频生成分辨率 */
+  videoGenerateResolution: string | null;
+  /** 视频生成耗时 */
+  videoGenerateElapsedSeconds: number | null;
   /** 视频廊 - 历史生成的视频 */
-  videoGallery: Array<{
-    id: string;
-    url: string;
-    prompt: string;
-    timestamp: number;
-  }>;
+  videoGallery: GalleryMediaItem[];
   /** 是否正在生成音乐 */
   isGeneratingMusic: boolean;
   /** 音乐生成进度 */
@@ -159,12 +179,7 @@ interface AgentState {
   /** 音乐生成错误信息 */
   musicGenerateError: string | null;
   /** 音乐廊 - 历史生成的音乐 */
-  musicGallery: Array<{
-    id: string;
-    url: string;
-    prompt: string;
-    timestamp: number;
-  }>;
+  musicGallery: GalleryMediaItem[];
   /** 是否正在编辑图片 */
   isEditingImage: boolean;
   /** 编辑后的图片 URL */
@@ -207,7 +222,7 @@ interface AgentState {
   /** 取消图片编辑 */
   cancelEditImage: () => void;
   /** 添加图片到图片廊 */
-  addToImageGallery: (url: string, prompt: string) => void;
+  addToImageGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => void;
   /** 从图片廊删除图片 */
   removeFromImageGallery: (id: string) => void;
   /** 清空图片廊 */
@@ -217,7 +232,7 @@ interface AgentState {
   /** 清除生成的视频 */
   clearGeneratedVideo: () => void;
   /** 添加视频到视频廊 */
-  addToVideoGallery: (url: string, prompt: string) => void;
+  addToVideoGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => void;
   /** 从视频廊删除视频 */
   removeFromVideoGallery: (id: string) => void;
   /** 清空视频廊 */
@@ -229,13 +244,19 @@ interface AgentState {
   /** 清除生成的音乐 */
   clearGeneratedMusic: () => void;
   /** 添加音乐到音乐廊 */
-  addToMusicGallery: (url: string, prompt: string) => void;
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => void;
   /** 从音乐廊删除音乐 */
   removeFromMusicGallery: (id: string) => void;
   /** 清空音乐廊 */
   clearMusicGallery: () => void;
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
   hydrateGalleries: () => void;
+  /** 从后端加载媒体历史 */
+  loadMediaHistory: () => Promise<void>;
+  /** 删除单条媒体历史 */
+  deleteMediaHistoryItem: (mediaType: "image" | "music" | "video", taskId: string) => Promise<void>;
+  /** 批量删除媒体历史 */
+  batchDeleteMediaHistoryItems: (mediaType: "image" | "music" | "video", taskIds: string[]) => Promise<void>;
 }
 
 // 兼容非安全环境的 UUID 生成
@@ -247,6 +268,34 @@ const generateUUID = () => {
     const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+};
+
+/**
+ * 异步等待指定毫秒数.
+ * @param ms 等待毫秒数
+ * @returns Promise<void>
+ */
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * 将后端媒体历史项转换为前端画廊项.
+ * @param item 后端媒体历史项
+ * @returns 画廊媒体项
+ */
+const mapHistoryItemToGalleryItem = (item: MediaHistoryItem): GalleryMediaItem | null => {
+  if (!item.url) {
+    return null;
+  }
+  return {
+    id: item.task_id,
+    task_id: item.task_id,
+    url: item.url,
+    public_url: item.public_url,
+    prompt: item.prompt,
+    status: item.status,
+    meta: item.meta,
+    timestamp: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
+  };
 };
 
 /**
@@ -277,6 +326,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   isGeneratingVideo: false,
   generatedVideoUrl: null,
   videoGenerateError: null,
+  videoGenerateTaskId: null,
+  videoGenerateStage: null,
+  videoGenerateProgress: null,
+  videoGenerateCurrentStep: null,
+  videoGenerateTotalSteps: null,
+  videoGenerateFrames: null,
+  videoGenerateResolution: null,
+  videoGenerateElapsedSeconds: null,
   videoGallery: [],
   isGeneratingMusic: false,
   musicGenerateProgress: null,
@@ -293,6 +350,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
   hydrateGalleries: () => {
+    if (Cookies.get("token")) {
+      void get().loadMediaHistory();
+      return;
+    }
     try {
       const storedImageGallery = localStorage.getItem('imageGallery');
       if (storedImageGallery) {
@@ -309,6 +370,44 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     } catch {
       // 忽略解析错误
     }
+  },
+
+  loadMediaHistory: async () => {
+    try {
+      const history = await api.agent.listMediaHistory({ limit: 100 });
+      const imageGallery = history.images.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+      const videoGallery = history.videos.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+      const musicGallery = history.music.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+      set({ imageGallery, videoGallery, musicGallery });
+    } catch {
+      // 保持当前本地状态
+    }
+  },
+
+  deleteMediaHistoryItem: async (mediaType, taskId) => {
+    await api.agent.deleteMediaHistory({ media_type: mediaType, task_id: taskId });
+    if (mediaType === "image") {
+      set((state) => ({ imageGallery: state.imageGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
+      return;
+    }
+    if (mediaType === "video") {
+      set((state) => ({ videoGallery: state.videoGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
+      return;
+    }
+    set((state) => ({ musicGallery: state.musicGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
+  },
+
+  batchDeleteMediaHistoryItems: async (mediaType, taskIds) => {
+    await api.agent.batchDeleteMediaHistory({ media_type: mediaType, task_ids: taskIds });
+    if (mediaType === "image") {
+      set((state) => ({ imageGallery: state.imageGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
+      return;
+    }
+    if (mediaType === "video") {
+      set((state) => ({ videoGallery: state.videoGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
+      return;
+    }
+    set((state) => ({ musicGallery: state.musicGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
   },
 
   startSession: async () => {
@@ -709,7 +808,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           imageGenerateError: res.error || null,
         });
         // 将生成的图片添加到图片廊
-        get().addToImageGallery(res.image_url, prompt);
+        get().addToImageGallery(res.image_url, prompt, res.task_id);
       } else if (res.image_base64) {
         const byteString = atob(res.image_base64);
         const bytes = new Uint8Array(byteString.length);
@@ -842,7 +941,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       set({ isEditingImage: false, editAbortController: null });
       if (res.image_url) {
         set({ editedImageUrl: res.image_url });
-        get().addToImageGallery(res.image_url, editPrompt);
+        get().addToImageGallery(res.image_url, editPrompt, res.task_id);
       } else if (res.image_base64) {
         const byteString = atob(res.image_base64);
         const bytes = new Uint8Array(byteString.length);
@@ -884,13 +983,15 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ isEditingImage: false, imageEditError: null, editAbortController: null });
   },
 
-  addToImageGallery: (url: string, prompt: string) => {
+  addToImageGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => {
     if (url.startsWith("blob:") || url.startsWith("data:")) {
       return;
     }
     const newImage = {
-      id: generateUUID(),
+      id: taskId || generateUUID(),
+      task_id: taskId,
       url,
+      public_url: publicUrl || url,
       prompt,
       timestamp: Date.now(),
     };
@@ -907,39 +1008,99 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   removeFromImageGallery: (id: string) => {
+    const target = get().imageGallery.find((item) => item.id === id || item.task_id === id);
+    if (target?.task_id && Cookies.get("token")) {
+      void get().deleteMediaHistoryItem("image", target.task_id);
+      return;
+    }
     set((state) => {
       const updatedGallery = state.imageGallery.filter((img) => img.id !== id);
-      // 保存到本地存储
       try {
         localStorage.setItem('imageGallery', JSON.stringify(updatedGallery));
       } catch {
-        // 忽略存储错误
       }
       return { imageGallery: updatedGallery };
     });
   },
 
   clearImageGallery: () => {
+    const taskIds = get().imageGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
+    if (taskIds.length > 0 && Cookies.get("token")) {
+      void get().batchDeleteMediaHistoryItems("image", taskIds);
+      return;
+    }
     set({ imageGallery: [] });
-    // 清空本地存储
     try {
       localStorage.removeItem('imageGallery');
     } catch {
-      // 忽略存储错误
     }
   },
 
   generateVideo: async (prompt: string, model?: string, duration?: number, resolution?: string) => {
-    set({ isGeneratingVideo: true, videoGenerateError: null, generatedVideoUrl: null });
+    const applyVideoTaskStatus = (status: VideoGenerationTaskStatus) => {
+      set({
+        videoGenerateTaskId: status.task_id ?? null,
+        videoGenerateStage: status.stage ?? status.status ?? null,
+        videoGenerateProgress: status.progress_message ?? null,
+        videoGenerateCurrentStep: status.current_step ?? null,
+        videoGenerateTotalSteps: status.total_steps ?? null,
+        videoGenerateFrames: status.frames ?? duration ?? null,
+        videoGenerateResolution: status.resolution ?? resolution ?? null,
+        videoGenerateElapsedSeconds: status.total_time_seconds ?? null,
+      });
+    };
+
+    set({
+      isGeneratingVideo: true,
+      videoGenerateError: null,
+      generatedVideoUrl: null,
+      videoGenerateTaskId: null,
+      videoGenerateStage: "queued",
+      videoGenerateProgress: "正在提交视频任务...",
+      videoGenerateCurrentStep: 0,
+      videoGenerateTotalSteps: 9,
+      videoGenerateFrames: duration ?? 81,
+      videoGenerateResolution: resolution ?? "1280x720",
+      videoGenerateElapsedSeconds: null,
+    });
     try {
       const res = await api.agent.generateVideo({ prompt, model, frames: duration, resolution });
-      if (res.video_url) {
-        set({ generatedVideoUrl: res.video_url, isGeneratingVideo: false });
-        // 将生成的视频添加到视频廊
-        get().addToVideoGallery(res.video_url, prompt);
-      } else {
-        set({ videoGenerateError: res.error || "视频生成失败", isGeneratingVideo: false });
+      applyVideoTaskStatus(res);
+
+      if (!res.task_id) {
+        set({ videoGenerateError: res.error || "视频任务创建失败", isGeneratingVideo: false });
+        return;
       }
+
+      for (let attempt = 0; attempt < 900; attempt += 1) {
+        const currentStatus = attempt === 0 ? res : await api.agent.getVideoStatus(res.task_id);
+        applyVideoTaskStatus(currentStatus);
+
+        if (currentStatus.status === "completed" && currentStatus.video_url) {
+          set({
+            generatedVideoUrl: currentStatus.video_url,
+            isGeneratingVideo: false,
+            videoGenerateError: null,
+          });
+          get().addToVideoGallery(currentStatus.video_url, prompt, currentStatus.task_id, currentStatus.public_url);
+          return;
+        }
+
+        if (currentStatus.status === "failed") {
+          set({
+            videoGenerateError: currentStatus.error || "视频生成失败",
+            isGeneratingVideo: false,
+          });
+          return;
+        }
+
+        await sleep(2000);
+      }
+
+      set({
+        videoGenerateError: "视频生成超时, 请稍后重试",
+        isGeneratingVideo: false,
+      });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "视频生成失败";
       set({ videoGenerateError: msg, isGeneratingVideo: false });
@@ -947,13 +1108,26 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   clearGeneratedVideo: () => {
-    set({ generatedVideoUrl: null, videoGenerateError: null });
+    set({
+      generatedVideoUrl: null,
+      videoGenerateError: null,
+      videoGenerateTaskId: null,
+      videoGenerateStage: null,
+      videoGenerateProgress: null,
+      videoGenerateCurrentStep: null,
+      videoGenerateTotalSteps: null,
+      videoGenerateFrames: null,
+      videoGenerateResolution: null,
+      videoGenerateElapsedSeconds: null,
+    });
   },
 
-  addToVideoGallery: (url: string, prompt: string) => {
+  addToVideoGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => {
     const newVideo = {
-      id: generateUUID(),
+      id: taskId || generateUUID(),
+      task_id: taskId,
       url,
+      public_url: publicUrl || url,
       prompt,
       timestamp: Date.now(),
     };
@@ -970,25 +1144,31 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   removeFromVideoGallery: (id: string) => {
+    const target = get().videoGallery.find((item) => item.id === id || item.task_id === id);
+    if (target?.task_id && Cookies.get("token")) {
+      void get().deleteMediaHistoryItem("video", target.task_id);
+      return;
+    }
     set((state) => {
       const updatedGallery = state.videoGallery.filter((video) => video.id !== id);
-      // 保存到本地存储
       try {
         localStorage.setItem('videoGallery', JSON.stringify(updatedGallery));
       } catch {
-        // 忽略存储错误
       }
       return { videoGallery: updatedGallery };
     });
   },
 
   clearVideoGallery: () => {
+    const taskIds = get().videoGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
+    if (taskIds.length > 0 && Cookies.get("token")) {
+      void get().batchDeleteMediaHistoryItems("video", taskIds);
+      return;
+    }
     set({ videoGallery: [] });
-    // 清空本地存储
     try {
       localStorage.removeItem('videoGallery');
     } catch {
-      // 忽略存储错误
     }
   },
 
@@ -1018,7 +1198,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
             if (statusRes.status === "completed" && statusRes.music_url) {
               set({ generatedMusicUrl: statusRes.music_url, isGeneratingMusic: false, musicGenerateProgress: "生成完毕", musicGenerateTaskId: null });
-              get().addToMusicGallery(statusRes.music_url, prompt);
+              get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url);
             } else if (statusRes.status === "failed") {
               set({ musicGenerateError: statusRes.error || "音乐生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
             } else if (statusRes.status === "cancelled") {
@@ -1059,10 +1239,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     set({ generatedMusicUrl: null, musicGenerateError: null, musicGenerateProgress: null, musicGenerateTaskId: null });
   },
 
-  addToMusicGallery: (url: string, prompt: string) => {
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => {
     const newMusic = {
-      id: generateUUID(),
+      id: taskId || generateUUID(),
+      task_id: taskId,
       url,
+      public_url: publicUrl || url,
       prompt,
       timestamp: Date.now(),
     };
@@ -1079,25 +1261,31 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   removeFromMusicGallery: (id: string) => {
+    const target = get().musicGallery.find((item) => item.id === id || item.task_id === id);
+    if (target?.task_id && Cookies.get("token")) {
+      void get().deleteMediaHistoryItem("music", target.task_id);
+      return;
+    }
     set((state) => {
       const updatedGallery = state.musicGallery.filter((music) => music.id !== id);
-      // 保存到本地存储
       try {
         localStorage.setItem('musicGallery', JSON.stringify(updatedGallery));
       } catch {
-        // 忽略存储错误
       }
       return { musicGallery: updatedGallery };
     });
   },
 
   clearMusicGallery: () => {
+    const taskIds = get().musicGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
+    if (taskIds.length > 0 && Cookies.get("token")) {
+      void get().batchDeleteMediaHistoryItems("music", taskIds);
+      return;
+    }
     set({ musicGallery: [] });
-    // 清空本地存储
     try {
       localStorage.removeItem('musicGallery');
     } catch {
-      // 忽略存储错误
     }
   },
 }));

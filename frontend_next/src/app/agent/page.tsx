@@ -7,16 +7,16 @@
 
 "use client";
 
+import { AgentAuthCorner } from "@/components/agent/agent_auth_corner";
 import { ChatPanel } from "@/components/agent/chat_panel";
 import { Sidebar } from "@/components/agent/sidebar";
-import { Navbar } from "@/components/website/navbar";
 import { ToastContainer, registerToastState, ToastItem } from "@/components/toast/toast";
 import { useAgentStore } from "@/stores/agent.store";
 import { useEffect, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 function AgentContent() {
-  const { sessionId, startSession } = useAgentStore();
+  const { sessionId, startSession, hydrateGalleries } = useAgentStore();
   const searchParams = useSearchParams();
   const isWidget = searchParams.get("mode") === "widget";
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -24,6 +24,10 @@ function AgentContent() {
   useEffect(() => {
     registerToastState(setToasts);
   }, []);
+
+  useEffect(() => {
+    hydrateGalleries();
+  }, [hydrateGalleries]);
 
   /**
    * 初始化会话
@@ -47,8 +51,7 @@ function AgentContent() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-100 dark:bg-slate-900">
-      <Navbar />
-      <div className="flex flex-1 overflow-hidden pt-20 border-t-4 border-slate-900 dark:border-white">
+      <div className="flex flex-1 overflow-hidden border-t-4 border-slate-900 dark:border-white">
         <div className="border-r-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800">
           <Sidebar />
         </div>
@@ -56,6 +59,7 @@ function AgentContent() {
           <div className="flex-1 overflow-hidden h-full">
             <ChatPanel />
           </div>
+          <AgentAuthCorner />
         </main>
       </div>
       <ToastContainer toasts={toasts} onDismiss={(id) => setToasts((p) => p.filter((t) => t.id !== id))} />

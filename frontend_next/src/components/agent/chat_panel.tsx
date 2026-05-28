@@ -9,7 +9,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useAgentStore } from "@/stores/agent.store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
@@ -27,7 +27,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { type Message as AgentMessage } from "@/stores/agent.store";
+import { type GalleryMediaItem } from "@/stores/agent.store";
 import { type UploadedFileInfo } from "./multimodal_upload";
 import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
@@ -38,6 +38,7 @@ import { VideoDownloaderPanel } from "./video_downloader_panel";
 import { cn } from "@/lib/utils";
 
 type TabId = "chat" | "image" | "video" | "music" | "audio" | "image_edit" | "subtitle" | "digital_human" | "downloader";
+type GalleryType = "image" | "video" | "music";
 
 export function ChatPanel() {
   const [activeTab, setActiveTab] = useState<TabId>('chat');
@@ -49,13 +50,26 @@ export function ChatPanel() {
   const [imageLinkCopied, setImageLinkCopied] = useState(false);
   const [videoLinkCopied, setVideoLinkCopied] = useState(false);
   const [musicLinkCopied, setMusicLinkCopied] = useState(false);
+  const [gallerySelectionMode, setGallerySelectionMode] = useState<Record<GalleryType, boolean>>({
+    image: false,
+    video: false,
+    music: false,
+  });
+  const [selectedGalleryItems, setSelectedGalleryItems] = useState<Record<GalleryType, string[]>>({
+    image: [],
+    video: [],
+    music: [],
+  });
 
   const {
     messages, isStreaming, sendMessage, loadSessions,
     sessions, sessionId: currentSessionId, startSession, switchSession, deleteSession,
-    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage, imageGenerateError, imageGenerateProgress, imageGenerateStage, imageGallery,
-    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError, videoGallery,
-    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery,
+    isGeneratingImage, generateImage, generatedImageUrl, clearGeneratedImage, imageGenerateError, imageGenerateProgress, imageGenerateStage, imageGallery, removeFromImageGallery, clearImageGallery,
+    isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError, videoGallery, removeFromVideoGallery, clearVideoGallery,
+    videoGenerateTaskId, videoGenerateStage, videoGenerateProgress, videoGenerateCurrentStep, videoGenerateTotalSteps,
+    videoGenerateFrames, videoGenerateResolution, videoGenerateElapsedSeconds,
+    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery, removeFromMusicGallery, clearMusicGallery,
+    batchDeleteMediaHistoryItems,
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError,
   } = useAgentStore();
 
@@ -77,6 +91,95 @@ export function ChatPanel() {
 
   const toggleGallery = (type: string) => {
     setGalleryExpanded(prev => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  const clearGallerySelection = (type: GalleryType) => {
+    setSelectedGalleryItems((prev) => ({ ...prev, [type]: [] }));
+    setGallerySelectionMode((prev) => ({ ...prev, [type]: false }));
+  };
+
+  const getGalleryItems = (type: GalleryType): GalleryMediaItem[] => {
+    if (type === "image") {
+      return imageGallery;
+    }
+    if (type === "video") {
+      return videoGallery;
+    }
+    return musicGallery;
+  };
+
+  const toggleGallerySelectionMode = (type: GalleryType) => {
+    setGallerySelectionMode((prev) => {
+      const nextEnabled = !prev[type];
+      if (!nextEnabled) {
+        setSelectedGalleryItems((selection) => ({ ...selection, [type]: [] }));
+      }
+      return { ...prev, [type]: nextEnabled };
+    });
+  };
+
+  const toggleGalleryItemSelection = (type: GalleryType, itemId: string) => {
+    setSelectedGalleryItems((prev) => {
+      const exists = prev[type].includes(itemId);
+      return {
+        ...prev,
+        [type]: exists ? prev[type].filter((id) => id !== itemId) : [...prev[type], itemId],
+      };
+    });
+  };
+
+  const handleSelectAllGalleryItems = (type: GalleryType) => {
+    const items = getGalleryItems(type);
+    const allIds = items.map((item) => item.id);
+    setSelectedGalleryItems((prev) => ({
+      ...prev,
+      [type]: prev[type].length === allIds.length ? [] : allIds,
+    }));
+  };
+
+  const openGalleryItem = (type: GalleryType, item: GalleryMediaItem) => {
+    if (gallerySelectionMode[type]) {
+      toggleGalleryItemSelection(type, item.id);
+      return;
+    }
+    if (type === "image") {
+      useAgentStore.setState({ generatedImageUrl: item.url });
+      return;
+    }
+    if (type === "video") {
+      useAgentStore.setState({ generatedVideoUrl: item.url });
+      return;
+    }
+    useAgentStore.setState({ generatedMusicUrl: item.url });
+  };
+
+  const handleBatchDeleteSelected = async (type: GalleryType) => {
+    const selectedIds = selectedGalleryItems[type];
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    const selectedItems = getGalleryItems(type).filter((item) => selectedIds.includes(item.id));
+    const taskIds = selectedItems
+      .map((item) => item.task_id)
+      .filter((taskId): taskId is string => Boolean(taskId));
+
+    if (taskIds.length > 0) {
+      await batchDeleteMediaHistoryItems(type, taskIds);
+    }
+
+    const localOnlyItems = selectedItems.filter((item) => !item.task_id);
+    for (const item of localOnlyItems) {
+      if (type === "image") {
+        removeFromImageGallery(item.id);
+      } else if (type === "video") {
+        removeFromVideoGallery(item.id);
+      } else {
+        removeFromMusicGallery(item.id);
+      }
+    }
+
+    clearGallerySelection(type);
   };
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -108,6 +211,25 @@ export function ChatPanel() {
     { label: "电子舞曲", value: "电子舞曲, 强节奏, 合成器主旋律, 俱乐部氛围" },
     { label: "国风旋律", value: "国风旋律, 古筝与笛子, 清雅, 现代混音" },
   ];
+
+  const videoStageLabelMap: Record<string, string> = {
+    queued: "排队中",
+    preparing: "准备资源",
+    initializing: "初始化任务",
+    preparing_runtime: "准备运行环境",
+    loading_model: "加载模型",
+    model_ready: "模型就绪",
+    inferencing: "视频推理中",
+    assembling_video: "组装视频",
+    encoding_video: "编码视频",
+    uploading: "上传到 S3",
+    notifying: "发送通知",
+    completed: "已完成",
+    failed: "任务失败",
+  };
+  const videoProgressPercent = videoGenerateCurrentStep && videoGenerateTotalSteps
+    ? Math.min(100, Math.round((videoGenerateCurrentStep / videoGenerateTotalSteps) * 100))
+    : 0;
 
   const handleCopyImageLink = async (url: string) => {
     try {
@@ -496,8 +618,43 @@ export function ChatPanel() {
                                   </motion.div>
                                 ) : isGeneratingImage ? (
                                   <motion.div key="image-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
-                                    <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在处理...</div>
+                                    <div className={`relative w-full max-w-xl aspect-square bg-slate-100 dark:bg-slate-950 overflow-hidden ${brutalBorder}`}>
+                                      <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent"
+                                        animate={{ x: ["-100%", "100%"] }}
+                                        transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                                      />
+                                      <motion.div
+                                        className="absolute inset-[12%] border-4 border-dashed border-cyan-500/80"
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className={`w-32 h-32 bg-cyan-200 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}>
+                                          <ImageIcon className="w-16 h-16" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className={`w-full max-w-xl p-5 bg-white dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-4`}>
+                                      <div className="flex items-center justify-between gap-4 font-black uppercase">
+                                        <div className="flex items-center gap-3 text-xl">
+                                          <Loader2 className="animate-spin" />
+                                          画幅正在生成
+                                        </div>
+                                        <div>{Math.max(0, Math.min(100, imageGenerateProgress))}%</div>
+                                      </div>
+                                      <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-cyan-500"
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${Math.max(0, Math.min(100, imageGenerateProgress))}%` }}
+                                          transition={{ type: "spring", stiffness: 90, damping: 18 }}
+                                        />
+                                      </div>
+                                      <div className="text-sm font-bold break-words">
+                                        {imageGenerateProgress < 45 ? "正在铺设构图和光影..." : imageGenerateProgress < 80 ? "正在细化细节和纹理..." : "正在输出最终画面..."}
+                                      </div>
+                                    </div>
                                   </motion.div>
                                 ) : (
                                   <motion.div key="image-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
@@ -518,9 +675,65 @@ export function ChatPanel() {
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('image')}
                                 >
-                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-emerald-600 transition-colors">
-                                    GALLERY / 历史作品 ({imageGallery.length})
-                                  </h3>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-emerald-600 transition-colors">
+                                      GALLERY / 历史作品 ({imageGallery.length})
+                                    </h3>
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-emerald-200 text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGallerySelectionMode("image");
+                                      }}
+                                    >
+                                      {gallerySelectionMode.image ? `已选 ${selectedGalleryItems.image.length}` : "多选"}
+                                    </button>
+                                    {gallerySelectionMode.image && (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelectAllGalleryItems("image");
+                                          }}
+                                        >
+                                          {selectedGalleryItems.image.length === imageGallery.length ? "取消全选" : "全选"}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            void handleBatchDeleteSelected("image");
+                                          }}
+                                        >
+                                          删除已选
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            clearGallerySelection("image");
+                                          }}
+                                        >
+                                          取消
+                                        </button>
+                                      </>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        clearImageGallery();
+                                      }}
+                                    >
+                                      批量清空
+                                    </button>
+                                  </div>
                                   <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                     {galleryExpanded.image ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
                                   </div>
@@ -538,10 +751,29 @@ export function ChatPanel() {
                                         {imageGallery.map((item) => (
                                           <div 
                                             key={item.id} 
-                                            className={`shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`}
-                                            onClick={() => useAgentStore.setState({ generatedImageUrl: item.url })}
+                                            className={cn(
+                                              `shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`,
+                                              selectedGalleryItems.image.includes(item.id) && "ring-4 ring-emerald-500 ring-offset-2"
+                                            )}
+                                            onClick={() => openGalleryItem("image", item)}
                                           >
                                             <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" title={item.prompt} />
+                                            {gallerySelectionMode.image && (
+                                              <div className="absolute inset-0 bg-slate-900/35 pointer-events-none" />
+                                            )}
+                                            {(gallerySelectionMode.image || selectedGalleryItems.image.includes(item.id)) && (
+                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-emerald-600 ${brutalBorder}`}>
+                                                <Check className="w-4 h-4" />
+                                              </div>
+                                            )}
+                                            <div className="absolute inset-x-2 bottom-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyImageLink(item.public_url || item.url); }}>
+                                                <Copy className="h-4 w-4 mx-auto" />
+                                              </button>
+                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromImageGallery(item.id); }}>
+                                                <Trash2 className="h-4 w-4 mx-auto" />
+                                              </button>
+                                            </div>
                                           </div>
                                         ))}
                                       </div>
@@ -621,7 +853,32 @@ export function ChatPanel() {
                                 ) : isGeneratingVideo ? (
                                   <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
                                     <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在渲染帧...</div>
+                                    <div className={`w-full max-w-2xl p-5 bg-slate-50 dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-4`}>
+                                      <div className="flex items-center justify-between gap-4">
+                                        <div className="font-black uppercase text-xl flex items-center gap-3">
+                                          <Loader2 className="animate-spin" />
+                                          {videoStageLabelMap[videoGenerateStage || "queued"] || "视频生成中"}
+                                        </div>
+                                        <div className="text-sm font-black uppercase">
+                                          STEP {videoGenerateCurrentStep ?? 0}/{videoGenerateTotalSteps ?? 9}
+                                        </div>
+                                      </div>
+                                      <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+                                        <div
+                                          className="h-full bg-orange-500 transition-all duration-500"
+                                          style={{ width: `${videoProgressPercent}%` }}
+                                        />
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-3 text-sm font-bold">
+                                        <div>TASK ID: {videoGenerateTaskId || "-"}</div>
+                                        <div>帧数: {videoGenerateFrames || "-"}</div>
+                                        <div>分辨率: {videoGenerateResolution || "-"}</div>
+                                        <div>耗时: {videoGenerateElapsedSeconds ? `${videoGenerateElapsedSeconds}s` : "进行中"}</div>
+                                      </div>
+                                      <div className="text-sm font-bold break-words">
+                                        {videoGenerateProgress || "正在等待后端返回当前进度..."}
+                                      </div>
+                                    </div>
                                   </motion.div>
                                 ) : (
                                   <motion.div key="video-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
@@ -642,9 +899,65 @@ export function ChatPanel() {
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('video')}
                                 >
-                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-orange-500 transition-colors">
-                                    GALLERY / 历史作品 ({videoGallery.length})
-                                  </h3>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-orange-500 transition-colors">
+                                      GALLERY / 历史作品 ({videoGallery.length})
+                                    </h3>
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-orange-200 text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGallerySelectionMode("video");
+                                      }}
+                                    >
+                                      {gallerySelectionMode.video ? `已选 ${selectedGalleryItems.video.length}` : "多选"}
+                                    </button>
+                                    {gallerySelectionMode.video && (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelectAllGalleryItems("video");
+                                          }}
+                                        >
+                                          {selectedGalleryItems.video.length === videoGallery.length ? "取消全选" : "全选"}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            void handleBatchDeleteSelected("video");
+                                          }}
+                                        >
+                                          删除已选
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            clearGallerySelection("video");
+                                          }}
+                                        >
+                                          取消
+                                        </button>
+                                      </>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        clearVideoGallery();
+                                      }}
+                                    >
+                                      批量清空
+                                    </button>
+                                  </div>
                                   <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                     {galleryExpanded.video ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
                                   </div>
@@ -662,14 +975,33 @@ export function ChatPanel() {
                                         {videoGallery.map((item) => (
                                           <div 
                                             key={item.id} 
-                                            className={`shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`}
-                                            onClick={() => useAgentStore.setState({ generatedVideoUrl: item.url })}
+                                            className={cn(
+                                              `shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`,
+                                              selectedGalleryItems.video.includes(item.id) && "ring-4 ring-orange-500 ring-offset-2"
+                                            )}
+                                            onClick={() => openGalleryItem("video", item)}
                                           >
                                             <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" title={item.prompt} />
+                                            {gallerySelectionMode.video && (
+                                              <div className="absolute inset-0 bg-slate-900/40 pointer-events-none" />
+                                            )}
+                                            {(gallerySelectionMode.video || selectedGalleryItems.video.includes(item.id)) && (
+                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-orange-500 ${brutalBorder}`}>
+                                                <Check className="w-4 h-4" />
+                                              </div>
+                                            )}
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
                                                 <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
                                               </div>
+                                            </div>
+                                            <div className="absolute inset-x-2 bottom-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyVideoLink(item.public_url || item.url); }}>
+                                                <Copy className="h-4 w-4 mx-auto" />
+                                              </button>
+                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromVideoGallery(item.id); }}>
+                                                <Trash2 className="h-4 w-4 mx-auto" />
+                                              </button>
                                             </div>
                                           </div>
                                         ))}
@@ -789,8 +1121,34 @@ export function ChatPanel() {
                                   </motion.div>
                                 ) : isGeneratingMusic ? (
                                   <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
-                                    <div className={`w-full h-24 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                    <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 正在合成音频...</div>
+                                    <div className={`w-full max-w-2xl p-6 bg-indigo-50 dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-6`}>
+                                      <div className="flex items-center justify-between gap-4">
+                                        <div className="font-black uppercase text-xl flex items-center gap-3">
+                                          <Loader2 className="animate-spin" />
+                                          音轨正在生成
+                                        </div>
+                                        <div className="text-xs font-black uppercase text-slate-600 dark:text-slate-300">
+                                          MUSIC PIPELINE
+                                        </div>
+                                      </div>
+                                      <div className="flex items-end justify-center gap-2 h-28">
+                                        {Array.from({ length: 12 }).map((_, index) => (
+                                          <motion.div
+                                            key={`music-bar-${index}`}
+                                            className="w-4 bg-indigo-500 border-2 border-slate-900 dark:border-white"
+                                            animate={{ height: [20 + (index % 3) * 8, 88 - (index % 4) * 10, 28 + (index % 5) * 6] }}
+                                            transition={{ duration: 1.1 + index * 0.08, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+                                          />
+                                        ))}
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-3 text-sm font-bold">
+                                        <div>当前状态: 生成中</div>
+                                        <div>任务感知: 已开启</div>
+                                      </div>
+                                      <div className="text-sm font-bold break-words">
+                                        {musicGenerateProgress || "正在等待后端返回编曲阶段..."}
+                                      </div>
+                                    </div>
                                   </motion.div>
                                 ) : (
                                   <motion.div key="music-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-4 opacity-50 h-full">
@@ -811,9 +1169,65 @@ export function ChatPanel() {
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('music')}
                                 >
-                                  <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-indigo-500 transition-colors">
-                                    GALLERY / 历史作品 ({musicGallery.length})
-                                  </h3>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-indigo-500 transition-colors">
+                                      GALLERY / 历史作品 ({musicGallery.length})
+                                    </h3>
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-indigo-200 text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGallerySelectionMode("music");
+                                      }}
+                                    >
+                                      {gallerySelectionMode.music ? `已选 ${selectedGalleryItems.music.length}` : "多选"}
+                                    </button>
+                                    {gallerySelectionMode.music && (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelectAllGalleryItems("music");
+                                          }}
+                                        >
+                                          {selectedGalleryItems.music.length === musicGallery.length ? "取消全选" : "全选"}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            void handleBatchDeleteSelected("music");
+                                          }}
+                                        >
+                                          删除已选
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            clearGallerySelection("music");
+                                          }}
+                                        >
+                                          取消
+                                        </button>
+                                      </>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        clearMusicGallery();
+                                      }}
+                                    >
+                                      批量清空
+                                    </button>
+                                  </div>
                                   <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                     {galleryExpanded.music ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
                                   </div>
@@ -831,9 +1245,20 @@ export function ChatPanel() {
                                         {musicGallery.map((item) => (
                                           <div 
                                             key={item.id} 
-                                            className={`shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`}
-                                            onClick={() => useAgentStore.setState({ generatedMusicUrl: item.url })}
+                                            className={cn(
+                                              `shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-indigo-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`,
+                                              selectedGalleryItems.music.includes(item.id) && "ring-4 ring-indigo-500 ring-offset-2"
+                                            )}
+                                            onClick={() => openGalleryItem("music", item)}
                                           >
+                                            {gallerySelectionMode.music && (
+                                              <div className="absolute inset-0 bg-slate-900/15 pointer-events-none" />
+                                            )}
+                                            {(gallerySelectionMode.music || selectedGalleryItems.music.includes(item.id)) && (
+                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-indigo-500 ${brutalBorder}`}>
+                                                <Check className="w-4 h-4" />
+                                              </div>
+                                            )}
                                             <div className="flex items-center gap-3">
                                               <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white shrink-0">
                                                 <Music className="w-5 h-5" />
@@ -842,6 +1267,14 @@ export function ChatPanel() {
                                                 <p className="font-bold text-sm truncate" title={item.prompt}>{item.prompt}</p>
                                                 <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
                                               </div>
+                                            </div>
+                                            <div className="absolute right-3 bottom-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <button type="button" className={`px-2 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyMusicLink(item.public_url || item.url); }}>
+                                                <Copy className="h-4 w-4" />
+                                              </button>
+                                              <button type="button" className={`px-2 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromMusicGallery(item.id); }}>
+                                                <Trash2 className="h-4 w-4" />
+                                              </button>
                                             </div>
                                           </div>
                                         ))}

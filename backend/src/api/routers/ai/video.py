@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import base64
 import os
+import re
 import time
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Request
 from loguru import logger
@@ -19,6 +20,8 @@ from pydantic import BaseModel, Field
 from api.deps import CurrentUserOptional
 from core.exceptions import ExternalServiceError
 from infrastructure.ai.video.local_video_client import LocalVideoClient
+from infrastructure.database import get_session
+from infrastructure.database.models import VideoRecordModel
 from infrastructure.notifications.media_notify import media_notifier
 from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
@@ -27,6 +30,221 @@ from infrastructure.notify.feishu_ai_notify import (
 from infrastructure.storage.s3_storage import S3StorageService
 
 router = APIRouter()
+
+
+class VideoTaskStore:
+    """
+    视频任务状态仓库类, 在内存中维护视频生成任务的实时进度.
+    """
+
+    _tasks: dict[str, dict[str, Any]] = {}
+
+    @classmethod
+    def _create_record(cls, task: dict[str, Any]) -> None:
+        """
+        创建视频数据库记录.
+
+        参数:
+            task (dict[str, Any]): 任务状态字典.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
+        with get_session() as db:
+            db.add(
+                VideoRecordModel(
+                    t_task_id=str(task.get("task_id", "")),
+                    t_user_id=str(task.get("user_id", "")),
+                    t_username=str(task.get("user_name", "")) or None,
+                    t_client_ip=str(task.get("client_ip", "")) or None,
+                    t_user_agent=str(task.get("user_agent", "")) or None,
+                    t_tenant_id=str(task.get("tenant_id", "")) or None,
+                    t_prompt=str(task.get("prompt", "")),
+                    t_status=str(task.get("status", "queued")),
+                    t_stage=str(task.get("stage", "queued")),
+                    t_progress_message=str(task.get("progress_message", "")) or None,
+                    t_current_step=int(task.get("current_step", 0) or 0),
+                    t_total_steps=int(task.get("total_steps", 9) or 9),
+                    t_model=str(task.get("model", "")) or None,
+                    t_frames=int(task.get("frames", 81) or 81),
+                    t_resolution=str(task.get("resolution", "1280x720") or "1280x720"),
+                    t_created_by=str(task.get("user_id", "")) or None,
+                )
+            )
+            db.commit()
+
+    @classmethod
+    def _update_record(cls, task_id: str, fields: dict[str, Any]) -> None:
+        """
+        更新视频数据库记录.
+
+        参数:
+            task_id (str): 任务 ID.
+            fields (dict[str, Any]): 需要更新的任务字段.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
+        with get_session() as db:
+            record = db.query(VideoRecordModel).filter(VideoRecordModel.t_task_id == task_id).one_or_none()
+            if record is None:
+                return
+            mapping = {
+                "status": "t_status",
+                "stage": "t_stage",
+                "progress_message": "t_progress_message",
+                "current_step": "t_current_step",
+                "total_steps": "t_total_steps",
+                "video_url": "t_result_url",
+                "public_url": "t_public_url",
+                "object_key": "t_object_key",
+                "error": "t_error_message",
+                "frames": "t_frames",
+                "resolution": "t_resolution",
+                "inference_time_seconds": "t_inference_time_seconds",
+                "total_time_seconds": "t_total_time_seconds",
+            }
+            for source_key, target_key in mapping.items():
+                if source_key in fields:
+                    setattr(record, target_key, fields[source_key])
+            record.t_updated_at = datetime.now()
+            if fields.get("status") in {"completed", "failed", "cancelled"}:
+                record.t_completed_at = datetime.now()
+            db.commit()
+
+    @classmethod
+    def create_task(
+        cls,
+        task_id: str,
+        prompt: str,
+        model: str,
+        frames: int,
+        resolution: str,
+        user_id: str,
+        user_name: str,
+        tenant_id: str,
+        client_ip: str,
+        user_agent: str,
+    ) -> None:
+        """
+        创建视频生成任务的初始状态.
+
+        参数:
+            task_id (str): 任务 ID.
+            prompt (str): 视频提示词.
+            model (str): 模型名称.
+            frames (int): 视频帧数.
+            resolution (str): 分辨率.
+            user_id (str): 用户 ID.
+            user_name (str): 用户名.
+            tenant_id (str): 租户 ID.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
+        cls._tasks[task_id] = {
+            "task_id": task_id,
+            "status": "queued",
+            "stage": "queued",
+            "progress_message": "任务已进入队列",
+            "current_step": 0,
+            "total_steps": 9,
+            "queue_position": 0,
+            "video_url": None,
+            "video_base64": None,
+            "object_key": None,
+            "public_url": None,
+            "frames": frames,
+            "resolution": resolution,
+            "error": None,
+            "inference_time_seconds": None,
+            "total_time_seconds": None,
+            "prompt": prompt,
+            "model": model,
+            "user_id": user_id,
+            "user_name": user_name,
+            "tenant_id": tenant_id,
+            "client_ip": client_ip,
+            "user_agent": user_agent,
+            "started_at": time.monotonic(),
+        }
+        cls._create_record(cls._tasks[task_id])
+
+    @classmethod
+    def update_task(cls, task_id: str, **fields: Any) -> None:
+        """
+        更新视频任务状态.
+
+        参数:
+            task_id (str): 任务 ID.
+            **fields (Any): 需要更新的字段.
+
+        返回值:
+            None.
+
+        异常:
+            无.
+        """
+        task = cls._tasks.get(task_id)
+        if task is None:
+            return
+        task.update(fields)
+        started_at = task.get("started_at")
+        if isinstance(started_at, (int, float)):
+            task["total_time_seconds"] = int(time.monotonic() - started_at)
+        cls._update_record(task_id, task)
+
+    @classmethod
+    def get_task(cls, task_id: str) -> dict[str, Any] | None:
+        """
+        获取指定任务的状态快照.
+
+        参数:
+            task_id (str): 任务 ID.
+
+        返回值:
+            dict[str, Any] | None: 任务状态字典或 None.
+
+        异常:
+            无.
+        """
+        task = cls._tasks.get(task_id)
+        if task is None:
+            return None
+        task_copy = task.copy()
+        task_copy["queue_position"] = cls.get_queue_position(task_id)
+        return task_copy
+
+    @classmethod
+    def get_queue_position(cls, task_id: str) -> int:
+        """
+        计算任务在队列中的位置.
+
+        参数:
+            task_id (str): 任务 ID.
+
+        返回值:
+            int: 队列位置, 非排队状态返回 0.
+
+        异常:
+            无.
+        """
+        task = cls._tasks.get(task_id)
+        if task is None or task.get("status") != "queued":
+            return 0
+        queued_before = [
+            item_id for item_id, item in cls._tasks.items() if item.get("status") == "queued" and item_id < task_id
+        ]
+        return len(queued_before) + 1
 
 
 class VideoApiUtils:
@@ -111,6 +329,61 @@ class VideoApiUtils:
         video_url = s3_storage.get_long_term_url(object_key, expires_days=30)
         public_url = s3_storage.get_file_url(object_key)
         return video_url, public_url
+
+    @staticmethod
+    def parse_progress_line(line: str) -> dict[str, Any] | None:
+        """
+        解析本地视频子进程输出, 转换为前端可展示的进度字段.
+
+        参数:
+            line (str): 子进程输出的一行日志.
+
+        返回值:
+            dict[str, Any] | None: 可更新的进度字段, 无需展示时返回 None.
+
+        异常:
+            无.
+        """
+        step_match = re.match(r"^\[(\d+)/(\d+)\]\s*(.+)$", line)
+        if step_match:
+            current_step = int(step_match.group(1))
+            message = step_match.group(3).strip()
+            stage_map = {
+                1: "initializing",
+                2: "preparing_runtime",
+                3: "loading_model",
+                4: "model_ready",
+                5: "inferencing",
+                6: "assembling_video",
+                7: "encoding_video",
+            }
+            return {
+                "status": "processing",
+                "stage": stage_map.get(current_step, "processing"),
+                "progress_message": message,
+                "current_step": current_step,
+                "total_steps": 9,
+            }
+
+        if line.startswith("[推理心跳]"):
+            return {
+                "status": "processing",
+                "stage": "inferencing",
+                "progress_message": line,
+                "current_step": 5,
+                "total_steps": 9,
+            }
+
+        if line.startswith("Loading models from:"):
+            return {
+                "status": "processing",
+                "stage": "loading_model",
+                "progress_message": "正在加载模型文件",
+                "current_step": 3,
+                "total_steps": 9,
+            }
+
+        return None
 
     @staticmethod
     def send_video_generated_notify(
@@ -198,6 +471,11 @@ class VideoGenerationResponse(BaseModel):
     error: str | None = Field(default=None, description="错误信息")
     inference_time_seconds: int | None = Field(default=None, description="模型推理耗时 (秒)")
     total_time_seconds: int | None = Field(default=None, description="总耗时 (秒), 包含模型加载+推理+编码")
+    stage: str | None = Field(default=None, description="当前阶段")
+    progress_message: str | None = Field(default=None, description="当前进度描述")
+    current_step: int | None = Field(default=None, description="当前步骤序号")
+    total_steps: int | None = Field(default=None, description="总步骤数")
+    queue_position: int | None = Field(default=None, description="排队位置")
 
 
 class VideoApiRouter:
@@ -206,11 +484,161 @@ class VideoApiRouter:
     """
 
     @staticmethod
+    async def _execute_video_task(task_id: str) -> None:
+        """
+        在后台执行视频生成、上传和通知流程.
+
+        参数:
+            task_id (str): 任务 ID.
+
+        返回值:
+            None.
+
+        异常:
+            无. 所有失败信息都会写回任务状态.
+        """
+        task = VideoTaskStore.get_task(task_id)
+        if task is None:
+            return
+
+        VideoTaskStore.update_task(
+            task_id,
+            status="processing",
+            stage="preparing",
+            progress_message="正在分配 GPU 资源",
+            current_step=0,
+            total_steps=9,
+        )
+
+        try:
+            local_video_client = LocalVideoClient()
+
+            def progress_callback(line: str) -> None:
+                parsed = VideoApiUtils.parse_progress_line(line)
+                if parsed is not None:
+                    VideoTaskStore.update_task(task_id, **parsed)
+
+            result = await local_video_client.generate(
+                prompt=str(task.get("prompt", "")),
+                frames=int(task.get("frames", 81) or 81),
+                resolution=str(task.get("resolution", "1280x720") or "1280x720"),
+                task_id=task_id,
+                progress_callback=progress_callback,
+            )
+
+            object_key = VideoApiUtils.build_object_key(
+                tenant_id=str(task.get("tenant_id", "default") or "default"),
+                user_id=str(task.get("user_id", "anonymous") or "anonymous"),
+                task_id=task_id,
+            )
+            inference_time_seconds = int(result.get("inference_time_seconds", 0) or 0) or None
+
+            VideoTaskStore.update_task(
+                task_id,
+                stage="uploading",
+                progress_message="正在上传视频到 S3",
+                current_step=8,
+                total_steps=9,
+                inference_time_seconds=inference_time_seconds,
+                object_key=object_key,
+            )
+
+            video_url, public_url = VideoApiUtils.upload_video_to_s3(
+                video_base64=str(result.get("video_base64", "")),
+                object_key=object_key,
+            )
+
+            VideoTaskStore.update_task(
+                task_id,
+                stage="notifying",
+                progress_message="正在发送飞书和企业微信通知",
+                current_step=9,
+                total_steps=9,
+                video_url=video_url,
+                public_url=public_url,
+                frames=int(result.get("frames", task.get("frames", 81)) or task.get("frames", 81)),
+                resolution=str(
+                    result.get("resolution", task.get("resolution", "1280x720")) or task.get("resolution", "1280x720")
+                ),
+            )
+
+            VideoApiUtils.send_video_generated_notify(
+                user_id=str(task.get("user_id", "anonymous") or "anonymous"),
+                user_name=str(task.get("user_name", "guest") or "guest"),
+                prompt=str(task.get("prompt", "")),
+                video_url=video_url,
+                object_key=object_key,
+                public_url=public_url,
+                model=str(task.get("model", "Wan-AI/Wan2.1-T2V-1.3B")),
+                task_id=task_id,
+                frames=int(result.get("frames", task.get("frames", 81)) or task.get("frames", 81)),
+                resolution=str(
+                    result.get("resolution", task.get("resolution", "1280x720")) or task.get("resolution", "1280x720")
+                ),
+            )
+
+            VideoTaskStore.update_task(
+                task_id,
+                status="completed",
+                stage="completed",
+                progress_message="视频生成完成",
+                current_step=9,
+                total_steps=9,
+                video_base64=None,
+            )
+        except Exception as error:
+            logger.error(f"[视频生成] 任务失败 | task_id={task_id} | error={str(error)}")
+            VideoTaskStore.update_task(
+                task_id,
+                status="failed",
+                stage="failed",
+                progress_message="视频生成失败",
+                error=str(error),
+            )
+
+    @staticmethod
+    def _build_response(task_id: str) -> VideoGenerationResponse:
+        """
+        将任务状态字典转换为标准响应模型.
+
+        参数:
+            task_id (str): 任务 ID.
+
+        返回值:
+            VideoGenerationResponse: 标准响应对象.
+
+        异常:
+            ExternalServiceError: 任务不存在时抛出.
+        """
+        task = VideoTaskStore.get_task(task_id)
+        if task is None:
+            raise ExternalServiceError(message=f"视频任务不存在: {task_id}")
+
+        return VideoGenerationResponse(
+            task_id=task_id,
+            status=str(task.get("status", "queued")),
+            video_url=task.get("video_url"),
+            video_base64=None,
+            object_key=task.get("object_key"),
+            public_url=task.get("public_url"),
+            frames=int(task.get("frames", 81) or 81),
+            resolution=str(task.get("resolution", "1280x720") or "1280x720"),
+            error=task.get("error"),
+            inference_time_seconds=task.get("inference_time_seconds"),
+            total_time_seconds=task.get("total_time_seconds"),
+            stage=task.get("stage"),
+            progress_message=task.get("progress_message"),
+            current_step=task.get("current_step"),
+            total_steps=task.get("total_steps"),
+            queue_position=task.get("queue_position"),
+        )
+
+    @staticmethod
     @router.post(
         "/video/generate",
         response_model=VideoGenerationResponse,
         summary="AI 视频生成",
-        description="基于 Wan2.1 本地模型, 接收文本提示词并生成视频, 异步处理并支持通知推送",
+        description="基于 Wan2.1 本地模型, 接收文本提示词并创建视频生成任务, 前端可轮询查询进度与结果",
         tags=["AI 能力"],
     )
     async def generate_video(
@@ -220,7 +648,7 @@ class VideoApiRouter:
         current_user: CurrentUserOptional = None,
     ) -> VideoGenerationResponse:
         """
-        创建视频生成任务, 并在当前请求内返回生成结果.
+        创建视频生成任务, 立即返回任务状态.
 
         参数:
             req (VideoGenerationRequest): 生成参数
@@ -228,75 +656,52 @@ class VideoApiRouter:
             request (Request): 请求对象
             current_user (CurrentUserOptional): 当前用户
         返回值:
-            VideoGenerationResponse: 包含视频访问地址和状态的响应对象
+            VideoGenerationResponse: 包含任务 ID 和初始进度的响应对象.
 
         异常:
             无. 失败信息通过响应体返回.
         """
         task_id = str(uuid.uuid4())
-        started_at = time.monotonic()
         client_ip = VideoApiUtils.get_client_ip(request)
         user_id = str(current_user.get("user_id", "")) if current_user else "anonymous"
         user_name = current_user.get("username", "") if current_user else f"guest_{client_ip}"
         tenant_id = str(current_user.get("tenant_id", "default")) if current_user else "default"
 
         logger.info(f"[视频生成] 接收任务 | task_id={task_id} | user={user_name} | prompt={req.prompt[:50]}...")
+        VideoTaskStore.create_task(
+            task_id=task_id,
+            prompt=req.prompt,
+            model=req.model,
+            frames=req.frames,
+            resolution=req.resolution,
+            user_id=user_id,
+            user_name=user_name,
+            tenant_id=tenant_id,
+            client_ip=client_ip,
+            user_agent=request.headers.get("User-Agent", "")[:500],
+        )
+        background_tasks.add_task(VideoApiRouter._execute_video_task, task_id)
+        return VideoApiRouter._build_response(task_id)
 
-        try:
-            local_video_client = LocalVideoClient()
-            result = await local_video_client.generate(
-                prompt=req.prompt,
-                frames=req.frames,
-                resolution=req.resolution,
-                task_id=task_id,
-            )
-            object_key = VideoApiUtils.build_object_key(tenant_id=tenant_id, user_id=user_id, task_id=task_id)
-            video_url, public_url = VideoApiUtils.upload_video_to_s3(
-                video_base64=str(result.get("video_base64", "")),
-                object_key=object_key,
-            )
-            inference_time_seconds = int(result.get("inference_time_seconds", 0) or 0) or None
-            total_time_seconds = int(time.monotonic() - started_at)
+    @staticmethod
+    @router.get(
+        "/video/status/{task_id}",
+        response_model=VideoGenerationResponse,
+        summary="查询视频生成状态",
+        description="根据任务 ID 查询视频生成的实时阶段、步骤和结果地址",
+        tags=["AI 能力"],
+    )
+    async def get_video_status(task_id: str) -> VideoGenerationResponse:
+        """
+        查询视频生成任务状态.
 
-            background_tasks.add_task(
-                VideoApiUtils.send_video_generated_notify,
-                user_id,
-                user_name,
-                req.prompt,
-                video_url,
-                object_key,
-                public_url,
-                req.model,
-                task_id,
-                int(result.get("frames", req.frames) or req.frames),
-                str(result.get("resolution", req.resolution) or req.resolution),
-            )
+        参数:
+            task_id (str): 任务 ID.
 
-            return VideoGenerationResponse(
-                task_id=task_id,
-                status="completed",
-                video_url=video_url,
-                video_base64=None,
-                object_key=object_key,
-                public_url=public_url,
-                frames=int(result.get("frames", req.frames) or req.frames),
-                resolution=str(result.get("resolution", req.resolution) or req.resolution),
-                error=None,
-                inference_time_seconds=inference_time_seconds,
-                total_time_seconds=total_time_seconds,
-            )
-        except Exception as error:
-            logger.error(f"[视频生成] 任务失败 | task_id={task_id} | error={str(error)}")
-            return VideoGenerationResponse(
-                task_id=task_id,
-                status="failed",
-                video_url=None,
-                video_base64=None,
-                object_key=None,
-                public_url=None,
-                frames=req.frames,
-                resolution=req.resolution,
-                error=str(error),
-                inference_time_seconds=None,
-                total_time_seconds=int(time.monotonic() - started_at),
-            )
+        返回值:
+            VideoGenerationResponse: 任务的实时状态快照.
+
+        异常:
+            ExternalServiceError: 任务不存在时抛出.
+        """
+        return VideoApiRouter._build_response(task_id)

@@ -325,6 +325,15 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_28_1415
+- **新增(media_history)**: 新增 `/ai/media/history/list`、`/ai/media/history/delete`、`/ai/media/history/batch_delete` 接口, 统一返回图片、音乐、视频历史并支持用户侧删除。
+- **新增(migration)**: 补充 `migrate_add_media_history_tables.py`, 用于创建 `t_music_records` 与 `t_video_records`, 让音乐和视频历史真正落库可恢复。
+- **修复(image)**: 修复 `image_to_image` 链路没有沿用同一 `task_id` 写入记录的问题, 避免历史查询、删除与结果回填错位。
+
+### 🛠️ 后端_2026_05_28_1352
+- **功能(视频进度)**: 为 `/ai/video/generate` 和新增的 `/ai/video/status/{task_id}` 接口增加任务状态存储, 支持返回 `stage`、`progress_message`、`current_step`、`total_steps`、`queue_position` 等实时进度字段。
+- **优化(video)**: 将本地视频生成链路调整为后台异步任务模式, 前端可轮询看到 `加载模型`、`推理中`、`上传 S3`、`发送通知` 等完整阶段, 不再只能看到长时间无反馈的等待状态。
+
 ### 🛠️ 后端_2026_05_28_1202
 - **修复(视频生成)**: 修复 `/ai/video/generate` 只返回 `queued` 而不执行真实任务的问题, 接入 `LocalVideoClient` 本地视频生成链路, 生成完成后立即上传 S3 并直接返回 `video_url/public_url` 给前端 `/agent` 页面使用。
 - **测试(video)**: 已通过 mock 本地视频生成与 S3 上传流程完成接口验证, 确认接口会直接返回 `completed` 状态与视频地址。

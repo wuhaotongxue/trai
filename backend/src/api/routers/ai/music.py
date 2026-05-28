@@ -7,12 +7,16 @@
 import os
 import uuid
 from datetime import datetime
+from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 
+from api.deps import CurrentUserOptional
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
+from infrastructure.database import get_session
+from infrastructure.database.models import MusicRecordModel
 from infrastructure.notifications.media_notify import media_notifier
 
 router = APIRouter(prefix="/music", tags=["ai", "music"])
@@ -44,8 +48,6 @@ class MusicGenerateResponse(BaseModel):
     error: str | None = None
 
 
-from typing import Any
-
 _music_tasks: dict[str, Any] = {}
 
 
@@ -53,15 +55,78 @@ class MusicController:
     """音乐生成控制器类."""
 
     @staticmethod
-    def _do_generate(task_id: str, request: MusicGenerateRequest):
+    def _get_client_ip(request: Request) -> str:
+        """
+        获取客户端 IP.
+        """
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        real_ip = request.headers.get("X-Real-IP")
+        if real_ip:
+            return real_ip.strip()
+        if request.client:
+            return request.client.host or ""
+        return ""
+
+    @staticmethod
+    def _create_record(task_id: str, request: MusicGenerateRequest, user_context: dict[str, str]) -> None:
+        """
+        创建音乐记录.
+        """
+        with get_session() as db:
+            db.add(
+                MusicRecordModel(
+                    t_task_id=task_id,
+                    t_user_id=user_context.get("user_id", ""),
+                    t_username=user_context.get("username"),
+                    t_client_ip=user_context.get("client_ip"),
+                    t_user_agent=user_context.get("user_agent"),
+                    t_tenant_id=user_context.get("tenant_id"),
+                    t_prompt=request.prompt,
+                    t_status="queued",
+                    t_progress_message="任务已进入队列",
+                    t_model=request.model,
+                    t_duration_seconds=float(request.duration or 30.0),
+                    t_steps=int(request.steps or 27),
+                    t_guidance_scale=float(request.guidance_scale or 7.0),
+                    t_created_by=user_context.get("user_id", ""),
+                )
+            )
+            db.commit()
+
+    @staticmethod
+    def _update_record(task_id: str, **fields: Any) -> None:
+        """
+        更新音乐记录状态.
+        """
+        with get_session() as db:
+            record = db.query(MusicRecordModel).filter(MusicRecordModel.t_task_id == task_id).one_or_none()
+            if record is None:
+                return
+            for key, value in fields.items():
+                setattr(record, key, value)
+            record.t_updated_at = datetime.now()
+            if fields.get("t_status") in {"completed", "failed", "cancelled"}:
+                record.t_completed_at = datetime.now()
+            db.commit()
+
+    @staticmethod
+    def _do_generate(task_id: str, request: MusicGenerateRequest, user_context: dict[str, str]):
         """后台实际执行音乐生成的任务."""
         try:
             _music_tasks[task_id]["status"] = "processing"
             _music_tasks[task_id]["progress"] = "正在初始化生成任务..."
+            MusicController._update_record(
+                task_id,
+                t_status="processing",
+                t_progress_message="正在初始化生成任务...",
+            )
             client = MusicClientProvider.get_music_client()
 
             def progress_cb(msg: str):
                 _music_tasks[task_id]["progress"] = msg
+                MusicController._update_record(task_id, t_progress_message=msg)
 
             def cancel_check() -> bool:
                 return _music_tasks.get(task_id, {}).get("status") == "cancelling"
@@ -79,6 +144,11 @@ class MusicController:
             if _music_tasks[task_id]["status"] == "cancelling":
                 _music_tasks[task_id]["status"] = "cancelled"
                 _music_tasks[task_id]["progress"] = "已取消"
+                MusicController._update_record(
+                    task_id,
+                    t_status="cancelled",
+                    t_progress_message="已取消",
+                )
                 return
 
             if result.success:
@@ -88,26 +158,38 @@ class MusicController:
                 s3_url = ""
                 try:
                     from infrastructure.storage.s3_storage import get_s3_storage
-                    import hashlib
+
                     s3_storage = get_s3_storage()
                     date_prefix = datetime.now().strftime("%Y%m")
-                    
+
                     # 提取纯英数字作为前缀，避免 SignatureDoesNotMatch
                     safe_filename = f"music_{task_id}.wav"
                     s3_key = f"private/tenants/default/ai_generated/music/anonymous/{safe_filename}"
                     s3_storage.upload_file(result.file_path, s3_key, content_type="audio/wav")
                     # 使用预签名 URL，绕过 Nginx 的静态文件拦截
                     s3_url = s3_storage.get_long_term_url(s3_key, expires_days=30)
+                    public_url = s3_storage.get_file_url(s3_key)
                 except Exception as e:
                     logger.warning(f"音乐文件上传 S3 失败: {e}")
-                
+                    public_url = ""
+
                 final_url = s3_url or f"/api_trai/v1/ai/music/files/{filename}"
-                
+
                 _music_tasks[task_id]["status"] = "completed"
                 _music_tasks[task_id]["progress"] = "完成"
                 _music_tasks[task_id]["music_url"] = final_url
                 _music_tasks[task_id]["file_path"] = result.file_path
                 _music_tasks[task_id]["duration"] = result.duration
+                MusicController._update_record(
+                    task_id,
+                    t_status="completed",
+                    t_progress_message="完成",
+                    t_result_url=final_url,
+                    t_public_url=public_url or final_url,
+                    t_object_key=s3_key if s3_url else None,
+                    t_file_path=result.file_path,
+                    t_duration_seconds=float(result.duration),
+                )
 
                 # 发送飞书和企微通知
                 media_notifier.notify(
@@ -120,26 +202,48 @@ class MusicController:
                 _music_tasks[task_id]["status"] = "failed"
                 _music_tasks[task_id]["progress"] = "生成失败"
                 _music_tasks[task_id]["error"] = result.error
+                MusicController._update_record(
+                    task_id,
+                    t_status="failed",
+                    t_progress_message="生成失败",
+                    t_error_message=result.error,
+                )
         except Exception as e:
             _music_tasks[task_id]["status"] = "failed"
             _music_tasks[task_id]["progress"] = "生成异常"
             _music_tasks[task_id]["error"] = str(e)
+            MusicController._update_record(
+                task_id,
+                t_status="failed",
+                t_progress_message="生成异常",
+                t_error_message=str(e),
+            )
 
     @staticmethod
     @router.post("/generate", response_model=MusicGenerateResponse)
     async def generate_music(
+        request_http: Request,
         request: MusicGenerateRequest,
         background_tasks: BackgroundTasks,
+        current_user: CurrentUserOptional = None,
     ) -> MusicGenerateResponse:
         """
         提交音乐生成任务.
         """
         task_id = f"music_{uuid.uuid4().hex[:12]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        user_context = {
+            "user_id": str(current_user.get("user_id", "")) if current_user else "",
+            "username": str(current_user.get("username", "")) if current_user else "anonymous",
+            "tenant_id": str(current_user.get("tenant_id", "")) if current_user else "default",
+            "client_ip": MusicController._get_client_ip(request_http),
+            "user_agent": request_http.headers.get("User-Agent", "")[:500],
+        }
 
         _music_tasks[task_id] = {"status": "queued", "music_url": None, "error": None, "prompt": request.prompt}
+        MusicController._create_record(task_id=task_id, request=request, user_context=user_context)
 
         # 将长耗时的生成任务交给后台
-        background_tasks.add_task(MusicController._do_generate, task_id, request)
+        background_tasks.add_task(MusicController._do_generate, task_id, request, user_context)
 
         return MusicGenerateResponse(
             success=True,
