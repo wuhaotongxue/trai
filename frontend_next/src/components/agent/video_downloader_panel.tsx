@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Download, Loader2, Video, CheckCircle2, AlertCircle, ExternalLink, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import { request } from "@/lib/api_client";
+import { PANEL_EMPTY_COPY, PANEL_MOTION_TOKENS, PANEL_SUBTITLES } from "./panel_consistency";
 
 /**
  * 视频下载面板组件.
@@ -77,7 +78,7 @@ export function VideoDownloaderPanel() {
             <div className={`p-5 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} space-y-4`}>
               <div className="flex items-center justify-between gap-4">
                 <div className="font-black uppercase tracking-widest text-slate-900 dark:text-white">输入下载链接</div>
-                <div className="text-xs font-bold uppercase text-slate-500">Bilibili / Youtube / More</div>
+                <div className="text-xs font-bold uppercase text-slate-500">{PANEL_SUBTITLES.result_stage}</div>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-900 dark:text-white group-focus-within:text-cyan-500 transition-colors">
@@ -122,13 +123,13 @@ export function VideoDownloaderPanel() {
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent"
                       animate={{ x: ["-100%", "100%"] }}
-                      transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <motion.div
                         className={`w-28 h-28 bg-cyan-200 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}
                         animate={{ rotate: [0, 4, -4, 0] }}
-                        transition={{ duration: 1.8, repeat: Infinity }}
+                        transition={{ duration: PANEL_MOTION_TOKENS.pulse_duration, repeat: Infinity }}
                       >
                         <Loader2 className="w-14 h-14 animate-spin" />
                       </motion.div>
@@ -137,13 +138,13 @@ export function VideoDownloaderPanel() {
                   <div className={`p-5 bg-slate-50 dark:bg-slate-950 ${brutalBorder} ${brutalShadowSm} space-y-4`}>
                     <div className="flex items-center justify-between font-black uppercase">
                       <span>下载流程处理中</span>
-                      <span>Pipeline Active</span>
+                      <span>{PANEL_SUBTITLES.processing_feedback}</span>
                     </div>
                     <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
                       <motion.div
                         className="h-full bg-cyan-500"
                         animate={{ x: ["-25%", "100%"] }}
-                        transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
                         style={{ width: "35%" }}
                       />
                     </div>
@@ -197,16 +198,16 @@ export function VideoDownloaderPanel() {
                 <motion.div
                   initial={{ scale: 0.98 }}
                   animate={{ scale: 1 }}
-                  transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+                  transition={{ duration: PANEL_MOTION_TOKENS.float_duration, repeat: Infinity, repeatType: "reverse" }}
                   className="flex flex-col items-center justify-center gap-6"
                 >
                   <div className={`w-32 h-32 bg-cyan-300 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                     <Download className="w-16 h-16 text-slate-900 dark:text-white" />
                   </div>
                   <div className="text-center space-y-2">
-                    <div className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white">等待链接输入</div>
+                    <div className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{PANEL_EMPTY_COPY.waiting_input_title}</div>
                     <div className={`inline-flex px-4 py-2 bg-white dark:bg-slate-900 text-sm font-bold ${brutalBorder} ${brutalShadowSm}`}>
-                      在上方粘贴链接后开始解析
+                      {PANEL_EMPTY_COPY.waiting_input_desc}
                     </div>
                   </div>
                 </motion.div>
@@ -235,7 +236,7 @@ export function VideoDownloaderPanel() {
             </div>
           </div>
           <div className={`p-5 bg-amber-100 dark:bg-slate-950 ${brutalBorder} ${brutalShadow} space-y-3`}>
-            <div className="font-black uppercase tracking-widest text-slate-900 dark:text-white">使用建议</div>
+            <div className="font-black uppercase tracking-widest text-slate-900 dark:text-white">{PANEL_SUBTITLES.system_notes}</div>
             <ul className="space-y-2 text-sm font-bold text-slate-700 dark:text-slate-300">
               <li>优先粘贴完整作品页地址, 不要直接贴短链.</li>
               <li>下载结果会统一落入右侧结果卡片, 方便后续查看.</li>

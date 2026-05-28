@@ -1,38 +1,55 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_26_21:10:00
-# 描述: 本地图片编辑客户端实现, 使用 Qwen/Qwen-Image-Edit-2511 模型, 支持单图与双图联动编辑
+# 日期: 2026_05_28_15:21:54
+# 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
 
 import asyncio
+import base64
+import json
 import os
 import subprocess
+import sys
+import tempfile
+import uuid
+from io import BytesIO
+from pathlib import Path
 from typing import Any
 
 import torch
 from loguru import logger
-
-# Qwen-Image-Edit-2511 约需 ~30GB 显存（bf16），预留 2GB 余量
-_MIN_FREE_GB = 30
+from PIL import Image
 
 
 class LocalImageEditClient:
     """
-    本地图片编辑客户端 (Qwen-Image-Edit-2511)
+    本地图像编辑客户端.
 
-    采用子进程隔离模式执行推理, 确保显存资源在任务结束后能被操作系统自动回收。
-    支持 CUDA 设备锁管理, 允许多卡环境下的任务调度。
+    参数:
+        无.
+    返回:
+        LocalImageEditClient: 单例客户端实例.
+    异常:
+        无.
     """
 
     _instance: LocalImageEditClient | None = None
     _device_locks: dict[int, asyncio.Lock] = {}
     _init_done: bool = False
+    _min_free_gb: float = 30.0
 
     def __new__(cls) -> LocalImageEditClient:
         """
-        单例模式构造函数
+        创建或复用单例实例.
+
+        参数:
+            cls: 当前类对象.
+        返回:
+            LocalImageEditClient: 客户端实例.
+        异常:
+            无.
         """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -40,27 +57,36 @@ class LocalImageEditClient:
 
     def __init__(self) -> None:
         """
-        初始化客户端配置, 从环境变量读取模型路径及默认参数
+        初始化本地模型路径与默认参数.
+
+        参数:
+            无.
+        返回:
+            None: 无返回值.
+        异常:
+            ValueError: 当环境变量值无法转换为整数时抛出.
         """
         if LocalImageEditClient._init_done:
             return
         LocalImageEditClient._init_done = True
-        self._model_path: str = os.getenv(
+        self._model_path = os.getenv(
             "MODELSCOPE_IMAGE_EDIT_MODEL_PATH",
             "/home/qyjgylc_whf/.cache/modelscope/hub/models/Qwen/Qwen-Image-Edit-2511",
         )
-        self._default_steps: int = int(os.getenv("MODELSCOPE_IMAGE_EDIT_STEPS", "40"))
-        self._default_width: int = int(os.getenv("MODELSCOPE_IMAGE_EDIT_WIDTH", "1024"))
-        self._default_height: int = int(os.getenv("MODELSCOPE_IMAGE_EDIT_HEIGHT", "1024"))
+        self._default_steps = int(os.getenv("MODELSCOPE_IMAGE_EDIT_STEPS", "40"))
+        self._default_width = int(os.getenv("MODELSCOPE_IMAGE_EDIT_WIDTH", "1024"))
+        self._default_height = int(os.getenv("MODELSCOPE_IMAGE_EDIT_HEIGHT", "1024"))
 
     def _get_gpu_free_memory(self, device: int) -> float:
         """
-        查询指定 GPU 的空闲显存（GB）
+        查询指定 GPU 的空闲显存.
 
         参数:
-            device (int): GPU 索引编号
-        返回值:
-            float: 空闲显存 GB 数, 失败返回 -1.0
+            device: GPU 索引编号.
+        返回:
+            float: 空闲显存大小, 单位为 GB.
+        异常:
+            无. 失败时返回 -1.0.
         """
         if device < 0:
             return float("inf")
@@ -76,156 +102,229 @@ class LocalImageEditClient:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                check=False,
             )
             if result.returncode == 0:
                 free_mb = float(result.stdout.strip().split(",")[-1].strip())
                 return free_mb / 1024
-        except Exception as e:
-            logger.error(f"查询 GPU {device} 显存失败: {e}")
+        except Exception as error:
+            logger.error(f"查询 GPU {device} 空闲显存失败: {error}")
         return -1.0
 
     def _get_devices_by_free_memory(self) -> list[tuple[int, float]]:
         """
-        获取系统所有可用 GPU 并按空闲显存降序排列
+        按空闲显存倒序获取可用设备列表.
 
-        返回值:
-            list[tuple[int, float]]: 包含 (GPU索引, 空闲显存GB) 的列表
+        参数:
+            无.
+        返回:
+            list[tuple[int, float]]: 设备索引与空闲显存列表.
+        异常:
+            无.
         """
         if not torch.cuda.is_available():
             return [(-1, float("inf"))]
-
         devices: list[tuple[int, float]] = []
-        try:
-            result = subprocess.run(
-                [
-                    "nvidia-smi",
-                    "--query-gpu=index,memory.free",
-                    "--format=csv,noheader,nounits",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            if result.returncode == 0:
-                for line in result.stdout.strip().split("\n"):
-                    parts = line.split(",")
-                    if len(parts) >= 2:
-                        idx = int(parts[0].strip())
-                        free_mb = float(parts[1].strip())
-                        free_gb = free_mb / 1024
-                        devices.append((idx, free_gb))
-                        logger.info(f"GPU {idx}: free={free_gb:.2f}GB")
-            else:
-                logger.warning(f"nvidia-smi failed: {result.stderr}")
-        except Exception as error:
-            logger.warning(f"nvidia-smi 查询失败: {error}")
-
-        if not devices:
-            for i in range(torch.cuda.device_count()):
-                try:
-                    free, total = torch.cuda.mem_get_info(i)
-                    free_gb = free / (1024**3)
-                    devices.append((i, free_gb))
-                    logger.info(f"GPU {i}: free={free_gb:.2f}GB")
-                except Exception:
-                    devices.append((i, 0.0))
-
-        devices.sort(key=lambda x: x[1], reverse=True)
+        for index in range(torch.cuda.device_count()):
+            free_gb = self._get_gpu_free_memory(index)
+            devices.append((index, free_gb))
+            logger.info(f"ImageEdit GPU candidate: device={index}, free_gb={free_gb:.2f}")
+        devices.sort(key=lambda item: item[1], reverse=True)
         return devices
 
     def _ensure_lock(self, device: int) -> asyncio.Lock:
         """
-        确保指定 GPU 的异步并发锁存在
+        为指定设备创建并返回并发锁.
 
         参数:
-            device (int): GPU 索引
-        返回值:
-            asyncio.Lock: 对应的锁对象
+            device: 设备索引, CPU 使用 -1.
+        返回:
+            asyncio.Lock: 对应设备锁.
+        异常:
+            无.
         """
         if device not in LocalImageEditClient._device_locks:
             LocalImageEditClient._device_locks[device] = asyncio.Lock()
         return LocalImageEditClient._device_locks[device]
 
-    def _build_script(
-        self,
-        seed: int | None,
-        height: int | None,
-        width: int | None,
-        steps: int,
-        is_dual: bool = False,
-    ) -> str:
+    def _decode_to_temp_image(self, data: str, suffix: str, temp_dir: Path) -> tuple[Path, tuple[int, int]]:
         """
-        构建用于子进程执行的 Python 推理脚本
+        将 base64 或 data URL 写入临时图片文件.
 
         参数:
-            seed (int | None): 随机种子
-            height (int | None): 目标高度
-            width (int | None): 目标宽度
-            steps (int): 推理步数
-            is_dual (bool): 是否为双图联动编辑模式
-        返回值:
-            str: 完整的 Python 代码字符串
+            data: 前端上传的图片内容.
+            suffix: 输出文件后缀, 例如 ".png".
+            temp_dir: 临时目录路径.
+        返回:
+            tuple[Path, tuple[int, int]]: 临时文件路径与图片原始尺寸.
+        异常:
+            ValueError: 当图片无法解码时抛出.
         """
-        model_path = self._model_path
+        data_body = data.split(",", 1)[1] if data.startswith("data:") else data
+        image_bytes = base64.b64decode(data_body)
+        image = Image.open(BytesIO(image_bytes)).convert("RGB")
+        output_path = temp_dir / f"{uuid.uuid4().hex}{suffix}"
+        image.save(output_path, format="PNG")
+        return output_path, image.size
 
-        if is_dual:
-            script = (
-                "import base64\n"
-                "import io\n"
-                "import json\n"
-                "import sys\n"
-                "import traceback\n"
-                "import numpy as np\n"
-                "import torch\n"
-                "from accelerate.hooks import remove_hook_from_module\n"
-                "\n"
-                "from modelscope import QwenImageEditPlusPipeline\n"
-                "from PIL import Image\n"
-                "\n"
-                "def _main():\n"
-                '    sys.stderr.write("[1/7] 初始化完成 | GPU数量: " + str(torch.cuda.device_count()) + "\\n")\n'
-                "\n"
-                "    pipe = QwenImageEditPlusPipeline.from_pretrained(\n"
-                '        "' + model_path + '",\n'
-                "        torch_dtype=torch.bfloat16,\n"
-                "    )\n"
-                '    sys.stderr.write("[2/7] 模型加载完成\\n")\n'
-                "\n"
-                '    for name in ("transformer", "vae", "text_encoder"):\n'
-                "        obj = getattr(pipe, name, None)\n"
-                "        if obj is not None:\n"
-                "            remove_hook_from_module(obj)\n"
-                "\n"
-                "    pipe.enable_model_cpu_offload()\n"
-                "\n"
-                "    def _pipe_eval():\n"
-                '        for name in ("transformer", "vae", "text_encoder"):\n'
-                "            obj = getattr(pipe, name, None)\n"
-                '            if obj is not None and callable(getattr(obj, "eval", None)):\n'
-                "                obj.eval()\n"
-                "    pipe.eval = _pipe_eval\n"
-                "\n"
-                "    img_path_1 = sys.argv[1]\n"
-                "    img_path_2 = sys.argv[2]\n"
-                "    image1 = Image.open(img_path_1)\n"
-                "    image2 = Image.open(img_path_2)\n"
-                "    image1.load()\n"
-                "    image2.load()\n"
-                '    sys.stderr.write("[3/7] 图片加载完成 | 图1: " + str(image1.size) + " | 图2: " + str(image2.size) + "\\n")\n'
-                "\n"
-                "    generator = None\n"
-                "    _seed = " + repr(seed) + "\n"
-                "    if _seed is not None and _seed >= 0:\n"
-                '        generator = torch.Generator(device="cuda").manual_seed(_seed)\n'
-                "\n"
-                '    _seed_str = str(_seed) if _seed is not None else "随机"\n'
-                '    sys.stderr.write("[4/7] 开始推理 | 步数: ' + str(steps) + ' | seed: " + _seed_str + "\\n")\n'
-                "\n"
+    def _build_script(self, steps: int, seed: int | None) -> str:
+        """
+        构造子进程推理脚本.
+
+        参数:
+            steps: 推理步数.
+            seed: 随机种子.
+        返回:
+            str: 可直接传给 python -c 的脚本文本.
+        异常:
+            无.
+        """
+        return f"""
+import base64
+import io
+import json
+import os
+import sys
+import traceback
+
+import torch
+from diffusers import QwenImageEditPlusPipeline
+from PIL import Image
+
+
+def _load_image(path: str, width: int, height: int) -> Image.Image:
+    image = Image.open(path).convert("RGB")
+    if image.size != (width, height):
+        image = image.resize((width, height), Image.LANCZOS)
+    return image
+
+
+def _main() -> None:
+    device = os.environ.get("TRAI_IMAGE_EDIT_DEVICE", "cpu")
+    model_path = os.environ["TRAI_IMAGE_EDIT_MODEL_PATH"]
+    prompt = os.environ["TRAI_IMAGE_EDIT_PROMPT"]
+    width = int(os.environ["TRAI_IMAGE_EDIT_WIDTH"])
+    height = int(os.environ["TRAI_IMAGE_EDIT_HEIGHT"])
+    sys.stderr.write("[1/7] 初始化编辑管线\\n")
+    dtype = torch.bfloat16 if device.startswith("cuda") else torch.float32
+    pipe = QwenImageEditPlusPipeline.from_pretrained(model_path, torch_dtype=dtype)
+    pipe = pipe.to(device)
+    pipe.set_progress_bar_config(disable=None)
+    sys.stderr.write("[2/7] 模型加载完成\\n")
+    images = [_load_image(path, width, height) for path in sys.argv[1:]]
+    sys.stderr.write("[3/7] 图片加载完成 | count=" + str(len(images)) + " | size=" + str((width, height)) + "\\n")
+    seed_value = {repr(seed)}
+    generator = None
+    if seed_value is not None and seed_value >= 0:
+        generator = torch.Generator(device=device).manual_seed(seed_value)
+    sys.stderr.write("[4/7] 开始推理 | steps={steps} | seed=" + str(seed_value) + "\\n")
+    result = pipe(
+        image=images if len(images) > 1 else images[0],
+        prompt=prompt,
+        negative_prompt=" ",
+        num_inference_steps={steps},
+        true_cfg_scale=4.0,
+        guidance_scale=1.0,
+        num_images_per_prompt=1,
+        generator=generator,
+    )
+    image = result.images[0]
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    sys.stderr.write("[5/7] 推理完成 | result_size=" + str(image.size) + "\\n")
+    sys.stderr.write("[6/7] 结果编码完成\\n")
+    print(json.dumps({{"status": "completed", "image_base64": encoded}}, ensure_ascii=False))
+    sys.stderr.write("[7/7] 子进程结束\\n")
+
+
+if __name__ == "__main__":
+    try:
+        _main()
+    except Exception:
+        traceback.print_exc()
+        sys.exit(1)
+"""
+
+    async def _run_subprocess(
+        self,
+        image_input: str,
+        prompt: str,
+        width: int,
+        height: int,
+        steps: int,
+        seed: int | None,
+        image_input_2: str | None,
+    ) -> dict[str, Any]:
+        """
+        启动子进程执行本地图像编辑推理.
+
+        参数:
+            image_input: 第一张输入图片.
+            prompt: 编辑指令.
+            width: 输出宽度.
+            height: 输出高度.
+            steps: 推理步数.
+            seed: 随机种子.
+            image_input_2: 第二张输入图片, 为空表示单图编辑.
+        返回:
+            dict[str, Any]: 编辑结果字典.
+        异常:
+            RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
+        """
+        devices = self._get_devices_by_free_memory()
+        selected_device, free_gb = devices[0]
+        if selected_device >= 0 and free_gb < self._min_free_gb:
+            raise RuntimeError(
+                f"本地图像编辑模型显存不足, 当前最大空闲显存为 {free_gb:.2f}GB, 至少需要 {self._min_free_gb:.2f}GB"
             )
-            # ... rest of script logic (shortened for brevity here but would be full in reality)
-            # In real task I would replace all and complete it.
-        # ... and so on
-        return ""  # Placeholder for actual full write
+        lock = self._ensure_lock(selected_device)
+        async with lock:
+            with tempfile.TemporaryDirectory(prefix="trai_image_edit_") as temp_dir_str:
+                temp_dir = Path(temp_dir_str)
+                input_paths: list[str] = []
+                first_path, _ = self._decode_to_temp_image(image_input, ".png", temp_dir)
+                input_paths.append(str(first_path))
+                if image_input_2:
+                    second_path, _ = self._decode_to_temp_image(image_input_2, ".png", temp_dir)
+                    input_paths.append(str(second_path))
+                command = [sys.executable, "-c", self._build_script(steps=steps, seed=seed), *input_paths]
+                environment = os.environ.copy()
+                environment["TRAI_IMAGE_EDIT_DEVICE"] = "cpu" if selected_device < 0 else f"cuda:{selected_device}"
+                environment["TRAI_IMAGE_EDIT_MODEL_PATH"] = self._model_path
+                environment["TRAI_IMAGE_EDIT_PROMPT"] = prompt
+                environment["TRAI_IMAGE_EDIT_WIDTH"] = str(width)
+                environment["TRAI_IMAGE_EDIT_HEIGHT"] = str(height)
+                logger.info(
+                    "启动本地图像编辑子进程 | "
+                    f"device={environment['TRAI_IMAGE_EDIT_DEVICE']} | "
+                    f"steps={steps} | width={width} | height={height} | "
+                    f"dual_input={image_input_2 is not None}"
+                )
+                process = await asyncio.create_subprocess_exec(
+                    *command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    env=environment,
+                )
+                stdout_data, stderr_data = await process.communicate()
+                stderr_text = stderr_data.decode("utf-8", errors="ignore")
+                stdout_text = stdout_data.decode("utf-8", errors="ignore").strip()
+                if stderr_text:
+                    for line in stderr_text.splitlines():
+                        if line.strip():
+                            logger.info(f"ImageEdit subprocess: {line.strip()}")
+                if process.returncode != 0:
+                    logger.error(f"本地图像编辑子进程失败 | returncode={process.returncode} | stderr={stderr_text}")
+                    raise RuntimeError("本地图像编辑模型执行失败, 请检查后端日志")
+                lines = [line.strip() for line in stdout_text.splitlines() if line.strip()]
+                if not lines:
+                    raise RuntimeError("本地图像编辑模型未返回结果")
+                try:
+                    return json.loads(lines[-1])
+                except json.JSONDecodeError as error:
+                    logger.error(f"本地图像编辑结果解析失败 | stdout={stdout_text}")
+                    raise RuntimeError(f"本地图像编辑结果解析失败: {error}") from error
 
     async def edit(
         self,
@@ -237,62 +336,42 @@ class LocalImageEditClient:
         seed: int | None = None,
         image_input_2: str | None = None,
     ) -> dict[str, Any]:
-        """执行图片编辑 (单图/双图联动)
-
-        Args:
-            image_input: 原图1
-            prompt: 提示词
-            width: 宽
-            height: 高
-            steps: 步数
-            seed: 种子
-            image_input_2: 原图2 (可选)
-
-        Returns:
-            dict: 包含 base64 结果
         """
-        # 由于显存极大 (30GB+)，这里如果本地没有模型或显存不够，可能需要用云端或者简化处理。
-        # 为了修复 "no attribute 'edit'" 错误，这里提供一个完整的 API，暂时使用同步加载，或者抛出正确的错误。
-        import base64
-        import uuid
-        from io import BytesIO
+        执行单图或双图本地图像编辑.
 
-        from PIL import Image
-
-        # 为了防止进程崩溃，我们在类里实现一个最基础的测试桩或实际调用。
-        # 这里为了能够 "测试", 如果显存不足，我们直接返回一个带有文字的示意图
-        # 如果需要真跑 Qwen，就在子进程里跑。
-
-        # 由于这里主要解决 attribute error, 我们补齐这个方法
-        logger.info(f"LocalImageEditClient.edit called with prompt: {prompt}")
-
-        # 提取图片并转为 PIL
-        def decode_b64(data: str) -> Image.Image:
-            if data.startswith("data:"):
-                data = data.split(",", 1)[1]
-            return Image.open(BytesIO(base64.b64decode(data))).convert("RGB")
-
-        try:
-            img1 = decode_b64(image_input)
-            img_width, img_height = img1.size
-        except Exception:
-            img_width, img_height = 1024, 1024
-
-        # 模拟编辑 (直接返回一张图以通过端到端测试)
-        # 在真实环境中这里应该启动 subprocess 或者加载 pipeline
-        # 因为服务器显存可能被其他占用，这里先直接调用 Z-Image-Turbo 或者返回成功
-        from infrastructure.ai.vision.local_image_client import LocalImageClient
-
-        # 降级使用基础的文生图代替，以确保流程闭环（图片编辑模型太大）
-        client = LocalImageClient()
-        try:
-            res = client._generate_image(prompt, width or img_width, height or img_height, steps or 20, seed)
-            return {
-                "status": "completed",
-                "image_base64": res["image_base64"],
-                "image_url": res.get("image_url", ""),
-                "task_id": str(uuid.uuid4()),
-            }
-        except Exception as e:
-            logger.error(f"Image Edit Fallback Failed: {e}")
-            raise RuntimeError(f"编辑生成失败: {e}")
+        参数:
+            image_input: 第一张输入图片, 支持 data URL 或 base64.
+            prompt: 编辑描述文本.
+            width: 指定输出宽度, 为空时回退到原图宽度或默认值.
+            height: 指定输出高度, 为空时回退到原图高度或默认值.
+            steps: 指定推理步数, 为空时使用默认值.
+            seed: 指定随机种子, 为空时使用随机种子.
+            image_input_2: 第二张输入图片, 用于双图联动编辑.
+        返回:
+            dict[str, Any]: 编辑结果, 包含 status, image_base64 与 task_id.
+        异常:
+            RuntimeError: 当图片解码失败或本地推理失败时抛出.
+        """
+        with tempfile.TemporaryDirectory(prefix="trai_image_probe_") as probe_dir_str:
+            probe_dir = Path(probe_dir_str)
+            _, source_size = self._decode_to_temp_image(image_input, ".png", probe_dir)
+        target_width = width or source_size[0] or self._default_width
+        target_height = height or source_size[1] or self._default_height
+        target_steps = steps or self._default_steps
+        logger.info(
+            "开始本地图像编辑 | "
+            f"prompt={prompt[:80]} | width={target_width} | height={target_height} | "
+            f"steps={target_steps} | dual_input={image_input_2 is not None}"
+        )
+        result = await self._run_subprocess(
+            image_input=image_input,
+            prompt=prompt,
+            width=target_width,
+            height=target_height,
+            steps=target_steps,
+            seed=seed,
+            image_input_2=image_input_2,
+        )
+        result["task_id"] = result.get("task_id") or str(uuid.uuid4())
+        logger.info(f"本地图像编辑完成 | task_id={result['task_id']}")
+        return result

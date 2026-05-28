@@ -3,6 +3,7 @@ import { Loader2, Trash2, Captions, Music, Languages, MonitorPlay, Type } from "
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { cn } from "@/lib/utils";
 import { SubtitleRecordDTO } from "./types";
+import { PANEL_EMPTY_COPY, PANEL_SUBTITLES } from "../panel_consistency";
 
 interface HistorySidebarProps {
   showGallery: boolean;
@@ -51,7 +52,7 @@ export function HistorySidebar({
       <div className="p-4 border-b-2 border-slate-900 dark:border-white bg-cyan-200 dark:bg-slate-200 text-slate-900 flex justify-between items-center">
         <div>
           <h2 className="text-sm font-black uppercase tracking-wider">影音长廊</h2>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">History Rail</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">{PANEL_SUBTITLES.history_track}</p>
         </div>
         <button type="button" onClick={() => fetchHistory()} className="text-xs font-bold uppercase hover:text-slate-600 transition-colors flex items-center gap-1">
           <Loader2 className={cn("w-3 h-3", isLoadingHistory && "animate-spin")} />
@@ -118,7 +119,7 @@ export function HistorySidebar({
             ))
           ) : (
             <div className="text-center text-sm font-bold uppercase opacity-50 py-8">
-              暂无历史记录
+              {PANEL_EMPTY_COPY.waiting_history_title}
             </div>
           )}
         </div>

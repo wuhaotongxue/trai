@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { Image as ImageIcon, Video, Trash2, ExternalLink } from "lucide-react";
+import { PANEL_EMPTY_COPY, PANEL_SUBTITLES } from "./panel_consistency";
 
 type GalleryViewMode = "grid" | "list";
 type MediaItem = { id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean };
@@ -163,12 +164,8 @@ export function MediaGallery({
             <ImageIcon className="h-8 w-8 text-slate-400" />
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {isVideo ? "还没有生成过视频" : "还没有生成过图片"}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {isVideo ? "在视频模式下生成视频" : "在绘图或编辑模式下生成图片"}
-        </p>
+        <p className="text-sm text-muted-foreground">{PANEL_EMPTY_COPY.waiting_history_title}</p>
+        <p className="text-xs text-muted-foreground mt-1">{PANEL_EMPTY_COPY.waiting_history_desc}</p>
       </div>
     );
   }
@@ -178,12 +175,12 @@ export function MediaGallery({
   return (
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1">
-        <div className={`p-2 ${viewMode === "grid" ? "space-y-2" : "space-y-1"}`}>
+        <div className={`p-3 ${viewMode === "grid" ? "space-y-3" : "space-y-2"}`}>
           {/* 当前结果区 */}
           {filteredCurrent.length > 0 && (
             <div className="mb-3">
               <p className={`text-[10px] font-black uppercase tracking-[0.2em] px-1 mb-2 ${isVideo ? 'text-orange-600 dark:text-orange-400' : 'text-cyan-600 dark:text-cyan-400'}`}>
-                当前结果
+                {PANEL_SUBTITLES.current_result}
               </p>
               <div className={viewMode === "grid" ? "grid grid-cols-2 gap-2" : "space-y-1"}>
                 {filteredCurrent.map((item) => (
@@ -206,7 +203,7 @@ export function MediaGallery({
             <div>
               {filteredCurrent.length > 0 && (
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 mb-2">
-                  历史记录 ({filteredHistory.length})
+                  {PANEL_SUBTITLES.history_track} ({filteredHistory.length})
                 </p>
               )}
               {paginatedHistory.map((item) => (

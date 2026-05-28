@@ -4,6 +4,9 @@
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_05_28_1512
+- **优化(agent_detail)**: 新增 `panel_consistency.ts` 统一 `/agent` 面板的空态文案、英文副标题与微动画节奏, 同时收敛主聊天区、下载器、字幕面板、数字人面板和画廊的细节一致性。
+
 ### 🎨 前端_2026_05_28_1505
 - **优化(agent_ui)**: 继续统一 `DigitalHumanPanel`、`GalleryPanel`、`MediaGallery` 与 `MusicGallery` 的标题条、分页、卡片和按钮壳子, `/agent` 剩余子面板与主工作区保持同一视觉语言。
 

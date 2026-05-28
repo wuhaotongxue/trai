@@ -12,6 +12,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
 import { Music, Trash2 } from "lucide-react";
+import { PANEL_EMPTY_COPY, PANEL_SUBTITLES } from "./panel_consistency";
 
 type GalleryViewMode = "grid" | "list";
 type MusicItem = { id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean };
@@ -224,8 +225,8 @@ export function MusicGallery({
         <div className="w-32 h-32 bg-cyan-100 border-4 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] flex items-center justify-center mb-6">
           <Music className="h-16 w-16 text-slate-900" />
         </div>
-        <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">暂无音乐</p>
-        <p className="text-sm font-bold uppercase mt-2 text-slate-500 dark:text-slate-400">在音乐模式下生成您的第一首曲目</p>
+        <p className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{PANEL_EMPTY_COPY.waiting_history_title}</p>
+        <p className="text-sm font-bold uppercase mt-2 text-slate-500 dark:text-slate-400">{PANEL_EMPTY_COPY.waiting_history_desc}</p>
       </div>
     );
   }
@@ -233,12 +234,12 @@ export function MusicGallery({
   return (
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-2">
+        <div className="p-3 space-y-3">
           {/* 当前结果区 */}
           {currentMusic.length > 0 && (
             <div className="mb-3">
               <p className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-[0.2em] px-1 mb-2">
-                当前结果
+                {PANEL_SUBTITLES.current_result}
               </p>
               <div className="space-y-2">
                 {currentMusic.map((item) => (
@@ -253,7 +254,7 @@ export function MusicGallery({
             <div>
               {currentMusic.length > 0 && (
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 mb-2">
-                  历史记录 ({historyMusic.length})
+                  {PANEL_SUBTITLES.history_track} ({historyMusic.length})
                 </p>
               )}
               <div className="space-y-2">

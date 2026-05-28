@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BurnMode, SubtitleGenerateResponse, SubtitleRecordDTO, TARGET_LANG_OPTIONS } from "./subtitle/types";
 import { HistorySidebar } from "./subtitle/history_sidebar";
+import { PANEL_EMPTY_COPY, PANEL_MOTION_TOKENS, PANEL_SUBTITLES } from "./panel_consistency";
 
 export function SubtitlePanel() {
   const [taskType, setTaskType] = useState<"subtitle" | "separate" | "clone" | "lipsync" | "to_audio">("subtitle");
@@ -274,7 +275,7 @@ export function SubtitlePanel() {
         <div className="w-[280px] h-full flex flex-col border-r-2 border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-900">
           <div className="p-4 bg-cyan-200 dark:bg-slate-200 border-b-2 border-slate-900 dark:border-white text-slate-900">
             <h2 className="text-sm font-black uppercase tracking-wider">1. 选择工具类型</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">Tool Rail</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">{PANEL_SUBTITLES.tool_rail}</p>
           </div>
           <ScrollArea className="flex-1 min-h-0">
             <div className="p-3 space-y-2">
@@ -315,7 +316,7 @@ export function SubtitlePanel() {
         <div className="flex-1 h-full flex flex-col bg-white dark:bg-slate-800">
           <div className="p-4 bg-cyan-200 dark:bg-slate-200 border-b-2 border-slate-900 dark:border-white text-slate-900">
             <h2 className="text-sm font-black uppercase tracking-wider">2. 配置与上传</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">Config Rail</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 opacity-70">{PANEL_SUBTITLES.config_rail}</p>
           </div>
           <ScrollArea className="flex-1 min-h-0">
             <div className="p-4 space-y-6">
@@ -556,7 +557,7 @@ export function SubtitlePanel() {
         </div>
         
         <ScrollArea className="flex-1 w-full h-full">
-          <div className="flex flex-col min-h-full p-6 pt-16">
+          <div className="flex flex-col min-h-full p-5 pt-16">
             {activeRecord ? (
               <div className={`m-auto w-full max-w-3xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col ${brutalBorder} ${brutalShadow}`}>
                 {/* 视频/状态预览区 */}
@@ -573,7 +574,7 @@ export function SubtitlePanel() {
                       <div className="flex flex-col items-center gap-4">
                         <motion.div 
                           animate={{ rotate: 360, scale: [1, 1.2, 1] }} 
-                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                          transition={{ repeat: Infinity, duration: PANEL_MOTION_TOKENS.pulse_duration, ease: "easeInOut" }}
                           className={`w-20 h-20 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center`}
                         >
                           <Loader2 className="h-10 w-10 text-slate-900 animate-spin" />
@@ -584,7 +585,7 @@ export function SubtitlePanel() {
                             <motion.div
                               className="h-full bg-cyan-500"
                               animate={{ x: ["-20%", "100%"] }}
-                              transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+                              transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
                               style={{ width: "30%" }}
                             />
                           </div>
@@ -704,14 +705,14 @@ export function SubtitlePanel() {
                 <motion.div 
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
-                  transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+                  transition={{ duration: PANEL_MOTION_TOKENS.float_duration, repeat: Infinity, repeatType: "reverse" }}
                   className="flex flex-col items-center justify-center gap-6"
                 >
                 <div className="w-32 h-32 bg-cyan-400 border-4 border-slate-900 shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center">
                   <Captions className="h-16 w-16 text-slate-900" />
                 </div>
-                <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">等待任务执行</span>
-                <span className="text-sm font-bold bg-white dark:bg-slate-800 px-6 py-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">在左侧上传文件并提交</span>
+                <span className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white mt-4">{PANEL_EMPTY_COPY.waiting_task_title}</span>
+                <span className="text-sm font-bold bg-white dark:bg-slate-800 px-6 py-2 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff]">{PANEL_EMPTY_COPY.waiting_task_desc}</span>
               </motion.div>
             </div>
           )}

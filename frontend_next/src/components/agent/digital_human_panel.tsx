@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll_area";
 import { Input } from "@/components/ui/input";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { request } from "@/lib/api_client";
+import { PANEL_EMPTY_COPY, PANEL_SUBTITLES } from "./panel_consistency";
 
 interface ChatMessage {
   id: string;
@@ -95,7 +96,7 @@ export function DigitalHumanPanel() {
         <div className="p-4 bg-cyan-200 dark:bg-slate-200 text-slate-900 border-b-[3px] border-slate-900 flex items-center justify-between gap-4">
           <div>
             <h2 className="text-sm font-black uppercase tracking-[0.2em]">Digital Human Stage</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] mt-1 opacity-70">Realtime Avatar</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] mt-1 opacity-70">{PANEL_SUBTITLES.result_stage}</p>
           </div>
           <div className={`px-3 py-2 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-xs font-black uppercase tracking-widest`}>
             视频舞台
@@ -116,8 +117,8 @@ export function DigitalHumanPanel() {
             <div className={`w-32 h-32 bg-cyan-200 dark:bg-cyan-900 ${brutalBorder} ${brutalShadowSm} flex items-center justify-center mb-6`}>
               <Bot className="w-16 h-16 text-slate-900" />
             </div>
-            <p className="font-black uppercase tracking-widest text-2xl">等待数字人接入</p>
-            <p className="font-bold text-sm mt-2">请在右侧发起对话</p>
+            <p className="font-black uppercase tracking-widest text-2xl">{PANEL_EMPTY_COPY.waiting_input_title}</p>
+            <p className="font-bold text-sm mt-2">{PANEL_EMPTY_COPY.waiting_input_desc}</p>
           </div>
         )}
         
@@ -143,18 +144,19 @@ export function DigitalHumanPanel() {
           数字人对话
           </div>
           <span className={`px-3 py-2 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-xs`}>
-            Chat Rail
+            {PANEL_SUBTITLES.chat_rail}
           </span>
         </div>
         
-        <ScrollArea className="flex-1 p-6" ref={scrollRef}>
-          <div className="space-y-6">
+        <ScrollArea className="flex-1 p-5" ref={scrollRef}>
+          <div className="space-y-5">
             {messages.length === 0 && (
               <div className="text-center mt-12 opacity-50 text-slate-900 dark:text-white">
                 <div className={`w-24 h-24 bg-cyan-100 dark:bg-cyan-900 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadowSm} mx-auto mb-4`}>
                   <Bot className="w-10 h-10" />
                 </div>
-                <div className="font-black uppercase text-xl tracking-widest">暂无对话记录</div>
+                <div className="font-black uppercase text-xl tracking-widest">{PANEL_EMPTY_COPY.waiting_history_title}</div>
+                <div className="text-xs font-bold uppercase tracking-[0.18em] mt-2">{PANEL_EMPTY_COPY.waiting_history_desc}</div>
               </div>
             )}
             {messages.map(msg => (

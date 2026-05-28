@@ -36,6 +36,7 @@ import { SubtitlePanel } from "./subtitle_panel";
 import { DigitalHumanPanel } from "./digital_human_panel";
 import { VideoDownloaderPanel } from "./video_downloader_panel";
 import { cn } from "@/lib/utils";
+import { PANEL_EMPTY_COPY, PANEL_MOTION_TOKENS, PANEL_SUBTITLES } from "./panel_consistency";
 
 type TabId = "chat" | "image" | "video" | "music" | "audio" | "image_edit" | "subtitle" | "digital_human" | "downloader";
 type GalleryType = "image" | "video" | "music";
@@ -622,7 +623,7 @@ export function ChatPanel() {
                                       <motion.div
                                         className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent"
                                         animate={{ x: ["-100%", "100%"] }}
-                                        transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                                        transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
                                       />
                                       <motion.div
                                         className="absolute inset-[12%] border-4 border-dashed border-cyan-500/80"
@@ -661,8 +662,8 @@ export function ChatPanel() {
                                     <div className={`w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                       <ImageIcon className="h-16 w-16 text-slate-900 dark:text-white" />
                                     </div>
-                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                    <p className="font-bold text-sm">在左侧输入你的创意描述</p>
+                                    <div className="font-black uppercase text-2xl tracking-widest">{PANEL_EMPTY_COPY.waiting_input_title}</div>
+                                    <p className="font-bold text-sm">{PANEL_EMPTY_COPY.waiting_input_desc}</p>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
@@ -876,7 +877,7 @@ export function ChatPanel() {
                                         <div>耗时: {videoGenerateElapsedSeconds ? `${videoGenerateElapsedSeconds}s` : "进行中"}</div>
                                       </div>
                                       <div className="text-sm font-bold break-words">
-                                        {videoGenerateProgress || "正在等待后端返回当前进度..."}
+                                        {videoGenerateProgress || PANEL_SUBTITLES.processing_feedback}
                                       </div>
                                     </div>
                                   </motion.div>
@@ -885,8 +886,8 @@ export function ChatPanel() {
                                     <div className={`w-32 h-32 bg-orange-200 dark:bg-orange-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                       <Video className="h-16 w-16 text-slate-900 dark:text-white" />
                                     </div>
-                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                    <p className="font-bold text-sm">在左侧输入你的视频分镜描述</p>
+                                    <div className="font-black uppercase text-2xl tracking-widest">{PANEL_EMPTY_COPY.waiting_input_title}</div>
+                                    <p className="font-bold text-sm">{PANEL_EMPTY_COPY.waiting_input_desc}</p>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
@@ -1137,7 +1138,7 @@ export function ChatPanel() {
                                             key={`music-bar-${index}`}
                                             className="w-4 bg-cyan-500 border-2 border-slate-900 dark:border-white"
                                             animate={{ height: [20 + (index % 3) * 8, 88 - (index % 4) * 10, 28 + (index % 5) * 6] }}
-                                            transition={{ duration: 1.1 + index * 0.08, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+                                            transition={{ duration: PANEL_MOTION_TOKENS.pulse_duration + index * 0.04, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
                                           />
                                         ))}
                                       </div>
@@ -1146,7 +1147,7 @@ export function ChatPanel() {
                                         <div>任务感知: 已开启</div>
                                       </div>
                                       <div className="text-sm font-bold break-words">
-                                        {musicGenerateProgress || "正在等待后端返回编曲阶段..."}
+                                        {musicGenerateProgress || PANEL_SUBTITLES.processing_feedback}
                                       </div>
                                     </div>
                                   </motion.div>
@@ -1155,8 +1156,8 @@ export function ChatPanel() {
                                     <div className={`w-32 h-32 bg-cyan-200 dark:bg-cyan-900 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                       <Music className="h-16 w-16 text-slate-900 dark:text-white" />
                                     </div>
-                                    <div className="font-black uppercase text-2xl tracking-widest">等待指令输入</div>
-                                    <p className="font-bold text-sm">在左侧输入你的音乐灵感</p>
+                                    <div className="font-black uppercase text-2xl tracking-widest">{PANEL_EMPTY_COPY.waiting_input_title}</div>
+                                    <p className="font-bold text-sm">{PANEL_EMPTY_COPY.waiting_input_desc}</p>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
@@ -1293,7 +1294,7 @@ export function ChatPanel() {
                         <div className={`bg-rose-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">图像编辑</h2>
-                            <div className="text-sm font-bold mt-1">上传原图与遮罩，通过文字指令重新绘制图像。</div>
+                            <div className="text-sm font-bold mt-1">上传原图或双图参考, 使用本地图像编辑模型按指令完成修改。</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
@@ -1314,7 +1315,7 @@ export function ChatPanel() {
                                 )}
                               </div>
                               <div className={`p-4 bg-white dark:bg-slate-800 flex flex-col items-center justify-center gap-4 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a]`}>
-                                <div className="font-bold uppercase text-sm">参考图/遮罩 (OPTIONAL)</div>
+                                <div className="font-bold uppercase text-sm">第二张参考图 (OPTIONAL)</div>
                                 {editingImagePreview2 ? (
                                   <div className="relative w-full aspect-square">
                                     <img src={editingImagePreview2} className={`w-full h-full object-cover ${brutalBorder}`} alt="Ref" />
@@ -1355,16 +1356,24 @@ export function ChatPanel() {
                                 {isEditingImage ? (
                                   <><Loader2 className="h-6 w-6 animate-spin" /> 正在处理</>
                                 ) : (
-                                  <><Pencil className="h-6 w-6" /> 开始重绘</>
+                                  <><Pencil className="h-6 w-6" /> 开始编辑</>
                                 )}
                               </button>
                               <button
                                 type="button"
-                                onClick={cancelEditImage}
-                                disabled={!isEditingImage}
+                                onClick={() => {
+                                  if (isEditingImage) {
+                                    cancelEditImage();
+                                    return;
+                                  }
+                                  setEditingImagePreview(null);
+                                  setEditingImagePreview2(null);
+                                  setEditPrompt("");
+                                  clearEditedImage();
+                                }}
                                 className={`px-6 bg-white dark:bg-slate-800 text-slate-900 dark:text-white disabled:opacity-50 ${brutalBtnBase}`}
                               >
-                                取消
+                                {isEditingImage ? "取消任务" : "重置"}
                               </button>
                             </div>
 
@@ -1394,15 +1403,15 @@ export function ChatPanel() {
                             ) : isEditingImage ? (
                               <motion.div key="edit-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
                                 <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 图像处理中...</div>
+                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 图像编辑处理中...</div>
                               </motion.div>
                             ) : (
                               <motion.div key="edit-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">
                                 <div className={`w-32 h-32 bg-rose-200 dark:bg-rose-800 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
                                   <Pencil className="h-16 w-16 text-slate-900 dark:text-white" />
                                 </div>
-                                <div className="font-black uppercase text-2xl tracking-widest">等待上传与指令</div>
-                                <p className="font-bold text-sm">上传图片后在左侧输入修改指令</p>
+                                <div className="font-black uppercase text-2xl tracking-widest">{PANEL_EMPTY_COPY.waiting_input_title}</div>
+                                <p className="font-bold text-sm">{PANEL_EMPTY_COPY.waiting_input_desc}</p>
                               </motion.div>
                             )}
                           </AnimatePresence>

@@ -41,6 +41,10 @@ python run.py
 - **目录结构重构**: 按领域（Domain）对后端代码进行了重组织，建立了 `api/routers/system`、`api/routers/tools` 等规范化文件夹。
 - **命名规范统一**: 全面清理了不符合 snake_case 的变量和文件名，系统架构更加清晰。
 
+### 🛠️ 后端_2026_05_28_1525
+- **修正(image_edit)**: `LocalImageEditClient` 不再错误降级到文生图模型, 现在改为真正走 `Qwen-Image-Edit-2511` 本地图像编辑推理链路.
+- **修正(image_edit_ui)**: `/agent` 图像编辑区按钮语义更明确, 空闲态支持一键重置, 运行态支持明确取消任务.
+
 ### 🛠️ 后端_2026_05_26_1728
 - **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕
 - **修复(subtitle)**: 修复 delete_subtitle 接口中 object_prefix 未定义的问题
