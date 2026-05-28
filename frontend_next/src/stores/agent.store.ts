@@ -186,8 +186,30 @@ interface AgentState {
   editedImageUrl: string | null;
   /** 图片编辑错误信息 */
   imageEditError: string | null;
+  /** 当前编辑的原图 base64 (预览) */
+  editingImagePreview: string | null;
+  /** 当前编辑的参考图 base64 (预览) */
+  editingImagePreview2: string | null;
+  /** 当前编辑的提示词 */
+  editPrompt: string;
   /** 当前编辑的原图 base64 */
   editingSourceImage: string | null;
+  /** 当前编辑的参考图 base64 */
+  editingSourceImage2: string | null;
+  /** 图像编辑指令 */
+  imageEditPrompt: string;
+  /** 字幕生成任务类型 */
+  subtitleTaskType: "subtitle" | "separate" | "clone" | "lipsync" | "to_audio";
+  /** 字幕生成目标语言 */
+  subtitleTargetLang: string;
+  /** 字幕生成源语言 */
+  subtitleSourceLang: string;
+  /** 是否包含中文字幕 */
+  subtitleIncludeZh: boolean;
+  /** 是否包含目标语言字幕 */
+  subtitleIncludeTarget: boolean;
+  /** 字幕烧录模式 */
+  subtitleBurnMode: "none" | "zh" | "target" | "bilingual";
   /** 图片编辑 AbortController */
   editAbortController: AbortController | null;
   /** 图片编辑进度(0-100) */
@@ -226,6 +248,15 @@ interface AgentState {
   /** 编辑图片（单图/双图联动） */
   editImage: (sourceImage: string, editPrompt: string, sourceImage2?: string | null) => Promise<void>;
   /** 清除编辑结果 */
+  setImageEditProgressMessage: (msg: string | null) => void;
+  setEditingSourceImage: (url: string | null, isSecond?: boolean) => void;
+  setImageEditPrompt: (prompt: string) => void;
+  setSubtitleTaskType: (type: "subtitle" | "separate" | "clone" | "lipsync" | "to_audio") => void;
+  setSubtitleTargetLang: (lang: string) => void;
+  setSubtitleSourceLang: (lang: string) => void;
+  setSubtitleIncludeZh: (include: boolean) => void;
+  setSubtitleIncludeTarget: (include: boolean) => void;
+  setSubtitleBurnMode: (mode: "none" | "zh" | "target" | "bilingual") => void;
   clearEditedImage: () => void;
   /** 取消图片编辑 */
   cancelEditImage: () => void;
@@ -349,11 +380,18 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   generatedMusicUrl: null,
   musicGenerateError: null,
   musicGallery: [],
-
   isEditingImage: false,
   editedImageUrl: null,
   imageEditError: null,
   editingSourceImage: null,
+  editingSourceImage2: null,
+  imageEditPrompt: "",
+  subtitleTaskType: "subtitle",
+  subtitleTargetLang: "en",
+  subtitleSourceLang: "",
+  subtitleIncludeZh: true,
+  subtitleIncludeTarget: true,
+  subtitleBurnMode: "bilingual",
   editAbortController: null,
   imageEditProgress: 0,
   imageEditStage: "idle",
@@ -1068,6 +1106,18 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
   },
 
+  setImageEditProgressMessage: (msg: string | null) => set({ imageEditProgressMessage: msg }),
+  setEditingSourceImage: (url: string | null, isSecond = false) => {
+    if (isSecond) set({ editingSourceImage2: url });
+    else set({ editingSourceImage: url });
+  },
+  setImageEditPrompt: (prompt: string) => set({ imageEditPrompt: prompt }),
+  setSubtitleTaskType: (type: "subtitle" | "separate" | "clone" | "lipsync" | "to_audio") => set({ subtitleTaskType: type }),
+  setSubtitleTargetLang: (lang: string) => set({ subtitleTargetLang: lang }),
+  setSubtitleSourceLang: (lang: string) => set({ subtitleSourceLang: lang }),
+  setSubtitleIncludeZh: (include: boolean) => set({ subtitleIncludeZh: include }),
+  setSubtitleIncludeTarget: (include: boolean) => set({ subtitleIncludeTarget: include }),
+  setSubtitleBurnMode: (mode: "none" | "zh" | "target" | "bilingual") => set({ subtitleBurnMode: mode }),
   clearEditedImage: () => {
     const current = get().editedImageUrl;
     if (current && current.startsWith("blob:")) {
@@ -1090,6 +1140,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       imageEditProgress: 0,
       imageEditStage: "idle",
       imageEditTimer: null,
+      imageEditProgressMessage: null,
     });
   },
 

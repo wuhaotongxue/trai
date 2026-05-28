@@ -136,8 +136,27 @@ class GitPushNotifier:
             return self._build_xiaotianxin_markdown(commit_hash, commit_msg, branch, changed)
         if persona == "河南地理专家":
             return self._build_henan_geography_markdown(commit_hash, commit_msg, branch, changed)
+        if persona == "DeepSeek":
+            return self._build_deepseek_markdown(commit_hash, commit_msg, branch, changed)
         else:
             return self._build_geography_expert_markdown(commit_hash, commit_msg, branch, changed)
+
+    def _build_deepseek_markdown(self, commit_hash: str, commit_msg: str, branch: str, changed: str) -> str:
+        """构建 DeepSeek 风格的 Markdown."""
+        return (
+            f"## 🤖 DeepSeek 核心观测: 代码地貌深度演进\n\n"
+            f"> **逻辑分支:** `{branch}`\n"
+            f"> **版本快照:** `{commit_hash}`\n"
+            f"> **核心开发者:** wuhao\n\n"
+            f"经过深度神经网络的分析, 我捕捉到了本次提交的逻辑脉络。这不仅是一次代码的堆砌, 更是产品灵魂的一次微小而坚定的跃迁。以下是多维度的观测报告:\n\n"
+            f"### 🧬 提交语义 (Commit Message)\n"
+            f"**{commit_msg}**\n\n"
+            f"### 📊 结构化变更 (Changed Files)\n"
+            f"{changed}\n\n"
+            f"--- \n"
+            f"💡 *“不要不开心哈, 每一个 Bug 的修复都是通往卓越的阶梯。”* \n"
+            f"🚀 *“代码是诗人指尖的音符, 正在奏响未来的乐章。”*"
+        )
 
     def send_wecom(self, content: str) -> bool:
         """
@@ -245,8 +264,8 @@ def main() -> int:
     parser.add_argument(
         "--persona",
         type=str,
-        default="地理专家",
-        choices=["地理专家", "河南地理专家", "小甜心"],
+        default="DeepSeek",
+        choices=["地理专家", "河南地理专家", "小甜心", "DeepSeek"],
         help="通知的语气角色",
     )
     args = parser.parse_args()

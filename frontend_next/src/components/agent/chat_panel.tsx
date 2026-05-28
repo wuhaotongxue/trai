@@ -73,16 +73,12 @@ export function ChatPanel() {
     batchDeleteMediaHistoryItems,
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError, imageEditProgress, imageEditStage,
     imageEditProgressMessage,
+    editingSourceImage, editingSourceImage2, imageEditPrompt, setEditingSourceImage, setImageEditPrompt,
   } = useAgentStore();
 
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍');
   const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海');
   const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐');
-  const [editPrompt, setEditPrompt] = useState('将背景替换为城市夜景');
-  
-  // 新增：支持两张图片上传 (原图 + 参考图/遮罩)
-  const [editingImagePreview, setEditingImagePreview] = useState<string | null>(null);
-  const [editingImagePreview2, setEditingImagePreview2] = useState<string | null>(null);
 
   // 画廊折叠状态
   const [galleryExpanded, setGalleryExpanded] = useState<Record<string, boolean>>({
@@ -296,8 +292,7 @@ export function ChatPanel() {
     if (!file) return;
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      if (isSecond) setEditingImagePreview2(null);
-      else setEditingImagePreview(null);
+      setEditingSourceImage(null, isSecond);
       return;
     }
     try {
@@ -307,17 +302,15 @@ export function ChatPanel() {
         reader.onerror = () => reject(new Error("read failed"));
         reader.readAsDataURL(file);
       });
-      if (isSecond) setEditingImagePreview2(dataUrl);
-      else setEditingImagePreview(dataUrl);
+      setEditingSourceImage(dataUrl, isSecond);
     } catch {
-      if (isSecond) setEditingImagePreview2(null);
-      else setEditingImagePreview(null);
+      setEditingSourceImage(null, isSecond);
     }
   };
 
   const handleStartEditImage = async () => {
-    if (!editingImagePreview || !editPrompt.trim()) return;
-    await editImage(editingImagePreview, editPrompt.trim(), editingImagePreview2 || undefined);
+    if (!editingSourceImage || !imageEditPrompt.trim()) return;
+    await editImage(editingSourceImage, imageEditPrompt.trim(), editingSourceImage2 || undefined);
   };
 
   const handleSend = async () => {
