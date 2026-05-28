@@ -35,6 +35,12 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1730
+- **重构**: 将图片编辑接口 `/ai/image/edit` 改为异步模式, 引入 `ImageTaskStore` 维护实时任务状态. 
+- **增强**: 实现图片编辑任务状态查询接口 `/ai/image/status/{task_id}`, 支持前端轮询真实进度. 
+- **优化**: 改进 `LocalImageEditClient` 子进程日志读取, 实现 `stderr` 实时流式输出, 解决终端日志卡顿问题. 
+- **功能**: 子进程推理脚本现在支持通过 `progress_callback` 回传模型加载与推理的阶段性进度. 
+
 ### 🛠️ 后端_2026_05_28_1705
 - **优化**: local_image_edit_client 引入全局 `Semaphore(1)` 强制任务排队, 彻底防止多任务并发导致的 CUDA OOM. 
 - **增强**: 优化 GPU 自动切换逻辑, 优先选择显存充足 (>20GB) 的卡, 若无则选显存空闲最高的卡. 

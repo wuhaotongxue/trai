@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
@@ -34,6 +35,38 @@ from infrastructure.repositories.image_record_repository import ImageRecordRepos
 from infrastructure.services.agent_audit_log_service import AgentAuditLogService
 
 router = APIRouter()
+
+
+class ImageTaskStore:
+    """
+    图片编辑任务状态仓库类, 在内存中维护任务进度.
+    """
+
+    _tasks: dict[str, dict[str, Any]] = {}
+
+    @classmethod
+    def create_task(cls, task_id: str, prompt: str, user_id: str, username: str) -> None:
+        cls._tasks[task_id] = {
+            "task_id": task_id,
+            "status": "pending",
+            "progress": 0,
+            "stage": "initializing",
+            "progress_message": "任务已提交, 等待处理",
+            "prompt": prompt,
+            "user_id": user_id,
+            "username": username,
+            "created_at": datetime.now(),
+        }
+
+    @classmethod
+    def update_task(cls, task_id: str, **kwargs) -> None:
+        if task_id in cls._tasks:
+            cls._tasks[task_id].update(kwargs)
+            cls._tasks[task_id]["updated_at"] = datetime.now()
+
+    @classmethod
+    def get_task(cls, task_id: str) -> dict[str, Any] | None:
+        return cls._tasks.get(task_id)
 
 
 def _get_client_ip(request: Request) -> str:
@@ -288,6 +321,146 @@ class ImageEditRequest(BaseModel):
     height: Annotated[int | None, Field(default=None, ge=256, le=2048, description="输出高度")] = None
     steps: Annotated[int, Field(default=25, ge=1, le=100, description="采样步数")] = 25
     seed: Annotated[int, Field(default=-1, ge=-1, description="随机种子,-1 表示随机")] = -1
+
+
+@router.get("/image/status/{task_id}", tags=["AI"], summary="查询图片任务状态")
+async def get_image_status(task_id: str) -> dict[str, Any]:
+    """查询 AI 图片任务的实时进度和状态"""
+    task = ImageTaskStore.get_task(task_id)
+    if task:
+        return {
+            "code": 200,
+            "msg": "OK",
+            "data": task,
+        }
+
+    # 如果内存中没有, 尝试从数据库读取最终结果
+    try:
+        with get_session() as db:
+            repo = ImageRecordRepository(db)
+            record = repo.get_by_id(task_id)
+            if record:
+                return {
+                    "code": 200,
+                    "msg": "OK",
+                    "data": {
+                        "task_id": task_id,
+                        "status": record.status.value,
+                        "image_url": record.result_url,
+                        "image_base64": record.result_base64,
+                        "error": record.error_message,
+                    },
+                }
+    except Exception:
+        pass
+
+    raise HTTPException(status_code=404, detail="任务不存在")
+
+
+async def _execute_image_edit_task(
+    task_id: str,
+    image_url: str,
+    image_url_2: str | None,
+    prompt: str,
+    width: int | None,
+    height: int | None,
+    steps: int,
+    seed: int,
+    user_id: str,
+    username: str,
+    tenant_id: str,
+    client_ip: str,
+    user_agent: str,
+    is_guest: bool,
+    source_image_url: str,
+    source_image_url_2: str,
+    source_image_object_key: str,
+    source_image_object_key_2: str,
+    record_type: ImageRecordType,
+    actual_width: int,
+    actual_height: int,
+) -> None:
+    """后台执行图片编辑任务"""
+    from domain.media.entities import ImageRecordStatus
+
+    try:
+        ImageTaskStore.update_task(task_id, status="processing", stage="initializing", progress=10)
+
+        async def progress_callback(msg: str, curr: int, total: int) -> None:
+            progress = int((curr / total) * 100)
+            ImageTaskStore.update_task(
+                task_id,
+                stage="processing",
+                progress=progress,
+                progress_message=msg,
+            )
+
+        client = ModelScopeClient()
+        result = await client.image_edit(
+            image_input=image_url,
+            prompt=prompt,
+            width=width,
+            height=height,
+            steps=steps,
+            seed=seed if seed >= 0 else None,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            image_input_2=image_url_2,
+            progress_callback=progress_callback,
+        )
+
+        result_url = result.get("image_url", "")
+        result_base64 = result.get("image_base64", "")
+
+        with get_session() as db:
+            image_record_repo = ImageRecordRepository(db)
+            image_record_repo.update_status(
+                task_id=task_id,
+                status=ImageRecordStatus.COMPLETED,
+                result_url=result_url,
+                result_base64=result_base64,
+            )
+            db.commit()
+
+        ImageTaskStore.update_task(
+            task_id,
+            status="completed",
+            progress=100,
+            stage="done",
+            image_url=result_url,
+            image_base64=result_base64,
+        )
+
+        if result.get("status") == "completed" and result_url:
+            _send_image_edited_notify(
+                user_id,
+                username,
+                prompt,
+                source_image_url,
+                source_image_url_2,
+                result_url,
+                "Qwen/Qwen-Image-Edit-2511",
+                task_id,
+                actual_width,
+                actual_height,
+                steps,
+                seed,
+            )
+
+    except Exception as e:
+        logger.error(f"图片编辑后台任务失败 | task_id={task_id} | error={e}")
+        ImageTaskStore.update_task(task_id, status="failed", error=str(e), stage="failed")
+        try:
+            with get_session() as db:
+                repo = ImageRecordRepository(db)
+                repo.update_status(
+                    task_id=task_id,
+                    status=ImageRecordStatus.FAILED,
+                    error_message=str(e),
+                )
+                db.commit()
+        except Exception:
+            pass
 
 
 @router.post("/image", response_model=None, tags=["AI"])
@@ -704,70 +877,40 @@ async def edit_image(
             )
             db.commit()
 
-        client = ModelScopeClient()
-        result = await client.image_edit(
-            image_input=request.image_url,
+        # 创建内存任务状态
+        ImageTaskStore.create_task(task_id, request.prompt, user_id, username)
+
+        # 启动后台任务
+        background_tasks.add_task(
+            _execute_image_edit_task,
+            task_id=task_id,
+            image_url=request.image_url,
+            image_url_2=request.image_url_2,
             prompt=request.prompt,
             width=request.width,
             height=request.height,
             steps=request.steps,
-            seed=request.seed if request.seed >= 0 else None,
+            seed=request.seed,
             user_id=user_id,
+            username=username,
             tenant_id=tenant_id,
-            image_input_2=request.image_url_2,
+            client_ip=client_ip,
+            user_agent=user_agent,
+            is_guest=is_guest,
+            source_image_url=source_image_url,
+            source_image_url_2=source_image_url_2,
+            source_image_object_key=source_object_key,
+            source_image_object_key_2=source_object_key_2,
+            record_type=record_type,
+            actual_width=actual_width,
+            actual_height=actual_height,
         )
-
-        result_url = result.get("image_url", "")
-        result_base64 = result.get("image_base64", "")
-
-        with get_session() as db:
-            image_record_repo = ImageRecordRepository(db)
-            image_record_repo.update_status(
-                task_id=task_id,
-                status=ImageRecordStatus.COMPLETED,
-                result_url=result_url,
-                result_base64=result_base64,
-            )
-            db.commit()
-
-        if result.get("status") == "completed" and result_url:
-            if background_tasks is not None:
-                background_tasks.add_task(
-                    _send_image_edited_notify,
-                    user_id,
-                    username,
-                    request.prompt,
-                    source_image_url,
-                    source_image_url_2,
-                    result_url,
-                    request.model,
-                    task_id,
-                    actual_width,
-                    actual_height,
-                    request.steps,
-                    request.seed,
-                )
-            else:
-                _send_image_edited_notify(
-                    user_id,
-                    username,
-                    request.prompt,
-                    source_image_url,
-                    source_image_url_2,
-                    result_url,
-                    request.model,
-                    task_id,
-                    actual_width,
-                    actual_height,
-                    request.steps,
-                    request.seed,
-                )
 
         return ImageGenerationResponse(
             task_id=task_id,
-            status=result.get("status", "completed"),
-            image_url=result_url,
-            image_base64=result_base64,
+            status="pending",
+            image_url=None,
+            image_base64=None,
             error=None,
         )
 

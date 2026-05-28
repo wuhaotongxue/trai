@@ -533,6 +533,23 @@ export const agentApi = {
   editImage: (data: { image_url: string; prompt: string; mask?: string; width?: number; height?: number; steps?: number; seed?: number; signal?: AbortSignal; image_url_2?: string }) =>
     request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image/edit", { method: "POST", body: JSON.stringify(data), signal: data.signal }),
 
+  /** 查询图片生成/编辑状态 */
+  getImageStatus: (taskId: string) =>
+    request<{
+      code: number;
+      msg: string;
+      data: {
+        task_id: string;
+        status: string;
+        progress?: number;
+        stage?: string;
+        progress_message?: string;
+        image_url?: string;
+        image_base64?: string;
+        error?: string;
+      };
+    }>(`/ai/image/status/${taskId}`, { method: "GET" }),
+
   /** 文生视频 (Wan2.1-T2V-1.3B) */
   generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string }) =>
     request<VideoGenerationTaskStatus>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),

@@ -72,6 +72,7 @@ export function ChatPanel() {
     isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery, removeFromMusicGallery, clearMusicGallery,
     batchDeleteMediaHistoryItems,
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError, imageEditProgress, imageEditStage,
+    imageEditProgressMessage,
   } = useAgentStore();
 
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍');
@@ -232,12 +233,13 @@ export function ChatPanel() {
     ? Math.min(100, Math.round((videoGenerateCurrentStep / videoGenerateTotalSteps) * 100))
     : 0;
   const imageEditProgressPercent = Math.max(0, Math.min(100, imageEditProgress));
-  const imageEditProgressCopy =
+  const imageEditProgressCopy = imageEditProgressMessage || (
     imageEditProgressPercent < 35
       ? "正在分析原图结构和修改区域..."
       : imageEditProgressPercent < 72
         ? "正在重绘细节并融合编辑指令..."
-        : "正在整理最终画面并准备输出...";
+        : "正在整理最终画面并准备输出..."
+  );
 
   const handleCopyImageLink = async (url: string) => {
     try {

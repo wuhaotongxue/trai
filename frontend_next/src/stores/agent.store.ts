@@ -194,6 +194,8 @@ interface AgentState {
   imageEditProgress: number;
   /** 图片编辑阶段 */
   imageEditStage: "idle" | "editing" | "done" | "error";
+  /** 图片编辑进度描述 */
+  imageEditProgressMessage: string | null;
   /** 图片编辑进度定时器 */
   imageEditTimer: number | null;
 
@@ -355,6 +357,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   editAbortController: null,
   imageEditProgress: 0,
   imageEditStage: "idle",
+  imageEditProgressMessage: null,
   imageEditTimer: null,
 
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
@@ -982,36 +985,60 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         signal: abortCtrl.signal,
         ...(image2ToSend ? { image_url_2: image2ToSend } : {}),
       });
+
       if (timer) {
         try {
           window.clearInterval(timer);
         } catch {
         }
       }
-      set({
-        isEditingImage: false,
-        editAbortController: null,
-        imageEditProgress: 100,
-        imageEditStage: "done",
-        imageEditTimer: null,
-      });
-      if (res.image_url) {
-        set({ editedImageUrl: res.image_url });
-        get().addToImageGallery(res.image_url, editPrompt, res.task_id);
-      } else if (res.image_base64) {
-        const byteString = atob(res.image_base64);
-        const bytes = new Uint8Array(byteString.length);
-        for (let i = 0; i < byteString.length; i++) {
-          bytes[i] = byteString.charCodeAt(i);
+
+      // 开始轮询真实进度
+      const taskId = res.task_id;
+      if (!taskId) {
+        throw new Error(res.error || "任务创建失败");
+      }
+
+      let pollCount = 0;
+      const maxPolls = 200; // 最多轮询 200 次 (约 200 秒)
+
+      while (pollCount < maxPolls) {
+        if (abortCtrl.signal.aborted) break;
+
+        const statusRes = await api.agent.getImageStatus(taskId);
+        const taskData = statusRes.data;
+
+        if (taskData.status === "completed") {
+          const finalUrl = taskData.image_url || (taskData.image_base64 ? `data:image/png;base64,${taskData.image_base64}` : null);
+          set({
+            isEditingImage: false,
+            editAbortController: null,
+            imageEditProgress: 100,
+            imageEditStage: "done",
+            imageEditTimer: null,
+            editedImageUrl: finalUrl,
+          });
+          if (finalUrl) {
+            get().addToImageGallery(finalUrl, editPrompt, taskId);
+          }
+          break;
+        } else if (taskData.status === "failed") {
+          throw new Error(taskData.error || "编辑失败");
+        } else {
+          // 更新真实进度
+          set({
+            imageEditProgress: taskData.progress || 10,
+            imageEditStage: "editing",
+            imageEditProgressMessage: taskData.progress_message || "正在编辑...",
+          });
         }
-        const blobUrl = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
-        set({ editedImageUrl: blobUrl });
-        get().addToImageGallery(blobUrl, editPrompt);
-      } else {
-        set({
-          imageEditError: res.error || "图片编辑失败",
-          imageEditStage: "error",
-        });
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        pollCount++;
+      }
+
+      if (pollCount >= maxPolls) {
+        throw new Error("任务超时, 请在历史记录中查看");
       }
     } catch (e: unknown) {
       if (timer) {

@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🧩 前后端_2026_05_28_1730
+- **后端 (图片编辑实时进度)**: 将图片编辑接口 `/ai/image/edit` 重构为后台异步执行模式, 并新增 `/ai/image/status/{task_id}` 接口. 改进了 `LocalImageEditClient` 子进程日志读取, 允许通过回调实时上报推理进度.
+- **前端 (编辑进度轮询)**: 前端 Agent Store 的 `editImage` 方法接入真实轮询, 根据后端返回的 `progress` 与 `progress_message` 动态更新 UI. 解决了用户点击"编辑"后一直卡在"分析原图"阶段毫无真实进展的问题.
+
 ### 🧩 前后端_2026_05_28_1605
 - **优化(image_edit_progress)**: `/agent` 图像编辑区新增与图片生成一致的进度条、阶段文案和取消后的状态收口, 编辑期间可以持续感知任务仍在处理中.
 - **修复(migration_env)**: `migrate_add_media_history_tables.py` 现已优先读取 `backend/env/*.env`, 同时兼容 `POSTGRES_*` 与 `DB_*` 数据库变量, 避免后续再手工补媒体历史表.

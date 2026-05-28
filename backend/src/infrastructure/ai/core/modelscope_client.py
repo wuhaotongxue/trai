@@ -238,6 +238,7 @@ class ModelScopeClient:
         user_id: str | None = None,
         tenant_id: str | None = None,
         image_input_2: str | None = None,
+        progress_callback: Any | None = None,
     ) -> dict[str, Any]:
         """编辑图片（单图或双图联动，使用 Qwen-Image-Edit-2511 本地模型）
 
@@ -251,6 +252,7 @@ class ModelScopeClient:
             seed: 随机种子
             user_id: 用户 ID
             tenant_id: 租户 ID
+            progress_callback: 进度回调
 
         Returns:
             dict: 编辑结果
@@ -273,6 +275,7 @@ class ModelScopeClient:
             steps=steps,
             seed=seed,
             image_input_2=image_input_2,
+            progress_callback=progress_callback,
         )
         logger.info(f"[2/5] 推理完成 | task_id: {result.get('task_id', 'N/A')}")
 

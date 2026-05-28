@@ -314,6 +314,7 @@ if __name__ == "__main__":
         steps: int,
         seed: int | None,
         image_input_2: str | None,
+        progress_callback: Any | None = None,
     ) -> dict[str, Any]:
         """
         启动子进程执行本地图像编辑推理.
@@ -326,12 +327,13 @@ if __name__ == "__main__":
           steps: 推理步数.
           seed: 随机种子.
           image_input_2: 第二张输入图片, 为空表示单图编辑.
+          progress_callback: 进度回调函数, 接收 (message, current_step, total_steps).
         返回:
           dict[str, Any]: 编辑结果字典.
         异常:
           RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
         """
-        async with self._global_semaphore or asyncio.Semaphore(1):
+        async with (self._global_semaphore or asyncio.Semaphore(1)):
             devices = self._get_devices_by_free_memory()
             selected_device = -1
             for dev_idx, free_gb in devices:
@@ -355,6 +357,7 @@ if __name__ == "__main__":
                 if image_input_2:
                     second_path, _ = self._decode_to_temp_image(image_input_2, ".png", temp_dir)
                     input_paths.append(str(second_path))
+
                 command = [sys.executable, "-c", self._build_script(steps=steps, seed=seed), *input_paths]
                 environment = os.environ.copy()
                 if selected_device >= 0:
@@ -373,29 +376,61 @@ if __name__ == "__main__":
                     f"steps={steps} | width={width} | height={height} | "
                     f"dual_input={image_input_2 is not None}"
                 )
+
                 process = await asyncio.create_subprocess_exec(
                     *command,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                     env=environment,
                 )
-                stdout_data, stderr_data = await process.communicate()
-                stderr_text = stderr_data.decode("utf-8", errors="ignore")
-                stdout_text = stdout_data.decode("utf-8", errors="ignore").strip()
-                if stderr_text:
-                    for line in stderr_text.splitlines():
-                        if line.strip():
-                            logger.info(f"ImageEdit subprocess: {line.strip()}")
+
+                # 实时读取 stderr 输出并记录日志/回调进度
+                last_stdout_line = ""
+
+                async def read_stderr(stream: asyncio.StreamReader) -> None:
+                    import re
+                    while True:
+                        line = await stream.readline()
+                        if not line:
+                            break
+                        text = line.decode("utf-8", errors="ignore").strip()
+                        if text:
+                            logger.info(f"ImageEdit Subprocess Stderr: {text}")
+                            if progress_callback:
+                                # 解析进度信息, 例如 "[1/7] 初始化编辑管线"
+                                match = re.search(r"\[(\d+)/(\d+)\]\s+(.*)", text)
+                                if match:
+                                    curr, total, msg = match.groups()
+                                    await progress_callback(msg, int(curr), int(total))
+                                elif "it/s" in text or "s/it" in text:
+                                    # 处理 tqdm 进度条 (简单匹配)
+                                    await progress_callback("模型推理中...", 4, 7)
+
+                async def read_stdout(stream: asyncio.StreamReader) -> None:
+                    nonlocal last_stdout_line
+                    while True:
+                        line = await stream.readline()
+                        if not line:
+                            break
+                        text = line.decode("utf-8", errors="ignore").strip()
+                        if text:
+                            last_stdout_line = text
+
+                # 并发读取 stdout 和 stderr
+                await asyncio.gather(read_stderr(process.stderr), read_stdout(process.stdout))
+                await process.wait()
+
                 if process.returncode != 0:
-                    logger.error(f"本地图像编辑子进程失败 | returncode={process.returncode} | stderr={stderr_text}")
+                    logger.error(f"本地图像编辑子进程失败 | returncode={process.returncode}")
                     raise RuntimeError("本地图像编辑模型执行失败, 请检查后端日志")
-                lines = [line.strip() for line in stdout_text.splitlines() if line.strip()]
-                if not lines:
+
+                if not last_stdout_line:
                     raise RuntimeError("本地图像编辑模型未返回结果")
+
                 try:
-                    return json.loads(lines[-1])
+                    return json.loads(last_stdout_line)
                 except json.JSONDecodeError as error:
-                    logger.error(f"本地图像编辑结果解析失败 | stdout={stdout_text}")
+                    logger.error(f"本地图像编辑结果解析失败 | stdout={last_stdout_line}")
                     raise RuntimeError(f"本地图像编辑结果解析失败: {error}") from error
 
     async def edit(
@@ -407,6 +442,7 @@ if __name__ == "__main__":
         steps: int | None = None,
         seed: int | None = None,
         image_input_2: str | None = None,
+        progress_callback: Any | None = None,
     ) -> dict[str, Any]:
         """
         执行单图或双图本地图像编辑.
@@ -419,6 +455,7 @@ if __name__ == "__main__":
           steps: 指定推理步数, 为空时使用默认值.
           seed: 指定随机种子, 为空时使用随机种子.
           image_input_2: 第二张输入图片, 用于双图联动编辑.
+          progress_callback: 进度回调.
         返回:
           dict[str, Any]: 编辑结果, 包含 status, image_base64 与 task_id.
         异常:
@@ -446,6 +483,7 @@ if __name__ == "__main__":
             steps=target_steps,
             seed=seed,
             image_input_2=image_input_2,
+            progress_callback=progress_callback,
         )
         result["task_id"] = result.get("task_id") or str(uuid.uuid4())
         logger.info(f"本地图像编辑完成 | task_id={result['task_id']}")
