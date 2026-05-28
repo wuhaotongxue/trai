@@ -146,56 +146,68 @@ class S3StorageService:
                 details={"error": str(e)},
             )
 
-    def get_long_term_url(self, object_key: str, expires_days: int = 30) -> str:
+    def get_long_term_url(self, object_key: str, expires_days: int = 7) -> str:
         """
-        获取长效 Presigned URL
+        获取文件的长期访问预签名 URL
 
         参数:
-            object_key (str): S3 存储路径
-            expires_days (int): 过期天数
+            object_key (str): S3 对象键
+            expires_days (int): 有效期(天)
         返回值:
             str: 预签名 URL
         """
         try:
+            # 统一使用内网 endpoint 生成预签名 URL (保持 s3v4 签名一致性)
             url = self._client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self._bucket, "Key": object_key},
                 ExpiresIn=expires_days * 24 * 3600,
             )
+            
+            # 如果配置了外网网关域名，将内网 endpoint 替换为外网域名
+            # 因为 Nginx 会剥离一层 /trai/，所以这里替换后会形成双 bucket 路径 (例如 /trai/trai/...)
+            # 这样经过 Nginx 转发给 MinIO 时，路径和 Host 头都与签名时完全一致
             if self._presign_public_base:
-                from urllib.parse import urlparse
-
-                parsed = urlparse(url)
-                return f"{self._presign_public_base.rstrip('/')}{parsed.path}?{parsed.query}"
+                public_base = self._presign_public_base.rstrip('/')
+                endpoint = self._endpoint.rstrip('/')
+                url = url.replace(endpoint, public_base)
+                
             return url
         except ClientError as e:
-            logger.error(f"S3 签发长效 URL 失败 | 错误: {str(e)}")
+            logger.error(f"S3 生成长期 URL 失败 | error={str(e)}")
+            raise ExternalServiceError(f"生成文件长期 URL 失败: {str(e)}")
             return self.get_file_url(object_key)
 
-    def get_presigned_url(self, object_key: str, expires_in: int = 300) -> str:
+    def get_presigned_url(self, object_key: str, expires_in: int = 3600) -> str:
         """
-        获取短效 Presigned URL
+        获取文件的临时访问预签名 URL
 
         参数:
-            object_key (str): S3 存储路径
-            expires_in (int): 过期秒数
+            object_key (str): S3 对象键
+            expires_in (int): 有效期(秒)
         返回值:
             str: 预签名 URL
         """
         try:
+            # 统一使用内网 endpoint 生成预签名 URL (保持 s3v4 签名一致性)
             url = self._client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self._bucket, "Key": object_key},
                 ExpiresIn=expires_in,
             )
+            
+            # 如果配置了外网网关域名，将内网 endpoint 替换为外网域名
+            # 因为 Nginx 会剥离一层 /trai/，所以这里替换后会形成双 bucket 路径 (例如 /trai/trai/...)
+            # 这样经过 Nginx 转发给 MinIO 时，路径和 Host 头都与签名时完全一致
             if self._presign_public_base:
-                from urllib.parse import urlparse
+                public_base = self._presign_public_base.rstrip('/')
+                endpoint = self._endpoint.rstrip('/')
+                url = url.replace(endpoint, public_base)
 
-                parsed = urlparse(url)
-                return f"{self._presign_public_base.rstrip('/')}{parsed.path}?{parsed.query}"
             return url
         except ClientError as e:
-            logger.error(f"S3 签发短效 URL 失败 | 错误: {str(e)}")
+            logger.error(f"S3 生成临时 URL 失败 | error={str(e)}")
+            raise ExternalServiceError(f"生成文件临时 URL 失败: {str(e)}")
             return self.get_file_url(object_key)
 
     def delete_file(self, object_key: str) -> bool:

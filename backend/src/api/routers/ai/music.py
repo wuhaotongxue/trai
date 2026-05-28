@@ -84,23 +84,25 @@ class MusicController:
             if result.success:
                 filename = os.path.basename(result.file_path or "")
 
-                # 上传到 S3
+                # 上传到 S3 (使用纯 ASCII 键名避免预签名 URL 编码问题)
                 s3_url = ""
                 try:
                     from infrastructure.storage.s3_storage import get_s3_storage
-
+                    import hashlib
                     s3_storage = get_s3_storage()
                     date_prefix = datetime.now().strftime("%Y%m")
-                    s3_key = f"public/ai/music/{date_prefix}/{filename}"
+                    
+                    # 提取纯英数字作为前缀，避免 SignatureDoesNotMatch
+                    safe_filename = f"music_{task_id}.wav"
+                    s3_key = f"private/tenants/default/ai_generated/music/anonymous/{safe_filename}"
                     s3_storage.upload_file(result.file_path, s3_key, content_type="audio/wav")
-                    s3_url = s3_storage.get_file_url(s3_key)
+                    # 使用预签名 URL，绕过 Nginx 的静态文件拦截
+                    s3_url = s3_storage.get_long_term_url(s3_key, expires_days=30)
                 except Exception as e:
                     logger.warning(f"音乐文件上传 S3 失败: {e}")
-
-                # 优先返回通过后端的下载链接，避免 Nginx 直接拦截静态文件 .wav 导致 404
-                public_base = os.getenv("S3_PRESIGNED_PUBLIC_BASE", "https://ai.tuoren.com").rstrip("/")
-                final_url = f"{public_base}/api_trai/v1/ai/music/download?filename={filename}"
-
+                
+                final_url = s3_url or f"/api_trai/v1/ai/music/files/{filename}"
+                
                 _music_tasks[task_id]["status"] = "completed"
                 _music_tasks[task_id]["progress"] = "完成"
                 _music_tasks[task_id]["music_url"] = final_url

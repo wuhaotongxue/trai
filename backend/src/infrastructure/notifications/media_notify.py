@@ -18,6 +18,15 @@ class MediaNotifier:
         """调用 DeepSeek 动态生成地理专家文案"""
         api_key = os.getenv("DEEPSEEK_API_KEY")
         if not api_key:
+            # 尝试从 llm.env 中直接读取，以防环境变量未正确加载
+            env_path = "/home/qyjgylc_whf/code/trai/backend/env/llm.env"
+            if os.path.exists(env_path):
+                from dotenv import dotenv_values
+                env_dict = dotenv_values(env_path)
+                api_key = env_dict.get("DEEPSEEK_API_KEY")
+        
+        if not api_key:
+            logger.warning("未找到 DEEPSEEK_API_KEY，使用默认播报文案")
             return self._fallback_geography_expert(type_name, prompt, duration)
 
         try:
@@ -80,8 +89,10 @@ class MediaNotifier:
                     f"> **形成耗时:** `{duration:.1f} 秒`\n\n"
                     f"{ai_text}\n\n"
                 )
+            else:
+                logger.warning(f"DeepSeek 动态生成文案失败，状态码: {resp.status_code}, 内容: {resp.text}")
         except Exception as e:
-            logger.warning(f"DeepSeek 动态生成文案失败: {e}")
+            logger.warning(f"DeepSeek 动态生成文案异常: {e}")
 
         return self._fallback_geography_expert(type_name, prompt, duration)
 
