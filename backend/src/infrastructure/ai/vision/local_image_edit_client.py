@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_17:40:00
+# 日期: 2026_05_28_1855
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -382,6 +382,7 @@ if __name__ == "__main__":
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                     env=environment,
+                    limit=1024 * 1024 * 50,  # 设置 50MB 缓冲区, 彻底解决 Separator is not found 问题
                 )
 
                 # 实时读取 stderr 输出并记录日志/回调进度

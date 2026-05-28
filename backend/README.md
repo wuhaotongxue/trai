@@ -35,6 +35,9 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1855
+- **加固**: 为 `LocalImageEditClient` 子进程新增 `limit=50MB` 缓冲区设置. 彻底解决因模型输出超大 Base64 字符串导致的 `Separator is not found, and chunk exceed the limit` 错误. 
+
 ### 🛠️ 后端_2026_05_28_1740
 - **修复**: 解决 `LocalImageEditClient` 读取子进程 `stdout` 时因 Base64 字符串过长导致的缓冲区溢出错误 (`Separator is not found, and chunk exceed the limit`). 将 `readline()` 替换为 `read()` 以完整接收大尺寸图片数据. 
 
