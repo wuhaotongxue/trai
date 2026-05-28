@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # 文件名: video.py
 # 作者: wuhao
-# 日期: 2026_05_26_20:45:12
+# 日期: 2026_05_28_11:58:59
 # 描述: 视频生成 API, 支持 Wan2.1-T2V-1.3B 本地模型, 结果上传 S3 并推送飞书通知
 
 from __future__ import annotations
 
+import base64
 import os
+import time
 import uuid
 from typing import Annotated
 
@@ -15,11 +17,14 @@ from loguru import logger
 from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
+from core.exceptions import ExternalServiceError
+from infrastructure.ai.video.local_video_client import LocalVideoClient
 from infrastructure.notifications.media_notify import media_notifier
 from infrastructure.notify.feishu_ai_notify import (
     VideoGeneratedEvent,
     get_feishu_ai_notify_service,
 )
+from infrastructure.storage.s3_storage import S3StorageService
 
 router = APIRouter()
 
@@ -50,6 +55,62 @@ class VideoApiUtils:
         if real_ip:
             return real_ip.strip()
         return host
+
+    @staticmethod
+    def build_object_key(tenant_id: str, user_id: str, task_id: str) -> str:
+        """
+        构建视频结果的 S3 对象键.
+
+        参数:
+            tenant_id (str): 租户 ID.
+            user_id (str): 用户 ID.
+            task_id (str): 任务 ID.
+
+        返回值:
+            str: 视频对象键.
+
+        异常:
+            无.
+        """
+        safe_tenant_id = tenant_id or "default"
+        safe_user_id = user_id or "anonymous"
+        return f"private/tenants/{safe_tenant_id}/ai_generated/videos/{safe_user_id}/{task_id}.mp4"
+
+    @staticmethod
+    def upload_video_to_s3(video_base64: str, object_key: str) -> tuple[str, str]:
+        """
+        将生成的视频上传到 S3, 并返回访问地址.
+
+        参数:
+            video_base64 (str): 视频的 Base64 数据.
+            object_key (str): S3 对象键.
+
+        返回值:
+            tuple[str, str]: (预签名访问地址, 公共域名地址).
+
+        异常:
+            ExternalServiceError: 视频数据为空或上传失败时抛出.
+        """
+        if not video_base64:
+            raise ExternalServiceError(message="视频生成成功, 但未返回视频数据")
+
+        try:
+            video_bytes = base64.b64decode(video_base64)
+        except Exception as error:
+            raise ExternalServiceError(
+                message="视频数据解码失败",
+                details={"error": str(error)},
+            ) from error
+
+        s3_storage = S3StorageService()
+        s3_storage.upload_bytes(
+            data=video_bytes,
+            object_key=object_key,
+            content_type="video/mp4",
+        )
+        video_url = s3_storage.get_long_term_url(object_key, expires_days=30)
+        public_url = s3_storage.get_file_url(object_key)
+        return video_url, public_url
 
     @staticmethod
     def send_video_generated_notify(
@@ -159,7 +220,7 @@ class VideoApiRouter:
         current_user: CurrentUserOptional = None,
     ) -> VideoGenerationResponse:
         """
-        创建视频生成任务
+        创建视频生成任务, 并在当前请求内返回生成结果.
 
         参数:
             req (VideoGenerationRequest): 生成参数
@@ -167,16 +228,75 @@ class VideoApiRouter:
             request (Request): 请求对象
             current_user (CurrentUserOptional): 当前用户
         返回值:
-            VideoGenerationResponse: 包含任务 ID 和初始状态的响应对象
+            VideoGenerationResponse: 包含视频访问地址和状态的响应对象
+
+        异常:
+            无. 失败信息通过响应体返回.
         """
         task_id = str(uuid.uuid4())
+        started_at = time.monotonic()
         client_ip = VideoApiUtils.get_client_ip(request)
-        user_id = str(current_user.get("user_id", "")) if current_user else "guest"
+        user_id = str(current_user.get("user_id", "")) if current_user else "anonymous"
         user_name = current_user.get("username", "") if current_user else f"guest_{client_ip}"
+        tenant_id = str(current_user.get("tenant_id", "default")) if current_user else "default"
 
         logger.info(f"[视频生成] 接收任务 | task_id={task_id} | user={user_name} | prompt={req.prompt[:50]}...")
 
-        # 这里应当调用真正的推理逻辑, 目前简化流程
-        # background_tasks.add_task(...)
+        try:
+            local_video_client = LocalVideoClient()
+            result = await local_video_client.generate(
+                prompt=req.prompt,
+                frames=req.frames,
+                resolution=req.resolution,
+                task_id=task_id,
+            )
+            object_key = VideoApiUtils.build_object_key(tenant_id=tenant_id, user_id=user_id, task_id=task_id)
+            video_url, public_url = VideoApiUtils.upload_video_to_s3(
+                video_base64=str(result.get("video_base64", "")),
+                object_key=object_key,
+            )
+            inference_time_seconds = int(result.get("inference_time_seconds", 0) or 0) or None
+            total_time_seconds = int(time.monotonic() - started_at)
 
-        return VideoGenerationResponse(task_id=task_id, status="queued", frames=req.frames, resolution=req.resolution)
+            background_tasks.add_task(
+                VideoApiUtils.send_video_generated_notify,
+                user_id,
+                user_name,
+                req.prompt,
+                video_url,
+                object_key,
+                public_url,
+                req.model,
+                task_id,
+                int(result.get("frames", req.frames) or req.frames),
+                str(result.get("resolution", req.resolution) or req.resolution),
+            )
+
+            return VideoGenerationResponse(
+                task_id=task_id,
+                status="completed",
+                video_url=video_url,
+                video_base64=None,
+                object_key=object_key,
+                public_url=public_url,
+                frames=int(result.get("frames", req.frames) or req.frames),
+                resolution=str(result.get("resolution", req.resolution) or req.resolution),
+                error=None,
+                inference_time_seconds=inference_time_seconds,
+                total_time_seconds=total_time_seconds,
+            )
+        except Exception as error:
+            logger.error(f"[视频生成] 任务失败 | task_id={task_id} | error={str(error)}")
+            return VideoGenerationResponse(
+                task_id=task_id,
+                status="failed",
+                video_url=None,
+                video_base64=None,
+                object_key=None,
+                public_url=None,
+                frames=req.frames,
+                resolution=req.resolution,
+                error=str(error),
+                inference_time_seconds=None,
+                total_time_seconds=int(time.monotonic() - started_at),
+            )

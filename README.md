@@ -113,6 +113,10 @@ cd trai
 - **新增(subtitle)**: video_to_audio 视频转音频接口增加 SRT 字幕提取功能, 使用本地 FunASR 模型自动生成字幕
 - **修复(subtitle)**: 修复 delete_subtitle 接口中 object_prefix 未定义的问题
 
+### 🛠️ 后端_2026_05_28_1202
+- **修复(video)**: 修复 `/ai/video/generate` 接口只返回 `queued` 而不执行真实任务的问题, 接入本地 `LocalVideoClient` 视频生成链路, 生成成功后直接上传 S3 并返回 `video_url/public_url`, 让 `/agent` 页面无需轮询即可直接展示视频结果。
+- **测试(video)**: 已通过 mock 视频生成与 S3 上传流程完成接口验证, 确认接口返回 `completed` 状态。
+
 ### 🎨 前端_2026_05_26_1728
 - **新增(subtitle)**: 视频转音频任务增加提取字幕 (SRT) 下载按钮
 
