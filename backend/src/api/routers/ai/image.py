@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: image.py
 # 作者: wuhao
-# 日期: 2026_05_20_0830
+# 日期: 2026_05_28_1745
 # 描述: AI 图片生成接口，支持文生图、图生图、图片编辑，数据写入 t_image_records 表
 
 
@@ -46,6 +46,7 @@ class ImageTaskStore:
 
     @classmethod
     def create_task(cls, task_id: str, prompt: str, user_id: str, username: str) -> None:
+        logger.info(f"创建图片任务状态 | task_id={task_id}")
         cls._tasks[task_id] = {
             "task_id": task_id,
             "status": "pending",
@@ -326,8 +327,10 @@ class ImageEditRequest(BaseModel):
 @router.get("/image/status/{task_id}", tags=["AI"], summary="查询图片任务状态")
 async def get_image_status(task_id: str) -> dict[str, Any]:
     """查询 AI 图片任务的实时进度和状态"""
+    logger.info(f"查询图片任务状态 | task_id={task_id}")
     task = ImageTaskStore.get_task(task_id)
     if task:
+        logger.info(f"内存中找到任务 | task_id={task_id} | status={task['status']}")
         return {
             "code": 200,
             "msg": "OK",
@@ -335,11 +338,13 @@ async def get_image_status(task_id: str) -> dict[str, Any]:
         }
 
     # 如果内存中没有, 尝试从数据库读取最终结果
+    logger.info(f"内存中未找到任务, 尝试查询数据库 | task_id={task_id}")
     try:
         with get_session() as db:
             repo = ImageRecordRepository(db)
             record = repo.get_by_id(task_id)
             if record:
+                logger.info(f"数据库中找到任务 | task_id={task_id} | status={record.status.value}")
                 return {
                     "code": 200,
                     "msg": "OK",
@@ -351,10 +356,12 @@ async def get_image_status(task_id: str) -> dict[str, Any]:
                         "error": record.error_message,
                     },
                 }
-    except Exception:
-        pass
+            else:
+                logger.warning(f"数据库中也未找到任务 | task_id={task_id}")
+    except Exception as e:
+        logger.error(f"查询数据库记录失败 | task_id={task_id} | error={e}")
 
-    raise HTTPException(status_code=404, detail="任务不存在")
+    raise HTTPException(status_code=404, detail=f"任务 {task_id} 不存在")
 
 
 async def _execute_image_edit_task(
