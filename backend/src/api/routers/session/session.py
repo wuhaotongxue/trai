@@ -18,7 +18,7 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional, get_current_user_optional
 from core.context_manager import ContextManager, get_context_manager
 from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
@@ -278,16 +278,16 @@ class ActionResponse(BaseModel):
 async def send_message(
     session_id: str,
     request: SendMessageRequest,
-    current_user: CurrentUser,
     fastapi_request: Request,
     session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> SendMessageResponse:
     """发送消息(联动 AI 对话) - 使用 ChatHistoryService 实现持久化
 
     Args:
         session_id: 会话 ID
         request: 消息内容
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
         session: 数据库会话
 
     Returns:
@@ -296,9 +296,9 @@ async def send_message(
     Raises:
         HTTPException: 会话不存在(404)或无权访问(403)
     """
-    user_id = current_user.get("user_id")
-    role = current_user.get("role", "normal")
-    tenant_id = current_user.get("tenant_id") or "default"
+    user_id = current_user.get("user_id") if current_user else None
+    role = current_user.get("role", "normal") if current_user else "normal"
+    tenant_id = (current_user.get("tenant_id") if current_user else None) or "default"
 
     history_service = get_chat_history_service(session)
 
@@ -309,7 +309,9 @@ async def send_message(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
+    # 权限检查: 如果会话属于某个用户，则必须匹配该用户或管理员
+    session_user_id = chat_session.metadata.get("user_id")
+    if session_user_id and role != "admin" and session_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
@@ -449,7 +451,7 @@ async def send_message(
 async def stream_message(
     session_id: str,
     request: Request,
-    current_user: CurrentUser | None = None,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
     session: Annotated[Session, Depends(get_db_session)] = None,
 ):
     """流式发送消息(SSE)
@@ -480,7 +482,9 @@ async def stream_message(
     if not chat_session:
         raise HTTPException(status_code=404, detail="会话不存在")
 
-    if role_check != "admin" and chat_session.metadata.get("user_id") != user_id:
+    # 权限检查: 如果会话属于某个用户，则必须匹配该用户或管理员
+    session_user_id = chat_session.metadata.get("user_id")
+    if session_user_id and role_check != "admin" and session_user_id != user_id:
         raise HTTPException(status_code=403, detail="无权访问此会话")
 
     context_manager: ContextManager = get_context_manager()
@@ -735,23 +739,23 @@ async def stream_message(
 )
 async def create_session(
     request: CreateSessionRequest,
-    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
     request_obj: Annotated[Request, Depends()],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> CreateSessionResponse:
     """创建新会话
 
     Args:
         request: 创建会话参数
-        current_user: 当前登录用户
         session: 数据库会话
         request_obj: FastAPI Request 对象，用于获取客户端IP
+        current_user: 当前登录用户（可选）
 
     Returns:
         CreateSessionResponse: 创建的会话信息
     """
-    user_id = current_user.get("user_id")
-    username = current_user.get("username")
+    user_id = current_user.get("user_id") if current_user else None
+    username = current_user.get("username") if current_user else None
 
     # 获取客户端IP地址
     client_ip = request_obj.client.host if request_obj.client else None
@@ -793,23 +797,23 @@ async def create_session(
     description="获取当前用户的会话列表.",
 )
 async def list_sessions(
-    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> SessionListResponse:
-    """获取会话列表 - 需要登录
+    """获取会话列表 - 支持匿名访问
 
     Args:
-        current_user: 当前登录用户（必填）
         session: 数据库会话
+        current_user: 当前登录用户（可选）
         limit: 每页数量
         offset: 偏移量
 
     Returns:
         SessionListResponse: 会话列表
     """
-    user_id = current_user.get("user_id")
+    user_id = current_user.get("user_id") if current_user else None
 
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)
@@ -849,14 +853,14 @@ async def list_sessions(
 )
 async def get_session_detail(
     session_id: str,
-    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> SessionDetailResponse:
     """获取会话详情 - 使用 ChatHistoryService 和领域实体
 
     Args:
         session_id: 会话 ID
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
         session: 数据库会话
 
     Returns:
@@ -865,7 +869,7 @@ async def get_session_detail(
     Raises:
         HTTPException: 会话不存在(404)
     """
-    user_id = current_user.get("user_id")
+    user_id = current_user.get("user_id") if current_user else None
 
     history_service = get_chat_history_service(session)
     chat_session = history_service.load_session_history(session_id)
@@ -876,8 +880,9 @@ async def get_session_detail(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    role = current_user.get("role", "normal")
-    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
+    role = current_user.get("role", "normal") if current_user else "normal"
+    session_user_id = chat_session.metadata.get("user_id")
+    if session_user_id and role != "admin" and session_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权访问此会话"},
@@ -905,22 +910,22 @@ async def get_session_detail(
 async def rename_session(
     session_id: str,
     request: RenameSessionRequest,
-    current_user: CurrentUser,
     session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> SessionItem:
     """重命名会话标题 - 使用 ChatHistoryService
 
     Args:
         session_id: 会话 ID
         request: 新标题内容
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
         session: 数据库会话
 
     Returns:
         SessionItem: 更新后的会话信息
     """
-    user_id = current_user.get("user_id")
-    role = current_user.get("role", "normal")
+    user_id = current_user.get("user_id") if current_user else None
+    role = current_user.get("role", "normal") if current_user else "normal"
 
     history_service = get_chat_history_service(session)
 
@@ -931,7 +936,8 @@ async def rename_session(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.metadata.get("user_id") != user_id:
+    session_user_id = chat_session.metadata.get("user_id")
+    if session_user_id and role != "admin" and session_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权操作此会话"},
@@ -967,14 +973,14 @@ async def rename_session(
 )
 async def delete_session(
     session_id: str,
-    current_user: CurrentUser,
     db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> ActionResponse:
     """删除会话 - 使用 ChatHistoryService
 
     Args:
         session_id: 会话 ID
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
         db_session: 数据库会话
         request: FastAPI Request 对象，用于获取客户端IP
 
@@ -984,9 +990,9 @@ async def delete_session(
     Raises:
         HTTPException: 会话不存在(404)或无权访问(403)
     """
-    user_id = current_user.get("user_id")
-    username = current_user.get("username")
-    role = current_user.get("role", "normal")
+    user_id = current_user.get("user_id") if current_user else None
+    username = current_user.get("username") if current_user else None
+    role = current_user.get("role", "normal") if current_user else "normal"
 
     # 客户端IP地址从请求上下文获取(通过上下文变量)
     client_ip = None
@@ -1004,7 +1010,7 @@ async def delete_session(
             detail={"code": 404, "message": "会话不存在"},
         )
 
-    if role != "admin" and chat_session.user_id != user_id:
+    if chat_session.user_id and role != "admin" and chat_session.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": 403, "message": "无权操作此会话"},
@@ -1035,7 +1041,7 @@ _active_abort_events: dict[str, asyncio.Event] = {}
 )
 async def abort_generation(
     session_id: str,
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional,
     fastapi_request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
@@ -1050,7 +1056,15 @@ async def abort_generation(
     Returns:
         ActionResponse: 中止结果
     """
-    user_id = current_user.get("user_id")
+    user_id = current_user.get("user_id") if current_user else None
+    role = current_user.get("role", "normal") if current_user else "normal"
+
+    # 权限检查
+    session_repo = SessionRepository(db_session)
+    chat_session = session_repo.get_session(session_id)
+    if chat_session and chat_session.user_id:
+        if role != "admin" and chat_session.user_id != user_id:
+            raise HTTPException(status_code=403, detail="无权操作此会话")
 
     abort_event = _active_abort_events.get(session_id)
     if abort_event:
@@ -1070,7 +1084,7 @@ async def abort_generation(
 )
 async def confirm_action(
     session_id: str,
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional,
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> ActionResponse:
     """确认操作(示例端点)
@@ -1083,6 +1097,16 @@ async def confirm_action(
     Returns:
         ActionResponse: 确认结果
     """
+    user_id = current_user.get("user_id") if current_user else None
+    role = current_user.get("role", "normal") if current_user else "normal"
+
+    # 权限检查
+    session_repo = SessionRepository(db_session)
+    chat_session = session_repo.get_session(session_id)
+    if chat_session and chat_session.user_id:
+        if role != "admin" and chat_session.user_id != user_id:
+            raise HTTPException(status_code=403, detail="无权操作此会话")
+
     success = True
 
     return ActionResponse(message="操作已确认" if success else "确认失败,请重试")

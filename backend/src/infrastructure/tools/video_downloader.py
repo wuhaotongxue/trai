@@ -6,7 +6,9 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +34,34 @@ class VideoDownloader:
         self.download_path = Path(download_path)
         if not self.download_path.exists():
             self.download_path.mkdir(parents=True, exist_ok=True)
+        self._yt_dlp_path = self._find_yt_dlp()
+
+    def _find_yt_dlp(self) -> str:
+        """
+        寻找 yt-dlp 可执行文件的路径.
+        """
+        # 1. 尝试从 PATH 中寻找
+        path = shutil.which("yt-dlp")
+        if path:
+            logger.info(f"yt-dlp found in PATH: {path}")
+            return path
+
+        # 2. 尝试在当前 Python 解释器所在的 bin 目录下寻找
+        executable_dir = Path(sys.executable).parent
+        path = executable_dir / "yt-dlp"
+        if path.exists():
+            logger.info(f"yt-dlp found in Python bin: {path}")
+            return str(path)
+
+        # 3. 兜底: 尝试常见的 Conda 路径 (TRAI 项目专用)
+        conda_path = Path("/home/qyjgylc_whf/miniconda3/envs/trai31313/bin/yt-dlp")
+        if conda_path.exists():
+            logger.info(f"yt-dlp found in Conda env path: {conda_path}")
+            return str(conda_path)
+
+        # 4. 默认返回 'yt-dlp', 让 subprocess 报错以便捕获
+        logger.warning("yt-dlp not found in any known locations, falling back to 'yt-dlp'")
+        return "yt-dlp"
 
     async def download_bilibili(self, url: str) -> dict[str, Any]:
         """
@@ -50,24 +80,31 @@ class VideoDownloader:
             Exception: 捕获下载过程中的进程执行或文件系统异常
         """
         try:
+            # 检查 yt-dlp 是否可用
+            if self._yt_dlp_path == "yt-dlp" and not shutil.which("yt-dlp"):
+                return {
+                    "success": False,
+                    "error": "系统未找到 yt-dlp 依赖, 请确保已安装并配置在环境变量中.",
+                }
+
             # 第一步: 获取视频元数据
-            info_cmd = ["yt-dlp", "--print", "%(title)s|%(ext)s|%(id)s", "--no-playlist", url]
+            info_cmd = [self._yt_dlp_path, "--print", "%(title)s<SEP>%(ext)s<SEP>%(id)s", "--no-playlist", url]
 
             result = subprocess.run(info_cmd, capture_output=True, text=True)
             if result.returncode != 0:
                 logger.error(f"Failed to fetch video info: {result.stderr}")
                 return {"success": False, "error": result.stderr}
 
-            output = result.stdout.strip().split("|")
+            output = result.stdout.strip().split("<SEP>")
             if len(output) < 3:
-                return {"success": False, "error": "Invalid video info format from yt-dlp"}
+                return {"success": False, "error": f"Invalid video info format: {result.stdout}"}
 
-            title, ext, video_id = output
+            title, ext, video_id = output[:3]
             output_template = str(self.download_path / f"{video_id}.%(ext)s")
 
             # 第二步: 执行高清下载与合并
             download_cmd = [
-                "yt-dlp",
+                self._yt_dlp_path,
                 "-f",
                 "bestvideo+bestaudio/best",
                 "--merge-output-format",

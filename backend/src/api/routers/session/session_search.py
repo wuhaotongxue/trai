@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional
 from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
@@ -190,7 +190,7 @@ class SessionSearchRouter:
     async def search_sessions(
         self,
         request: SearchSessionsRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -218,9 +218,8 @@ class SessionSearchRouter:
             if request.date_to:
                 InputValidator.validate_date(request.date_to)
 
-            user_id = current_user.get("user_id")
+            user_id = current_user.get("user_id") if current_user else None
 
-            history_service = get_chat_history_service(db_session)
             session_repo = SessionRepository(db_session)
 
             sessions = session_repo.list_sessions(user_id=user_id, limit=100, offset=0)
@@ -284,7 +283,7 @@ class SessionSearchRouter:
     async def get_messages_paginated(
         self,
         session_id: str,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
         page: Annotated[int, Query(ge=1)] = 1,
         page_size: Annotated[int, Query(ge=1, le=100)] = 20,
@@ -302,6 +301,9 @@ class SessionSearchRouter:
         Returns:
             UnifiedResponse: 统一响应格式
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             # 验证会话ID
             session_id = InputValidator.validate_session_id(session_id)
@@ -316,6 +318,14 @@ class SessionSearchRouter:
                 raise HTTPException(
                     status_code=404,
                     detail={"code": 404, "message": "Session not found"},
+                )
+
+            # 权限检查
+            session_user_id = chat_session.metadata.get("user_id")
+            if session_user_id and role != "admin" and session_user_id != user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail={"code": 403, "message": "Access denied"},
                 )
 
             all_messages = chat_session.messages
@@ -349,7 +359,7 @@ class SessionSearchRouter:
 
     async def get_session_stats(
         self,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -363,7 +373,7 @@ class SessionSearchRouter:
             UnifiedResponse: 统一响应格式
         """
         try:
-            user_id = current_user.get("user_id")
+            user_id = current_user.get("user_id") if current_user else None
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
 
@@ -406,7 +416,7 @@ class SessionSearchRouter:
     async def get_sessions_by_tags(
         self,
         tag: Annotated[str, Query(description="标签名称")],
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -424,7 +434,7 @@ class SessionSearchRouter:
             # 验证标签
             tag = InputValidator.sanitize_string(tag, max_length=50)
 
-            user_id = current_user.get("user_id")
+            user_id = current_user.get("user_id") if current_user else None
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
 

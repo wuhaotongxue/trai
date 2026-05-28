@@ -16,7 +16,7 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional, get_current_user_optional
 from application.chat.chat_usecases import ChatInput, ChatUseCase
 from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.database import get_db_session
@@ -46,13 +46,13 @@ class ChatResponse(BaseModel):
 @router.post("/chat", response_model=ChatResponse, tags=["AI"])
 async def chat(
     request: ChatRequest,
-    current_user: CurrentUser,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> ChatResponse:
     """AI 对话接口(非流式)
 
     Args:
         request: 对话请求参数
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
 
     Returns:
         ChatResponse: AI 响应结果
@@ -60,7 +60,8 @@ async def chat(
     Raises:
         HTTPException: AI 服务错误(502)
     """
-    current_user.get("user_id", "")
+    if current_user:
+        current_user.get("user_id", "")
 
     try:
         client = OpenAIClient()
@@ -91,18 +92,19 @@ async def chat(
 @router.post("/chat/stream", tags=["AI"])
 async def chat_stream(
     request: ChatRequest,
-    current_user: CurrentUser,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> StreamingResponse:
     """AI 对话接口(流式响应)
 
     Args:
         request: 对话请求参数
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
 
     Returns:
         StreamingResponse: SSE 流式响应
     """
-    current_user.get("user_id", "")
+    if current_user:
+        current_user.get("user_id", "")
 
     async def generate() -> AsyncIterator[bytes]:
         try:
@@ -140,7 +142,7 @@ async def chat_with_session(
     content: Annotated[str, Body(description="用户消息内容")],
     model: Annotated[str, Body(description="模型名称")] = "gpt-4o",
     temperature: Annotated[float, Body(ge=0, le=2)] = 0.7,
-    current_user: CurrentUser = None,
+    current_user: CurrentUserOptional = None,
     db_session: Annotated[Session, Depends(get_db_session)] = None,
 ) -> ChatResponse:
     """在新会话中发送消息并自动创建/加载会话
@@ -192,7 +194,7 @@ async def chat_with_session(
             logger.info(f"创建新会话 | session_id={session_id}")
 
         # 保存用户消息到数据库
-        user_msg_entity = history_service.save_message(
+        history_service.save_message(
             session_id=session_id,
             role="user",
             content=content,
@@ -215,7 +217,7 @@ async def chat_with_session(
         result = await use_case.execute(input_data)
 
         # 保存 AI 回复到数据库
-        ai_msg_entity = history_service.save_message(
+        history_service.save_message(
             session_id=session_id,
             role="assistant",
             content=result.content,

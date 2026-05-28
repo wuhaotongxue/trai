@@ -15,7 +15,7 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser, CurrentUserOptional
+from api.deps import CurrentUserOptional, get_current_user_optional
 from api.routers.ai.management import _MOCK_AGENTS
 from core.exceptions import ExternalServiceError
 from infrastructure.agent.executor import AgentExecutor
@@ -144,9 +144,9 @@ class AgentChatResponse(BaseModel):
 )
 async def agent_chat(
     request: AgentChatRequest,
-    current_user: CurrentUser,
     fastapi_request: Request,
     db_session: Annotated[Session, Depends(get_db_session)] = None,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> Any:
     """Agent 对话(支持多轮工具调用 + 对话历史持久化)
 
@@ -160,16 +160,16 @@ async def agent_chat(
 
     Args:
         request: Agent 对话请求
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
         fastapi_request: FastAPI 请求对象
         db_session: 数据库会话
 
     Returns:
         AgentChatResponse: AI 回复及执行明细
     """
-    user_id = current_user.get("user_id", "")
-    role = current_user.get("role", "normal")
-    username = current_user.get("username", "Unknown")
+    user_id = current_user.get("user_id", "") if current_user else "guest"
+    role = current_user.get("role", "normal") if current_user else "guest"
+    username = current_user.get("username", "Guest") if current_user else "Guest"
 
     # 获取用户 IP
     client_ip = fastapi_request.client.host if fastapi_request.client else "unknown"
@@ -259,7 +259,7 @@ async def agent_chat(
 
     # 保存用户消息到数据库
     try:
-        user_msg_entity = history_service.save_message(
+        history_service.save_message(
             session_id=request.session_id,
             role="user",
             content=request.message,
@@ -338,7 +338,7 @@ async def agent_chat(
     # == 保存 AI 回复到数据库 ==
     final_content = result["final_content"]
     try:
-        ai_msg_entity = history_service.save_message(
+        history_service.save_message(
             session_id=request.session_id,
             role="assistant",
             content=final_content,
@@ -390,7 +390,7 @@ class ToolListResponse(BaseModel):
     description="获取智能体可用工具列表.",
 )
 async def list_tools(
-    current_user: CurrentUser,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> ToolListResponse:
     """获取可用工具列表
 
@@ -398,13 +398,13 @@ async def list_tools(
     前端据此构建 AI 的工具选择界面.
 
     Args:
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
 
     Returns:
         ToolListResponse: 工具列表
     """
     registry = get_tool_registry()
-    user_role = current_user.get("role", "normal")
+    user_role = current_user.get("role", "normal") if current_user else "guest"
     definitions = registry.get_tools_for_user(user_role)
     tools = get_openai_tools_format(definitions)
 
@@ -437,7 +437,7 @@ class ToolCallResponse(BaseModel):
 )
 async def call_tool(
     request: ToolCallRequest,
-    current_user: CurrentUser,
+    current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> ToolCallResponse:
     """手动调用指定工具
 
@@ -446,13 +446,13 @@ async def call_tool(
 
     Args:
         request: 工具调用请求
-        current_user: 当前登录用户
+        current_user: 当前登录用户（可选）
 
     Returns:
         ToolCallResponse: 执行结果
     """
-    user_id = current_user.get("user_id", "")
-    role = current_user.get("role", "normal")
+    user_id = current_user.get("user_id", "") if current_user else "guest"
+    role = current_user.get("role", "normal") if current_user else "guest"
 
     registry = get_tool_registry()
     tool = registry.get_tool(request.tool_id)

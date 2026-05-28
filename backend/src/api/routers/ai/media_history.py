@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional
 from infrastructure.database import get_db_session
 from infrastructure.services.media_history_service import MediaHistoryService
 
@@ -120,7 +120,7 @@ class MediaHistoryRouter:
     )
     async def list_media_history(
         req: MediaHistoryListRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         session: Annotated[Session, Depends(get_db_session)],
     ) -> MediaHistoryListResponse:
         """
@@ -128,7 +128,7 @@ class MediaHistoryRouter:
 
         参数:
             req (MediaHistoryListRequest): 查询参数.
-            current_user (CurrentUser): 当前登录用户.
+            current_user (CurrentUserOptional): 当前登录用户.
             session (Session): 数据库会话.
 
         返回值:
@@ -137,9 +137,13 @@ class MediaHistoryRouter:
         异常:
             无.
         """
+        user_id = str(current_user.get("user_id", "")) if current_user else ""
+        if not user_id:
+            return MediaHistoryListResponse()
+
         service = MediaHistoryService(session)
         records = service.list_user_media_records(
-            user_id=str(current_user.get("user_id", "")),
+            user_id=user_id,
             limit=req.limit,
             include_deleted=req.include_deleted,
         )
@@ -159,7 +163,7 @@ class MediaHistoryRouter:
     async def delete_media_history(
         req: MediaHistoryDeleteRequest,
         request: Request,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         session: Annotated[Session, Depends(get_db_session)],
     ) -> dict[str, Any]:
         """
@@ -168,7 +172,7 @@ class MediaHistoryRouter:
         参数:
             req (MediaHistoryDeleteRequest): 删除参数.
             request (Request): HTTP 请求对象.
-            current_user (CurrentUser): 当前登录用户.
+            current_user (CurrentUserOptional): 当前登录用户.
             session (Session): 数据库会话.
 
         返回值:
@@ -177,11 +181,15 @@ class MediaHistoryRouter:
         异常:
             HTTPException: 记录不存在时抛出.
         """
+        user_id = str(current_user.get("user_id", "")) if current_user else ""
+        if not user_id:
+            raise HTTPException(status_code=401, detail={"code": 401, "message": "Unauthorized"})
+
         service = MediaHistoryService(session)
         success = service.delete_media_record(
             media_type=req.media_type,
             task_id=req.task_id,
-            user_id=str(current_user.get("user_id", "")),
+            user_id=user_id,
             operator_ip=MediaHistoryUtils.get_client_ip(request),
         )
         if not success:
@@ -199,7 +207,7 @@ class MediaHistoryRouter:
     async def batch_delete_media_history(
         req: MediaHistoryBatchDeleteRequest,
         request: Request,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         session: Annotated[Session, Depends(get_db_session)],
     ) -> dict[str, Any]:
         """
@@ -208,7 +216,7 @@ class MediaHistoryRouter:
         参数:
             req (MediaHistoryBatchDeleteRequest): 批量删除参数.
             request (Request): HTTP 请求对象.
-            current_user (CurrentUser): 当前登录用户.
+            current_user (CurrentUserOptional): 当前登录用户.
             session (Session): 数据库会话.
 
         返回值:
@@ -217,11 +225,15 @@ class MediaHistoryRouter:
         异常:
             无.
         """
+        user_id = str(current_user.get("user_id", "")) if current_user else ""
+        if not user_id:
+            raise HTTPException(status_code=401, detail={"code": 401, "message": "Unauthorized"})
+
         service = MediaHistoryService(session)
         count = service.batch_delete_media_records(
             media_type=req.media_type,
             task_ids=req.task_ids,
-            user_id=str(current_user.get("user_id", "")),
+            user_id=user_id,
             operator_ip=MediaHistoryUtils.get_client_ip(request),
         )
         session.commit()

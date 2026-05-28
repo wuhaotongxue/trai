@@ -35,11 +35,14 @@ def get_current_user_optional(
     Returns:
         dict | None: 用户信息字典或 None
     """
-    if not credentials or not credentials.credentials:
+    if not credentials or not credentials.credentials or credentials.credentials == "undefined":
         return None
 
     try:
         token = credentials.credentials
+        if not token or len(token) < 10:  # 基础长度校验
+            return None
+
         if blacklist_service.is_blacklisted(token):
             return None
 

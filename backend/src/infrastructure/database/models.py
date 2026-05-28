@@ -676,20 +676,42 @@ class MusicRecordModel(Base):
     """扩展元数据"""
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
     """创建时间"""
-    t_created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    """创建人 user_id"""
+
+
+class VideoDownloadModel(Base):
+    """B站视频下载记录模型"""
+
+    __tablename__ = "t_video_downloads"
+    __comment__ = "B站视频下载记录表, 存储视频标题、来源 URL、S3 地址及下载状态."
+
+    t_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    """自增主键 ID"""
+    t_task_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    """下载任务唯一标识"""
+    t_user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    """执行下载的用户 ID"""
+    t_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    """执行下载的用户名"""
+    t_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    """视频标题"""
+    t_source_url: Mapped[str] = mapped_column(Text, nullable=False)
+    """原始视频链接 (Bilibili 等)"""
+    t_s3_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """S3 存储键名"""
+    t_s3_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    """S3 预签名下载 URL"""
+    t_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """文件大小(字节)"""
+    t_status: Mapped[str] = mapped_column(String(32), default="completed", nullable=False)
+    """下载状态: completed / failed"""
+    t_client_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    """下载来源 IP"""
+    t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    """扩展元数据"""
+    t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True)
+    """创建时间"""
     t_updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
     """更新时间"""
-    t_updated_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    """更新人 user_id"""
-    t_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    """任务完成时间"""
-    t_deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    """软删除时间"""
-    t_deleted_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    """软删除操作人 user_id"""
-    t_deleted_ip: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    """软删除来源 IP"""
 
 
 class VideoRecordModel(Base):
@@ -826,6 +848,7 @@ __all__ = [
     "ImageRecordModel",
     "MusicRecordModel",
     "VideoRecordModel",
+    "VideoDownloadModel",
     "ChatLogModel",
     "LoginLogModel",
 ]

@@ -16,7 +16,7 @@ from fastapi.responses import Response
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from api.deps import CurrentUser
+from api.deps import CurrentUserOptional
 from infrastructure.database import get_db_session
 from infrastructure.repositories.session_repository import (
     MessageRepository,
@@ -128,7 +128,7 @@ class SessionManagementRouter:
     async def batch_delete_sessions(
         self,
         request: BatchDeleteRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -142,6 +142,9 @@ class SessionManagementRouter:
         Returns:
             UnifiedResponse: 统一响应格式
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             if not request.session_ids or len(request.session_ids) == 0:
                 raise HTTPException(
@@ -164,6 +167,14 @@ class SessionManagementRouter:
             for sid in request.session_ids:
                 try:
                     sid = InputValidator.validate_session_id(sid)
+
+                    # 权限检查
+                    chat_session = session_repo.get_session(sid)
+                    if chat_session and chat_session.user_id:
+                        if role != "admin" and chat_session.user_id != user_id:
+                            failed_ids.append(sid)
+                            continue
+
                     message_repo.delete_messages(sid)
                     session_repo.delete_session(sid)
                     success_count += 1
@@ -197,7 +208,7 @@ class SessionManagementRouter:
         session_id: str,
         message_index: int,
         request: EditMessageRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -213,6 +224,9 @@ class SessionManagementRouter:
         Returns:
             UnifiedResponse: 统一响应格式
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             # 验证输入
             session_id = InputValidator.validate_session_id(session_id)
@@ -232,6 +246,14 @@ class SessionManagementRouter:
                 raise HTTPException(
                     status_code=404,
                     detail={"code": 404, "message": "Session not found"},
+                )
+
+            # 权限检查
+            session_user_id = chat_session.metadata.get("user_id")
+            if session_user_id and role != "admin" and session_user_id != user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail={"code": 403, "message": "Access denied"},
                 )
 
             if message_index >= len(chat_session.messages):
@@ -280,7 +302,7 @@ class SessionManagementRouter:
     async def export_session(
         self,
         session_id: str,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
         format: Annotated[ExportFormat, Query(description="Export format")] = ExportFormat.JSON,
     ) -> Response:
@@ -296,6 +318,9 @@ class SessionManagementRouter:
         Returns:
             Response: 文件下载响应
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             # 验证输入
             session_id = InputValidator.validate_session_id(session_id)
@@ -307,6 +332,14 @@ class SessionManagementRouter:
                 raise HTTPException(
                     status_code=404,
                     detail={"code": 404, "message": "Session not found"},
+                )
+
+            # 权限检查
+            session_user_id = chat_session.metadata.get("user_id")
+            if session_user_id and role != "admin" and session_user_id != user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail={"code": 403, "message": "Access denied"},
                 )
 
             # 根据格式生成内容
@@ -439,7 +472,7 @@ class SessionManagementRouter:
         self,
         session_id: str,
         request: CompressContextRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -454,6 +487,9 @@ class SessionManagementRouter:
         Returns:
             UnifiedResponse: 统一响应格式
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             # 验证输入
             session_id = InputValidator.validate_session_id(session_id)
@@ -471,6 +507,14 @@ class SessionManagementRouter:
                 raise HTTPException(
                     status_code=404,
                     detail={"code": 404, "message": "Session not found"},
+                )
+
+            # 权限检查
+            session_user_id = chat_session.metadata.get("user_id")
+            if session_user_id and role != "admin" and session_user_id != user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail={"code": 403, "message": "Access denied"},
                 )
 
             original_count = chat_session.message_count
@@ -536,7 +580,7 @@ class SessionManagementRouter:
         self,
         session_id: str,
         request: TagSessionRequest,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -551,6 +595,9 @@ class SessionManagementRouter:
         Returns:
             UnifiedResponse: 统一响应格式
         """
+        user_id = current_user.get("user_id") if current_user else None
+        role = current_user.get("role", "normal") if current_user else "normal"
+
         try:
             # 验证输入
             session_id = InputValidator.validate_session_id(session_id)
@@ -587,6 +634,14 @@ class SessionManagementRouter:
                     detail={"code": 404, "message": "Session not found"},
                 )
 
+            # 权限检查
+            session_user_id = chat_session.metadata.get("user_id")
+            if session_user_id and role != "admin" and session_user_id != user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail={"code": 403, "message": "Access denied"},
+                )
+
             new_metadata = chat_session.metadata.copy()
             new_metadata["tags"] = sanitized_tags
 
@@ -619,7 +674,7 @@ class SessionManagementRouter:
 
     async def get_ai_usage_stats(
         self,
-        current_user: CurrentUser,
+        current_user: CurrentUserOptional,
         db_session: Annotated[Session, Depends(get_db_session)],
     ) -> UnifiedResponse:
         """
@@ -633,7 +688,7 @@ class SessionManagementRouter:
             UnifiedResponse: 统一响应格式
         """
         try:
-            user_id = current_user.get("user_id")
+            user_id = current_user.get("user_id") if current_user else None
             session_repo = SessionRepository(db_session)
             message_repo = MessageRepository(db_session)
 
