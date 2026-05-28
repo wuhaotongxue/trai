@@ -108,25 +108,35 @@ def _send_image_generated_notify(
     width: int,
     height: int,
 ) -> None:
-    """后台发送文生图完成飞书通知（不阻塞主请求）"""
-    if not os.getenv("NOTIFY_FEISHU_IMAGE_ENABLED", "true").lower() == "true":
-        return
+    """后台发送文生图完成通知（不阻塞主请求）"""
+    if os.getenv("NOTIFY_FEISHU_IMAGE_ENABLED", "true").lower() == "true":
+        try:
+            service = get_feishu_ai_notify_service()
+            event = ImageGeneratedEvent(
+                user_id=user_id,
+                user_name=user_name,
+                prompt=prompt,
+                image_url=image_url,
+                model=model,
+                task_id=task_id,
+                width=width,
+                height=height,
+            )
+            service.notify_image_generated(event)
+            _update_notify_status(task_id, True, "success")
+        except Exception as e:
+            logger.warning(f"飞书原生图片生成通知失败: {e}")
+            _update_notify_status(task_id, False, "failed")
+            
     try:
-        service = get_feishu_ai_notify_service()
-        event = ImageGeneratedEvent(
-            user_id=user_id,
-            user_name=user_name,
+        media_notifier.notify(
+            media_type="image",
             prompt=prompt,
-            image_url=image_url,
-            model=model,
-            task_id=task_id,
-            width=width,
-            height=height,
+            file_url=image_url,
+            duration=3.0,
         )
-        service.notify_image_generated(event)
-        _update_notify_status(task_id, True, "success")
-    except Exception:
-        _update_notify_status(task_id, False, "failed")
+    except Exception as e:
+        logger.error(f"媒体统一推送异常(image): {e}")
 
 
 def _send_image_edited_notify(
@@ -143,29 +153,39 @@ def _send_image_edited_notify(
     steps: int,
     seed: int,
 ) -> None:
-    """后台发送图片编辑完成飞书通知（不阻塞主请求）"""
-    if not os.getenv("NOTIFY_FEISHU_IMAGE_ENABLED", "true").lower() == "true":
-        return
+    """后台发送图片编辑完成通知（不阻塞主请求）"""
+    if os.getenv("NOTIFY_FEISHU_IMAGE_ENABLED", "true").lower() == "true":
+        try:
+            service = get_feishu_ai_notify_service()
+            event = ImageEditedEvent(
+                user_id=user_id,
+                user_name=user_name,
+                prompt=prompt,
+                source_image_url=source_image_url,
+                source_image_url_2=source_image_url_2,
+                result_image_url=result_image_url,
+                model=model,
+                task_id=task_id,
+                width=width,
+                height=height,
+                steps=steps,
+                seed=seed,
+            )
+            service.notify_image_edited(event)
+            _update_notify_status(task_id, True, "success")
+        except Exception as e:
+            logger.warning(f"飞书原生图片编辑通知失败: {e}")
+            _update_notify_status(task_id, False, "failed")
+
     try:
-        service = get_feishu_ai_notify_service()
-        event = ImageEditedEvent(
-            user_id=user_id,
-            user_name=user_name,
+        media_notifier.notify(
+            media_type="image",
             prompt=prompt,
-            source_image_url=source_image_url,
-            source_image_url_2=source_image_url_2,
-            result_image_url=result_image_url,
-            model=model,
-            task_id=task_id,
-            width=width,
-            height=height,
-            steps=steps,
-            seed=seed,
+            file_url=result_image_url,
+            duration=3.0,
         )
-        service.notify_image_edited(event)
-        _update_notify_status(task_id, True, "success")
-    except Exception:
-        _update_notify_status(task_id, False, "failed")
+    except Exception as e:
+        logger.error(f"媒体统一推送异常(image_edit): {e}")
 
 
 def _update_notify_status(task_id: str, notified: bool, notify_status: str) -> None:

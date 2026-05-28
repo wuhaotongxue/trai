@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
+from loguru import logger
 from pydantic import BaseModel, Field
 
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
@@ -82,9 +83,24 @@ class MusicController:
 
             if result.success:
                 filename = os.path.basename(result.file_path or "")
+                
+                # 上传到 S3
+                s3_url = ""
+                try:
+                    from infrastructure.storage.s3_storage import get_s3_storage
+                    s3_storage = get_s3_storage()
+                    date_prefix = datetime.now().strftime("%Y%m")
+                    s3_key = f"public/ai/music/{date_prefix}/{filename}"
+                    s3_storage.upload_file(result.file_path, s3_key, content_type="audio/wav")
+                    s3_url = s3_storage.get_file_url(s3_key)
+                except Exception as e:
+                    logger.warning(f"音乐文件上传 S3 失败: {e}")
+                
+                final_url = s3_url or f"/api_trai/v1/ai/music/files/{filename}"
+                
                 _music_tasks[task_id]["status"] = "completed"
                 _music_tasks[task_id]["progress"] = "完成"
-                _music_tasks[task_id]["music_url"] = f"/api_trai/v1/ai/music/files/{filename}"
+                _music_tasks[task_id]["music_url"] = final_url
                 _music_tasks[task_id]["file_path"] = result.file_path
                 _music_tasks[task_id]["duration"] = result.duration
 
@@ -92,7 +108,7 @@ class MusicController:
                 media_notifier.notify(
                     media_type="music",
                     prompt=request.prompt,
-                    file_url=f"http://localhost:5666{_music_tasks[task_id]['music_url']}",
+                    file_url=final_url,
                     duration=result.duration,
                 )
             else:
