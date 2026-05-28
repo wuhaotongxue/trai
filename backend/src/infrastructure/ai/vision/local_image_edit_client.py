@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_16:20:00
+# 日期: 2026_05_28_17:05:00
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -37,8 +37,9 @@ class LocalImageEditClient:
 
     _instance: LocalImageEditClient | None = None
     _device_locks: dict[int, asyncio.Lock] = {}
+    _global_semaphore: asyncio.Semaphore | None = None
     _init_done: bool = False
-    _min_free_gb: float = 30.0
+    _min_free_gb: float = 20.0  # 降低阈值, 配合 CPU Offload
 
     def __new__(cls) -> LocalImageEditClient:
         """
@@ -69,6 +70,9 @@ class LocalImageEditClient:
         if LocalImageEditClient._init_done:
             return
         LocalImageEditClient._init_done = True
+        if LocalImageEditClient._global_semaphore is None:
+            # 限制全局同时执行图像编辑的任务数为 1, 确保排队防止 OOM
+            LocalImageEditClient._global_semaphore = asyncio.Semaphore(1)
         self._model_path = os.getenv(
             "MODELSCOPE_IMAGE_EDIT_MODEL_PATH",
             "/home/qyjgylc_whf/.cache/modelscope/hub/models/Qwen/Qwen-Image-Edit-2511",
@@ -242,14 +246,25 @@ def _main() -> None:
   height = int(os.environ["TRAI_IMAGE_EDIT_HEIGHT"])
   sys.stderr.write("[1/7] 初始化编辑管线\\n")
   dtype = torch.bfloat16 if device.startswith("cuda") else torch.float32
-  pipe = QwenImageEditPlusPipeline.from_pretrained(model_path, torch_dtype=dtype)
+
+  # 使用 low_cpu_mem_usage=True 减少内存占用, 先加载到 CPU
+  pipe = QwenImageEditPlusPipeline.from_pretrained(
+    model_path,
+    torch_dtype=dtype,
+    low_cpu_mem_usage=True,
+    device_map="cpu"
+  )
 
   if device.startswith("cuda"):
     # 显式设置当前设备, 配合 CUDA_VISIBLE_DEVICES 确保正确加载
-    torch.cuda.set_device(0)
-    # 开启模型层级 CPU Offload, 解决 20B 模型显存需求 (>50GB) 超过单卡 (44GB) 的问题
-    pipe.enable_model_cpu_offload()
-    sys.stderr.write("[1.5/7] 已启用显存优化 (Model CPU Offload)\\n")
+    try:
+      torch.cuda.set_device(0)
+      # 开启模型层级 CPU Offload, 解决 20B 模型显存需求 (>50GB) 超过单卡 (44GB) 的问题
+      pipe.enable_model_cpu_offload()
+      sys.stderr.write("[1.5/7] 已启用显存优化 (Model CPU Offload)\\n")
+    except Exception as e:
+      sys.stderr.write(f"启用显存优化失败: {{e}}, 尝试强制移动到设备\\n")
+      pipe = pipe.to(device)
   else:
     pipe = pipe.to(device)
 
@@ -316,14 +331,22 @@ if __name__ == "__main__":
         异常:
           RuntimeError: 当模型执行失败, 显存不足或返回无效结果时抛出.
         """
-        devices = self._get_devices_by_free_memory()
-        selected_device, free_gb = devices[0]
-        if selected_device >= 0 and free_gb < self._min_free_gb:
-            raise RuntimeError(
-                f"本地图像编辑模型显存不足, 当前最大空闲显存为 {free_gb:.2f}GB, 至少需要 {self._min_free_gb:.2f}GB"
-            )
-        lock = self._ensure_lock(selected_device)
-        async with lock:
+        async with self._global_semaphore or asyncio.Semaphore(1):
+            devices = self._get_devices_by_free_memory()
+            selected_device = -1
+            for dev_idx, free_gb in devices:
+                if dev_idx >= 0 and free_gb >= self._min_free_gb:
+                    selected_device = dev_idx
+                    logger.info(f"选择 GPU {selected_device} 执行任务, 空闲显存: {free_gb:.2f}GB")
+                    break
+
+            if selected_device < 0 and devices and devices[0][0] >= 0:
+                # 如果没有显存充足的卡, 但有 GPU 可用, 强制选显存最高的那张并尝试执行
+                selected_device = devices[0][0]
+                logger.warning(
+                    f"未找到显存充足 (>={self._min_free_gb}GB) 的 GPU, 强制使用最佳候选卡 {selected_device}, 空闲显存: {devices[0][1]:.2f}GB"
+                )
+
             with tempfile.TemporaryDirectory(prefix="trai_image_edit_") as temp_dir_str:
                 temp_dir = Path(temp_dir_str)
                 input_paths: list[str] = []
