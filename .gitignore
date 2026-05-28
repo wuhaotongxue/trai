@@ -129,3 +129,4 @@ src/models/backend/src/models/
 output_music/
 backend/acestep_lib/models/
 *.wav
+rewrite*.js
