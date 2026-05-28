@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_15:21:54
+# 日期: 2026_05_28_15:32:49
 # 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
 
 from __future__ import annotations
@@ -166,6 +166,41 @@ class LocalImageEditClient:
         output_path = temp_dir / f"{uuid.uuid4().hex}{suffix}"
         image.save(output_path, format="PNG")
         return output_path, image.size
+
+    def _normalize_dimension(self, value: int, *, fallback: int) -> int:
+        """
+        将单个尺寸规范到 16 的倍数.
+
+        参数:
+            value: 原始尺寸值.
+            fallback: 当尺寸无效时使用的兜底值.
+        返回:
+            int: 可用于模型推理的合法尺寸.
+        异常:
+            无.
+        """
+        if value <= 0:
+            value = fallback
+        normalized = max(16, (value // 16) * 16)
+        if normalized <= 0:
+            normalized = max(16, (fallback // 16) * 16)
+        return normalized
+
+    def _normalize_output_size(self, width: int, height: int) -> tuple[int, int]:
+        """
+        将输出宽高同时规范到 16 的倍数.
+
+        参数:
+            width: 原始宽度.
+            height: 原始高度.
+        返回:
+            tuple[int, int]: 规范化后的宽高.
+        异常:
+            无.
+        """
+        normalized_width = self._normalize_dimension(width, fallback=self._default_width)
+        normalized_height = self._normalize_dimension(height, fallback=self._default_height)
+        return normalized_width, normalized_height
 
     def _build_script(self, steps: int, seed: int | None) -> str:
         """
@@ -355,12 +390,15 @@ if __name__ == "__main__":
         with tempfile.TemporaryDirectory(prefix="trai_image_probe_") as probe_dir_str:
             probe_dir = Path(probe_dir_str)
             _, source_size = self._decode_to_temp_image(image_input, ".png", probe_dir)
-        target_width = width or source_size[0] or self._default_width
-        target_height = height or source_size[1] or self._default_height
+        original_width = width or source_size[0] or self._default_width
+        original_height = height or source_size[1] or self._default_height
+        target_width, target_height = self._normalize_output_size(original_width, original_height)
         target_steps = steps or self._default_steps
         logger.info(
             "开始本地图像编辑 | "
-            f"prompt={prompt[:80]} | width={target_width} | height={target_height} | "
+            f"prompt={prompt[:80]} | "
+            f"requested_size={original_width}x{original_height} | "
+            f"normalized_size={target_width}x{target_height} | "
             f"steps={target_steps} | dual_input={image_input_2 is not None}"
         )
         result = await self._run_subprocess(

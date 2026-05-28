@@ -35,6 +35,9 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_28_1532
+- **修正(image_edit_size)**: 本地图像编辑模型执行前新增尺寸自动对齐, 会把宽高规范到最接近的 16 倍数, 避免原图尺寸如 `5972x3987` 直接触发推理报错.
+
 ### 🛠️ 2026_05_26_2230
 - **深度规范治理**: 彻底修复了 [downloader.py](file:///home/qyjgylc_whf/code/trai/backend/src/api/routers/tools/downloader.py) 等 20+ 核心 Python 文件的入参返回值类型提示（Type Hints）。
 - **强制 Docstring**: 补齐了所有类和函数的中文文档，详细说明了参数含义、返回值及异常情况。
@@ -328,6 +331,9 @@ python run.py
 - **新增(backend)**: 初始化后端模块的 README.md 说明文档
 
 ## 📝 更新日志 (Changelog)
+
+### 🛠️ 后端_2026_05_28_1605
+- **修复(migration_env)**: `migrate_add_media_history_tables.py` 现已自动加载 `backend/env/*.env`, 并同时兼容 `POSTGRES_*` 与 `DB_*` 数据库配置变量, 避免再次因为脚本漏读环境导致手工补表.
 
 ### 🛠️ 后端_2026_05_28_1435
 - **优化(audit)**: 新增 `agent_audit_log_service.py`, 为媒体历史、音乐生成、视频生成和图片通知链路统一写入 `t_audit_logs`, 支持 `info/warning/error` 分级。

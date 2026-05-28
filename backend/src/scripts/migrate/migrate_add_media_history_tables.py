@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: migrate_add_media_history_tables.py
 # 作者: wuhao
-# 日期: 2026_05_28_14:15:09
+# 日期: 2026_05_28_15:58:43
 # 描述: 为 Agent 媒体历史能力创建音乐和视频记录表, 支持历史查询与批量删除
 
 from __future__ import annotations
@@ -54,15 +54,15 @@ class MediaHistoryTableMigration:
         异常:
             ValueError: 当数据库密码未配置时抛出.
         """
-        password = os.getenv("DB_PASSWORD", "")
+        password = os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD", "")
         if not password:
             raise ValueError("DB_PASSWORD 环境变量未设置")
         return {
-            "host": os.getenv("DB_HOST", "127.0.0.1"),
-            "port": int(os.getenv("DB_PORT", "5432")),
-            "user": os.getenv("DB_USER", "postgres"),
+            "host": os.getenv("POSTGRES_SERVER") or os.getenv("DB_HOST", "127.0.0.1"),
+            "port": int(os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT", "5432")),
+            "user": os.getenv("POSTGRES_USER") or os.getenv("DB_USER", "postgres"),
             "password": password,
-            "database": os.getenv("DB_NAME", "trai"),
+            "database": os.getenv("POSTGRES_DB") or os.getenv("DB_NAME", "trai"),
             "connect_timeout": 30,
         }
 
@@ -245,9 +245,18 @@ class MediaHistoryTableMigration:
         try:
             from dotenv import load_dotenv
 
-            env_path = cls._BACKEND_DIR / ".env"
-            logger.info(f"加载环境文件: {env_path}")
-            load_dotenv(env_path)
+            env_dir = cls._BACKEND_DIR / "env"
+            env_files = sorted(env_dir.glob("*.env")) if env_dir.exists() else []
+
+            if env_files:
+                for env_path in env_files:
+                    logger.info(f"加载环境文件: {env_path}")
+                    load_dotenv(env_path, override=False)
+                return
+
+            legacy_env_path = cls._BACKEND_DIR / ".env"
+            logger.info(f"加载兼容环境文件: {legacy_env_path}")
+            load_dotenv(legacy_env_path, override=False)
         except ImportError:
             logger.warning("python-dotenv 未安装, 跳过 .env 自动加载")
 

@@ -71,7 +71,7 @@ export function ChatPanel() {
     videoGenerateFrames, videoGenerateResolution, videoGenerateElapsedSeconds,
     isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery, removeFromMusicGallery, clearMusicGallery,
     batchDeleteMediaHistoryItems,
-    isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError,
+    isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError, imageEditProgress, imageEditStage,
   } = useAgentStore();
 
   const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍');
@@ -231,6 +231,13 @@ export function ChatPanel() {
   const videoProgressPercent = videoGenerateCurrentStep && videoGenerateTotalSteps
     ? Math.min(100, Math.round((videoGenerateCurrentStep / videoGenerateTotalSteps) * 100))
     : 0;
+  const imageEditProgressPercent = Math.max(0, Math.min(100, imageEditProgress));
+  const imageEditProgressCopy =
+    imageEditProgressPercent < 35
+      ? "正在分析原图结构和修改区域..."
+      : imageEditProgressPercent < 72
+        ? "正在重绘细节并融合编辑指令..."
+        : "正在整理最终画面并准备输出...";
 
   const handleCopyImageLink = async (url: string) => {
     try {
@@ -1402,8 +1409,43 @@ export function ChatPanel() {
                               </motion.div>
                             ) : isEditingImage ? (
                               <motion.div key="edit-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
-                                <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
-                                <div className="font-black uppercase text-xl flex items-center gap-3"><Loader2 className="animate-spin" /> 图像编辑处理中...</div>
+                                <div className={`relative w-full max-w-xl aspect-square bg-slate-100 dark:bg-slate-950 overflow-hidden ${brutalBorder}`}>
+                                  <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-300/40 to-transparent"
+                                    animate={{ x: ["-100%", "100%"] }}
+                                    transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
+                                  />
+                                  <motion.div
+                                    className="absolute inset-[12%] border-4 border-dashed border-rose-500/80"
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className={`w-32 h-32 bg-rose-200 dark:bg-rose-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}>
+                                      <Pencil className="w-16 h-16" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className={`w-full max-w-xl p-5 bg-white dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-4`}>
+                                  <div className="flex items-center justify-between gap-4 font-black uppercase">
+                                    <div className="flex items-center gap-3 text-xl">
+                                      <Loader2 className="animate-spin" />
+                                      {imageEditStage === "editing" ? "图像正在编辑" : "图像编辑处理中"}
+                                    </div>
+                                    <div>{imageEditProgressPercent}%</div>
+                                  </div>
+                                  <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+                                    <motion.div
+                                      className="h-full bg-rose-500"
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${imageEditProgressPercent}%` }}
+                                      transition={{ type: "spring", stiffness: 90, damping: 18 }}
+                                    />
+                                  </div>
+                                  <div className="text-sm font-bold break-words">
+                                    {imageEditProgressCopy}
+                                  </div>
+                                </div>
                               </motion.div>
                             ) : (
                               <motion.div key="edit-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4 opacity-50">

@@ -190,6 +190,12 @@ interface AgentState {
   editingSourceImage: string | null;
   /** 图片编辑 AbortController */
   editAbortController: AbortController | null;
+  /** 图片编辑进度(0-100) */
+  imageEditProgress: number;
+  /** 图片编辑阶段 */
+  imageEditStage: "idle" | "editing" | "done" | "error";
+  /** 图片编辑进度定时器 */
+  imageEditTimer: number | null;
 
   /** 开始会话 */
   startSession: () => Promise<void>;
@@ -347,6 +353,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   imageEditError: null,
   editingSourceImage: null,
   editAbortController: null,
+  imageEditProgress: 0,
+  imageEditStage: "idle",
+  imageEditTimer: null,
 
   /** 从 localStorage 恢复 gallery 数据（仅客户端调用） */
   hydrateGalleries: () => {
@@ -887,8 +896,43 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   editImage: async (sourceImage: string, editPrompt: string, sourceImage2?: string | null) => {
+    const current = get().editedImageUrl;
+    if (current && current.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(current);
+      } catch {
+      }
+    }
+    const existingTimer = get().imageEditTimer;
+    if (existingTimer) {
+      try {
+        window.clearInterval(existingTimer);
+      } catch {
+      }
+    }
     const abortCtrl = new AbortController();
-    set({ isEditingImage: true, imageEditError: null, editedImageUrl: null, editingSourceImage: sourceImage, editAbortController: abortCtrl });
+    const timer =
+      typeof window !== "undefined"
+        ? window.setInterval(() => {
+            set((state) => {
+              if (state.imageEditStage !== "editing") {
+                return state;
+              }
+              const next = Math.min(91, state.imageEditProgress + Math.max(1, Math.round(Math.random() * 5)));
+              return { ...state, imageEditProgress: next };
+            });
+          }, 500)
+        : null;
+    set({
+      isEditingImage: true,
+      imageEditError: null,
+      editedImageUrl: null,
+      editingSourceImage: sourceImage,
+      editAbortController: abortCtrl,
+      imageEditProgress: 6,
+      imageEditStage: "editing",
+      imageEditTimer: timer,
+    });
     try {
       // 压缩图片：base64 图片压缩到 5M 以内（避免超过后端 10M 限制）
       let imageToSend = sourceImage;
@@ -938,7 +982,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         signal: abortCtrl.signal,
         ...(image2ToSend ? { image_url_2: image2ToSend } : {}),
       });
-      set({ isEditingImage: false, editAbortController: null });
+      if (timer) {
+        try {
+          window.clearInterval(timer);
+        } catch {
+        }
+      }
+      set({
+        isEditingImage: false,
+        editAbortController: null,
+        imageEditProgress: 100,
+        imageEditStage: "done",
+        imageEditTimer: null,
+      });
       if (res.image_url) {
         set({ editedImageUrl: res.image_url });
         get().addToImageGallery(res.image_url, editPrompt, res.task_id);
@@ -952,15 +1008,36 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         set({ editedImageUrl: blobUrl });
         get().addToImageGallery(blobUrl, editPrompt);
       } else {
-        set({ imageEditError: res.error || "图片编辑失败" });
+        set({
+          imageEditError: res.error || "图片编辑失败",
+          imageEditStage: "error",
+        });
       }
     } catch (e: unknown) {
+      if (timer) {
+        try {
+          window.clearInterval(timer);
+        } catch {
+        }
+      }
       if (e instanceof Error && e.name === "AbortError") {
-        set({ isEditingImage: false, editAbortController: null });
+        set({
+          isEditingImage: false,
+          editAbortController: null,
+          imageEditProgress: 0,
+          imageEditStage: "idle",
+          imageEditTimer: null,
+        });
         return;
       }
       const msg = e instanceof Error ? e.message : "图片编辑失败";
-      set({ imageEditError: msg, isEditingImage: false, editAbortController: null });
+      set({
+        imageEditError: msg,
+        isEditingImage: false,
+        editAbortController: null,
+        imageEditStage: "error",
+        imageEditTimer: null,
+      });
     }
   },
 
@@ -972,15 +1049,42 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       } catch {
       }
     }
-    set({ editedImageUrl: null, imageEditError: null, editingSourceImage: null });
+    const existingTimer = get().imageEditTimer;
+    if (existingTimer) {
+      try {
+        window.clearInterval(existingTimer);
+      } catch {
+      }
+    }
+    set({
+      editedImageUrl: null,
+      imageEditError: null,
+      editingSourceImage: null,
+      imageEditProgress: 0,
+      imageEditStage: "idle",
+      imageEditTimer: null,
+    });
   },
 
   cancelEditImage: () => {
-    const { editAbortController } = get();
+    const { editAbortController, imageEditTimer } = get();
     if (editAbortController) {
       editAbortController.abort();
     }
-    set({ isEditingImage: false, imageEditError: null, editAbortController: null });
+    if (imageEditTimer) {
+      try {
+        window.clearInterval(imageEditTimer);
+      } catch {
+      }
+    }
+    set({
+      isEditingImage: false,
+      imageEditError: null,
+      editAbortController: null,
+      imageEditProgress: 0,
+      imageEditStage: "idle",
+      imageEditTimer: null,
+    });
   },
 
   addToImageGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => {
