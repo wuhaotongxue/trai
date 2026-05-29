@@ -237,10 +237,20 @@ class TaskFlowService:
                 logger.warning(f"Failed to generate expert msg: {e}")
 
         # 4. 推送通知
-        # 确保从 task_data 或 record_data 中获取转录文本
-        transcript = task_data.get("t_extra_data", {}).get("transcript", "")
-        if not transcript and "transcript" in task_data:
-            transcript = task_data["transcript"]
+        # 强制从所有可能的地方提取转录文本
+        transcript = ""
+        # 1. 尝试从 t_extra_data 提取
+        extra_data = task_data.get("t_extra_data", {})
+        if isinstance(extra_data, dict):
+            transcript = extra_data.get("transcript", "")
+
+        # 2. 尝试从 task_data 顶层提取
+        if not transcript:
+            transcript = task_data.get("transcript", "")
+
+        # 3. 如果还是没有, 记录警告日志
+        if not transcript:
+            logger.warning(f"Task {task_id} notification: No transcript found in task_data: {task_data}")
 
         self._send_notifications(
             notify_title, username, s3_url, expert_msg, task_data.get("t_title", "未命名任务"), transcript=transcript
@@ -258,22 +268,25 @@ class TaskFlowService:
         EnvFileLoader.load_local_envs()
 
         enabled = os.getenv("NOTIFY_ENABLED", "false").lower() == "true"
-        logger.info(f"Notification status: {enabled}")
+        logger.info(f"Notification status: {enabled}, transcript_len: {len(transcript)}")
         if not enabled:
             return
 
         # 格式化消息内容
-        transcript_text = transcript if transcript else "识别结果解析中, 请稍后查看详情..."
-        transcript_preview = (
-            f"\n\n**📄 识别内容 (2026-05-29):**\n> {transcript_text[:500]}{'...' if len(transcript_text) > 500 else ''}"
-        )
+        # 重点: 确保 transcript 哪怕只有一点内容也要显示出来
+        transcript_content = transcript.strip() if transcript else ""
+        if not transcript_content:
+            transcript_display = "> ⚠️ 暂未提取到有效文本内容"
+        else:
+            transcript_display = f"> {transcript_content[:800]}{'...' if len(transcript_content) > 800 else ''}"
 
         msg_content = (
             f"## 🧭 河南地理专家核心观测\n\n"
             f"> **事项:** {title}\n"
             f"> **目标:** {item_name}\n"
-            f"> **操作人:** {username}\n"
-            f"{transcript_preview}\n\n"
+            f"> **操作人:** {username}\n\n"
+            f"**📄 识别文本内容 (2026-05-29):**\n"
+            f"{transcript_display}\n\n"
             f"**💡 专家点评:**\n"
             f"{expert_msg if expert_msg else '任务已圆满完成, 祝您周五愉快!'}\n\n"
             f"--- \n"
