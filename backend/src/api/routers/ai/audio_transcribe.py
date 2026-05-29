@@ -522,6 +522,7 @@ class AudioTranscribeTask:
                         url=md_url,
                         expert_msg=expert_prompt,  # 使用生成的点评提示词作为预览
                         item_name=file_name,
+                        transcript=text,  # 显式传入转录文本
                     )
             finally:
                 db.close()

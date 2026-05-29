@@ -237,7 +237,11 @@ class TaskFlowService:
                 logger.warning(f"Failed to generate expert msg: {e}")
 
         # 4. 推送通知
+        # 确保从 task_data 或 record_data 中获取转录文本
         transcript = task_data.get("t_extra_data", {}).get("transcript", "")
+        if not transcript and "transcript" in task_data:
+            transcript = task_data["transcript"]
+
         self._send_notifications(
             notify_title, username, s3_url, expert_msg, task_data.get("t_title", "未命名任务"), transcript=transcript
         )
@@ -259,9 +263,9 @@ class TaskFlowService:
             return
 
         # 格式化消息内容
-        transcript_text = transcript if transcript else "未识别到有效文本"
+        transcript_text = transcript if transcript else "识别结果解析中, 请稍后查看详情..."
         transcript_preview = (
-            f"\n\n**📄 转录内容预览:**\n> {transcript_text[:500]}{'...' if len(transcript_text) > 500 else ''}"
+            f"\n\n**📄 识别内容 (2026-05-29):**\n> {transcript_text[:500]}{'...' if len(transcript_text) > 500 else ''}"
         )
 
         msg_content = (
