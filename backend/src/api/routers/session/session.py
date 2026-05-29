@@ -740,7 +740,7 @@ async def stream_message(
 async def create_session(
     request: CreateSessionRequest,
     session: Annotated[Session, Depends(get_db_session)],
-    request_obj: Annotated[Request, Depends()],
+    request_obj: Request,
     current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
 ) -> CreateSessionResponse:
     """创建新会话
@@ -763,6 +763,11 @@ async def create_session(
     x_forwarded_for = request_obj.headers.get("X-Forwarded-For")
     if x_forwarded_for:
         client_ip = x_forwarded_for.split(",")[0].strip()
+
+    # 如果是游客，使用 IP 作为标识符，以便游客也能看到自己的历史记录
+    if not user_id and client_ip:
+        user_id = f"guest_{client_ip}"
+        username = f"游客({client_ip})"
 
     session_repo = SessionRepository(session)
 
@@ -798,6 +803,7 @@ async def create_session(
 )
 async def list_sessions(
     session: Annotated[Session, Depends(get_db_session)],
+    request_obj: Request,
     current_user: Annotated[dict[str, Any] | None, Depends(get_current_user_optional)] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
@@ -806,6 +812,7 @@ async def list_sessions(
 
     Args:
         session: 数据库会话
+        request_obj: FastAPI Request 对象
         current_user: 当前登录用户（可选）
         limit: 每页数量
         offset: 偏移量
@@ -814,6 +821,15 @@ async def list_sessions(
         SessionListResponse: 会话列表
     """
     user_id = current_user.get("user_id") if current_user else None
+
+    # 如果是游客，尝试通过 IP 获取历史记录
+    if not user_id:
+        client_ip = request_obj.client.host if request_obj.client else None
+        x_forwarded_for = request_obj.headers.get("X-Forwarded-For")
+        if x_forwarded_for:
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        if client_ip:
+            user_id = f"guest_{client_ip}"
 
     session_repo = SessionRepository(session)
     message_repo = MessageRepository(session)

@@ -72,7 +72,7 @@ class EnvFileLoader:
             value = value.strip().strip('"').strip("'")
             if not key:
                 continue
-            os.environ.setdefault(key, value)
+            os.environ[key] = value  # 直接覆盖，确保模块配置生效
 
     @staticmethod
     def load_local_envs() -> None:
