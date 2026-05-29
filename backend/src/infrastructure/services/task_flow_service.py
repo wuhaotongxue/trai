@@ -5,6 +5,7 @@
 # 描述: 核心任务流服务, 封装 S3 上传、数据库记录持久化与多端通知推送逻辑.
 
 import os
+import random
 from datetime import datetime
 from typing import Any
 
@@ -118,11 +119,117 @@ class TaskFlowService:
         if expert_prompt:
             try:
                 ai_client = OpenAIClient(provider="deepseek")
-                # 增强提示词，加入周五认知
+
+                # 河南 100 个景点知识库
+                henan_spots = [
+                    "少林寺",
+                    "龙门石窟",
+                    "清明上河园",
+                    "云台山",
+                    "老君山",
+                    "白马寺",
+                    "殷墟",
+                    "红旗渠",
+                    "万仙山",
+                    "重渡沟",
+                    "鸡公山",
+                    "嵖岈山",
+                    "宝泉",
+                    "青天河",
+                    "神农山",
+                    "尧山",
+                    "龙潭大峡谷",
+                    "黛眉山",
+                    "荆紫山",
+                    "青龙峡",
+                    "峰林峡",
+                    "圆融寺",
+                    "武家湾",
+                    "关林",
+                    "白云山",
+                    "木札岭",
+                    "天河大峡谷",
+                    "龙峪湾",
+                    "养子沟",
+                    "伏牛山",
+                    "老界岭",
+                    "五朵山",
+                    "恐龙遗迹园",
+                    "内乡县衙",
+                    "宝天曼",
+                    "渠首",
+                    "丹江大观苑",
+                    "坐禅谷",
+                    "香严寺",
+                    "八里沟",
+                    "九莲山",
+                    "天界山",
+                    "关山",
+                    "秋沟",
+                    "齐王寨",
+                    "黄河小浪底",
+                    "王屋山",
+                    "五龙口",
+                    "黄河三峡",
+                    "小沟背",
+                    "中岳庙",
+                    "嵩阳书院",
+                    "少室阙",
+                    "启母阙",
+                    "太室阙",
+                    "法王寺",
+                    "永泰寺",
+                    "三皇寨",
+                    "康百万庄园",
+                    "杜甫故里",
+                    "伏羲山",
+                    "三泉湖",
+                    "红石林",
+                    "大峡谷",
+                    "云上牧场",
+                    "银基动物王国",
+                    "只有河南·戏剧幻城",
+                    "建业电影小镇",
+                    "方特旅游度假区",
+                    "绿博园",
+                    "河南博物院",
+                    "黄河博物馆",
+                    "二七纪念塔",
+                    "大河村遗址",
+                    "古荥冶铁遗址",
+                    "郑州城隍庙",
+                    "文庙",
+                    "开封府",
+                    "大相国寺",
+                    "包公祠",
+                    "龙亭",
+                    "铁塔",
+                    "繁塔",
+                    "延庆观",
+                    "翰园碑林",
+                    "朱仙镇启封故园",
+                    "洛阳博物馆",
+                    "隋唐洛阳城遗址",
+                    "应天门",
+                    "明堂天堂",
+                    "九洲池",
+                    "丽景门",
+                    "洛邑古城",
+                    "中国国花园",
+                    "王城公园",
+                    "隋唐城遗址植物园",
+                    "安阳博物馆",
+                    "中国文字博物馆",
+                    "马氏庄园",
+                    "袁林",
+                ]
+                selected_spot = random.choice(henan_spots)
+
+                # 增强提示词，加入周五认知和随机景点
                 full_prompt = (
-                    f"今天是 2026-05-29 周五。请作为一位'河南地理专家'，针对以下任务给出点评：\n"
+                    f"今天是 2026-05-29 周五. 请作为一位'河南地理专家', 针对以下任务给出点评: \n"
                     f"{expert_prompt}\n"
-                    "要求：口吻专业亲切，融入周五愉悦氛围，推荐一个河南景点，字数 60 字以内。"
+                    f"要求: 口吻专业亲切, 融入周五愉悦氛围, 必须推荐景点 '{selected_spot}', 字数 60 字以内."
                 )
                 ai_res = await ai_client.chat(messages=[{"role": "user", "content": full_prompt}])
                 expert_msg = ai_res.get("content", "")
@@ -132,17 +239,14 @@ class TaskFlowService:
         # 4. 推送通知
         transcript = task_data.get("t_extra_data", {}).get("transcript", "")
         self._send_notifications(
-            notify_title,
-            username,
-            s3_url,
-            expert_msg,
-            task_data.get("t_title", "未命名任务"),
-            transcript=transcript
+            notify_title, username, s3_url, expert_msg, task_data.get("t_title", "未命名任务"), transcript=transcript
         )
 
         return s3_url
 
-    def _send_notifications(self, title: str, username: str, url: str, expert_msg: str, item_name: str, transcript: str = ""):
+    def _send_notifications(
+        self, title: str, username: str, url: str, expert_msg: str, item_name: str, transcript: str = ""
+    ):
         """发送多端通知"""
         # 强制重新加载环境变量, 确保在异步线程中也能读取到最新配置
         from run import EnvFileLoader
@@ -155,7 +259,10 @@ class TaskFlowService:
             return
 
         # 格式化消息内容
-        transcript_preview = f"\n\n**📄 转录内容预览:**\n> {transcript[:300]}{'...' if len(transcript) > 300 else ''}" if transcript else ""
+        transcript_text = transcript if transcript else "未识别到有效文本"
+        transcript_preview = (
+            f"\n\n**📄 转录内容预览:**\n> {transcript_text[:500]}{'...' if len(transcript_text) > 500 else ''}"
+        )
 
         msg_content = (
             f"## 🧭 河南地理专家核心观测\n\n"

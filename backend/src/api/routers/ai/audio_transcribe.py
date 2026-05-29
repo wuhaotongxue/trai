@@ -149,7 +149,7 @@ class AudioTranscribeRouter:
 
             # 定义专家点评提示词
             expert_prompt = (
-                f"用户完成了一段实时语音转录, 识别内容为: '{transcript[:100]}...'. 请评价其录音质量或内容要点."
+                f"用户完成了一段实时语音转录, 识别内容为: '{transcript[:500]}...'. 请评价其录音质量或内容要点."
             )
 
             # 后台处理后续流程
@@ -500,7 +500,7 @@ class AudioTranscribeTask:
             try:
                 task_flow = TaskFlowService(db)
                 # 定义专家点评提示词
-                expert_prompt = f"用户上传了一段音频文件 '{file_name}' 并完成了识别. 识别内容为: '{text[:100]}...'. 请评价其录音质量或内容要点."
+                expert_prompt = f"用户上传了一段音频文件 '{file_name}' 并完成了识别. 识别内容为: '{text[:500]}...'. 请评价其录音质量或内容要点."
 
                 # 直接调用同步方法或异步方法
                 # 这里我们已经在后台线程了, 可以直接使用 TaskFlowService 的逻辑
