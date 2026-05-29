@@ -12,6 +12,19 @@ class ITTSClient(Protocol):
     TTS (Text-to-Speech) 声音克隆与合成抽象接口.
     """
 
+    def generate_speech(self, text: str, voice: str = "longxiaoyue") -> bytes:
+        """
+        使用预设音色合成语音
+
+        参数:
+            text: 要合成的文本
+            voice: 预设音色名称
+
+        返回:
+            bytes: 合成后的音频字节数据 (WAV格式)
+        """
+        ...
+
     def clone_and_synthesize(self, text: str, reference_audio_url: str, language: str = "zh") -> bytes:
         """
         零样本声音克隆并合成

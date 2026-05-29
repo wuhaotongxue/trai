@@ -346,7 +346,7 @@ export function ChatPanel() {
   const brutalBtnBase = `font-bold uppercase tracking-wide transition-transform active:translate-x-[4px] active:translate-y-[4px] active:shadow-none ${brutalBorder} ${brutalShadowSm}`;
 
   return (
-    <div className="flex h-full relative bg-[#fdfdfc] dark:bg-slate-950 text-slate-900 dark:text-slate-100" style={{ backgroundImage: "radial-gradient(#cbd5e1 1px, transparent 1px)", backgroundSize: "20px 20px" }}>
+    <div className="flex h-full min-h-0 relative bg-[#fdfdfc] dark:bg-slate-950 text-slate-900 dark:text-slate-100" style={{ backgroundImage: "radial-gradient(#cbd5e1 1px, transparent 1px)", backgroundSize: "20px 20px" }}>
       {/* 历史对话侧边栏 */}
       <AnimatePresence>
         {showHistory && (
@@ -354,13 +354,13 @@ export function ChatPanel() {
             initial={{ width: 0, opacity: 0, x: -20 }}
             animate={{ width: 280, opacity: 1, x: 0 }}
             exit={{ width: 0, opacity: 0, x: -20 }}
-            className={`flex flex-col overflow-hidden bg-white dark:bg-slate-900 ${brutalBorder} border-l-0 border-t-0 border-b-0 relative z-30`}
+            className={`flex flex-col min-h-0 overflow-hidden bg-white dark:bg-slate-900 ${brutalBorder} border-l-0 border-t-0 border-b-0 relative z-30`}
           >
-            <div className={`p-4 ${brutalBorder} border-l-0 border-t-0 border-r-0 flex items-center justify-between bg-cyan-200 dark:bg-slate-200 text-slate-900`}>
+            <div className={`p-4 ${brutalBorder} border-l-0 border-t-0 border-r-0 flex items-center justify-between bg-cyan-200 dark:bg-slate-200 text-slate-900 shrink-0`}>
               <span className="font-black text-lg uppercase tracking-tight">历史会话</span>
               <button onClick={() => startSession()} className={`h-8 w-8 bg-white flex items-center justify-center ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}><Plus className="h-4 w-4" /></button>
             </div>
-            <ScrollArea className="flex-1 p-4 bg-slate-50 dark:bg-slate-900">
+            <ScrollArea className="flex-1 min-h-0 p-4 bg-slate-50 dark:bg-slate-900">
               {sessions.map(s => (
                 <div 
                   key={s.session_id}
@@ -381,14 +381,14 @@ export function ChatPanel() {
       </AnimatePresence>
 
       {/* 主工作区 */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* 顶部导航 */}
-        <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20`}>
+        <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20 shrink-0`}>
           <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-cyan-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
             {showHistory ? <PanelLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </button>
           
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 min-h-0">
             <div className="flex items-center gap-3 py-1">
               {[
                 { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
@@ -427,16 +427,16 @@ export function ChatPanel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: "circOut" }}
-              className="flex-1 flex flex-col overflow-hidden"
+              className="flex-1 flex flex-col min-h-0 overflow-hidden"
             >
               { activeTab === "chat" ? (
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className={`p-4 bg-cyan-100 dark:bg-slate-200 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex justify-center text-slate-900`}>
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <div className={`p-4 bg-cyan-100 dark:bg-slate-200 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex justify-center text-slate-900 shrink-0`}>
                     <div className="w-full max-w-4xl">
                       <AgentTypeSelector value={selectedAgentType} onChange={setSelectedAgentType} compact />
                     </div>
                   </div>
-                  <ScrollArea className="flex-1">
+                  <ScrollArea className="flex-1 min-h-0">
                     <div className="max-w-4xl mx-auto p-6 space-y-8">
                       {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 opacity-70">
@@ -474,7 +474,7 @@ export function ChatPanel() {
                     </div>
                   </ScrollArea>
                   {/* 输入框 */}
-                  <div className={`p-6 bg-white dark:bg-slate-900 ${brutalBorder} border-b-0 border-l-0 border-r-0`}>
+                  <div className={`p-6 bg-white dark:bg-slate-900 ${brutalBorder} border-b-0 border-l-0 border-r-0 shrink-0`}>
                     <div className={`max-w-4xl mx-auto flex items-end gap-3 bg-white dark:bg-slate-800 p-2 ${brutalBorder} ${brutalShadow}`}>
                       <textarea 
                         value={input} 
@@ -490,8 +490,8 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : activeTab === "subtitle" ? (
-                <div className="flex-1 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                <div className="flex-1 min-h-0 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
                     <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">智能字幕提取</h2>
                     <div className="flex-1 min-h-0">
                       <SubtitlePanel />
@@ -499,17 +499,17 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : activeTab === "digital_human" ? (
-                <div className="flex-1 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                <div className="flex-1 min-h-0 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
                     <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">数字人合成</h2>
-                    <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+                    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                       <DigitalHumanPanel />
                     </div>
                   </div>
                 </div>
               ) : activeTab === "downloader" ? (
-                <div className="flex-1 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow}`}>
+                <div className="flex-1 min-h-0 overflow-hidden p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
                     <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">全网视频下载</h2>
                     <div className="flex-1 min-h-0 overflow-y-auto pr-2">
                       <VideoDownloaderPanel />
@@ -517,11 +517,11 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 overflow-hidden p-2">
-                  <div className="w-full h-full">
+                <div className="flex-1 min-h-0 overflow-hidden p-2">
+                  <div className="w-full h-full min-h-0">
                     {activeTab === "image" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
-                        <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
+                        <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">创意绘图</h2>
                             <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作.</div>
@@ -790,8 +790,8 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "video" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
-                        <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
+                        <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">视频生成</h2>
                             <div className="text-sm font-bold mt-1">让你的想象力动起来.</div>
@@ -1019,8 +1019,8 @@ export function ChatPanel() {
                     )}
 
                     {activeTab === "music" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full">
-                        <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full ${brutalBorder} ${brutalShadow}`}>
+                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
+                        <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">音乐创作</h2>
                             <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化.</div>

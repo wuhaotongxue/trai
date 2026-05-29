@@ -261,7 +261,7 @@ class OpenAIClient:
 
     async def chat(
         self,
-        messages: list[dict[str, Any]],
+        messages: list[dict[str, Any]] | str,
         model: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
@@ -271,7 +271,7 @@ class OpenAIClient:
         """发送对话请求
 
         Args:
-            messages: 消息列表(支持多模态 Vision 内容)
+            messages: 消息列表(支持多模态 Vision 内容) 或 纯文本字符串(将自动包装为 user 消息)
                 文本消息: {"role": "user", "content": "text"}
                 图片消息: {"role": "user", "content": [
                     {"type": "text", "text": "..."},
@@ -287,6 +287,11 @@ class OpenAIClient:
             dict: 响应结果
         """
         self._ensure_api_key()
+
+        # 健壮性处理: 如果传入的是字符串,自动包装为 messages 列表
+        if isinstance(messages, str):
+            logger.warning(f"检测到非标准调用: chat() 接收到字符串 messages,已自动包装为 list[dict]. 内容预览: {messages[:50]}...")
+            messages = [{"role": "user", "content": messages}]
 
         url = f"{self._base_url}/chat/completions"
         headers = {

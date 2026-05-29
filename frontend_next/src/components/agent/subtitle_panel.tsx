@@ -338,7 +338,7 @@ export function SubtitlePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950 p-6">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-50 dark:bg-slate-950 p-6">
       {/* 顶部 Tab 切换 */}
       <div className="flex gap-4 mb-6 shrink-0">
         {[

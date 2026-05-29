@@ -100,7 +100,8 @@ class MusicCreatorTool(BaseTool):
             logger.info("[MusicCreator] Step 1: LLM 创作歌词")
             llm = LLMClientFactory.create_client()
             lyrics_prompt = f"请根据以下主题创作一首简短的歌词(包含主歌和副歌), 并给出这首歌的视觉封面描述提示词.\n主题: {topic}\n\n请按以下严格的格式输出: \n【歌词】\n(此处写歌词)\n【封面提示词】\n(此处写封面提示词, 必须是英文)"
-            llm_result = await llm.chat(lyrics_prompt)
+            res = await llm.chat(messages=[{"role": "user", "content": lyrics_prompt}])
+            llm_result = res.get("content", "")
 
             lyrics = llm_result
             cover_prompt = f"A beautiful music album cover about {topic}, high quality, masterpiece, 4k"

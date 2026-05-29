@@ -35,6 +35,18 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_29_1436
+- **优化(ai)**: 升级 `DigitalHumanChatTool` 演示逻辑. 将 Mock 视频地址替换为真实可播放的 S3 示例视频, 解决前端“看不到视频舞台”的问题.
+- **增强(ai)**: 为数字人对话逻辑增加 `strip()` 处理及详细的 AI 回复日志记录.
+
+### 🛠️ 后端_2026_05_29_1420
+- **加固(ai)**: 在 `OpenAIClient.chat` 中引入防御性编程逻辑, 自动兼容并修复非标准的字符串类型 `messages` 参数, 强制将其转换为标准的 OpenAI `list[dict]` 格式, 彻底杜绝 400 序列化错误。
+- **服务(system)**: 重启后端服务 (Port 5666), 确保所有热修复补丁已加载生效。
+
+### 🛠️ 后端_2026_05_29_1417
+- **修复(ai)**: 修复 `OpenAIClient.chat` 调用格式错误. 统一将 `messages` 参数从纯字符串改为标准的 `list[dict]` 格式, 解决了 DeepSeek API 报 400 序列化失败的问题. 受影响模块包括: `digital_human_chat`, `music_creator`, `clone_voice_usecase`.
+- **规范(docstring)**: 进一步优化 `digital_human.py` 等模块的方法文档, 确保符合 3.13.13 研发规范.
+
 ### 🛠️ 后端_2026_05_29_1150
 - **修复(storage)**: 彻底解决 S3 文本产物在浏览器/客户端中查看时的中文乱码问题. 引入 `utf-8-sig` (带有 BOM) 编码写入本地临时文件, 并强制设置 S3 `ContentType` 为 `text/plain; charset=utf-8`.
 - **优化(notify)**: ASR 文件转写后台任务现在支持真正的 AI 动态点评, 接入 DeepSeek 模型根据识别文本生成专业且富有地理底蕴的专家回复.

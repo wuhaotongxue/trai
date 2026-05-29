@@ -60,6 +60,10 @@ class DashScopeTTSClient(ITTSClient):
                 model="cosyvoice-v1", voice=voice, format=AudioFormat.WAV_24000HZ_MONO_16BIT
             )
             audio_bytes = synthesizer.call(text)
+            
+            if audio_bytes is None:
+                raise ExternalServiceError("DashScope TTS 返回数据为空，请检查 API Key 或配额状态")
+
             logger.info(f"语音合成成功 | 音频大小: {len(audio_bytes)} bytes")
             return audio_bytes
         except Exception as e:

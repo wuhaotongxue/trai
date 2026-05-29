@@ -36,9 +36,11 @@ async def digital_human_chat(
         # 1. 使用 LLM 生成回复
         llm = OpenAIClient()
         prompt = f"你是一个友好的虚拟数字人助理, 请用简短, 自然, 口语化的语言回复用户的提问. 用户的提问是: {req.text}"
-        reply_text = await llm.chat(prompt)
+        res = await llm.chat(messages=[{"role": "user", "content": prompt}])
+        reply_text = res.get("content", "").strip()
+        logger.info(f"Digital human reply generated: {reply_text[:50]}...")
 
-        # 2. 调用数字人工具生成视频
+        # 2. 调用工具生成视频
         tool = DigitalHumanChatTool()
         user_id = current_user.get("user_id", "") if current_user else "anonymous"
         context = ExecutionContext(user_id=str(user_id), tenant_id="default")

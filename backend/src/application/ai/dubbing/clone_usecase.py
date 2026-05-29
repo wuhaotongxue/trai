@@ -75,7 +75,8 @@ class CloneVoiceUseCase:
 
             logger.info(f"[Clone] Step 3: 翻译为 {record.target_lang}")
             prompt = f"请将以下台词翻译为 {record.target_lang}. 只返回翻译后的纯文本, 不要任何解释或多余内容: \n{original_text}"
-            translated_text = await self._llm.chat(prompt)
+            res = await self._llm.chat(messages=[{"role": "user", "content": prompt}])
+            translated_text = res.get("content", "")
             logger.info(f"翻译结果: {translated_text}")
 
             logger.info("[Clone] Step 4: 上传参考人声到 S3")

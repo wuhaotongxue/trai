@@ -49,13 +49,13 @@ function AgentContent() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-100 dark:bg-slate-900">
-      <div className="flex flex-1 overflow-hidden border-t-4 border-slate-900 dark:border-white">
-        <div className="border-r-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800">
+    <div className="flex flex-col h-screen h-[100dvh] overflow-hidden bg-slate-100 dark:bg-slate-900">
+      <div className="flex flex-1 min-h-0 overflow-hidden border-t-4 border-slate-900 dark:border-white">
+        <div className="flex flex-col min-h-0 border-r-4 border-slate-900 dark:border-white bg-white dark:bg-slate-800">
           <Sidebar />
         </div>
         <main className="flex-1 relative flex flex-col min-w-0 bg-slate-50 dark:bg-slate-900 p-0 m-0 overflow-hidden">
-          <div className="flex-1 overflow-hidden h-full">
+          <div className="flex-1 min-h-0 overflow-hidden">
             <ChatPanel />
           </div>
         </main>

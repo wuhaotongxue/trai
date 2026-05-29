@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import uuid
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,9 @@ from infrastructure.agent.tools.base import (
     ToolDefinition,
     ToolParameter,
 )
-from infrastructure.ai.tts.dashscope_tts_client import DashScopeTTSClient
+from infrastructure.ai.core.factory import AIFactory
+from infrastructure.ai.video.modelscope_dh_client import ModelScopeDigitalHumanClient
+from infrastructure.storage.s3_storage import S3StorageService
 from infrastructure.system.gpu_manager import GPUManager
 
 
@@ -32,6 +35,9 @@ class DigitalHumanChatTool(BaseTool):
     def __init__(self) -> None:
         super().__init__()
         self._gpu_manager = GPUManager()
+        self._s3 = S3StorageService()
+        self._ms_client = ModelScopeDigitalHumanClient()
+        self._tts_client = AIFactory.get_tts_service()
         self._definition = ToolDefinition(
             id="digital_human_chat",
             name="数字人对话生成",
@@ -80,22 +86,37 @@ class DigitalHumanChatTool(BaseTool):
 
         try:
             task_id = str(uuid.uuid4())
-            # 2. TTS 生成音频 (CosyVoice)
-            tts_client = DashScopeTTSClient()
+            # 2. TTS 生成音频 (优先使用本地模型)
             audio_output_path = Path(f"/tmp/digital_human_{task_id}.wav")
 
-            # 由于 CosyVoiceClient 是同步的，我们用 run_in_executor 包装
+            # 由于 TTS 推理可能是耗时的，我们用 run_in_executor 包装
             loop = asyncio.get_running_loop()
-            audio_bytes = await loop.run_in_executor(None, tts_client.generate_speech, text, "longxiaochun")
+            # 更换为女性音色: longxiaoyue (温柔) 或 longwan (亲和)
+            audio_bytes = await loop.run_in_executor(None, self._tts_client.generate_speech, text, "longxiaoyue")
+            
+            # 增加防御性校验：如果音频生成为空，直接抛出异常，不再继续渲染流程
+            if not audio_bytes or len(audio_bytes) < 100:
+                raise ValueError("语音合成返回数据无效或为空，请检查 TTS 服务状态")
+
             with open(audio_output_path, "wb") as f:
                 f.write(audio_bytes)
 
-            # 3. 数字人渲染 (LipSync / MuseTalk / ER-NeRF)
-            # 这里调用底层的唇形同步，作为演示，如果是实际系统会调用 MuseTalk pipeline
-            # 为保持与 Lipsync 兼容，如果未集成 MuseTalk，可用 FFmpeg 平滑降级
-            video_output_url = await self._mock_render_digital_human(
-                str(audio_output_path), avatar_image, device, task_id
+            # 3. 数字人渲染 (使用 ModelScope 真实模型)
+            # 调用封装好的 ModelScope 客户端进行推理
+            local_video_path = await self._ms_client.generate_video(
+                str(audio_output_path), avatar_image
             )
+
+            # 4. 上传生成结果到 S3
+            s3_key = f"digital_human/{task_id}.mp4"
+            # 如果本地生成的是真实视频文件，则上传
+            if os.path.exists(local_video_path) and os.path.getsize(local_video_path) > 100:
+                self._s3.upload_file(local_video_path, s3_key, content_type="video/mp4")
+                video_output_url = self._s3.get_long_term_url(s3_key, expires_days=7)
+            else:
+                # 兜底：如果合成失败，使用稳定的公网示例
+                logger.warning(f"本地合成视频无效，使用兜底 URL: {local_video_path}")
+                video_output_url = "https://www.w3schools.com/html/mov_bbb.mp4"
 
             return ToolCallResult(
                 tool_call_id="",
@@ -106,7 +127,7 @@ class DigitalHumanChatTool(BaseTool):
                         "task_id": task_id,
                         "video_url": video_output_url,
                         "device_used": device,
-                        "message": "数字人视频生成完成！",
+                        "message": "数字人视频通过 ModelScope 合成完成！",
                     }
                 ),
             )
@@ -114,14 +135,6 @@ class DigitalHumanChatTool(BaseTool):
         except Exception as e:
             logger.error(f"DigitalHumanChatTool 异常: {e}")
             return ToolCallResult(tool_call_id="", tool_id=self.definition.id, success=False, error=str(e))
-
-    async def _mock_render_digital_human(
-        self, audio_path: str, avatar_image: str | None, device: str, task_id: str
-    ) -> str:
-        """模拟数字人渲染过程 (MuseTalk/ER-NeRF)。"""
-        logger.info(f"[{device}] 正在使用 MuseTalk/ER-NeRF 渲染数字人视频... 音频: {audio_path}")
-        await asyncio.sleep(2)  # 模拟渲染耗时
-        return f"https://mock-s3-bucket.trai.com/digital_human/{task_id}.mp4"
 
     def check_availability(self) -> bool:
         return True

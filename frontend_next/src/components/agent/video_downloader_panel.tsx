@@ -203,13 +203,13 @@ export function VideoDownloaderPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 p-6">
+    <div className="flex flex-col h-full min-h-0 bg-slate-50 dark:bg-slate-950 p-6">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto w-full h-full grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6"
+        className="max-w-6xl mx-auto w-full flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6"
       >
-        <div className={`flex flex-col min-h-[680px] bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+        <div className={`flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} overflow-hidden`}>
           <div className={`p-4 bg-cyan-200 dark:bg-slate-200 text-slate-900 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex items-center justify-between gap-4`}>
             <div>
               <h1 className="text-xl font-black uppercase tracking-[0.2em]">Video Downloader</h1>
