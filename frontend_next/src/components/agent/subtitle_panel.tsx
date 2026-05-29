@@ -55,6 +55,7 @@ export function SubtitlePanel() {
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState<string>("");
+  const [pendingAudioBlob, setPendingAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -196,7 +197,7 @@ export function SubtitlePanel() {
       micStream?.getTracks().forEach(track => track.stop());
       setMicStream(null);
       setIsRecording(false);
-      globalToast({ message: "正在识别语音内容, 请稍候...", variant: "info" });
+      globalToast({ message: "录音已停止, 请选择是否保存结果", variant: "info" });
     } else {
       // 开始录音
       try {
@@ -204,6 +205,7 @@ export function SubtitlePanel() {
         setMicStream(stream);
         setIsRecording(true);
         setLiveTranscript("");
+        setPendingAudioBlob(null);
         
         const recorder = new MediaRecorder(stream);
         mediaRecorderRef.current = recorder;
@@ -213,8 +215,6 @@ export function SubtitlePanel() {
           if (e.data.size > 0) {
             audioChunksRef.current.push(e.data);
             
-            // 实时发送当前所有已录制的音频进行识别
-            // 注意: 此处不使用 state 变量 isRecording 以避免闭包陷阱
             if (recorder.state === 'recording') {
               const currentBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
               const formData = new FormData();
@@ -237,26 +237,7 @@ export function SubtitlePanel() {
 
         recorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-          const formData = new FormData();
-          formData.append('file', audioBlob, 'recording.wav');
-
-          setIsTranscribing(true);
-          try {
-            const res = await request<any>("/ai/audio/realtime_transcribe", {
-              method: "POST",
-              body: formData
-            });
-            if (res.code === 200) {
-              setLiveTranscript(res.data.transcript);
-              globalToast({ message: "识别成功! 已同步 S3 并推送通知", variant: "success" });
-              fetchHistory(); // 刷新历史记录
-            }
-          } catch (err) {
-            console.error("ASR Error:", err);
-            globalToast({ message: "语音识别失败, 请检查网络或重试", variant: "error" });
-          } finally {
-            setIsTranscribing(false);
-          }
+          setPendingAudioBlob(audioBlob);
         };
 
         // 每 1.5 秒触发一次 ondataavailable，提升实时感
@@ -268,6 +249,50 @@ export function SubtitlePanel() {
       }
     }
   };
+
+  const handleSaveAudioRecord = async () => {
+    if (!pendingAudioBlob) return;
+    
+    const formData = new FormData();
+    formData.append('file', pendingAudioBlob, 'recording.wav');
+
+    setIsTranscribing(true);
+    try {
+      const res = await request<any>("/ai/audio/realtime_transcribe", {
+        method: "POST",
+        body: formData
+      });
+      if (res.code === 200) {
+        setLiveTranscript(res.data.transcript);
+        setPendingAudioBlob(null);
+        globalToast({ message: "保存成功! 已同步 S3 并推送通知", variant: "success" });
+        fetchHistory(); // 刷新历史记录
+      }
+    } catch (err) {
+      console.error("ASR Error:", err);
+      globalToast({ message: "保存失败, 请检查网络或重试", variant: "error" });
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const handleDiscardAudioRecord = () => {
+     setPendingAudioBlob(null);
+     setLiveTranscript("");
+     globalToast({ message: "已放弃当前录音结果", variant: "info" });
+   };
+ 
+   const handleCancelRecording = () => {
+     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+       mediaRecorderRef.current.stop();
+     }
+     micStream?.getTracks().forEach(track => track.stop());
+     setMicStream(null);
+     setIsRecording(false);
+     setPendingAudioBlob(null);
+     setLiveTranscript("");
+     globalToast({ message: "录音已直接取消", variant: "warning" });
+   };
 
   const toggleMeetingOption = (opt: string) => {
     setMeetingOptions(prev => 
@@ -435,54 +460,98 @@ export function SubtitlePanel() {
                       音频增强工具
                     </h3>
                     <div className="grid grid-cols-1 gap-6">
-                      <button 
-                        onClick={toggleRecording}
-                        className={cn(
-                          "p-8 flex items-center justify-between transition-all",
-                          brutalBorder,
-                          isRecording 
-                            ? "bg-red-500 text-white shadow-none translate-x-1 translate-y-1" 
-                            : "bg-indigo-100 text-slate-900 shadow-[6px_6px_0px_0px_#0f172a]"
-                        )}
-                      >
-                        <div className="flex items-center gap-6">
-                          {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
-                          <div className="text-left">
-                            <div className="text-2xl font-black uppercase tracking-tight">
-                              {isRecording ? "正在录音/识别..." : "实时语音识别"}
-                            </div>
-                            <div className={cn("text-base font-bold", isRecording ? "text-white/80" : "text-indigo-600")}>
-                              {isRecording ? "点击停止并生成结果" : "使用麦克风进行实时转录"}
+                      <div className="flex gap-4">
+                        <button 
+                          onClick={toggleRecording}
+                          disabled={isTranscribing}
+                          className={cn(
+                            "flex-1 p-8 flex items-center justify-between transition-all",
+                            brutalBorder,
+                            isRecording 
+                              ? "bg-red-500 text-white shadow-none translate-x-1 translate-y-1" 
+                              : "bg-indigo-100 text-slate-900 shadow-[6px_6px_0px_0px_#0f172a]"
+                          )}
+                        >
+                          <div className="flex items-center gap-6">
+                            {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
+                            <div className="text-left">
+                              <div className="text-2xl font-black uppercase tracking-tight">
+                                {isRecording ? "停止录音" : "实时语音识别"}
+                              </div>
+                              <div className={cn("text-base font-bold", isRecording ? "text-white/80" : "text-indigo-600")}>
+                                {isRecording ? "点击结束并进入保存确认" : "使用麦克风进行实时转录"}
+                              </div>
                             </div>
                           </div>
-                        </div>
+                          {isRecording && (
+                            <div className="flex gap-1">
+                              {[1, 2, 3].map(i => (
+                                <div key={i} className="w-1.5 h-6 bg-white animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                              ))}
+                            </div>
+                          )}
+                        </button>
+                        
                         {isRecording && (
-                          <div className="flex gap-1">
-                            {[1, 2, 3].map(i => (
-                              <div key={i} className="w-1.5 h-6 bg-white animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
-                            ))}
-                          </div>
+                          <button
+                            onClick={handleCancelRecording}
+                            className={cn(
+                              "px-8 bg-white text-red-500 font-black uppercase tracking-tight transition-all",
+                              brutalBorder,
+                              "shadow-[4px_4px_0px_0px_#ef4444] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                            )}
+                          >
+                            直接取消
+                          </button>
                         )}
-                      </button>
+                      </div>
 
                       {/* 实时识别结果展示区 */}
-                      {(liveTranscript || isTranscribing) && (
+                      {(liveTranscript || isTranscribing || pendingAudioBlob) && (
                         <div className={cn("p-8 bg-white dark:bg-slate-900 min-h-[160px] flex flex-col gap-4 transition-all", brutalBorder, brutalShadow)}>
                           <div className="flex items-center justify-between">
                             <h4 className="text-lg font-black uppercase tracking-tighter text-indigo-600 flex items-center gap-2">
                               <Type className="w-5 h-5" />
-                              识别结果 (ASR Result)
+                              {isRecording ? "正在实时识别 (Live Transcription)" : "识别结果预览 (Transcription Preview)"}
                             </h4>
                             {isTranscribing && <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />}
                           </div>
+                          
                           <div className="flex-1 text-xl font-bold leading-relaxed text-slate-700 dark:text-slate-300 italic">
                             {isTranscribing ? (
-                              <span className="animate-pulse">正在深度解析语音内容...</span>
+                              <div className="flex flex-col gap-2">
+                                <span className="animate-pulse">正在保存并同步至 S3...</span>
+                                <div className="w-full h-2 bg-slate-100 overflow-hidden">
+                                  <div className="w-1/2 h-full bg-indigo-500 animate-[shimmer_2s_infinite]" />
+                                </div>
+                              </div>
                             ) : (
-                              liveTranscript
+                              liveTranscript || (isRecording ? "正在倾听..." : "未识别到内容")
                             )}
                           </div>
-                          {!isTranscribing && liveTranscript && (
+
+                          {!isTranscribing && !isRecording && pendingAudioBlob && (
+                            <div className="flex items-center justify-between pt-6 border-t-2 border-slate-900 dark:border-white gap-4">
+                              <div className="text-xs font-black uppercase text-slate-500">录音已就绪, 是否入库?</div>
+                              <div className="flex gap-4">
+                                <Button 
+                                  onClick={handleDiscardAudioRecord}
+                                  variant="outline"
+                                  className={cn("h-12 px-6 font-black uppercase rounded-none border-2 border-red-500 text-red-500 hover:bg-red-50")}
+                                >
+                                  放弃 (Discard)
+                                </Button>
+                                <Button 
+                                  onClick={handleSaveAudioRecord}
+                                  className={cn("h-12 px-8 font-black uppercase rounded-none bg-emerald-500 text-white hover:bg-emerald-600 shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none")}
+                                >
+                                  保存记录 (Save)
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {!isTranscribing && !isRecording && !pendingAudioBlob && liveTranscript && (
                             <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
                               <Button 
                                 variant="outline" 
