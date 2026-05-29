@@ -58,7 +58,6 @@ class LocalASRClient:
                     self._model = AutoModel(
                         model=self._model_id,
                         trust_remote_code=True,
-                        remote_code="./model.py",
                         vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",  # 虽然 SenseVoice 有能力，但 FunASR 框架建议配一个
                         vad_kwargs={"max_single_segment_time": 30000},
                         device=device,

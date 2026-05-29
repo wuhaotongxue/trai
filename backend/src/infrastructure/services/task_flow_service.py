@@ -44,6 +44,7 @@ class TaskFlowService:
         task_data: dict[str, Any],
         notify_title: str,
         expert_prompt: str | None = None,
+        transcript: str | None = None,
     ) -> str:
         """
         执行标准化的 处理 -> 上传 -> 记录 -> 通知 流程.
@@ -52,21 +53,23 @@ class TaskFlowService:
             task_id (str): 任务 ID.
             user_id (str): 用户 ID.
             username (str): 用户名.
-            local_file_path (str): 本地文件路径 (可选).
-            s3_prefix (str): S3 存储前缀 (如 'audio/separation').
+            local_file_path (str): 本地音频/视频文件路径 (可选).
+            s3_prefix (str): S3 存储前缀 (如 'audio/asr').
             record_model_class (Any): 数据库模型类.
             task_data (dict): 写入数据库的额外数据.
             notify_title (str): 通知标题.
             expert_prompt (str): 如果提供, 将调用 DeepSeek 生成专家点评.
+            transcript (str): 识别出的文本内容 (可选).
 
         返回值:
             str: 结果访问 URL (S3 预签名地址).
         """
         s3_url = ""
+        transcript_url = ""
         object_key = ""
         file_size = 0
 
-        # 1. S3 上传
+        # 1. S3 上传原始文件 (音频/视频)
         if local_file_path and os.path.exists(local_file_path):
             file_ext = os.path.splitext(local_file_path)[1]
             object_key = f"{s3_prefix}/{task_id}{file_ext}"
@@ -77,13 +80,31 @@ class TaskFlowService:
             if file_ext.lower() in [".mp4", ".mov"]:
                 content_type = "video/mp4"
             elif file_ext.lower() in [".mp3", ".wav"]:
-                content_type = "audio/mpeg"
+                content_type = "audio/wav" if file_ext.lower() == ".wav" else "audio/mpeg"
 
             self._s3.upload_file(local_file_path, object_key, content_type=content_type)
             s3_url = self._s3.get_long_term_url(object_key, expires_days=7)
-            logger.info(f"Task {task_id} file uploaded to S3: {object_key}")
+            logger.info(f"Task {task_id} source file uploaded to S3: {object_key}")
 
-        # 2. 数据库持久化
+        # 2. 如果有转录文本, 上传到 S3 作为文本文件
+        if transcript:
+            import tempfile
+
+            # 使用 utf-8-sig (带有 BOM) 确保 Windows/浏览器能正确识别编码
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8-sig") as tmp:
+                tmp.write(transcript)
+                tmp_path = tmp.name
+
+            try:
+                transcript_key = f"{s3_prefix}/{task_id}_result.txt"
+                self._s3.upload_file(tmp_path, transcript_key, content_type="text/plain; charset=utf-8")
+                transcript_url = self._s3.get_long_term_url(transcript_key, expires_days=7)
+                logger.info(f"Task {task_id} transcript uploaded to S3: {transcript_key}")
+            finally:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+
+        # 3. 数据库持久化
         record_data = {
             "t_task_id": task_id,
             "t_user_id": user_id,
@@ -101,9 +122,18 @@ class TaskFlowService:
             if hasattr(record_model_class, "t_file_size"):
                 record_data["t_file_size"] = file_size
             if hasattr(record_model_class, "t_result_url"):
-                record_data["t_result_url"] = s3_url
+                # 如果是 ASR 任务, result_url 优先使用 transcript_url
+                record_data["t_result_url"] = transcript_url if transcript_url else s3_url
+            if hasattr(record_model_class, "t_source_url"):
+                record_data["t_source_url"] = s3_url
 
         record_data.update(task_data)
+
+        # 如果有 transcript_url, 更新 extra_data
+        if transcript_url:
+            if "t_extra_data" not in record_data:
+                record_data["t_extra_data"] = {}
+            record_data["t_extra_data"]["transcript_url"] = transcript_url
 
         # 移除 model 中不存在的 key
         valid_keys = record_model_class.__table__.columns.keys()
@@ -114,7 +144,7 @@ class TaskFlowService:
         self._db.commit()
         logger.info(f"Task {task_id} record saved to database.")
 
-        # 3. 生成专家点评 (DeepSeek)
+        # 4. 生成专家点评 (DeepSeek)
         expert_msg = ""
         if expert_prompt:
             try:
@@ -225,43 +255,70 @@ class TaskFlowService:
                 ]
                 selected_spot = random.choice(henan_spots)
 
-                # 增强提示词，加入周五认知和随机景点
+                # 增强提示词，加入当前日期和随机景点
+                now = datetime.now()
+                weekday_map = {0: "周一", 1: "周二", 2: "周三", 3: "周四", 4: "周五", 5: "周六", 6: "周日"}
+                current_date_str = f"{now.strftime('%Y-%m-%d')} {weekday_map[now.weekday()]}"
+
                 full_prompt = (
-                    f"今天是 2026-05-29 周五. 请作为一位'河南地理专家', 针对以下任务给出点评: \n"
+                    f"今天是 {current_date_str}. 请作为一位'河南地理专家', 针对以下任务给出点评: \n"
                     f"{expert_prompt}\n"
-                    f"要求: 口吻专业亲切, 融入周五愉悦氛围, 必须推荐景点 '{selected_spot}', 字数 60 字以内."
+                    f"要求: 口吻专业亲切, 融入{'周五' if now.weekday() == 4 else '工作日'}氛围, 必须推荐景点 '{selected_spot}', 字数 60 字以内."
                 )
                 ai_res = await ai_client.chat(messages=[{"role": "user", "content": full_prompt}])
                 expert_msg = ai_res.get("content", "")
             except Exception as e:
                 logger.warning(f"Failed to generate expert msg: {e}")
 
-        # 4. 推送通知
-        # 强制从所有可能的地方提取转录文本
-        transcript = ""
-        # 1. 尝试从 t_extra_data 提取
-        extra_data = task_data.get("t_extra_data", {})
-        if isinstance(extra_data, dict):
-            transcript = extra_data.get("transcript", "")
-
-        # 2. 尝试从 task_data 顶层提取
+        # 5. 推送通知
+        # 优先使用传入的 transcript
         if not transcript:
-            transcript = task_data.get("transcript", "")
-
-        # 3. 如果还是没有, 记录警告日志
-        if not transcript:
-            logger.warning(f"Task {task_id} notification: No transcript found in task_data: {task_data}")
+            extra_data = task_data.get("t_extra_data", {})
+            if isinstance(extra_data, dict):
+                transcript = extra_data.get("transcript", "")
+            if not transcript:
+                transcript = task_data.get("transcript", "")
 
         self._send_notifications(
-            notify_title, username, s3_url, expert_msg, task_data.get("t_title", "未命名任务"), transcript=transcript
+            title=notify_title,
+            username=username,
+            audio_url=s3_url,
+            transcript_url=transcript_url,
+            expert_msg=expert_msg,
+            item_name=task_data.get("t_title", "未命名任务"),
+            transcript=transcript,
         )
 
-        return s3_url
+        return transcript_url if transcript_url else s3_url
 
     def _send_notifications(
-        self, title: str, username: str, url: str, expert_msg: str, item_name: str, transcript: str = ""
-    ):
-        """发送多端通知"""
+        self,
+        title: str,
+        username: str,
+        audio_url: str,
+        transcript_url: str,
+        expert_msg: str,
+        item_name: str,
+        transcript: str = "",
+    ) -> None:
+        """
+        发送多端通知 (飞书 & 企微).
+
+        参数:
+            title (str): 通知事项标题.
+            username (str): 操作人用户名.
+            audio_url (str): 原始音频文件访问地址.
+            transcript_url (str): 识别结果文本文件访问地址.
+            expert_msg (str): 专家点评内容.
+            item_name (str): 目标任务名称.
+            transcript (str): 识别出的文本内容.
+
+        返回值:
+            None.
+
+        异常:
+            无 (内部已捕获并记录日志).
+        """
         # 强制重新加载环境变量, 确保在异步线程中也能读取到最新配置
         from run import EnvFileLoader
 
@@ -273,24 +330,28 @@ class TaskFlowService:
             return
 
         # 格式化消息内容
-        # 重点: 确保 transcript 哪怕只有一点内容也要显示出来
         transcript_content = transcript.strip() if transcript else ""
         if not transcript_content:
-            transcript_display = "> ⚠️ 暂未提取到有效文本内容"
+            transcript_display = "⚠️ 暂未提取到有效文本内容"
         else:
-            transcript_display = f"> {transcript_content[:800]}{'...' if len(transcript_content) > 800 else ''}"
+            # 限制长度并保持原样, 不再强制加块引用
+            transcript_display = f"{transcript_content[:800]}{'...' if len(transcript_content) > 800 else ''}"
+
+        now_str = datetime.now().strftime("%Y-%m-%d")
 
         msg_content = (
-            f"## 🧭 河南地理专家核心观测\n\n"
-            f"> **事项:** {title}\n"
-            f"> **目标:** {item_name}\n"
-            f"> **操作人:** {username}\n\n"
-            f"**📄 识别文本内容 (2026-05-29):**\n"
+            f"# 🧭 河南地理专家核心观测\n\n"
+            f"**事项:** {title}\n"
+            f"**目标:** {item_name}\n"
+            f"**操作人:** {username}\n\n"
+            f"--- \n"
+            f"**📄 识别文本内容 ({now_str}):**\n"
             f"{transcript_display}\n\n"
             f"**💡 专家点评:**\n"
             f"{expert_msg if expert_msg else '任务已圆满完成, 祝您周五愉快!'}\n\n"
             f"--- \n"
-            f"🔗 [点击查看详情/下载]({url})"
+            f"🔗 [音频文件地址]({audio_url})\n"
+            f"📄 [识别结果地址]({transcript_url if transcript_url else audio_url})"
         )
 
         # 飞书
@@ -298,7 +359,6 @@ class TaskFlowService:
         logger.info(f"Feishu notification enabled: {feishu_enabled}")
         if feishu_enabled:
             webhook = os.getenv("NOTIFY_FEISHU_WEBHOOK")
-            logger.info(f"Feishu webhook present: {bool(webhook)}")
             if webhook:
                 try:
                     NotifyServiceFactory.create_feishu(webhook).send(
@@ -313,7 +373,6 @@ class TaskFlowService:
         logger.info(f"WeCom notification enabled: {wecom_enabled}")
         if wecom_enabled:
             webhook = os.getenv("NOTIFY_WECOM_WEBHOOK")
-            logger.info(f"WeCom webhook present: {bool(webhook)}")
             if webhook:
                 try:
                     NotifyServiceFactory.create_wecom(webhook).send(

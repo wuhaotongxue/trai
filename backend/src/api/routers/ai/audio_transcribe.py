@@ -63,7 +63,16 @@ class AudioTranscribeRouter:
         file: UploadFile = File(..., description="录音分片 Blob"),
     ):
         """
-        处理增量录音识别, 仅返回文本
+        处理增量录音识别, 仅返回文本.
+
+        参数:
+            file (UploadFile): 录音分片文件.
+
+        返回值:
+            dict: 包含状态码、消息和识别出的文本数据.
+
+        异常:
+            无 (内部捕获并返回错误信息).
         """
         # 1. 保存临时文件
         suffix = ".wav"
@@ -111,12 +120,25 @@ class AudioTranscribeRouter:
         db: Session = Depends(get_db_session),
     ):
         """
-        处理实时录音转写
+        处理实时录音转写.
 
-        1. 保存临时文件
-        2. ASR 识别
-        3. 调用 TaskFlowService (异步)
-        4. 立即返回识别文本
+        流程:
+        1. 保存临时文件.
+        2. ASR 识别.
+        3. 异步启动 TaskFlowService 处理后续 (上传 S3 + 数据库 + 通知).
+        4. 立即返回识别文本给前端展示.
+
+        参数:
+            background_tasks (BackgroundTasks): 后台任务管理器.
+            file (UploadFile): 录音文件.
+            current_user (CurrentUserOptional): 当前用户 (可选).
+            db (Session): 数据库会话.
+
+        返回值:
+            dict: 包含 task_id、识别文本和状态的结果.
+
+        异常:
+            HTTPException: 识别或处理失败时抛出.
         """
         user_id = current_user.get("user_id", "anonymous") if current_user else "anonymous"
         username = current_user.get("display_name", "游客") if current_user else "游客"
@@ -181,6 +203,7 @@ class AudioTranscribeRouter:
                                 },
                                 notify_title="🎙️ 实时语音识别完成",
                                 expert_prompt=expert_prompt,
+                                transcript=trans,
                             )
                         )
                     finally:
@@ -442,9 +465,9 @@ class AudioTranscribeTask:
                 txt_path = os.path.join(tmpdir, f"{base_name}.txt")
                 pdf_path = os.path.join(tmpdir, f"{base_name}.pdf")
 
-                with open(md_path, "w", encoding="utf-8") as f:
+                with open(md_path, "w", encoding="utf-8-sig") as f:
                     f.write(md_content)
-                with open(txt_path, "w", encoding="utf-8") as f:
+                with open(txt_path, "w", encoding="utf-8-sig") as f:
                     f.write(txt_content)
 
                 # 使用 fpdf2 生成真正的 PDF
@@ -484,9 +507,9 @@ class AudioTranscribeTask:
                 txt_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.txt"
                 pdf_key = f"transcribes/{date_prefix}/{uuid.uuid4().hex[:8]}_{base_name}.pdf"
 
-                s3_storage.upload_file(md_path, md_key)
-                s3_storage.upload_file(txt_path, txt_key)
-                s3_storage.upload_file(pdf_path, pdf_key)
+                s3_storage.upload_file(md_path, md_key, content_type="text/markdown; charset=utf-8")
+                s3_storage.upload_file(txt_path, txt_key, content_type="text/plain; charset=utf-8")
+                s3_storage.upload_file(pdf_path, pdf_key, content_type="application/pdf")
 
                 md_url = s3_storage.get_file_url(md_key)
                 txt_url = s3_storage.get_file_url(txt_key)
@@ -499,12 +522,45 @@ class AudioTranscribeTask:
             db = get_database().get_session()
             try:
                 task_flow = TaskFlowService(db)
-                # 定义专家点评提示词
-                expert_prompt = f"用户上传了一段音频文件 '{file_name}' 并完成了识别. 识别内容为: '{text[:500]}...'. 请评价其录音质量或内容要点."
+                # 1. 生成专家点评 (调用 AI)
+                import random
 
-                # 直接调用同步方法或异步方法
-                # 这里我们已经在后台线程了, 可以直接使用 TaskFlowService 的逻辑
-                # 为了保持代码简洁, 我们手动触发核心更新和通知逻辑
+                from infrastructure.ai.core.openai_client import OpenAIClient
+
+                expert_msg = ""
+                try:
+                    ai_client = OpenAIClient(provider="deepseek")
+                    expert_prompt = f"用户上传了一段音频文件 '{file_name}' 并完成了识别. 识别内容为: '{text[:500]}...'. 请评价其录音质量或内容要点."
+
+                    # 河南 100 个景点知识库 (保持与 task_flow_service 一致)
+                    henan_spots = [
+                        "少林寺",
+                        "龙门石窟",
+                        "清明上河园",
+                        "云台山",
+                        "老君山",
+                        "白马寺",
+                        "殷墟",
+                        "红旗渠",
+                        "万仙山",
+                        "重渡沟",
+                    ]
+                    selected_spot = random.choice(henan_spots)
+
+                    now = datetime.now()
+                    weekday_map = {0: "周一", 1: "周二", 2: "周三", 3: "周四", 4: "周五", 5: "周六", 6: "周日"}
+                    current_date_str = f"{now.strftime('%Y-%m-%d')} {weekday_map[now.weekday()]}"
+
+                    full_prompt = (
+                        f"今天是 {current_date_str}. 请作为一位'河南地理专家', 针对以下任务给出点评: \n"
+                        f"{expert_prompt}\n"
+                        f"要求: 口吻专业亲切, 融入{'周五' if now.weekday() == 4 else '工作日'}氛围, 必须推荐景点 '{selected_spot}', 字数 60 字以内."
+                    )
+                    ai_res = await ai_client.chat(messages=[{"role": "user", "content": full_prompt}])
+                    expert_msg = ai_res.get("content", "任务已圆满完成, 祝您愉快!")
+                except Exception as e:
+                    logger.warning(f"Failed to generate expert msg in background task: {e}")
+                    expert_msg = "音频转写已完成, 请查收结果."
 
                 record = db.query(AudioRecordModel).filter(AudioRecordModel.t_id == record_id).first()
                 if record:
@@ -512,17 +568,18 @@ class AudioTranscribeTask:
                     extra = dict(record.t_extra_data or {})
                     extra.update({"transcript": text, "md_url": md_url, "txt_url": txt_url, "pdf_url": pdf_url})
                     record.t_extra_data = extra
-                    record.t_result_url = md_url
+                    record.t_result_url = txt_url  # 优先使用 TXT
                     db.commit()
 
                     # 发送多端通知
                     task_flow._send_notifications(
                         title="🎙️ 音频文件转写完成",
                         username=creator_id,
-                        url=md_url,
-                        expert_msg=expert_prompt,  # 使用生成的点评提示词作为预览
+                        audio_url=record.t_source_url or "",
+                        transcript_url=txt_url,  # 显式使用 txt_url
+                        expert_msg=expert_msg,
                         item_name=file_name,
-                        transcript=text,  # 显式传入转录文本
+                        transcript=text,
                     )
             finally:
                 db.close()
