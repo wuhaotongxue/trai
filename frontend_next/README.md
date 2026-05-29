@@ -4,6 +4,11 @@
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_05_29_1056
+- **功能(audio)**: 音频处理面板新增实时语音识别预览功能, 录音过程中识别结果每 1.5 秒实时填充至右侧结果区. 
+- **优化(agent_ui)**: 彻底清理 `/agent` 页面残余紫色系元素, 统一使用 Indigo (靛蓝色) 视觉语言, 增强品牌一致性. 
+- **修复(recording)**: 修复 MediaRecorder 的闭包陷阱问题, 确保增量音频识别请求在录音期间持续发送. 
+
 ### 🎨 前端_2026_05_28_1800
 - **修复(undefined_error)**: 修复 `chat_panel.tsx` 中 `editingImagePreview` 和 `editPrompt` 未定义导致的渲染崩溃问题.
 - **重构(state_cleanup)**: 从 `agent.store.ts` 中彻底移除已弃用的 legacy 变量 (`editingImagePreview`, `editPrompt`), 统一使用 `editingSourceImage` 和 `imageEditPrompt`.

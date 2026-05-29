@@ -35,6 +35,12 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_29_1056
+- **优化(audio_transcribe)**: 音频识别模型升级为阿里 SenseVoiceSmall, 显著提升多语言识别准确率, 并支持 GPU 加速与 ITN 格式化. 
+- **修复(database)**: 手动补齐 `t_audio_records` 数据库表, 解决 ASR 历史记录持久化报错问题. 
+- **优化(notify)**: 飞书通知升级为交互式卡片 (Interactive Card), 解决 Markdown 无法正常渲染的问题, 并增强异步环境下的配置重载. 
+- **优化(audit)**: 实时语音识别链路补齐 `TaskFlow` 审计, 支持全流程状态追溯与多端实时同步. 
+
 ### 🛠️ 后端_2026_05_29_0920
 - **优化(notify)**: 升级 B 站视频下载通知逻辑，由“河南地理专家”身份进行实时播报。
 - **集成(LLM)**: 接入 DeepSeek 模型，为每次成功下载随机生成一段河南地理人文介绍，并带有周五欢快氛围的专家问候。

@@ -57,7 +57,15 @@ class FeishuNotifyService(BaseNotifyService):
             payload["content"] = {"text": message.content}
 
         elif message.msg_type == NotifyType.MARKDOWN:
-            payload["content"] = {"text": message.content}
+            # 飞书文本类型不支持 Markdown，转换为交互式卡片以支持
+            payload["msg_type"] = "interactive"
+            payload["card"] = {
+                "header": {
+                    "title": {"content": message.title or "TRAI 助手通知", "tag": "plain_text"},
+                    "template": "blue",
+                },
+                "elements": [{"tag": "markdown", "content": message.content}],
+            }
 
         elif message.msg_type == NotifyType.HTML:
             payload["content"] = {"text": message.content}

@@ -26,8 +26,8 @@ class LocalASRClient:
 
     def __init__(self) -> None:
         self._model_id: str = os.getenv(
-            "ASR_MODEL_ID",
-            "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+            "MODELSCOPE_ASR_MODEL_ID",
+            "iic/SenseVoiceSmall",
         )
         self._model = None
 
@@ -47,14 +47,31 @@ class LocalASRClient:
         if self._model is None:
             try:
                 logger.info(f"加载本地 ASR 模型: {self._model_id}")
+                import torch
                 from funasr import AutoModel
 
-                self._model = AutoModel(
-                    model=self._model_id,
-                    vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
-                    punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
-                    disable_update=True,
-                )
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                logger.info(f"使用设备: {device}")
+
+                # SenseVoiceSmall 不需要单独的 VAD 和标点模型，它内置了这些能力
+                if "SenseVoice" in self._model_id:
+                    self._model = AutoModel(
+                        model=self._model_id,
+                        trust_remote_code=True,
+                        remote_code="./model.py",
+                        vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",  # 虽然 SenseVoice 有能力，但 FunASR 框架建议配一个
+                        vad_kwargs={"max_single_segment_time": 30000},
+                        device=device,
+                        disable_update=True,
+                    )
+                else:
+                    self._model = AutoModel(
+                        model=self._model_id,
+                        vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                        punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
+                        device=device,
+                        disable_update=True,
+                    )
             except ImportError:
                 logger.error("缺少 funasr 库, 请执行: pip install funasr torchaudio")
                 raise RuntimeError("缺少 funasr 库, 请执行: pip install funasr torchaudio")
@@ -79,12 +96,25 @@ class LocalASRClient:
         try:
             model = self._get_model()
             logger.info(f"开始本地 ASR 识别: {audio_path}")
-            res = model.generate(input=str(audio_path), batch_size_s=300)
+
+            # SenseVoiceSmall 支持 language, use_itn 等参数
+            kwargs = {"batch_size_s": 300}
+            if "SenseVoice" in self._model_id:
+                kwargs["language"] = os.getenv("MODELSCOPE_ASR_LANGUAGE", "auto")
+                kwargs["use_itn"] = os.getenv("MODELSCOPE_ASR_USE_ITN", "true").lower() == "true"
+
+            res = model.generate(input=str(audio_path), **kwargs)
 
             if not res or not isinstance(res, list):
                 return ""
 
             text = res[0].get("text", "")
+
+            # SenseVoice 的结果中可能包含 <|zh|><|NEUTRAL|><|Speech|> 等标签，需要清理以供显示
+            import re
+
+            text = re.sub(r"<\|.*?\|>", "", text)
+
             timestamp = res[0].get("timestamp", [])
 
             if not text:
