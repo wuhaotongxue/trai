@@ -69,6 +69,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_05_29_1115
+- **优化(audio_transcribe)**: 深度优化音频识别体验. 集成阿里 `SenseVoiceSmall` 模型提升识别准确度. 实现增量音频流处理, 前端每 1.5 秒发送一次增量音频, 后端实时 ASR 识别并在前端右侧流式展示识别结果.
+- **修复(notify)**: 修复 `TaskFlowService` 在 `BackgroundTasks` 中因数据库 Session 提前关闭导致的执行中断问题. 确保实时转录完成后能正确触发 S3 上传、专家点评及飞书/企微通知推送.
+- **规范(code_quality)**: 全量修复 `audio_transcribe.py` 中的中文全角标点, 补齐所有类与方法的 Docstring, 确保 100% 符合 Python 3.13.13 研发与安全红线规范.
+
 ### 🧩 前端_2026_05_28_1800
 - **修复(undefined_error)**: 修复 `chat_panel.tsx` 中 `editingImagePreview` 和 `editPrompt` 未定义导致的渲染崩溃问题.
 - **重构(state_cleanup)**: 从 `agent.store.ts` 中彻底移除已弃用的 legacy 变量 (`editingImagePreview`, `editPrompt`), 统一使用 `editingSourceImage` 和 `imageEditPrompt`.

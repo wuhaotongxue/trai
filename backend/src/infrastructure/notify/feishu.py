@@ -73,8 +73,8 @@ class FeishuNotifyService(BaseNotifyService):
         if message.extra.get("at_mobiles"):
             payload["at"] = {"atMobiles": message.extra["at_mobiles"]}
 
-        if message.title:
-            payload["content"]["text"] = f"{message.title}\n{payload['content']['text']}"
+        if message.title and payload["msg_type"] != "interactive":
+            payload["content"]["text"] = f"{message.title}\n{payload['content'].get('text', '')}"
 
         return payload
 

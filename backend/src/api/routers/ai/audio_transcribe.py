@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # 文件名: audio_transcribe.py
 # 作者: wuhao
-# 日期: 2026_05_26_20:45:12
+# 日期: 2026_05_29_11:15:53
 # 描述: 语音转写 API, 支持上传音频、后台 ASR 处理、生成多格式报告并推送通知
 
 import os
@@ -147,30 +147,53 @@ class AudioTranscribeRouter:
             # 3. 异步执行 TaskFlow (上传 S3 + 数据库 + 通知)
             task_id = str(uuid.uuid4())
 
-            # 获取当前数据库 Session 供 TaskFlow 使用
-            task_flow = TaskFlowService(db)
-
             # 定义专家点评提示词
             expert_prompt = (
-                f"用户完成了一段实时语音转录，识别内容为：'{transcript[:100]}...'。请评价其录音质量或内容要点。"
+                f"用户完成了一段实时语音转录, 识别内容为: '{transcript[:100]}...'. 请评价其录音质量或内容要点."
             )
 
             # 后台处理后续流程
+            # 注意: 不要直接传递 Depends(get_db_session) 注入的 db, 因为它在请求结束后会被关闭
+            # 我们在后台任务中手动获取一个新的 session
+            from infrastructure.database.database import DatabaseProvider
+
+            def run_background_task(tid, uid, uname, path, filename, trans):
+                with DatabaseProvider.get_session() as background_db:
+                    task_flow = TaskFlowService(background_db)
+                    import asyncio
+
+                    # process_and_notify 是 async 方法, 需要用 event loop 运行
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        loop.run_until_complete(
+                            task_flow.process_and_notify(
+                                task_id=tid,
+                                user_id=uid,
+                                username=uname,
+                                local_file_path=path,
+                                s3_prefix="audio/asr",
+                                record_model_class=AudioRecordModel,
+                                task_data={
+                                    "t_task_type": "asr",
+                                    "t_title": f"实时识别: {filename or '未命名'}",
+                                    "t_extra_data": {"transcript": trans, "original_filename": filename},
+                                },
+                                notify_title="🎙️ 实时语音识别完成",
+                                expert_prompt=expert_prompt,
+                            )
+                        )
+                    finally:
+                        loop.close()
+
             background_tasks.add_task(
-                task_flow.process_and_notify,
-                task_id=task_id,
-                user_id=user_id,
-                username=username,
-                local_file_path=tmp_path,
-                s3_prefix="audio/asr",
-                record_model_class=AudioRecordModel,
-                task_data={
-                    "t_task_type": "asr",
-                    "t_title": f"实时识别: {file.filename or '未命名'}",
-                    "t_extra_data": {"transcript": transcript, "original_filename": file.filename},
-                },
-                notify_title="🎙️ 实时语音识别完成",
-                expert_prompt=expert_prompt,
+                run_background_task,
+                task_id,
+                user_id,
+                username,
+                tmp_path,
+                file.filename,
+                transcript,
             )
 
             return {
@@ -469,25 +492,39 @@ class AudioTranscribeTask:
                 txt_url = s3_storage.get_file_url(txt_key)
                 pdf_url = s3_storage.get_file_url(pdf_key)
 
-            # 4. 更新数据库
+            # 4. 执行 TaskFlow 流程 (更新数据库 + 发送通知)
             from infrastructure.database.database import get_database
+            from infrastructure.services.task_flow_service import TaskFlowService
 
             db = get_database().get_session()
             try:
+                task_flow = TaskFlowService(db)
+                # 定义专家点评提示词
+                expert_prompt = f"用户上传了一段音频文件 '{file_name}' 并完成了识别. 识别内容为: '{text[:100]}...'. 请评价其录音质量或内容要点."
+
+                # 直接调用同步方法或异步方法
+                # 这里我们已经在后台线程了, 可以直接使用 TaskFlowService 的逻辑
+                # 为了保持代码简洁, 我们手动触发核心更新和通知逻辑
+
                 record = db.query(AudioRecordModel).filter(AudioRecordModel.t_id == record_id).first()
                 if record:
                     record.t_status = "success"
-                    # 将结果存入 extra_data
                     extra = dict(record.t_extra_data or {})
                     extra.update({"transcript": text, "md_url": md_url, "txt_url": txt_url, "pdf_url": pdf_url})
                     record.t_extra_data = extra
-                    record.t_result_url = md_url  # 默认结果 URL
+                    record.t_result_url = md_url
                     db.commit()
+
+                    # 发送多端通知
+                    task_flow._send_notifications(
+                        title="🎙️ 音频文件转写完成",
+                        username=creator_id,
+                        url=md_url,
+                        expert_msg=expert_prompt,  # 使用生成的点评提示词作为预览
+                        item_name=file_name,
+                    )
             finally:
                 db.close()
-
-            # 5. 发送飞书通知
-            AudioTranscribeUtils.send_transcribe_notify(creator_id, file_name, text, md_url, txt_url, pdf_url)
 
             logger.info(f"音频转写任务完成: {record_id}")
 

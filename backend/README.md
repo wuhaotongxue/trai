@@ -35,6 +35,11 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_05_29_1115
+- **优化(audio_transcribe)**: 深度优化音频识别体验. 集成阿里 `SenseVoiceSmall` 模型提升识别准确度. 实现增量音频流处理, 前端每 1.5 秒发送一次增量音频, 后端实时 ASR 识别并在前端右侧流式展示识别结果.
+- **修复(notify)**: 修复 `TaskFlowService` 在 `BackgroundTasks` 中因数据库 Session 提前关闭导致的执行中断问题. 确保实时转录完成后能正确触发 S3 上传、专家点评及飞书/企微通知推送.
+- **规范(code_quality)**: 全量修复 `audio_transcribe.py` 中的中文全角标点, 补齐所有类与方法的 Docstring, 确保 100% 符合 Python 3.13.13 研发与安全红线规范.
+
 ### 🛠️ 后端_2026_05_29_1056
 - **优化(audio_transcribe)**: 音频识别模型升级为阿里 SenseVoiceSmall, 显著提升多语言识别准确率, 并支持 GPU 加速与 ITN 格式化. 
 - **修复(database)**: 手动补齐 `t_audio_records` 数据库表, 解决 ASR 历史记录持久化报错问题. 
