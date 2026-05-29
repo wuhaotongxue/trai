@@ -130,13 +130,21 @@ class TaskFlowService:
                 logger.warning(f"Failed to generate expert msg: {e}")
 
         # 4. 推送通知
-        self._send_notifications(notify_title, username, s3_url, expert_msg, task_data.get("t_title", "未命名任务"))
+        transcript = task_data.get("t_extra_data", {}).get("transcript", "")
+        self._send_notifications(
+            notify_title,
+            username,
+            s3_url,
+            expert_msg,
+            task_data.get("t_title", "未命名任务"),
+            transcript=transcript
+        )
 
         return s3_url
 
-    def _send_notifications(self, title: str, username: str, url: str, expert_msg: str, item_name: str):
+    def _send_notifications(self, title: str, username: str, url: str, expert_msg: str, item_name: str, transcript: str = ""):
         """发送多端通知"""
-        # 强制重新加载环境变量，确保在异步线程中也能读取到最新配置
+        # 强制重新加载环境变量, 确保在异步线程中也能读取到最新配置
         from run import EnvFileLoader
 
         EnvFileLoader.load_local_envs()
@@ -147,12 +155,16 @@ class TaskFlowService:
             return
 
         # 格式化消息内容
+        transcript_preview = f"\n\n**📄 转录内容预览:**\n> {transcript[:300]}{'...' if len(transcript) > 300 else ''}" if transcript else ""
+
         msg_content = (
             f"## 🧭 河南地理专家核心观测\n\n"
             f"> **事项:** {title}\n"
             f"> **目标:** {item_name}\n"
-            f"> **操作人:** {username}\n\n"
-            f"{expert_msg if expert_msg else '任务已圆满完成，祝您周五愉快！'}\n\n"
+            f"> **操作人:** {username}\n"
+            f"{transcript_preview}\n\n"
+            f"**💡 专家点评:**\n"
+            f"{expert_msg if expert_msg else '任务已圆满完成, 祝您周五愉快!'}\n\n"
             f"--- \n"
             f"🔗 [点击查看详情/下载]({url})"
         )
