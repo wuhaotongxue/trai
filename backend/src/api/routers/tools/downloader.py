@@ -166,12 +166,13 @@ class VideoDownloaderRouter:
                         try:
                             wecom_service = NotifyServiceFactory.create_wecom(wecom_webhook)
                             msg = (
-                                f"🧭 河南地理专家核心观测\n\n"
+                                f"🧭 **河南地理专家核心观测**\n\n"
                                 f"状态: 已从历史记录恢复\n"
                                 f"标题: {exist_record.t_title}\n"
                                 f"用户: {username}\n\n"
                                 f"{expert_msg}\n\n"
-                                f"预览: {exist_record.t_s3_url}"
+                                f"--- \n"
+                                f"🔗 [点击预览视频]({exist_record.t_s3_url})"
                             )
                             wecom_service.send(
                                 NotifyMessage(title="TRAI 视频助手", content=msg, msg_type=NotifyType.MARKDOWN)
@@ -307,14 +308,15 @@ class VideoDownloaderRouter:
                     try:
                         wecom_service = NotifyServiceFactory.create_wecom(wecom_webhook)
                         msg = (
-                            f"🧭 河南地理专家核心观测\n\n"
+                            f"🧭 **河南地理专家核心观测**\n\n"
                             f"状态: 视频下载成功\n"
                             f"平台: {source_platform}\n"
                             f"标题: {title}\n"
                             f"用户: {username}\n"
                             f"大小: {file_size / 1024 / 1024:.2f} MB\n\n"
                             f"{expert_msg}\n\n"
-                            f"预览: {presigned_url}"
+                            f"--- \n"
+                            f"🔗 [点击预览视频]({presigned_url})"
                         )
                         wecom_service.send(
                             NotifyMessage(
