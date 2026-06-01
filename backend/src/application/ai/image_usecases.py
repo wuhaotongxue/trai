@@ -18,6 +18,7 @@ from domain.ai.interfaces import (
     IImageGenerationRepository,
 )
 from infrastructure.ai.core.modelscope_client import ModelScopeClient
+from infrastructure.ai.core.prompt_optimizer import PromptOptimizer
 
 
 @dataclass
@@ -66,13 +67,17 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
     ) -> None:
         self._client = client or ModelScopeClient()
         self._repository = repository
+        self._optimizer = PromptOptimizer()
 
     async def execute(self, input_data: ImageGenerationInput) -> ImageGenerationOutput:
         """执行图片生成"""
+        # 0. 优化提示词
+        optimized_prompt = await self._optimizer.optimize_image_prompt(input_data.prompt)
+        
         if input_data.task_id:
             generation = ImageGeneration.with_task_id(
                 task_id=input_data.task_id,
-                prompt=input_data.prompt,
+                prompt=optimized_prompt, # 使用优化后的提示词
                 user_id=input_data.user_id,
                 model=input_data.model,
                 width=input_data.width,
@@ -87,7 +92,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
             )
         else:
             generation = ImageGeneration(
-                prompt=input_data.prompt,
+                prompt=optimized_prompt, # 使用优化后的提示词
                 user_id=input_data.user_id,
                 model=input_data.model,
                 width=input_data.width,
@@ -106,7 +111,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
 
         try:
             result = await self._client.generate(
-                prompt=input_data.prompt,
+                prompt=optimized_prompt, # 使用优化后的提示词
                 width=input_data.width,
                 height=input_data.height,
                 steps=input_data.steps,

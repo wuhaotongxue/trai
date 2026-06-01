@@ -218,33 +218,86 @@ class MediaNotifier:
         content = await self._build_markdown(media_type, prompt, file_url, duration, persona)
         success = False
 
-        # 企微
+        # 获取封面图
+        pic_url = ""
+        if media_type in ["image", "video", "music"]:
+            pic_url = file_url if media_type == "image" else ""
+            
+            # 优先从数据库查找封面 (因为后台任务可能还没更新完状态就调用了 notify，或者为了更准)
+            try:
+                from infrastructure.database import get_session
+                from infrastructure.database.models import MusicRecordModel
+                from sqlalchemy import select
+                async with get_session() as db:
+                    # 根据 result_url 查找
+                    stmt = select(MusicRecordModel.t_cover_url).where(MusicRecordModel.t_result_url == file_url).order_by(MusicRecordModel.t_id.desc())
+                    res = await db.execute(stmt)
+                    db_pic = res.scalar()
+                    if db_pic:
+                        pic_url = db_pic
+                        logger.info(f"[Notify] 从数据库获取到封面: {pic_url}")
+            except Exception as e:
+                logger.warning(f"[Notify] 数据库查找封面失败: {e}")
+
+        # 1. 企微通知 (优先使用 news 类型展示图片)
         if self.WECOM_WEBHOOK:
             try:
-                resp = requests.post(
-                    self.WECOM_WEBHOOK,
-                    json={"msgtype": "markdown", "markdown": {"content": content}},
-                    timeout=5,
-                )
+                # 如果有图片，使用 news 类型展示缩略图
+                if pic_url:
+                    payload = {
+                        "msgtype": "news",
+                        "news": {
+                            "articles": [
+                                {
+                                    "title": f"🎉 {media_type.upper()} 生成成功！",
+                                    "description": content.replace("## ", "").replace("**", "").replace(">", "").strip(),
+                                    "url": file_url,
+                                    "picurl": pic_url
+                                }
+                            ]
+                        }
+                    }
+                else:
+                    payload = {"msgtype": "markdown", "markdown": {"content": content}}
+
+                resp = requests.post(self.WECOM_WEBHOOK, json=payload, timeout=5)
                 if resp.json().get("errcode") == 0:
                     logger.info(f"企微媒体通知发送成功 ({media_type})")
                     success = True
             except Exception as e:
                 logger.error(f"企微媒体通知异常: {e}")
 
-        # 飞书
+        # 2. 飞书通知 (使用富文本消息展示图片)
         if self.FEISHU_WEBHOOK and "xxxx" not in self.FEISHU_WEBHOOK:
             try:
-                # 飞书不支持 markdown，转为 text 或飞书特定的 rich text
-                text_content = content.replace("##", "").replace("**", "").replace(">", "").replace("`", "")
-                resp = requests.post(
-                    self.FEISHU_WEBHOOK,
-                    json={"msg_type": "text", "content": {"text": text_content}},
-                    timeout=5,
-                )
+                # 飞书富文本格式
+                post_content = [
+                    [{"tag": "text", "text": content.replace("## ", "").replace("**", "").replace(">", "").strip()}]
+                ]
+                
+                # 如果有图片，额外加一行图片展示
+                if pic_url:
+                    post_content.append([{"tag": "a", "text": "📸 点击预览艺术封面", "href": pic_url}])
+                    post_content.append([{"tag": "a", "text": "🎵 点击听取动听旋律", "href": file_url}])
+
+                payload = {
+                    "msg_type": "post",
+                    "content": {
+                        "post": {
+                            "zh_cn": {
+                                "title": f"✨ TRAI AI {media_type.capitalize()} Report",
+                                "content": post_content
+                            }
+                        }
+                    }
+                }
+                
+                resp = requests.post(self.FEISHU_WEBHOOK, json=payload, timeout=5)
                 if resp.json().get("code") == 0:
                     logger.info(f"飞书媒体通知发送成功 ({media_type})")
                     success = True
+                else:
+                    logger.warning(f"飞书通知返回错误: {resp.text}")
             except Exception as e:
                 logger.error(f"飞书媒体通知异常: {e}")
 

@@ -178,6 +178,10 @@ interface AgentState {
   musicGenerateTaskId: string | null;
   /** 生成的音乐 URL */
   generatedMusicUrl: string | null;
+  /** 生成的音乐歌词 */
+  generatedMusicLyrics: string | null;
+  /** 生成的音乐封面 URL */
+  generatedMusicCoverUrl: string | null;
   /** 音乐生成错误信息 */
   musicGenerateError: string | null;
   /** 音乐廊 - 历史生成的音乐 */
@@ -376,6 +380,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateProgress: null,
   musicGenerateTaskId: null,
   generatedMusicUrl: null,
+  generatedMusicLyrics: null,
+  generatedMusicCoverUrl: null,
   musicGenerateError: null,
   musicGallery: [],
   isEditingImage: false,
@@ -1333,7 +1339,15 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   generateMusic: async (prompt: string, duration?: number, steps?: number, guidance_scale?: number) => {
-    set({ isGeneratingMusic: true, musicGenerateError: null, generatedMusicUrl: null, musicGenerateProgress: "正在提交任务...", musicGenerateTaskId: null });
+    set({ 
+      isGeneratingMusic: true, 
+      musicGenerateError: null, 
+      generatedMusicUrl: null, 
+      generatedMusicLyrics: null,
+      generatedMusicCoverUrl: null,
+      musicGenerateProgress: "正在提交任务...", 
+      musicGenerateTaskId: null 
+    });
     try {
       const res = await api.agent.generateMusic({ prompt, duration, steps, guidance_scale });
       if (res.success && res.task_id) {
@@ -1349,6 +1363,14 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           try {
             const statusRes = await api.agent.getMusicStatus(res.task_id);
             
+            // 实时更新歌词和封面预览 (即使还在处理中)
+            if (statusRes.lyrics || statusRes.cover_url) {
+              set({ 
+                generatedMusicLyrics: statusRes.lyrics || get().generatedMusicLyrics,
+                generatedMusicCoverUrl: statusRes.cover_url || get().generatedMusicCoverUrl 
+              });
+            } 
+
             // 更新进度
             if (statusRes.status === "queued" && statusRes.queue_position) {
               set({ musicGenerateProgress: `排队中... 前面还有 ${statusRes.queue_position - 1} 人等待` });
@@ -1357,15 +1379,22 @@ export const useAgentStore = create<AgentState>((set, get) => ({
             }
 
             if (statusRes.status === "completed" && statusRes.music_url) {
-              set({ generatedMusicUrl: statusRes.music_url, isGeneratingMusic: false, musicGenerateProgress: "生成完成", musicGenerateTaskId: null });
-              get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url);
+              set({ 
+                generatedMusicUrl: statusRes.music_url, 
+                generatedMusicLyrics: statusRes.lyrics,
+                generatedMusicCoverUrl: statusRes.cover_url,
+                isGeneratingMusic: false, 
+                musicGenerateProgress: "生成完成", 
+                musicGenerateTaskId: null 
+              });
+              get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url, statusRes.lyrics, statusRes.cover_url);
             } else if (statusRes.status === "failed") {
               set({ musicGenerateError: statusRes.error || "生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
             } else if (statusRes.status === "cancelled") {
               set({ isGeneratingMusic: false, musicGenerateProgress: "已取消", musicGenerateTaskId: null });
             } else {
               // 还在队列或处理中, 继续轮询
-              setTimeout(checkStatus, 3000); // 改为每 3 秒查一次, 进度更新更及时
+              setTimeout(checkStatus, 2000); // 缩短轮询间隔, 响应更快
             }
           } catch (e: unknown) {
             set({ musicGenerateError: "查询状态失败", isGeneratingMusic: false, musicGenerateTaskId: null });
@@ -1396,16 +1425,25 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   clearGeneratedMusic: () => {
-    set({ generatedMusicUrl: null, musicGenerateError: null, musicGenerateProgress: null, musicGenerateTaskId: null });
+    set({ 
+      generatedMusicUrl: null, 
+      generatedMusicLyrics: null,
+      generatedMusicCoverUrl: null,
+      musicGenerateError: null, 
+      musicGenerateProgress: null, 
+      musicGenerateTaskId: null 
+    });
   },
 
-  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => {
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null) => {
     const newMusic = {
       id: taskId || generateUUID(),
       task_id: taskId,
       url,
       public_url: publicUrl || url,
       prompt,
+      lyrics,
+      cover_url: coverUrl,
       timestamp: Date.now(),
     };
     set((state) => {

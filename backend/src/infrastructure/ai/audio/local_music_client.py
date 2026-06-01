@@ -77,12 +77,22 @@ class LocalMusicClient:
         """
         生成音乐（同步调用）.
         """
-        # 优化 Prompt：增加女性音质标签，避免生成男声
+        # 优化 Prompt：增加女性音质标签和中文魔法标签，确保生成结果符合预期
         enhanced_prompt = prompt
         female_keywords = ["female", "woman", "girl", "lady", "田馥甄", "hebe"]
-        if any(keyword.lower() in prompt.lower() for keyword in female_keywords):
-            if "female" not in prompt.lower() and "woman" not in prompt.lower():
-                enhanced_prompt = f"female singer, {prompt}"
+        is_female = any(keyword.lower() in prompt.lower() for keyword in female_keywords)
+        
+        chinese_keywords = ["中文", "chinese", "mandarin", "普通话"]
+        is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords)
+        
+        magic_tags = []
+        if is_female:
+            magic_tags.append("female singer")
+        if is_chinese:
+            magic_tags.append("mandarin chinese")
+        
+        if magic_tags:
+            enhanced_prompt = f"{', '.join(magic_tags)}, {prompt}"
         
         actual_duration = duration or self.default_duration
         actual_steps = steps or self.default_steps

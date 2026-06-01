@@ -146,11 +146,12 @@ class MusicController:
             llm = OpenAIClient(provider="deepseek")
             system_prompt = (
                 "你是一位专业的金牌作词人。请根据用户的描述，创作一段动听的歌词。\n"
-                "格式要求：\n"
-                "1. 包含 [00:00.00] 格式的时间戳（模拟 LRC 格式）。\n"
-                "2. 结构清晰，包含 [Verse], [Chorus] 等段落。\n"
-                "3. 歌词要优美，富有画面感。\n"
-                "4. 直接输出歌词内容，不要任何解释。"
+                "要求：\n"
+                "1. 智能识别语言：如果用户描述是中文，则写中文歌词；如果是英文，则写英文歌词。\n"
+                "2. 包含 [00:00.00] 格式的时间戳（模拟 LRC 格式）。\n"
+                "3. 结构清晰，包含 [Verse], [Chorus] 等段落。\n"
+                "4. 歌词要优美，富有画面感。\n"
+                "5. 直接输出歌词内容，不要任何解释。"
             )
             resp = await llm.chat(
                 messages=[
@@ -168,10 +169,15 @@ class MusicController:
     async def _generate_cover(prompt: str) -> str:
         """动态生成歌曲封面图"""
         try:
+            from infrastructure.ai.core.prompt_optimizer import PromptOptimizer
+            optimizer = PromptOptimizer()
+            # 优化封面提示词
+            optimized_image_prompt = await optimizer.optimize_image_prompt(
+                f"Professional music album cover, artistic style, theme: {prompt}"
+            )
+            
             image_client = ImageClientFactory.create()
-            # 增强 Prompt 确保封面质量
-            image_prompt = f"Professional music album cover, artistic style, high quality, digital art, theme: {prompt}"
-            result = await image_client.generate(prompt=image_prompt)
+            result = await image_client.generate(prompt=optimized_image_prompt)
             return result.image_url
         except Exception as e:
             logger.warning(f"生成封面失败: {e}")
@@ -183,22 +189,32 @@ class MusicController:
         try:
             logger.info(f"[音乐生成] 开始执行后台任务 | task_id={task_id}")
             _music_tasks[task_id]["status"] = "processing"
-            _music_tasks[task_id]["progress"] = "正在创作歌词和设计封面..."
             
-            # 1. 异步生成歌词和封面
+            # 1. 异步生成歌词和封面，生成完立刻更新进度
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             
+            # 优先生成歌词
+            _music_tasks[task_id]["progress"] = "正在创作灵感歌词..."
+            MusicController._update_record(task_id, t_progress_message="正在创作灵感歌词...")
             lyrics = loop.run_until_complete(MusicController._generate_lyrics(request.prompt))
-            cover_url = loop.run_until_complete(MusicController._generate_cover(request.prompt))
-            
             _music_tasks[task_id]["lyrics"] = lyrics
+            
+            # 生成封面
+            _music_tasks[task_id]["progress"] = "正在设计艺术封面..."
+            MusicController._update_record(
+                task_id, 
+                t_progress_message="正在设计艺术封面...",
+                t_lyrics=lyrics # 先存入歌词
+            )
+            cover_url = loop.run_until_complete(MusicController._generate_cover(request.prompt))
             _music_tasks[task_id]["cover_url"] = cover_url
             
+            # 更新状态，让前端能拿到歌词和封面
             MusicController._update_record(
                 task_id,
                 t_status="processing",
-                t_progress_message="正在初始化音频引擎...",
+                t_progress_message="正在渲染动听旋律...",
                 t_lyrics=lyrics,
                 t_cover_url=cover_url
             )
@@ -311,7 +327,7 @@ class MusicController:
                             prompt=request.prompt,
                             file_url=final_url,
                             duration=result.duration,
-                            persona="河南地理专家",
+                            persona="AI 音乐助手",
                         )
                     )
                     loop.close()

@@ -33,6 +33,7 @@ import { AgentTypeSelector } from "./agent_type_selector";
 import type { AgentTypeValue } from "@/lib/api_client";
 import { multimodalApi } from "@/lib/api_client";
 import { SubtitlePanel } from "./subtitle_panel";
+import { MusicPlayer } from "./music_player";
 import { DigitalHumanPanel } from "./digital_human_panel";
 import { VideoDownloaderPanel } from "./video_downloader_panel";
 import { cn } from "@/lib/utils";
@@ -69,7 +70,7 @@ export function ChatPanel() {
     isGeneratingVideo, generateVideo, generatedVideoUrl, clearGeneratedVideo, videoGenerateError, videoGallery, removeFromVideoGallery, clearVideoGallery,
     videoGenerateTaskId, videoGenerateStage, videoGenerateProgress, videoGenerateCurrentStep, videoGenerateTotalSteps,
     videoGenerateFrames, videoGenerateResolution, videoGenerateElapsedSeconds,
-    isGeneratingMusic, generateMusic, generatedMusicUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery, removeFromMusicGallery, clearMusicGallery,
+    isGeneratingMusic, generateMusic, generatedMusicUrl, generatedMusicLyrics, generatedMusicCoverUrl, clearGeneratedMusic, musicGenerateError, musicGenerateProgress, cancelGenerateMusic, musicGallery, removeFromMusicGallery, clearMusicGallery,
     batchDeleteMediaHistoryItems,
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError, imageEditProgress, imageEditStage,
     imageEditProgressMessage,
@@ -148,7 +149,12 @@ export function ChatPanel() {
       useAgentStore.setState({ generatedVideoUrl: item.url });
       return;
     }
-    useAgentStore.setState({ generatedMusicUrl: item.url });
+    useAgentStore.setState({ 
+      generatedMusicUrl: item.url,
+      generatedMusicLyrics: item.lyrics,
+      generatedMusicCoverUrl: item.cover_url,
+      musicPrompt: item.prompt
+    });
   };
 
   const handleBatchDeleteSelected = async (type: GalleryType) => {
@@ -1107,19 +1113,15 @@ export function ChatPanel() {
                             <div className="flex-1 flex items-center justify-center relative min-h-0">
                               <AnimatePresence mode="wait">
                                 {generatedMusicUrl ? (
-                                  <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full group flex flex-col gap-6">
-                                    <div className="border-b-4 border-slate-900 dark:border-white pb-4 flex items-center justify-between">
-                                      <h3 className="text-2xl font-black uppercase">生成完毕</h3>
-                                    </div>
-                                    <audio src={generatedMusicUrl} controls className={`w-full ${brutalBorder}`} />
-                                    <div className="flex gap-4 mt-4">
-                                      <button onClick={clearGeneratedMusic} className={`flex-1 py-3 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                      <button onClick={() => void handleCopyMusicLink(generatedMusicUrl)} aria-label="复制链接" className={`flex-1 py-3 bg-slate-50 text-slate-900 flex items-center justify-center gap-2 ${brutalBtnBase}`}>
-                                        {musicLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} 复制链接
-                                      </button>
-                                      <a href={generatedMusicUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                                        <button className={`w-full py-3 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                      </a>
+                                  <motion.div key="music-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full flex flex-col">
+                                    <div className="flex-1 min-h-0 overflow-hidden">
+                                      <MusicPlayer 
+                                        url={generatedMusicUrl}
+                                        title={musicPrompt || "AI 创作音乐"}
+                                        coverUrl={generatedMusicCoverUrl}
+                                        lyrics={generatedMusicLyrics}
+                                        onClose={clearGeneratedMusic}
+                                      />
                                     </div>
                                   </motion.div>
                                 ) : isGeneratingMusic ? (
@@ -1134,19 +1136,52 @@ export function ChatPanel() {
                                           MUSIC PIPELINE
                                         </div>
                                       </div>
-                                      <div className="flex items-end justify-center gap-2 h-28">
-                                        {Array.from({ length: 12 }).map((_, index) => (
-                                          <motion.div
-                                            key={`music-bar-${index}`}
-                                            className="w-4 bg-cyan-500 border-2 border-slate-900 dark:border-white"
-                                            animate={{ height: [20 + (index % 3) * 8, 88 - (index % 4) * 10, 28 + (index % 5) * 6] }}
-                                            transition={{ duration: PANEL_MOTION_TOKENS.pulse_duration + index * 0.04, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-                                          />
-                                        ))}
+
+                                      {/* 动态展示封面和歌词预览 */}
+                                      <div className="flex flex-col md:flex-row gap-6">
+                                        {/* 封面预览 */}
+                                        <div className={cn(
+                                          "w-full md:w-48 aspect-square flex items-center justify-center overflow-hidden transition-all",
+                                          brutalBorder,
+                                          generatedMusicCoverUrl ? "" : "bg-slate-100 animate-pulse"
+                                        )}>
+                                          {generatedMusicCoverUrl ? (
+                                            <img src={generatedMusicCoverUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                                          ) : (
+                                            <Music className="h-12 w-12 text-slate-300" />
+                                          )}
+                                        </div>
+
+                                        {/* 歌词预览 */}
+                                        <div className={cn(
+                                          "flex-1 h-48 overflow-hidden relative p-4",
+                                          brutalBorder,
+                                          generatedMusicLyrics ? "bg-white" : "bg-slate-50 animate-pulse"
+                                        )}>
+                                          {generatedMusicLyrics ? (
+                                            <div className="text-sm font-medium text-slate-600 line-clamp-6 whitespace-pre-wrap">
+                                              {generatedMusicLyrics.replace(/\[\d{2}:\d{2}\.\d{2,3}\]/g, "")}
+                                            </div>
+                                          ) : (
+                                            <div className="space-y-2">
+                                              <div className="h-4 bg-slate-200 w-3/4" />
+                                              <div className="h-4 bg-slate-200 w-1/2" />
+                                              <div className="h-4 bg-slate-200 w-2/3" />
+                                            </div>
+                                          )}
+                                          <div className="absolute bottom-2 right-2 bg-cyan-500 text-slate-900 px-2 py-0.5 text-[10px] font-black uppercase">
+                                            {generatedMusicLyrics ? "歌词已就绪" : "正在作词..."}
+                                          </div>
+                                        </div>
                                       </div>
-                                      <div className="grid grid-cols-2 gap-3 text-sm font-bold">
-                                        <div>当前状态: 生成中</div>
-                                        <div>任务感知: 已开启</div>
+
+                                      <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-cyan-500"
+                                          initial={{ width: 0 }}
+                                          animate={{ width: generatedMusicLyrics ? (generatedMusicCoverUrl ? "60%" : "30%") : "10%" }}
+                                          transition={{ duration: 1 }}
+                                        />
                                       </div>
                                       <div className="text-sm font-bold break-words">
                                         {musicGenerateProgress || PANEL_SUBTITLES.processing_feedback}
