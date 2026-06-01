@@ -182,7 +182,7 @@ class MediaNotifier:
                 # 移除时间戳展示在通知中更美观
                 import re
 
-                clean_line = re.sub(r"\[\d{2}:\d{2}\.\d{2}\]", "", line).strip()
+                clean_line = re.sub(r"\[\d{2}:\d{2}\.\d{2,3}\]", "", line).strip()
                 if clean_line:
                     preview_lines.append(clean_line)
 
@@ -211,7 +211,19 @@ class MediaNotifier:
                 f"*{footer}*"
             )
 
-        # 2. 如果没有节日，按原逻辑执行
+        # 2. 处理特定角色
+        if persona == "儿童节使者":
+            return (
+                f"## 🎈 儿童节快乐！魔法音乐盒开启 🍭\n\n"
+                f"> **探险坐标:** `{prompt}`\n"
+                f"> **施法耗时:** `{duration:.1f} 秒`\n\n"
+                f"嘿！大朋友！在这个充满童心的日子里, 我为你准备了一个奇妙的礼物！\n"
+                f"快听, 这是属于你的童话旋律！愿你永远保持好奇心, 像孩子一样快乐！✨\n"
+                f"{lyrics_display}\n"
+                f"👉 **[点击查看魔法作品]({file_url})**\n\n"
+                f"*“愿你永远被这个世界温柔以待, 六一快乐！”*"
+            )
+
         if persona == "小甜心":
             content = (
                 f"## 💖 小甜心 Agent 生成播报\n\n"
@@ -252,7 +264,7 @@ class MediaNotifier:
             resp = requests.get(image_url, timeout=10)
             if resp.status_code != 200:
                 return ""
-            
+
             # 2. 获取飞书 tenant_access_token (这里简化处理，如果 webhook 是机器人，可能需要 app_id)
             # 实际上飞书 Webhook 不支持直接上传图片，必须通过应用 API。
             # 这里我们退而求其次，在通知中使用 a 标签链接封面图，
@@ -288,23 +300,20 @@ class MediaNotifier:
 
             # 优先从数据库查找封面
             try:
-                from sqlalchemy import select
-
                 from infrastructure.database import get_session
                 from infrastructure.database.models import MusicRecordModel
 
-                async with get_session() as db:
+                with get_session() as db:
                     # 查找最近的一个记录
-                    stmt = (
-                        select(MusicRecordModel.t_cover_url)
-                        .where(MusicRecordModel.t_prompt == prompt)
+                    record = (
+                        db.query(MusicRecordModel.t_cover_url)
+                        .filter(MusicRecordModel.t_prompt == prompt)
                         .order_by(MusicRecordModel.t_id.desc())
-                        .limit(1)
+                        .first()
                     )
-                    res = await db.execute(stmt)
-                    db_pic = res.scalar()
-                    if db_pic:
-                        final_pic_url = db_pic
+
+                    if record and record[0]:
+                        final_pic_url = record[0]
                         logger.info(f"[Notify] 从数据库获取到封面: {final_pic_url}")
             except Exception as e:
                 logger.warning(f"[Notify] 数据库查找封面失败: {e}")
@@ -314,6 +323,14 @@ class MediaNotifier:
             try:
                 # 如果有图片，使用 news 类型展示缩略图
                 if final_pic_url:
+                    # 针对儿童节定制标题
+                    is_childrens_day = datetime.now().strftime("%m-%d") == "06-01"
+                    title = (
+                        f"🍭 儿童节快乐！{media_type.upper()} 魔法礼物已送达！"
+                        if is_childrens_day
+                        else f"🎉 {media_type.upper()} 生成成功！"
+                    )
+
                     # 企微 news 类型不支持 markdown，需要纯文本描述
                     clean_description = (
                         content.replace("## ", "").replace("**", "").replace(">", "").replace("👉", "").strip()
@@ -331,7 +348,7 @@ class MediaNotifier:
                         "news": {
                             "articles": [
                                 {
-                                    "title": f"🎉 {media_type.upper()} 生成成功！",
+                                    "title": title,
                                     "description": clean_description,
                                     "url": file_url,
                                     "picurl": final_pic_url,

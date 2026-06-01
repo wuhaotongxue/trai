@@ -140,27 +140,32 @@ class MusicController:
 
     @staticmethod
     async def _generate_lyrics(prompt: str) -> str:
-        """调用 DeepSeek 动态生成歌词"""
+        """调用 LLM 动态生成歌词"""
         try:
             llm = OpenAIClient(provider="deepseek")
 
+            # 针对 6.1 儿童节定制
+            is_childrens_day = datetime.now().strftime("%m-%d") == "06-01"
+
             system_prompt = (
-                "你是一位全球顶尖的音乐作词人, 拥有极强的风格模仿能力与深厚的原创功底。\n"
-                "### 核心任务：\n"
-                "1. **风格灵魂捕捉**：分析用户提到的歌手、乐队或曲目, 提取其创作中的核心意象、情感基调和叙事角度。\n"
-                "2. **绝对严禁抄袭**：**严禁使用任何原词、金句或歌名中的短语**。例如, 如果模仿《青花瓷》, 严禁出现“天青色等烟雨”、“素胚勾勒”等任何原句。你必须用全新的词汇（如：宣纸、泼墨、断桥、古巷）去重塑意境, 而不是搬运文字。\n"
-                "3. **高品质原创**：创作一首结构完整、韵律优美、情感真实的**全新原创**歌词。它应该听起来像该艺术家的作品, 但却是一首从未面世的新歌。\n\n"
-                "### 歌词格式要求：\n"
-                "- 必须包含 [00:00.00] 格式的时间戳（LRC 标准）。\n"
-                "- 结构必须包含 [Verse], [Chorus], [Bridge] 等明确标识。\n"
-                "- 直接输出歌词文本, 禁止包含任何前言、解释或致敬说明。"
+                f"你是一位{'充满童心、想象力爆炸的六一儿童节金牌作词官' if is_childrens_day else '全球顶尖的音乐作词人'}。\n"
+                "### 核心准则 (绝不可违反)：\n"
+                "1. **原创性红线**：严禁抄袭、搬运、改写任何已有歌曲的歌词。如果用户提到某首名曲（如《青花瓷》、《温柔》），你必须**避开其所有原词、意象和金句**，仅模仿其宏观风格。搬运原句将导致任务彻底失败。\n"
+                "2. **风格重塑**：用全新的词汇、全新的故事、全新的意象去致敬经典。例如，模仿《青花瓷》时，不要写“天青色等烟雨”，而可以写“宣纸铺陈了旧梦”、“断桥边落了残墨”。\n"
+                "3. **情感共鸣**：歌词要富有画面感和叙事性。"
+                f"{' 在这个儿童节，请加入更多梦幻、纯真、快乐的元素，像是在写一段彩虹色的童话。' if is_childrens_day else ''}\n\n"
+                "### 格式规范：\n"
+                "- 必须包含 [00:00.00] 格式的时间戳 (LRC 标准)。\n"
+                "- 结构包含 [Verse], [Chorus], [Bridge]。\n"
+                "- 直接输出歌词文本，禁止任何前言或致敬说明。"
             )
+
             resp = await llm.chat(
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"请为我创作一首全新原创歌词, 风格要求: {prompt}"},
+                    {"role": "user", "content": f"请为我创作一首全新原创歌词，风格参考: {prompt}"},
                 ],
-                temperature=0.9,
+                temperature=0.95,  # 极高温度以确保原创性
             )
             lyrics = resp.get("content", "").strip()
             logger.info(f"[歌词生成] 成功生成歌词预览 (前50字): {lyrics[:50]}...")
@@ -177,15 +182,23 @@ class MusicController:
 
             optimizer = PromptOptimizer()
             # 优化封面提示词
+            logger.info(f"[封面生成] 开始为提示词优化封面: {prompt[:50]}...")
             optimized_image_prompt = await optimizer.optimize_image_prompt(
                 f"Professional music album cover, artistic style, theme: {prompt}"
             )
+            logger.info(f"[封面生成] 优化后的提示词: {optimized_image_prompt[:80]}...")
 
             image_client = ImageClientFactory.create()
             result = await image_client.generate(prompt=optimized_image_prompt)
-            return result.image_url
+
+            if result and result.image_url:
+                logger.info(f"[封面生成] 封面生成成功: {result.image_url}")
+                return result.image_url
+
+            logger.warning(f"[封面生成] 封面生成返回空 URL: {result}")
+            return ""
         except Exception as e:
-            logger.warning(f"生成封面失败: {e}")
+            logger.error(f"[封面生成] 封面生成异常: {e}", exc_info=True)
             return ""
 
     @staticmethod
@@ -204,6 +217,7 @@ class MusicController:
             MusicController._update_record(task_id, t_progress_message="正在创作灵感歌词...")
             lyrics = loop.run_until_complete(MusicController._generate_lyrics(request.prompt))
             _music_tasks[task_id]["lyrics"] = lyrics
+            logger.info(f"[音乐生成] 歌词生成完成 | task_id={task_id}")
 
             # 生成封面
             _music_tasks[task_id]["progress"] = "正在设计艺术封面..."
@@ -214,8 +228,11 @@ class MusicController:
             )
             cover_url = loop.run_until_complete(MusicController._generate_cover(request.prompt))
             _music_tasks[task_id]["cover_url"] = cover_url
+            logger.info(f"[音乐生成] 封面生成完成 | task_id={task_id} | url={cover_url}")
 
-            # 更新状态，让前端能拿到歌词和封面
+            # 再次更新状态，确保前端轮询能拿到最新的歌词和封面
+            _music_tasks[task_id]["status"] = "processing"
+            _music_tasks[task_id]["progress"] = "正在渲染动听旋律..."
             MusicController._update_record(
                 task_id,
                 t_status="processing",
