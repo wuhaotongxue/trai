@@ -128,9 +128,32 @@ class GitPushNotifier:
             f"*“代码如中原沃土, 每一次沉积与抬升, 都在塑造更稳固的产品地形。”*"
         )
 
+    def _build_childrens_day_markdown(self, commit_hash: str, commit_msg: str, branch: str, changed: str) -> str:
+        """构建儿童节风格的 Markdown."""
+        return (
+            f"## 🎈 儿童节快乐！代码童话更新播报 🍭\n\n"
+            f"> **时光机分支:** `{branch}`\n"
+            f"> **魔法标记:** `{commit_hash}`\n"
+            f"> **小探险家:** wuhao\n\n"
+            f"嘿！大朋友！在这个充满童心的日子里, 我们又给代码城堡增添了新的积木！\n"
+            f"每一次 Push 都是一次奇妙的探险, 让我们一起把这个世界变得更有趣吧！✨\n\n"
+            f"### 📝 探险记录 (Commit Message)\n"
+            f"**{commit_msg}**\n\n"
+            f"### 📂 城堡里的新玩具 (Changed Files)\n"
+            f"{changed}\n\n"
+            f"--- \n"
+            f"🍭 *“愿你永远保持好奇心, 像孩子一样去探索代码的无限可能。”* \n"
+            f"🎡 *“代码虽然复杂, 但我们的心可以很简单。”*"
+        )
+
     def build_markdown(self, commit_hash: str, commit_msg: str, branch: str, persona: str = "地理专家") -> str:
         """构建企微 Markdown 通知内容."""
         changed = self._get_changed_files_summary()
+
+        # 针对 6.1 儿童节强制切换
+        from datetime import datetime
+        if datetime.now().strftime("%m-%d") == "06-01":
+            return self._build_childrens_day_markdown(commit_hash, commit_msg, branch, changed)
 
         if persona == "小甜心":
             return self._build_xiaotianxin_markdown(commit_hash, commit_msg, branch, changed)

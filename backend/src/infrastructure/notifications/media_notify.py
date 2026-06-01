@@ -1,10 +1,11 @@
 import os
+from datetime import datetime
 
 import requests
 from loguru import logger
 
-from core.paths import ProjectPaths
 from core.festivals import FestivalManager
+from core.paths import ProjectPaths
 from infrastructure.ai.core.openai_client import OpenAIClient
 
 
@@ -21,28 +22,28 @@ class MediaNotifier:
 
     async def _generate_dynamic_festival_text(self, festival_name: str, type_name: str, prompt: str) -> dict:
         """调用 DeepSeek 动态生成节日祝福文案"""
+        is_childrens_day = festival_name == "儿童节"
+
         system_prompt = (
-            f"你是一位充满童心且幽默的创意官。今天是【{festival_name}】，用户刚刚用 AI 生成了一个【{type_name}】作品。\n"
+            f"你是一位{'超级可爱、充满童心且幽默的六一儿童节特使' if is_childrens_day else '充满童心且幽默的创意官'}。今天是【{festival_name}】，用户刚刚用 AI 生成了一个【{type_name}】作品。\n"
             f"请根据节日氛围和作品内容，写一段独特的祝福语（约60-80字）。\n"
             "要求：\n"
-            "1. 语气要欢快、可爱，像在跟好朋友分享礼物。\n"
+            f"1. 语气要{'极其欢快、奶气、可爱，多用语气助词（如：哒、呀、嗷），像在给小朋友送糖果' if is_childrens_day else '欢快、可爱，像在跟好朋友分享礼物'}。\n"
             "2. 必须包含对作品的简短赞美。\n"
             "3. 每次生成的侧重点要不同，避免机械重复。\n"
-            "4. 输出格式必须为 JSON: {\"title\": \"...\", \"message\": \"...\", \"footer\": \"...\"}\n"
+            '4. 输出格式必须为 JSON: {"title": "...", "message": "...", "footer": "..."}\n'
             "5. 不要输出任何 JSON 以外的内容。"
         )
-        
+
         user_content = f"节日: {festival_name}\n作品类型: {type_name}\n用户提示词: {prompt}"
-        
+
         try:
             resp = await self._llm.chat(
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_content}
-                ],
-                temperature=0.9, # 调高温度增加多样性
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}],
+                temperature=0.9,  # 调高温度增加多样性
             )
             import json
+
             content = resp.get("content", "").strip()
             # 移除可能的 markdown 标记
             if content.startswith("```json"):
@@ -155,13 +156,13 @@ class MediaNotifier:
         )
 
     async def _build_markdown(
-        self, 
-        media_type: str, 
-        prompt: str, 
-        file_url: str, 
-        duration: float = 0.0, 
+        self,
+        media_type: str,
+        prompt: str,
+        file_url: str,
+        duration: float = 0.0,
         persona: str = "地理专家",
-        lyrics: str | None = None
+        lyrics: str | None = None,
     ) -> str:
         """构建 Markdown 通知内容"""
 
@@ -180,12 +181,13 @@ class MediaNotifier:
             for line in lines[:8]:
                 # 移除时间戳展示在通知中更美观
                 import re
+
                 clean_line = re.sub(r"\[\d{2}:\d{2}\.\d{2}\]", "", line).strip()
                 if clean_line:
                     preview_lines.append(clean_line)
-            
+
             if preview_lines:
-                lyrics_text = "\n".join([f"> {l}" for l in preview_lines])
+                lyrics_text = "\n".join([f"> {line_text}" for line_text in preview_lines])
                 lyrics_display = f"\n\n**📜 灵感歌词预览:**\n{lyrics_text}\n"
                 if len(lines) > 8:
                     lyrics_display += "> ... (更多内容请在应用中查看)\n"
@@ -244,13 +246,12 @@ class MediaNotifier:
         """下载图片并上传到飞书，获取 image_key"""
         if not image_url or not image_url.startswith("http"):
             return ""
-            
+
         try:
             # 1. 下载图片
             resp = requests.get(image_url, timeout=10)
             if resp.status_code != 200:
                 return ""
-            image_bytes = resp.content
             
             # 2. 获取飞书 tenant_access_token (这里简化处理，如果 webhook 是机器人，可能需要 app_id)
             # 实际上飞书 Webhook 不支持直接上传图片，必须通过应用 API。
@@ -263,36 +264,48 @@ class MediaNotifier:
             return ""
 
     async def notify(
-        self, 
-        media_type: str, 
-        prompt: str, 
-        file_url: str, 
-        duration: float = 0.0, 
+        self,
+        media_type: str,
+        prompt: str,
+        file_url: str,
+        duration: float = 0.0,
         persona: str = "地理专家",
-        lyrics: str | None = None
+        lyrics: str | None = None,
+        pic_url: str | None = None,
     ) -> bool:
         """发送通知"""
+        # 针对儿童节强制切换 persona
+        if datetime.now().strftime("%m-%d") == "06-01":
+            persona = "儿童节使者"
+
         content = await self._build_markdown(media_type, prompt, file_url, duration, persona, lyrics)
         success = False
 
         # 获取封面图
-        pic_url = ""
-        if media_type in ["image", "video", "music"]:
-            pic_url = file_url if media_type == "image" else ""
-            
+        final_pic_url = pic_url or ""
+        if not final_pic_url and media_type in ["image", "video", "music"]:
+            final_pic_url = file_url if media_type == "image" else ""
+
             # 优先从数据库查找封面
             try:
+                from sqlalchemy import select
+
                 from infrastructure.database import get_session
                 from infrastructure.database.models import MusicRecordModel
-                from sqlalchemy import select
+
                 async with get_session() as db:
                     # 查找最近的一个记录
-                    stmt = select(MusicRecordModel.t_cover_url).where(MusicRecordModel.t_prompt == prompt).order_by(MusicRecordModel.t_id.desc()).limit(1)
+                    stmt = (
+                        select(MusicRecordModel.t_cover_url)
+                        .where(MusicRecordModel.t_prompt == prompt)
+                        .order_by(MusicRecordModel.t_id.desc())
+                        .limit(1)
+                    )
                     res = await db.execute(stmt)
                     db_pic = res.scalar()
                     if db_pic:
-                        pic_url = db_pic
-                        logger.info(f"[Notify] 从数据库获取到封面: {pic_url}")
+                        final_pic_url = db_pic
+                        logger.info(f"[Notify] 从数据库获取到封面: {final_pic_url}")
             except Exception as e:
                 logger.warning(f"[Notify] 数据库查找封面失败: {e}")
 
@@ -300,13 +313,19 @@ class MediaNotifier:
         if self.WECOM_WEBHOOK:
             try:
                 # 如果有图片，使用 news 类型展示缩略图
-                if pic_url:
+                if final_pic_url:
                     # 企微 news 类型不支持 markdown，需要纯文本描述
-                    clean_description = content.replace("## ", "").replace("**", "").replace(">", "").replace("👉", "").strip()
+                    clean_description = (
+                        content.replace("## ", "").replace("**", "").replace(">", "").replace("👉", "").strip()
+                    )
+                    # 移除链接标记
+                    import re
+
+                    clean_description = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", clean_description)
                     # 截断描述，防止过长
                     if len(clean_description) > 300:
                         clean_description = clean_description[:300] + "..."
-                        
+
                     payload = {
                         "msgtype": "news",
                         "news": {
@@ -315,10 +334,10 @@ class MediaNotifier:
                                     "title": f"🎉 {media_type.upper()} 生成成功！",
                                     "description": clean_description,
                                     "url": file_url,
-                                    "picurl": pic_url
+                                    "picurl": final_pic_url,
                                 }
                             ]
-                        }
+                        },
                     }
                 else:
                     payload = {"msgtype": "markdown", "markdown": {"content": content}}
@@ -336,25 +355,23 @@ class MediaNotifier:
                 # 尝试上传图片到飞书以获取 image_key (如果配置了 APP_ID/SECRET)
                 image_key = ""
                 # 这里简单判断一下是否有相关的环境变量
-                if os.getenv("FEISHU_APP_ID") and pic_url:
+                if os.getenv("FEISHU_APP_ID") and final_pic_url:
                     from infrastructure.notify.feishu_ai_notify import FeishuAINotifyService
+
                     service = FeishuAINotifyService(self.FEISHU_WEBHOOK)
-                    image_bytes = service._download_image(pic_url)
+                    image_bytes = service._download_image(final_pic_url)
                     if image_bytes:
                         image_key = service._upload_image_to_feishu(image_bytes)
 
                 if image_key:
                     # 使用交互式卡片 (interactive)
                     card_elements = [
-                        {
-                            "tag": "div",
-                            "text": {"tag": "lark_md", "content": content}
-                        },
+                        {"tag": "div", "text": {"tag": "lark_md", "content": content}},
                         {
                             "tag": "img",
                             "img_key": image_key,
                             "alt": {"tag": "plain_text", "content": "AI 生成预览"},
-                            "width": 300
+                            "width": 300,
                         },
                         {
                             "tag": "action",
@@ -363,21 +380,24 @@ class MediaNotifier:
                                     "tag": "button",
                                     "text": {"tag": "plain_text", "content": "点击查看完整作品"},
                                     "type": "primary",
-                                    "url": file_url
+                                    "url": file_url,
                                 }
-                            ]
-                        }
+                            ],
+                        },
                     ]
                     payload = {
                         "msg_type": "interactive",
                         "card": {
                             "config": {"wide_screen_mode": True},
                             "header": {
-                                "title": {"tag": "plain_text", "content": f"✨ TRAI AI {media_type.capitalize()} Report"},
-                                "template": "cyan"
+                                "title": {
+                                    "tag": "plain_text",
+                                    "content": f"✨ TRAI AI {media_type.capitalize()} Report",
+                                },
+                                "template": "cyan",
                             },
-                            "elements": card_elements
-                        }
+                            "elements": card_elements,
+                        },
                     }
                 else:
                     # 退而求其次使用富文本 (post)
@@ -386,18 +406,21 @@ class MediaNotifier:
                         if not line.strip():
                             continue
                         import re
+
                         link_match = re.search(r"\[(.*?)\]\((.*?)\)", line)
                         if link_match:
-                            text_before = line[:link_match.start()].strip()
+                            text_before = line[: link_match.start()].strip()
                             if text_before:
                                 post_elements.append([{"tag": "text", "text": text_before}])
-                            post_elements.append([{"tag": "a", "text": link_match.group(1), "href": link_match.group(2)}])
+                            post_elements.append(
+                                [{"tag": "a", "text": link_match.group(1), "href": link_match.group(2)}]
+                            )
                         else:
                             post_elements.append([{"tag": "text", "text": line.strip()}])
-                    
-                    if pic_url:
+
+                    if final_pic_url:
                         post_elements.append([{"tag": "text", "text": "\n📸 艺术封面预览 (点击查看):"}])
-                        post_elements.append([{"tag": "a", "text": "点击预览封面图", "href": pic_url}])
+                        post_elements.append([{"tag": "a", "text": "点击预览封面图", "href": final_pic_url}])
 
                     payload = {
                         "msg_type": "post",
@@ -405,12 +428,12 @@ class MediaNotifier:
                             "post": {
                                 "zh_cn": {
                                     "title": f"✨ TRAI AI {media_type.capitalize()} Report",
-                                    "content": post_elements
+                                    "content": post_elements,
                                 }
                             }
-                        }
+                        },
                     }
-                
+
                 resp = requests.post(self.FEISHU_WEBHOOK, json=payload, timeout=5)
                 if resp.json().get("code") == 0 or resp.json().get("errcode") == 0:
                     logger.info(f"飞书媒体通知发送成功 ({media_type})")

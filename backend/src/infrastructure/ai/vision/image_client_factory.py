@@ -285,7 +285,8 @@ class LocalModelScopeImageClient(IImageGenerationClient):
                 object_key=object_key,
                 content_type="image/png",
             )
-            image_url = storage.get_presigned_url(object_key, expires_in=3600)  # 1小时有效期
+            # 使用长期有效的 URL (30天), 避免前端画廊或通知中链接失效
+            image_url = storage.get_long_term_url(object_key, expires_days=30)
 
             logger.info(f"本地图片生成成功 | task_id={task_id} | url={image_url}")
             return ImageGenerationResult(

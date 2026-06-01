@@ -579,6 +579,8 @@ export const agentApi = {
       progress?: string;
       queue_position?: number;
       music_url?: string;
+      lyrics?: string | null;
+      cover_url?: string | null;
       error?: string;
       prompt: string;
     }>(`/ai/music/status/${taskId}`, { method: "GET" }),

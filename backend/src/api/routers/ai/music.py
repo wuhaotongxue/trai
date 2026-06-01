@@ -4,22 +4,21 @@
 # 日期: 2026_05_26_20:53:15
 # 描述: 音乐生成 API, 提供基于 ACE-Step 模型的音乐生成、下载及列表查询接口.
 
+import asyncio
 import os
 import uuid
 from datetime import datetime
 from typing import Any
 
-import asyncio
-
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from core.paths import ProjectPaths
 from api.deps import CurrentUserOptional
+from core.paths import ProjectPaths
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
-from infrastructure.ai.vision.image_client_factory import ImageClientFactory
 from infrastructure.ai.core.openai_client import OpenAIClient
+from infrastructure.ai.vision.image_client_factory import ImageClientFactory
 from infrastructure.database import get_session
 from infrastructure.database.models import MusicRecordModel
 from infrastructure.notifications.media_notify import media_notifier
@@ -144,32 +143,28 @@ class MusicController:
         """调用 DeepSeek 动态生成歌词"""
         try:
             llm = OpenAIClient(provider="deepseek")
-            
-            # 检测是否包含周杰伦相关的关键词
-            jay_keywords = ["周杰伦", "jay chou", "周董", "jay"]
-            is_jay_style = any(k.lower() in prompt.lower() for k in jay_keywords)
-            
-            style_guide = "你是一位专业的金牌作词人。"
-            if is_jay_style:
-                style_guide = "你是一位擅长方文山风格的作词大咖, 能够创作出富有中国风、古典韵味且带有一丝忧伤或天马行空想象力的歌词。"
 
             system_prompt = (
-                f"{style_guide}请根据用户的描述，创作一段动听的歌词。\n"
-                "要求：\n"
-                "1. 智能识别语言：如果用户描述是中文，则写中文歌词；如果是英文，则写英文歌词。\n"
-                "2. 包含 [00:00.00] 格式的时间戳（模拟 LRC 格式）。\n"
-                "3. 结构清晰，包含 [Verse], [Chorus] 等段落。\n"
-                "4. 歌词要优美，富有画面感。\n"
-                "5. 直接输出歌词内容，不要任何解释。"
+                "你是一位全球顶尖的音乐作词人, 拥有极强的风格模仿能力与深厚的原创功底。\n"
+                "### 核心任务：\n"
+                "1. **风格灵魂捕捉**：分析用户提到的歌手、乐队或曲目, 提取其创作中的核心意象、情感基调和叙事角度。\n"
+                "2. **绝对严禁抄袭**：**严禁使用任何原词、金句或歌名中的短语**。例如, 如果模仿《青花瓷》, 严禁出现“天青色等烟雨”、“素胚勾勒”等任何原句。你必须用全新的词汇（如：宣纸、泼墨、断桥、古巷）去重塑意境, 而不是搬运文字。\n"
+                "3. **高品质原创**：创作一首结构完整、韵律优美、情感真实的**全新原创**歌词。它应该听起来像该艺术家的作品, 但却是一首从未面世的新歌。\n\n"
+                "### 歌词格式要求：\n"
+                "- 必须包含 [00:00.00] 格式的时间戳（LRC 标准）。\n"
+                "- 结构必须包含 [Verse], [Chorus], [Bridge] 等明确标识。\n"
+                "- 直接输出歌词文本, 禁止包含任何前言、解释或致敬说明。"
             )
             resp = await llm.chat(
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"歌曲主题/风格: {prompt}"}
+                    {"role": "user", "content": f"请为我创作一首全新原创歌词, 风格要求: {prompt}"},
                 ],
-                temperature=0.8
+                temperature=0.9,
             )
-            return resp.get("content", "").strip()
+            lyrics = resp.get("content", "").strip()
+            logger.info(f"[歌词生成] 成功生成歌词预览 (前50字): {lyrics[:50]}...")
+            return lyrics
         except Exception as e:
             logger.warning(f"生成歌词失败: {e}")
             return "（歌词生成失败，请欣赏纯音乐）"
@@ -179,12 +174,13 @@ class MusicController:
         """动态生成歌曲封面图"""
         try:
             from infrastructure.ai.core.prompt_optimizer import PromptOptimizer
+
             optimizer = PromptOptimizer()
             # 优化封面提示词
             optimized_image_prompt = await optimizer.optimize_image_prompt(
                 f"Professional music album cover, artistic style, theme: {prompt}"
             )
-            
+
             image_client = ImageClientFactory.create()
             result = await image_client.generate(prompt=optimized_image_prompt)
             return result.image_url
@@ -198,36 +194,36 @@ class MusicController:
         try:
             logger.info(f"[音乐生成] 开始执行后台任务 | task_id={task_id}")
             _music_tasks[task_id]["status"] = "processing"
-            
+
             # 1. 异步生成歌词和封面，生成完立刻更新进度
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             # 优先生成歌词
             _music_tasks[task_id]["progress"] = "正在创作灵感歌词..."
             MusicController._update_record(task_id, t_progress_message="正在创作灵感歌词...")
             lyrics = loop.run_until_complete(MusicController._generate_lyrics(request.prompt))
             _music_tasks[task_id]["lyrics"] = lyrics
-            
+
             # 生成封面
             _music_tasks[task_id]["progress"] = "正在设计艺术封面..."
             MusicController._update_record(
-                task_id, 
+                task_id,
                 t_progress_message="正在设计艺术封面...",
-                t_lyrics=lyrics # 先存入歌词
+                t_lyrics=lyrics,  # 先存入歌词
             )
             cover_url = loop.run_until_complete(MusicController._generate_cover(request.prompt))
             _music_tasks[task_id]["cover_url"] = cover_url
-            
+
             # 更新状态，让前端能拿到歌词和封面
             MusicController._update_record(
                 task_id,
                 t_status="processing",
                 t_progress_message="正在渲染动听旋律...",
                 t_lyrics=lyrics,
-                t_cover_url=cover_url
+                t_cover_url=cover_url,
             )
-            
+
             client = MusicClientProvider.get_music_client()
 
             def progress_cb(msg: str):
@@ -336,8 +332,9 @@ class MusicController:
                             prompt=request.prompt,
                             file_url=final_url,
                             duration=result.duration,
-                            persona="AI 音乐助手",
+                            persona="儿童节音乐助手" if datetime.now().strftime("%m-%d") == "06-01" else "AI 音乐助手",
                             lyrics=_music_tasks[task_id].get("lyrics"),
+                            pic_url=_music_tasks[task_id].get("cover_url"),
                         )
                     )
                     loop.close()
@@ -410,7 +407,15 @@ class MusicController:
             "user_agent": request_http.headers.get("User-Agent", "")[:500],
         }
 
-        _music_tasks[task_id] = {"status": "queued", "music_url": None, "error": None, "prompt": request.prompt}
+        _music_tasks[task_id] = {
+            "status": "queued",
+            "music_url": None,
+            "error": None,
+            "prompt": request.prompt,
+            "lyrics": "",
+            "cover_url": "",
+            "progress": "正在排队中...",
+        }
         logger.info(
             f"[音乐生成] 收到生成请求 | task_id={task_id} | user_id={user_context['user_id']} | prompt={request.prompt[:80]}"
         )
@@ -435,6 +440,10 @@ class MusicController:
             raise HTTPException(status_code=404, detail="任务不存在")
 
         task_info = _music_tasks[task_id].copy()
+
+        # 添加日志，确保歌词在状态中可见
+        if task_info.get("lyrics"):
+            logger.debug(f"[音乐状态查询] 任务 {task_id} 已包含歌词 (前20字): {task_info['lyrics'][:20]}...")
 
         # 计算排队位置
         if task_info["status"] == "queued":
