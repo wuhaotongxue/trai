@@ -11,6 +11,7 @@ import sys
 import time
 import uuid
 from dataclasses import dataclass
+from pathlib import Path
 
 from core.paths import ProjectPaths
 
@@ -76,6 +77,13 @@ class LocalMusicClient:
         """
         生成音乐（同步调用）.
         """
+        # 优化 Prompt：增加女性音质标签，避免生成男声
+        enhanced_prompt = prompt
+        female_keywords = ["female", "woman", "girl", "lady", "田馥甄", "hebe"]
+        if any(keyword.lower() in prompt.lower() for keyword in female_keywords):
+            if "female" not in prompt.lower() and "woman" not in prompt.lower():
+                enhanced_prompt = f"female singer, {prompt}"
+        
         actual_duration = duration or self.default_duration
         actual_steps = steps or self.default_steps
 
@@ -91,7 +99,7 @@ class LocalMusicClient:
             cmd = [
                 sys.executable,
                 self.script_path,
-                prompt,
+                enhanced_prompt,
                 str(int(actual_duration)),
                 str(actual_steps),
                 str(guidance_scale),

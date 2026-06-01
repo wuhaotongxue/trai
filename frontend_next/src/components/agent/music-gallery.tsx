@@ -11,11 +11,20 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll_area";
-import { Music, Trash2 } from "lucide-react";
+import { Music, Trash2, PlayCircle, X } from "lucide-react";
 import { PANEL_EMPTY_COPY, PANEL_SUBTITLES } from "./panel_consistency";
+import { MusicPlayer } from "./music_player";
 
 type GalleryViewMode = "grid" | "list";
-type MusicItem = { id: string; url: string; prompt: string; timestamp: number; isCurrent: boolean };
+type MusicItem = { 
+  id: string; 
+  url: string; 
+  prompt: string; 
+  timestamp: number; 
+  isCurrent: boolean;
+  lyrics?: string | null;
+  cover_url?: string | null;
+};
 
 const PAGE_SIZE = 20;
 
@@ -36,40 +45,28 @@ function MusicCardItem({
   music,
   isCurrent,
   viewMode,
-  onDelete
+  onDelete,
+  onPlay
 }: {
   music: MusicItem;
   isCurrent: boolean;
   viewMode: GalleryViewMode;
   onDelete?: (id: string) => void;
+  onPlay: (music: MusicItem) => void;
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const brutalBorder = "border-2 border-slate-900 dark:border-white";
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
   return (
     <div className={`group relative overflow-hidden transition-all ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] dark:shadow-[4px_4px_0px_0px_#ffffff] ${isCurrent ? 'bg-cyan-50 dark:bg-slate-900' : 'bg-white dark:bg-slate-900 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_#0f172a] dark:hover:shadow-[6px_6px_0px_0px_#ffffff]'}`}>
-      <audio
-        ref={audioRef}
-        src={music.url}
-        onEnded={() => setIsPlaying(false)}
-      />
       <div className="p-4">
         {/* 标题和播放按钮 */}
         <div className="flex items-center gap-3 mb-3">
           <div className={`w-12 h-12 flex items-center justify-center shrink-0 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] ${isCurrent ? 'bg-cyan-100 dark:bg-cyan-900' : 'bg-slate-50 dark:bg-cyan-600'}`}>
-            <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
+            {music.cover_url ? (
+              <img src={music.cover_url} alt="cover" className="w-full h-full object-cover" />
+            ) : (
+              <Music className={`h-6 w-6 text-slate-900 dark:text-white`} />
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white truncate" title={music.prompt}>
@@ -81,22 +78,10 @@ function MusicCardItem({
           </div>
           {/* 播放按钮 */}
           <button
-            onClick={togglePlay}
-            className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
-              isPlaying
-                ? 'bg-cyan-500 text-slate-900'
-                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'
-            }`}
+            onClick={() => onPlay(music)}
+            className={`shrink-0 w-10 h-10 flex items-center justify-center transition-all ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100`}
           >
-            {isPlaying ? (
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
+            <PlayCircle className="h-6 w-6" />
           </button>
         </div>
 
@@ -214,6 +199,7 @@ export function MusicGallery({
   onDelete
 }: MusicGalleryProps) {
   const [historyPage, setHistoryPage] = useState(1);
+  const [activePlayerMusic, setActivePlayerMusic] = useState<MusicItem | null>(null);
 
   const totalPages = Math.ceil(historyMusic.length / PAGE_SIZE);
   const startIndex = (historyPage - 1) * PAGE_SIZE;
@@ -232,7 +218,20 @@ export function MusicGallery({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* 梦幻播放器浮层 */}
+      {activePlayerMusic && (
+        <div className="absolute inset-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm p-4 flex flex-col">
+          <MusicPlayer 
+            url={activePlayerMusic.url}
+            title={activePlayerMusic.prompt}
+            coverUrl={activePlayerMusic.cover_url}
+            lyrics={activePlayerMusic.lyrics}
+            onClose={() => setActivePlayerMusic(null)}
+          />
+        </div>
+      )}
+
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-3">
           {/* 当前结果区 */}
@@ -243,7 +242,13 @@ export function MusicGallery({
               </p>
               <div className="space-y-2">
                 {currentMusic.map((item) => (
-                  <MusicCardItem key={item.id} music={item} isCurrent={true} viewMode={viewMode} />
+                  <MusicCardItem 
+                    key={item.id} 
+                    music={item} 
+                    isCurrent={true} 
+                    viewMode={viewMode} 
+                    onPlay={setActivePlayerMusic}
+                  />
                 ))}
               </div>
             </div>
@@ -259,7 +264,14 @@ export function MusicGallery({
               )}
               <div className="space-y-2">
                 {paginatedHistory.map((item) => (
-                  <MusicCardItem key={item.id} music={item} isCurrent={false} viewMode={viewMode} onDelete={onDelete} />
+                  <MusicCardItem 
+                    key={item.id} 
+                    music={item} 
+                    isCurrent={false} 
+                    viewMode={viewMode} 
+                    onDelete={onDelete} 
+                    onPlay={setActivePlayerMusic}
+                  />
                 ))}
               </div>
             </div>
@@ -268,11 +280,13 @@ export function MusicGallery({
       </ScrollArea>
 
       {/* 翻页控件 */}
-      <Pagination
-        currentPage={historyPage}
-        totalPages={totalPages}
-        onPageChange={setHistoryPage}
-      />
+      {!activePlayerMusic && (
+        <Pagination
+          currentPage={historyPage}
+          totalPages={totalPages}
+          onPageChange={setHistoryPage}
+        />
+      )}
     </div>
   );
 }

@@ -9,13 +9,17 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+import asyncio
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 
 from core.paths import ProjectPaths
 from api.deps import CurrentUserOptional
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
+from infrastructure.ai.vision.image_client_factory import ImageClientFactory
+from infrastructure.ai.core.openai_client import OpenAIClient
 from infrastructure.database import get_session
 from infrastructure.database.models import MusicRecordModel
 from infrastructure.notifications.media_notify import media_notifier
@@ -45,6 +49,8 @@ class MusicGenerateResponse(BaseModel):
     task_id: str
     message: str
     music_url: str | None = None
+    lyrics: str | None = Field(None, description="AI 生成歌词")
+    cover_url: str | None = Field(None, description="AI 生成封面图")
     file_path: str | None = None
     duration: float | None = None
     error: str | None = None
@@ -96,7 +102,6 @@ class MusicController:
                     t_duration_seconds=float(request.duration or 30.0),
                     t_steps=int(request.steps or 27),
                     t_guidance_scale=float(request.guidance_scale or 7.0),
-                    t_created_by=user_context.get("user_id", ""),
                 )
             )
             AgentAuditLogService(db).write_log(
@@ -135,17 +140,69 @@ class MusicController:
             db.commit()
 
     @staticmethod
+    async def _generate_lyrics(prompt: str) -> str:
+        """调用 DeepSeek 动态生成歌词"""
+        try:
+            llm = OpenAIClient(provider="deepseek")
+            system_prompt = (
+                "你是一位专业的金牌作词人。请根据用户的描述，创作一段动听的歌词。\n"
+                "格式要求：\n"
+                "1. 包含 [00:00.00] 格式的时间戳（模拟 LRC 格式）。\n"
+                "2. 结构清晰，包含 [Verse], [Chorus] 等段落。\n"
+                "3. 歌词要优美，富有画面感。\n"
+                "4. 直接输出歌词内容，不要任何解释。"
+            )
+            resp = await llm.chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"歌曲主题/风格: {prompt}"}
+                ],
+                temperature=0.8
+            )
+            return resp.get("content", "").strip()
+        except Exception as e:
+            logger.warning(f"生成歌词失败: {e}")
+            return "（歌词生成失败，请欣赏纯音乐）"
+
+    @staticmethod
+    async def _generate_cover(prompt: str) -> str:
+        """动态生成歌曲封面图"""
+        try:
+            image_client = ImageClientFactory.create()
+            # 增强 Prompt 确保封面质量
+            image_prompt = f"Professional music album cover, artistic style, high quality, digital art, theme: {prompt}"
+            result = await image_client.generate(prompt=image_prompt)
+            return result.image_url
+        except Exception as e:
+            logger.warning(f"生成封面失败: {e}")
+            return ""
+
+    @staticmethod
     def _do_generate(task_id: str, request: MusicGenerateRequest, user_context: dict[str, str]):
         """后台实际执行音乐生成的任务."""
         try:
             logger.info(f"[音乐生成] 开始执行后台任务 | task_id={task_id}")
             _music_tasks[task_id]["status"] = "processing"
-            _music_tasks[task_id]["progress"] = "正在初始化生成任务..."
+            _music_tasks[task_id]["progress"] = "正在创作歌词和设计封面..."
+            
+            # 1. 异步生成歌词和封面
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            lyrics = loop.run_until_complete(MusicController._generate_lyrics(request.prompt))
+            cover_url = loop.run_until_complete(MusicController._generate_cover(request.prompt))
+            
+            _music_tasks[task_id]["lyrics"] = lyrics
+            _music_tasks[task_id]["cover_url"] = cover_url
+            
             MusicController._update_record(
                 task_id,
                 t_status="processing",
-                t_progress_message="正在初始化生成任务...",
+                t_progress_message="正在初始化音频引擎...",
+                t_lyrics=lyrics,
+                t_cover_url=cover_url
             )
+            
             client = MusicClientProvider.get_music_client()
 
             def progress_cb(msg: str):
@@ -216,6 +273,9 @@ class MusicController:
                 _music_tasks[task_id]["music_url"] = final_url
                 _music_tasks[task_id]["file_path"] = result.file_path
                 _music_tasks[task_id]["duration"] = result.duration
+                # 确保返回结果中包含歌词和封面
+                _music_tasks[task_id]["lyrics"] = _music_tasks[task_id].get("lyrics")
+                _music_tasks[task_id]["cover_url"] = _music_tasks[task_id].get("cover_url")
                 MusicController._update_record(
                     task_id,
                     t_status="completed",
@@ -225,6 +285,8 @@ class MusicController:
                     t_object_key=s3_key if s3_url else None,
                     t_file_path=result.file_path,
                     t_duration_seconds=float(result.duration),
+                    t_lyrics=_music_tasks[task_id].get("lyrics"),
+                    t_cover_url=_music_tasks[task_id].get("cover_url"),
                 )
                 AgentAuditLogService.write_log_with_new_session(
                     action="music_generate_completed",
@@ -239,13 +301,22 @@ class MusicController:
                 )
 
                 # 发送飞书和企微通知
-                media_notifier.notify(
-                    media_type="music",
-                    prompt=request.prompt,
-                    file_url=final_url,
-                    duration=result.duration,
-                    persona="河南地理专家",
-                )
+                # 在后台任务中，我们需要运行异步的 notify
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    loop.run_until_complete(
+                        media_notifier.notify(
+                            media_type="music",
+                            prompt=request.prompt,
+                            file_url=final_url,
+                            duration=result.duration,
+                            persona="河南地理专家",
+                        )
+                    )
+                    loop.close()
+                except Exception as notify_err:
+                    logger.warning(f"发送节日通知失败: {notify_err}")
             else:
                 logger.warning(f"[音乐生成] 模型返回失败 | task_id={task_id} | error={result.error}")
                 _music_tasks[task_id]["status"] = "failed"

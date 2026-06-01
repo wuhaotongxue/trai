@@ -339,6 +339,8 @@ class MediaHistoryService:
             "object_key": record.t_object_key,
             "status": record.t_status,
             "model": record.t_model,
+            "lyrics": record.t_lyrics,
+            "cover_url": record.t_cover_url,
             "created_at": record.t_created_at.isoformat() if record.t_created_at else "",
             "updated_at": record.t_updated_at.isoformat() if record.t_updated_at else "",
             "deleted_at": record.t_deleted_at.isoformat() if record.t_deleted_at else None,

@@ -85,6 +85,8 @@ export interface GalleryMediaItem {
   task_id?: string;
   public_url?: string | null;
   status?: string;
+  lyrics?: string | null;
+  cover_url?: string | null;
   meta?: Record<string, unknown>;
 }
 
@@ -326,6 +328,8 @@ const mapHistoryItemToGalleryItem = (item: MediaHistoryItem): GalleryMediaItem |
     public_url: item.public_url,
     prompt: item.prompt,
     status: item.status,
+    lyrics: item.lyrics,
+    cover_url: item.cover_url,
     meta: item.meta,
     timestamp: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
   };

@@ -496,6 +496,8 @@ export interface MediaHistoryItem {
   object_key?: string | null;
   status: string;
   model?: string | null;
+  lyrics?: string | null;
+  cover_url?: string | null;
   created_at: string;
   updated_at: string;
   meta: Record<string, unknown>;

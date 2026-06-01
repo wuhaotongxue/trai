@@ -491,6 +491,8 @@ class MusicRecordModel(Base):
     )
     t_steps: Mapped[int] = mapped_column(Integer, default=27, nullable=False, comment="推理步数")
     t_guidance_scale: Mapped[float] = mapped_column(Float, default=7.0, nullable=False, comment="引导强度参数")
+    t_lyrics: Mapped[str | None] = mapped_column(Text, nullable=True, comment="AI 生成歌词")
+    t_cover_url: Mapped[str | None] = mapped_column(Text, nullable=True, comment="AI 生成封面图片地址")
     t_notify_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False, comment="通知发送状态")
     t_extra_data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, comment="扩展元数据")
     t_created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, index=True, comment="创建时间")

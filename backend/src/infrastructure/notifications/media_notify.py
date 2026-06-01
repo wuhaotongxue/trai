@@ -4,6 +4,8 @@ import requests
 from loguru import logger
 
 from core.paths import ProjectPaths
+from core.festivals import FestivalManager
+from infrastructure.ai.core.openai_client import OpenAIClient
 
 
 class MediaNotifier:
@@ -15,6 +17,40 @@ class MediaNotifier:
             "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=688936ed-0ea7-4f3f-8aa8-4476f638718a",
         )
         self.FEISHU_WEBHOOK = os.getenv("NOTIFY_FEISHU_WEBHOOK", "")
+        self._llm = OpenAIClient(provider="deepseek")
+
+    async def _generate_dynamic_festival_text(self, festival_name: str, type_name: str, prompt: str) -> dict:
+        """调用 DeepSeek 动态生成节日祝福文案"""
+        system_prompt = (
+            f"你是一位充满童心且幽默的创意官。今天是【{festival_name}】，用户刚刚用 AI 生成了一个【{type_name}】作品。\n"
+            f"请根据节日氛围和作品内容，写一段独特的祝福语（约60-80字）。\n"
+            "要求：\n"
+            "1. 语气要欢快、可爱，像在跟好朋友分享礼物。\n"
+            "2. 必须包含对作品的简短赞美。\n"
+            "3. 每次生成的侧重点要不同，避免机械重复。\n"
+            "4. 输出格式必须为 JSON: {\"title\": \"...\", \"message\": \"...\", \"footer\": \"...\"}\n"
+            "5. 不要输出任何 JSON 以外的内容。"
+        )
+        
+        user_content = f"节日: {festival_name}\n作品类型: {type_name}\n用户提示词: {prompt}"
+        
+        try:
+            resp = await self._llm.chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content}
+                ],
+                temperature=0.9, # 调高温度增加多样性
+            )
+            import json
+            content = resp.get("content", "").strip()
+            # 移除可能的 markdown 标记
+            if content.startswith("```json"):
+                content = content[7:-3].strip()
+            return json.loads(content)
+        except Exception as e:
+            logger.warning(f"动态节日文案生成失败: {e}")
+            return None
 
     def _generate_geography_expert_text(self, type_name: str, prompt: str, duration: float) -> str:
         """调用 DeepSeek 动态生成地理专家文案"""
@@ -118,7 +154,7 @@ class MediaNotifier:
             f"作为地理专家，我刚刚观测到了这一全新生成的数字奇观。它的板块构造非常完美，宛如巴哈马首都**拿骚** (Nassau) 那般充满着加勒比海的活力与宁静，请您查收这片新大陆的勘探结果：\n\n"
         )
 
-    def _build_markdown(
+    async def _build_markdown(
         self, media_type: str, prompt: str, file_url: str, duration: float = 0.0, persona: str = "地理专家"
     ) -> str:
         """构建 Markdown 通知内容"""
@@ -129,6 +165,25 @@ class MediaNotifier:
             "music": "音乐创作",
         }.get(media_type, media_type)
 
+        # 1. 优先检查今天是否有节日
+        festival = FestivalManager.get_today_festival()
+        if festival:
+            # 尝试动态生成
+            dynamic = await self._generate_dynamic_festival_text(festival["name"], type_name, prompt)
+            title = dynamic["title"] if dynamic else festival["title"]
+            message = dynamic["message"] if dynamic else festival["message"]
+            footer = dynamic["footer"] if dynamic else festival["footer"]
+
+            return (
+                f"## {title}\n\n"
+                f"> **观测坐标 (Prompt):** `{prompt}`\n"
+                f"> **魔法耗时:** `{duration:.1f} 秒`\n\n"
+                f"{message}\n\n"
+                f"👉 **[点击查看生成结果]({file_url})**\n\n"
+                f"*{footer}*"
+            )
+
+        # 2. 如果没有节日，按原逻辑执行
         if persona == "小甜心":
             content = (
                 f"## 💖 小甜心 Agent 生成播报\n\n"
@@ -156,11 +211,11 @@ class MediaNotifier:
 
         return content
 
-    def notify(
+    async def notify(
         self, media_type: str, prompt: str, file_url: str, duration: float = 0.0, persona: str = "地理专家"
     ) -> bool:
         """发送通知"""
-        content = self._build_markdown(media_type, prompt, file_url, duration, persona)
+        content = await self._build_markdown(media_type, prompt, file_url, duration, persona)
         success = False
 
         # 企微

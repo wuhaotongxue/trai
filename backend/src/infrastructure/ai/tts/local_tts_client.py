@@ -58,14 +58,29 @@ class LocalTTSClient(ITTSClient):
                 snapshot_download(model_id)
 
                 # Sambert 是 ModelScope 的标准 TTS 模型，pipeline 支持非常完美
-                inference_pipeline = pipeline(
-                    task=Tasks.text_to_speech,
-                    model=model_id
-                )
+                try:
+                    inference_pipeline = pipeline(
+                        task=Tasks.text_to_speech,
+                        model=model_id
+                    )
+                except (ImportError, ModuleNotFoundError) as imp_e:
+                    if "kantts" in str(imp_e):
+                        logger.warning("检测到缺少 kantts 依赖，正在尝试自动安装（儿童节特供自动修复）🍭")
+                        import subprocess
+                        import sys
+                        subprocess.check_call([sys.executable, "-m", "pip", "install", "kantts", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple"])
+                        # 安装后重新尝试加载
+                        inference_pipeline = pipeline(
+                            task=Tasks.text_to_speech,
+                            model=model_id
+                        )
+                    else:
+                        raise imp_e
+
                 output = inference_pipeline(text)
                 return output['output_wav']
             except Exception as ms_e:
-                logger.warning(f"本地 Sambert 引擎加载失败: {ms_e}, 正在尝试自动修复环境...")
+                logger.warning(f"本地 Sambert 引擎加载失败: {ms_e}, 正在使用欢快的兜底音频模式...")
 
             # 模拟模式兜底 (如果 ModelScope 也不可用)
             import time
