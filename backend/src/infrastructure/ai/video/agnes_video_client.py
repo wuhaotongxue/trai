@@ -126,7 +126,7 @@ class AgnesVideoClient:
     async def _poll_task(self, task_id: str, headers: dict) -> str:
         """轮询视频生成结果"""
         loop = asyncio.get_running_loop()
-        poll_url = f"{self._base_url}/tasks/{task_id}"
+        poll_url = f"{self._base_url}/video/generations/{task_id}"
 
         max_retries = 60
         for i in range(max_retries):
