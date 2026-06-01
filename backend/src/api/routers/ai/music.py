@@ -144,8 +144,17 @@ class MusicController:
         """调用 DeepSeek 动态生成歌词"""
         try:
             llm = OpenAIClient(provider="deepseek")
+            
+            # 检测是否包含周杰伦相关的关键词
+            jay_keywords = ["周杰伦", "jay chou", "周董", "jay"]
+            is_jay_style = any(k.lower() in prompt.lower() for k in jay_keywords)
+            
+            style_guide = "你是一位专业的金牌作词人。"
+            if is_jay_style:
+                style_guide = "你是一位擅长方文山风格的作词大咖, 能够创作出富有中国风、古典韵味且带有一丝忧伤或天马行空想象力的歌词。"
+
             system_prompt = (
-                "你是一位专业的金牌作词人。请根据用户的描述，创作一段动听的歌词。\n"
+                f"{style_guide}请根据用户的描述，创作一段动听的歌词。\n"
                 "要求：\n"
                 "1. 智能识别语言：如果用户描述是中文，则写中文歌词；如果是英文，则写英文歌词。\n"
                 "2. 包含 [00:00.00] 格式的时间戳（模拟 LRC 格式）。\n"
@@ -328,6 +337,7 @@ class MusicController:
                             file_url=final_url,
                             duration=result.duration,
                             persona="AI 音乐助手",
+                            lyrics=_music_tasks[task_id].get("lyrics"),
                         )
                     )
                     loop.close()
