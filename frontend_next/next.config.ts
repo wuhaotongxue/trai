@@ -3,6 +3,18 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // 移除 output: "export" 以启用热重载和 WebSocket 功能
   allowedDevOrigins: ["127.0.0.1", "192.168.100.119", "localhost", "192.168.98.72", "192.168.98.183"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+  },
   async rewrites() {
     return [
       {
