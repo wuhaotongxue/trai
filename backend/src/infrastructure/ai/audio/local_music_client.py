@@ -88,9 +88,9 @@ class LocalMusicClient:
         is_female = any(keyword.lower() in prompt.lower() for keyword in female_keywords)
 
         chinese_keywords = ["中文", "chinese", "mandarin", "普通话", "粤语", "cantonese"]
-        is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords)
+        is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords) or any("\u4e00" <= char <= "\u9fff" for char in prompt)
 
-        magic_tags = []
+        magic_tags = ["masterpiece", "high quality", "clear vocals", "studio recording"]
         if is_female:
             magic_tags.append("female singer")
         if is_chinese:
@@ -101,17 +101,13 @@ class LocalMusicClient:
                     "chinese lyrics",
                     "chinese vocals",
                     "clear chinese pronunciation",
-                    "traditional chinese instruments",
-                    "erhu",
-                    "pipa",
-                    "guzheng",
-                    "chinese pop style",
+                    "c-pop",
                 ]
             )
 
         if magic_tags:
             # 将魔法标签放在最前面，增加权重
-            enhanced_prompt = f"{', '.join(magic_tags)}, {prompt}"
+            enhanced_prompt = f"{', '.join(magic_tags)}\n{prompt}"
             logger.info(f"[音乐生成] 增强提示词: {enhanced_prompt}")
 
         actual_duration = duration or self.default_duration
