@@ -402,7 +402,9 @@ async def _execute_image_edit_task(
                 progress_message=msg,
             )
 
-        client = ModelScopeClient()
+        from infrastructure.ai.core.agnes_image_client import AgnesImageClient
+
+        client = AgnesImageClient()
         result = await client.image_edit(
             image_input=image_url,
             prompt=prompt,
@@ -529,7 +531,9 @@ async def generate_image(
             )
             db.commit()
 
-            client = ModelScopeClient()
+            from infrastructure.ai.core.agnes_image_client import AgnesImageClient
+
+            client = AgnesImageClient()
             use_case = ImageGenerationUseCase(client=client, repository=image_gen_repo)
 
             input_data = ImageGenerationInput(

@@ -18,7 +18,7 @@ class MediaNotifier:
             "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=688936ed-0ea7-4f3f-8aa8-4476f638718a",
         )
         self.FEISHU_WEBHOOK = os.getenv("NOTIFY_FEISHU_WEBHOOK", "")
-        self._llm = OpenAIClient(provider="deepseek")
+        self._llm = OpenAIClient(provider="agnes")
 
     async def _generate_dynamic_festival_text(self, festival_name: str, type_name: str, prompt: str) -> dict:
         """调用 DeepSeek 动态生成节日祝福文案"""

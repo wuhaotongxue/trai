@@ -69,6 +69,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### Backend_2026_06_01_1626
+- **Agnes AI 集成**: 引入了 Agnes AI 的图像和视频生成模型（agnes-image-2.0-flash / agnes-video-v2.0），并为其编写了带有自动回退机制（Fallback）的客户端（`AgnesImageClient`, `AgnesVideoClient`）。
+- **配置与前端支持**: 新增了 `agnes.env` 环境变量，并在前端系统设置页面补充了 Agnes Key 输入框。
+- **LLM 与节日推送**: 在媒体通知和音乐生成（歌词撰写）等场景接入了 Agnes LLM 支持，并添加了充满童心的六一儿童节专属推送文案逻辑。
+
 ### 🛠️ 后端_2026_06_01_1155
 - **优化(music_cover)**: 修复前端音乐封面不展示的 Bug. 深度对齐 `api_client` 接口定义, 并将封面 URL 切换为 30 天长期有效的 S3 预签名链接, 确保历史记录与画廊预览始终可见.
 - **节日(childrens_day)**: 全面接入儿童节限定模式. 后端通知、Git 推送均自动切换为“六一特使”角色, 提供极其欢快可爱的节日专属文案与交互体验.

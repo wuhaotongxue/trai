@@ -15,7 +15,7 @@ from loguru import logger
 
 # === 动态路径计算 ===
 SCRIPT_DIR = Path(__file__).resolve().parent
-BACKEND_DIR = SCRIPT_DIR.parent.parent # backend/src/scripts -> src -> backend
+BACKEND_DIR = SCRIPT_DIR.parent.parent  # backend/src/scripts -> src -> backend
 
 OUT_DIR = str(BACKEND_DIR / "output_video/lipsync")
 os.makedirs(OUT_DIR, exist_ok=True)

@@ -152,6 +152,7 @@ class GitPushNotifier:
 
         # 针对 6.1 儿童节强制切换
         from datetime import datetime
+
         if datetime.now().strftime("%m-%d") == "06-01":
             return self._build_childrens_day_markdown(commit_hash, commit_msg, branch, changed)
 

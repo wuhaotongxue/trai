@@ -298,6 +298,7 @@ export const ADMIN_EN = {
   "admin.settings.db_connection": "Database Connection",
   "admin.settings.redis_connection": "Redis Connection",
   "admin.settings.openai_key": "OpenAI API Key",
+  "admin.settings.agnes_key": "Agnes AI Key",
   "admin.settings.log_level": "Log Level",
   // ===== Database Management =====
   "admin.database.title": "Database Management",

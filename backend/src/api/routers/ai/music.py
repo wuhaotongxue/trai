@@ -142,7 +142,7 @@ class MusicController:
     async def _generate_lyrics(prompt: str) -> str:
         """调用 LLM 动态生成歌词"""
         try:
-            llm = OpenAIClient(provider="deepseek")
+            llm = OpenAIClient(provider="agnes")
 
             # 针对 6.1 儿童节定制
             is_childrens_day = datetime.now().strftime("%m-%d") == "06-01"

@@ -184,6 +184,8 @@ interface AgentState {
   generatedMusicCoverUrl: string | null;
   /** 音乐生成错误信息 */
   musicGenerateError: string | null;
+  /** 音乐创作指令 */
+  musicPrompt: string;
   /** 音乐廊 - 历史生成的音乐 */
   musicGallery: GalleryMediaItem[];
   /** 是否正在编辑图片 */
@@ -283,7 +285,7 @@ interface AgentState {
   /** 清除生成的音乐 */
   clearGeneratedMusic: () => void;
   /** 添加音乐到音乐廊 */
-  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null) => void;
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null) => void;
   /** 从音乐廊删除音乐 */
   removeFromMusicGallery: (id: string) => void;
   /** 清空音乐廊 */
@@ -383,6 +385,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   generatedMusicLyrics: null,
   generatedMusicCoverUrl: null,
   musicGenerateError: null,
+  musicPrompt: "",
   musicGallery: [],
   isEditingImage: false,
   editedImageUrl: null,
@@ -1431,7 +1434,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       generatedMusicCoverUrl: null,
       musicGenerateError: null, 
       musicGenerateProgress: null, 
-      musicGenerateTaskId: null 
+      musicGenerateTaskId: null,
+      musicPrompt: ""
     });
   },
 

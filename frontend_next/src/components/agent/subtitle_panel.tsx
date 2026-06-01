@@ -338,9 +338,9 @@ export function SubtitlePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-50 dark:bg-slate-950 p-6">
-      {/* 顶部 Tab 切换 */}
-      <div className="flex gap-4 mb-6 shrink-0">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-50 dark:bg-slate-950 p-1 sm:p-2">
+      {/* 顶部 Tab 切换 - 更加紧凑 */}
+      <div className="flex gap-2 mb-2 shrink-0 overflow-x-auto no-scrollbar pb-0.5">
         {[
           { id: "subtitle", label: "字幕创作", icon: Video },
           { id: "audio", label: "音频处理", icon: Music },
@@ -349,26 +349,26 @@ export function SubtitlePanel() {
           <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`h-12 px-6 gap-2 rounded-none font-black uppercase tracking-widest transition-all ${
+            className={`h-9 px-4 gap-1.5 rounded-none font-black uppercase tracking-tight transition-all shrink-0 ${
               activeTab === tab.id
-                ? "bg-cyan-400 text-slate-900 shadow-[4px_4px_0px_0px_#0f172a]"
+                ? "bg-cyan-400 text-slate-900 shadow-[2px_2px_0px_0px_#0f172a]"
                 : "bg-white dark:bg-slate-900 text-slate-500 hover:bg-slate-100"
             } ${brutalBorder}`}
           >
-            <tab.icon className="w-5 h-5" />
-            <span className="text-base">{tab.label}</span>
+            <tab.icon className="w-3.5 h-3.5" />
+            <span className="text-xs">{tab.label}</span>
           </Button>
         ))}
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 overflow-hidden min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 overflow-hidden min-h-0">
         {/* 左侧配置区 */}
-        <div className={`bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} flex flex-col overflow-hidden`}>
-          <div className="p-8 border-b-2 border-slate-100 dark:border-slate-800 shrink-0">
-            <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-900 dark:text-white mb-2">
+        <div className={`bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} flex flex-col overflow-hidden min-h-0`}>
+          <div className="p-3 sm:p-4 border-b-2 border-slate-100 dark:border-slate-800 shrink-0">
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-slate-900 dark:text-white leading-none mb-1">
               {activeTab === "subtitle" ? "字幕创作中心" : activeTab === "audio" ? "音频处理中心" : "智能会议助手"}
             </h2>
-            <p className="text-base font-bold text-slate-500 uppercase">
+            <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase">
               {activeTab === "subtitle" 
                 ? "自动生成字幕, 人声分离, 声音克隆及口型同步" 
                 : activeTab === "audio" 
@@ -377,68 +377,68 @@ export function SubtitlePanel() {
             </p>
           </div>
           
-          <ScrollArea className="flex-1 p-8">
-            <div className="space-y-10 pb-6">
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full p-3 sm:p-5 flex flex-col gap-4">
               {activeTab === "subtitle" && (
-                <div className="space-y-8">
-                  {/* 1. 工具选择 */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
-                      <div className="w-2 h-6 bg-cyan-400" />
+                <div className="flex flex-col h-full gap-4">
+                  {/* 1. 工具选择 - 紧凑网格 */}
+                  <div className="space-y-2 shrink-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-cyan-400" />
                       1. 选择工具类型
                     </h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-2">
                       {toolCategories.map((tool) => (
                         <button
                           key={tool.id}
                           onClick={() => { setTaskType(tool.id as any); setFile(null); setAudioFile(null); }}
                           className={cn(
-                            "flex items-center justify-between p-5 text-left transition-all border-2 border-slate-900 dark:border-white",
+                            "flex items-center justify-between p-2.5 sm:p-3 text-left transition-all border-2 border-slate-900 dark:border-white",
                             taskType === tool.id
-                              ? "bg-cyan-400 text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] translate-x-[-2px] translate-y-[-2px]"
+                              ? "bg-cyan-400 text-slate-900 shadow-[2px_2px_0px_0px_#0f172a] translate-x-[-1px] translate-y-[-1px]"
                               : "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100"
                           )}
                         >
-                          <div className="flex items-center gap-4">
-                            <tool.icon className="w-6 h-6 shrink-0" />
-                            <span className="font-black text-base uppercase">{tool.label}</span>
+                          <div className="flex items-center gap-2">
+                            <tool.icon className="w-4 h-4 shrink-0" />
+                            <span className="font-black text-xs uppercase">{tool.label}</span>
                           </div>
-                          {taskType === tool.id && <Check className="w-6 h-6" />}
+                          {taskType === tool.id && <Check className="w-4 h-4" />}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* 2. 文件上传 */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
-                      <div className="w-2 h-6 bg-amber-400" />
+                  {/* 2. 文件上传 - 压缩高度 */}
+                  <div className="space-y-2 flex-1 min-h-0 flex flex-col">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-amber-400" />
                       2. 上传原始文件
                     </h3>
-                    <div className={cn("p-12 bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center gap-4 cursor-pointer hover:bg-slate-100 transition-colors relative")}>
+                    <div className={cn("flex-1 p-4 bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-100 transition-colors relative min-h-[100px]")}>
                       <input type="file" accept="video/*,audio/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }} />
-                      <div className="w-16 h-16 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[4px_4px_0px_0px_#0f172a] flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-slate-900 dark:text-white" />
+                      <div className="w-10 h-10 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] flex items-center justify-center">
+                        <Upload className="w-5 h-5 text-slate-900 dark:text-white" />
                       </div>
-                      <span className="text-base font-black text-slate-500 uppercase">{file ? file.name : "点击或拖拽视频/音频文件"}</span>
+                      <span className="text-xs font-black text-slate-500 uppercase text-center break-all px-4">{file ? file.name : "点击或拖拽视频/音频文件"}</span>
                     </div>
                   </div>
 
-                  {/* 3. 参数配置 */}
+                  {/* 3. 参数配置 - 极简布局 */}
                   {taskType !== "separate" && (
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
-                          <div className="w-2 h-6 bg-indigo-400" />
+                    <div className="space-y-2 shrink-0">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                          <div className="w-1.5 h-4 bg-indigo-400" />
                           3. 参数配置
                         </h3>
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-xs font-black uppercase text-slate-500">源语言 (可选)</label>
-                          <input className={cn("w-full h-12 px-4 bg-slate-50 dark:bg-slate-900", brutalBorder)} value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} placeholder="zh, en..." />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500">源语言</label>
+                          <input className={cn("w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 text-xs", brutalBorder)} value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} placeholder="zh, en..." />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-xs font-black uppercase text-slate-500">目标翻译语言</label>
-                          <select className={cn("w-full h-12 px-4 bg-slate-50 dark:bg-slate-900", brutalBorder)} value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black uppercase text-slate-500">翻译语言</label>
+                          <select className={cn("w-full h-9 px-3 bg-slate-50 dark:bg-slate-900 text-xs", brutalBorder)} value={targetLang} onChange={(e) => setTargetLang(e.target.value)}>
                             {TARGET_LANG_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
                           </select>
                         </div>
@@ -446,143 +446,104 @@ export function SubtitlePanel() {
                     </div>
                   )}
 
-                  <Button onClick={handleSubmit} disabled={submitDisabled} className="w-full h-20 text-2xl font-black uppercase tracking-[0.2em] bg-slate-900 text-white hover:bg-slate-800 rounded-none shadow-[8px_8px_0px_0px_#22d3ee] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
-                    {isSubmitting ? <><Loader2 className="w-8 h-8 animate-spin" /> 处理中 {uploadProgress}%</> : "开始处理任务"}
+                  <Button onClick={handleSubmit} disabled={submitDisabled} className="w-full h-12 text-lg font-black uppercase tracking-widest bg-slate-900 text-white hover:bg-slate-800 rounded-none shadow-[4px_4px_0px_0px_#22d3ee] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all shrink-0">
+                    {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" /> 处理中 {uploadProgress}%</> : "开始处理任务"}
                   </Button>
                 </div>
               )}
 
               {activeTab === "audio" && (
-                <div className="space-y-10">
-                  <section className="space-y-6">
-                    <h3 className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-3">
-                      <div className="w-3 h-8 bg-indigo-400" />
+                <div className="flex flex-col h-full gap-4">
+                  <section className="space-y-3 flex-1 flex flex-col min-h-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-indigo-400" />
                       音频增强工具
                     </h3>
-                    <div className="grid grid-cols-1 gap-6">
-                      <div className="flex gap-4">
+                    <div className="flex-1 flex flex-col gap-3 min-h-0">
+                      <div className="flex gap-2 shrink-0">
                         <button 
                           onClick={toggleRecording}
                           disabled={isTranscribing}
                           className={cn(
-                            "flex-1 p-8 flex items-center justify-between transition-all",
+                            "flex-1 p-4 flex items-center justify-between transition-all",
                             brutalBorder,
                             isRecording 
-                              ? "bg-red-500 text-white shadow-none translate-x-1 translate-y-1" 
-                              : "bg-indigo-100 text-slate-900 shadow-[6px_6px_0px_0px_#0f172a]"
+                              ? "bg-red-500 text-white shadow-none translate-x-0.5 translate-y-0.5" 
+                              : "bg-indigo-100 text-slate-900 shadow-[4px_4px_0px_0px_#0f172a]"
                           )}
                         >
-                          <div className="flex items-center gap-6">
-                            {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
+                          <div className="flex items-center gap-3">
+                            {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                             <div className="text-left">
-                              <div className="text-2xl font-black uppercase tracking-tight">
+                              <div className="text-sm font-black uppercase tracking-tight">
                                 {isRecording ? "停止录音" : "实时语音识别"}
-                              </div>
-                              <div className={cn("text-base font-bold", isRecording ? "text-white/80" : "text-indigo-600")}>
-                                {isRecording ? "点击结束并进入保存确认" : "使用麦克风进行实时转录"}
                               </div>
                             </div>
                           </div>
-                          {isRecording && (
-                            <div className="flex gap-1">
-                              {[1, 2, 3].map(i => (
-                                <div key={i} className="w-1.5 h-6 bg-white animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
-                              ))}
-                            </div>
-                          )}
                         </button>
                         
                         {isRecording && (
                           <button
                             onClick={handleCancelRecording}
                             className={cn(
-                              "px-8 bg-white text-red-500 font-black uppercase tracking-tight transition-all",
+                              "px-4 bg-white text-red-500 text-xs font-black uppercase transition-all",
                               brutalBorder,
-                              "shadow-[4px_4px_0px_0px_#ef4444] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                              "shadow-[2px_2px_0px_0px_#ef4444]"
                             )}
                           >
-                            直接取消
+                            取消
                           </button>
                         )}
                       </div>
 
-                      {/* 实时识别结果展示区 */}
+                      {/* 实时识别结果展示区 - 自动填充剩余空间 */}
                       {(liveTranscript || isTranscribing || pendingAudioBlob) && (
-                        <div className={cn("p-8 bg-white dark:bg-slate-900 min-h-[160px] flex flex-col gap-4 transition-all", brutalBorder, brutalShadow)}>
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-black uppercase tracking-tighter text-indigo-600 flex items-center gap-2">
-                              <Type className="w-5 h-5" />
-                              {isRecording ? "正在实时识别 (Live Transcription)" : "识别结果预览 (Transcription Preview)"}
+                        <div className={cn("flex-1 p-4 bg-white dark:bg-slate-900 flex flex-col gap-2 transition-all overflow-hidden", brutalBorder, brutalShadowSm)}>
+                          <div className="flex items-center justify-between shrink-0">
+                            <h4 className="text-[10px] font-black uppercase tracking-tighter text-indigo-600 flex items-center gap-1">
+                              <Type className="w-3 h-3" />
+                              {isRecording ? "实时识别中" : "识别结果预览"}
                             </h4>
-                            {isTranscribing && <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />}
                           </div>
                           
-                          <div className="flex-1 text-xl font-bold leading-relaxed text-slate-700 dark:text-slate-300 italic">
-                            {isTranscribing ? (
-                              <div className="flex flex-col gap-2">
-                                <span className="animate-pulse">正在保存并同步至 S3...</span>
-                                <div className="w-full h-2 bg-slate-100 overflow-hidden">
-                                  <div className="w-1/2 h-full bg-indigo-500 animate-[shimmer_2s_infinite]" />
+                          <ScrollArea className="flex-1 min-h-0">
+                            <div className="text-base font-bold leading-relaxed text-slate-700 dark:text-slate-300 italic">
+                              {isTranscribing ? (
+                                <div className="flex flex-col gap-2">
+                                  <span className="animate-pulse text-xs text-indigo-500">正在同步至云端...</span>
+                                  <div className="w-full h-1 bg-slate-100 overflow-hidden">
+                                    <div className="w-1/2 h-full bg-indigo-500 animate-[shimmer_2s_infinite]" />
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              liveTranscript || (isRecording ? "正在倾听..." : "未识别到内容")
-                            )}
-                          </div>
+                              ) : (
+                                liveTranscript || (isRecording ? "正在倾听..." : "未识别到内容")
+                              )}
+                            </div>
+                          </ScrollArea>
 
                           {!isTranscribing && !isRecording && pendingAudioBlob && (
-                            <div className="flex items-center justify-between pt-6 border-t-2 border-slate-900 dark:border-white gap-4">
-                              <div className="text-xs font-black uppercase text-slate-500">录音已就绪, 是否入库?</div>
-                              <div className="flex gap-4">
-                                <Button 
-                                  onClick={handleDiscardAudioRecord}
-                                  variant="outline"
-                                  className={cn("h-12 px-6 font-black uppercase rounded-none border-2 border-red-500 text-red-500 hover:bg-red-50")}
-                                >
-                                  放弃 (Discard)
-                                </Button>
-                                <Button 
-                                  onClick={handleSaveAudioRecord}
-                                  className={cn("h-12 px-8 font-black uppercase rounded-none bg-emerald-500 text-white hover:bg-emerald-600 shadow-[4px_4px_0px_0px_#0f172a] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none")}
-                                >
-                                  保存记录 (Save)
-                                </Button>
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-900 dark:border-white gap-2 shrink-0">
+                              <div className="text-[9px] font-black uppercase text-slate-500">是否保存?</div>
+                              <div className="flex gap-2">
+                                <Button onClick={handleDiscardAudioRecord} variant="outline" className="h-8 px-3 text-[10px] font-black uppercase rounded-none border-2 border-red-500 text-red-500">放弃</Button>
+                                <Button onClick={handleSaveAudioRecord} className="h-8 px-4 text-[10px] font-black uppercase rounded-none bg-emerald-500 text-white shadow-[2px_2px_0px_0px_#0f172a]">保存</Button>
                               </div>
-                            </div>
-                          )}
-
-                          {!isTranscribing && !isRecording && !pendingAudioBlob && liveTranscript && (
-                            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className={cn("h-10 px-4 font-black uppercase rounded-none", brutalBorder)}
-                                onClick={() => {
-                                  navigator.clipboard.writeText(liveTranscript);
-                                  globalToast({ message: "已复制到剪贴板", variant: "success" });
-                                }}
-                              >
-                                复制文本
-                              </Button>
                             </div>
                           )}
                         </div>
                       )}
                     </div>
                   </section>
-                  <section className="space-y-6">
-                    <h3 className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-3">
-                      <div className="w-3 h-8 bg-emerald-400" />
-                      处理规范 (Skills)
+                  
+                  <section className="space-y-2 shrink-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-emerald-400" />
+                      处理规范
                     </h3>
-                    <div className="p-8 bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-900/10 space-y-6">
-                      <div className="flex items-start gap-4 text-emerald-800 dark:text-emerald-400">
-                        <CheckCircle2 className="w-6 h-6 mt-1 shrink-0" />
-                        <span className="font-black text-lg leading-tight uppercase">音频结果将自动同步至 S3 私有桶并生成预签名 URL</span>
-                      </div>
-                      <div className="flex items-start gap-4 text-emerald-800 dark:text-emerald-400">
-                        <CheckCircle2 className="w-6 h-6 mt-1 shrink-0" />
-                        <span className="font-black text-lg leading-tight uppercase">处理完成后将即时推送通知至飞书与企业微信</span>
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border-2 border-emerald-900/10 flex flex-col gap-2">
+                      <div className="flex items-start gap-2 text-emerald-800 dark:text-emerald-400">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span className="font-black text-xs uppercase leading-tight">结果自动同步 S3 并生成加密链接</span>
                       </div>
                     </div>
                   </section>
@@ -590,131 +551,124 @@ export function SubtitlePanel() {
               )}
 
               {activeTab === "meeting" && (
-                <div className="space-y-10">
-                  <section className="space-y-6">
-                    <h3 className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-3">
-                      <div className="w-3 h-8 bg-indigo-400" />
+                <div className="flex flex-col h-full gap-4">
+                  <section className="space-y-3 flex-1 flex flex-col min-h-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-indigo-400" />
                       会议纪要生成
                     </h3>
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-slate-500">会议标题</label>
-                      <input placeholder="请输入会议标题..." className={`w-full h-16 text-xl font-black bg-white dark:bg-slate-900 px-6 ${brutalBorder} focus:outline-none focus:ring-8 focus:ring-indigo-400/20`} />
+                    <div className="space-y-1 shrink-0">
+                      <label className="text-[10px] font-black uppercase text-slate-500 px-1">会议标题</label>
+                      <input placeholder="请输入会议标题..." className={`w-full h-10 text-base font-black bg-white dark:bg-slate-900 px-4 ${brutalBorder} focus:outline-none`} />
                     </div>
-                    <div className={`p-12 bg-slate-50 dark:bg-slate-800 ${brutalBorder} border-dashed flex flex-col items-center gap-6 group cursor-pointer hover:bg-slate-100 transition-all`}>
-                      <div className="w-20 h-20 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[6px_6px_0px_0px_#0f172a] flex items-center justify-center group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
-                        <Upload className="w-10 h-10 text-slate-900 dark:text-white" />
+                    <div className={`flex-1 p-6 bg-slate-50 dark:bg-slate-800 ${brutalBorder} border-dashed flex flex-col items-center justify-center gap-3 group cursor-pointer min-h-[100px]`}>
+                      <div className="w-12 h-12 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[2px_2px_0px_0px_#0f172a] flex items-center justify-center">
+                        <Upload className="w-6 h-6 text-slate-900 dark:text-white" />
                       </div>
-                      <span className="font-black text-xl text-slate-500 uppercase tracking-widest">上传会议录音 (MP3/WAV/M4A)</span>
+                      <span className="font-black text-xs text-slate-500 uppercase tracking-widest">上传会议录音</span>
                     </div>
                   </section>
-                  <section className="space-y-6">
-                    <h3 className="text-2xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-3">
-                      <div className="w-3 h-8 bg-pink-400" />
-                      AI 智能总结选项
+                  <section className="space-y-2 shrink-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-pink-400" />
+                      总结选项
                     </h3>
-                    <div className="grid grid-cols-2 gap-6">
-                      {["精简摘要", "详细纪要", "行动项提取", "全量转录"].map((item) => (
+                    <div className="grid grid-cols-2 gap-2">
+                      {["精简摘要", "行动项"].map((item) => (
                         <div 
                           key={item} 
                           onClick={() => toggleMeetingOption(item)}
                           className={cn(
-                            "p-6 border-2 transition-all cursor-pointer flex items-center gap-4",
+                            "p-2 border-2 transition-all cursor-pointer flex items-center gap-2",
                             meetingOptions.includes(item)
-                              ? "border-pink-500 bg-pink-50 dark:bg-pink-950/20 text-pink-900 dark:text-pink-100 shadow-[4px_4px_0px_0px_#ec4899]"
-                              : "border-slate-900 dark:border-white bg-white dark:bg-slate-800 hover:bg-slate-50"
+                              ? "border-pink-500 bg-pink-50 dark:bg-pink-950/20 text-pink-900 shadow-[2px_2px_0px_0px_#ec4899]"
+                              : "border-slate-900 dark:border-white bg-white dark:bg-slate-800"
                           )}
                         >
-                          <div className={cn(
-                            "w-6 h-6 border-2 flex items-center justify-center shrink-0 transition-all",
-                            meetingOptions.includes(item) ? "border-pink-500 bg-pink-500" : "border-slate-300"
-                          )}>
-                            {meetingOptions.includes(item) && <Check className="w-5 h-5 text-white" />}
+                          <div className={cn("w-4 h-4 border-2 flex items-center justify-center shrink-0", meetingOptions.includes(item) ? "border-pink-500 bg-pink-500" : "border-slate-300")}>
+                            {meetingOptions.includes(item) && <Check className="w-3 h-3 text-white" />}
                           </div>
-                          <span className="font-black text-lg uppercase tracking-tight">{item}</span>
+                          <span className="font-black text-xs uppercase">{item}</span>
                         </div>
                       ))}
                     </div>
                   </section>
-                  <Button className="w-full h-24 bg-indigo-600 text-white text-3xl font-black uppercase tracking-[0.2em] rounded-none shadow-[10px_10px_0px_0px_#000000] hover:bg-indigo-700 transition-all active:translate-x-1 active:translate-y-1 active:shadow-none">
+                  <Button className="w-full h-14 bg-indigo-600 text-white text-xl font-black uppercase tracking-widest rounded-none shadow-[4px_4px_0px_0px_#000000] shrink-0">
                     开始智能转录
                   </Button>
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </div>
 
-        {/* 右侧结果区 */}
-        <div className="flex flex-col gap-6 overflow-hidden min-h-0">
+        {/* 右侧结果区 - 同步压缩 */}
+        <div className="flex flex-col gap-2 lg:gap-4 overflow-hidden min-h-0">
           {/* 实时预览 / 播放器 */}
           <div className={cn(
             "aspect-video bg-slate-900 relative group flex items-center justify-center shrink-0 overflow-hidden",
             brutalBorder,
-            brutalShadow
+            brutalShadowSm
           )}>
             {activeTab === "meeting" ? (
-               <div className="flex flex-col items-center gap-4 text-slate-500">
-                 <Mic className="w-16 h-16 animate-pulse text-cyan-500" />
-                 <span className="font-black uppercase tracking-widest">等待会议音频输入...</span>
+               <div className="flex flex-col items-center gap-2 text-slate-500">
+                 <Mic className="w-10 h-10 animate-pulse text-cyan-500" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">等待音频输入...</span>
                </div>
             ) : (activeTab === "audio" && (isRecording || liveTranscript)) ? (
-              <div className="w-full h-full p-8 flex flex-col gap-6 bg-slate-900 text-white overflow-hidden">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-sm font-black uppercase tracking-widest text-cyan-400">实时识别预览 (Live Preview)</span>
+              <div className="w-full h-full p-4 flex flex-col gap-2 bg-slate-900 text-white overflow-hidden">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">实时识别预览</span>
                   </div>
-                  {isTranscribing && <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />}
+                  {isTranscribing && <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />}
                 </div>
                 <ScrollArea className="flex-1">
-                  <div className="text-2xl font-bold leading-relaxed text-slate-200 italic pr-4">
-                    {liveTranscript || (isRecording ? "正在倾听语音..." : "")}
+                  <div className="text-lg font-bold leading-relaxed text-slate-200 italic pr-2">
+                    {liveTranscript || (isRecording ? "正在倾听..." : "")}
                   </div>
                 </ScrollArea>
               </div>
             ) : activeRecord?.output_video_url ? (
               <video className="w-full h-full object-contain" controls src={activeRecord.output_video_url} />
             ) : (
-              <div className="text-center p-6 text-slate-500">
-                <Video className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                <span className="font-black uppercase tracking-widest">等待任务完成后显示预览</span>
+              <div className="text-center p-4 text-slate-500">
+                <Video className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                <span className="text-[10px] font-black uppercase tracking-widest">完成任务后显示预览</span>
               </div>
             )}
           </div>
           
           {/* 任务列表 / 历史 */}
-          <div className={`flex-1 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} p-6 flex flex-col overflow-hidden min-h-0`}>
-             <div className="flex items-center justify-between mb-6 shrink-0">
-                <h3 className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-3">
-                  <HistoryIcon className="w-6 h-6" />
+          <div className={`flex-1 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} p-3 sm:p-4 flex flex-col overflow-hidden min-h-0`}>
+             <div className="flex items-center justify-between mb-3 shrink-0">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                  <HistoryIcon className="w-4 h-4" />
                   历史任务
                 </h3>
-                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 border-2 border-slate-900 dark:border-white text-xs font-black">TOTAL: {history.length}</span>
+                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border-2 border-slate-900 dark:border-white text-[9px] font-black">TOTAL: {history.length}</span>
              </div>
              <ScrollArea className="flex-1">
-                <div className="space-y-4 pb-4">
+                <div className="space-y-2 pb-2">
                   {history.length === 0 ? (
-                    <div className="h-40 flex flex-col items-center justify-center text-slate-300 gap-4">
-                       <FileTextIcon className="w-12 h-12 opacity-20" />
-                       <span className="font-bold text-sm uppercase">暂无历史记录</span>
+                    <div className="h-24 flex flex-col items-center justify-center text-slate-300 gap-2">
+                       <FileTextIcon className="w-8 h-8 opacity-20" />
+                       <span className="font-bold text-[10px] uppercase">暂无记录</span>
                     </div>
                   ) : (
                     history.map((item) => (
-                      <div key={item.task_id} onClick={() => setActiveRecord(item)} className={cn("p-4 border-2 transition-all cursor-pointer group flex items-center justify-between", activeRecord?.task_id === item.task_id ? "border-cyan-500 bg-cyan-50 dark:bg-slate-800" : "border-slate-900 dark:border-white hover:bg-slate-50 dark:hover:bg-slate-800")}>
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="relative">
-                            <div className={cn("w-4 h-4 rounded-full shrink-0 flex items-center justify-center", item.status === "completed" ? "bg-emerald-500" : "bg-cyan-500 animate-pulse")}>
-                              {activeRecord?.task_id === item.task_id && <Check className="w-3 h-3 text-white" />}
-                            </div>
-                          </div>
+                      <div key={item.task_id} onClick={() => setActiveRecord(item)} className={cn("p-2 border-2 transition-all cursor-pointer group flex items-center justify-between", activeRecord?.task_id === item.task_id ? "border-cyan-500 bg-cyan-50 dark:bg-slate-800" : "border-slate-900 dark:border-white hover:bg-slate-50 dark:hover:bg-slate-800")}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={cn("w-2 h-2 rounded-full shrink-0", item.status === "completed" ? "bg-emerald-500" : "bg-cyan-500 animate-pulse")} />
                           <div className="min-w-0">
-                            <div className="font-black text-sm uppercase truncate">{item.file_name}</div>
-                            <div className="text-[10px] font-bold text-slate-400">{new Date(item.created_at).toLocaleString()}</div>
+                            <div className="font-black text-[10px] uppercase truncate">{item.file_name}</div>
+                            <div className="text-[8px] font-bold text-slate-400">{new Date(item.created_at).toLocaleDateString()}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
-                          <button onClick={(e) => { e.stopPropagation(); handleDelete(item.task_id); }} className="p-2 text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                          {item.output_video_url && <a href={item.output_video_url} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-900 dark:text-white hover:bg-slate-100"><ExternalLink className="w-4 h-4" /></a>}
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(item.task_id); }} className="p-1 text-red-500 hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                          {item.output_video_url && <a href={item.output_video_url} target="_blank" rel="noopener noreferrer" className="p-1 text-slate-900 dark:text-white hover:bg-slate-100"><ExternalLink className="w-3 h-3" /></a>}
                         </div>
                       </div>
                     ))

@@ -245,15 +245,14 @@ export function DigitalHumanPanel() {
   };
 
   return (
-    <div className={`flex w-full flex-1 min-h-0 ${brutalBorder} border-[3px] ${brutalShadow} bg-white dark:bg-slate-900 overflow-hidden`}>
+    <div className={`flex w-full flex-1 min-h-0 ${brutalBorder} border-[3px] ${brutalShadowSm} bg-white dark:bg-slate-900 overflow-hidden`}>
       {/* 左侧: 数字人视频展示区 */}
-      <div className="flex-1 border-r-[3px] border-slate-900 dark:border-white flex flex-col bg-slate-100 dark:bg-slate-950 relative">
-        <div className="p-4 bg-cyan-200 dark:bg-slate-200 text-slate-900 border-b-[3px] border-slate-900 flex items-center justify-between gap-4 shrink-0">
+      <div className="flex-1 border-r-[3px] border-slate-900 dark:border-white flex flex-col bg-slate-100 dark:bg-slate-950 relative min-h-0">
+        <div className="p-3 bg-cyan-200 dark:bg-slate-200 text-slate-900 border-b-[3px] border-slate-900 flex items-center justify-between gap-4 shrink-0">
           <div>
-            <h2 className="text-sm font-black uppercase tracking-[0.2em]">Digital Human Stage</h2>
-            <p className="text-[10px] font-bold uppercase tracking-[0.25em] mt-1 opacity-70">{PANEL_SUBTITLES.result_stage}</p>
+            <h2 className="text-xs font-black uppercase tracking-wider">Digital Human Stage</h2>
           </div>
-          <div className={`px-3 py-2 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-xs font-black uppercase tracking-widest`}>
+          <div className={`px-2 py-1 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-[10px] font-black uppercase`}>
             视频舞台
           </div>
         </div>
@@ -263,16 +262,13 @@ export function DigitalHumanPanel() {
             <FemaleAvatarSVG isListening={isRecording} />
             
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
-            <div className="absolute bottom-10 left-0 right-0 text-center text-white">
-              <div className="flex flex-col items-center gap-2">
-                <div className={`w-12 h-12 bg-cyan-400/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-cyan-400/50 mb-1`}>
-                  {isRecording ? <Volume2 className="w-6 h-6 text-cyan-300 animate-pulse" /> : <Sparkles className="w-6 h-6 text-cyan-300 animate-pulse" />}
+            <div className="absolute bottom-6 left-0 right-0 text-center text-white">
+              <div className="flex flex-col items-center gap-1.5">
+                <div className={`w-10 h-10 bg-cyan-400/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-cyan-400/50 mb-1`}>
+                  {isRecording ? <Volume2 className="w-5 h-5 text-cyan-300 animate-pulse" /> : <Sparkles className="w-5 h-5 text-cyan-300 animate-pulse" />}
                 </div>
-                <p className="font-black uppercase tracking-[0.3em] text-lg drop-shadow-2xl">
+                <p className="font-black uppercase tracking-widest text-base drop-shadow-2xl">
                   {isRecording ? "正在倾听..." : "智能助手已就绪"}
-                </p>
-                <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">
-                  {isRecording ? "Listening to Voice" : "Ready to Chat"}
                 </p>
               </div>
             </div>
@@ -301,14 +297,14 @@ export function DigitalHumanPanel() {
           )}
         
           {(isProcessing || isRecording) && (
-          <div className={`absolute bottom-6 left-6 right-6 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} text-slate-900 dark:text-white p-4 space-y-3 z-10`}>
-            <div className="flex items-center gap-4">
-              {isRecording ? <Mic className="w-6 h-6 animate-bounce text-red-500" /> : <Loader2 className="w-6 h-6 animate-spin font-black" />}
-              <span className="text-lg font-black uppercase tracking-widest">
+          <div className={`absolute bottom-4 left-4 right-4 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} text-slate-900 dark:text-white p-3 space-y-2 z-10`}>
+            <div className="flex items-center gap-3">
+              {isRecording ? <Mic className="w-5 h-5 animate-bounce text-red-500" /> : <Loader2 className="w-5 h-5 animate-spin font-black" />}
+              <span className="text-sm font-black uppercase tracking-widest">
                 {isRecording ? "正在倾听您的声音..." : "数字人正在回应..."}
               </span>
             </div>
-            <div className="h-4 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
+            <div className="h-2 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden">
               <div className={`h-full bg-cyan-500 ${isRecording ? 'w-full animate-[shimmer_2s_infinite]' : 'w-1/3 animate-pulse'}`} />
             </div>
           </div>
@@ -317,34 +313,33 @@ export function DigitalHumanPanel() {
       </div>
 
       {/* 右侧: 聊天记录区 */}
-      <div className="w-[400px] flex flex-col bg-white dark:bg-slate-900 border-l-[3px] border-slate-900 dark:border-white">
-        <div className="p-4 border-b-[3px] border-slate-900 dark:border-white font-black uppercase tracking-widest text-lg flex items-center justify-between gap-3 bg-cyan-200 dark:bg-slate-200 text-slate-900 shrink-0">
+      <div className="w-[320px] flex flex-col bg-white dark:bg-slate-900 border-l-[3px] border-slate-900 dark:border-white min-h-0">
+        <div className="p-3 border-b-[3px] border-slate-900 dark:border-white font-black uppercase tracking-wider text-base flex items-center justify-between gap-3 bg-cyan-200 dark:bg-slate-200 text-slate-900 shrink-0">
           <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5" />
+          <Bot className="w-4 h-4" />
           数字人对话
           </div>
-          <span className={`px-2 py-1 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-[10px]`}>
-            {PANEL_SUBTITLES.chat_rail}
+          <span className={`px-1.5 py-0.5 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-[8px]`}>
+            LIVE CHAT
           </span>
         </div>
         
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-4">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-3 space-y-3">
             {messages.length === 0 && (
-              <div className="text-center mt-8 opacity-40 text-slate-900 dark:text-white">
-                <div className={`w-16 h-16 bg-cyan-100 dark:bg-cyan-900 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadowSm} mx-auto mb-3`}>
-                  <Bot className="w-8 h-8" />
+              <div className="text-center mt-6 opacity-40 text-slate-900 dark:text-white">
+                <div className={`w-12 h-12 bg-cyan-100 dark:bg-cyan-900 rounded-none flex items-center justify-center ${brutalBorder} ${brutalShadowSm} mx-auto mb-2`}>
+                  <Bot className="w-6 h-6" />
                 </div>
-                <div className="font-black uppercase text-sm tracking-widest">{PANEL_EMPTY_COPY.waiting_history_title}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.15em] mt-1">{PANEL_EMPTY_COPY.waiting_history_desc}</div>
+                <div className="font-black uppercase text-xs tracking-widest">等待对话</div>
               </div>
             )}
             {messages.map(msg => (
               <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`w-10 h-10 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-slate-100 text-slate-900" : "bg-cyan-100 text-slate-900"}`}>
-                  {msg.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                <div className={`w-8 h-8 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-slate-100 text-slate-900" : "bg-cyan-100 text-slate-900"}`}>
+                  {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                 </div>
-                <div className={`max-w-[80%] p-3 ${brutalBorder} ${brutalShadowSm} font-bold text-sm leading-snug ${
+                <div className={`max-w-[85%] p-2 ${brutalBorder} ${brutalShadowSm} font-bold text-xs leading-snug ${
                   msg.role === "user" 
                     ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100" 
                     : "bg-cyan-200 text-slate-900 dark:bg-cyan-900 dark:text-cyan-50"
@@ -353,26 +348,22 @@ export function DigitalHumanPanel() {
                 </div>
               </div>
             ))}
-            <div ref={bottomRef} className="h-2" />
+            <div ref={bottomRef} className="h-1" />
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t-[3px] border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-950 shrink-0">
+        <div className="p-3 border-t-[3px] border-slate-900 dark:border-white bg-slate-50 dark:bg-slate-950 shrink-0">
           <div className="flex items-center gap-2">
             <Button 
               type="button"
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isProcessing}
-              aria-label={isRecording ? "停止录音" : "开始录音"}
-              title={isRecording ? "停止录音" : "开始录音"}
-              className={`h-12 w-12 rounded-none ${isRecording ? 'bg-red-500 hover:bg-red-400 text-white animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'} ${brutalBtnBase} shrink-0`}
+              className={`h-10 w-10 rounded-none ${isRecording ? 'bg-red-500 hover:bg-red-400 text-white animate-pulse' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-100'} ${brutalBtnBase} shrink-0 p-0`}
             >
-              {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </Button>
             <Input 
               ref={inputRef}
-              aria-label="数字人对话输入框"
-              title="数字人对话输入框"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => {
@@ -382,18 +373,16 @@ export function DigitalHumanPanel() {
                 }
               }}
               placeholder={isRecording ? "正在录音..." : "输入内容..."}
-              className={`flex-1 h-12 rounded-none bg-white dark:bg-slate-800 border-[3px] border-slate-900 dark:border-white ${brutalShadowSm} text-sm font-bold text-slate-900 dark:text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyan-500`}
+              className={`flex-1 h-10 rounded-none bg-white dark:bg-slate-800 border-2 border-slate-900 dark:border-white ${brutalShadowSm} text-xs font-bold text-slate-900 dark:text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-cyan-500`}
               disabled={isProcessing || isRecording}
             />
             <Button 
               type="button"
               onClick={handleSend}
               disabled={!input.trim() || isProcessing || isRecording}
-              aria-label="发送数字人消息"
-              title="发送数字人消息"
-              className={`h-12 w-12 rounded-none bg-cyan-500 hover:bg-cyan-400 text-slate-900 dark:text-white ${brutalBtnBase} shrink-0`}
+              className={`h-10 w-10 rounded-none bg-cyan-500 hover:bg-cyan-400 text-slate-900 dark:text-white ${brutalBtnBase} shrink-0 p-0`}
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </Button>
           </div>
         </div>

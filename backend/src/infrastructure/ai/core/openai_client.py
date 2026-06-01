@@ -97,6 +97,13 @@ class OpenAIClient:
             self._base_url: str = (os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1") or "").strip()
             self._model: str = (os.getenv("DEEPSEEK_CHAT_MODEL", "deepseek-reasoner") or "").strip()
             self._timeout: int = int(os.getenv("DEEPSEEK_TIMEOUT", "120"))
+        elif self._provider == "agnes":
+            self._api_key_env = "AGNES_API_KEY"
+            self._api_key: str = (os.getenv("AGNES_API_KEY", "") or "").strip()
+            self._api_key_source_env = "AGNES_API_KEY" if self._api_key else ""
+            self._base_url: str = (os.getenv("AGNES_BASE_URL", "https://apihub.agnes-ai.com/v1") or "").strip()
+            self._model: str = (os.getenv("AGNES_CHAT_MODEL", "agnes-2.0-flash") or "").strip()
+            self._timeout: int = int(os.getenv("AGNES_TIMEOUT", "120"))
         else:
             self._api_key_env = "OPENAI_API_KEY"
             self._api_key: str = (os.getenv("OPENAI_API_KEY", "") or "").strip()
@@ -290,7 +297,9 @@ class OpenAIClient:
 
         # 健壮性处理: 如果传入的是字符串,自动包装为 messages 列表
         if isinstance(messages, str):
-            logger.warning(f"检测到非标准调用: chat() 接收到字符串 messages,已自动包装为 list[dict]. 内容预览: {messages[:50]}...")
+            logger.warning(
+                f"检测到非标准调用: chat() 接收到字符串 messages,已自动包装为 list[dict]. 内容预览: {messages[:50]}..."
+            )
             messages = [{"role": "user", "content": messages}]
 
         url = f"{self._base_url}/chat/completions"

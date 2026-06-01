@@ -388,14 +388,14 @@ export function ChatPanel() {
 
       {/* 主工作区 */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        {/* 顶部导航 */}
-        <div className={`flex items-center gap-4 p-4 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20 shrink-0`}>
-          <button onClick={() => setShowHistory(!showHistory)} className={`h-10 w-10 flex items-center justify-center bg-slate-50 dark:bg-cyan-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none`}>
-            {showHistory ? <PanelLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        {/* 顶部导航 - 更加紧凑 */}
+        <div className={`flex items-center gap-2 p-2 sm:p-3 ${brutalBorder} border-t-0 border-l-0 border-r-0 bg-white dark:bg-slate-900 sticky top-0 z-20 shrink-0`}>
+          <button onClick={() => setShowHistory(!showHistory)} className={`h-8 w-8 flex items-center justify-center bg-slate-50 dark:bg-cyan-500 text-slate-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all`}>
+            {showHistory ? <PanelLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </button>
           
           <ScrollArea className="flex-1 min-h-0">
-            <div className="flex items-center gap-3 py-1">
+            <div className="flex items-center gap-2 py-0.5">
               {[
                 { id: "chat", label: "对话聊天", icon: Bot, bg: "bg-blue-300 dark:bg-blue-600" },
                 { id: "image", label: "创意绘图", icon: ImageIcon, bg: "bg-slate-50 dark:bg-cyan-600" },
@@ -410,13 +410,13 @@ export function ChatPanel() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabId)}
                   className={cn(
-                    `flex items-center gap-2 px-4 py-2 text-sm font-black transition-all shrink-0 ${brutalBorder}`,
+                    `flex items-center gap-1.5 px-3 py-1.5 text-xs font-black transition-all shrink-0 ${brutalBorder}`,
                     activeTab === tab.id 
-                      ? `${tab.bg} text-slate-900 dark:text-white ${brutalShadowSm} translate-x-[-2px] translate-y-[-2px]` 
+                      ? `${tab.bg} text-slate-900 dark:text-white shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff] translate-x-[-1px] translate-y-[-1px]` 
                       : "bg-white dark:bg-slate-800 hover:bg-slate-100 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#ffffff]"
                   )}
                 >
-                  <tab.icon className="h-4 w-4" />
+                  <tab.icon className="h-3.5 w-3.5" />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -496,28 +496,37 @@ export function ChatPanel() {
                   </div>
                 </div>
               ) : activeTab === "subtitle" ? (
-                <div className="flex-1 min-h-0 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
-                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">智能字幕提取</h2>
+                <div className="flex-1 min-h-0 overflow-hidden p-1 sm:p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-1 sm:p-2 ${brutalBorder} ${brutalShadowSm} min-h-0`}>
+                    <h2 className="text-sm sm:text-base font-black uppercase mb-1 sm:mb-2 border-b-2 border-slate-900 dark:border-white pb-1 shrink-0 flex items-center gap-2">
+                      <Captions className="w-4 h-4" />
+                      智能字幕提取
+                    </h2>
                     <div className="flex-1 min-h-0">
                       <SubtitlePanel />
                     </div>
                   </div>
                 </div>
               ) : activeTab === "digital_human" ? (
-                <div className="flex-1 min-h-0 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
-                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">数字人合成</h2>
+                <div className="flex-1 min-h-0 overflow-hidden p-1 sm:p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-1 sm:p-2 ${brutalBorder} ${brutalShadowSm} min-h-0`}>
+                    <h2 className="text-sm sm:text-base font-black uppercase mb-1 sm:mb-2 border-b-2 border-slate-900 dark:border-white pb-1 shrink-0 flex items-center gap-2">
+                      <UserRound className="w-4 h-4" />
+                      数字人合成
+                    </h2>
                     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                       <DigitalHumanPanel />
                     </div>
                   </div>
                 </div>
               ) : activeTab === "downloader" ? (
-                <div className="flex-1 min-h-0 overflow-hidden p-2">
-                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-2 ${brutalBorder} ${brutalShadow} min-h-0`}>
-                    <h2 className="text-2xl font-black uppercase mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">全网视频下载</h2>
-                    <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+                <div className="flex-1 min-h-0 overflow-hidden p-1 sm:p-2">
+                  <div className={`w-full h-full flex flex-col bg-white dark:bg-slate-900 p-1 sm:p-2 ${brutalBorder} ${brutalShadowSm} min-h-0`}>
+                    <h2 className="text-sm sm:text-base font-black uppercase mb-1 sm:mb-2 border-b-2 border-slate-900 dark:border-white pb-1 shrink-0 flex items-center gap-2">
+                      <Download className="w-4 h-4" />
+                      全网视频下载
+                    </h2>
+                    <div className="flex-1 min-h-0">
                       <VideoDownloaderPanel />
                     </div>
                   </div>

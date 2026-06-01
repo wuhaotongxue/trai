@@ -203,237 +203,195 @@ export function VideoDownloaderPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-slate-50 dark:bg-slate-950 p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto w-full flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6"
+    <div className="flex flex-col h-full min-h-0 bg-slate-50 dark:bg-slate-950 p-1 sm:p-2 overflow-hidden">
+      <div 
+        className="w-full h-full flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-2 lg:gap-4 overflow-hidden"
       >
-        <div className={`flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} overflow-hidden`}>
-          <div className={`p-4 bg-cyan-200 dark:bg-slate-200 text-slate-900 ${brutalBorder} border-t-0 border-l-0 border-r-0 flex items-center justify-between gap-4`}>
+        <div className={`flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} overflow-hidden`}>
+          <div className={`p-3 bg-cyan-200 dark:bg-slate-200 text-slate-900 border-b-2 border-slate-900 flex items-center justify-between gap-4 shrink-0`}>
             <div>
-              <h1 className="text-xl font-black uppercase tracking-[0.2em]">Video Downloader</h1>
-              <p className="text-xs font-bold uppercase tracking-wider mt-1">同一套边框, 同一套状态感知, 同一套结果区</p>
+              <h1 className="text-sm font-black uppercase tracking-wider">Video Downloader</h1>
+              <p className="text-[10px] font-bold uppercase tracking-tight opacity-70">同一套边框, 同一套状态感知</p>
             </div>
-            <div className={`px-3 py-2 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-xs font-black uppercase tracking-widest`}>
+            <div className={`px-2 py-1 bg-white ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] text-[10px] font-black uppercase`}>
               下载工具
             </div>
           </div>
 
-          <div className="flex-1 grid grid-rows-[auto_1fr] p-4 gap-4 bg-slate-50 dark:bg-slate-950">
-            <div className={`p-5 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} space-y-4`}>
+          <div className="flex-1 grid grid-rows-[auto_1fr] p-2 gap-2 bg-slate-50 dark:bg-slate-950 overflow-hidden min-h-0">
+            <div className={`p-3 sm:p-4 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} space-y-3 shrink-0`}>
               <div className="flex items-center justify-between gap-4">
-                <div className="font-black uppercase tracking-widest text-slate-900 dark:text-white">输入下载链接</div>
-                <div className="text-xs font-bold uppercase text-slate-500">{PANEL_SUBTITLES.result_stage}</div>
+                <div className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">输入下载链接</div>
               </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-900 dark:text-white group-focus-within:text-cyan-500 transition-colors">
-                  <Search className="w-6 h-6 font-black" />
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-900 dark:text-white group-focus-within:text-cyan-500 transition-colors">
+                  <Search className="w-5 h-5 font-black" />
                 </div>
                 <Input 
                   aria-label="视频下载链接"
                   title="视频下载链接"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="粘贴视频链接, 例如: https://www.bilibili.com/video/BV1MSLt6qEdt"
-                  className={`pl-14 h-16 bg-white dark:bg-slate-800 rounded-none ${brutalBorder} ${brutalShadowSm} focus-visible:ring-0 focus-visible:border-cyan-500 focus-visible:shadow-[4px_4px_0px_0px_#06b6d4] transition-all text-lg font-bold`}
+                  placeholder="粘贴视频链接..."
+                  className={`pl-12 h-11 bg-white dark:bg-slate-800 rounded-none ${brutalBorder} ${brutalShadowSm} focus-visible:ring-0 focus-visible:border-cyan-500 transition-all text-sm font-bold`}
                 />
               </div>
               <Button 
                 onClick={handleDownload}
                 disabled={!url.trim() || isDownloading}
-                className={`w-full h-16 rounded-none bg-slate-100 hover:bg-cyan-100 text-slate-900 disabled:opacity-50 ${brutalBtnBase} text-xl`}
+                className={`w-full h-11 rounded-none bg-slate-100 hover:bg-cyan-100 text-slate-900 disabled:opacity-50 ${brutalBtnBase} text-base`}
               >
                 {isDownloading ? (
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="w-6 h-6 animate-spin font-black" />
-                    <span>正在解析并下载中...</span>
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin font-black" />
+                    <span>正在解析中...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <Download className="w-6 h-6 font-black" />
+                  <div className="flex items-center gap-2">
+                    <Download className="w-4 h-4 font-black" />
                     <span>立即下载</span>
                   </div>
                 )}
               </Button>
             </div>
 
-            <div className={`bg-white dark:bg-slate-900 p-6 ${brutalBorder} ${brutalShadow} flex items-center justify-center overflow-hidden`}>
+            <div className={`bg-white dark:bg-slate-900 p-4 ${brutalBorder} ${brutalShadowSm} flex items-center justify-center overflow-hidden min-h-0`}>
               {isDownloading ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="w-full max-w-2xl space-y-6"
+                <div
+                  className="w-full max-w-lg space-y-4"
                 >
-                  <div className={`relative aspect-video bg-slate-100 dark:bg-slate-950 overflow-hidden ${brutalBorder}`}>
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent"
-                      animate={{ x: ["-100%", "100%"] }}
-                      transition={{ duration: PANEL_MOTION_TOKENS.sweep_duration, repeat: Infinity, ease: "linear" }}
-                    />
+                  <div className={`relative aspect-video bg-slate-100 dark:bg-slate-950 overflow-hidden ${brutalBorder} max-h-[160px] mx-auto`}>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div
-                        className={`w-28 h-28 bg-cyan-200 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}
-                        animate={{ rotate: [0, 4, -4, 0] }}
-                        transition={{ duration: PANEL_MOTION_TOKENS.pulse_duration, repeat: Infinity }}
+                      <div
+                        className={`w-16 h-16 bg-cyan-200 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}
                       >
-                        <Loader2 className="w-14 h-14 animate-spin" />
-                      </motion.div>
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                      </div>
                     </div>
                   </div>
-                    <div className={`p-5 bg-slate-50 dark:bg-slate-950 ${brutalBorder} ${brutalShadowSm} space-y-4`}>
-                      <div className="flex items-center justify-between font-black uppercase">
-                        <span>Agent 运行步骤</span>
+                    <div className={`p-3 bg-slate-50 dark:bg-slate-950 ${brutalBorder} ${brutalShadowSm} space-y-2`}>
+                      <div className="flex items-center justify-between font-black uppercase text-[10px]">
+                        <span>运行步骤</span>
                         <span className="text-cyan-500">{currentStepIndex + 1} / {downloadSteps.length}</span>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1 max-h-[100px] overflow-y-auto no-scrollbar">
                         {downloadSteps.slice(0, currentStepIndex + 1).map((step, idx) => (
-                          <motion.div 
+                          <div 
                             key={idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-2 text-sm font-bold"
+                            className="flex items-center gap-2 text-[10px] font-bold"
                           >
                             {idx < currentStepIndex ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                             ) : (
-                              <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />
+                              <Loader2 className="w-3 h-3 animate-spin text-cyan-500" />
                             )}
                             <span className={idx < currentStepIndex ? "text-slate-400" : "text-slate-900 dark:text-white"}>
                               {step}
                             </span>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
-                      <div className="h-2 bg-slate-200 dark:bg-slate-800 border-2 border-slate-900 dark:border-white overflow-hidden mt-4">
-                        <motion.div
-                          className="h-full bg-cyan-500"
-                          initial={{ width: "0%" }}
-                          animate={{ width: `${((currentStepIndex + 1) / downloadSteps.length) * 100}%` }}
-                        />
-                      </div>
                     </div>
-                </motion.div>
+                </div>
               ) : error ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className={`w-full max-w-2xl p-5 bg-red-500 text-white ${brutalBorder} ${brutalShadowSm} flex items-center gap-4`}
+                <div 
+                  className={`w-full max-w-lg p-4 bg-red-500 text-white ${brutalBorder} ${brutalShadowSm} flex items-center gap-3`}
                 >
-                  <AlertCircle className="w-8 h-8 shrink-0 font-black" />
-                  <span className="font-bold text-lg uppercase tracking-wider">{error}</span>
-                </motion.div>
+                  <AlertCircle className="w-6 h-6 shrink-0 font-black" />
+                  <span className="font-bold text-sm uppercase">{error}</span>
+                </div>
               ) : result ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="w-full max-w-3xl space-y-5"
+                <div 
+                  className="w-full max-w-lg space-y-3"
                 >
-                  <div className={`p-5 bg-emerald-100 dark:bg-slate-950 ${brutalBorder} ${brutalShadowSm} flex items-center gap-4`}>
-                    <CheckCircle2 className="w-8 h-8 shrink-0 font-black text-emerald-700" />
+                  <div className={`p-3 bg-emerald-100 dark:bg-slate-950 ${brutalBorder} ${brutalShadowSm} flex items-center gap-3`}>
+                    <CheckCircle2 className="w-6 h-6 shrink-0 font-black text-emerald-700" />
                     <div>
-                      <div className="font-black text-2xl uppercase tracking-widest text-slate-900 dark:text-white">下载成功</div>
-                      <div className="text-sm font-bold text-slate-600 dark:text-slate-300">结果已整理到统一结果区</div>
+                      <div className="font-black text-lg uppercase tracking-wider text-slate-900 dark:text-white">下载成功</div>
                     </div>
                   </div>
-                  <div className={`p-6 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} space-y-5`}>
-                    <div className="flex items-start gap-6">
-                      <div className={`w-16 h-16 bg-cyan-200 dark:bg-cyan-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] flex items-center justify-center shrink-0`}>
-                        <Video className="w-8 h-8 text-slate-900 dark:text-white" />
+                  <div className={`p-4 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} space-y-3`}>
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 bg-cyan-200 dark:bg-cyan-900 ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] flex items-center justify-center shrink-0`}>
+                        <Video className="w-6 h-6 text-slate-900 dark:text-white" />
                       </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <h3 className="font-black text-xl text-slate-900 dark:text-white truncate uppercase">{result.title}</h3>
-                        <div className="flex flex-wrap gap-2 text-xs font-bold uppercase text-slate-500">
-                          <span className={`px-3 py-2 bg-slate-100 dark:bg-slate-800 ${brutalBorder}`}>平台: {result.platform || "Bilibili"}</span>
-                          <span className={`px-3 py-2 bg-slate-100 dark:bg-slate-800 ${brutalBorder}`}>ID: {result.video_id}</span>
-                          <span className={`px-3 py-2 bg-slate-100 dark:bg-slate-800 ${brutalBorder}`}>S3 READY</span>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <h3 className="font-black text-sm text-slate-900 dark:text-white truncate uppercase">{result.title}</h3>
+                        <div className="flex flex-wrap gap-1.5 text-[9px] font-bold uppercase text-slate-500">
+                          <span className={`px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 ${brutalBorder}`}>平台: {result.platform || "Bilibili"}</span>
+                          <span className={`px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 ${brutalBorder}`}>S3 READY</span>
                         </div>
                       </div>
                       <a href={result.s3_url} target="_blank" rel="noopener noreferrer">
-                        <Button className={`shrink-0 h-12 gap-2 bg-cyan-100 hover:bg-cyan-200 text-slate-900 rounded-none ${brutalBtnBase}`}>
-                          <ExternalLink className="w-5 h-5" />
-                          <span>立即查看</span>
+                        <Button className={`shrink-0 h-9 px-3 gap-1.5 bg-cyan-100 hover:bg-cyan-200 text-slate-900 rounded-none ${brutalBtnBase} text-[10px]`}>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>查看</span>
                         </Button>
                       </a>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
-                  initial={{ scale: 0.98 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: PANEL_MOTION_TOKENS.float_duration, repeat: Infinity, repeatType: "reverse" }}
-                  className="flex flex-col items-center justify-center gap-6"
+                <div
+                  className="flex flex-col items-center justify-center gap-4"
                 >
-                  <div className={`w-32 h-32 bg-cyan-300 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadow}`}>
-                    <Download className="w-16 h-16 text-slate-900 dark:text-white" />
+                  <div className={`w-20 h-20 bg-cyan-300 dark:bg-cyan-900 flex items-center justify-center ${brutalBorder} ${brutalShadowSm}`}>
+                    <Download className="w-10 h-10 text-slate-900 dark:text-white" />
                   </div>
-                  <div className="text-center space-y-2">
-                    <div className="text-3xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{PANEL_EMPTY_COPY.waiting_input_title}</div>
-                    <div className={`inline-flex px-4 py-2 bg-white dark:bg-slate-900 text-sm font-bold ${brutalBorder} ${brutalShadowSm}`}>
+                  <div className="text-center space-y-1">
+                    <div className="text-xl font-black uppercase tracking-widest text-slate-900 dark:text-white">{PANEL_EMPTY_COPY.waiting_input_title}</div>
+                    <div className={`inline-flex px-3 py-1 bg-white dark:bg-slate-900 text-[10px] font-bold ${brutalBorder} ${brutalShadowSm}`}>
                       {PANEL_EMPTY_COPY.waiting_input_desc}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 auto-rows-min overflow-hidden">
-          <div className={`p-5 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadow} flex flex-col h-[550px]`}>
-            <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col gap-2 overflow-hidden min-h-0">
+          <div className={`p-4 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} flex flex-col flex-1 min-h-0`}>
+            <div className="flex items-center justify-between gap-4 mb-3 shrink-0">
               <div className="flex items-center gap-2">
-                <History className="w-5 h-5 font-black" />
+                <History className="w-4 h-4 font-black" />
                 <div className="flex flex-col">
-                  <div className="font-black uppercase tracking-widest text-slate-900 dark:text-white text-sm">下载画廊</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{PANEL_SUBTITLES.gallery_rail}</div>
+                  <div className="font-black uppercase tracking-wider text-slate-900 dark:text-white text-xs">下载画廊</div>
+                  <div className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">GALLERY</div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {history.length > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={toggleSelectAll}
-                    title="全选/取消全选"
-                    className={`h-8 px-2 rounded-none border-2 border-slate-900 dark:border-white font-bold text-xs uppercase bg-white dark:bg-slate-900`}
-                  >
-                    {selectedIds.size === history.length ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-                  </Button>
-                )}
+              <div className="flex items-center gap-1.5">
                 {selectedIds.size > 0 && (
                   <Button 
                     onClick={() => handleDelete(Array.from(selectedIds))}
-                    className={`h-8 px-2 rounded-none bg-red-100 hover:bg-red-200 text-red-600 border-2 border-slate-900 dark:border-white font-black text-xs uppercase`}
+                    className={`h-7 px-2 rounded-none bg-red-100 hover:bg-red-200 text-red-600 border-2 border-slate-900 dark:border-white font-black text-[9px] uppercase`}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3" />
                   </Button>
                 )}
                 <Button 
                   onClick={handleBatchCopy}
                   disabled={selectedIds.size === 0}
-                  className={`h-8 px-3 gap-2 rounded-none bg-cyan-100 hover:bg-cyan-200 text-slate-900 border-2 border-slate-900 dark:border-white font-black text-xs uppercase disabled:opacity-50`}
+                  className={`h-7 px-2 gap-1 rounded-none bg-cyan-100 hover:bg-cyan-200 text-slate-900 border-2 border-slate-900 dark:border-white font-black text-[9px] uppercase disabled:opacity-50`}
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-3 h-3" />
                   <span>复制 ({selectedIds.size})</span>
                 </Button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2 no-scrollbar">
               <AnimatePresence mode="popLayout">
                 {isLoadingHistory ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                    <span className="font-bold uppercase tracking-wider text-[10px]">正在同步历史记录...</span>
+                  <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="font-bold uppercase tracking-wider text-[8px]">同步中...</span>
                   </div>
                 ) : history.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-                    <History className="w-12 h-12 opacity-20" />
+                  <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
+                    <History className="w-10 h-10 opacity-20" />
                     <div className="text-center">
-                      <div className="font-black uppercase tracking-wider text-sm text-slate-600">{PANEL_EMPTY_COPY.waiting_history_title}</div>
-                      <div className="font-bold text-[10px] text-slate-400 max-w-[150px] mx-auto mt-1">{PANEL_EMPTY_COPY.waiting_history_desc}</div>
+                      <div className="font-black uppercase tracking-wider text-xs text-slate-600">暂无记录</div>
                     </div>
                   </div>
                 ) : (
@@ -441,53 +399,43 @@ export function VideoDownloaderPanel() {
                     <motion.div
                       key={record.task_id}
                       layout
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className={`group relative p-3 bg-slate-50 dark:bg-slate-800 border-2 ${selectedIds.has(record.task_id) ? 'border-cyan-500 bg-cyan-50/50 shadow-[4px_4px_0px_0px_#06b6d4]' : 'border-slate-900 dark:border-white'} transition-all hover:bg-white dark:hover:bg-slate-700 cursor-pointer`}
+                      exit={{ opacity: 0, x: -10 }}
+                      className={`group relative p-2 bg-slate-50 dark:bg-slate-800 border-2 ${selectedIds.has(record.task_id) ? 'border-cyan-500 bg-cyan-50/50 shadow-[2px_2px_0px_0px_#06b6d4]' : 'border-slate-900 dark:border-white'} transition-all hover:bg-white dark:hover:bg-slate-700 cursor-pointer`}
                       onClick={() => toggleSelect(record.task_id)}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2">
                         <div 
-                          className={`mt-1 shrink-0 w-5 h-5 border-2 border-slate-900 dark:border-white flex items-center justify-center ${selectedIds.has(record.task_id) ? 'bg-cyan-500' : 'bg-white dark:bg-slate-900'}`}
+                          className={`mt-0.5 shrink-0 w-4 h-4 border-2 border-slate-900 dark:border-white flex items-center justify-center ${selectedIds.has(record.task_id) ? 'bg-cyan-500' : 'bg-white dark:bg-slate-900'}`}
                         >
-                          {selectedIds.has(record.task_id) && <Check className="w-4 h-4 text-white font-black" strokeWidth={4} />}
+                          {selectedIds.has(record.task_id) && <Check className="w-3 h-3 text-white font-black" strokeWidth={4} />}
                         </div>
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <h4 className="font-black text-sm text-slate-900 dark:text-white truncate uppercase leading-tight" title={record.title}>
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <h4 className="font-black text-[10px] text-slate-900 dark:text-white truncate uppercase leading-tight" title={record.title}>
                             {record.title}
                           </h4>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500">
-                            <span className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded-none text-slate-700 dark:text-slate-300">
+                          <div className="flex items-center gap-1.5 text-[8px] font-bold uppercase text-slate-400">
+                            <span className="px-1 py-0.5 bg-slate-200 dark:bg-slate-700 rounded-none text-slate-700 dark:text-slate-300">
                               {record.platform}
                             </span>
                             <span>{(record.file_size / 1024 / 1024).toFixed(1)} MB</span>
-                            <span className="truncate">{new Date(record.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
-                            onClick={() => handleCopy(record.s3_url)}
-                            className="p-1.5 hover:bg-cyan-200 text-slate-900 dark:text-white transition-colors border-2 border-transparent hover:border-slate-900"
-                            title="复制链接"
+                            onClick={(e) => { e.stopPropagation(); handleCopy(record.s3_url); }}
+                            className="p-1 hover:bg-cyan-200 text-slate-900 dark:text-white transition-colors border border-transparent hover:border-slate-900"
                           >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button 
-                            onClick={() => handleDelete([record.task_id])}
-                            className="p-1.5 hover:bg-red-200 text-red-600 transition-colors border-2 border-transparent hover:border-slate-900"
-                            title="删除"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Copy className="w-2.5 h-2.5" />
                           </button>
                           <a 
                             href={record.s3_url} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="p-1.5 hover:bg-emerald-200 text-slate-900 dark:text-white transition-colors border-2 border-transparent hover:border-slate-900"
-                            title="打开预览"
+                            className="p-1 hover:bg-emerald-200 text-slate-900 dark:text-white transition-colors border border-transparent hover:border-slate-900"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                         </div>
                       </div>
@@ -498,30 +446,28 @@ export function VideoDownloaderPanel() {
             </div>
 
             {total > pageSize && (
-              <div className={`mt-4 pt-3 border-t-2 border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4`}>
-                <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={page === 1} 
+                  onClick={() => setPage(p => p - 1)}
+                  className="h-6 px-1.5 rounded-none border-2 border-slate-900 dark:border-white disabled:opacity-30"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </Button>
+                <span className="text-[9px] font-black uppercase tracking-tighter">
                   PAGE {page} / {Math.ceil(total / pageSize)}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page === 1 || isLoadingHistory}
-                    onClick={() => setPage(p => p - 1)}
-                    className={`h-8 w-8 p-0 rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-900`}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= Math.ceil(total / pageSize) || isLoadingHistory}
-                    onClick={() => setPage(p => p + 1)}
-                    className={`h-8 w-8 p-0 rounded-none border-2 border-slate-900 dark:border-white bg-white dark:bg-slate-900`}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={page >= Math.ceil(total / pageSize)} 
+                  onClick={() => setPage(p => p + 1)}
+                  className="h-6 px-1.5 rounded-none border-2 border-slate-900 dark:border-white disabled:opacity-30"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </Button>
               </div>
             )}
           </div>
@@ -534,7 +480,7 @@ export function VideoDownloaderPanel() {
             </ul>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

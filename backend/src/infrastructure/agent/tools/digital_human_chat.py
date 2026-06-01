@@ -93,7 +93,7 @@ class DigitalHumanChatTool(BaseTool):
             loop = asyncio.get_running_loop()
             # 更换为女性音色: longxiaoyue (温柔) 或 longwan (亲和)
             audio_bytes = await loop.run_in_executor(None, self._tts_client.generate_speech, text, "longxiaoyue")
-            
+
             # 增加防御性校验：如果音频生成为空，直接抛出异常，不再继续渲染流程
             if not audio_bytes or len(audio_bytes) < 100:
                 raise ValueError("语音合成返回数据无效或为空，请检查 TTS 服务状态")
@@ -103,9 +103,7 @@ class DigitalHumanChatTool(BaseTool):
 
             # 3. 数字人渲染 (使用 ModelScope 真实模型)
             # 调用封装好的 ModelScope 客户端进行推理
-            local_video_path = await self._ms_client.generate_video(
-                str(audio_output_path), avatar_image
-            )
+            local_video_path = await self._ms_client.generate_video(str(audio_output_path), avatar_image)
 
             # 4. 上传生成结果到 S3
             s3_key = f"digital_human/{task_id}.mp4"

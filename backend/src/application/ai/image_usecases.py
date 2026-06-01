@@ -73,11 +73,11 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
         """执行图片生成"""
         # 0. 优化提示词
         optimized_prompt = await self._optimizer.optimize_image_prompt(input_data.prompt)
-        
+
         if input_data.task_id:
             generation = ImageGeneration.with_task_id(
                 task_id=input_data.task_id,
-                prompt=optimized_prompt, # 使用优化后的提示词
+                prompt=optimized_prompt,  # 使用优化后的提示词
                 user_id=input_data.user_id,
                 model=input_data.model,
                 width=input_data.width,
@@ -92,7 +92,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
             )
         else:
             generation = ImageGeneration(
-                prompt=optimized_prompt, # 使用优化后的提示词
+                prompt=optimized_prompt,  # 使用优化后的提示词
                 user_id=input_data.user_id,
                 model=input_data.model,
                 width=input_data.width,
@@ -111,7 +111,7 @@ class ImageGenerationUseCase(UseCase[ImageGenerationInput, ImageGenerationOutput
 
         try:
             result = await self._client.generate(
-                prompt=optimized_prompt, # 使用优化后的提示词
+                prompt=optimized_prompt,  # 使用优化后的提示词
                 width=input_data.width,
                 height=input_data.height,
                 steps=input_data.steps,

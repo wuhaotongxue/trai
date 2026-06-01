@@ -18,11 +18,12 @@ os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
 from pathlib import Path
+
 from loguru import logger
 
 # === 动态路径计算 ===
 SCRIPT_DIR = Path(__file__).resolve().parent
-BACKEND_DIR = SCRIPT_DIR.parent.parent # backend/src/scripts -> src -> backend
+BACKEND_DIR = SCRIPT_DIR.parent.parent  # backend/src/scripts -> src -> backend
 
 # 强制 logger 输出到 stderr/stdout 无缓冲
 logger.remove()

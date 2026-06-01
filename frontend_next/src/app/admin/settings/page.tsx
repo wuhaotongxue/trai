@@ -74,6 +74,7 @@ export default function SettingsPage() {
     { labelKey: "admin.settings.db_connection", value: "postgresql://localhost:5432/trai", type: "text" },
     { labelKey: "admin.settings.redis_connection", value: "redis://localhost:6379", type: "text" },
     { labelKey: "admin.settings.openai_key", value: "sk-••••••••••••", type: "password" },
+    { labelKey: "admin.settings.agnes_key", value: "sk-FdipbzdGv0tV2VVPpxwkHyH4qRlUiCDWv1WCEnoruYDG7sF5", type: "password" },
     { labelKey: "admin.settings.log_level", value: "INFO", type: "text" },
   ];
 

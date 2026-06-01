@@ -12,9 +12,11 @@ import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
+
 from loguru import logger
 
 from core.paths import ProjectPaths
+
 
 @dataclass
 class MusicGenerateResult:
@@ -57,7 +59,9 @@ class LocalMusicClient:
             None.
         """
         self.output_dir = output_dir or str(ProjectPaths.get_output_music_dir())
-        self.checkpoint_dir = checkpoint_dir or os.path.join(Path.home(), ".cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B")
+        self.checkpoint_dir = checkpoint_dir or os.path.join(
+            Path.home(), ".cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B"
+        )
         self.default_steps = default_steps
         self.default_duration = default_duration
         self.script_path = str(ProjectPaths.get_backend_root() / "src/scripts/ace_step_music_runner.py")
@@ -82,32 +86,34 @@ class LocalMusicClient:
         enhanced_prompt = prompt
         female_keywords = ["female", "woman", "girl", "lady", "田馥甄", "hebe"]
         is_female = any(keyword.lower() in prompt.lower() for keyword in female_keywords)
-        
+
         chinese_keywords = ["中文", "chinese", "mandarin", "普通话", "粤语", "cantonese"]
         is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords)
-        
+
         magic_tags = []
         if is_female:
             magic_tags.append("female singer")
         if is_chinese:
             # 增加更强的中文引导标签和乐器标签
-            magic_tags.extend([
-                "mandarin chinese", 
-                "chinese lyrics", 
-                "chinese vocals", 
-                "clear chinese pronunciation",
-                "traditional chinese instruments",
-                "erhu",
-                "pipa",
-                "guzheng",
-                "chinese pop style"
-            ])
-        
+            magic_tags.extend(
+                [
+                    "mandarin chinese",
+                    "chinese lyrics",
+                    "chinese vocals",
+                    "clear chinese pronunciation",
+                    "traditional chinese instruments",
+                    "erhu",
+                    "pipa",
+                    "guzheng",
+                    "chinese pop style",
+                ]
+            )
+
         if magic_tags:
             # 将魔法标签放在最前面，增加权重
             enhanced_prompt = f"{', '.join(magic_tags)}, {prompt}"
             logger.info(f"[音乐生成] 增强提示词: {enhanced_prompt}")
-        
+
         actual_duration = duration or self.default_duration
         actual_steps = steps or self.default_steps
 

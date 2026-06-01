@@ -7,6 +7,7 @@
 
 from pathlib import Path
 
+
 class ProjectPaths:
     """
     项目路径管理类.

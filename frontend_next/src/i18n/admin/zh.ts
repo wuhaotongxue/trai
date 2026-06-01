@@ -298,6 +298,7 @@ export const ADMIN_ZH = {
   "admin.settings.db_connection": "数据库连接",
   "admin.settings.redis_connection": "Redis 连接",
   "admin.settings.openai_key": "OpenAI API Key",
+  "admin.settings.agnes_key": "Agnes AI 密钥",
   "admin.settings.log_level": "日志级别",
   // ===== 数据库管理 =====
   "admin.database.title": "数据库管理",

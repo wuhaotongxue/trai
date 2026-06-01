@@ -20,7 +20,6 @@ from pydantic import BaseModel, Field
 
 from api.deps import CurrentUserOptional
 from core.exceptions import ExternalServiceError
-from infrastructure.ai.video.local_video_client import LocalVideoClient
 from infrastructure.database import get_session
 from infrastructure.database.models import VideoRecordModel
 from infrastructure.notifications.media_notify import media_notifier
@@ -546,7 +545,9 @@ class VideoApiRouter:
         )
 
         try:
-            local_video_client = LocalVideoClient()
+            from infrastructure.ai.video.agnes_video_client import AgnesVideoClient
+
+            local_video_client = AgnesVideoClient()
             logger.info(f"[视频生成] 后台任务启动 | task_id={task_id}")
 
             def progress_callback(line: str) -> None:

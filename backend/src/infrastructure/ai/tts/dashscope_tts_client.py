@@ -60,14 +60,14 @@ class DashScopeTTSClient(ITTSClient):
                 model="cosyvoice-v1", voice=voice, format=AudioFormat.WAV_24000HZ_MONO_16BIT
             )
             audio_bytes = synthesizer.call(text)
-            
+
             if audio_bytes is None:
                 raise ExternalServiceError("DashScope TTS 返回数据为空，请检查 API Key 或配额状态")
 
             logger.info(f"语音合成成功 | 音频大小: {len(audio_bytes)} bytes")
             return audio_bytes
         except Exception as e:
-            logger.error(f"DashScope TTS 合成失败: {str(e)}")
+            logger.warning(f"DashScope TTS 合成失败: {str(e)}")
             raise ExternalServiceError(f"语音合成失败: {str(e)}")
 
     def clone_and_synthesize(self, text: str, reference_audio_url: str, language: str = "zh") -> bytes:
@@ -105,5 +105,5 @@ class DashScopeTTSClient(ITTSClient):
             return audio_bytes
 
         except Exception as e:
-            logger.error(f"DashScope CosyVoice API 调用失败: {str(e)}")
+            logger.warning(f"DashScope CosyVoice API 调用失败: {str(e)}")
             raise ExternalServiceError(f"声音克隆失败: {str(e)}")

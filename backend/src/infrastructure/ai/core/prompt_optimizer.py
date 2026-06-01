@@ -6,12 +6,14 @@
 # 描述: 提示词优化器，利用 LLM 增强用户的原始提示词
 
 from loguru import logger
+
 from infrastructure.ai.core.openai_client import OpenAIClient
+
 
 class PromptOptimizer:
     """
     提示词优化器类.
-    
+
     使用 DeepSeek 等大模型将简单的用户输入转化为丰富、艺术化的专业 AI 绘画提示词.
     """
 
@@ -30,14 +32,14 @@ class PromptOptimizer:
             "3. 直接输出优化后的英文提示词，不要任何解释或标点符号前缀。\n"
             "4. 如果用户提到节日（如儿童节），请加入相关的梦幻和庆祝元素。"
         )
-        
+
         try:
             resp = await self._llm.chat(
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"原始描述: {user_prompt}"}
+                    {"role": "user", "content": f"原始描述: {user_prompt}"},
                 ],
-                temperature=0.7
+                temperature=0.7,
             )
             optimized = resp.get("content", "").strip()
             if optimized:
@@ -45,5 +47,5 @@ class PromptOptimizer:
                 return optimized
         except Exception as e:
             logger.warning(f"提示词优化失败: {e}")
-            
+
         return user_prompt
