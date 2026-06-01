@@ -11,6 +11,8 @@ from typing import Any
 from loguru import logger
 import torch
 
+from core.paths import ProjectPaths
+
 class ModelScopeDigitalHumanClient:
     """魔塔社区数字人视频合成客户端"""
 
@@ -53,7 +55,7 @@ class ModelScopeDigitalHumanClient:
         """
         # 如果没有提供形象，使用内置的默认女性形象
         if not avatar_image_path:
-            avatar_image_path = "/home/qyjgylc_whf/code/trai/backend/src/assets/default_avatar_female.jpg"
+            avatar_image_path = str(ProjectPaths.get_backend_root() / "src/assets/default_avatar_female.jpg")
 
         logger.info(f"ModelScope DH 开始合成 | 音频: {audio_path} | 形象: {avatar_image_path}")
         
@@ -61,8 +63,7 @@ class ModelScopeDigitalHumanClient:
         # 考虑到服务器环境可能没有完整的 MuseTalk 环境依赖，这里先做结构化封装
         # 并在内部保留一个高可用的回退逻辑或调用具体的 modelscope 接口
         
-        output_dir = Path("/home/qyjgylc_whf/code/trai/output_video/digital_human")
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir = ProjectPaths.get_digital_human_output_dir()
         
         task_id = Path(audio_path).stem.replace("digital_human_", "")
         output_path = output_dir / f"dh_result_{task_id}.mp4"

@@ -9,10 +9,15 @@ import os
 import sys
 import time
 import uuid
+from pathlib import Path
 
 from loguru import logger
 
-OUT_DIR = "/home/qyjgylc_whf/code/trai/output_video/lipsync"
+# === 动态路径计算 ===
+SCRIPT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = SCRIPT_DIR.parent.parent # backend/src/scripts -> src -> backend
+
+OUT_DIR = str(BACKEND_DIR / "output_video/lipsync")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 

@@ -3,9 +3,11 @@ import os
 import requests
 from loguru import logger
 
+from core.paths import ProjectPaths
+
 
 class MediaNotifier:
-    """媒体生成结果推送通知器 (飞书/企微)"""
+    """媒体通知工具类"""
 
     def __init__(self):
         self.WECOM_WEBHOOK = os.getenv(
@@ -18,8 +20,8 @@ class MediaNotifier:
         """调用 DeepSeek 动态生成地理专家文案"""
         api_key = os.getenv("DEEPSEEK_API_KEY")
         if not api_key:
-            # 尝试从 llm.env 中直接读取，以防环境变量未正确加载
-            env_path = "/home/qyjgylc_whf/code/trai/backend/env/llm.env"
+            # 优先使用 ProjectPaths 计算路径
+            env_path = str(ProjectPaths.get_backend_root() / "env/llm.env")
             if os.path.exists(env_path):
                 from dotenv import dotenv_values
 

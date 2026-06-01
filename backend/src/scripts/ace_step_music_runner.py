@@ -17,7 +17,12 @@ import time
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
+from pathlib import Path
 from loguru import logger
+
+# === 动态路径计算 ===
+SCRIPT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = SCRIPT_DIR.parent.parent # backend/src/scripts -> src -> backend
 
 # 强制 logger 输出到 stderr/stdout 无缓冲
 logger.remove()
@@ -25,15 +30,15 @@ logger.add(sys.stdout, format="{message}", level="INFO", enqueue=False)
 
 # === sys.path 隔离 ===
 for p in list(sys.path):
-    if p.startswith("/home/qyjgylc_whf/code/trai/backend"):
+    if p.startswith(str(BACKEND_DIR)):
         sys.path.remove(p)
 _site_idx = next((i for i, p in enumerate(sys.path) if "site-packages" in p), len(sys.path))
-sys.path.insert(_site_idx, "/home/qyjgylc_whf/code/trai/backend/acestep_lib")
-sys.path.insert(_site_idx + 1, "/home/qyjgylc_whf/code/trai/backend/acestep_lib/acestep")
+sys.path.insert(_site_idx, str(BACKEND_DIR / "acestep_lib"))
+sys.path.insert(_site_idx + 1, str(BACKEND_DIR / "acestep_lib/acestep"))
 
-OUT_DIR = "/home/qyjgylc_whf/code/trai/output_music"
+OUT_DIR = str(BACKEND_DIR / "output_music")
 # CKPT_DIR = os.path.join(OUT_DIR, "checkpoints")
-CKPT_DIR = "/home/qyjgylc_whf/.cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B"
+CKPT_DIR = os.path.join(Path.home(), ".cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B")
 os.makedirs(OUT_DIR, exist_ok=True)
 os.makedirs(CKPT_DIR, exist_ok=True)
 

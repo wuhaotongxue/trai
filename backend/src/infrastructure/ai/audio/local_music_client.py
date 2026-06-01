@@ -12,6 +12,7 @@ import time
 import uuid
 from dataclasses import dataclass
 
+from core.paths import ProjectPaths
 
 @dataclass
 class MusicGenerateResult:
@@ -36,7 +37,7 @@ class LocalMusicClient:
 
     def __init__(
         self,
-        output_dir: str = "/home/qyjgylc_whf/code/trai/output_music",
+        output_dir: str | None = None,
         checkpoint_dir: str | None = None,
         default_steps: int = 27,
         default_duration: int = 30,
@@ -45,7 +46,7 @@ class LocalMusicClient:
         初始化音乐生成客户端.
 
         参数:
-            output_dir: str, 输出目录.
+            output_dir: str | None, 输出目录.
             checkpoint_dir: str | None, 权重目录.
             default_steps: int, 默认步数.
             default_duration: int, 默认时长.
@@ -53,11 +54,11 @@ class LocalMusicClient:
         返回值:
             None.
         """
-        self.output_dir = output_dir
-        self.checkpoint_dir = checkpoint_dir or os.path.join(output_dir, "checkpoints")
+        self.output_dir = output_dir or str(ProjectPaths.get_output_music_dir())
+        self.checkpoint_dir = checkpoint_dir or os.path.join(Path.home(), ".cache/modelscope/hub/models/ACE-Step/ACE-Step-v1-3___5B")
         self.default_steps = default_steps
         self.default_duration = default_duration
-        self.script_path = "/home/qyjgylc_whf/code/trai/backend/src/scripts/ace_step_music_runner.py"
+        self.script_path = str(ProjectPaths.get_backend_root() / "src/scripts/ace_step_music_runner.py")
 
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(self.checkpoint_dir, exist_ok=True)

@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # TRAI 项目临时文件规范
 # 文件名: .gitignore
 # 作者: wuhao
@@ -126,7 +126,17 @@ client_pyqt6/
 *.onnx
 backend/models/
 src/models/backend/src/models/
+# Nginx 配置
+nginix.config
+
+# 业务输出目录
+backend/out/
 output_music/
-backend/acestep_lib/models/
-*.wav
+output_video/
+backend/output_music/
+backend/output_video/
+
+# 临时脚本
+reduce_saturation.js
 rewrite*.js
+replace_*.js

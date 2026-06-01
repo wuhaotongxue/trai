@@ -11,6 +11,8 @@ import sys
 
 from loguru import logger
 
+from core.paths import ProjectPaths
+
 
 class LocalLipSyncClient:
     """本地唇形同步客户端 - 进程隔离."""
@@ -28,7 +30,7 @@ class LocalLipSyncClient:
         异常:
             无.
         """
-        self.script_path = "/home/qyjgylc_whf/code/trai/backend/src/scripts/local_lipsync_runner.py"
+        self.script_path = str(ProjectPaths.get_backend_root() / "src/scripts/local_lipsync_runner.py")
 
     async def generate_lipsync(self, source_image: str, driven_audio: str) -> dict:
         """

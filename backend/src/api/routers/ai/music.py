@@ -13,6 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from loguru import logger
 from pydantic import BaseModel, Field
 
+from core.paths import ProjectPaths
 from api.deps import CurrentUserOptional
 from infrastructure.ai.audio.local_music_client import MusicClientProvider
 from infrastructure.database import get_session
@@ -386,7 +387,7 @@ class MusicController:
         if not re.match(r"^[\w\s\-\( \)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
             raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
 
-        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+        output_dir = str(ProjectPaths.get_output_music_dir())
         file_path = os.path.join(output_dir, filename)
 
         if not os.path.exists(file_path):
@@ -433,7 +434,7 @@ class MusicController:
         if not re.match(r"^[\w\s\-\( \)（）\.]+\.(wav|mp3|ogg)$", filename, re.UNICODE):
             raise HTTPException(status_code=400, detail=f"无效的文件名: {filename}")
 
-        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+        output_dir = str(ProjectPaths.get_output_music_dir())
         file_path = os.path.join(output_dir, filename)
 
         if not os.path.exists(file_path):
@@ -471,7 +472,7 @@ class MusicController:
         异常:
             无.
         """
-        output_dir = "/home/qyjgylc_whf/code/trai/output_music"
+        output_dir = str(ProjectPaths.get_output_music_dir())
 
         if not os.path.exists(output_dir):
             return {"files": [], "total": 0}
