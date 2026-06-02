@@ -35,6 +35,10 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_06_02_1700
+- **修复(env_loader)**: 调整 `run.py` 中环境变量加载顺序, 先加载 `backend/env/*.env` 公共配置, 再让 `backend/.env.local` 作为本地最终覆盖, 修复公共 `tracing.env` 把开发机自定义 OTLP 地址覆盖回 `localhost` 的问题.
+- **验证(otlp_endpoint)**: 重启后端后已确认 OTLP Exporter 实际使用 `http://192.168.100.119:4317`, 并通过 `GET /api_trai/v1/ai/image/models` 在 Jaeger 中查询到最新 trace.
+
 ### 🛠️ 后端_2026_06_02_1644
 - **修复(tracing_init)**: 调整 `api.main` 中 OpenTelemetry 的初始化顺序, 改为先执行 `init_telemetry()` 再对 FastAPI 注入 tracing, 修复 Jaeger 已启动但后端真实请求不入链路的问题.
 - **验证(jaeger_trace)**: 使用 `GET /api_trai/v1/ai/image/models` 完成真实联调, `trai-backend` 服务已出现在 Jaeger UI, 且可查询到接口 trace 明细.

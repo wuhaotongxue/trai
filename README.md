@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_02_1700
+- **修复(env_override)**: 调整后端环境变量加载顺序, 改为先读取 `backend/env/*.env`, 再由 `backend/.env` 和 `backend/.env.local` 做最终覆盖, 修复本地 OTLP 地址会被公共 tracing 配置回写的问题.
+- **验证(otlp_lan)**: 本地 `backend/.env.local` 已成功将 OTLP 导出地址切换为 `http://192.168.100.119:4317`, 且 `trai-backend` 真实请求仍可在 Jaeger UI 中查询到链路详情.
+
 ### 🛠️ 后端_2026_06_02_1644
 - **修复(tracing)**: 调整 FastAPI OpenTelemetry 注入时机, 确保 `init_telemetry()` 完成后再绑定 `tracer_provider`, 避免业务请求存在埋点已启用但 Jaeger 中无 trace 的问题.
 - **验证(jaeger)**: 本地 Jaeger `all-in-one` 联调通过, `GET /api_trai/v1/ai/image/models` 已可在 Jaeger UI 中查询到 `trai-backend` 服务与真实接口 trace.
