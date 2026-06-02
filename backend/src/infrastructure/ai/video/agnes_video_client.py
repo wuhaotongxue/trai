@@ -12,6 +12,7 @@ from typing import Any
 
 import requests
 from loguru import logger
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from core.exceptions import ExternalServiceError
 from infrastructure.ai.video.local_video_client import LocalVideoClient
@@ -78,8 +79,19 @@ class AgnesVideoClient:
                 loop = asyncio.get_running_loop()
 
                 def _submit_task():
-                    url = f"{self._base_url}/video/generations"
-                    return requests.post(url, headers=headers, json=payload, timeout=10)
+                    @retry(
+                        stop=stop_after_attempt(3),
+                        wait=wait_exponential(multiplier=1, min=2, max=10),
+                        retry=retry_if_exception_type(Exception),
+                        reraise=True,
+                    )
+                    def do_submit():
+                        url = f"{self._base_url}/video/generations"
+                        res = requests.post(url, headers=headers, json=payload, timeout=10)
+                        res.raise_for_status()
+                        return res
+
+                    return do_submit()
 
                 response = await loop.run_in_executor(None, _submit_task)
 
@@ -94,9 +106,18 @@ class AgnesVideoClient:
                         logger.info(f"正在下载生成的视频: {video_url}")
 
                         def _download_video():
-                            res = requests.get(video_url, timeout=60)
-                            res.raise_for_status()
-                            return res.content
+                            @retry(
+                                stop=stop_after_attempt(3),
+                                wait=wait_exponential(multiplier=1, min=2, max=10),
+                                retry=retry_if_exception_type(Exception),
+                                reraise=True,
+                            )
+                            def do_download():
+                                res = requests.get(video_url, timeout=60)
+                                res.raise_for_status()
+                                return res.content
+
+                            return do_download()
 
                         video_bytes = await loop.run_in_executor(None, _download_video)
                         import base64
@@ -133,7 +154,18 @@ class AgnesVideoClient:
             await asyncio.sleep(10)
 
             def _check():
-                return requests.get(poll_url, headers=headers, timeout=10)
+                @retry(
+                    stop=stop_after_attempt(3),
+                    wait=wait_exponential(multiplier=1, min=2, max=10),
+                    retry=retry_if_exception_type(Exception),
+                    reraise=True,
+                )
+                def do_check():
+                    res = requests.get(poll_url, headers=headers, timeout=10)
+                    res.raise_for_status()
+                    return res
+
+                return do_check()
 
             poll_res = await loop.run_in_executor(None, _check)
             if poll_res.status_code == 200:

@@ -11,6 +11,7 @@ from typing import Any
 
 from loguru import logger
 from openai import OpenAI
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from infrastructure.ai.core.modelscope_client import ModelScopeClient
 
@@ -72,12 +73,21 @@ class AgnesImageClient:
                 loop = asyncio.get_running_loop()
 
                 def _call_api():
-                    return client.images.generate(
-                        model="agnes-image-2.0-flash",
-                        prompt=prompt,
-                        n=1,
-                        size=f"{width}x{height}" if width and height else "1024x1024",
+                    @retry(
+                        stop=stop_after_attempt(3),
+                        wait=wait_exponential(multiplier=1, min=2, max=10),
+                        retry=retry_if_exception_type(Exception),
+                        reraise=True,
                     )
+                    def do_call():
+                        return client.images.generate(
+                            model="agnes-image-2.0-flash",
+                            prompt=prompt,
+                            n=1,
+                            size=f"{width}x{height}" if width and height else "1024x1024",
+                        )
+
+                    return do_call()
 
                 response = await loop.run_in_executor(None, _call_api)
 
@@ -93,9 +103,18 @@ class AgnesImageClient:
                     from infrastructure.storage.s3_storage import S3StorageService
 
                     def _download_image():
-                        res = requests.get(external_url, timeout=30)
-                        res.raise_for_status()
-                        return res.content
+                        @retry(
+                            stop=stop_after_attempt(3),
+                            wait=wait_exponential(multiplier=1, min=2, max=10),
+                            retry=retry_if_exception_type(Exception),
+                            reraise=True,
+                        )
+                        def do_download():
+                            res = requests.get(external_url, timeout=30)
+                            res.raise_for_status()
+                            return res.content
+
+                        return do_download()
 
                     image_bytes = await loop.run_in_executor(None, _download_image)
 

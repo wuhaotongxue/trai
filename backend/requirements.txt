@@ -101,6 +101,7 @@ requests>=2.31.0,<3.0.0               # HTTP requests
 # Utilities
 # ====================
 python-dotenv>=1.0.0,<2.0.0            # .env file support
+tenacity>=8.2.0,<10.0.0                # Retry mechanism
 Markdown>=3.5.1,<4.0.0                 # Markdown rendering
 anyio>=4.2.0,<5.0.0                    # Async I/O
 click>=8.1.7,<9.0.0                    # CLI tools
