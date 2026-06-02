@@ -11,6 +11,7 @@ import log from 'electron-log'
 import { register_ipc_handlers } from './ipc/index'
 import { config_store } from './platform/config_store'
 import { UpdateService } from './services/update_service'
+import { local_db } from './services/local_db'
 
 log.transports.console.level = 'info'
 log.transports.file.level = 'info'
@@ -266,6 +267,7 @@ if (process.platform === 'win32') {
 }
 
 app.whenReady().then(() => {
+  local_db.init()
   register_ipc_handlers()
   create_window()
   create_tray()

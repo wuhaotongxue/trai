@@ -736,7 +736,24 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   loadSessions: async () => {
     try {
-      const res = await api.session.list();
+      let res: any;
+      try {
+        res = await api.session.list();
+      } catch (err) {
+        // 尝试从 Electron 本地 DB 加载离线数据
+        if (window.electronAPI?.ipcRenderer) {
+          console.warn("网络请求失败, 尝试从本地 SQLite 加载历史会话");
+          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_sessions');
+          if (localRes?.success) {
+            res = { sessions: localRes.data };
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
+      
       // 从 localStorage 恢复第一条消息缓存
       let storedFirstMsgs: Record<string, string> = {};
       try {
@@ -771,7 +788,22 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      const res = await api.session.get(sessionId);
+      let res: any;
+      try {
+        res = await api.session.get(sessionId);
+      } catch (err) {
+        if (window.electronAPI?.ipcRenderer) {
+          console.warn("网络请求失败, 尝试从本地 SQLite 加载历史消息");
+          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_session_messages', sessionId);
+          if (localRes?.success) {
+            res = { session_id: sessionId, messages: localRes.data };
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
       set({ sessionId, messages: res.messages, isLoading: false });
     } catch (e) {
       console.error("切换会话失败:", e);

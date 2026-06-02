@@ -9,6 +9,7 @@ import log from 'electron-log'
 import { ApiEndpoints } from '../platform/api_endpoints'
 import { ApiUrl } from '../platform/api_url'
 import { api_client } from '../platform/api_client'
+import { local_db } from './local_db'
 
 // 保存每个 session_id 对应的 CancelToken, 用于中止请求
 const active_requests: Record<string, CancelTokenSource> = {}
@@ -62,6 +63,13 @@ export const agent_service = {
 
       log.info('Agent Chat Payload:', payload)
       
+      // Save user message to local db
+      const crypto = require('crypto')
+      const msg_id = crypto.randomUUID()
+      local_db.save_message(msg_id, session_id, 'user', message)
+      // Update session locally
+      local_db.save_session(session_id, null)
+      
       const res = await api_client.post(url, payload, { 
         responseType: 'stream',
         cancelToken: cancel_source.token 
@@ -83,6 +91,12 @@ export const agent_service = {
               const data_str = line.slice(6).trim()
               if (data_str === '[DONE]') {
                 delete active_requests[session_id]
+                
+                // Save bot reply to local db
+                const crypto = require('crypto')
+                const reply_id = crypto.randomUUID()
+                local_db.save_message(reply_id, session_id, 'assistant', final_data.content)
+                
                 resolve({ success: true, data: final_data })
                 return
               }

@@ -250,6 +250,17 @@ export const register_ipc_handlers = (): void => {
     return agent_service.stop_chat(session_id)
   })
 
+  // ===================== Local DB (SQLite) =====================
+  ipcMain.handle('db:get_sessions', async () => {
+    const { local_db } = require('../services/local_db')
+    return { success: true, data: local_db.get_sessions() }
+  })
+
+  ipcMain.handle('db:get_session_messages', async (_, session_id: string) => {
+    const { local_db } = require('../services/local_db')
+    return { success: true, data: local_db.get_session_messages(session_id) }
+  })
+
   // ===================== AI Generation =====================
   ipcMain.handle('ai:generate_image', async (_, prompt: string) => {
     return agent_service.generate_image(prompt)
