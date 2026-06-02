@@ -323,6 +323,14 @@ def create_app() -> FastAPI:
         openapi_tags=openapi_tags,
     )
 
+    try:
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+        FastAPIInstrumentor.instrument_app(app)
+        logger.info("FastAPI OpenTelemetry 追踪已开启")
+    except ImportError:
+        logger.warning("未安装 opentelemetry-instrumentation-fastapi")
+
     register_middlewares(app)
     register_routers(app)
 

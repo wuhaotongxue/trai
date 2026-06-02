@@ -1,156 +1,89 @@
 #!/usr/bin/env python
 # 文件名: telemetry.py
 # 作者: wuhao
-# 日期: 2026_04_10
-# 描述: 可观测性集成 (简化版，无 opentelemetry 依赖)
+# 日期: 2026_06_02
+# 描述: OpenTelemetry 链路追踪集成 (支持 OTLP 导出与 Console 输出)
 
 from __future__ import annotations
 
+import os
 from typing import Any
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
 from core.logger import get_logger
 
 logger = get_logger()
 
-_tracer = None
-
-
-def get_tracer(name: str = "trai") -> Any:
-    """获取 Tracer 实例 (简化版)
-
-    Args:
-        name: tracer 名称
-
-    Returns:
-        Any: tracer 实例
-    """
-    global _tracer
-    if _tracer is not None:
-        return _tracer
-
-    logger.info("Telemetry initialized (simple mode, no opentelemetry)")
-    _tracer = object()
-    return _tracer
-
-
-class SpanBuilder:
-    """Span 构建器 (简化版)"""
-
-    def __init__(self, tracer: Any, name: str) -> None:
-        self._tracer = tracer
-        self._name = name
-        self._span = None
-        self._attributes: dict[str, Any] = {}
-
-    def with_attribute(self, key: str, value: Any) -> SpanBuilder:
-        self._attributes[key] = value
-        return self
-
-    def with_attributes(self, **kwargs: Any) -> SpanBuilder:
-        self._attributes.update(kwargs)
-        return self
-
-    def start(self) -> SpanBuilder:
-        return self
-
-    def end(self) -> None:
-        pass
-
-    def set_status(self, code: Any, message: str = "") -> None:
-        pass
-
-    def record_exception(self, exception: Exception) -> None:
-        pass
-
-    def add_event(self, name: str, attributes: dict[str, Any] | None = None) -> None:
-        pass
-
-    def __enter__(self) -> SpanBuilder:
-        return self.start()
-
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        if exc_type:
-            self.record_exception(exc_val)
-        self.end()
-
-
-def create_span(
-    name: str,
-    tracer: Any | None = None,
-    **attributes: Any,
-) -> SpanBuilder:
-    """创建 Span 的快捷方法"""
-    if tracer is None:
-        tracer = get_tracer()
-    builder = SpanBuilder(tracer, name)
-    if attributes:
-        builder.with_attributes(**attributes)
-    return builder
-
-
-def trace_ai_call(
-    model: str,
-    messages: list[dict[str, str]],
-    user_id: str | None = None,
-    session_id: str | None = None,
-) -> SpanBuilder:
-    """追踪 AI 对话调用"""
-    tracer = get_tracer()
-    return (
-        create_span("ai.chat", tracer)
-        .with_attribute("gen_ai.system", "openai")
-        .with_attribute("gen_ai.request.model", model)
-        .with_attribute("gen_ai.request.message_count", len(messages))
-        .with_attribute("trai.user_id", user_id or "")
-        .with_attribute("trai.session_id", session_id or "")
-    )
-
-
-def trace_tool_call(
-    tool_name: str,
-    risk_level: str = "low",
-    user_id: str | None = None,
-) -> SpanBuilder:
-    """追踪工具调用"""
-    tracer = get_tracer()
-    return (
-        create_span(f"tool.{tool_name}", tracer)
-        .with_attribute("trai.tool.name", tool_name)
-        .with_attribute("trai.tool.risk_level", risk_level)
-        .with_attribute("trai.user_id", user_id or "")
-    )
-
-
-def trace_db_call(
-    operation: str,
-    table: str,
-    latency_ms: float,
-    status: str,
-) -> SpanBuilder:
-    """追踪数据库调用"""
-    tracer = get_tracer()
-    return (
-        create_span(f"db.{operation}", tracer)
-        .with_attribute("db.system", "postgresql")
-        .with_attribute("db.operation", operation)
-        .with_attribute("db.table", table)
-        .with_attribute("db.latency_ms", latency_ms)
-        .with_attribute("db.status", status)
-    )
+_is_initialized = False
 
 
 def init_telemetry() -> None:
-    """初始化遥测模块"""
-    get_tracer()
-    logger.info("Telemetry module initialized (simple mode)")
+    """初始化 OpenTelemetry 遥测模块，集成请求和外部 API 追踪"""
+    global _is_initialized
+    if _is_initialized:
+        return
+
+    # 配置 Resource
+    resource = Resource.create(
+        {
+            "service.name": os.getenv("OTEL_SERVICE_NAME", "trai-backend"),
+            "service.version": "0.1.0",
+        }
+    )
+
+    # 设置 TracerProvider
+    provider = TracerProvider(resource=resource)
+    trace.set_tracer_provider(provider)
+
+    # 配置 Exporter (OTLP 优先, 如果配置了 ENDPOINT)
+    otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    if otlp_endpoint:
+        otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True)
+        provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+        logger.info(f"OpenTelemetry OTLP Exporter 配置完成: {otlp_endpoint}")
+    else:
+        # 默认只在控制台输出关键信息（为了不刷屏，可以考虑去掉，但这里保留供调试）
+        console_exporter = ConsoleSpanExporter()
+        provider.add_span_processor(BatchSpanProcessor(console_exporter))
+        logger.info("OpenTelemetry Console Exporter 配置完成 (OTLP Endpoint 未配置)")
+
+    # 自动注入各个库
+    try:
+        from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+        RequestsInstrumentor().instrument()
+        logger.info("Requests 自动追踪已开启")
+    except ImportError:
+        logger.warning("未安装 opentelemetry-instrumentation-requests")
+
+    try:
+        from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+
+        HTTPXClientInstrumentor().instrument()
+        logger.info("HTTPX 自动追踪已开启")
+    except ImportError:
+        logger.warning("未安装 opentelemetry-instrumentation-httpx")
+
+    try:
+        from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+
+        OpenAIInstrumentor().instrument()
+        logger.info("OpenAI API 自动追踪已开启")
+    except ImportError:
+        logger.warning("未安装 opentelemetry-instrumentation-openai")
+
+    _is_initialized = True
+    logger.info("Telemetry 模块初始化成功")
 
 
-__all__ = [
-    "get_tracer",
-    "SpanBuilder",
-    "create_span",
-    "trace_ai_call",
-    "trace_tool_call",
-    "trace_db_call",
-    "init_telemetry",
-]
+def get_tracer(name: str = "trai") -> Any:
+    """获取 Tracer 实例"""
+    return trace.get_tracer(name)
+
+
+__all__ = ["init_telemetry", "get_tracer"]
