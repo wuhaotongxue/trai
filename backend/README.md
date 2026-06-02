@@ -35,6 +35,10 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_06_02_1704
+- **统一(tracing_default)**: 将 `backend/env/tracing.env` 与 `backend/env_example/tracing.env` 中默认 OTLP 上报地址统一切换为 `http://192.168.100.119:4317`, 方便同网段服务直接接入本机 Jaeger.
+- **说明(frontend_scope)**: 经核查, `frontend_next` 与 `client_electron` 当前仅存在业务接口地址配置, 尚未实际接入 OpenTelemetry OTLP SDK, 因此本次未额外引入新的前端观测代码.
+
 ### 🛠️ 后端_2026_06_02_1700
 - **修复(env_loader)**: 调整 `run.py` 中环境变量加载顺序, 先加载 `backend/env/*.env` 公共配置, 再让 `backend/.env.local` 作为本地最终覆盖, 修复公共 `tracing.env` 把开发机自定义 OTLP 地址覆盖回 `localhost` 的问题.
 - **验证(otlp_endpoint)**: 重启后端后已确认 OTLP Exporter 实际使用 `http://192.168.100.119:4317`, 并通过 `GET /api_trai/v1/ai/image/models` 在 Jaeger 中查询到最新 trace.

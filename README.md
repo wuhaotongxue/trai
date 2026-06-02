@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_02_1704
+- **统一(otlp_default)**: 将仓库内已接入 OpenTelemetry 的 tracing 默认配置统一调整为 `http://192.168.100.119:4317`, 包括 `backend/env/tracing.env` 与 `backend/env_example/tracing.env`, 便于同网段服务直接上报到本机 Jaeger.
+- **说明(scope)**: 核查后确认 `frontend_next` 与 `client_electron` 当前仓库中尚未启用 OTLP SDK, 因此本次未强行引入新观测实现, 仅统一现有服务的默认上报地址.
+
 ### 🛠️ 后端_2026_06_02_1700
 - **修复(env_override)**: 调整后端环境变量加载顺序, 改为先读取 `backend/env/*.env`, 再由 `backend/.env` 和 `backend/.env.local` 做最终覆盖, 修复本地 OTLP 地址会被公共 tracing 配置回写的问题.
 - **验证(otlp_lan)**: 本地 `backend/.env.local` 已成功将 OTLP 导出地址切换为 `http://192.168.100.119:4317`, 且 `trai-backend` 真实请求仍可在 Jaeger UI 中查询到链路详情.
