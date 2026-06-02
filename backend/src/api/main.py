@@ -501,12 +501,17 @@ def register_routers(app: FastAPI) -> None:
         init_telemetry()
         # 初始化数据库(单例)，触发建表
         from infrastructure.database import get_database
+        from infrastructure.scheduler.cleanup_job import start_scheduler
 
         _ = get_database()
+        start_scheduler()
         logger.info("TRAI API 服务启动")
 
     @app.on_event("shutdown")
     async def shutdown_event() -> None:
+        from infrastructure.scheduler.cleanup_job import stop_scheduler
+
+        stop_scheduler()
         logger.info("TRAI API 服务关闭")
 
 

@@ -226,6 +226,48 @@ class S3StorageService:
             logger.error(f"S3 删除文件失败 | 错误: {str(e)}")
             return False
 
+    def list_objects(self, prefix: str = "") -> list[dict]:
+        """
+        列出指定前缀的 S3 对象
+
+        参数:
+            prefix (str): 前缀
+        返回值:
+            list[dict]: 对象列表, 包含 Key, LastModified, Size 等信息
+        """
+        objects = []
+        try:
+            paginator = self._client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self._bucket, Prefix=prefix):
+                if "Contents" in page:
+                    objects.extend(page["Contents"])
+        except ClientError as e:
+            logger.error(f"S3 列出文件失败 | 前缀: {prefix} | 错误: {str(e)}")
+        return objects
+
+    def delete_objects(self, object_keys: list[str]) -> bool:
+        """
+        批量删除 S3 文件
+
+        参数:
+            object_keys (list[str]): S3 存储路径列表
+        返回值:
+            bool: 是否成功
+        """
+        if not object_keys:
+            return True
+
+        try:
+            # S3 批量删除单次最多 1000 个
+            for i in range(0, len(object_keys), 1000):
+                batch = object_keys[i : i + 1000]
+                delete_dict = {"Objects": [{"Key": key} for key in batch], "Quiet": True}
+                self._client.delete_objects(Bucket=self._bucket, Delete=delete_dict)
+            return True
+        except ClientError as e:
+            logger.error(f"S3 批量删除文件失败 | 错误: {str(e)}")
+            return False
+
 
 def get_s3_storage() -> S3StorageService:
     """
