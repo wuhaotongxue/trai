@@ -323,11 +323,19 @@ def create_app() -> FastAPI:
         openapi_tags=openapi_tags,
     )
 
+    init_telemetry()
+
     try:
+        from opentelemetry import trace
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
-        FastAPIInstrumentor.instrument_app(app)
-        logger.info("FastAPI OpenTelemetry 追踪已开启")
+        if not getattr(app.state, "otel_fastapi_instrumented", False):
+            FastAPIInstrumentor.instrument_app(
+                app,
+                tracer_provider=trace.get_tracer_provider(),
+            )
+            app.state.otel_fastapi_instrumented = True
+            logger.info("FastAPI OpenTelemetry 追踪已开启")
     except ImportError:
         logger.warning("未安装 opentelemetry-instrumentation-fastapi")
 
@@ -498,7 +506,6 @@ def register_routers(app: FastAPI) -> None:
 
     @app.on_event("startup")
     async def startup_event() -> None:
-        init_telemetry()
         # 初始化数据库(单例)，触发建表
         from infrastructure.database import get_database
         from infrastructure.scheduler.cleanup_job import start_scheduler

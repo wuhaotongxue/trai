@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_02_1644
+- **修复(tracing)**: 调整 FastAPI OpenTelemetry 注入时机, 确保 `init_telemetry()` 完成后再绑定 `tracer_provider`, 避免业务请求存在埋点已启用但 Jaeger 中无 trace 的问题.
+- **验证(jaeger)**: 本地 Jaeger `all-in-one` 联调通过, `GET /api_trai/v1/ai/image/models` 已可在 Jaeger UI 中查询到 `trai-backend` 服务与真实接口 trace.
+
 ### 🛠️ 后端_2026_06_02_1529
 - **修复(image_edit)**: 复现并修复图像编辑任务在前端 `200s` 轮询阈值附近误判超时的问题. 真实任务完成后不再提前提示“任务超时, 请在历史记录中查看”.
 - **优化(image_edit)**: 为“添加眼镜”等轻量局部编辑场景新增自动提速策略. 后端会自动压缩步数与输出尺寸, 将同类任务耗时从约 `201.83s` 降至约 `180.34s`.

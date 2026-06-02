@@ -35,6 +35,10 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_06_02_1644
+- **修复(tracing_init)**: 调整 `api.main` 中 OpenTelemetry 的初始化顺序, 改为先执行 `init_telemetry()` 再对 FastAPI 注入 tracing, 修复 Jaeger 已启动但后端真实请求不入链路的问题.
+- **验证(jaeger_trace)**: 使用 `GET /api_trai/v1/ai/image/models` 完成真实联调, `trai-backend` 服务已出现在 Jaeger UI, 且可查询到接口 trace 明细.
+
 ### 🛠️ 后端_2026_06_02_1529
 - **修复(image_edit_timeout)**: 复现并修复图像编辑任务在前端 `200s` 轮询阈值附近误判超时的问题. 真实任务完成后不再提前提示超时.
 - **优化(image_edit_lightweight)**: 为“添加眼镜”等轻量局部编辑场景新增自动提速策略. 后端会自动压缩推理步数与输出尺寸, 将同类任务耗时从约 `201.83s` 降至约 `180.34s`.
