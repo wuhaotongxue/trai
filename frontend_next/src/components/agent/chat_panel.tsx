@@ -870,7 +870,33 @@ export function ChatPanel() {
                                   </motion.div>
                                 ) : isGeneratingVideo ? (
                                   <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
-                                    <div className={`w-3/4 h-3/4 bg-slate-200 dark:bg-slate-800 animate-pulse ${brutalBorder}`} />
+                                    <div className={`relative w-full max-w-2xl aspect-video bg-slate-900 overflow-hidden ${brutalBorder}`}>
+                                      {/* 背景光影 */}
+                                      <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent"
+                                        animate={{ x: ["-100%", "100%"] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                      />
+                                      {/* 胶片滚动效果 */}
+                                      <div className="absolute left-4 top-0 bottom-0 w-8 flex flex-col justify-around py-4">
+                                        {[...Array(6)].map((_, i) => (
+                                          <motion.div key={`l-${i}`} className="w-4 h-6 bg-white/20" animate={{ y: [0, -40] }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} />
+                                        ))}
+                                      </div>
+                                      <div className="absolute right-4 top-0 bottom-0 w-8 flex flex-col justify-around py-4">
+                                        {[...Array(6)].map((_, i) => (
+                                          <motion.div key={`r-${i}`} className="w-4 h-6 bg-white/20" animate={{ y: [0, -40] }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} />
+                                        ))}
+                                      </div>
+                                      {/* 中心大图标与提示 */}
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center text-orange-400 gap-4">
+                                        <motion.div animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+                                          <Video className="w-20 h-20" />
+                                        </motion.div>
+                                        <div className="text-xl font-black tracking-widest animate-pulse">4K RENDERING...</div>
+                                        <div className="text-sm font-bold text-white/60">☕ 去泡杯咖啡吧，史诗级大片正在洗印中...</div>
+                                      </div>
+                                    </div>
                                     <div className={`w-full max-w-2xl p-5 bg-slate-50 dark:bg-slate-950 ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] space-y-4`}>
                                       <div className="flex items-center justify-between gap-4">
                                         <div className="font-black uppercase text-xl flex items-center gap-3">
