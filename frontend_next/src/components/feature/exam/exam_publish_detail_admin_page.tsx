@@ -116,6 +116,25 @@ export function ExamPublishDetailAdminPage({ shareToken }: ExamPublishDetailAdmi
   }
 
   /**
+   * 生成当前前端站点下的可访问答题页地址.
+   *
+   * 用途:
+   *     当历史发布记录保存了旧端口时, 仍然给后台提供当前站点可直接打开的地址.
+   * 参数:
+   *     无.
+   * 返回值:
+   *     string: 当前站点下的完整分享链接.
+   * 异常:
+   *     无.
+   */
+  function buildCurrentSiteShareUrl(): string {
+    if (typeof window === "undefined") {
+      return `/exam/${shareToken}`;
+    }
+    return `${window.location.origin}/exam/${shareToken}`;
+  }
+
+  /**
    * 渲染答卷列表.
    *
    * 用途:
@@ -319,7 +338,11 @@ export function ExamPublishDetailAdminPage({ shareToken }: ExamPublishDetailAdmi
                   <div className="mt-1 break-all text-slate-900 dark:text-white">{detail.share_token}</div>
                 </div>
                 <div>
-                  <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Share URL</div>
+                  <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">当前可访问地址</div>
+                  <div className="mt-1 break-all text-slate-900 dark:text-white">{buildCurrentSiteShareUrl()}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">发布时保存的原始链接</div>
                   <div className="mt-1 break-all text-slate-900 dark:text-white">{detail.share_url}</div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -335,22 +358,33 @@ export function ExamPublishDetailAdminPage({ shareToken }: ExamPublishDetailAdmi
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => void copyText(detail.share_url, "分享链接已复制")}
+                    onClick={() => void copyText(buildCurrentSiteShareUrl(), "分享链接已复制")}
                     className="h-11 border-4 border-slate-900 bg-white px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-slate-900 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
                   >
                     <Copy className="mr-2 h-4 w-4" />
-                    复制链接
+                    复制当前链接
                   </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => window.open(detail.share_url, "_blank", "noopener,noreferrer")}
-                  className="h-11 border-4 border-slate-900 bg-cyan-200 px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-cyan-700/40 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  打开答题页
-                </Button>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => window.open(buildCurrentSiteShareUrl(), "_blank", "noopener,noreferrer")}
+                    className="h-11 border-4 border-slate-900 bg-cyan-200 px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-cyan-700/40 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    打开当前站点
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => window.open(detail.share_url, "_blank", "noopener,noreferrer")}
+                    className="h-11 border-4 border-slate-900 bg-white px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-slate-900 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    打开原始链接
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

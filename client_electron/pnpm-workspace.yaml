@@ -1,3 +1,5 @@
 allowBuilds:
+  better-sqlite3: false
   electron: false
   esbuild: false
+  puppeteer: set this to true or false

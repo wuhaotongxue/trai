@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from infrastructure.database.models import ImageRecordModel, MusicRecordModel, VideoRecordModel
@@ -39,25 +39,46 @@ class MediaHistoryService:
         self._audit_log_service = AgentAuditLogService(session)
 
     def list_user_media_records(
-        self, user_id: str, limit: int = 100, include_deleted: bool = False
-    ) -> dict[str, list[dict[str, Any]]]:
+        self, user_id: str, limit: int = 100, offset: int = 0, include_deleted: bool = False
+    ) -> dict[str, Any]:
         """
         查询用户的全部媒体历史记录.
 
         参数:
             user_id (str): 用户 ID.
             limit (int): 单类媒体最大返回数量.
+            offset (int): 分页偏移量.
             include_deleted (bool): 是否包含软删除记录.
 
         返回值:
-            dict[str, list[dict[str, Any]]]: 按媒体类型分组的历史记录.
+            dict[str, Any]: 按媒体类型分组的历史记录及其总数.
 
         异常:
             无.
         """
         logger.info(
-            f"[媒体历史] 查询用户媒体记录 | user_id={user_id} | limit={limit} | include_deleted={include_deleted}"
+            f"[媒体历史] 查询用户媒体记录 | user_id={user_id} | limit={limit} | offset={offset} | include_deleted={include_deleted}"
         )
+
+        # 统计总数
+        total_images = self._session.execute(
+            select(func.count(ImageRecordModel.t_id)).where(
+                and_(*self._build_user_filters(ImageRecordModel, user_id=user_id, include_deleted=include_deleted))
+            )
+        ).scalar_one()
+
+        total_music = self._session.execute(
+            select(func.count(MusicRecordModel.t_id)).where(
+                and_(*self._build_user_filters(MusicRecordModel, user_id=user_id, include_deleted=include_deleted))
+            )
+        ).scalar_one()
+
+        total_videos = self._session.execute(
+            select(func.count(VideoRecordModel.t_id)).where(
+                and_(*self._build_user_filters(VideoRecordModel, user_id=user_id, include_deleted=include_deleted))
+            )
+        ).scalar_one()
+
         image_records = (
             self._session.execute(
                 select(ImageRecordModel)
@@ -65,6 +86,7 @@ class MediaHistoryService:
                     and_(*self._build_user_filters(ImageRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(ImageRecordModel.t_created_at.desc())
+                .offset(offset)
                 .limit(limit)
             )
             .scalars()
@@ -77,6 +99,7 @@ class MediaHistoryService:
                     and_(*self._build_user_filters(MusicRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(MusicRecordModel.t_created_at.desc())
+                .offset(offset)
                 .limit(limit)
             )
             .scalars()
@@ -89,6 +112,7 @@ class MediaHistoryService:
                     and_(*self._build_user_filters(VideoRecordModel, user_id=user_id, include_deleted=include_deleted))
                 )
                 .order_by(VideoRecordModel.t_created_at.desc())
+                .offset(offset)
                 .limit(limit)
             )
             .scalars()
@@ -99,6 +123,9 @@ class MediaHistoryService:
             "images": [self._serialize_image_record(record) for record in image_records],
             "music": [self._serialize_music_record(record) for record in music_records],
             "videos": [self._serialize_video_record(record) for record in video_records],
+            "total_images": total_images,
+            "total_music": total_music,
+            "total_videos": total_videos,
         }
         self._audit_log_service.write_log(
             action="agent_media_history_list",

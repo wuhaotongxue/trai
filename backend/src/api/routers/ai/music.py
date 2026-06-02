@@ -37,6 +37,7 @@ class MusicGenerateRequest(BaseModel):
     steps: int | None = Field(27, description="推理步数", ge=1, le=100)
     guidance_scale: float | None = Field(7.0, description="引导强度", ge=1.0, le=20.0)
     model: str | None = Field("ace-step", description="模型名称 (ace-step)")
+    enable_optimization: bool = Field(True, description="是否启用提示词优化")
 
 
 class MusicGenerateResponse(BaseModel):
@@ -50,6 +51,7 @@ class MusicGenerateResponse(BaseModel):
     music_url: str | None = None
     lyrics: str | None = Field(None, description="AI 生成歌词")
     cover_url: str | None = Field(None, description="AI 生成封面图")
+    optimized_prompt: str | None = Field(None, description="优化后的提示词")
     file_path: str | None = None
     duration: float | None = None
     error: str | None = None
@@ -208,10 +210,19 @@ class MusicController:
             logger.info(f"[音乐生成] 开始执行后台任务 | task_id={task_id}")
             _music_tasks[task_id]["status"] = "processing"
 
-            # 1. 异步生成歌词和封面，生成完立刻更新进度
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
+            prompt_to_use = request.prompt
+            optimized_prompt = prompt_to_use
+            if request.enable_optimization:
+                from infrastructure.ai.core.prompt_optimizer import PromptOptimizer
+
+                optimizer = PromptOptimizer()
+                optimized_prompt = loop.run_until_complete(optimizer.optimize_music_prompt(request.prompt))
+                _music_tasks[task_id]["optimized_prompt"] = optimized_prompt
+
+            # 1. 异步生成歌词和封面，生成完立刻更新进度
             # 优先生成歌词
             _music_tasks[task_id]["progress"] = "正在创作灵感歌词..."
             MusicController._update_record(task_id, t_progress_message="正在创作灵感歌词...")
@@ -253,7 +264,7 @@ class MusicController:
 
             # 在后台线程中必须使用同步生成，或者创建一个新的事件循环
             # 将用户原始提示词（作为风格标签）与生成的歌词合并，交给音乐生成模型
-            combined_prompt = f"Style: {request.prompt}\n\nLyrics:\n{lyrics}"
+            combined_prompt = f"Style: {optimized_prompt}\n\nLyrics:\n{lyrics}"
 
             result = client.generate(
                 prompt=combined_prompt,

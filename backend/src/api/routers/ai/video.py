@@ -150,6 +150,7 @@ class VideoTaskStore:
         tenant_id: str,
         client_ip: str,
         user_agent: str,
+        enable_optimization: bool = True,
     ) -> None:
         """
         创建视频生成任务的初始状态.
@@ -195,6 +196,8 @@ class VideoTaskStore:
             "client_ip": client_ip,
             "user_agent": user_agent,
             "started_at": time.monotonic(),
+            "enable_optimization": enable_optimization,
+            "optimized_prompt": None,
         }
         cls._create_record(cls._tasks[task_id])
 
@@ -476,6 +479,7 @@ class VideoGenerationRequest(BaseModel):
     model: Annotated[str, Field(default="Wan-AI/Wan2.1-T2V-1.3B", description="模型名称")] = "Wan-AI/Wan2.1-T2V-1.3B"
     frames: Annotated[int, Field(default=81, ge=1, le=200, description="视频帧数 (约 5fps, 81帧约 16 秒)")] = 81
     resolution: Annotated[str, Field(default="1280x720", description="分辨率, 如 1280x720 / 1920x1080")] = "1280x720"
+    enable_optimization: Annotated[bool, Field(default=True, description="是否启用提示词优化")] = True
 
 
 class VideoGenerationResponse(BaseModel):
@@ -489,6 +493,7 @@ class VideoGenerationResponse(BaseModel):
     video_base64: str | None = Field(default=None, description="视频 base64 (备用)")
     object_key: str | None = Field(default=None, description="S3 对象键")
     public_url: str | None = Field(default=None, description="S3 公共域名 URL")
+    optimized_prompt: str | None = Field(default=None, description="优化后的提示词")
     frames: int = Field(description="视频帧数")
     resolution: str = Field(description="分辨率")
     error: str | None = Field(default=None, description="错误信息")
@@ -545,10 +550,18 @@ class VideoApiRouter:
         )
 
         try:
+            from infrastructure.ai.core.prompt_optimizer import PromptOptimizer
             from infrastructure.ai.video.agnes_video_client import AgnesVideoClient
 
             local_video_client = AgnesVideoClient()
             logger.info(f"[视频生成] 后台任务启动 | task_id={task_id}")
+
+            prompt_to_use = str(task.get("prompt", ""))
+            optimized_prompt = prompt_to_use
+            if task.get("enable_optimization", True):
+                optimizer = PromptOptimizer()
+                optimized_prompt = await optimizer.optimize_video_prompt(prompt_to_use)
+                VideoTaskStore.update_task(task_id, optimized_prompt=optimized_prompt)
 
             def progress_callback(line: str) -> None:
                 parsed = VideoApiUtils.parse_progress_line(line)
@@ -556,7 +569,7 @@ class VideoApiRouter:
                     VideoTaskStore.update_task(task_id, **parsed)
 
             result = await local_video_client.generate(
-                prompt=str(task.get("prompt", "")),
+                prompt=optimized_prompt,
                 frames=int(task.get("frames", 81) or 81),
                 resolution=str(task.get("resolution", "1280x720") or "1280x720"),
                 task_id=task_id,
@@ -691,6 +704,7 @@ class VideoApiRouter:
             current_step=task.get("current_step"),
             total_steps=task.get("total_steps"),
             queue_position=task.get("queue_position"),
+            optimized_prompt=task.get("optimized_prompt"),
         )
 
     @staticmethod
@@ -739,6 +753,7 @@ class VideoApiRouter:
             tenant_id=tenant_id,
             client_ip=client_ip,
             user_agent=request.headers.get("User-Agent", "")[:500],
+            enable_optimization=req.enable_optimization,
         )
         background_tasks.add_task(VideoApiRouter._execute_video_task, task_id)
         return VideoApiRouter._build_response(task_id)

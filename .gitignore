@@ -140,3 +140,6 @@ backend/output_video/
 reduce_saturation.js
 rewrite*.js
 replace_*.js
+
+# 运行时生成目录
+backend/runtime/

@@ -7,7 +7,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Copy, LoaderCircle, Send, TriangleAlert } from "lucide-react";
+import { ArrowDownToLine, ArrowUpToLine, CheckCircle2, Copy, LoaderCircle, Send, TriangleAlert } from "lucide-react";
 
 import { ExamQuestionCard, type ExamAnswerDraft } from "@/components/feature/exam/exam_question_card";
 import { Button } from "@/components/ui/button";
@@ -223,6 +223,38 @@ export function ExamShareClient({ shareToken }: ExamShareClientProps) {
     window.setTimeout(() => setCopied(false), 1500);
   }
 
+  /**
+   * 滚动到页面顶部.
+   *
+   * 用途:
+   *     方便考生在长试卷中快速回到顶部查看结果和基础信息.
+   * 参数:
+   *     无.
+   * 返回值:
+   *     void: 无返回值.
+   * 异常:
+   *     无显式异常.
+   */
+  function scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /**
+   * 滚动到页面底部.
+   *
+   * 用途:
+   *     提供一键到底能力, 让考生快速到达提交区域.
+   * 参数:
+   *     无.
+   * 返回值:
+   *     void: 无返回值.
+   * 异常:
+   *     无显式异常.
+   */
+  function scrollToBottom(): void {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -318,6 +350,16 @@ export function ExamShareClient({ shareToken }: ExamShareClientProps) {
           </CardContent>
         </Card>
 
+        <Card className="border-4 border-slate-900 bg-cyan-100 shadow-[8px_8px_0px_0px_#0f172a]">
+          <CardContent className="space-y-3 p-6">
+            <div className="text-sm font-black uppercase tracking-widest">当前可访问分享链接</div>
+            <div className="break-all text-sm font-bold leading-7 text-slate-900">{buildBrowserShareUrl()}</div>
+            <p className="text-xs font-bold leading-6 text-slate-700">
+              如果你看到的旧链接是 `3000` 或写成了 `http://localhost/:3000/...`, 请以这里显示的当前地址为准.
+            </p>
+          </CardContent>
+        </Card>
+
         {paper.warning_messages.length > 0 && (
           <Card className="border-4 border-slate-900 bg-amber-100 shadow-[8px_8px_0px_0px_#0f172a]">
             <CardContent className="space-y-2 p-6">
@@ -365,6 +407,27 @@ export function ExamShareClient({ shareToken }: ExamShareClientProps) {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        <Button
+          type="button"
+          aria-label="Scroll to bottom"
+          title="Scroll to bottom"
+          onClick={scrollToBottom}
+          className="h-12 w-12 border-4 border-slate-900 bg-cyan-300 p-0 text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-cyan-200"
+        >
+          <ArrowDownToLine className="h-5 w-5" />
+        </Button>
+        <Button
+          type="button"
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          onClick={scrollToTop}
+          className="h-12 w-12 border-4 border-slate-900 bg-white p-0 text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] hover:bg-slate-100"
+        >
+          <ArrowUpToLine className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

@@ -457,6 +457,10 @@ python run.py
 ## 📝 更新日志 (Changelog)
 
 ### 🛠️ 后端_2026_06_02_0857
+### 🛠️ 后端_2026_06_02_2253
+- **新增(yida_form_client)**: 实现宜搭表单自动化创建功能，支持 Cookie 认证创建空白表单和保存 Schema。
+- **优化(request_headers)**: 优化请求头配置，添加 Referer、Origin、User-Agent 等模拟浏览器请求，提升接口稳定性。
+
 - **修复(video)**: 修复视频生成结果通知方法调用缺少 await 导致未触发企业微信 Webhook 推送的问题。
 - **功能(agent)**: 更新默认 Agent 配置，模型切换为 `deepseek-chat` 并注入“河南地理专家”专属 Prompt，同时禁止回复中出现“尝试”等测试词汇。
 - **代码(format)**: 执行 Ruff 代码格式化与规范检查，确保 Python 代码符合项目最新标准。

@@ -40,6 +40,25 @@ class EnvLoader:
     """
 
     @staticmethod
+    def should_override(key: str, value: str) -> bool:
+        """
+        判断 env 值是否允许覆盖已有环境变量.
+
+        参数:
+            key: 环境变量键名
+            value: 待写入值
+        返回值:
+            bool: True 表示允许覆盖, False 表示保留已有真实值
+        """
+        current_value = os.environ.get(key, "")
+        normalized_value = value.strip()
+        if not current_value:
+            return True
+        if normalized_value and set(normalized_value) != {"x"}:
+            return True
+        return False
+
+    @staticmethod
     def load_all() -> None:
         """
         扫描并加载所有配置文件
@@ -61,7 +80,11 @@ class EnvLoader:
                         _line = _line.strip()
                         if _line and not _line.startswith("#") and "=" in _line:
                             _key, _val = _line.split("=", 1)
-                            os.environ[_key.strip()] = _val.strip()
+                            _normalized_key = _key.strip()
+                            _normalized_val = _val.strip()
+                            if not EnvLoader.should_override(_normalized_key, _normalized_val):
+                                continue
+                            os.environ[_normalized_key] = _normalized_val
         logger.info("环境配置加载完成")
 
 

@@ -70,6 +70,10 @@ cd trai
 ## 📝 更新日志 (Changelog)
 
 ### 🛠️ 后端_2026_06_02_1906
+### 🛠️ 后端_2026_06_02_2253
+- **新增(yida_form_client)**: 实现宜搭表单自动化创建功能，支持 Cookie 认证创建空白表单和保存 Schema。
+- **优化(request_headers)**: 优化请求头配置，添加 Referer、Origin、User-Agent 等模拟浏览器请求，提升接口稳定性。
+
 - **新增(exam_share_mvp)**: 新增 `application/exam_share_usecases.py`, `infrastructure/tools/exam_share_repository.py` 与 `infrastructure/tools/dingtalk_ai_table_sync.py`, 打通 Word 试卷发布, 公开试卷读取, 答卷提交, 自动评分和 AI 表格同步接口位的最小闭环.
 - **新增(exam_share_api)**: 在 `POST /api_trai/v1/tools/exam` 下新增 `publish_share`, `share_detail`, `submit_answers` 三个接口, 支持生成分享链接, 获取脱敏试卷和提交答卷结果.
 - **增强(exam_share_history_api)**: 新增 `published_list` 列表接口和发布记录聚合逻辑, 支持后台查询历史已发布考试, 重新打开历史分享链接, 查看题目数与答卷统计.

@@ -430,6 +430,7 @@ def register_routers(app: FastAPI) -> None:
     from api.routers.apps.extensions import router as extensions_router
     from api.routers.tools import converter as tools
     from api.routers.tools import downloader
+    from api.routers.tools import exam as exam_tools
 
     app.include_router(extensions_router, prefix=f"{api_prefix}/apps", tags=["应用扩展"])
     app.include_router(downloader.router, prefix=f"{api_prefix}", tags=["工具"])
@@ -488,6 +489,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(websocket_router, tags=["WebSocket"])
     app.include_router(upload.router, prefix=f"{api_prefix}/media", tags=["媒体"])
     app.include_router(tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
+    app.include_router(exam_tools.router, prefix=f"{api_prefix}/tools", tags=["工具"])
     app.include_router(contact_router, prefix=api_prefix, tags=["公开接口"])
     app.include_router(i18n_public_router, prefix=api_prefix, tags=["翻译"])
     app.include_router(admin_i18n_router, prefix=f"{api_prefix}/admin", tags=["国际化管理"])

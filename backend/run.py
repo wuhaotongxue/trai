@@ -40,6 +40,29 @@ class EnvFileLoader:
     """
 
     @staticmethod
+    def should_override(key: str, value: str) -> bool:
+        """
+        判断当前 env 值是否允许覆盖已有环境变量.
+
+        Args:
+            key: 环境变量键名.
+            value: 待写入的环境变量值.
+
+        Returns:
+            bool: True 表示允许覆盖, False 表示应保留已有真实值.
+
+        Raises:
+            无.
+        """
+        current_value = os.environ.get(key, "")
+        normalized_value = value.strip()
+        if not current_value:
+            return True
+        if normalized_value and set(normalized_value) != {"x"}:
+            return True
+        return False
+
+    @staticmethod
     def load_if_exists(file_path: Path) -> None:
         """
         加载指定路径的 env 文件,仅在变量未设置时写入 os.environ.
@@ -71,6 +94,8 @@ class EnvFileLoader:
             key = key.strip()
             value = value.strip().strip('"').strip("'")
             if not key:
+                continue
+            if not EnvFileLoader.should_override(key=key, value=value):
                 continue
             os.environ[key] = value  # 直接覆盖，确保模块配置生效
 

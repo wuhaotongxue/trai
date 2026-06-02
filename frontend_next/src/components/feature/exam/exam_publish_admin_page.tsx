@@ -58,6 +58,41 @@ export function ExamPublishAdminPage() {
   }, [selectedFile]);
 
   /**
+   * 基于当前前端站点生成可直接访问的答题页地址.
+   *
+   * 用途:
+   *     兼容历史记录中保存了旧端口的 share_url, 始终给出当前站点可直接打开的地址.
+   * 参数:
+   *     shareToken: 分享令牌.
+   * 返回值:
+   *     string: 当前站点下的完整答题页地址.
+   * 异常:
+   *     无显式异常.
+   */
+  function buildCurrentSiteShareUrl(shareToken: string): string {
+    if (typeof window === "undefined") {
+      return `/exam/${shareToken}`;
+    }
+    return `${window.location.origin}/exam/${shareToken}`;
+  }
+
+  /**
+   * 打开当前站点下的答题页地址.
+   *
+   * 用途:
+   *     避免历史记录里的旧域名或旧端口导致链接无法打开.
+   * 参数:
+   *     shareToken: 分享令牌.
+   * 返回值:
+   *     void: 无返回值.
+   * 异常:
+   *     无显式异常.
+   */
+  function openCurrentSiteSharePage(shareToken: string): void {
+    window.open(buildCurrentSiteShareUrl(shareToken), "_blank", "noopener,noreferrer");
+  }
+
+  /**
    * 拉取已发布考试历史列表.
    *
    * 用途:
@@ -170,10 +205,10 @@ export function ExamPublishAdminPage() {
    *     无显式异常, 失败时通过 toast 提示.
    */
   async function handleCopyShareUrl(): Promise<void> {
-    if (!publishedResult?.share_url) {
+    if (!publishedResult?.share_token) {
       return;
     }
-    await handleCopyText(publishedResult.share_url, "分享链接已复制");
+    await handleCopyText(buildCurrentSiteShareUrl(publishedResult.share_token), "分享链接已复制");
   }
 
   /**
@@ -211,7 +246,7 @@ export function ExamPublishAdminPage() {
             发布考试后台页面
           </h1>
           <p className="max-w-3xl text-sm font-bold leading-7 text-slate-700 dark:text-slate-300">
-            上传 Word 试卷后, 后端会自动解析题目结构, 生成可公开访问的答题页链接. 当前主链路是自建答题页, AI 表格同步会在配置完整后自动接上.
+            管理员可以直接在这里上传 Word 试卷. 后端会自动解析题目结构, 生成可公开访问的答题页链接. 当前主链路是自建答题页, AI 表格同步会在配置完整后自动接上.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -252,7 +287,7 @@ export function ExamPublishAdminPage() {
                 className="h-12 border-4 border-slate-900 bg-white font-bold shadow-[4px_4px_0px_0px_#0f172a] focus-visible:ring-0 dark:border-white dark:bg-slate-950 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
               />
               <p className="text-xs font-bold leading-6 text-slate-600 dark:text-slate-400">
-                这里决定生成后的分享链接域名, 本地联调建议填当前前端地址, 例如 `http://127.0.0.1:3000`.
+                这里决定生成后的分享链接域名. 本地联调时必须填当前前端实际端口, 例如 `http://127.0.0.1:3001` 或当前浏览器所在地址.
               </p>
             </div>
 
@@ -306,7 +341,16 @@ export function ExamPublishAdminPage() {
                     className="h-12 border-4 border-slate-900 bg-white px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-slate-900 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    打开预览
+                    打开原始链接
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => openCurrentSiteSharePage(publishedResult.share_token)}
+                    className="h-12 border-4 border-slate-900 bg-cyan-200 px-5 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-cyan-700/40 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    打开当前站点
                   </Button>
                 </>
               )}
@@ -362,7 +406,13 @@ export function ExamPublishAdminPage() {
                       <div className="text-slate-900 dark:text-white">{publishedResult.question_count}</div>
                     </div>
                     <div>
-                      <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Share URL</div>
+                      <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">当前可访问地址</div>
+                      <div className="break-all text-slate-900 dark:text-white">
+                        {buildCurrentSiteShareUrl(publishedResult.share_token)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">发布时保存的原始链接</div>
                       <div className="break-all text-slate-900 dark:text-white">{publishedResult.share_url}</div>
                     </div>
                   </div>
@@ -440,7 +490,7 @@ export function ExamPublishAdminPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => void handleCopyText(item.share_url, "历史分享链接已复制")}
+                            onClick={() => void handleCopyText(buildCurrentSiteShareUrl(item.share_token), "历史分享链接已复制")}
                             className="h-10 border-4 border-slate-900 bg-white px-4 text-xs font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-slate-900 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
                           >
                             <Copy className="mr-2 h-4 w-4" />
@@ -449,11 +499,11 @@ export function ExamPublishAdminPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => window.open(item.share_url, "_blank", "noopener,noreferrer")}
+                            onClick={() => openCurrentSiteSharePage(item.share_token)}
                             className="h-10 border-4 border-slate-900 bg-white px-4 text-xs font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0px_0px_#0f172a] dark:border-white dark:bg-slate-900 dark:text-white dark:shadow-[4px_4px_0px_0px_#ffffff]"
                           >
                             <Eye className="mr-2 h-4 w-4" />
-                            重新打开
+                            当前站点打开
                           </Button>
                         </div>
                       </div>
@@ -476,7 +526,11 @@ export function ExamPublishAdminPage() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Share URL</div>
+                          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">当前可访问地址</div>
+                          <div className="break-all text-slate-900 dark:text-white">{buildCurrentSiteShareUrl(item.share_token)}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">原始保存链接</div>
                           <div className="break-all text-slate-900 dark:text-white">{item.share_url}</div>
                         </div>
                       </div>

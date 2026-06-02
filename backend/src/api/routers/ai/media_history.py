@@ -55,6 +55,7 @@ class MediaHistoryListRequest(BaseModel):
     """
 
     limit: int = Field(default=100, ge=1, le=200, description="单类媒体最大返回数量")
+    offset: int = Field(default=0, ge=0, description="分页偏移量")
     include_deleted: bool = Field(default=False, description="是否包含已软删除记录")
 
 
@@ -103,6 +104,9 @@ class MediaHistoryListResponse(BaseModel):
     images: list[MediaHistoryItemResponse] = Field(default_factory=list, description="图片历史")
     music: list[MediaHistoryItemResponse] = Field(default_factory=list, description="音乐历史")
     videos: list[MediaHistoryItemResponse] = Field(default_factory=list, description="视频历史")
+    total_images: int = Field(default=0, description="图片总数")
+    total_music: int = Field(default=0, description="音乐总数")
+    total_videos: int = Field(default=0, description="视频总数")
 
 
 class MediaHistoryRouter:
@@ -145,12 +149,16 @@ class MediaHistoryRouter:
         records = service.list_user_media_records(
             user_id=user_id,
             limit=req.limit,
+            offset=req.offset,
             include_deleted=req.include_deleted,
         )
         return MediaHistoryListResponse(
             images=[MediaHistoryItemResponse(**item) for item in records["images"]],
             music=[MediaHistoryItemResponse(**item) for item in records["music"]],
             videos=[MediaHistoryItemResponse(**item) for item in records["videos"]],
+            total_images=records.get("total_images", 0),
+            total_music=records.get("total_music", 0),
+            total_videos=records.get("total_videos", 0),
         )
 
     @staticmethod
