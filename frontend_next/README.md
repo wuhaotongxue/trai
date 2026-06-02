@@ -4,6 +4,17 @@
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_06_02_1906
+- **新增(public_exam_route)**: 新增 `src/app/exam/[share_token]/page.tsx`, 支持通过分享令牌直接打开公开答题页.
+- **新增(public_exam_components)**: 新增 `src/components/feature/exam/exam_share_client.tsx` 和 `src/components/feature/exam/exam_question_card.tsx`, 实现考生信息填写, 题目展示, 选项交互和答卷提交结果展示.
+- **新增(textarea_component)**: 新增 `src/components/ui/textarea.tsx`, 为公开答题页和后续表单场景补齐统一风格的多行输入组件.
+- **增强(api_client)**: 扩展 `src/lib/api_client.ts`, 新增 `publicExamApi` 以及公开试卷详情, 提交答卷的强类型定义, 直接对接后端分享考试接口.
+- **新增(admin_exam_publish_page)**: 新增 `src/app/admin/exam_publish/page.tsx` 与 `src/components/feature/exam/exam_publish_admin_page.tsx`, 提供管理后台上传 Word 试卷, 发布考试, 复制分享链接和跳转预览的界面能力.
+- **增强(admin_exam_publish_history)**: 为考试发布后台页补充历史发布列表, 已发布考试管理和重新打开历史分享链接能力, 直接对接后端 `published_list` 接口.
+- **增强(admin_exam_publish_detail)**: 新增 `src/app/admin/exam_publish/[share_token]/page.tsx` 与 `exam_publish_detail_admin_page.tsx`, 支持从历史记录跳转查看单场考试详情, 分享链接和答卷列表.
+- **增强(admin_submission_detail)**: 新增 `src/app/admin/exam_publish/[share_token]/submission/[submission_id]/page.tsx` 与 `exam_submission_detail_admin_page.tsx`, 支持查看单份答卷的考生答案, 自动评分明细和钉钉同步结果详情.
+- **验证(frontend_checks)**: 已执行 `pnpm run lint:fix`, `pnpm exec eslint . --max-warnings 0` 和 `pnpm run type-check`, 当前改动通过静态检查.
+
 ### 🎨 前端_2026_05_29_1436
 - **功能(digital_human)**: 为数字人面板新增“语音对话”功能. 集成 Web MediaRecorder API 与后端 ASR 接口, 支持一键录音转文字.
 - **优化(digital_human)**: 深度重构视频舞台 (Stage) 视觉表现. 引入高清数字人形象占位图替代 Bot 图标, 增加“等待唤醒”呼吸灯动效与渐变遮罩, 提升交互沉浸感.

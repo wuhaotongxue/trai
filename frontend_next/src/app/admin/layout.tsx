@@ -114,6 +114,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         { label: translate("admin.ai"), href: "/admin/ai", icon: Bot, desc: translate("admin.ai.desc") },
         { label: translate("admin.knowledge_base"), href: "/admin/knowledge_base", icon: Database, desc: translate("admin.knowledge_base.desc") },
         { label: translate("admin.organization"), href: "/admin/organization", icon: Users, desc: translate("admin.organization.desc") },
+        { label: translate("admin.exam_publish"), href: "/admin/exam_publish", icon: FileText, desc: translate("admin.exam_publish.desc") },
         { label: translate("admin.client_release"), href: "/admin/client_release", icon: Cpu, desc: translate("admin.client_release.desc") },
       ],
     },

@@ -69,6 +69,42 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_02_1906
+- **新增(exam_share_mvp)**: 新增 `application/exam_share_usecases.py`, `infrastructure/tools/exam_share_repository.py` 与 `infrastructure/tools/dingtalk_ai_table_sync.py`, 打通 Word 试卷发布, 公开试卷读取, 答卷提交, 自动评分和 AI 表格同步接口位的最小闭环.
+- **新增(exam_share_api)**: 在 `POST /api_trai/v1/tools/exam` 下新增 `publish_share`, `share_detail`, `submit_answers` 三个接口, 支持生成分享链接, 获取脱敏试卷和提交答卷结果.
+- **增强(exam_share_history_api)**: 新增 `published_list` 列表接口和发布记录聚合逻辑, 支持后台查询历史已发布考试, 重新打开历史分享链接, 查看题目数与答卷统计.
+- **增强(exam_share_detail_api)**: 新增 `published_detail` 详情接口与答卷摘要聚合逻辑, 支持后台查询单场考试的分享信息, 解析告警和答卷列表.
+- **增强(exam_share_submission_detail_api)**: 新增 `submission_detail` 接口与逐题评分明细聚合逻辑, 支持后台查询单份答卷的考生答案, 自动评分明细, 主观题复核状态和钉钉 AI 表格同步结果详情.
+- **新增(exam_share_test)**: 新增 `backend/tests/test_exam_share_usecases.py`, 并扩展 `backend/tests/test_word_exam_api.py`, 已覆盖分享考试发布, 公开试卷脱敏, 自动评分和新路由序列化返回.
+- **新增(exam_share_env)**: 新增 `backend/env_example/exam_share.env`, 补齐 `EXAM_SHARE_STORAGE_DIR`, `DINGTALK_APP_KEY`, `DINGTALK_AI_TABLE_BASE_ID`, `DINGTALK_AI_TABLE_SHEET_ID`, `DINGTALK_AI_TABLE_OPERATOR_ID` 等运行参数模板.
+
+### 🎨 前端_2026_06_02_1906
+- **新增(public_exam_page)**: 新增 `frontend_next/src/app/exam/[share_token]/page.tsx`, 支持按分享令牌打开公开答题页.
+- **新增(exam_ui)**: 新增 `exam_share_client.tsx`, `exam_question_card.tsx` 和 `textarea.tsx`, 形成自建答题页的考生信息填写, 题目渲染, 选项交互和主观题作答能力.
+- **新增(exam_api_client)**: 扩展 `frontend_next/src/lib/api_client.ts`, 新增公开考试详情与答卷提交的强类型接口封装, 用于对接后端 `share_detail` 与 `submit_answers` 路由.
+- **新增(admin_exam_publish_page)**: 新增 `frontend_next/src/app/admin/exam_publish/page.tsx` 与 `exam_publish_admin_page.tsx`, 支持在管理后台上传 `docx` 试卷, 一键发布考试, 复制分享链接并直接打开答题页预览.
+- **增强(admin_exam_publish_history)**: 在考试发布后台页补充发布记录列表, 已发布考试管理和历史分享链接重开能力, 支持查看题目数, 答卷数和最近提交时间.
+- **增强(admin_exam_publish_detail)**: 新增 `/admin/exam_publish/[share_token]` 详情页, 支持查看单场已发布考试的基础信息, 分享链接, 解析告警和答卷列表, 并从历史记录中直接跳转详情.
+- **增强(admin_submission_detail)**: 新增 `/admin/exam_publish/[share_token]/submission/[submission_id]` 答卷详情页, 支持查看单份答卷的考生答案, 自动评分明细和钉钉同步结果 JSON, 并从考试详情页直接跳转.
+- **验证(frontend_checks)**: 已执行 `pnpm run lint:fix`, `pnpm exec eslint . --max-warnings 0` 与 `pnpm run type-check`, 前端静态检查通过.
+
+### 🛠️ 后端_2026_06_02_1825
+- **新增(yida_create_form)**: 新增 `WordExamCreateYidaFormUseCase`, `YidaFormClient` 和 `YidaFormSchemaBuilder`, 支持将 Word 试卷解析结果进一步转换为宜搭 `superform` Schema 并调用 `saveFormSchemaInfo / saveFormSchema / updateFormConfig` 创建表单.
+- **新增(exam_create_api)**: 在 `POST /api_trai/v1/tools/exam/create_yida_form` 增加“一步创建宜搭考试表单”能力, 上传 `docx` 后可直接传入 `app_type` 创建表单.
+- **新增(yida_env)**: 新增 `backend/env_example/yida.env` 配置模板, 补齐 `YIDA_BASE_URL`, `YIDA_CSRF_TOKEN`, `YIDA_COOKIE`, `YIDA_TIMEOUT` 等运行参数说明.
+- **验证(yida_create_test)**: 新增宜搭表单创建用例测试和路由测试, 已覆盖 Schema 构建, 假客户端创建成功以及新接口序列化返回.
+
+### 🛠️ 后端_2026_06_02_1742
+- **新增(yida_mapper)**: 新增 `YidaExamFieldMapper`, 支持将结构化试卷 JSON 进一步映射为钉钉宜搭可消费的字段数组, 默认输出姓名, 部门, 单选, 多选, 判断与简答题组件定义.
+- **新增(exam_upload_api)**: 新增 `POST /api_trai/v1/tools/exam/parse_word`, 支持上传 `docx` 试卷并返回结构化试卷数据, 宜搭字段映射, 题目总数, 分组总数和解析告警.
+- **加固(upload_validation)**: 上传接口补齐 `docx` 扩展名和标准 `Content-Type` 双重校验, 同时自动清理临时文件, 降低非法文件进入解析链路的风险.
+- **验证(exam_api_test)**: 新增 `backend/tests/test_word_exam_api.py`, 已覆盖真实试卷上传解析成功路径和非法 `Content-Type` 拒绝路径.
+
+### 🛠️ 后端_2026_06_02_1733
+- **新增(word_exam_parser)**: 新增 `WordExamParseUseCase` 与 `WordExamParser`, 支持将 Word 试卷解析为结构化 JSON, 输出试卷标题, 岗位, 总分, 时长, 分组, 题目, 选项与标准答案.
+- **增强(exam_domain)**: 新增考试领域实体, 将单选, 多选, 判断, 简答题统一沉淀为可复用的数据模型, 方便后续继续对接钉钉宜搭表单生成链路.
+- **验证(word_exam_test)**: 基于 `7-CAP产品知识测试B卷.docx` 增加解析测试, 已验证 4 个分组, 客观题答案提取和简答题评分标准提取均可正常工作.
+
 ### 🛠️ 后端_2026_06_02_1704
 - **统一(otlp_default)**: 将仓库内已接入 OpenTelemetry 的 tracing 默认配置统一调整为 `http://192.168.100.119:4317`, 包括 `backend/env/tracing.env` 与 `backend/env_example/tracing.env`, 便于同网段服务直接上报到本机 Jaeger.
 - **说明(scope)**: 核查后确认 `frontend_next` 与 `client_electron` 当前仓库中尚未启用 OTLP SDK, 因此本次未强行引入新观测实现, 仅统一现有服务的默认上报地址.

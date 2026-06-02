@@ -485,6 +485,7 @@ export interface VideoGenerationTaskStatus {
   current_step?: number | null;
   total_steps?: number | null;
   queue_position?: number | null;
+  optimized_prompt?: string | null;
 }
 
 export interface MediaHistoryItem {
@@ -507,6 +508,9 @@ export interface MediaHistoryResponse {
   images: MediaHistoryItem[];
   music: MediaHistoryItem[];
   videos: MediaHistoryItem[];
+  total_images: number;
+  total_music: number;
+  total_videos: number;
 }
 
 export const agentApi = {
@@ -528,8 +532,8 @@ export const agentApi = {
   getQuota: () => request<{ user_id: string; role: string; quotas: QuotaStatus[] }>("/agent/quota"),
 
   /** 文生图 */
-  generateImage: (data: { prompt: string; model?: string; width?: number; height?: number; steps?: number; seed?: number }) =>
-    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
+  generateImage: (data: { prompt: string; model?: string; width?: number; height?: number; steps?: number; seed?: number; enable_optimization?: boolean }) =>
+    request<{ task_id: string; status: string; image_url?: string; image_base64?: string; error?: string; optimized_prompt?: string }>("/ai/image", { method: "POST", body: JSON.stringify(data) }),
 
   /** 图生图 / 图片编辑 */
   editImage: (data: { image_url: string; prompt: string; mask?: string; width?: number; height?: number; steps?: number; seed?: number; signal?: AbortSignal; image_url_2?: string }) =>
@@ -553,7 +557,7 @@ export const agentApi = {
     }>(`/ai/image/status/${taskId}`, { method: "GET" }),
 
   /** 文生视频 (Wan2.1-T2V-1.3B) */
-  generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string }) =>
+  generateVideo: (data: { prompt: string; model?: string; frames?: number; resolution?: string; enable_optimization?: boolean }) =>
     request<VideoGenerationTaskStatus>("/ai/video/generate", { method: "POST", body: JSON.stringify(data) }),
 
   /** 查询视频生成状态 */
@@ -561,7 +565,7 @@ export const agentApi = {
     request<VideoGenerationTaskStatus>(`/ai/video/status/${taskId}`, { method: "GET" }),
 
   /** 文生音乐 (ACE-Step) */
-  generateMusic: (data: { prompt: string; duration?: number; steps?: number; guidance_scale?: number }) =>
+  generateMusic: (data: { prompt: string; duration?: number; steps?: number; guidance_scale?: number; enable_optimization?: boolean }) =>
     request<{
       success: boolean;
       task_id: string;
@@ -570,6 +574,9 @@ export const agentApi = {
       file_path?: string;
       duration?: number;
       error?: string;
+      lyrics?: string;
+      cover_url?: string;
+      optimized_prompt?: string;
     }>("/ai/music/generate", { method: "POST", body: JSON.stringify(data) }),
 
   /** 查询音乐生成状态 */
@@ -583,6 +590,7 @@ export const agentApi = {
       cover_url?: string | null;
       error?: string;
       prompt: string;
+      optimized_prompt?: string | null;
     }>(`/ai/music/status/${taskId}`, { method: "GET" }),
 
   /** 取消音乐生成 */
@@ -593,8 +601,8 @@ export const agentApi = {
     }>(`/ai/music/cancel/${taskId}`, { method: "DELETE" }),
 
   /** 查询媒体历史 */
-  listMediaHistory: (data?: { limit?: number }) =>
-    request<MediaHistoryResponse>("/ai/media/history/list", { method: "POST", body: JSON.stringify(data ?? { limit: 100 }) }),
+  listMediaHistory: (data?: { limit?: number; offset?: number }) =>
+    request<MediaHistoryResponse>("/ai/media/history/list", { method: "POST", body: JSON.stringify(data ?? { limit: 100, offset: 0 }) }),
 
   /** 删除媒体历史 */
   deleteMediaHistory: (data: { media_type: "image" | "music" | "video"; task_id: string }) =>
@@ -1646,6 +1654,317 @@ export const adminApi = {
       `/admin/audit_logs${qs ? `?${qs}` : ""}`
     );
   },
+};
+
+/**
+ * Public exam option item.
+ */
+export interface PublicExamQuestionOption {
+  key: string;
+  text: string;
+}
+
+/**
+ * Public exam question item.
+ */
+export interface PublicExamQuestion {
+  question_no: number;
+  question_type: string;
+  stem: string;
+  score: number;
+  options: PublicExamQuestionOption[];
+}
+
+/**
+ * Public exam section item.
+ */
+export interface PublicExamSection {
+  section_type: string;
+  section_title: string;
+  question_count: number;
+  score_per_question: number;
+  questions: PublicExamQuestion[];
+}
+
+/**
+ * Public exam paper payload.
+ */
+export interface PublicExamPaper {
+  paper_title: string;
+  position?: string | null;
+  total_score: number;
+  duration_minutes?: number | null;
+  warning_messages: string[];
+  sections: PublicExamSection[];
+}
+
+/**
+ * Public exam detail response envelope.
+ */
+export interface SharedExamDetailResponse {
+  code: number;
+  msg: string;
+  data: {
+    exam_id: string;
+    share_token: string;
+    paper: PublicExamPaper;
+    question_count: number;
+    section_count: number;
+    share_url: string;
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/**
+ * Public exam answer request item.
+ */
+export interface SubmitSharedExamAnswerRequest {
+  question_no: number;
+  values: string[];
+  text_answer?: string | null;
+}
+
+/**
+ * Public exam submit request payload.
+ */
+export interface SubmitSharedExamRequest {
+  share_token: string;
+  candidate_name: string;
+  candidate_department: string;
+  answers: SubmitSharedExamAnswerRequest[];
+}
+
+/**
+ * Public exam submit response envelope.
+ */
+export interface SubmitSharedExamResponse {
+  code: number;
+  msg: string;
+  data: {
+    submission_id: string;
+    exam_id: string;
+    score: number;
+    total_score: number;
+    requires_manual_review: boolean;
+    sync_result: Record<string, unknown>;
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/**
+ * Shared exam publish response envelope.
+ */
+export interface PublishSharedExamResponse {
+  code: number;
+  msg: string;
+  data: {
+    exam_id: string;
+    share_token: string;
+    share_path: string;
+    share_url: string;
+    paper: Record<string, unknown>;
+    question_count: number;
+    warning_messages: string[];
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/**
+ * Published shared exam list item.
+ */
+export interface PublishedSharedExamListItem {
+  exam_id: string;
+  share_token: string;
+  share_url: string;
+  paper_title: string;
+  position?: string | null;
+  question_count: number;
+  submission_count: number;
+  latest_submission_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Published shared exam list response envelope.
+ */
+export interface PublishedSharedExamListResponse {
+  code: number;
+  msg: string;
+  data: {
+    items: PublishedSharedExamListItem[];
+    total: number;
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/**
+ * Published shared exam submission item.
+ */
+export interface PublishedSharedExamSubmissionItem {
+  submission_id: string;
+  candidate_name: string;
+  candidate_department: string;
+  score: number;
+  total_score: number;
+  requires_manual_review: boolean;
+  sync_status: string;
+  submitted_at: string;
+}
+
+/**
+ * Published shared exam detail response envelope.
+ */
+export interface PublishedSharedExamDetailResponse {
+  code: number;
+  msg: string;
+  data: {
+    exam_id: string;
+    share_token: string;
+    share_url: string;
+    share_path: string;
+    paper_title: string;
+    position?: string | null;
+    question_count: number;
+    total_score?: number | null;
+    duration_minutes?: number | null;
+    warning_messages: string[];
+    created_at: string;
+    updated_at: string;
+    submission_count: number;
+    submissions: PublishedSharedExamSubmissionItem[];
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/**
+ * Published shared exam question grading detail item.
+ */
+export interface PublishedSharedExamQuestionDetailItem {
+  question_no: number;
+  question_type: string;
+  section_title: string;
+  stem: string;
+  max_score: number;
+  awarded_score?: number | null;
+  is_correct?: boolean | null;
+  requires_manual_review: boolean;
+  standard_answer: string[];
+  reference_answer?: string | null;
+  candidate_values: string[];
+  candidate_text?: string | null;
+  evaluation_status: string;
+}
+
+/**
+ * Published shared submission detail response envelope.
+ */
+export interface PublishedSharedSubmissionDetailResponse {
+  code: number;
+  msg: string;
+  data: {
+    exam_id: string;
+    submission_id: string;
+    share_token: string;
+    paper_title: string;
+    candidate_name: string;
+    candidate_department: string;
+    score: number;
+    total_score: number;
+    requires_manual_review: boolean;
+    sync_status: string;
+    sync_result: Record<string, unknown>;
+    submitted_at: string;
+    question_details: PublishedSharedExamQuestionDetailItem[];
+  } | null;
+  req_id: string;
+  ts: string;
+}
+
+/** 公开考试 API(无需认证) */
+export const publicExamApi = {
+  /**
+   * Fetch public exam detail by share token.
+   * @param shareToken - Shared exam token.
+   * @returns Public exam paper and metadata.
+   */
+  getSharedExamDetail: (shareToken: string) =>
+    request<SharedExamDetailResponse>("/tools/exam/share_detail", {
+      method: "POST",
+      body: JSON.stringify({ share_token: shareToken }),
+    }),
+
+  /**
+   * Submit public exam answers.
+   * @param data - Candidate info and answers.
+   * @returns Submission result with score and sync status.
+   */
+  submitSharedExam: (data: SubmitSharedExamRequest) =>
+    request<SubmitSharedExamResponse>("/tools/exam/submit_answers", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+/** 管理后台考试发布 API */
+export const adminExamApi = {
+  /**
+   * Publish a shared exam from a docx file.
+   * @param file - Source docx exam file.
+   * @param shareBaseUrl - Public share base URL.
+   * @returns Published exam metadata and share link.
+   */
+  publishSharedExam: (file: File, shareBaseUrl: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (shareBaseUrl.trim()) {
+      formData.append("share_base_url", shareBaseUrl.trim());
+    }
+    return request<PublishSharedExamResponse>("/tools/exam/publish_share", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  /**
+   * Fetch published shared exams for admin history management.
+   * @returns Published exam history and summary metadata.
+   */
+  listPublishedExams: () =>
+    request<PublishedSharedExamListResponse>("/tools/exam/published_list", {
+      method: "POST",
+    }),
+
+  /**
+   * Fetch one published exam detail for admin management.
+   * @param shareToken - Share token used as admin detail page key.
+   * @returns Exam summary and submission rows.
+   */
+  getPublishedExamDetail: (shareToken: string) =>
+    request<PublishedSharedExamDetailResponse>("/tools/exam/published_detail", {
+      method: "POST",
+      body: JSON.stringify({ share_token: shareToken }),
+    }),
+
+  /**
+   * Fetch one published submission detail for admin review.
+   * @param shareToken - Share token used to validate the exam scope.
+   * @param submissionId - Submission id to inspect.
+   * @returns Submission detail with answers, grading and sync result.
+   */
+  getPublishedSubmissionDetail: (shareToken: string, submissionId: string) =>
+    request<PublishedSharedSubmissionDetailResponse>("/tools/exam/submission_detail", {
+      method: "POST",
+      body: JSON.stringify({
+        share_token: shareToken,
+        submission_id: submissionId,
+      }),
+    }),
 };
 
 /** 公开 API(无需认证) */

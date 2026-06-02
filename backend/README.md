@@ -35,6 +35,34 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_06_02_1733
+- **新增(word_exam_parse)**: 新增 `application/exam_parser_usecases.py` 与 `infrastructure/tools/word_exam_parser.py`, 支持从 `docx` 试卷中提取试卷元信息, 题型分组, 题干, 选项, 客观题答案和简答题评分标准.
+- **新增(exam_entities)**: 新增 `domain/exam_entities.py`, 统一沉淀试卷, 分组, 题目, 选项与题型枚举实体, 便于后续继续对接钉钉宜搭表单字段映射.
+- **验证(word_exam_test)**: 基于 `backend/tests/test_word_exam_parser.py` 完成真实 CAP 试卷解析测试, 已验证 4 个分组和客观题答案提取均通过.
+
+### 🛠️ 后端_2026_06_02_1906
+- **新增(exam_share_usecases)**: 新增 `application/exam_share_usecases.py`, 提供分享考试发布, 公开试卷脱敏和答卷提交自动评分三类用例.
+- **新增(exam_share_repository)**: 新增 `infrastructure/tools/exam_share_repository.py`, 以本地 JSON 文件仓储方式保存考试, 分享索引和答卷, 支持最小 MVP 快速闭环.
+- **新增(ai_table_sync)**: 新增 `infrastructure/tools/dingtalk_ai_table_sync.py` 与 `backend/env_example/exam_share.env`, 预留钉钉 AI 表格记录同步能力, 在配置不完整时自动跳过同步而不阻塞主流程.
+- **新增(exam_share_api)**: 扩展 `api/routers/tools/exam.py`, 新增 `publish_share`, `share_detail`, `submit_answers` 三个公开考试接口, 对接前端自建答题页.
+- **增强(exam_share_history)**: 扩展 `list_published_exams` 仓储与 `ListPublishedExamsUseCase`, 并新增 `published_list` 接口, 支持后台管理历史已发布考试与分享链接.
+- **增强(exam_share_detail)**: 新增 `GetPublishedExamDetailUseCase` 与 `published_detail` 接口, 支持后台查询单场考试详情, 分享信息和答卷摘要列表.
+- **增强(exam_share_submission_detail)**: 新增 `GetPublishedSubmissionDetailUseCase` 与 `submission_detail` 接口, 支持后台查询单份答卷详情, 逐题评分明细和钉钉 AI 表格同步结果详情, 同时补齐 `sync_result` 落盘.
+- **验证(exam_share_test)**: 新增 `backend/tests/test_exam_share_usecases.py` 并扩展 `backend/tests/test_word_exam_api.py`, 已覆盖发布, 脱敏读取, 自动评分和接口序列化路径.
+
+### 🛠️ 后端_2026_06_02_1825
+- **新增(yida_form_client)**: 新增 `infrastructure/tools/yida_form_client.py`, 支持基于 `YIDA_COOKIE` 与 `YIDA_CSRF_TOKEN` 调用宜搭 `saveFormSchemaInfo`, `saveFormSchema`, `updateFormConfig` 完成表单创建.
+- **新增(yida_schema_builder)**: 新增 `infrastructure/tools/yida_form_schema_builder.py`, 支持将考试字段映射转换为宜搭 `superform` Schema, 当前覆盖文本, 多行文本, 单选和多选组件.
+- **新增(create_yida_api)**: 在 `api/routers/tools/exam.py` 增加 `POST /api_trai/v1/tools/exam/create_yida_form`, 支持上传 `docx` 并直接创建宜搭考试表单.
+- **新增(yida_config_template)**: 新增 `backend/env_example/yida.env` 配置模板, 统一说明 `YIDA_BASE_URL`, `YIDA_CSRF_TOKEN`, `YIDA_COOKIE`, `YIDA_TIMEOUT` 等参数.
+- **验证(yida_form_test)**: 新增 `backend/tests/test_yida_form_creation_usecase.py`, 并扩展 `backend/tests/test_word_exam_api.py`, 已覆盖宜搭表单创建用例和接口成功路径.
+
+### 🛠️ 后端_2026_06_02_1742
+- **新增(yida_mapper)**: 新增 `infrastructure/tools/yida_exam_field_mapper.py`, 支持将结构化试卷映射为钉钉宜搭字段定义, 默认输出姓名, 部门与各题型组件结构.
+- **新增(exam_api)**: 新增 `api/routers/tools/exam.py` 与 `WordExamParseAndMapUseCase`, 支持上传 `docx` 后一次性返回试卷 JSON, 宜搭字段映射, 总题数和解析告警.
+- **加固(upload_validation)**: 上传接口增加 `.docx` 扩展名和标准 `Content-Type` 双重校验, 并在请求结束后自动清理临时文件.
+- **验证(exam_api_test)**: 新增 `backend/tests/test_word_exam_api.py`, 覆盖真实试卷上传成功路径与非法 `Content-Type` 拒绝路径.
+
 ### 🛠️ 后端_2026_06_02_1704
 - **统一(tracing_default)**: 将 `backend/env/tracing.env` 与 `backend/env_example/tracing.env` 中默认 OTLP 上报地址统一切换为 `http://192.168.100.119:4317`, 方便同网段服务直接接入本机 Jaeger.
 - **说明(frontend_scope)**: 经核查, `frontend_next` 与 `client_electron` 当前仅存在业务接口地址配置, 尚未实际接入 OpenTelemetry OTLP SDK, 因此本次未额外引入新的前端观测代码.
