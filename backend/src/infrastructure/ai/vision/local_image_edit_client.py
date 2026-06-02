@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # 文件名: local_image_edit_client.py
 # 作者: wuhao
-# 日期: 2026_05_28_1920
-# 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑
+# 日期: 2026_06_02_14:53:56
+# 描述: 本地图像编辑客户端, 使用 Qwen/Qwen-Image-Edit-2511 模型执行单图与双图编辑并优化轻量任务耗时
 
 from __future__ import annotations
 
@@ -215,6 +216,120 @@ class LocalImageEditClient:
         normalized_width = self._normalize_dimension(width, fallback=self._default_width)
         normalized_height = self._normalize_dimension(height, fallback=self._default_height)
         return normalized_width, normalized_height
+
+    def _is_lightweight_edit_prompt(self, prompt: str, image_input_2: str | None) -> bool:
+        """
+        判断是否为轻量局部编辑任务.
+
+        用途:
+          识别加眼镜、换发色、加帽子等局部小改动场景, 为后续步数压缩提供依据.
+        参数:
+          prompt: 用户编辑提示词.
+          image_input_2: 第二张输入图, 双图联动时不走轻量策略.
+        返回:
+          bool: 是否命中轻量编辑场景.
+        异常:
+          无.
+        """
+        if image_input_2:
+            return False
+        normalized_prompt = str(prompt or "").lower()
+        lightweight_keywords = (
+            "眼镜",
+            "墨镜",
+            "glasses",
+            "sunglasses",
+            "帽子",
+            "hat",
+            "耳环",
+            "earring",
+            "项链",
+            "necklace",
+            "口红",
+            "lipstick",
+            "发色",
+            "hair color",
+        )
+        preserve_keywords = (
+            "保持",
+            "其余不变",
+            "其他不变",
+            "仅添加",
+            "只添加",
+            "only add",
+            "keep",
+            "preserve",
+        )
+        return any(keyword in normalized_prompt for keyword in lightweight_keywords) and any(
+            keyword in normalized_prompt for keyword in preserve_keywords
+        )
+
+    def _resolve_target_steps(self, prompt: str, steps: int, image_input_2: str | None) -> int:
+        """
+        解析最终推理步数.
+
+        用途:
+          对轻量局部编辑任务自动压缩步数, 降低冷启动和推理耗时, 避免前端误判超时.
+        参数:
+          prompt: 用户编辑提示词.
+          steps: 原始步数.
+          image_input_2: 第二张输入图.
+        返回:
+          int: 最终推理步数.
+        异常:
+          无.
+        """
+        if self._is_lightweight_edit_prompt(prompt=prompt, image_input_2=image_input_2):
+            optimized_steps = min(steps, 16)
+            logger.info(
+                f"命中轻量图像编辑策略, 自动压缩推理步数 | original_steps={steps} | optimized_steps={optimized_steps}"
+            )
+            return optimized_steps
+        return steps
+
+    def _resolve_target_size(
+        self,
+        prompt: str,
+        width: int,
+        height: int,
+        image_input_2: str | None,
+    ) -> tuple[int, int]:
+        """
+        解析最终输出尺寸.
+
+        用途:
+          对轻量局部编辑场景主动压缩输出分辨率, 进一步降低推理耗时和显存占用.
+        参数:
+          prompt: 用户编辑提示词.
+          width: 当前宽度.
+          height: 当前高度.
+          image_input_2: 第二张输入图.
+        返回:
+          tuple[int, int]: 最终用于推理的宽高.
+        异常:
+          无.
+        """
+        if not self._is_lightweight_edit_prompt(prompt=prompt, image_input_2=image_input_2):
+            return width, height
+
+        max_dim = 768
+        if width <= max_dim and height <= max_dim:
+            return width, height
+
+        if width >= height:
+            resized_width = max_dim
+            resized_height = int(height * (max_dim / width))
+        else:
+            resized_height = max_dim
+            resized_width = int(width * (max_dim / height))
+
+        optimized_width = self._normalize_dimension(resized_width, fallback=max_dim)
+        optimized_height = self._normalize_dimension(resized_height, fallback=max_dim)
+        logger.info(
+            "命中轻量图像编辑尺寸优化策略, 自动缩放输出尺寸 | "
+            f"original_size={width}x{height} | optimized_size={optimized_width}x{optimized_height}"
+        )
+        return optimized_width, optimized_height
 
     def _build_script(self, steps: int, seed: int | None) -> str:
         """
@@ -479,7 +594,17 @@ if __name__ == "__main__":
         original_width = width or source_size[0] or self._default_width
         original_height = height or source_size[1] or self._default_height
         target_width, target_height = self._normalize_output_size(original_width, original_height)
-        target_steps = steps or self._default_steps
+        target_width, target_height = self._resolve_target_size(
+            prompt=prompt,
+            width=target_width,
+            height=target_height,
+            image_input_2=image_input_2,
+        )
+        target_steps = self._resolve_target_steps(
+            prompt=prompt,
+            steps=steps or self._default_steps,
+            image_input_2=image_input_2,
+        )
         logger.info(
             "开始本地图像编辑 | "
             f"prompt={prompt[:80]} | "

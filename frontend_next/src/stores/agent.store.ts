@@ -87,6 +87,7 @@ export interface GalleryMediaItem {
   status?: string;
   lyrics?: string | null;
   cover_url?: string | null;
+  optimized_prompt?: string | null;
   meta?: Record<string, unknown>;
 }
 
@@ -144,6 +145,13 @@ interface AgentState {
   imageGenerateStage: "idle" | "generating" | "done" | "error";
   /** 图片生成进度定时器 */
   imageGenerateTimer: number | null;
+  /** 优化后的提示词 */
+  imageOptimizedPrompt: string | null;
+  videoOptimizedPrompt: string | null;
+  musicOptimizedPrompt: string | null;
+  /** 是否开启优化 */
+  enableOptimization: boolean;
+  setEnableOptimization: (enable: boolean) => void;
   /** 图片廊 - 历史生成的图片 */
   imageGallery: GalleryMediaItem[];
   /** 是否正在生成视频 */
@@ -188,6 +196,14 @@ interface AgentState {
   musicPrompt: string;
   /** 音乐廊 - 历史生成的音乐 */
   musicGallery: GalleryMediaItem[];
+  /** 画廊分页状态 */
+  galleryPagination: {
+    image: { page: number; total: number; hasMore: boolean };
+    video: { page: number; total: number; hasMore: boolean };
+    music: { page: number; total: number; hasMore: boolean };
+  };
+  setGalleryPage: (mediaType: "image" | "video" | "music", page: number) => void;
+  loadMoreGalleryItems: (mediaType: "image" | "video" | "music") => Promise<void>;
   /** 是否正在编辑图片 */
   isEditingImage: boolean;
   /** 编辑后的图片 URL */
@@ -285,7 +301,7 @@ interface AgentState {
   /** 清除生成的音乐 */
   clearGeneratedMusic: () => void;
   /** 添加音乐到音乐廊 */
-  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null) => void;
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null, optimizedPrompt?: string | null) => void;
   /** 从音乐廊删除音乐 */
   removeFromMusicGallery: (id: string) => void;
   /** 清空音乐廊 */
@@ -365,6 +381,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   imageGenerateProgress: 0,
   imageGenerateStage: "idle",
   imageGenerateTimer: null,
+  imageOptimizedPrompt: null,
+  videoOptimizedPrompt: null,
+  musicOptimizedPrompt: null,
+  enableOptimization: true,
+  setEnableOptimization: (enable: boolean) => set({ enableOptimization: enable }),
   imageGallery: [],
   isGeneratingVideo: false,
   generatedVideoUrl: null,
@@ -387,6 +408,50 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   musicGenerateError: null,
   musicPrompt: "",
   musicGallery: [],
+  galleryPagination: {
+    image: { page: 1, total: 0, hasMore: false },
+    video: { page: 1, total: 0, hasMore: false },
+    music: { page: 1, total: 0, hasMore: false },
+  },
+  setGalleryPage: (mediaType, page) => {
+    set((state) => ({
+      galleryPagination: {
+        ...state.galleryPagination,
+        [mediaType]: { ...state.galleryPagination[mediaType], page },
+      },
+    }));
+    void get().loadMoreGalleryItems(mediaType);
+  },
+  loadMoreGalleryItems: async (mediaType) => {
+    if (!Cookies.get("token")) return;
+    const { page } = get().galleryPagination[mediaType];
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    try {
+      const history = await api.agent.listMediaHistory({ limit, offset });
+      set((state) => {
+        const newPagination = { ...state.galleryPagination };
+        if (mediaType === "image") {
+          const imageGallery = history.images.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+          newPagination.image.total = history.total_images;
+          newPagination.image.hasMore = offset + limit < history.total_images;
+          return { imageGallery, galleryPagination: newPagination };
+        } else if (mediaType === "video") {
+          const videoGallery = history.videos.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+          newPagination.video.total = history.total_videos;
+          newPagination.video.hasMore = offset + limit < history.total_videos;
+          return { videoGallery, galleryPagination: newPagination };
+        } else {
+          const musicGallery = history.music.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
+          newPagination.music.total = history.total_music;
+          newPagination.music.hasMore = offset + limit < history.total_music;
+          return { musicGallery, galleryPagination: newPagination };
+        }
+      });
+    } catch {
+      // ignore
+    }
+  },
   isEditingImage: false,
   editedImageUrl: null,
   imageEditError: null,
@@ -431,40 +496,60 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   loadMediaHistory: async () => {
     try {
-      const history = await api.agent.listMediaHistory({ limit: 100 });
+      const limit = 20;
+      const history = await api.agent.listMediaHistory({ limit, offset: 0 });
       const imageGallery = history.images.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
       const videoGallery = history.videos.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
       const musicGallery = history.music.map(mapHistoryItemToGalleryItem).filter((item): item is GalleryMediaItem => item !== null);
-      set({ imageGallery, videoGallery, musicGallery });
+      set({
+        imageGallery,
+        videoGallery,
+        musicGallery,
+        galleryPagination: {
+          image: { page: 1, total: history.total_images, hasMore: limit < history.total_images },
+          video: { page: 1, total: history.total_videos, hasMore: limit < history.total_videos },
+          music: { page: 1, total: history.total_music, hasMore: limit < history.total_music },
+        }
+      });
     } catch {
       // 保持当前本地状态
     }
   },
 
   deleteMediaHistoryItem: async (mediaType, taskId) => {
-    await api.agent.deleteMediaHistory({ media_type: mediaType, task_id: taskId });
-    if (mediaType === "image") {
-      set((state) => ({ imageGallery: state.imageGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
-      return;
+    if (Cookies.get("token")) {
+      try {
+        await api.agent.deleteMediaHistory({ media_type: mediaType, task_id: taskId });
+      } catch (e) {
+        console.warn("Failed to delete media history from server", e);
+      }
     }
-    if (mediaType === "video") {
-      set((state) => ({ videoGallery: state.videoGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
-      return;
-    }
-    set((state) => ({ musicGallery: state.musicGallery.filter((item) => item.task_id !== taskId && item.id !== taskId) }));
+    set((state) => {
+      const galleryKey = mediaType === "image" ? "imageGallery" : mediaType === "video" ? "videoGallery" : "musicGallery";
+      const updatedGallery = state[galleryKey].filter((item) => item.task_id !== taskId && item.id !== taskId);
+      try {
+        localStorage.setItem(galleryKey, JSON.stringify(updatedGallery));
+      } catch {}
+      return { [galleryKey]: updatedGallery } as unknown as Partial<AgentState>;
+    });
   },
 
   batchDeleteMediaHistoryItems: async (mediaType, taskIds) => {
-    await api.agent.batchDeleteMediaHistory({ media_type: mediaType, task_ids: taskIds });
-    if (mediaType === "image") {
-      set((state) => ({ imageGallery: state.imageGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
-      return;
+    if (Cookies.get("token")) {
+      try {
+        await api.agent.batchDeleteMediaHistory({ media_type: mediaType, task_ids: taskIds });
+      } catch (e) {
+        console.warn("Failed to batch delete media history from server", e);
+      }
     }
-    if (mediaType === "video") {
-      set((state) => ({ videoGallery: state.videoGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
-      return;
-    }
-    set((state) => ({ musicGallery: state.musicGallery.filter((item) => !taskIds.includes(item.task_id || item.id)) }));
+    set((state) => {
+      const galleryKey = mediaType === "image" ? "imageGallery" : mediaType === "video" ? "videoGallery" : "musicGallery";
+      const updatedGallery = state[galleryKey].filter((item) => !taskIds.includes(item.task_id || "") && !taskIds.includes(item.id));
+      try {
+        localStorage.setItem(galleryKey, JSON.stringify(updatedGallery));
+      } catch {}
+      return { [galleryKey]: updatedGallery } as unknown as Partial<AgentState>;
+    });
   },
 
   startSession: async () => {
@@ -855,12 +940,13 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       isGeneratingImage: true,
       imageGenerateError: null,
       generatedImageUrl: null,
+      imageOptimizedPrompt: null,
       imageGenerateProgress: 8,
       imageGenerateStage: "generating",
       imageGenerateTimer: timer,
     });
     try {
-      const res = await api.agent.generateImage({ prompt, model, width, height, steps: 4, seed: -1 });
+      const res = await api.agent.generateImage({ prompt, model, width, height, steps: 4, seed: -1, enable_optimization: get().enableOptimization });
       if (res.image_url) {
         if (timer) {
           try {
@@ -875,6 +961,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           imageGenerateStage: "done",
           imageGenerateTimer: null,
           imageGenerateError: res.error || null,
+          imageOptimizedPrompt: res.optimized_prompt || null,
         });
         // 将生成的图片添加到图片廊
         get().addToImageGallery(res.image_url, prompt, res.task_id);
@@ -898,6 +985,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           imageGenerateStage: "done",
           imageGenerateTimer: null,
           imageGenerateError: res.error || null,
+          imageOptimizedPrompt: res.optimized_prompt || null,
         });
         get().addToImageGallery(blobUrl, prompt);
       } else {
@@ -994,6 +1082,16 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       imageEditTimer: timer,
     });
     try {
+      const normalizedPrompt = editPrompt.trim().toLowerCase();
+      const isLightweightEdit =
+        !sourceImage2 &&
+        ["眼镜", "墨镜", "glasses", "sunglasses", "帽子", "hat", "耳环", "earring"].some((keyword) =>
+          normalizedPrompt.includes(keyword)
+        );
+      const requestedSteps = isLightweightEdit ? 16 : 22;
+      const requestedWidth = isLightweightEdit ? 768 : undefined;
+      const requestedHeight = isLightweightEdit ? 768 : undefined;
+
       // 压缩图片: base64 图片压缩到 5M 以内 (避免超过后端 10M 限制)
       let imageToSend = sourceImage;
       if (sourceImage.startsWith("data:image/")) {
@@ -1037,7 +1135,9 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       const res = await api.agent.editImage({
         image_url: imageToSend,
         prompt: editPrompt,
-        steps: 25,
+        steps: requestedSteps,
+        width: requestedWidth,
+        height: requestedHeight,
         seed: -1,
         signal: abortCtrl.signal,
         ...(image2ToSend ? { image_url_2: image2ToSend } : {}),
@@ -1057,7 +1157,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       }
 
       let pollCount = 0;
-      const maxPolls = 200; // 最多轮询 200 次 (约 200 秒)
+      const pollIntervalMs = 1000;
+      const maxPolls = 480;
+      const finalizingGracePolls = 120;
+      let finalizingPollCount = 0;
 
       while (pollCount < maxPolls) {
         if (abortCtrl.signal.aborted) break;
@@ -1082,20 +1185,31 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         } else if (taskData.status === "failed") {
           throw new Error(taskData.error || "编辑失败");
         } else {
+          const stage = taskData.stage || "editing";
+          const progress = taskData.progress || 10;
+          const progressMessage = taskData.progress_message || "正在编辑...";
+          if (progress >= 96 || stage === "finalizing" || stage === "persisting") {
+            finalizingPollCount += 1;
+          } else {
+            finalizingPollCount = 0;
+          }
           // 更新真实进度
           set({
-            imageEditProgress: taskData.progress || 10,
+            imageEditProgress: progress,
             imageEditStage: "editing",
-            imageEditProgressMessage: taskData.progress_message || "正在编辑...",
+            imageEditProgressMessage: progressMessage,
           });
         }
 
-        await sleep(1000);
+        await sleep(pollIntervalMs);
         pollCount++;
       }
 
       if (pollCount >= maxPolls) {
-        throw new Error("任务超时, 请在历史记录中查看");
+        if (finalizingPollCount >= finalizingGracePolls) {
+          throw new Error("图像编辑仍在整理结果, 请稍后在历史记录中查看");
+        }
+        throw new Error("图像编辑耗时过长, 任务仍在后台继续执行, 请稍后在历史记录中查看");
       }
     } catch (e: unknown) {
       if (timer) {
@@ -1210,30 +1324,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   removeFromImageGallery: (id: string) => {
     const target = get().imageGallery.find((item) => item.id === id || item.task_id === id);
-    if (target?.task_id && Cookies.get("token")) {
+    if (target?.task_id) {
       void get().deleteMediaHistoryItem("image", target.task_id);
-      return;
+    } else {
+      void get().deleteMediaHistoryItem("image", id);
     }
-    set((state) => {
-      const updatedGallery = state.imageGallery.filter((img) => img.id !== id);
-      try {
-        localStorage.setItem('imageGallery', JSON.stringify(updatedGallery));
-      } catch {
-      }
-      return { imageGallery: updatedGallery };
-    });
   },
 
   clearImageGallery: () => {
-    const taskIds = get().imageGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
-    if (taskIds.length > 0 && Cookies.get("token")) {
+    const taskIds = get().imageGallery.map((item) => item.task_id || item.id);
+    if (taskIds.length > 0) {
       void get().batchDeleteMediaHistoryItems("image", taskIds);
-      return;
-    }
-    set({ imageGallery: [] });
-    try {
-      localStorage.removeItem('imageGallery');
-    } catch {
     }
   },
 
@@ -1248,6 +1349,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         videoGenerateFrames: status.frames ?? duration ?? null,
         videoGenerateResolution: status.resolution ?? resolution ?? null,
         videoGenerateElapsedSeconds: status.total_time_seconds ?? null,
+        videoOptimizedPrompt: status.optimized_prompt ?? null,
       });
     };
 
@@ -1263,9 +1365,10 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       videoGenerateFrames: duration ?? 81,
       videoGenerateResolution: resolution ?? "1280x720",
       videoGenerateElapsedSeconds: null,
+      videoOptimizedPrompt: null,
     });
     try {
-      const res = await api.agent.generateVideo({ prompt, model, frames: duration, resolution });
+      const res = await api.agent.generateVideo({ prompt, model, frames: duration, resolution, enable_optimization: get().enableOptimization });
       applyVideoTaskStatus(res);
 
       if (!res.task_id) {
@@ -1346,30 +1449,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   removeFromVideoGallery: (id: string) => {
     const target = get().videoGallery.find((item) => item.id === id || item.task_id === id);
-    if (target?.task_id && Cookies.get("token")) {
+    if (target?.task_id) {
       void get().deleteMediaHistoryItem("video", target.task_id);
-      return;
+    } else {
+      void get().deleteMediaHistoryItem("video", id);
     }
-    set((state) => {
-      const updatedGallery = state.videoGallery.filter((video) => video.id !== id);
-      try {
-        localStorage.setItem('videoGallery', JSON.stringify(updatedGallery));
-      } catch {
-      }
-      return { videoGallery: updatedGallery };
-    });
   },
 
   clearVideoGallery: () => {
-    const taskIds = get().videoGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
-    if (taskIds.length > 0 && Cookies.get("token")) {
+    const taskIds = get().videoGallery.map((item) => item.task_id || item.id);
+    if (taskIds.length > 0) {
       void get().batchDeleteMediaHistoryItems("video", taskIds);
-      return;
-    }
-    set({ videoGallery: [] });
-    try {
-      localStorage.removeItem('videoGallery');
-    } catch {
     }
   },
 
@@ -1380,11 +1470,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       generatedMusicUrl: null, 
       generatedMusicLyrics: null,
       generatedMusicCoverUrl: null,
+      musicOptimizedPrompt: null,
       musicGenerateProgress: "正在提交任务...", 
       musicGenerateTaskId: null 
     });
     try {
-      const res = await api.agent.generateMusic({ prompt, duration, steps, guidance_scale });
+      const res = await api.agent.generateMusic({ prompt, duration, steps, guidance_scale, enable_optimization: get().enableOptimization });
       if (res.success && res.task_id) {
         set({ musicGenerateTaskId: res.task_id });
         
@@ -1399,10 +1490,11 @@ export const useAgentStore = create<AgentState>((set, get) => ({
             const statusRes = await api.agent.getMusicStatus(res.task_id);
             
             // 实时更新歌词和封面预览 (即使还在处理中)
-            if (statusRes.lyrics || statusRes.cover_url) {
+            if (statusRes.lyrics || statusRes.cover_url || statusRes.optimized_prompt) {
               set({ 
                 generatedMusicLyrics: statusRes.lyrics || get().generatedMusicLyrics,
-                generatedMusicCoverUrl: statusRes.cover_url || get().generatedMusicCoverUrl 
+                generatedMusicCoverUrl: statusRes.cover_url || get().generatedMusicCoverUrl,
+                musicOptimizedPrompt: statusRes.optimized_prompt || get().musicOptimizedPrompt
               });
             } 
 
@@ -1418,11 +1510,12 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 generatedMusicUrl: statusRes.music_url, 
                 generatedMusicLyrics: statusRes.lyrics,
                 generatedMusicCoverUrl: statusRes.cover_url,
+                musicOptimizedPrompt: statusRes.optimized_prompt,
                 isGeneratingMusic: false, 
                 musicGenerateProgress: "生成完成", 
                 musicGenerateTaskId: null 
               });
-              get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url, statusRes.lyrics, statusRes.cover_url);
+              get().addToMusicGallery(statusRes.music_url, prompt, res.task_id, statusRes.music_url, statusRes.lyrics, statusRes.cover_url, statusRes.optimized_prompt);
             } else if (statusRes.status === "failed") {
               set({ musicGenerateError: statusRes.error || "生成失败", isGeneratingMusic: false, musicGenerateProgress: null, musicGenerateTaskId: null });
             } else if (statusRes.status === "cancelled") {
@@ -1471,7 +1564,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     });
   },
 
-  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null) => {
+  addToMusicGallery: (url: string, prompt: string, taskId?: string, publicUrl?: string | null, lyrics?: string | null, coverUrl?: string | null, optimizedPrompt?: string | null) => {
     const newMusic = {
       id: taskId || generateUUID(),
       task_id: taskId,
@@ -1480,6 +1573,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       prompt,
       lyrics,
       cover_url: coverUrl,
+      optimized_prompt: optimizedPrompt,
       timestamp: Date.now(),
     };
     set((state) => {
@@ -1496,30 +1590,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
   removeFromMusicGallery: (id: string) => {
     const target = get().musicGallery.find((item) => item.id === id || item.task_id === id);
-    if (target?.task_id && Cookies.get("token")) {
+    if (target?.task_id) {
       void get().deleteMediaHistoryItem("music", target.task_id);
-      return;
+    } else {
+      void get().deleteMediaHistoryItem("music", id);
     }
-    set((state) => {
-      const updatedGallery = state.musicGallery.filter((music) => music.id !== id);
-      try {
-        localStorage.setItem('musicGallery', JSON.stringify(updatedGallery));
-      } catch {
-      }
-      return { musicGallery: updatedGallery };
-    });
   },
 
   clearMusicGallery: () => {
-    const taskIds = get().musicGallery.map((item) => item.task_id).filter((item): item is string => Boolean(item));
-    if (taskIds.length > 0 && Cookies.get("token")) {
+    const taskIds = get().musicGallery.map((item) => item.task_id || item.id);
+    if (taskIds.length > 0) {
       void get().batchDeleteMediaHistoryItems("music", taskIds);
-      return;
-    }
-    set({ musicGallery: [] });
-    try {
-      localStorage.removeItem('musicGallery');
-    } catch {
     }
   },
 }));

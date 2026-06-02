@@ -51,8 +51,8 @@ class ImageTaskStore:
             "task_id": task_id,
             "status": "pending",
             "progress": 0,
-            "stage": "initializing",
-            "progress_message": "任务已提交, 等待处理",
+            "stage": "queued",
+            "progress_message": "任务已提交, 正在排队",
             "prompt": prompt,
             "user_id": user_id,
             "username": username,
@@ -270,6 +270,7 @@ class ImageGenerationRequest(BaseModel):
     height: Annotated[int, Field(ge=256, le=4096, default=1024, description="图片高度")] = 1024
     steps: Annotated[int, Field(ge=1, le=100, default=30, description="采样步数")] = 30
     seed: Annotated[int, Field(ge=-1, default=-1, description="随机种子,-1 表示随机")] = -1
+    enable_optimization: Annotated[bool, Field(default=True, description="是否启用提示词优化")] = True
 
 
 class ImageGenerationResponse(BaseModel):
@@ -282,6 +283,7 @@ class ImageGenerationResponse(BaseModel):
     object_key: str | None = Field(default=None, description="S3 对象键")
     public_url: str | None = Field(default=None, description="S3 公共域名 URL")
     error: str | None = Field(default=None, description="错误信息")
+    optimized_prompt: str | None = Field(default=None, description="优化后的提示词")
 
 
 class ImageToImageRequest(BaseModel):
@@ -391,10 +393,18 @@ async def _execute_image_edit_task(
     from domain.media.entities import ImageRecordStatus
 
     try:
-        ImageTaskStore.update_task(task_id, status="processing", stage="initializing", progress=10)
+        ImageTaskStore.update_task(
+            task_id,
+            status="processing",
+            stage="preparing",
+            progress=8,
+            progress_message="正在准备图像编辑任务",
+        )
 
         async def progress_callback(msg: str, curr: int, total: int) -> None:
-            progress = int((curr / total) * 100)
+            bounded_total = max(total, 1)
+            normalized_progress = int((curr / bounded_total) * 72)
+            progress = min(80, 8 + normalized_progress)
             ImageTaskStore.update_task(
                 task_id,
                 stage="processing",
@@ -421,6 +431,14 @@ async def _execute_image_edit_task(
         result_url = result.get("image_url", "")
         result_base64 = result.get("image_base64", "")
 
+        ImageTaskStore.update_task(
+            task_id,
+            status="processing",
+            stage="persisting",
+            progress=90,
+            progress_message="推理完成, 正在写入结果",
+        )
+
         with get_session() as db:
             image_record_repo = ImageRecordRepository(db)
             image_record_repo.update_status(
@@ -433,9 +451,18 @@ async def _execute_image_edit_task(
 
         ImageTaskStore.update_task(
             task_id,
+            status="processing",
+            stage="finalizing",
+            progress=96,
+            progress_message="结果已保存, 正在整理返回信息",
+        )
+
+        ImageTaskStore.update_task(
+            task_id,
             status="completed",
             progress=100,
             stage="done",
+            progress_message="图像编辑完成",
             image_url=result_url,
             image_base64=result_base64,
         )
@@ -546,6 +573,7 @@ async def generate_image(
                 steps=request.steps,
                 seed=request.seed if request.seed >= 0 else -1,
                 task_id=task_id,
+                enable_optimization=request.enable_optimization,
             )
             result = await use_case.execute(input_data)
 
@@ -586,6 +614,7 @@ async def generate_image(
                 object_key=result.object_key,
                 public_url=result.public_url,
                 error=result.error,
+                optimized_prompt=result.optimized_prompt,
             )
 
     except Exception as e:

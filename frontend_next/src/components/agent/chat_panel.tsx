@@ -75,6 +75,9 @@ export function ChatPanel() {
     isEditingImage, editImage, editedImageUrl, clearEditedImage, cancelEditImage, imageEditError, imageEditProgress, imageEditStage,
     imageEditProgressMessage,
     editingSourceImage, editingSourceImage2, imageEditPrompt, setEditingSourceImage, setImageEditPrompt,
+    enableOptimization, setEnableOptimization,
+    imageOptimizedPrompt, videoOptimizedPrompt, musicOptimizedPrompt,
+    galleryPagination, setGalleryPage
   } = useAgentStore();
 
   const [imagePrompt, setImagePrompt] = useState('');
@@ -142,18 +145,21 @@ export function ChatPanel() {
       return;
     }
     if (type === "image") {
-      useAgentStore.setState({ generatedImageUrl: item.url });
+      setImagePrompt(item.prompt || "");
+      useAgentStore.setState({ generatedImageUrl: item.url, imageOptimizedPrompt: item.optimized_prompt || null });
       return;
     }
     if (type === "video") {
-      useAgentStore.setState({ generatedVideoUrl: item.url });
+      setVideoPrompt(item.prompt || "");
+      useAgentStore.setState({ generatedVideoUrl: item.url, videoOptimizedPrompt: item.optimized_prompt || null });
       return;
     }
+    setMusicPrompt(item.prompt || "");
     useAgentStore.setState({ 
       generatedMusicUrl: item.url,
       generatedMusicLyrics: item.lyrics,
       generatedMusicCoverUrl: item.cover_url,
-      musicPrompt: item.prompt
+      musicOptimizedPrompt: item.optimized_prompt || null
     });
   };
 
@@ -164,23 +170,10 @@ export function ChatPanel() {
     }
 
     const selectedItems = getGalleryItems(type).filter((item) => selectedIds.includes(item.id));
-    const taskIds = selectedItems
-      .map((item) => item.task_id)
-      .filter((taskId): taskId is string => Boolean(taskId));
+    const taskIds = selectedItems.map((item) => item.task_id || item.id);
 
     if (taskIds.length > 0) {
       await batchDeleteMediaHistoryItems(type, taskIds);
-    }
-
-    const localOnlyItems = selectedItems.filter((item) => !item.task_id);
-    for (const item of localOnlyItems) {
-      if (type === "image") {
-        removeFromImageGallery(item.id);
-      } else if (type === "video") {
-        removeFromVideoGallery(item.id);
-      } else {
-        removeFromMusicGallery(item.id);
-      }
     }
 
     clearGallerySelection(type);
@@ -535,17 +528,25 @@ export function ChatPanel() {
                 <div className="flex-1 min-h-0 overflow-hidden p-2">
                   <div className="w-full h-full min-h-0">
                     {activeTab === "image" && (
-                      <div className="flex flex-col gap-4 h-full min-h-0">
-                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
-                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
-                          {/* 左侧：输入框区域 */}
-                          <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex gap-4 h-full min-h-0">
+                        {/* 左侧：输入框区域 */}
+                        <div className={`w-[350px] lg:w-[400px] shrink-0 bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">创意绘图</h2>
                             <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                            <label className="flex items-center gap-2 cursor-pointer mt-1 mb-1 text-sm font-bold w-fit">
+                              <input
+                                type="checkbox"
+                                checked={enableOptimization}
+                                onChange={(e) => setEnableOptimization(e.target.checked)}
+                                className="w-4 h-4 accent-cyan-500"
+                              />
+                              <Sparkles className="w-4 h-4 text-cyan-500" />
+                              DeepSeek 提示词优化
+                            </label>
                             <div className="relative">
                               <textarea
                                 value={imagePrompt}
@@ -621,21 +622,30 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+                        {/* 中间：生成结果区域 */}
+                        <div className={`flex-1 bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} min-w-[300px] overflow-hidden`}>
                             <div className="flex-1 flex items-center justify-center relative min-h-0">
                               <AnimatePresence mode="wait">
                                 {generatedImageUrl ? (
-                                  <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex items-center justify-center">
-                                    <img src={generatedImageUrl} className={`max-w-full max-h-full object-contain ${brutalBorder}`} alt="Generated" />
-                                    <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                      <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
-                                        {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                                      </button>
-                                      <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
-                                        <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                      </a>
+                                  <motion.div key="image-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex flex-col items-center justify-center">
+                                    <div className="flex-1 min-h-0 w-full flex items-center justify-center relative">
+                                      <img src={generatedImageUrl} className={`max-w-full max-h-full object-contain ${brutalBorder}`} alt="Generated" />
+                                      <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={clearGeneratedImage} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                        <button onClick={() => void handleCopyImageLink(generatedImageUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                          {imageLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                        </button>
+                                        <a href={generatedImageUrl} target="_blank" rel="noopener noreferrer">
+                                          <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                        </a>
+                                      </div>
                                     </div>
+                                    {(imagePrompt || imageOptimizedPrompt) && (
+                                      <div className={`w-full mt-2 p-2 bg-slate-50 dark:bg-slate-800 text-xs overflow-y-auto max-h-24 ${brutalBorder} shrink-0`}>
+                                        {imagePrompt && <div className="mb-1"><span className="font-bold text-cyan-600 dark:text-cyan-400">原始:</span> {imagePrompt}</div>}
+                                        {imageOptimizedPrompt && imageOptimizedPrompt !== imagePrompt && <div><span className="font-bold text-orange-600 dark:text-orange-400">优化:</span> {imageOptimizedPrompt}</div>}
+                                      </div>
+                                    )}
                                   </motion.div>
                                 ) : isGeneratingImage ? (
                                   <motion.div key="image-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
@@ -689,147 +699,153 @@ export function ChatPanel() {
                               </AnimatePresence>
                             </div>
                           </div>
-                        </div>
 
-                        {/* 底栏：画廊区域（横向铺满，放在左侧输入框和右侧生成结果的下方） */}
-                        <div className={`bg-white dark:bg-slate-900 p-4 flex flex-col min-h-0 flex-1 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="flex flex-col h-full min-h-0">
-                            {/* 画廊部分 */}
-                            {imageGallery && imageGallery.length > 0 ? (
-                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
-                                <div 
-                                  className="flex items-center justify-between cursor-pointer group mb-3"
-                                  onClick={() => toggleGallery('image')}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-emerald-600 transition-colors">
-                                      GALLERY / 历史作品 ({imageGallery.length})
-                                    </h3>
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-emerald-200 text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleGallerySelectionMode("image");
-                                      }}
+                        {/* 右侧：画廊区域（纵向列表） */}
+                        <div className={`w-[250px] lg:w-[300px] shrink-0 bg-white dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="flex items-center justify-between cursor-pointer group mb-3 shrink-0" onClick={() => toggleGallery('image')}>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-sm font-black uppercase shrink-0 group-hover:text-emerald-600 transition-colors">
+                                历史作品 ({imageGallery.length})
+                              </h3>
+                              <button
+                                type="button"
+                                className={`px-2 py-0.5 text-[10px] bg-emerald-200 text-slate-900 ${brutalBtnBase}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleGallerySelectionMode("image");
+                                }}
+                              >
+                                {gallerySelectionMode.image ? `已选 ${selectedGalleryItems.image.length}` : "多选"}
+                              </button>
+                              {gallerySelectionMode.image && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-white text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectAllGalleryItems("image");
+                                    }}
+                                  >
+                                    {selectedGalleryItems.image.length === imageGallery.length ? "取消全选" : "全选"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void handleBatchDeleteSelected("image");
+                                    }}
+                                  >
+                                    删除
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {imageGallery && imageGallery.length > 0 ? (
+                            <>
+                            <div className="flex-1 min-h-0 overflow-y-auto pr-2 grid grid-cols-2 gap-2 content-start">
+                              <AnimatePresence>
+                                {imageGallery.map((item) => {
+                                  const isSelected = selectedGalleryItems.image.includes(item.id);
+                                  return (
+                                    <motion.div
+                                      key={item.id}
+                                      layout
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      className={`relative aspect-square cursor-pointer group ${brutalBorder} overflow-hidden ${isSelected ? 'ring-4 ring-emerald-500' : ''}`}
+                                      onClick={() => openGalleryItem('image', item)}
+                                      title={item.prompt}
                                     >
-                                      {gallerySelectionMode.image ? `已选 ${selectedGalleryItems.image.length}` : "多选"}
-                                    </button>
-                                    {gallerySelectionMode.image && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSelectAllGalleryItems("image");
-                                          }}
-                                        >
-                                          {selectedGalleryItems.image.length === imageGallery.length ? "取消全选" : "全选"}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            void handleBatchDeleteSelected("image");
-                                          }}
-                                        >
-                                          删除已选
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            clearGallerySelection("image");
-                                          }}
-                                        >
-                                          取消
-                                        </button>
-                                      </>
-                                    )}
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        clearImageGallery();
-                                      }}
-                                    >
-                                      批量清空
-                                    </button>
-                                  </div>
-                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    {galleryExpanded.image ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-                                  </div>
-                                </div>
-                                
-                                <AnimatePresence>
-                                  {galleryExpanded.image && (
-                                    <motion.div 
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      className="overflow-hidden"
-                                    >
-                                      <div className="h-36 overflow-x-auto flex gap-4 pb-4 snap-x">
-                                        {imageGallery.map((item) => (
-                                          <div 
-                                            key={item.id} 
-                                            className={cn(
-                                              `shrink-0 w-32 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group`,
-                                              selectedGalleryItems.image.includes(item.id) && "ring-4 ring-emerald-500 ring-offset-2"
-                                            )}
-                                            onClick={() => openGalleryItem("image", item)}
-                                          >
-                                            <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" title={item.prompt} />
-                                            {gallerySelectionMode.image && (
-                                              <div className="absolute inset-0 bg-slate-900/35 pointer-events-none" />
-                                            )}
-                                            {(gallerySelectionMode.image || selectedGalleryItems.image.includes(item.id)) && (
-                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-emerald-600 ${brutalBorder}`}>
-                                                <Check className="w-4 h-4" />
-                                              </div>
-                                            )}
-                                            <div className="absolute inset-x-2 bottom-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyImageLink(item.public_url || item.url); }}>
-                                                <Copy className="h-4 w-4 mx-auto" />
-                                              </button>
-                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromImageGallery(item.id); }}>
-                                                <Trash2 className="h-4 w-4 mx-auto" />
-                                              </button>
-                                            </div>
+                                      <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" />
+                                      {!gallerySelectionMode.image && (
+                                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2">
+                                          <div className="text-white text-xs font-bold text-center line-clamp-3">
+                                            {item.prompt}
                                           </div>
-                                        ))}
-                                      </div>
+                                          <button
+                                            type="button"
+                                            className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              removeFromImageGallery(item.id);
+                                            }}
+                                            title="删除此图片"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      )}
+                                      {gallerySelectionMode.image && (
+                                        <div className="absolute top-1 left-1">
+                                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'bg-white/80 border-slate-400'}`}>
+                                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                                          </div>
+                                        </div>
+                                      )}
                                     </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            ) : (
-                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
-                                <ImageIcon className="h-12 w-12 mb-2" />
-                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                                  );
+                                })}
+                              </AnimatePresence>
+                            </div>
+                            {/* 分页控制 */}
+                            {galleryPagination.image.total > 0 && (
+                              <div className="shrink-0 mt-3 pt-3 border-t-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  disabled={galleryPagination.image.page <= 1}
+                                  onClick={() => setGalleryPage('image', galleryPagination.image.page - 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  上一页
+                                </button>
+                                <span className="text-xs font-bold">
+                                  {galleryPagination.image.page} / {Math.ceil(galleryPagination.image.total / 20) || 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  disabled={!galleryPagination.image.hasMore}
+                                  onClick={() => setGalleryPage('image', galleryPagination.image.page + 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  下一页
+                                </button>
                               </div>
                             )}
-                          </div>
+                            </>
+                          ) : (
+                            <div className="flex-1 min-h-0 flex items-center justify-center text-sm font-bold text-slate-400">
+                              暂无历史作品
+                            </div>
+                          )}
                         </div>
+
                       </div>
                     )}
-
                     {activeTab === "video" && (
-                      <div className="flex flex-col gap-4 h-full min-h-0">
-                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
-                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
-                          {/* 左侧：输入框区域 */}
-                          <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex gap-4 h-full min-h-0">
+                        {/* 左侧：输入框区域 */}
+                        <div className={`w-[350px] lg:w-[400px] shrink-0 bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">视频生成</h2>
                             <div className="text-sm font-bold mt-1">让你的想象力动起来.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                            <label className="flex items-center gap-2 cursor-pointer mt-1 mb-1 text-sm font-bold w-fit">
+                              <input
+                                type="checkbox"
+                                checked={enableOptimization}
+                                onChange={(e) => setEnableOptimization(e.target.checked)}
+                                className="w-4 h-4 accent-orange-500"
+                              />
+                              <Sparkles className="w-4 h-4 text-orange-500" />
+                              DeepSeek 提示词优化
+                            </label>
                             <textarea
                               value={videoPrompt}
                               onChange={(e) => setVideoPrompt(e.target.value)}
@@ -869,21 +885,30 @@ export function ChatPanel() {
                           </div>
                         </div>
 
-                        <div className={`bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} overflow-hidden`}>
+                        {/* 中间：生成结果区域 */}
+                        <div className={`flex-1 bg-white dark:bg-slate-900 p-4 h-full flex flex-col ${brutalBorder} ${brutalShadow} min-w-[300px] overflow-hidden`}>
                             <div className="flex-1 flex items-center justify-center relative min-h-0">
                               <AnimatePresence mode="wait">
                                 {generatedVideoUrl ? (
-                                  <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex items-center justify-center">
-                                    <video src={generatedVideoUrl} controls className={`max-w-full max-h-full object-contain ${brutalBorder}`} />
-                                    <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
-                                      <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
-                                        {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                                      </button>
-                                      <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
-                                        <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
-                                      </a>
+                                  <motion.div key="video-result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="relative w-full h-full group flex flex-col items-center justify-center">
+                                    <div className="flex-1 min-h-0 w-full flex items-center justify-center relative">
+                                      <video src={generatedVideoUrl} controls className={`max-w-full max-h-full object-contain ${brutalBorder}`} />
+                                      <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={clearGeneratedVideo} className={`px-4 py-2 bg-white text-slate-900 ${brutalBtnBase}`}>清除</button>
+                                        <button onClick={() => void handleCopyVideoLink(generatedVideoUrl)} aria-label="复制链接" className={`px-4 py-2 bg-slate-50 text-slate-900 flex items-center justify-center ${brutalBtnBase}`}>
+                                          {videoLinkCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                                        </button>
+                                        <a href={generatedVideoUrl} target="_blank" rel="noopener noreferrer">
+                                          <button className={`px-4 py-2 bg-slate-50 text-slate-900 ${brutalBtnBase}`}>打开</button>
+                                        </a>
+                                      </div>
                                     </div>
+                                    {(videoPrompt || videoOptimizedPrompt) && (
+                                      <div className={`w-full mt-2 p-2 bg-slate-50 dark:bg-slate-800 text-xs overflow-y-auto max-h-24 ${brutalBorder} shrink-0`}>
+                                        {videoPrompt && <div className="mb-1"><span className="font-bold text-orange-600 dark:text-orange-400">原始:</span> {videoPrompt}</div>}
+                                        {videoOptimizedPrompt && videoOptimizedPrompt !== videoPrompt && <div><span className="font-bold text-cyan-600 dark:text-cyan-400">优化:</span> {videoOptimizedPrompt}</div>}
+                                      </div>
+                                    )}
                                   </motion.div>
                                 ) : isGeneratingVideo ? (
                                   <motion.div key="video-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex items-center justify-center flex-col gap-6">
@@ -953,152 +978,161 @@ export function ChatPanel() {
                               </AnimatePresence>
                             </div>
                           </div>
-                        </div>
 
-                        {/* 底栏：画廊区域（横向铺满，放在左侧输入框和右侧生成结果的下方） */}
-                        <div className={`bg-white dark:bg-slate-900 p-4 flex flex-col min-h-0 flex-1 ${brutalBorder} ${brutalShadow}`}>
-                          <div className="flex flex-col h-full min-h-0">
-                            {/* 画廊部分 */}
-                            {videoGallery && videoGallery.length > 0 ? (
-                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
-                                <div 
-                                  className="flex items-center justify-between cursor-pointer group mb-3"
-                                  onClick={() => toggleGallery('video')}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-orange-500 transition-colors">
-                                      GALLERY / 历史作品 ({videoGallery.length})
-                                    </h3>
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-orange-200 text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleGallerySelectionMode("video");
-                                      }}
-                                    >
-                                      {gallerySelectionMode.video ? `已选 ${selectedGalleryItems.video.length}` : "多选"}
-                                    </button>
-                                    {gallerySelectionMode.video && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSelectAllGalleryItems("video");
-                                          }}
-                                        >
-                                          {selectedGalleryItems.video.length === videoGallery.length ? "取消全选" : "全选"}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            void handleBatchDeleteSelected("video");
-                                          }}
-                                        >
-                                          删除已选
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            clearGallerySelection("video");
-                                          }}
-                                        >
-                                          取消
-                                        </button>
-                                      </>
-                                    )}
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        clearVideoGallery();
-                                      }}
-                                    >
-                                      批量清空
-                                    </button>
-                                  </div>
-                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    {galleryExpanded.video ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-                                  </div>
-                                </div>
+                        {/* 右侧：画廊区域（纵向列表） */}
+                        <div className={`w-[250px] lg:w-[300px] shrink-0 bg-white dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="flex items-center justify-between cursor-pointer group mb-3 shrink-0" onClick={() => toggleGallery('video')}>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-sm font-black uppercase shrink-0 group-hover:text-orange-600 transition-colors">
+                                历史作品 ({videoGallery.length})
+                              </h3>
+                              <button
+                                type="button"
+                                className={`px-2 py-0.5 text-[10px] bg-orange-200 text-slate-900 ${brutalBtnBase}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleGallerySelectionMode("video");
+                                }}
+                              >
+                                {gallerySelectionMode.video ? `已选 ${selectedGalleryItems.video.length}` : "多选"}
+                              </button>
+                              {gallerySelectionMode.video && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-white text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectAllGalleryItems("video");
+                                    }}
+                                  >
+                                    {selectedGalleryItems.video.length === videoGallery.length ? "取消全选" : "全选"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void handleBatchDeleteSelected("video");
+                                    }}
+                                  >
+                                    删除
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
 
-                                <AnimatePresence>
-                                  {galleryExpanded.video && (
-                                    <motion.div 
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      className="overflow-hidden"
+                          {videoGallery && videoGallery.length > 0 ? (
+                            <>
+                            <div className="flex-1 min-h-0 overflow-y-auto pr-2 flex flex-col gap-3 content-start">
+                              <AnimatePresence>
+                                {videoGallery.map((item) => {
+                                  const isSelected = selectedGalleryItems.video.includes(item.id);
+                                  return (
+                                    <motion.div
+                                      key={item.id}
+                                      layout
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      className={`relative aspect-video cursor-pointer group bg-black flex items-center justify-center ${brutalBorder} overflow-hidden ${isSelected ? 'ring-4 ring-orange-500' : ''}`}
+                                      onClick={() => openGalleryItem('video', item)}
+                                      title={item.prompt}
                                     >
-                                      <div className="h-36 overflow-x-auto flex gap-4 pb-4 snap-x">
-                                        {videoGallery.map((item) => (
-                                          <div 
-                                            key={item.id} 
-                                            className={cn(
-                                              `shrink-0 w-48 h-32 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-black flex items-center justify-center`,
-                                              selectedGalleryItems.video.includes(item.id) && "ring-4 ring-orange-500 ring-offset-2"
-                                            )}
-                                            onClick={() => openGalleryItem("video", item)}
-                                          >
-                                            <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100" title={item.prompt} />
-                                            {gallerySelectionMode.video && (
-                                              <div className="absolute inset-0 bg-slate-900/40 pointer-events-none" />
-                                            )}
-                                            {(gallerySelectionMode.video || selectedGalleryItems.video.includes(item.id)) && (
-                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-orange-500 ${brutalBorder}`}>
-                                                <Check className="w-4 h-4" />
-                                              </div>
-                                            )}
-                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
-                                                <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
-                                              </div>
-                                            </div>
-                                            <div className="absolute inset-x-2 bottom-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyVideoLink(item.public_url || item.url); }}>
-                                                <Copy className="h-4 w-4 mx-auto" />
-                                              </button>
-                                              <button type="button" className={`flex-1 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromVideoGallery(item.id); }}>
-                                                <Trash2 className="h-4 w-4 mx-auto" />
-                                              </button>
+                                      <video src={item.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                      {!gallerySelectionMode.video && (
+                                        <>
+                                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/40 transition-colors">
+                                              <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-white border-b-4 border-b-transparent ml-1" />
                                             </div>
                                           </div>
-                                        ))}
-                                      </div>
+                                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2">
+                                            <div className="text-white text-xs font-bold text-center line-clamp-3">
+                                              {item.prompt}
+                                            </div>
+                                            <button
+                                              type="button"
+                                              className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors pointer-events-auto"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeFromVideoGallery(item.id);
+                                              }}
+                                              title="删除此视频"
+                                            >
+                                              <X className="w-3 h-3" />
+                                            </button>
+                                          </div>
+                                        </>
+                                      )}
+                                      {gallerySelectionMode.video && (
+                                        <div className="absolute top-1 left-1">
+                                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-orange-500 border-orange-500' : 'bg-white/80 border-slate-400'}`}>
+                                            {isSelected && <Check className="w-3 h-3 text-white" />}
+                                          </div>
+                                        </div>
+                                      )}
                                     </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            ) : (
-                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
-                                <Video className="h-12 w-12 mb-2" />
-                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                                  );
+                                })}
+                              </AnimatePresence>
+                            </div>
+                            {/* 分页控制 */}
+                            {galleryPagination.music.total > 0 && (
+                              <div className="shrink-0 mt-3 pt-3 border-t-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  disabled={galleryPagination.music.page <= 1}
+                                  onClick={() => setGalleryPage('music', galleryPagination.music.page - 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  上一页
+                                </button>
+                                <span className="text-xs font-bold">
+                                  {galleryPagination.music.page} / {Math.ceil(galleryPagination.music.total / 20) || 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  disabled={!galleryPagination.music.hasMore}
+                                  onClick={() => setGalleryPage('music', galleryPagination.music.page + 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  下一页
+                                </button>
                               </div>
                             )}
-                          </div>
+                            </>
+                          ) : (
+                            <div className="flex-1 min-h-0 flex items-center justify-center text-sm font-bold text-slate-400">
+                              暂无历史作品
+                            </div>
+                          )}
                         </div>
+
                       </div>
                     )}
 
                     {activeTab === "music" && (
-                      <div className="flex flex-col gap-4 h-full min-h-0">
-                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
-                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
-                          {/* 左侧：输入框区域 */}
-                          <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex gap-4 h-full min-h-0">
+                        {/* 左侧：输入框区域 */}
+                        <div className={`w-[350px] lg:w-[400px] shrink-0 bg-violet-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">音乐创作</h2>
                             <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化.</div>
                           </div>
 
                           <div className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto pr-2">
+                            <label className="flex items-center gap-2 cursor-pointer mt-1 mb-1 text-sm font-bold w-fit">
+                              <input
+                                type="checkbox"
+                                checked={enableOptimization}
+                                onChange={(e) => setEnableOptimization(e.target.checked)}
+                                className="w-4 h-4 accent-violet-500"
+                              />
+                              <Sparkles className="w-4 h-4 text-violet-500" />
+                              DeepSeek 提示词优化
+                            </label>
                             <div className="relative">
                               <textarea
                                 value={musicPrompt}
@@ -1189,6 +1223,12 @@ export function ChatPanel() {
                                         onClose={clearGeneratedMusic}
                                       />
                                     </div>
+                                    {(musicPrompt || musicOptimizedPrompt) && (
+                                      <div className={`w-full mt-2 p-2 bg-slate-50 dark:bg-slate-800 text-xs overflow-y-auto max-h-24 ${brutalBorder} shrink-0`}>
+                                        {musicPrompt && <div className="mb-1"><span className="font-bold text-violet-600 dark:text-violet-400">原始:</span> {musicPrompt}</div>}
+                                        {musicOptimizedPrompt && musicOptimizedPrompt !== musicPrompt && <div><span className="font-bold text-cyan-600 dark:text-cyan-400">优化:</span> {musicOptimizedPrompt}</div>}
+                                      </div>
+                                    )}
                                   </motion.div>
                                 ) : isGeneratingMusic ? (
                                   <motion.div key="music-loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full flex items-center justify-center flex-col gap-6">
@@ -1265,135 +1305,133 @@ export function ChatPanel() {
                                 )}
                               </AnimatePresence>
                             </div>
+                          </div>
 
-                            {musicGallery && musicGallery.length > 0 ? (
-                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
-                                <div 
-                                  className="flex items-center justify-between cursor-pointer group mb-3"
-                                  onClick={() => toggleGallery('music')}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-black uppercase shrink-0 group-hover:text-cyan-600 transition-colors">
-                                      GALLERY / 历史作品 ({musicGallery.length})
-                                    </h3>
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-cyan-200 text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleGallerySelectionMode("music");
-                                      }}
-                                    >
-                                      {gallerySelectionMode.music ? `已选 ${selectedGalleryItems.music.length}` : "多选"}
-                                    </button>
-                                    {gallerySelectionMode.music && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleSelectAllGalleryItems("music");
-                                          }}
-                                        >
-                                          {selectedGalleryItems.music.length === musicGallery.length ? "取消全选" : "全选"}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-red-400 text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            void handleBatchDeleteSelected("music");
-                                          }}
-                                        >
-                                          删除已选
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            clearGallerySelection("music");
-                                          }}
-                                        >
-                                          取消
-                                        </button>
-                                      </>
-                                    )}
-                                    <button
-                                      type="button"
-                                      className={`px-3 py-1 text-xs bg-white text-slate-900 ${brutalBtnBase}`}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        clearMusicGallery();
-                                      }}
-                                    >
-                                      批量清空
-                                    </button>
-                                  </div>
-                                  <div className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                    {galleryExpanded.music ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-                                  </div>
-                                </div>
+                        {/* 右侧：画廊区域（纵向列表） */}
+                        <div className={`w-[250px] lg:w-[300px] shrink-0 bg-white dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="flex items-center justify-between cursor-pointer group mb-3 shrink-0" onClick={() => toggleGallery('music')}>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-sm font-black uppercase shrink-0 group-hover:text-cyan-600 transition-colors">
+                                历史作品 ({musicGallery.length})
+                              </h3>
+                              <button
+                                type="button"
+                                className={`px-2 py-0.5 text-[10px] bg-cyan-200 text-slate-900 ${brutalBtnBase}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleGallerySelectionMode("music");
+                                }}
+                              >
+                                {gallerySelectionMode.music ? `已选 ${selectedGalleryItems.music.length}` : "多选"}
+                              </button>
+                              {gallerySelectionMode.music && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-white text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectAllGalleryItems("music");
+                                    }}
+                                  >
+                                    {selectedGalleryItems.music.length === musicGallery.length ? "取消全选" : "全选"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`px-2 py-0.5 text-[10px] bg-red-400 text-slate-900 ${brutalBtnBase}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void handleBatchDeleteSelected("music");
+                                    }}
+                                  >
+                                    删除
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
 
-                                <AnimatePresence>
-                                  {galleryExpanded.music && (
-                                    <motion.div 
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      className="overflow-hidden"
+                          {musicGallery && musicGallery.length > 0 ? (
+                            <>
+                            <div className="flex-1 min-h-0 overflow-y-auto pr-2 flex flex-col gap-3 content-start">
+                              <AnimatePresence>
+                                {musicGallery.map((item) => {
+                                  const isSelected = selectedGalleryItems.music.includes(item.id);
+                                  return (
+                                    <motion.div
+                                      key={item.id}
+                                      layout
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      className={`relative cursor-pointer group bg-cyan-50 dark:bg-slate-800 p-3 flex flex-col justify-center gap-2 ${brutalBorder} overflow-hidden ${isSelected ? 'ring-4 ring-cyan-500' : ''}`}
+                                      onClick={() => openGalleryItem("music", item)}
+                                      title={item.prompt}
                                     >
-                                      <div className="h-32 overflow-x-auto flex gap-4 pb-4 snap-x">
-                                        {musicGallery.map((item) => (
-                                          <div 
-                                            key={item.id} 
-                                            className={cn(
-                                              `shrink-0 w-64 h-24 cursor-pointer ${brutalBorder} hover:-translate-y-1 transition-transform snap-start relative group bg-cyan-50 dark:bg-slate-800 p-4 flex flex-col justify-center gap-2`,
-                                              selectedGalleryItems.music.includes(item.id) && "ring-4 ring-cyan-500 ring-offset-2"
-                                            )}
-                                            onClick={() => openGalleryItem("music", item)}
-                                          >
-                                            {gallerySelectionMode.music && (
-                                              <div className="absolute inset-0 bg-slate-900/15 pointer-events-none" />
-                                            )}
-                                            {(gallerySelectionMode.music || selectedGalleryItems.music.includes(item.id)) && (
-                                              <div className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center bg-white text-cyan-600 ${brutalBorder}`}>
-                                                <Check className="w-4 h-4" />
-                                              </div>
-                                            )}
-                                            <div className="flex items-center gap-3">
-                                              <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white shrink-0">
-                                                <Music className="w-5 h-5" />
-                                              </div>
-                                              <div className="flex-1 min-w-0">
-                                                <p className="font-bold text-sm truncate" title={item.prompt}>{item.prompt}</p>
-                                                <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
-                                              </div>
-                                            </div>
-                                            <div className="absolute right-3 bottom-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                              <button type="button" className={`px-2 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyMusicLink(item.public_url || item.url); }}>
-                                                <Copy className="h-4 w-4" />
-                                              </button>
-                                              <button type="button" className={`px-2 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromMusicGallery(item.id); }}>
-                                                <Trash2 className="h-4 w-4" />
-                                              </button>
-                                            </div>
-                                          </div>
-                                        ))}
+                                      {gallerySelectionMode.music && (
+                                        <div className="absolute inset-0 bg-slate-900/15 pointer-events-none" />
+                                      )}
+                                      {(gallerySelectionMode.music || isSelected) && (
+                                        <div className={`absolute top-2 left-2 w-5 h-5 flex items-center justify-center border-2 ${isSelected ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white/80 border-slate-400 text-transparent'}`}>
+                                          <Check className="w-3 h-3" />
+                                        </div>
+                                      )}
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white shrink-0">
+                                          <Music className="w-5 h-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-bold text-sm truncate">{item.prompt}</p>
+                                          <p className="text-xs opacity-60">{new Date(item.timestamp).toLocaleTimeString()}</p>
+                                        </div>
                                       </div>
+                                      {!gallerySelectionMode.music && (
+                                        <div className="absolute right-2 bottom-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <button type="button" className={`px-2 py-1 bg-white text-slate-900 ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); void handleCopyMusicLink(item.public_url || item.url); }} title="复制链接">
+                                            <Copy className="h-4 w-4" />
+                                          </button>
+                                          <button type="button" className={`px-2 py-1 bg-red-500 text-white ${brutalBtnBase}`} onClick={(e) => { e.stopPropagation(); removeFromMusicGallery(item.id); }} title="删除此音乐">
+                                            <X className="h-4 w-4" />
+                                          </button>
+                                        </div>
+                                      )}
                                     </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            ) : (
-                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
-                                <Music className="h-12 w-12 mb-2" />
-                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                                  );
+                                })}
+                              </AnimatePresence>
+                            </div>
+                            {/* 分页控制 */}
+                            {galleryPagination.music.total > 0 && (
+                              <div className="shrink-0 mt-3 pt-3 border-t-2 border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  disabled={galleryPagination.music.page <= 1}
+                                  onClick={() => setGalleryPage('music', galleryPagination.music.page - 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  上一页
+                                </button>
+                                <span className="text-xs font-bold">
+                                  {galleryPagination.music.page} / {Math.ceil(galleryPagination.music.total / 20) || 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  disabled={!galleryPagination.music.hasMore}
+                                  onClick={() => setGalleryPage('music', galleryPagination.music.page + 1)}
+                                  className={`px-2 py-1 text-xs bg-slate-100 dark:bg-slate-800 disabled:opacity-50 ${brutalBtnBase}`}
+                                >
+                                  下一页
+                                </button>
                               </div>
                             )}
-                          </div>
+                            </>
+                          ) : (
+                            <div className="flex-1 min-h-0 flex items-center justify-center text-sm font-bold text-slate-400">
+                              暂无历史作品
+                            </div>
+                          )}
                         </div>
+
                       </div>
                     )}
 
@@ -1453,6 +1491,27 @@ export function ChatPanel() {
                               placeholder="例如: 将背景替换为赛博朋克城市夜景..."
                               className={`w-full h-32 p-5 bg-white dark:bg-slate-800 text-lg font-medium resize-none outline-none ${brutalBorder} shadow-[4px_4px_0px_0px_#0f172a] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
                             />
+
+                            <div className="flex flex-wrap gap-3">
+                              {[
+                                "给人物添加一副自然、精致、适合脸型的黑框眼镜, 保持原有五官、发型、背景和光影不变, 真实自然",
+                                "为人物添加银色细框眼镜, 保持脸型、肤色、发型和背景不变, 风格自然协调",
+                                "给人物换成城市夜景背景, 保持人物五官、服装和姿态不变, 电影感更强",
+                              ].map((preset) => (
+                                <button
+                                  key={preset}
+                                  type="button"
+                                  onClick={() => setImageEditPrompt(preset)}
+                                  className={`px-3 py-2 text-xs font-bold uppercase bg-white dark:bg-slate-800 ${brutalBorder} shadow-[3px_3px_0px_0px_#0f172a] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#0f172a] transition-all`}
+                                >
+                                  {preset.includes("黑框眼镜")
+                                    ? "添加黑框眼镜"
+                                    : preset.includes("细框眼镜")
+                                      ? "添加细框眼镜"
+                                      : "切换夜景背景"}
+                                </button>
+                              ))}
+                            </div>
 
                             <div className="flex gap-4">
                               <button
