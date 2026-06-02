@@ -743,7 +743,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         // 尝试从 Electron 本地 DB 加载离线数据
         if (window.electronAPI?.ipcRenderer) {
           console.warn("网络请求失败, 尝试从本地 SQLite 加载历史会话");
-          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_sessions');
+          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_sessions') as any;
           if (localRes?.success) {
             res = { sessions: localRes.data };
           } else {
@@ -794,7 +794,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       } catch (err) {
         if (window.electronAPI?.ipcRenderer) {
           console.warn("网络请求失败, 尝试从本地 SQLite 加载历史消息");
-          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_session_messages', sessionId);
+          const localRes = await window.electronAPI.ipcRenderer.invoke('db:get_session_messages', sessionId) as any;
           if (localRes?.success) {
             res = { session_id: sessionId, messages: localRes.data };
           } else {

@@ -77,9 +77,9 @@ export function ChatPanel() {
     editingSourceImage, editingSourceImage2, imageEditPrompt, setEditingSourceImage, setImageEditPrompt,
   } = useAgentStore();
 
-  const [imagePrompt, setImagePrompt] = useState('一只可爱的猫在花园里玩耍');
-  const [videoPrompt, setVideoPrompt] = useState('波涛汹涌的大海');
-  const [musicPrompt, setMusicPrompt] = useState('轻快的爵士乐');
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [videoPrompt, setVideoPrompt] = useState('');
+  const [musicPrompt, setMusicPrompt] = useState('');
 
   // 画廊折叠状态
   const [galleryExpanded, setGalleryExpanded] = useState<Record<string, boolean>>({
@@ -568,7 +568,7 @@ export function ChatPanel() {
                                 <button
                                   key={p.label}
                                   type="button"
-                                  onClick={() => setImagePrompt(p.value)}
+                                  onClick={() => setImagePrompt(prev => prev ? `${prev}, ${p.value}` : p.value)}
                                   className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
                                 >
                                   {p.label}
@@ -1093,7 +1093,7 @@ export function ChatPanel() {
                                 <button
                                   key={p.label}
                                   type="button"
-                                  onClick={() => setMusicPrompt(p.value)}
+                                  onClick={() => setMusicPrompt(prev => prev ? `${prev}, ${p.value}` : p.value)}
                                   className={`px-4 py-2 bg-white dark:bg-slate-800 text-xs font-bold uppercase ${brutalBorder} shadow-[2px_2px_0px_0px_#0f172a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all`}
                                 >
                                   {p.label}

@@ -92,7 +92,7 @@ class LocalMusicClient:
             "\u4e00" <= char <= "\u9fff" for char in prompt
         )
 
-        magic_tags = ["masterpiece", "high quality", "clear vocals", "studio recording"]
+        magic_tags = ["masterpiece", "high quality", "clear vocals", "studio recording", "pop music", "clear human voice"]
         if is_female:
             magic_tags.append("female singer")
         if is_chinese:

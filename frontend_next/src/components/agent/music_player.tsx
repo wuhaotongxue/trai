@@ -122,7 +122,7 @@ export function MusicPlayer({ url, title, coverUrl, lyrics, onClose }: MusicPlay
   return (
     <div className={cn(
       "flex flex-col bg-white dark:bg-slate-950 transition-all duration-300",
-      isMaximized ? "fixed inset-4 z-50 rounded-none" : "relative w-full rounded-none",
+      isMaximized ? "fixed inset-4 z-50 rounded-none" : "relative w-full h-full rounded-none",
       brutalBorder,
       brutalShadow
     )}>
