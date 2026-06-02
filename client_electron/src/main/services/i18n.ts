@@ -79,7 +79,8 @@ export const i18n_service = {
     try {
       const url = ApiUrl.build_api_url(ApiEndpoints.i18n_public.replace('{locale}', locale))
       log.info(`Fetching translations for locale: ${locale} from ${url}`)
-      const res = await api_client.get(url)
+      // 国际化接口是公开的，不携带认证token
+      const res = await api_client.get(url, { headers: { Authorization: undefined } })
 
       if (res.data?.translations) {
         log.info(`Successfully fetched ${Object.keys(res.data.translations).length} translations for ${locale}`)

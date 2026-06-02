@@ -167,7 +167,7 @@ export const agent_service = {
   },
 
   /**
-   * AI 音乐生成
+   * AI 音乐生成（异步轮询）
    * @param prompt - 提示词
    * @returns 生成结果
    */
@@ -176,7 +176,45 @@ export const agent_service = {
       const url = ApiUrl.build_api_url(ApiEndpoints.ai_generate_music)
       const payload = { prompt }
       const res = await api_client.post(url, payload)
-      return { success: true, data: res.data }
+      
+      if (!res.data?.task_id) {
+        return { success: false, error: '任务创建失败' }
+      }
+      
+      const task_id = res.data.task_id
+      log.info(`Music generation task created: ${task_id}`)
+      
+      // 轮询任务状态
+      const max_retries = 60
+      const poll_interval = 3000 // 3秒间隔
+      
+      for (let i = 0; i < max_retries; i++) {
+        await new Promise(resolve => setTimeout(resolve, poll_interval))
+        
+        const status_url = ApiUrl.build_api_url(`${ApiEndpoints.ai_generate_music}/status/${task_id}`)
+        // 状态查询接口是公开的，不携带认证token避免401错误
+        const status_res = await api_client.get(status_url, { headers: { Authorization: undefined } })
+        
+        const status = status_res.data?.status
+        const music_url = status_res.data?.music_url
+        
+        if (status === 'completed' && music_url) {
+          return { success: true, data: { music_url, task_id } }
+        }
+        
+        if (status === 'failed') {
+          const error_msg = status_res.data?.error || '生成失败'
+          return { success: false, error: error_msg }
+        }
+        
+        if (status === 'cancelled') {
+          return { success: false, error: '任务已取消' }
+        }
+        
+        log.info(`Music generation in progress (${i + 1}/${max_retries}): ${status_res.data?.progress || 'processing'}`)
+      }
+      
+      return { success: false, error: '生成超时，请重试' }
     } catch (error: any) {
       log.error('generate_music failed:', error.message)
       return { success: false, error: error.message || '音乐生成失败' }

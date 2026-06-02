@@ -72,8 +72,8 @@ const AiMusic: React.FC = () => {
     
     try {
       const res = await window.electron_api.ai_generate_music(prompt)
-      if (res.success && res.data?.audio_url) {
-        set_result_url(res.data.audio_url)
+      if (res.success && res.data?.music_url) {
+        set_result_url(res.data.music_url)
       } else {
         set_error(res.error || '生成失败, 请重试')
       }

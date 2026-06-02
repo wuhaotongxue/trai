@@ -25,7 +25,7 @@ function add_refresh_subscriber(cb: (token: string | null) => void) {
 
 // 创建共享的 axios 实例
 export const api_client = axios.create({
-  timeout: 10000, // 10 秒超时
+  timeout: 300000, // 5分钟超时（AI生成任务可能需要较长时间）
   timeoutErrorMessage: '请求超时, 请检查网络连接或服务器状态'
 })
 

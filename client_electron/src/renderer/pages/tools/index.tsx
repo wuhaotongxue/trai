@@ -52,6 +52,8 @@ const Tools: React.FC = () => {
   const [json_input, set_json_input] = useState('')
   const [json_result, set_json_result] = useState('')
   const [json_error, set_json_error] = useState('')
+  const [target_convert_kb, set_target_compress_kb] = useState('')
+  const [target_convert_size_kb, set_target_convert_size_kb] = useState('')
 
   const handle_md_to_pdf = async () => {
     const input = document.createElement('input')
