@@ -405,7 +405,7 @@ class VideoApiUtils:
         return None
 
     @staticmethod
-    def send_video_generated_notify(
+    async def send_video_generated_notify(
         user_id: str,
         user_name: str,
         prompt: str,
@@ -456,7 +456,7 @@ class VideoApiUtils:
                 logger.error(f"[通知] 飞书推送失败 | task_id={task_id} | error={str(e)}")
 
         try:
-            media_notifier.notify(
+            await media_notifier.notify(
                 media_type="video",
                 prompt=prompt,
                 file_url=public_url or video_url,
@@ -599,7 +599,7 @@ class VideoApiRouter:
                 ),
             )
 
-            VideoApiUtils.send_video_generated_notify(
+            await VideoApiUtils.send_video_generated_notify(
                 user_id=str(task.get("user_id", "anonymous") or "anonymous"),
                 user_name=str(task.get("user_name", "guest") or "guest"),
                 prompt=str(task.get("prompt", "")),

@@ -410,7 +410,12 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
-### 🛠️ 后端_2026_05_28_1605
+### 🛠️ 后端_2026_06_02_0857
+- **修复(video)**: 修复视频生成结果通知方法调用缺少 await 导致未触发企业微信 Webhook 推送的问题。
+- **功能(agent)**: 更新默认 Agent 配置，模型切换为 `deepseek-chat` 并注入“河南地理专家”专属 Prompt，同时禁止回复中出现“尝试”等测试词汇。
+- **代码(format)**: 执行 Ruff 代码格式化与规范检查，确保 Python 代码符合项目最新标准。
+
+### 🛠️ 后端_2026_06_01_1140
 - **修复(migration_env)**: `migrate_add_media_history_tables.py` 现已自动加载 `backend/env/*.env`, 并同时兼容 `POSTGRES_*` 与 `DB_*` 数据库配置变量, 避免再次因为脚本漏读环境导致手工补表.
 
 ### 🛠️ 后端_2026_05_28_1435

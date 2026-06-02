@@ -84,41 +84,45 @@ class AgnesImageClient:
                 if response.data and len(response.data) > 0:
                     external_url = response.data[0].url
                     logger.info(f"Agnes AI 图片生成成功: {external_url}，正在转存至 S3...")
-                    
-                    import requests
-                    from infrastructure.storage.s3_storage import S3StorageService
+
                     import time
                     import uuid
-                    
+
+                    import requests
+
+                    from infrastructure.storage.s3_storage import S3StorageService
+
                     def _download_image():
                         res = requests.get(external_url, timeout=30)
                         res.raise_for_status()
                         return res.content
-                        
+
                     image_bytes = await loop.run_in_executor(None, _download_image)
-                    
+
                     storage = S3StorageService()
                     safe_tenant_id = tenant_id or "default"
                     safe_user_id = user_id or "anonymous"
                     task_id_str = f"agnes_{int(time.time())}_{str(uuid.uuid4())[:8]}"
-                    object_key = f"private/tenants/{safe_tenant_id}/ai_generated/images/{safe_user_id}/{task_id_str}.png"
-                    
+                    object_key = (
+                        f"private/tenants/{safe_tenant_id}/ai_generated/images/{safe_user_id}/{task_id_str}.png"
+                    )
+
                     storage.upload_bytes(
                         data=image_bytes,
                         object_key=object_key,
                         content_type="image/png",
                     )
-                    
+
                     s3_url = storage.get_long_term_url(object_key, expires_days=30)
                     public_url = storage.get_file_url(object_key)
                     logger.info(f"Agnes AI 图片已成功转存至 S3: {object_key}")
-                    
+
                     return {
                         "image_url": s3_url,
                         "public_url": public_url,
                         "object_key": object_key,
                         "image_base64": None,
-                        "error": None
+                        "error": None,
                     }
                 else:
                     raise Exception("Agnes API 返回数据为空")

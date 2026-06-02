@@ -69,6 +69,11 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_02_0857
+- **修复(video)**: 修复视频生成结果通知方法调用缺少 await 导致未触发企业微信 Webhook 推送的问题。
+- **功能(agent)**: 更新默认 Agent 配置，模型切换为 `deepseek-chat` 并注入“河南地理专家”专属 Prompt，同时禁止回复中出现“尝试”等测试词汇。
+- **代码(format)**: 执行 Ruff 代码格式化与规范检查，确保 Python 代码符合项目最新标准。
+
 ### Backend_2026_06_01_1626
 - **Agnes AI 集成**: 引入了 Agnes AI 的图像和视频生成模型（agnes-image-2.0-flash / agnes-video-v2.0），并为其编写了带有自动回退机制（Fallback）的客户端（`AgnesImageClient`, `AgnesVideoClient`）。
 - **配置与前端支持**: 新增了 `agnes.env` 环境变量，并在前端系统设置页面补充了 Agnes Key 输入框。

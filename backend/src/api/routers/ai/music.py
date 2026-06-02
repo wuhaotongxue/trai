@@ -254,7 +254,7 @@ class MusicController:
             # 在后台线程中必须使用同步生成，或者创建一个新的事件循环
             # 将用户原始提示词（作为风格标签）与生成的歌词合并，交给音乐生成模型
             combined_prompt = f"Style: {request.prompt}\n\nLyrics:\n{lyrics}"
-            
+
             result = client.generate(
                 prompt=combined_prompt,
                 duration=request.duration,

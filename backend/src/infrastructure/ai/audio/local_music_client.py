@@ -88,7 +88,9 @@ class LocalMusicClient:
         is_female = any(keyword.lower() in prompt.lower() for keyword in female_keywords)
 
         chinese_keywords = ["中文", "chinese", "mandarin", "普通话", "粤语", "cantonese"]
-        is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords) or any("\u4e00" <= char <= "\u9fff" for char in prompt)
+        is_chinese = any(keyword.lower() in prompt.lower() for keyword in chinese_keywords) or any(
+            "\u4e00" <= char <= "\u9fff" for char in prompt
+        )
 
         magic_tags = ["masterpiece", "high quality", "clear vocals", "studio recording"]
         if is_female:
