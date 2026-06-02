@@ -535,8 +535,11 @@ export function ChatPanel() {
                 <div className="flex-1 min-h-0 overflow-hidden p-2">
                   <div className="w-full h-full min-h-0">
                     {activeTab === "image" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
-                        <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex flex-col gap-4 h-full min-h-0">
+                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
+                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
+                          {/* 左侧：输入框区域 */}
+                          <div className={`bg-emerald-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">创意绘图</h2>
                             <div className="text-sm font-bold mt-1">将你的想象力转化为视觉杰作.</div>
@@ -685,10 +688,15 @@ export function ChatPanel() {
                                 )}
                               </AnimatePresence>
                             </div>
+                          </div>
+                        </div>
 
+                        {/* 底栏：画廊区域（横向铺满，放在左侧输入框和右侧生成结果的下方） */}
+                        <div className={`bg-white dark:bg-slate-900 p-4 flex flex-col min-h-0 flex-1 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="flex flex-col h-full min-h-0">
                             {/* 画廊部分 */}
-                            {imageGallery && imageGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                            {imageGallery && imageGallery.length > 0 ? (
+                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
                                 <div 
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('image')}
@@ -799,14 +807,23 @@ export function ChatPanel() {
                                   )}
                                 </AnimatePresence>
                               </div>
+                            ) : (
+                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
+                                <ImageIcon className="h-12 w-12 mb-2" />
+                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                              </div>
                             )}
                           </div>
+                        </div>
                       </div>
                     )}
 
                     {activeTab === "video" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
-                        <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex flex-col gap-4 h-full min-h-0">
+                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
+                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
+                          {/* 左侧：输入框区域 */}
+                          <div className={`bg-orange-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">视频生成</h2>
                             <div className="text-sm font-bold mt-1">让你的想象力动起来.</div>
@@ -935,10 +952,15 @@ export function ChatPanel() {
                                 )}
                               </AnimatePresence>
                             </div>
+                          </div>
+                        </div>
 
+                        {/* 底栏：画廊区域（横向铺满，放在左侧输入框和右侧生成结果的下方） */}
+                        <div className={`bg-white dark:bg-slate-900 p-4 flex flex-col min-h-0 flex-1 ${brutalBorder} ${brutalShadow}`}>
+                          <div className="flex flex-col h-full min-h-0">
                             {/* 画廊部分 */}
-                            {videoGallery && videoGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                            {videoGallery && videoGallery.length > 0 ? (
+                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
                                 <div 
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('video')}
@@ -1054,14 +1076,23 @@ export function ChatPanel() {
                                   )}
                                 </AnimatePresence>
                               </div>
+                            ) : (
+                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
+                                <Video className="h-12 w-12 mb-2" />
+                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                              </div>
                             )}
                           </div>
+                        </div>
                       </div>
                     )}
 
                     {activeTab === "music" && (
-                      <div className="grid lg:grid-cols-2 gap-4 items-start h-full min-h-0">
-                        <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
+                      <div className="flex flex-col gap-4 h-full min-h-0">
+                        {/* 顶栏：左右分屏排列 (左侧是生成框，右侧是生成结果/播放器) */}
+                        <div className="grid lg:grid-cols-2 gap-4 flex-shrink-0 h-[400px]">
+                          {/* 左侧：输入框区域 */}
+                          <div className={`bg-cyan-100 dark:bg-slate-900 p-4 flex flex-col h-full min-h-0 ${brutalBorder} ${brutalShadow}`}>
                           <div className="mb-4 border-b-4 border-slate-900 dark:border-white pb-2 shrink-0">
                             <h2 className="text-2xl font-black uppercase">音乐创作</h2>
                             <div className="text-sm font-bold mt-1">从文字到旋律的奇妙转化.</div>
@@ -1235,9 +1266,8 @@ export function ChatPanel() {
                               </AnimatePresence>
                             </div>
 
-                            {/* 画廊部分 */}
-                            {musicGallery && musicGallery.length > 0 && (
-                              <div className="mt-6 pt-4 border-t-4 border-slate-900 dark:border-white shrink-0 flex flex-col transition-all duration-300">
+                            {musicGallery && musicGallery.length > 0 ? (
+                              <div className="shrink-0 flex flex-col transition-all duration-300 h-full min-h-0">
                                 <div 
                                   className="flex items-center justify-between cursor-pointer group mb-3"
                                   onClick={() => toggleGallery('music')}
@@ -1356,8 +1386,14 @@ export function ChatPanel() {
                                   )}
                                 </AnimatePresence>
                               </div>
+                            ) : (
+                              <div className="flex-1 flex flex-col items-center justify-center opacity-30 min-h-0 py-8">
+                                <Music className="h-12 w-12 mb-2" />
+                                <p className="text-sm font-bold uppercase tracking-widest">暂无历史作品</p>
+                              </div>
                             )}
                           </div>
+                        </div>
                       </div>
                     )}
 
