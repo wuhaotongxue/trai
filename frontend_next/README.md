@@ -4,6 +4,11 @@
 
 ## 📝 更新日志 (Changelog)
 
+### 🎨 前端_2026_06_03_1413
+- **优化(ui)**: 智能字幕面板支持前端直接解析 SRT 并渲染预览
+- **新增(ui)**: 视频生成等待状态新增胶片滚动与 4K 渲染趣味动画
+- **优化(agent)**: 画廊与多模态面板布局结构优化, 画廊移至独立底栏
+
 ### 🎨 前端_2026_06_02_1906
 - **新增(public_exam_route)**: 新增 `src/app/exam/[share_token]/page.tsx`, 支持通过分享令牌直接打开公开答题页.
 - **新增(public_exam_components)**: 新增 `src/components/feature/exam/exam_share_client.tsx` 和 `src/components/feature/exam/exam_question_card.tsx`, 实现考生信息填写, 题目展示, 选项交互和答卷提交结果展示.

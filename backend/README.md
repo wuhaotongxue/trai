@@ -35,6 +35,12 @@ python run.py
 
 所有代码遵循 DDD 五层架构, 详见 `.trae/skills/backend_code_check_wuhao/SKILL.md`.
 
+### 🛠️ 后端_2026_06_03_1413
+- **新增(infra)**: 引入 OpenTelemetry (Jaeger) 全局链路追踪监控 API 耗时
+- **新增(task)**: 增加基于 APScheduler 的定时清理任务, 自动清理过期 S3 资源
+- **优化(ai)**: 深度重构音乐歌词引擎与 S3 存储, 优化人声清晰度
+- **新增(exam)**: 完成考试发布与答卷后台管理闭环逻辑
+
 ### 🛠️ 后端_2026_06_02_1733
 - **新增(word_exam_parse)**: 新增 `application/exam_parser_usecases.py` 与 `infrastructure/tools/word_exam_parser.py`, 支持从 `docx` 试卷中提取试卷元信息, 题型分组, 题干, 选项, 客观题答案和简答题评分标准.
 - **新增(exam_entities)**: 新增 `domain/exam_entities.py`, 统一沉淀试卷, 分组, 题目, 选项与题型枚举实体, 便于后续继续对接钉钉宜搭表单字段映射.
