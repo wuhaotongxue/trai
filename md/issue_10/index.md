@@ -63,6 +63,32 @@
 - 支持多种图片尺寸和风格定制
 - 图片质量优化，加载速度提升
 
+**文生图功能演示**:
+
+| 原图 | 生成结果 |
+|------|----------|
+| ![文生图原图](issue_10_04.png) | ![文生图生成结果](issue_10_03.png) |
+
+*原图展示了海边日落场景，AI 根据图片内容进行分析和描述，生成详细的文字描述。*
+
+**思考过程日志**:
+
+```
+INFO  | infrastructure.storage.s3_storage:upload_bytes:159 | S3上传 bytes大小: 942737 bytes
+INFO  | api.routers.session.session:stream_message:565 | 图片 已上传至 default/attachments/chat_images/7e7db418-6cba-4889-90b6-c905537fd68b/5fe73345b8cf4
+INFO  | api.routers.session.session:stream_message:565 | 图片 已上传至 default/attachments/chat_images/7e7db418-6cba-4889-90b6-c905537fd68b/5fe73345b8cf4
+INFO  | api.routers.session.session:stream_message:561 | 原始内容:"描述下..."
+INFO  | infrastructure.ai.vision.vision_client:__load_model:101 | GPU 0: 空 (44.39 GB)
+INFO  | infrastructure.ai.vision.vision_client:__load_model:101 | GPU 1: 空 (44.39 GB)
+INFO  | infrastructure.ai.vision.vision_client:__load_model:101 | GPU 2: 空 (44.39 GB)
+INFO  | infrastructure.ai.vision.vision_client:__load_model:101 | GPU 3: 空 (44.39 GB)
+INFO  | infrastructure.ai.vision.vision_client:__load_model:108 | 选择空闲显卡
+INFO  | infrastructure.ai.vision.vision_client:__load_model:112 | 加载本地视觉模型 ./cache/modelscope/hub/models/Qwen/Qwen2-VL-7B-Instruct | 设备: cuda:1 | 精度: fp16 | 41.99 GB)
+INFO  | infrastructure.ai.vision.vision_client:__load_model:120 | 视觉模型加载成功
+```
+
+*视觉模型加载流程：自动检测空闲 GPU → 加载 Qwen2-VL-7B-Instruct 模型 → 开始图片分析推理。*
+
 ### 2. 登录日志安全审计体系
 
 <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 16px;margin:14px 0;color:#065f46;">
