@@ -19,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll_area";
 import { globalToast } from "@/components/toast/toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { BurnMode, SubtitleGenerateResponse, SubtitleRecordDTO, TARGET_LANG_OPTIONS } from "./subtitle/types";
+import { BurnMode, SubtitleContentPreviewResponse, SubtitleGenerateResponse, SubtitleRecordDTO, TARGET_LANG_OPTIONS } from "./subtitle/types";
 import { HistorySidebar } from "./subtitle/history_sidebar";
 import { PANEL_EMPTY_COPY, PANEL_MOTION_TOKENS, PANEL_SUBTITLES } from "./panel_consistency";
 
@@ -50,6 +50,10 @@ export function SubtitlePanel() {
   const PAGE_SIZE = 10;
 
   const [activeRecord, setActiveRecord] = useState<SubtitleRecordDTO | null>(null);
+  const [previewLoadingKind, setPreviewLoadingKind] = useState<"zh" | "target" | null>(null);
+  const [previewError, setPreviewError] = useState<string>("");
+  const [previewContent, setPreviewContent] = useState<string>("");
+  const [previewFileName, setPreviewFileName] = useState<string>("");
   const [meetingOptions, setMeetingOptions] = useState<string[]>(["精简摘要", "行动项提取"]);
   const [isRecording, setIsRecording] = useState(false);
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
@@ -71,17 +75,31 @@ export function SubtitlePanel() {
     { id: "to_audio", label: "视频转音频", icon: Type, color: "text-teal-500", desc: "提取视频中的音频轨道" },
   ];
 
-  const fetchHistory = async () => {
+  /**
+   * 拉取字幕任务历史, 并尽量保持当前选中的记录.
+   *
+   * 返回值:
+   *   Promise<SubtitleRecordDTO[]>: 最新历史记录数组.
+   */
+  const fetchHistory = async (): Promise<SubtitleRecordDTO[]> => {
     try {
       setIsLoadingHistory(true);
       const data = await request<SubtitleRecordDTO[]>("/ai/subtitle/list", { method: "POST" });
       const records = data || [];
       setHistory(records);
-      if (!activeRecord && records.length > 0) {
-        setActiveRecord(records[0]);
-      }
+      setActiveRecord((prev) => {
+        if (!records.length) {
+          return null;
+        }
+        if (!prev) {
+          return records[0];
+        }
+        return records.find((item) => item.task_id === prev.task_id) ?? records[0];
+      });
+      return records;
     } catch (e) {
       console.error("Failed to fetch subtitle history:", e);
+      return [];
     } finally {
       setIsLoadingHistory(false);
     }
@@ -104,7 +122,7 @@ export function SubtitlePanel() {
               "Content-Type": "application/x-www-form-urlencoded",
             },
           });
-          fetchHistory();
+          await fetchHistory();
           if (activeRecord?.task_id === taskId) {
             setActiveRecord(null);
           }
@@ -123,13 +141,47 @@ export function SubtitlePanel() {
     });
   };
 
+  /**
+   * 预览指定字幕文本内容.
+   *
+   * 参数:
+   *   taskId: 任务 ID.
+   *   subtitleKind: 字幕类型, zh 或 target.
+   * 返回值:
+   *   Promise<void>: 无返回值.
+   */
+  const handlePreviewSubtitle = async (taskId: string, subtitleKind: "zh" | "target"): Promise<void> => {
+    try {
+      setPreviewLoadingKind(subtitleKind);
+      setPreviewError("");
+      const result = await request<SubtitleContentPreviewResponse>("/ai/subtitle/content", {
+        method: "POST",
+        body: JSON.stringify({
+          task_id: taskId,
+          subtitle_kind: subtitleKind,
+        }),
+      });
+      setPreviewFileName(result.file_name);
+      setPreviewContent(result.content);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "字幕预览失败";
+      setPreviewError(message);
+      setPreviewContent("");
+      setPreviewFileName("");
+    } finally {
+      setPreviewLoadingKind(null);
+    }
+  };
+
   useEffect(() => {
-    setTimeout(() => fetchHistory(), 0);
+    setTimeout(() => {
+      void fetchHistory();
+    }, 0);
     const timer = setInterval(() => {
       setHistory((prev) => {
         const hasProcessing = prev.some((r) => r.status === "processing" || r.status === "pending");
         if (hasProcessing) {
-          fetchHistory();
+          void fetchHistory();
         }
         return prev;
       });
@@ -326,7 +378,13 @@ export function SubtitlePanel() {
       }
       const res = await uploadFileWithProgress(endpoint, form, abortController);
       setCurrentTask(res);
-      fetchHistory();
+      setPreviewContent("");
+      setPreviewFileName("");
+      setPreviewError("");
+      const latestRecords = await fetchHistory();
+      if (latestRecords.length > 0) {
+        setActiveRecord(latestRecords[0]);
+      }
       setHistoryPage(1);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "请求失败, 请稍后再试");
@@ -639,6 +697,159 @@ export function SubtitlePanel() {
               </div>
             )}
           </div>
+
+          <div className={`bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} p-3 sm:p-4 shrink-0`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                  当前任务结果
+                </div>
+                <div className="mt-1 text-[10px] font-bold uppercase text-slate-500">
+                  {activeRecord ? activeRecord.file_name : "请选择一条历史任务"}
+                </div>
+              </div>
+              {activeRecord && (
+                <span
+                  className={cn(
+                    `px-2 py-1 text-[10px] font-black uppercase ${brutalBorder}`,
+                    activeRecord.status === "completed"
+                      ? "bg-emerald-200 text-emerald-800"
+                      : activeRecord.status === "failed"
+                        ? "bg-red-200 text-red-800"
+                        : "bg-cyan-200 text-cyan-800"
+                  )}
+                >
+                  {activeRecord.status === "completed"
+                    ? "已完成"
+                    : activeRecord.status === "failed"
+                      ? "失败"
+                      : "处理中"}
+                </span>
+              )}
+            </div>
+
+            {activeRecord ? (
+              <div className="mt-3 space-y-3">
+                {activeRecord.error_message && (
+                  <div className="border-2 border-red-500 bg-red-50 px-3 py-2 text-xs font-bold leading-5 text-red-700">
+                    {activeRecord.error_message}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    disabled={!activeRecord.zh_srt_url || previewLoadingKind === "zh"}
+                    onClick={() => void handlePreviewSubtitle(activeRecord.task_id, "zh")}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 text-xs font-black uppercase transition-all",
+                      brutalBorder,
+                      activeRecord.zh_srt_url
+                        ? "bg-cyan-100 text-slate-900 hover:bg-cyan-200"
+                        : "cursor-not-allowed bg-slate-100 text-slate-400"
+                    )}
+                  >
+                    <span>{previewLoadingKind === "zh" ? "加载中" : "中文字幕"}</span>
+                    <FileTextIcon className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!activeRecord.target_srt_url || previewLoadingKind === "target"}
+                    onClick={() => void handlePreviewSubtitle(activeRecord.task_id, "target")}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 text-xs font-black uppercase transition-all",
+                      brutalBorder,
+                      activeRecord.target_srt_url
+                        ? "bg-amber-100 text-slate-900 hover:bg-amber-200"
+                        : "cursor-not-allowed bg-slate-100 text-slate-400"
+                    )}
+                  >
+                    <span>{previewLoadingKind === "target" ? "加载中" : "翻译字幕"}</span>
+                    <FileTextIcon className="h-3.5 w-3.5" />
+                  </button>
+                  <a
+                    href={activeRecord.output_video_url || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!activeRecord.output_video_url}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 text-xs font-black uppercase transition-all",
+                      brutalBorder,
+                      activeRecord.output_video_url
+                        ? "bg-emerald-100 text-slate-900 hover:bg-emerald-200"
+                        : "pointer-events-none bg-slate-100 text-slate-400"
+                    )}
+                  >
+                    <span>烧录视频</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <a
+                    href={activeRecord.zh_srt_url || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!activeRecord.zh_srt_url}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 text-[10px] font-black uppercase transition-all",
+                      brutalBorder,
+                      activeRecord.zh_srt_url
+                        ? "bg-white text-slate-900 hover:bg-slate-100"
+                        : "pointer-events-none bg-slate-100 text-slate-400"
+                    )}
+                  >
+                    <span>下载中文字幕</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <a
+                    href={activeRecord.target_srt_url || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!activeRecord.target_srt_url}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 text-[10px] font-black uppercase transition-all",
+                      brutalBorder,
+                      activeRecord.target_srt_url
+                        ? "bg-white text-slate-900 hover:bg-slate-100"
+                        : "pointer-events-none bg-slate-100 text-slate-400"
+                    )}
+                  >
+                    <span>下载翻译字幕</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+
+                {(previewContent || previewError) && (
+                  <div className={`border-2 border-slate-900 bg-slate-950 text-slate-100 ${brutalShadowSm}`}>
+                    <div className="flex items-center justify-between border-b-2 border-slate-700 px-3 py-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-cyan-300">
+                        字幕预览
+                      </span>
+                      <span className="text-[10px] font-bold uppercase text-slate-400">
+                        {previewFileName || "preview.srt"}
+                      </span>
+                    </div>
+                    <ScrollArea className="h-64">
+                      <pre className="whitespace-pre-wrap break-words px-3 py-3 text-xs leading-6">
+                        {previewError || previewContent}
+                      </pre>
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {!activeRecord.zh_srt_url && !activeRecord.target_srt_url && !activeRecord.output_video_url && activeRecord.status === "completed" && (
+                  <div className="text-xs font-bold leading-5 text-slate-500">
+                    任务已完成, 但当前记录暂无可下载文件. 如果这是纯音频任务, 正常应至少出现字幕文件链接.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mt-3 text-xs font-bold leading-5 text-slate-500">
+                上传音频或视频后, 这里会显示字幕文件和导出结果.
+              </div>
+            )}
+          </div>
           
           {/* 任务列表 / 历史 */}
           <div className={`flex-1 bg-white dark:bg-slate-900 ${brutalBorder} ${brutalShadowSm} p-3 sm:p-4 flex flex-col overflow-hidden min-h-0`}>
@@ -660,7 +871,16 @@ export function SubtitlePanel() {
                     history.map((item) => (
                       <div key={item.task_id} onClick={() => setActiveRecord(item)} className={cn("p-2 border-2 transition-all cursor-pointer group flex items-center justify-between", activeRecord?.task_id === item.task_id ? "border-cyan-500 bg-cyan-50 dark:bg-slate-800" : "border-slate-900 dark:border-white hover:bg-slate-50 dark:hover:bg-slate-800")}>
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className={cn("w-2 h-2 rounded-full shrink-0", item.status === "completed" ? "bg-emerald-500" : "bg-cyan-500 animate-pulse")} />
+                          <div
+                            className={cn(
+                              "w-2 h-2 rounded-full shrink-0",
+                              item.status === "completed"
+                                ? "bg-emerald-500"
+                                : item.status === "failed"
+                                  ? "bg-red-500"
+                                  : "bg-cyan-500 animate-pulse"
+                            )}
+                          />
                           <div className="min-w-0">
                             <div className="font-black text-[10px] uppercase truncate">{item.file_name}</div>
                             <div className="text-[8px] font-bold text-slate-400">{new Date(item.created_at).toLocaleDateString()}</div>

@@ -69,6 +69,10 @@ cd trai
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_04_1056
+- **修复(storage)**: S3StorageService 新增 get_object_bytes 方法，修复聊天图片上传后无法用于 Vision 处理的 bug
+- **清理(tests)**: 删除 backend/tests/ 目录下遗留的测试文件
+
 ### 🛠️ 后端_2026_06_03_1413
 - **新增(infra)**: 引入 OpenTelemetry (Jaeger) 全局链路追踪监控 API 耗时
 - **新增(task)**: 增加基于 APScheduler 的定时清理任务, 自动清理过期 S3 资源

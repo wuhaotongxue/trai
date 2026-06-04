@@ -32,6 +32,14 @@ export interface SubtitleRecordDTO {
   created_at: string;
 }
 
+export interface SubtitleContentPreviewResponse {
+  task_id: string;
+  subtitle_kind: "zh" | "target";
+  file_name: string;
+  source_url: string;
+  content: string;
+}
+
 export const TARGET_LANG_OPTIONS: Array<{ label: string; value: string }> = [
   { label: "英文", value: "en" },
   { label: "日文", value: "ja" },

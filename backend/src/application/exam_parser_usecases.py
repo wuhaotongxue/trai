@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exam_parser_usecases.py
 # 作者: wuhao
 # 日期: 2026_06_02_18:25:48
@@ -15,9 +14,9 @@ from loguru import logger
 from application.common.base_usecase import UseCase
 from core.exceptions import ValidationError
 from domain.exam_entities import ExamPaper
-from infrastructure.tools.yida_form_client import YidaCreateFormResult, YidaFormClient
 from infrastructure.tools.word_exam_parser import WordExamParser
 from infrastructure.tools.yida_exam_field_mapper import YidaExamFieldMapper
+from infrastructure.tools.yida_form_client import YidaCreateFormResult, YidaFormClient
 from infrastructure.tools.yida_form_schema_builder import YidaFormSchemaBuilder
 
 
@@ -301,9 +300,7 @@ class WordExamParseAndMapUseCase(UseCase[WordExamParseAndMapInput, WordExamParse
         异常:
             无.
         """
-        parsed_output = await self._parse_use_case.execute(
-            WordExamParseInput(file_path=input_data.file_path)
-        )
+        parsed_output = await self._parse_use_case.execute(WordExamParseInput(file_path=input_data.file_path))
         yida_fields = self._mapper.map_paper_to_fields(parsed_output.paper) if input_data.include_yida_fields else []
         return WordExamParseAndMapOutput(
             paper=parsed_output.paper,

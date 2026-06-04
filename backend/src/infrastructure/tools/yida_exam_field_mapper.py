@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: yida_exam_field_mapper.py
 # 作者: wuhao
 # 日期: 2026_06_02_17:27:19

@@ -1,8 +1,7 @@
-import os
 import shutil
 import tempfile
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -57,7 +56,7 @@ class CleanupService:
             prefix = "private/tenants/"
             objects = storage.list_objects(prefix=prefix)
 
-            now_utc = datetime.now(timezone.utc)
+            now_utc = datetime.now(UTC)
             seven_days_ago = now_utc - timedelta(days=7)
 
             keys_to_delete = []

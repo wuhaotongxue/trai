@@ -462,6 +462,10 @@ python run.py
 
 ## 📝 更新日志 (Changelog)
 
+### 🛠️ 后端_2026_06_04_1056
+- **修复(storage)**: S3StorageService 新增 get_object_bytes 方法，修复聊天图片上传后无法用于 Vision 处理的 bug
+- **清理(tests)**: 删除 backend/tests/ 目录下遗留的测试文件
+
 ### 🛠️ 后端_2026_06_02_0857
 ### 🛠️ 后端_2026_06_02_2253
 - **新增(yida_form_client)**: 实现宜搭表单自动化创建功能，支持 Cookie 认证创建空白表单和保存 Schema。

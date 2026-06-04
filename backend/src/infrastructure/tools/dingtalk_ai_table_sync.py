@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: dingtalk_ai_table_sync.py
 # 作者: wuhao
 # 日期: 2026_06_02_18:48:39
@@ -65,9 +64,9 @@ class DingTalkAiTableSyncService:
         异常:
             无.
         """
-        self._api_base_url = str(
-            api_base_url or os.getenv("DINGTALK_API_BASE_URL", "https://api.dingtalk.com")
-        ).strip().rstrip("/")
+        self._api_base_url = (
+            str(api_base_url or os.getenv("DINGTALK_API_BASE_URL", "https://api.dingtalk.com")).strip().rstrip("/")
+        )
         self._app_key = str(app_key or os.getenv("DINGTALK_APP_KEY", "")).strip()
         self._app_secret = str(app_secret or os.getenv("DINGTALK_APP_SECRET", "")).strip()
         self._base_id = str(base_id or os.getenv("DINGTALK_AI_TABLE_BASE_ID", "")).strip()
@@ -182,9 +181,7 @@ class DingTalkAiTableSyncService:
         异常:
             ExternalServiceError: 当记录写入失败时抛出.
         """
-        request_url = (
-            f"{self._api_base_url}/v1.0/notable/bases/{self._base_id}/sheets/{self._sheet_id}/records"
-        )
+        request_url = f"{self._api_base_url}/v1.0/notable/bases/{self._base_id}/sheets/{self._sheet_id}/records"
         headers = {
             "x-acs-dingtalk-access-token": access_token,
             "Content-Type": "application/json",
@@ -228,9 +225,7 @@ class DingTalkAiTableSyncService:
                         "答题人部门": str(submission_data.get("candidate_department", "")),
                         "自动得分": int(submission_data.get("score", 0)),
                         "试卷总分": int(submission_data.get("total_score", 0)),
-                        "需人工复核": "是"
-                        if bool(submission_data.get("requires_manual_review", False))
-                        else "否",
+                        "需人工复核": "是" if bool(submission_data.get("requires_manual_review", False)) else "否",
                         "提交时间": str(submission_data.get("submitted_at", "")),
                         "答案JSON": self._serialize_answers(answers=submission_data.get("answers", [])),
                     }

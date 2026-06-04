@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exam_share_repository.py
 # 作者: wuhao
 # 日期: 2026_06_02_18:48:39

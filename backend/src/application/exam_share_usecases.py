@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exam_share_usecases.py
 # 作者: wuhao
 # 日期: 2026_06_02_18:48:39
@@ -7,7 +6,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
@@ -655,9 +654,7 @@ class PublishSharedExamUseCase(UseCase[PublishSharedExamInput, PublishSharedExam
             ValidationError: 当输入参数不合法时抛出.
         """
         self._validate_publish_input(input_data=input_data)
-        parsed_output = await self._parse_use_case.execute(
-            WordExamParseInput(file_path=input_data.file_path)
-        )
+        parsed_output = await self._parse_use_case.execute(WordExamParseInput(file_path=input_data.file_path))
         exam_id = f"exam_{uuid4().hex}"
         share_token = f"share_{uuid4().hex}"
         share_path = f"/exam/{share_token}"
@@ -793,9 +790,7 @@ class GetSharedExamUseCase(UseCase[GetSharedExamInput, GetSharedExamOutput]):
         """
         self._validate_get_input(input_data=input_data)
         exam_data = self._repository.get_published_exam(share_token=input_data.share_token)
-        public_paper = self._sanitizer.build_public_paper(
-            paper_data=dict(exam_data.get("paper", {}))
-        )
+        public_paper = self._sanitizer.build_public_paper(paper_data=dict(exam_data.get("paper", {})))
         return GetSharedExamOutput(
             exam_id=str(exam_data.get("exam_id", "")),
             share_token=str(exam_data.get("share_token", "")),
@@ -1124,9 +1119,7 @@ class ListPublishedExamsUseCase(UseCase[None, ListPublishedExamsOutput]):
         return submitted_times[0]
 
 
-class GetPublishedExamDetailUseCase(
-    UseCase[GetPublishedExamDetailInput, GetPublishedExamDetailOutput]
-):
+class GetPublishedExamDetailUseCase(UseCase[GetPublishedExamDetailInput, GetPublishedExamDetailOutput]):
     """
     获取已发布考试详情用例.
 
@@ -1355,18 +1348,10 @@ class GetPublishedSubmissionDetailUseCase(
                 question_type = str(question.get("question_type", "")).strip()
                 max_score = int(question.get("score", 0) or 0)
                 submission_answer = dict(answer_lookup.get(question_no, {}))
-                candidate_values = self._grader.normalize_values_for_detail(
-                    values=submission_answer.get("values", [])
-                )
-                candidate_text = self._normalize_text_answer(
-                    value=submission_answer.get("text_answer")
-                )
-                standard_answer = self._grader.normalize_values_for_detail(
-                    values=question.get("answer", [])
-                )
-                reference_answer = self._normalize_text_answer(
-                    value=question.get("reference_answer")
-                )
+                candidate_values = self._grader.normalize_values_for_detail(values=submission_answer.get("values", []))
+                candidate_text = self._normalize_text_answer(value=submission_answer.get("text_answer"))
+                standard_answer = self._grader.normalize_values_for_detail(values=question.get("answer", []))
+                reference_answer = self._normalize_text_answer(value=question.get("reference_answer"))
                 details.append(
                     PublishedSubmissionQuestionDetailItem(
                         question_no=question_no,

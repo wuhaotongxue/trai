@@ -122,6 +122,27 @@ class S3StorageService:
             return f"{self._public_domain.rstrip('/')}/{object_key.lstrip('/')}"
         return f"{self._endpoint.rstrip('/')}/{self._bucket}/{object_key.lstrip('/')}"
 
+    def get_object_bytes(self, object_key: str) -> bytes:
+        """
+        获取 S3 对象的字节数据
+
+        参数:
+            object_key (str): S3 存储路径
+        返回值:
+            bytes: 文件的字节数据
+        异常:
+            ExternalServiceError: S3 通信或权限异常时抛出
+        """
+        try:
+            response = self._client.get_object(Bucket=self._bucket, Key=object_key)
+            return response["Body"].read()
+        except ClientError as e:
+            logger.error(f"S3 获取对象失败 | 键: {object_key} | 错误: {str(e)}")
+            raise ExternalServiceError(
+                message=f"S3 获取对象失败: {str(e)}",
+                details={"error": str(e)},
+            )
+
     def upload_bytes(self, data: bytes, object_key: str, content_type: str = "application/octet-stream") -> str:
         """
         上传字节数据到 S3 指定位置

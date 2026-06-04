@@ -10,6 +10,7 @@ import asyncio
 import uuid
 from typing import Literal
 
+import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -69,6 +70,23 @@ class SubtitleRecordDTO(BaseModel):
     created_at: str
 
 
+class SubtitleContentPreviewRequest(BaseModel):
+    """字幕内容预览请求模型."""
+
+    task_id: str = Field(..., description="任务 ID")
+    subtitle_kind: Literal["zh", "target"] = Field(..., description="字幕类型, zh 或 target")
+
+
+class SubtitleContentPreviewResponse(BaseModel):
+    """字幕内容预览响应模型."""
+
+    task_id: str = Field(description="任务 ID")
+    subtitle_kind: Literal["zh", "target"] = Field(description="字幕类型")
+    file_name: str = Field(description="字幕文件名")
+    source_url: str = Field(description="字幕原始下载地址")
+    content: str = Field(description="字幕文本内容")
+
+
 class SubtitleRouterUtils:
     """字幕路由工具类."""
 
@@ -105,6 +123,33 @@ class SubtitleRouterUtils:
         """
         repo = SubtitleRecordRepository(session)
         return SubtitleGenerateUseCase(repo)
+
+    @staticmethod
+    async def fetch_text_content(url: str) -> str:
+        """
+        拉取字幕文本内容.
+
+        参数:
+            url: 字幕文件访问地址.
+
+        返回值:
+            str: 字幕文本内容.
+
+        异常:
+            HTTPException: 请求失败或返回空内容时抛出.
+        """
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+        except httpx.HTTPError as error:
+            logger.error(f"获取字幕内容失败 | url={url} | error={error}")
+            raise HTTPException(status_code=502, detail={"message": "获取字幕内容失败"}) from error
+
+        content = response.text.strip()
+        if not content:
+            raise HTTPException(status_code=404, detail={"message": "字幕内容为空"})
+        return content
 
 
 class SubtitleApiRouter:
@@ -505,6 +550,66 @@ class SubtitleApiRouter:
                 )
             )
         return out
+
+    @staticmethod
+    @router.post(
+        "/subtitle/content",
+        response_model=SubtitleContentPreviewResponse,
+        tags=["AI"],
+        summary="预览字幕内容",
+        description="根据任务记录读取指定字幕文件内容, 供前端在站内直接预览 SRT 文本.",
+    )
+    async def preview_subtitle_content(
+        req: SubtitleContentPreviewRequest,
+        current_user: CurrentUserOptional = None,
+        session=Depends(get_db_session),
+    ) -> SubtitleContentPreviewResponse:
+        """
+        预览字幕内容.
+
+        参数:
+            req: SubtitleContentPreviewRequest, 任务 ID 与字幕类型.
+            current_user: CurrentUserOptional, 当前用户.
+            session: 数据库会话.
+
+        返回值:
+            SubtitleContentPreviewResponse: 预览结果, 包含字幕文件名与文本内容.
+
+        异常:
+            HTTPException: 记录不存在, 无对应字幕地址或拉取失败时抛出.
+        """
+        from sqlalchemy import select
+
+        from infrastructure.database.subtitle_record_model import SubtitleRecordModel
+
+        user_id = current_user.get("user_id", "") if current_user else ""
+        safe_user_id = user_id or "anonymous"
+        record = (
+            session.execute(
+                select(SubtitleRecordModel).where(
+                    SubtitleRecordModel.task_id == req.task_id,
+                    SubtitleRecordModel.user_id == safe_user_id,
+                )
+            )
+            .scalars()
+            .first()
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail={"message": "字幕记录不存在"})
+
+        source_url = record.zh_srt_url if req.subtitle_kind == "zh" else record.target_srt_url
+        if not source_url:
+            raise HTTPException(status_code=404, detail={"message": "当前字幕文件尚未生成"})
+
+        content = await SubtitleRouterUtils.fetch_text_content(source_url)
+        subtitle_file_name = f"{req.task_id}_{req.subtitle_kind}.srt"
+        return SubtitleContentPreviewResponse(
+            task_id=req.task_id,
+            subtitle_kind=req.subtitle_kind,
+            file_name=subtitle_file_name,
+            source_url=source_url,
+            content=content,
+        )
 
     @staticmethod
     @router.post(

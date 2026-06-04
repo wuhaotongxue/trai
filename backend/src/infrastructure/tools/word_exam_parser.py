@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: word_exam_parser.py
 # 作者: wuhao
 # 日期: 2026_06_02_17:27:19
@@ -102,7 +101,9 @@ class WordExamParser:
         position = self._extract_position(lines=question_lines)
         total_score = self._extract_numeric_metadata(lines=question_lines, prefix="满分")
         duration_minutes = self._extract_numeric_metadata(lines=question_lines, prefix="考试时间")
-        sections = self._parse_sections(question_lines=question_lines, answer_lookup=answer_lookup, warning_messages=warning_messages)
+        sections = self._parse_sections(
+            question_lines=question_lines, answer_lookup=answer_lookup, warning_messages=warning_messages
+        )
 
         if not sections:
             raise ValidationError(
@@ -458,9 +459,7 @@ class WordExamParser:
             warning_messages=warning_messages,
         )
         if question_count is not None and question_count != len(parsed_questions):
-            warning_messages.append(
-                f"{section_title} 声明题量为 {question_count}, 实际解析为 {len(parsed_questions)}."
-            )
+            warning_messages.append(f"{section_title} 声明题量为 {question_count}, 实际解析为 {len(parsed_questions)}.")
         return ExamSection(
             section_type=section_type,
             section_title=section_title,

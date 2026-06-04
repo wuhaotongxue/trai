@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # 文件名: exam.py
 # 作者: wuhao
 # 日期: 2026_06_02_18:25:48
@@ -446,9 +445,7 @@ class PublishedExamDetailApiData(BaseModel):
     created_at: str = Field(..., description="发布时间")
     updated_at: str = Field(..., description="更新时间")
     submission_count: int = Field(..., description="已提交答卷数量")
-    submissions: list[PublishedExamSubmissionItemApiData] = Field(
-        default_factory=list, description="答卷摘要列表"
-    )
+    submissions: list[PublishedExamSubmissionItemApiData] = Field(default_factory=list, description="答卷摘要列表")
 
 
 class PublishedExamDetailApiResponse(BaseModel):
@@ -1041,9 +1038,7 @@ class WordExamToolRouter:
         use_case = GetPublishedExamDetailUseCase()
 
         try:
-            output = await use_case.execute(
-                GetPublishedExamDetailInput(share_token=req.share_token)
-            )
+            output = await use_case.execute(GetPublishedExamDetailInput(share_token=req.share_token))
             return PublishedExamDetailApiResponse(
                 code=200,
                 msg="OK",
