@@ -11,10 +11,10 @@
     📋 <strong>上期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">2547d966</code> · 2026-06-04 09:26:13 +0800
   </div>
   <div style="margin-top:6px;">
-    🎯 <strong>本期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/a14778e61a5f7f99b6f96919f8c67d94b3e4f614" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/a14778e61a5f7f99b6f96919f8c67d94b3e4f614" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">a14778e6</code> · 2026-06-04 10:30:00 +0800
+    🎯 <strong>本期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/990bec18d736d68d180359c16e8944c5030f75e5" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/990bec18d736d68d180359c16e8944c5030f75e5" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">990bec18</code> · 2026-06-04 10:31:08 +0800
   </div>
   <div style="margin-top:6px;">
-    📐 <strong>本期范围</strong>: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 2547d966..a14778e6</code>
+    📐 <strong>本期范围</strong>: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 2547d966..990bec18</code>
   </div>
 </div>
 
