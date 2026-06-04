@@ -6,14 +6,10 @@
 </div>
 
 <div style="background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:10px 14px;margin:12px 0;font-family:ui-monospace,monospace;font-size:0.88em;color:#475569;">
-  <strong>时间锚点</strong> <a href="md/issue_10/index.md" style="color:#2563eb;text-decoration:underline;">md/issue_10/index.md</a> 最后入库: 
-  <a href="https://gitee.com/no5689/trai/commit/22053651c0c313b380f7d4f2b2a0eaa731263d86" target="_blank" style="color:#2563eb;text-decoration:underline;">Gitee</a> | 
-  <a href="https://github.com/wuhaotongxue/trai/commit/22053651c0c313b380f7d4f2b2a0eaa731263d86" target="_blank" style="color:#2563eb;text-decoration:underline;">GitHub</a> 
-  · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">22053651</code> · 2026-06-04 10:19:19 +0800
-  <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #cbd5e1;">
-    📦 完整哈希: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">22053651c0c313b380f7d4f2b2a0eaa731263d86</code> | 
-    本期范围: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 22053651..HEAD</code>
-  </div>
+  <strong>时间锚点</strong> <a href="md/issue_09/index.md" style="color:#2563eb;text-decoration:underline;">md/issue_09/index.md</a> 最后入库: 
+  <a href="https://gitee.com/no5689/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;text-decoration:underline;">Gitee</a> | 
+  <a href="https://github.com/wuhaotongxue/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;text-decoration:underline;">GitHub</a> 
+  · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">2547d966</code> · 2026-06-04 09:26:13 +0800 · 本期范围 <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 2547d966..HEAD</code>
 </div>
 
 <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px 16px;margin:14px 0;color:#1e40af;">
