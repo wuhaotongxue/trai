@@ -117,6 +117,11 @@
 #### 4.1 env 配置模块化
 
 **目录结构**:
+
+![env 配置模块化拆分](issue_10_01.png)
+
+*将敏感配置与示例分离，env/ 目录不提交到仓库，env_example/ 提供配置模板。*
+
 ```tree
 backend/
 ├── env/                    # 实际配置（不提交）
@@ -134,25 +139,57 @@ backend/
 **配置管理 API**:
 ```python
 class ConfigManager:
+    """配置管理器, 负责加载和管理环境变量配置."""
+
     def __init__(self, env_dir: str):
-        self.env_dir = env_dir
-        self.configs = {}
+        """
+        初始化配置管理器.
+
+        Args:
+            env_dir: str, 配置文件目录路径.
+        """
+        self.env_dir = env_dir      # 配置文件目录
+        self.configs = {}           # 配置缓存字典
     
     def load_config(self, config_name: str) -> dict:
+        """
+        加载指定的配置文件.
+
+        Args:
+            config_name: str, 配置文件名称（不含扩展名）.
+
+        Returns:
+            dict: 配置键值对字典.
+
+        Raises:
+            ConfigError: 配置文件不存在时抛出.
+        """
         path = os.path.join(self.env_dir, f"{config_name}.env")
         if not os.path.exists(path):
             raise ConfigError(f"Config file not found: {path}")
-        
+
+        # 逐行解析配置文件
         with open(path, 'r') as f:
             for line in f:
                 line = line.strip()
+                # 跳过空行和注释行
                 if line and not line.startswith('#'):
                     key, value = line.split('=', 1)
                     self.configs[key] = value
-        
+
         return self.configs
-    
+
     def get(self, key: str, default: Any = None) -> Any:
+        """
+        获取配置值.
+
+        Args:
+            key: str, 配置键名.
+            default: Any, 默认值（键不存在时返回）.
+
+        Returns:
+            Any: 配置值或默认值.
+        """
         return self.configs.get(key, default)
 ```
 
