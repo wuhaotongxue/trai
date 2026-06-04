@@ -6,7 +6,16 @@
 </div>
 
 <div style="background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:10px 14px;margin:12px 0;font-family:ui-monospace,monospace;font-size:0.88em;color:#475569;">
-  <strong>时间锚点</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">md/issue_10/index.md</code> 最后入库: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">240d024</code> · 2026-05-16 11:22:35 +0800 · 本期范围 <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 240d024..HEAD</code>
+  <strong>时间锚点</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">md/issue_11/index.md</code>
+  <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #cbd5e1;">
+    📋 <strong>上期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/5ef94fef31915c1265fa22a1d4a2cbab0b55b505" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/5ef94fef31915c1265fa22a1d4a2cbab0b55b505" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">5ef94fef</code> · 2026-05-15 17:04:01 +0800
+  </div>
+  <div style="margin-top:6px;">
+    🎯 <strong>本期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/adc769fc7e2352194e2bfa335463712f7d0f23d0" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/adc769fc7e2352194e2bfa335463712f7d0f23d0" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">adc769fc</code> · 2026-05-23 16:52:32 +0800
+  </div>
+  <div style="margin-top:6px;">
+    📐 <strong>本期范围</strong>: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 5ef94fef..adc769fc</code>
+  </div>
 </div>
 
 <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px 16px;margin:14px 0;color:#1e40af;">
