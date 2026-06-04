@@ -8,13 +8,13 @@
 <div style="background:#f8fafc;border:1px dashed #94a3b8;border-radius:8px;padding:10px 14px;margin:12px 0;font-family:ui-monospace,monospace;font-size:0.88em;color:#475569;">
   <strong>时间锚点</strong> <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">md/issue_10/index.md</code>
   <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #cbd5e1;">
-    📋 <strong>上期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/2547d96675b28379bca6d03a136b9e3c4e8ae15e" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">2547d966</code> · 2026-06-04 09:26:13 +0800
+    📋 <strong>上期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/ebb3ccfc02ad71a251d06b023153d97627b124df" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/ebb3ccfc02ad71a251d06b023153d97627b124df" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">ebb3ccfc</code> · 2026-05-09 10:41:48 +0800
   </div>
   <div style="margin-top:6px;">
-    🎯 <strong>本期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/990bec18d736d68d180359c16e8944c5030f75e5" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/990bec18d736d68d180359c16e8944c5030f75e5" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">990bec18</code> · 2026-06-04 10:31:08 +0800
+    🎯 <strong>本期节点</strong>: <a href="https://gitee.com/no5689/trai/commit/5ef94fef31915c1265fa22a1d4a2cbab0b55b505" target="_blank" style="color:#2563eb;">Gitee</a> | <a href="https://github.com/wuhaotongxue/trai/commit/5ef94fef31915c1265fa22a1d4a2cbab0b55b505" target="_blank" style="color:#2563eb;">GitHub</a> · <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">5ef94fef</code> · 2026-05-15 17:04:01 +0800
   </div>
   <div style="margin-top:6px;">
-    📐 <strong>本期范围</strong>: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log 2547d966..990bec18</code>
+    📐 <strong>本期范围</strong>: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;color:#0f172a;">git log ebb3ccfc..5ef94fef</code>
   </div>
 </div>
 
